@@ -74,14 +74,40 @@ def sortReq(classList):
         for j in range(i + 1, len(classList)):
             if len(classList[index]) > len(classList[j]):
                 index = j
-        classList[i],classList[index] = classList[index],classList[i]
+        classList[i], classList[index] = classList[index], classList[i]
     return classList
+
+
+def filterBefore(classList, timeLimit, professor, availability):
+
+    # check timeLimit
+    date = []
+    timeBlock = []
+    for time in timeLimit:
+        d,t = parseTime(time)
+        date.append(d)
+        timeBlock.append(t)
+    for classNum in range(len(classList)):
+        for choiceNum in range(len(classList[classNum])):
+            for i in range(len(timeLimit)):
+                timeTable = [classList[classNum][choiceNum][7]]
+                if checkTimeConflict(timeTable,date[i],timeBlock[i]):
+                    del classList[classNum][choiceNum]
+                    break
+    pass
+
 
 def getReq(classes: list, filters: list):
     # return a list contain a lists of classes 3 dimension: classname, classtime, class info
     classList = []
     for i in classes:
-        classList.append(DICT[i])
+        eachClass = DICT[i]
+        temp = []
+        for j in range(len(eachClass)):
+            identifier= eachClass[j][0]
+            time = eachClass[j][7]
+            temp.append([identifier,time])
+        classList.append(temp.copy())
     classList = sortReq(classList)
     table = Algorithm(classList)
     return table
@@ -90,7 +116,7 @@ def getReq(classes: list, filters: list):
 def Algorithm(classList: List):
     classNum = 0  # the sequence of the class
     choiceNum = 0  # the sequence of the choices within one class
-    timeNum = 7  # the time which the schedule info is stored
+    timeNum = 1  # the time which the schedule info is stored
     timeTable = []  # table store all the time so that we can compare
     tempTable = []  # the temp table which stores all the info in the current matches
     finalTable = []  # the final result of all the full matches
@@ -133,7 +159,7 @@ def Algorithm(classList: List):
         if not checkTimeConflict(timeTable, date, timeBlock):
             # if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
             timeTable.append((date, timeBlock))
-            tempTable.append(classList[classNum][choiceNum])
+            tempTable.append(classList[classNum][choiceNum][0])
             pathMemory[classNum] = choiceNum + 1
             classNum += 1
             choiceNum = 0
@@ -236,22 +262,20 @@ def parseTime(classTime: str):
 readData()
 
 if __name__ == "__main__":
+    # date, time = parseTime("MoTuWeThFr 8:00AM - 10:00PM")
+    # print(date,time)
     classLists = [
         "CS2110Lecture",
-            "CS2110Laboratory",
-            "ECE2630Studio",
-            "CS2102Lecture",
+        "CS2110Laboratory",
+        "ECE2630Studio",
+        "CS2102Lecture",
         "STS1500Discussion",
         "MATH3354Lecture"
-        ]
+    ]
     classLists2 = [
         "FREN1020Lecture",
-        "CS2110Lecture",
-        "CS2110Laboratory",
-        "MATH2310Lecture",
         "ENWR1510Seminar",
-        "MATH2310Discussion",
-        "CS2102Lecture"
+
     ]
     k = getReq(classLists2, None)
     print(k[1])
@@ -259,3 +283,15 @@ if __name__ == "__main__":
     #     for j in i:
     #         print(j)
     #     print()
+
+"""
+classLists2 = [
+        "FREN1020Lecture",
+        "ENWR1510Seminar",
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "MATH2310Lecture",
+        "MATH2310Discussion",
+        "CS2102Lecture"
+    ]
+"""

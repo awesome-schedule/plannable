@@ -1,6 +1,7 @@
 import xlrd  # CSV file does not work well, so I decide to use excel instead
 from typing import *
 import re
+import os
 
 DICT = {}
 lectureType = (
@@ -8,20 +9,25 @@ lectureType = (
     "Workshop")
 
 
+def getDataPath(filename: str):
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(dir_path, "data", filename)
+
+
 def readData():
     """
     Read all the classes and put in a dictionary called DICT
     :return:
     """
-    file = xlrd.open_workbook("CS1192Data.xlsx")
+    file = xlrd.open_workbook(getDataPath('CS1192Data.xlsx'))
     sheet = file.sheet_by_index(0)
     for i in range(1, sheet.nrows):
         category = str(sheet.cell_value(i, 1))
         number = str(int(sheet.cell_value(i, 2)))
-        lecture = str(sheet.cell_value(i,4))
+        lecture = str(sheet.cell_value(i, 4))
         course = category + number + lecture
-        print(course)
-        input()
+        # print(course)
+        # input()
         DICT[course] = DICT.get(course, []) + [sheet.row_values(i)]
 
 

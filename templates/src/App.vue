@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!-- navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#F9A348;">
       <!-- brand -->
       <a class="navbar-brand text-white" href="#">UNOne</a>
       
@@ -30,24 +30,32 @@
           <li class="nav-item">
             <a class="nav-link text-light" href="#" aria-disabled="true">nav-item2</a>
           </li>
-        </ul>
-        <div class="my-2 my-lg-0 text-white" aria-disabled="true">nav-item4</div>
+        </ul>        
       </div>
     </nav>
     <!-- end of navigation bar -->
+
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
           <!-- term selection dropdown -->
           <div class="dropdown">
             <button
-              class="btn btn-secondary dropdown-toggle mt-3 mx-auto"
+              class="button mt-2 mx-auto"
               style="width: 100%;"
               type="button"
               id="semester"
               data-toggle="dropdown"
-            >Select Term</button>
-            <Semesters v-bind:semesters="semesters"></Semesters>
+            >{{ currentSemester === null ? 'Select Semester' : currentSemester.name }}</button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a
+                class="dropdown-item"
+                href="#"
+                v-for="semester in semesters"
+                v-bind:key="semester.id"
+                v-on:click="selectSemester(semester.id)"
+              >{{ semester.name }}</a>
+            </div>
           </div>
 
           <div class="input-group">
@@ -58,7 +66,7 @@
             <input
               type="text"
               class="form-control"
-              placeholder="Department"
+              placeholder="CS"
               style="font-size: 10pt; align-content: center"
               aria-describedby="basic-addon1"
             >
@@ -69,14 +77,13 @@
             <input
               type="text"
               class="form-control"
-              placeholder="Course#"
+              placeholder="1110"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
             >
           </div>
-
           <!--input title-->
-          <div class="input-group mt-3">
+          <div class="input-group mt-2">
             <div class="input-group-prepend">
               <span class="input-group-text" id="title" style="font-size:10pt">Course Name</span>
             </div>
@@ -88,7 +95,10 @@
               aria-describedby="basic-addon1"
             >
           </div>
-          <div class="input-group mt-3">
+          <!--filter block button-->
+          <button type="button" class="filter-button mt-2">Filter (Optional)</button>
+
+          <div class="input-group">
             <!--input earliest time-->
             <div class="input-group-prepend">
               <span class="input-group-text" id="earliest" style="font-size:10pt">Earliest Time</span>
@@ -114,7 +124,7 @@
           </div>
 
           <!--input maximum class number per day-->
-          <div class="input-group mt-3">
+          <div class="input-group mt-2">
             <div class="input-group-prepend">
               <span class="input-group-text" id="max" style="font-size:10pt">max classes/day</span>
             </div>
@@ -128,7 +138,7 @@
           </div>
 
           <!--submit button-->
-          <button type="button" class="btn button mt-3 mb-3" onClick="add_class();">Submit</button>
+          <button type="button" class="btn btn-outline-success mt-1 mb-1" onClick="add_class();">Submit</button>
 
           <div id="courses">
             <p>Current Selected Classes:</p>
@@ -139,12 +149,12 @@
 
           <!--create button-->
           <div>
-            <button type="button" class="btn button mt-3 mb-3" style="position:inherit;">Create</button>
+            <button type="button" class="btn btn-outline-success mt-1 mb-1" style="position:inherit;">Create</button>
           </div>
         </td>
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
-          <div class="tab mt-3">
+          <div class="tab mt-2">
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
@@ -175,19 +185,25 @@
 <script>
 import Schedule from './components/Schedule';
 import Active from './components/Active';
-import Semesters from './components/Semesters';
 
 export default {
     name: 'app',
     components: {
+<<<<<<< HEAD
         Active,
         Semesters,
         Schedule
+=======
+        Active
+>>>>>>> 5f1a8d226e8d07f41633c2754699172891ccd4b6
     },
     data() {
         return {
             api: 'http://localhost:8000/api',
             semesters: [],
+            currentSemester: null,
+            courses: [],
+            courseKeys: [],
             schedule: {
                 title: 'Dummy asdsad',
                 courses: [
@@ -206,7 +222,52 @@ export default {
     mounted() {
         this.$http.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
+            this.selectSemester(0);
         });
+    },
+    methods: {
+        /**
+         * @param {string} query
+         * @returns {any[]}
+         */
+        getClass(query) {
+            const arr = this.courseKeys;
+            const len = query.length;
+            let start = 0,
+                end = arr.length - 1;
+
+            let target_idx = -1;
+
+            // do a binary search on the keys of courses
+            while (start <= end) {
+                let mid = Math.floor((start + end) / 2);
+
+                const ele = arr[mid].substr(0, len);
+                // If element is present at mid, return True
+                if (ele === query) {
+                    target_idx = mid;
+                    break;
+                }
+                // Else look in left or right half accordingly
+                else if (ele < query) {
+                    start = mid + 1;
+                } else end = mid - 1;
+            }
+
+            if (target_idx === -1) {
+                for (const course of this.courses) {
+                    if (course[9].indexOf(query) !== -1) return course;
+                }
+                return null;
+            } else return this.courses[target_idx];
+        },
+        selectSemester(semesterId) {
+            this.currentSemester = this.semesters[semesterId];
+            this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
+                this.courses = res.data.data;
+                this.courseKeys = res.data.keys;
+            });
+        }
     }
 };
 </script>
@@ -220,13 +281,17 @@ export default {
     color: #2c3e50;
     margin-top: 60px;
 } */
+.filter-button{
+  border-radius: 3px;
+  background-color:#78a7ec;
+  width: 100%;
+}
 .button {
     border-radius: 3px;
-    font-size: 12px;
+    font-size: 20px;
     text-decoration: none;
     color: #1b3866;
-    background-color: #f1c40f;
-    box-shadow: 0px 4px 0px 0px #d8ab00;
+    background-color: #78a7ec;
     position: inherit;
 }
 
@@ -237,17 +302,13 @@ export default {
 }
 
 .button:hover {
-    background-color: rgb(241, 206, 3);
+    background-color: rgb(243, 218, 74);
 }
 .tab {
     overflow: hidden;
     border: 1px solid #ccc;
-    background-color: #f1f1f1;
-    /* 
-    width: 68%;
-    position: fixed;
-    left: 32%;
-    top: 10%; */
+    background-color: #78a7ec;
+    border-radius: 3px;
 }
 /* Style the buttons that are used to open the tab content */
 .tab button {
@@ -256,18 +317,19 @@ export default {
     border: none;
     outline: none;
     cursor: pointer;
-    padding: 10px 30px;
+    padding: 6px 20px;
     transition: 0.3s;
 }
 
 /* Change background color of buttons on hover */
 .tab button:hover {
-    background-color: rgb(116, 218, 95);
+    background-color: rgb(56, 124, 212);
 }
 
 /* Create an active/current tablink class */
 .tab button.active {
-    background-color: rgb(161, 236, 110);
+    background-color: rgb(136, 224, 47);
+    box-shadow: 0px 1px 0px 0px;
 }
 
 /* Style the tab content */
@@ -276,10 +338,5 @@ export default {
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-top: none;
-    /* 
-    width: 68%;
-    position: fixed;
-    left: 32%;
-    top: 16%; */
 }
 </style>

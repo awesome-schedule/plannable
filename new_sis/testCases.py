@@ -47,7 +47,7 @@ if __name__ == "__main__":
             "STS1500Discussion",
             "MATH3354Lecture",
             "STS1500Lecture",
-            ]
+            "ECE2630Studio",]
 
     callAlgorithm(classes)
 import unittest

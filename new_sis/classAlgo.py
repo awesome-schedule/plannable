@@ -32,7 +32,6 @@ def readData():
         DICT[course] = DICT.get(course, []) + [sheet.row_values(i)]
 
 
-
 def readTitle():
     """
     Get all the class titles and output the classTitle.csv
@@ -78,14 +77,16 @@ def getReq(classes: list, filters: list):
 
 
 def Algorithm(classList: List):
+    count = 0
     classNum = 0  # the sequence of the class
     choiceNum = 0  # the sequence of the choices within one class
     timeNum = 7  # the time which the schedule info is stored
     timeTable = []  # table store all the time so that we can compare
     tempTable = []  # the temp table which stores all the info in the current matches
     finalTable = []  # the final result of all the full matches
-    pathMemory = [0] * len(classList)  # the path the search has taken
+    pathMemory = [0] * len(classList)  # the path the search has taken, the number indicates the next search
     while True:
+        print("classNum", classNum)
         if classNum == 7:
             for i in tempTable:
                 print(i[7])
@@ -96,27 +97,42 @@ def Algorithm(classList: List):
             classNum -= 1
             choiceNum += 1
 
-        classList, classNum, choiceNum, pathMemory, exhausted = AlgorithmRetract(classList, classNum, choiceNum,
-                                                                                 pathMemory)
+        classList, classNum, choiceNum, pathMemory, tempTable, timeTable, exhausted = AlgorithmRetract(classList,
+                                                                                                       classNum,
+                                                                                                       choiceNum,
+                                                                                                       pathMemory,
+                                                                                                       tempTable,
+                                                                                                       timeTable)
+
         if exhausted:
             break
 
         (date, timeBlock) = parseTime(
             classList[classNum][choiceNum][timeNum])
 
+        print("-----------------")
+        print("pathmem", pathMemory)
+        print("class", classList[classNum][choiceNum][timeNum], classNum)
+        print(date, timeBlock, timeTable)
+        print(checkTimeConflict(timeTable, date, timeBlock), count, len(classList))
+        print()
+
         if not checkTimeConflict(timeTable, date, timeBlock):
+            print(count)
             # if the schedule matches, record the next path memory and go to the next class
             timeTable.append((date, timeBlock))
             tempTable.append(classList[classNum][choiceNum])
             pathMemory[classNum] = choiceNum + 1
             classNum += 1
+            choiceNum = 0
         else:
             choiceNum += 1
-    print(finalTable)
+        count += 1
+    print(len(finalTable))
     return finalTable
 
 
-def AlgorithmRetract(classList, classNum, choiceNum, pathMemory):
+def AlgorithmRetract(classList, classNum, choiceNum, pathMemory, tempTable, timeTable):
     while choiceNum >= len(classList[classNum]):
         # when all possibilities in on class have exhausted, retract one class
         # explore the next possibilities in the nearest possible class
@@ -124,13 +140,17 @@ def AlgorithmRetract(classList, classNum, choiceNum, pathMemory):
         # print("in the retract",len(classList[classNum]),choiceNum)
 
         classNum -= 1
+
         if classNum < 0:
             print("no more matches")
-            return classList, classNum, choiceNum, pathMemory, True
+            return classList, classNum, choiceNum, pathMemory, tempTable, timeTable, True
+
+        tempTable.pop()
+        timeTable.pop()
         choiceNum = pathMemory[classNum]
         for i in range(classNum + 1, len(pathMemory)):
             pathMemory[i] = 0
-    return classList, classNum, choiceNum, pathMemory, False
+    return classList, classNum, choiceNum, pathMemory, tempTable, timeTable, False
 
 
 def checkTimeConflict(timeTable: List, date: List, timeBlock: List):
@@ -199,14 +219,13 @@ def parseTime(classTime: str):
             tempTime = i.strip().strip("PM").split(":")
             timeBlock[count] += (int(tempTime[0]) + 12) * 60 + int(tempTime[1])
 
-
     return date, timeBlock
 
 
 readData()
 
 if __name__ == "__main__":
-    date, timeBlock = parseTime("MoWeFr 1:00PM - 1:50PM")
-    print(date,timeBlock)
-    for choices in DICT["CS2110Lecture"]:
-        print(choices)
+    timeTable = [(['Mo', 'We', 'Fr'], [780, 830]), (['Tu'], [1035, 1140])]
+    date = ['Tu', 'Th']
+    time = [700, 1000]
+    print(checkTimeConflict(timeTable, date, time))

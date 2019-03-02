@@ -46,8 +46,16 @@
               type="button"
               id="semester"
               data-toggle="dropdown"
-            >Select Term</button>
-            <Semesters v-bind:semesters="semesters"></Semesters>
+            >{{ currentSemester === null ? 'Select Semester' : currentSemester.name }}</button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <a
+                class="dropdown-item"
+                href="#"
+                v-for="semester in semesters"
+                v-bind:key="semester.id"
+                v-on:click="selectSemester(semester.id)"
+              >{{ semester.name }}</a>
+            </div>
           </div>
 
           <div class="input-group">
@@ -174,18 +182,19 @@
 <script>
 import Schedule from './components/Schedule.vue';
 import Active from './components/Active';
-import Semesters from './components/Semesters';
 
 export default {
     name: 'app',
     components: {
-        Active,
-        Semesters
+        Active
     },
     data() {
         return {
             api: 'http://localhost:8000/api',
             semesters: [],
+            currentSemester: null,
+            courses: [],
+            courseKeys: [],
             schedule: {
                 title: 'Dummy asdsad',
                 courses: [
@@ -204,7 +213,52 @@ export default {
     mounted() {
         this.$http.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
+            this.selectSemester(0);
         });
+    },
+    methods: {
+        /**
+         * @param {string} query
+         * @returns {any[]}
+         */
+        getClass(query) {
+            const arr = this.courseKeys;
+            const len = query.length;
+            let start = 0,
+                end = arr.length - 1;
+
+            let target_idx = -1;
+
+            // do a binary search on the keys of courses
+            while (start <= end) {
+                let mid = Math.floor((start + end) / 2);
+
+                const ele = arr[mid].substr(0, len);
+                // If element is present at mid, return True
+                if (ele === query) {
+                    target_idx = mid;
+                    break;
+                }
+                // Else look in left or right half accordingly
+                else if (ele < query) {
+                    start = mid + 1;
+                } else end = mid - 1;
+            }
+
+            if (target_idx === -1) {
+                for (const course of this.courses) {
+                    if (course[9].indexOf(query) !== -1) return course;
+                }
+                return null;
+            } else return this.courses[target_idx];
+        },
+        selectSemester(semesterId) {
+            this.currentSemester = this.semesters[semesterId];
+            this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
+                this.courses = res.data.data;
+                this.courseKeys = res.data.keys;
+            });
+        }
     }
 };
 </script>

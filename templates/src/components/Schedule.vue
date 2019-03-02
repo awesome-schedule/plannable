@@ -34,14 +34,15 @@
 			<li class="events-group">
 				<div class="top-info"><span>Monday</span></div>
 				<ul>
-					
+          <course v-for="c in courses" :key="c.id" ></course>
+					<course start_time="10:00" end_time="11:00" title="Feeding Cats" color_type="event-1"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Tuesday</span></div>
 				<ul>
-					
+					<course start_time="13:00" end_time="14:00" title="Feeding Cats" color_type="event-2"></course>
 				</ul>
 			</li>
 
@@ -75,10 +76,8 @@
 import Course from './Course.vue'
 export default {
     name : 'Schedule',
-    data(){
-        return {
-
-        }
+    props : {
+      courses : Array,
     },
     components : {
         Course
@@ -348,8 +347,6 @@ Main Components
 }
 
 .cd-schedule.loading .events .single-event {
-  /* the class .loading is added by default to the .cd-schedule element
-	   it is removed as soon as the single events are placed in the schedule plan (using javascript) */
   opacity: 0;
 }
 

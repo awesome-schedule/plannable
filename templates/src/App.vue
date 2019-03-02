@@ -153,9 +153,10 @@
           <!-- Tab content -->
           <div id="Schedule 1" class="tabcontent">
             <h3>Schedule 1</h3>
-            <p>Something.</p>
+            <!-- <p>Something.</p> -->
+            <!-- <Schedule></Schedule> -->
           </div>
-
+          <Schedule></Schedule>
           <div id="Schedule 2" class="tabcontent">
             <h3>Schedule 2</h3>
             <p>Something.</p>
@@ -172,7 +173,7 @@
 </template>
 
 <script>
-import Schedule from './components/Schedule.vue';
+import Schedule from './components/Schedule';
 import Active from './components/Active';
 import Semesters from './components/Semesters';
 
@@ -180,7 +181,8 @@ export default {
     name: 'app',
     components: {
         Active,
-        Semesters
+        Semesters,
+        Schedule
     },
     data() {
         return {

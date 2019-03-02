@@ -1,5 +1,7 @@
 import csv
+import logging
 from flask import Flask, render_template, jsonify
+from new_sis.classAlgo import readData, DICT
 
 app = Flask(__name__)
 
@@ -30,4 +32,7 @@ def default_handler(any_text):
 
 
 if __name__ == "__main__":
+    logging.info('Loading data...')
+    readData()
+    logging.info('Running...')
     app.run(host='0.0.0.0', port=8000, debug=True)

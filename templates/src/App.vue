@@ -189,13 +189,8 @@ import Active from './components/Active';
 export default {
     name: 'app',
     components: {
-<<<<<<< HEAD
         Active,
-        Semesters,
         Schedule
-=======
-        Active
->>>>>>> 5f1a8d226e8d07f41633c2754699172891ccd4b6
     },
     data() {
         return {

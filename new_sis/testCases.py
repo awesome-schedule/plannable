@@ -48,8 +48,16 @@ if __name__ == "__main__":
             "MATH3354Lecture",
             "STS1500Lecture",
             "ECE2630Studio",]
-
-    callAlgorithm(classes)
+    classLists2 = [
+        "FREN1020Lecture",
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "MATH2310Lecture",
+        "ENWR1510Seminar",
+        "MATH2310Discussion",
+        "CS2102Lecture"
+    ]
+    callAlgorithm(classLists2)
 import unittest
 
 class TestAlgo(unittest.TestCase):

@@ -67,17 +67,27 @@ def readTime():
     print(len(aSet))
 
 
+def sortReq(classList):
+    # just use select sort
+    for i in range(len(classList)):
+        index = i
+        for j in range(i + 1, len(classList)):
+            if len(classList[index]) > len(classList[j]):
+                index = j
+        classList[i],classList[index] = classList[index],classList[i]
+    return classList
+
 def getReq(classes: list, filters: list):
     # return a list contain a lists of classes 3 dimension: classname, classtime, class info
     classList = []
-    for theClass in classes:
-        classList.append(DICT[theClass])
-
-    return classList
+    for i in classes:
+        classList.append(DICT[i])
+    classList = sortReq(classList)
+    table = Algorithm(classList)
+    return table
 
 
 def Algorithm(classList: List):
-    count = 0
     classNum = 0  # the sequence of the class
     choiceNum = 0  # the sequence of the choices within one class
     timeNum = 7  # the time which the schedule info is stored
@@ -86,16 +96,19 @@ def Algorithm(classList: List):
     finalTable = []  # the final result of all the full matches
     pathMemory = [0] * len(classList)  # the path the search has taken, the number indicates the next search
     while True:
-        print("classNum", classNum)
-        if classNum == 7:
-            for i in tempTable:
-                print(i[7])
+        # print("classNum", classNum)
         if classNum >= len(classList):
             # made a full match and keep searching in the last class
-            finalTable.append(tempTable)
-            print("made one")
+            # print("temptable length",len(tempTable))
+            finalTable.append(tempTable.copy())
+            # print(finalTable)
+            # print("made one")
             classNum -= 1
-            choiceNum += 1
+            choiceNum = pathMemory[classNum]
+            tempTable.pop()
+            timeTable.pop()
+
+        # print(choiceNum, pathMemory)
 
         classList, classNum, choiceNum, pathMemory, tempTable, timeTable, exhausted = AlgorithmRetract(classList,
                                                                                                        classNum,
@@ -109,17 +122,16 @@ def Algorithm(classList: List):
 
         (date, timeBlock) = parseTime(
             classList[classNum][choiceNum][timeNum])
-
-        print("-----------------")
-        print("pathmem", pathMemory)
-        print("class", classList[classNum][choiceNum][timeNum], classNum)
-        print(date, timeBlock, timeTable)
-        print(checkTimeConflict(timeTable, date, timeBlock), count, len(classList))
-        print()
+        #
+        # print("-----------------")
+        # print("pathmem", pathMemory)
+        # print("class", classList[classNum][choiceNum][timeNum], classNum)
+        # print(date, timeBlock, timeTable)
+        # print(checkTimeConflict(timeTable, date, timeBlock), len(classList))
+        # print()
 
         if not checkTimeConflict(timeTable, date, timeBlock):
-            print(count)
-            # if the schedule matches, record the next path memory and go to the next class
+            # if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
             timeTable.append((date, timeBlock))
             tempTable.append(classList[classNum][choiceNum])
             pathMemory[classNum] = choiceNum + 1
@@ -127,7 +139,6 @@ def Algorithm(classList: List):
             choiceNum = 0
         else:
             choiceNum += 1
-        count += 1
     print(len(finalTable))
     return finalTable
 
@@ -225,7 +236,26 @@ def parseTime(classTime: str):
 readData()
 
 if __name__ == "__main__":
-    timeTable = [(['Mo', 'We', 'Fr'], [780, 830]), (['Tu'], [1035, 1140])]
-    date = ['Tu', 'Th']
-    time = [700, 1000]
-    print(checkTimeConflict(timeTable, date, time))
+    classLists = [
+        "CS2110Lecture",
+            "CS2110Laboratory",
+            "ECE2630Studio",
+            "CS2102Lecture",
+        "STS1500Discussion",
+        "MATH3354Lecture"
+        ]
+    classLists2 = [
+        "FREN1020Lecture",
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "MATH2310Lecture",
+        "ENWR1510Seminar",
+        "MATH2310Discussion",
+        "CS2102Lecture"
+    ]
+    k = getReq(classLists2, None)
+    print(k[1])
+    # for i in k:
+    #     for j in i:
+    #         print(j)
+    #     print()

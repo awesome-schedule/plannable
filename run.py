@@ -1,12 +1,17 @@
 import csv
 import logging
 from flask import Flask, render_template, jsonify, request
-from new_sis.classAlgo import readData, DICT
+from new_sis.classAlgo import readData, DICT, Algorithm
 from collections import OrderedDict
+
 
 app = Flask(__name__)
 
 RECORDS_SHORT = OrderedDict()
+ATTR_MAP = {
+    0: 'department', 1: 'number', 2: 'section', 3: 'type', 4: 'units', 5: 'instructor', 6: 'days', 7: 'room',
+    8: 'title', 9: 'topic', 10: 'status', 11: 'enrollment', 12: 'enrollment_limit', 13: 'wait_list', 14: 'description'
+}
 
 
 @app.route('/')
@@ -24,17 +29,68 @@ def get_semesters():
     return jsonify(semesters)
 
 
+def callAlgorithm(classes):
+    """classes=  [
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "SPAN2020Lecture",
+        "CS2102Lecture",
+        "STS1500Discussion",
+        "MATH3354Lecture",
+        "STS1500Lecture",
+        "ECE2630Studio",]"""
+    classList = []
+    for i in classes:
+        classList.append(DICT[i])
+    return Algorithm(classList)
+
+
 @app.route('/api/classes', methods=['GET', 'POST'])
 def get_classes():
     if request.method == "GET":
-        return jsonify(
-            {
-                'meta': {
-                    'attr_map': {0: 'department', 1: 'number', 2: 'section', 3: 'type', 4: 'units', 5: 'instructor', 6: 'days', 7: 'room', 8: 'title', 9: 'topic', 10: 'status', 11: 'enrollment', 12: 'enrollment_limit', 13: 'wait_list', 14: 'description'}
-                },
-                'data': RECORDS_SHORT
-            }
-        )
+        t = request.args.get('t')
+
+        if t is not None:
+            return jsonify(
+                {
+                    'meta': {
+                        'attr_map': ATTR_MAP
+                    },
+                    'data': callAlgorithm([
+                        "CS2110Lecture",
+                        "CS2110Laboratory",
+                        "SPAN2020Lecture",
+                        "CS2102Lecture",
+                        "STS1500Discussion",
+                        "MATH3354Lecture",
+                        "STS1500Lecture",
+                    ])
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    'meta': {
+                        'attr_map': ATTR_MAP
+                    },
+                    'data': RECORDS_SHORT
+                }
+            )
+    elif request.method == "POST":
+        return jsonify({
+            'meta': {
+                'attr_map': ATTR_MAP
+            },
+            'data': callAlgorithm([
+                "CS2110Lecture",
+                "CS2110Laboratory",
+                "SPAN2020Lecture",
+                "CS2102Lecture",
+                "STS1500Discussion",
+                "MATH3354Lecture",
+                "STS1500Lecture",
+            ])
+        })
     return "haha"
 
 

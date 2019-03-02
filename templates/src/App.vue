@@ -38,7 +38,7 @@
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
-          <!-- term selection dropdown -->
+          <!-- term selection dropdown -->      
           <div class="dropdown">
             <button
               class="button mt-2 mx-auto"
@@ -47,14 +47,15 @@
               id="semester"
               data-toggle="dropdown"
             >{{ currentSemester === null ? 'Select Semester' : currentSemester.name }}</button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 100%;">
               <a
                 class="dropdown-item"
+                style="width: 100%;"
                 href="#"
                 v-for="semester in semesters"
                 v-bind:key="semester.id"
                 v-on:click="selectSemester(semester.id)"
-              >{{ semester.name }}</a>
+              >{{ semester.name }}</a>    
             </div>
           </div>
 
@@ -95,13 +96,46 @@
               aria-describedby="basic-addon1"
             >
           </div>
-          <!--filter block button-->
+          <!--filter button-->
           <button type="button" class="filter-button mt-2">Filter (Optional)</button>
 
           <div class="input-group">
             <!--input earliest time-->
             <div class="input-group-prepend">
               <span class="input-group-text" id="earliest" style="font-size:10pt">Earliest Time</span>
+              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#">8:00am</a>
+                <a class="dropdown-item" href="#">8:30am</a>
+                <a class="dropdown-item" href="#">9:00am</a>
+                <a class="dropdown-item" href="#">9:30am</a>
+                <a class="dropdown-item" href="#">10:00am</a>
+                <a class="dropdown-item" href="#">10:30am</a>
+                <a class="dropdown-item" href="#">11:00am</a>
+                <a class="dropdown-item" href="#">11:30am</a>
+                <a class="dropdown-item" href="#">12:00am</a>
+                <a class="dropdown-item" href="#">12:30am</a>
+                <a class="dropdown-item" href="#">13:00am</a>
+                <a class="dropdown-item" href="#">13:30am</a>
+                <a class="dropdown-item" href="#">14:00am</a>
+                <a class="dropdown-item" href="#">14:30am</a>
+                <a class="dropdown-item" href="#">15:00am</a>
+                <a class="dropdown-item" href="#">15:30am</a>
+                <a class="dropdown-item" href="#">16:00am</a>
+                <a class="dropdown-item" href="#">16:30am</a>
+                <a class="dropdown-item" href="#">17:00am</a>
+                <a class="dropdown-item" href="#">17:30am</a>
+                <a class="dropdown-item" href="#">18:00am</a>
+                <a class="dropdown-item" href="#">18:30am</a>
+                <a class="dropdown-item" href="#">19:00am</a>
+                <a class="dropdown-item" href="#">19:30am</a>
+                <a class="dropdown-item" href="#">20:00am</a>
+                <a class="dropdown-item" href="#">20:30am</a>
+                <a class="dropdown-item" href="#">21:00am</a>
+                <a class="dropdown-item" href="#">21:30am</a>
+              </div>
             </div>
             <input
               type="text"
@@ -109,10 +143,46 @@
               placeholder="8:00am"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
-            >
+            >  
+          </div>
+
+          <div class="input-group mt-2">
             <!--input latest time-->
             <div class="input-group-prepend">
               <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>
+              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#">8:00am</a>
+                <a class="dropdown-item" href="#">8:30am</a>
+                <a class="dropdown-item" href="#">9:00am</a>
+                <a class="dropdown-item" href="#">9:30am</a>
+                <a class="dropdown-item" href="#">10:00am</a>
+                <a class="dropdown-item" href="#">10:30am</a>
+                <a class="dropdown-item" href="#">11:00am</a>
+                <a class="dropdown-item" href="#">11:30am</a>
+                <a class="dropdown-item" href="#">12:00am</a>
+                <a class="dropdown-item" href="#">12:30am</a>
+                <a class="dropdown-item" href="#">13:00am</a>
+                <a class="dropdown-item" href="#">13:30am</a>
+                <a class="dropdown-item" href="#">14:00am</a>
+                <a class="dropdown-item" href="#">14:30am</a>
+                <a class="dropdown-item" href="#">15:00am</a>
+                <a class="dropdown-item" href="#">15:30am</a>
+                <a class="dropdown-item" href="#">16:00am</a>
+                <a class="dropdown-item" href="#">16:30am</a>
+                <a class="dropdown-item" href="#">17:00am</a>
+                <a class="dropdown-item" href="#">17:30am</a>
+                <a class="dropdown-item" href="#">18:00am</a>
+                <a class="dropdown-item" href="#">18:30am</a>
+                <a class="dropdown-item" href="#">19:00am</a>
+                <a class="dropdown-item" href="#">19:30am</a>
+                <a class="dropdown-item" href="#">20:00am</a>
+                <a class="dropdown-item" href="#">20:30am</a>
+                <a class="dropdown-item" href="#">21:00am</a>
+                <a class="dropdown-item" href="#">21:30am</a>
+              </div>
             </div>
             <input
               type="text"
@@ -284,6 +354,10 @@ export default {
     color: #2c3e50;
     margin-top: 60px;
 } */
+.dropdown-menu{
+  overflow: auto;
+  max-height:100px;
+}
 .filter-button{
   border-radius: 3px;
   background-color:#78a7ec;
@@ -299,8 +373,6 @@ export default {
 }
 
 .button:active {
-    transform: translate(0px, 5px);
-    -webkit-transform: translate(0px, 5px);
     box-shadow: 0px 1px 0px 0px;
 }
 

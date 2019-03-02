@@ -30,11 +30,10 @@
           <li class="nav-item">
             <a class="nav-link text-light" href="#" aria-disabled="true">nav-item2</a>
           </li>
-        </ul>        
+        </ul>
       </div>
     </nav>
     <!-- end of navigation bar -->
-
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
@@ -93,6 +92,7 @@
               placeholder="Algorithm"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
+              @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
           <!--filter block button-->
@@ -138,7 +138,11 @@
           </div>
 
           <!--submit button-->
-          <button type="button" class="btn btn-outline-success mt-1 mb-1" onClick="add_class();">Submit</button>
+          <button
+            type="button"
+            class="btn btn-outline-success mt-1 mb-1"
+            onClick="add_class();"
+          >Submit</button>
 
           <div id="courses">
             <p>Current Selected Classes:</p>
@@ -149,7 +153,11 @@
 
           <!--create button-->
           <div>
-            <button type="button" class="btn btn-outline-success mt-1 mb-1" style="position:inherit;">Create</button>
+            <button
+              type="button"
+              class="btn btn-outline-success mt-1 mb-1"
+              style="position:inherit;"
+            >Create</button>
           </div>
         </td>
         <td style="width: 68%; vertical-align: top;">
@@ -250,11 +258,15 @@ export default {
             }
 
             if (target_idx === -1) {
-                for (const course of this.courses) {
-                    if (course[9].indexOf(query) !== -1) return course;
+                for (const key in this.courses) {
+                    const course = this.courses[key];
+                    if (course[9].toLowerCase().indexOf(query) !== -1) return course;
                 }
                 return null;
-            } else return this.courses[target_idx];
+            } else return this.courses[this.courseKeys[target_idx]];
+        },
+        expandClass(course) {
+            console.log(course);
         },
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
@@ -276,10 +288,10 @@ export default {
     color: #2c3e50;
     margin-top: 60px;
 } */
-.filter-button{
-  border-radius: 3px;
-  background-color:#78a7ec;
-  width: 100%;
+.filter-button {
+    border-radius: 3px;
+    background-color: #78a7ec;
+    width: 100%;
 }
 .button {
     border-radius: 3px;

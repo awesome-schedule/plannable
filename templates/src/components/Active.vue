@@ -1,0 +1,48 @@
+<template>
+  <div class="card" style="width: 18rem;">
+    <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
+    <div class="card-body">
+      <h5 class="card-title">Current Schedule</h5>
+      <p class="card-text">{{ schedule.title }}</p>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li
+        class="list-group-item"
+        v-for="course in schedule.courses"
+        v-bind:key="course.id"
+      >{{ course.title }}</li>
+    </ul>
+    <div class="card-body">
+      <a href="#" class="card-link">Card link</a>
+      <a href="#" class="card-link">Another link</a>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            schedule: {
+                title: 'Dummy title',
+                courses: [
+                    {
+                        id: 'asd',
+                        title: 'asd'
+                    },
+                    {
+                        id: 'asd1',
+                        title: 'asd1'
+                    }
+                ]
+            }
+        };
+    }
+    // props: {
+    //     schedule: Object
+    // }
+};
+</script>
+
+<style>
+</style>

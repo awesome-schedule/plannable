@@ -3,9 +3,11 @@ import logging
 from flask import Flask, render_template, jsonify, request
 from new_sis.classAlgo import readData, DICT, Algorithm
 from collections import OrderedDict
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 
 RECORDS_SHORT = OrderedDict()
 ATTR_MAP = {

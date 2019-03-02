@@ -1,16 +1,18 @@
 <template>
   <div id="app">
-    <Active></Active>
+    <!-- <Active></Active> -->
+    <Schedule></Schedule>
   </div>
 </template>
 
 <script>
+import Schedule from './components/Schedule.vue';
 import Active from './components/Active';
 
 export default {
     name: 'app',
     components: {
-        Active
+        Active, Schedule
     },
     data() {
         return {

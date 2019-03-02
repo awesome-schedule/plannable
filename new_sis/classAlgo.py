@@ -16,8 +16,11 @@ def readData():
     file = xlrd.open_workbook("CS1192Data.xlsx")
     sheet = file.sheet_by_index(0)
     for i in range(1, sheet.nrows):
-        courseName = sheet.cell_value(i, 9)
-        DICT[courseName] = DICT.get(courseName, []) + [sheet.row_values(i)]
+        category = str(sheet.cell_value(i, 1))
+        number = str(int(sheet.cell_value(i, 2)))
+        course = category + number
+        DICT[course] = DICT.get(course, []) + [sheet.row_values(i)]
+
 
 
 def readTitle():
@@ -29,8 +32,10 @@ def readTitle():
     sheet = file.sheet_by_index(0)
     aSet = set()
     for i in range(1, sheet.nrows):
-        info = sheet.cell_value(i, 9).strip()
-        aSet.add(info)
+        category = str(sheet.cell_value(i, 1))
+        number = str(int(sheet.cell_value(i, 2)))
+        course = category + number
+        aSet.add(course)
     with open("CompSci_classTitle.csv", "w") as f:
         for element in aSet:
             print(element, file=f)
@@ -194,6 +199,7 @@ def parseTime(classTime: str):
 readData()
 
 if __name__ == "__main__":
+    readTitle()
     existingTT = [[['Mo', 'Fr'], [495, 650]]]
     date, time = parseTime("MoFr 8:15AM - 10:50AM")
     print(checkTimeConflict(existingTT, date, time))

@@ -2,8 +2,9 @@ import xlrd  # CSV file does not work well, so I decide to use excel instead
 from typing import *
 import re
 import os
+from collections import OrderedDict
 
-DICT = {}
+DICT = OrderedDict()
 lectureType = (
     "Laboratory", "Studio", "Seminar", "Clinical", "Practicum", "Discussion", "Drill", "Independent Study", "Lecture",
     "Workshop")
@@ -29,6 +30,7 @@ def readData():
         # print(course)
         # input()
         DICT[course] = DICT.get(course, []) + [sheet.row_values(i)]
+
 
 
 def readTitle():
@@ -84,9 +86,13 @@ def Algorithm(classList: List):
     finalTable = []  # the final result of all the full matches
     pathMemory = [0] * len(classList)  # the path the search has taken
     while True:
+        if classNum == 7:
+            for i in tempTable:
+                print(i[7])
         if classNum >= len(classList):
             # made a full match and keep searching in the last class
             finalTable.append(tempTable)
+            print("made one")
             classNum -= 1
             choiceNum += 1
 
@@ -94,18 +100,10 @@ def Algorithm(classList: List):
                                                                                  pathMemory)
         if exhausted:
             break
-        # print("debug 3: ClassList",classNum,choiceNum,timeNum)
-        # get date and time block
-        try:
-            (date, timeBlock) = parseTime(
-                classList[classNum][choiceNum][timeNum])
-        except IndexError:
-            # it will stuck in loop : retract method: choiceNum >= len(classList[classNum]) - 1 not choiceNum == len(classList[classNum]) - 1
-            print("indexError", classList[classNum], choiceNum, timeNum)
-            input()
-        # print("debug 1")
-        # print("timetable:",timeTable,date,timeBlock)
-        # input()
+
+        (date, timeBlock) = parseTime(
+            classList[classNum][choiceNum][timeNum])
+
         if not checkTimeConflict(timeTable, date, timeBlock):
             # if the schedule matches, record the next path memory and go to the next class
             timeTable.append((date, timeBlock))
@@ -119,18 +117,17 @@ def Algorithm(classList: List):
 
 
 def AlgorithmRetract(classList, classNum, choiceNum, pathMemory):
-    while choiceNum >= len(classList[classNum]) - 1:
+    while choiceNum >= len(classList[classNum]):
         # when all possibilities in on class have exhausted, retract one class
         # explore the next possibilities in the nearest possible class
         # reset the memory path forward to zero
         # print("in the retract",len(classList[classNum]),choiceNum)
+
         classNum -= 1
         if classNum < 0:
             print("no more matches")
             return classList, classNum, choiceNum, pathMemory, True
         choiceNum = pathMemory[classNum]
-        # print(pathMemory)
-        # reset the next memory
         for i in range(classNum + 1, len(pathMemory)):
             pathMemory[i] = 0
     return classList, classNum, choiceNum, pathMemory, False
@@ -192,7 +189,7 @@ def parseTime(classTime: str):
     time = times.strip().split("-")
     timeBlock = [0, 0]
     for count, i in enumerate(time):
-        if "12" and "PM" in i:
+        if "12" in i and "PM" in i:
             tempTime = i.strip().strip("PM").split(":")
             timeBlock[count] += int(tempTime[0]) * 60 + int(tempTime[1])
         elif "AM" in i:
@@ -202,11 +199,14 @@ def parseTime(classTime: str):
             tempTime = i.strip().strip("PM").split(":")
             timeBlock[count] += (int(tempTime[0]) + 12) * 60 + int(tempTime[1])
 
+
     return date, timeBlock
 
 
 readData()
 
 if __name__ == "__main__":
-    for choices in DICT["CS2110"]:
+    date, timeBlock = parseTime("MoWeFr 1:00PM - 1:50PM")
+    print(date,timeBlock)
+    for choices in DICT["CS2110Lecture"]:
         print(choices)

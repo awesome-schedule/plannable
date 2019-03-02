@@ -1,5 +1,6 @@
 import time
 import random
+
 t1 = time.clock()
 import classAlgo
 print(len(classAlgo.DICT))
@@ -22,13 +23,49 @@ def generateTestCases(classNumber=2):
         print(classList[i][0][9],classList[i][0][7])
     return classList
 
-def callAlgorithm():
-    for i in range(1000):
-        print("start")
-        classList = generateTestCases()
-        classAlgo.Algorithm(classList)
+def callAlgorithm(classes):
+    """classes=  [
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "SPAN2020Lecture",
+        "CS2102Lecture",
+        "STS1500Discussion",
+        "MATH3354Lecture",
+        "STS1500Lecture",
+        "ECE2630Studio",]"""
+    classList = []
+    for i in classes:
+        classList.append(classAlgo.DICT[i])
+    table = classAlgo.Algorithm(classList)
+    print(table)
+if __name__ == "__main__":
+    classes=  [
+            "CS2110Lecture",
+            "CS2110Laboratory",
+            "SPAN2020Lecture",
+            "CS2102Lecture",
+            "STS1500Discussion",
+            "MATH3354Lecture",
+            "STS1500Lecture",
+            ]
 
-callAlgorithm()
+    callAlgorithm(classes)
+import unittest
+
+class TestAlgo(unittest.TestCase):
+    def test_schedule1(self):
+        classLists = [
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "SPAN2020Lecture",
+        "CS2102Lecture",
+        "STS1500Discussion",
+        "MATH3354Lecture",
+        "STS1500Lecture",
+        "ECE2630Studio",]
+
+
+
 
 #Thesis,Defense Against the Dark Arts
 

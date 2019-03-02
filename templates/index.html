@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+    <style>
+        .button {
+            border-radius: 5px;
+
+            font-size: 18px;
+            text-decoration: none;
+            color: #1b3866;
+            background-color: #f1c40f;
+            box-shadow: 0px 5px 0px 0px #D8AB00;
+        }
+
+        .button:active {
+            transform: translate(0px, 5px);
+            -webkit-transform: translate(0px, 5px);
+            box-shadow: 0px 1px 0px 0px;
+        }
+
+        .button:hover {
+            background-color: #FFDE29;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+        <!-- brand -->
+        <a class="navbar-brand text-white" href="#">Navbar</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <!-- first item -->
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="#" aria-disabled="true">nav-item1 <span
+                            class="sr-only">(current)</span></a>
+                </li>
+                <!-- second item -->
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="#" aria-disabled="true">nav-item2</a>
+                </li>
+                <!-- third item -->
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="#" aria-disabled="true">nav-item3</a>
+                </li>
+            </ul>
+            <div class="my-2 my-lg-0 text-white" aria-disabled="true">nav-item4</div>
+        </div>
+    </nav>
+    <!-- end of navigation bar -->
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-3">
+                <!-- term selection dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle mt-3 mx-auto" style="width: 100%;" type="button"
+                        id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select Term
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#">Spring 2019</a>
+                        <a class="dropdown-item" href="#">Fall 2018</a>
+                        <a class="dropdown-item" href="#">Spring 2018</a>
+                    </div>
+                </div>
+                <!--input subject-->
+                <div class="input-group mt-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1" style="font-size:10pt">Subject</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="PHYS"
+                        style="font-size: 10pt; align-content: center" aria-describedby="basic-addon1">
+                </div>
+                <!--input course number-->
+                <div class="input-group mt-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1" style="font-size:10pt">Course Number</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="1429" style="font-size: 10pt"
+                        aria-describedby="basic-addon1">
+                </div>
+                <!--input earliest time-->
+                <div class="input-group mt-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1" style="font-size:10pt">Earliest Time</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="8:00am" style="font-size: 10pt"
+                        aria-describedby="basic-addon1">
+                </div>
+                <!--input latest time-->
+                <div class="input-group mt-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1" style="font-size:10pt">Latest Time</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="5:00pm" style="font-size: 10pt"
+                        aria-describedby="basic-addon1">
+
+                </div>
+                <!--input favorite professor-->
+                <div class="input-group mt-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1" style="font-size:10pt">Favorite
+                            Professor</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Kaiying" style="font-size: 10pt"
+                        aria-describedby="basic-addon1">
+                </div>
+                <!--submit button-->
+                <button type="button" class="btn button mt-3 mb-3">Submit</button>
+
+                <!--display buttons; to be dynamically displayed-->
+                <div class="btn-group mb-1" role="group" aria-label="Basic example">
+                    <button type="button" class="btn btn-secondary">Render</button>
+                    <button type="button" class="btn btn-secondary">List</button>
+                </div>
+
+                <div class="btn-group mb-1 " role="group" aria-label="Basic example">
+                    <button type="button" class="btn btn-secondary">Render</button>
+                    <button type="btn btn-lg" data-toggle="popover" class="btn btn-secondary" title="Popover title"
+                        data-content="?">List</button>
+                </div>
+            </div>
+
+            <div class="col">
+                One of two columns
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 <template>
-  <div class="card" style="width: 18rem;">
+  <div class="card" style="width: 98%; margin: auto auto">
     <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
     <div class="card-body">
       <h5 class="card-title">Current Schedule</h5>
@@ -21,26 +21,9 @@
 
 <script>
 export default {
-    data() {
-        return {
-            schedule: {
-                title: 'Dummy title',
-                courses: [
-                    {
-                        id: 'asd',
-                        title: 'asd'
-                    },
-                    {
-                        id: 'asd1',
-                        title: 'asd1'
-                    }
-                ]
-            }
-        };
+    props: {
+        schedule: Object
     }
-    // props: {
-    //     schedule: Object
-    // }
 };
 </script>
 

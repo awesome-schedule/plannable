@@ -23,11 +23,12 @@ def home():
 
 @app.route('/api/semesters')
 def get_semesters():
-    semesters = {
-        "s1": {
+    semesters = [
+        {
+            "id": 1,
             "name": "Spring 2019"
         }
-    }
+    ]
     return jsonify(semesters)
 
 

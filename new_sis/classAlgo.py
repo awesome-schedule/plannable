@@ -23,9 +23,9 @@ def readData():
     file = xlrd.open_workbook(getDataPath('CS1192Data.xlsx'))
     sheet = file.sheet_by_index(0)
     for i in range(1, sheet.nrows):
-        category = str(sheet.cell_value(i, 1))
+        category = str(sheet.cell_value(i, 1)).lower()
         number = str(int(sheet.cell_value(i, 2)))
-        lecture = str(sheet.cell_value(i, 4))
+        lecture = str(sheet.cell_value(i, 4)).lower()
         course = category + number + lecture
         # print(course)
         # input()
@@ -78,35 +78,51 @@ def sortReq(classList):
     return classList
 
 
-def filterBefore(classList, timeLimit, professor, availability):
+def filterBefore(date, timeBlock, professor,availability,**kwargs):
+    """
 
-    # check timeLimit
-    date = []
-    timeBlock = []
-    for time in timeLimit:
-        d,t = parseTime(time)
-        date.append(d)
-        timeBlock.append(t)
-    for classNum in range(len(classList)):
-        for choiceNum in range(len(classList[classNum])):
-            for i in range(len(timeLimit)):
-                timeTable = [classList[classNum][choiceNum][7]]
-                if checkTimeConflict(timeTable,date[i],timeBlock[i]):
-                    del classList[classNum][choiceNum]
-                    break
-    pass
+    :param classList: the list with time
+    :param timeLimit: the filter req
+    :param professor: professor name
+    :param availability:
+    :return: true if being filtered
+    """
+    for key, value in kwargs.items():
+        if key == "time":
+            # check timeLimit
+            filterDates = []
+            placeHolder = 0
+            for times in value:
+                d, t = parseTime(times)
+                filterDates.append([placeHolder, d, t])
+
+            if checkTimeConflict(filterDates, date, timeBlock):
+                return True
+        if key == "professor" and professor != value:
+                return True
+
+        if key == "availability" and availability != value:
+            return True
+        pass
 
 
-def getReq(classes: list, filters: list):
+def getReq(classes: list, **kwargs):
     # return a list contain a lists of classes 3 dimension: classname, classtime, class info
     classList = []
     for i in classes:
         eachClass = DICT[i]
+        # can filter here
+
         temp = []
         for j in range(len(eachClass)):
-            identifier= eachClass[j][0]
+            identifier = eachClass[j][0]
             time = eachClass[j][7]
-            temp.append([identifier,time])
+            date, timeBlock = parseTime(time)
+            professor = eachClass[j][6]
+            availability = eachClass[j][11]
+            if filterBefore(date, timeBlock, professor,availability, **kwargs):
+                continue
+            temp.append([identifier, date, timeBlock])
         classList.append(temp.copy())
     classList = sortReq(classList)
     table = Algorithm(classList)
@@ -116,9 +132,7 @@ def getReq(classes: list, filters: list):
 def Algorithm(classList: List):
     classNum = 0  # the sequence of the class
     choiceNum = 0  # the sequence of the choices within one class
-    timeNum = 1  # the time which the schedule info is stored
     timeTable = []  # table store all the time so that we can compare
-    tempTable = []  # the temp table which stores all the info in the current matches
     finalTable = []  # the final result of all the full matches
     pathMemory = [0] * len(classList)  # the path the search has taken, the number indicates the next search
     while True:
@@ -126,28 +140,26 @@ def Algorithm(classList: List):
         if classNum >= len(classList):
             # made a full match and keep searching in the last class
             # print("temptable length",len(tempTable))
-            finalTable.append(tempTable.copy())
+            finalTable.append(timeTable.copy())
             # print(finalTable)
             # print("made one")
             classNum -= 1
             choiceNum = pathMemory[classNum]
-            tempTable.pop()
             timeTable.pop()
 
         # print(choiceNum, pathMemory)
 
-        classList, classNum, choiceNum, pathMemory, tempTable, timeTable, exhausted = AlgorithmRetract(classList,
-                                                                                                       classNum,
-                                                                                                       choiceNum,
-                                                                                                       pathMemory,
-                                                                                                       tempTable,
-                                                                                                       timeTable)
+        classList, classNum, choiceNum, pathMemory, timeTable, exhausted = AlgorithmRetract(classList,
+                                                                                            classNum,
+                                                                                            choiceNum,
+                                                                                            pathMemory,
+                                                                                            timeTable)
 
         if exhausted:
             break
 
-        (date, timeBlock) = parseTime(
-            classList[classNum][choiceNum][timeNum])
+        date = classList[classNum][choiceNum][1]
+        timeBlock = classList[classNum][choiceNum][2]
         #
         # print("-----------------")
         # print("pathmem", pathMemory)
@@ -158,8 +170,7 @@ def Algorithm(classList: List):
 
         if not checkTimeConflict(timeTable, date, timeBlock):
             # if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
-            timeTable.append((date, timeBlock))
-            tempTable.append(classList[classNum][choiceNum][0])
+            timeTable.append(classList[classNum][choiceNum])
             pathMemory[classNum] = choiceNum + 1
             classNum += 1
             choiceNum = 0
@@ -169,7 +180,7 @@ def Algorithm(classList: List):
     return finalTable
 
 
-def AlgorithmRetract(classList, classNum, choiceNum, pathMemory, tempTable, timeTable):
+def AlgorithmRetract(classList, classNum, choiceNum, pathMemory, timeTable):
     while choiceNum >= len(classList[classNum]):
         # when all possibilities in on class have exhausted, retract one class
         # explore the next possibilities in the nearest possible class
@@ -180,20 +191,19 @@ def AlgorithmRetract(classList, classNum, choiceNum, pathMemory, tempTable, time
 
         if classNum < 0:
             print("no more matches")
-            return classList, classNum, choiceNum, pathMemory, tempTable, timeTable, True
+            return classList, classNum, choiceNum, pathMemory, timeTable, True
 
-        tempTable.pop()
         timeTable.pop()
         choiceNum = pathMemory[classNum]
         for i in range(classNum + 1, len(pathMemory)):
             pathMemory[i] = 0
-    return classList, classNum, choiceNum, pathMemory, tempTable, timeTable, False
+    return classList, classNum, choiceNum, pathMemory, timeTable, False
 
 
 def checkTimeConflict(timeTable: List, date: List, timeBlock: List):
     """
     compare the new class to see if it has conflicts with the existing time table
-    :param timeTable: the existing timeTable implemented using stack
+    :param timeTable: three entries: 1. the class serial number, 2. the date 3. the time
     :param date: contains the date when the class takes place
     :param timeBlock: contains beginTime and endTime of a class
     :return:
@@ -210,9 +220,9 @@ def checkTimeConflict(timeTable: List, date: List, timeBlock: List):
         # print("debug 2", times)
         # input()
 
-        dates = times[0]
-        begin = times[1][0]
-        end = times[1][1]
+        dates = times[1]
+        begin = times[2][0]
+        end = times[2][1]
         for d in date:
             if d not in dates:
                 continue
@@ -225,7 +235,7 @@ def parseTime(classTime: str):
     """
     parse the classTime and return which day the class is on and what time it takes place
     remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
-    :param classTime: give the class time in form of String
+    :param classTime: give the clclassList[classNum][choiceNum][0ass time in form of String
     :return: date: List, timeBlock: List
     """
     if classTime == "TBA":
@@ -265,20 +275,25 @@ if __name__ == "__main__":
     # date, time = parseTime("MoTuWeThFr 8:00AM - 10:00PM")
     # print(date,time)
     classLists = [
-        "CS2110Lecture",
-        "CS2110Laboratory",
-        "ECE2630Studio",
-        "CS2102Lecture",
-        "STS1500Discussion",
-        "MATH3354Lecture"
+        "cs2110lecture",
+        "cs2110laboratory",
+        "ece2630studio",
+        "cs2102lecture",
+        "sts1500discussion",
+        "math3354lecture"
     ]
     classLists2 = [
         "FREN1020Lecture",
         "ENWR1510Seminar",
+        "CS2110Lecture",
+        "CS2110Laboratory",
+        "MATH2310Lecture",
+        "MATH2310Discussion",
+        "CS2102Lecture",
 
     ]
-    k = getReq(classLists2, None)
-    print(k[1])
+    kwargs = {"time":["MoTuWeThFr 00:00AM - 08:00AM","MoTuWeThFr 08:00PM - 10:00PM"],"availability" : "Open"}
+    k = getReq(classLists,**kwargs)
     # for i in k:
     #     for j in i:
     #         print(j)

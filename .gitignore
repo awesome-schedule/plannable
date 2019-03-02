@@ -8,3 +8,4 @@ new_sis/test*.ipynb
 models/
 *.ipynb
 node_modules
+.DS_Store

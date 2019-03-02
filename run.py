@@ -1,15 +1,16 @@
 import csv
 import logging
 from flask import Flask, render_template, jsonify, request
-from new_sis.classAlgo import readData, DICT, Algorithm
+from new_sis.classAlgo import readData, DICT, getReq
 from collections import OrderedDict
 from flask_cors import CORS
-
 
 app = Flask(__name__)
 CORS(app)
 
 RECORDS_SHORT = OrderedDict()
+RECORD_KEYS = []
+
 ATTR_MAP = {
     0: 'department', 1: 'number', 2: 'section', 3: 'type', 4: 'units', 5: 'instructor', 6: 'days', 7: 'room',
     8: 'title', 9: 'topic', 10: 'status', 11: 'enrollment', 12: 'enrollment_limit', 13: 'wait_list', 14: 'description'
@@ -25,57 +26,54 @@ def home():
 def get_semesters():
     semesters = [
         {
-            "id": 1,
+            "id": 0,
             "name": "Spring 2019"
+        },
+        {
+            "id": 1,
+            "name": "Fall 2018"
         }
     ]
     return jsonify(semesters)
 
 
-def callAlgorithm(classes):
-    classList = []
-    for i in classes:
-        classList.append(DICT[i])
-    return Algorithm(classList)
-
-
 @app.route('/api/classes', methods=['GET', 'POST'])
 def get_classes():
     if request.method == "GET":
-        t = request.args.get('t')
-
-        if t is not None:
+        semester = request.args.get('semester')
+        if semester:
             return jsonify(
                 {
                     'meta': {
                         'attr_map': ATTR_MAP
                     },
-                    'data': callAlgorithm([
-                        "CS2110Lecture",
-                        "CS2110Laboratory",
-                        "SPAN2020Lecture",
-                        "CS2102Lecture",
-                        "STS1500Discussion",
-                        "MATH3354Lecture",
-                        "STS1500Lecture",
-                    ])
+                    'data': RECORDS_SHORT,
+                    'keys': RECORD_KEYS,
                 }
             )
         else:
-            return jsonify(
-                {
-                    'meta': {
-                        'attr_map': ATTR_MAP
-                    },
-                    'data': RECORDS_SHORT
-                }
-            )
+            return "!!!"
+        # if t is not None:
+        #     return jsonify(
+        #         {
+        #             'meta': {
+        #                 'attr_map': ATTR_MAP
+        #             },
+        #             'data': getReq([
+        #                 "CS2110Lecture",
+        #                 "CS2110Laboratory",
+
+        #             ], None)
+        #         }
+        #     )
+        # else:
+
     elif request.method == "POST":
         return jsonify({
             'meta': {
                 'attr_map': ATTR_MAP
             },
-            'data': callAlgorithm([
+            'data': getReq([
                 "CS2110Lecture",
                 "CS2110Laboratory",
                 "SPAN2020Lecture",
@@ -83,7 +81,7 @@ def get_classes():
                 "STS1500Discussion",
                 "MATH3354Lecture",
                 "STS1500Lecture",
-            ])
+            ], None)
         })
     return "haha"
 
@@ -95,7 +93,8 @@ def default_handler(any_text):
 
 def to_short():
     for k, v in DICT.items():
-        RECORDS_SHORT[k] = [course[:10] for course in v]
+        RECORDS_SHORT[k] = v[0][:10]
+        RECORD_KEYS.append(k)
 
 
 if __name__ == "__main__":

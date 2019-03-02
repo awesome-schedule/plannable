@@ -90,7 +90,7 @@ function change_semester(sems){
             semester: document.getElementById(sems).innerHTML,
         },
         function(data){
-
+            
         },
         "json"
     )

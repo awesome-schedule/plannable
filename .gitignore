@@ -4,3 +4,5 @@ __pycache__
 new_sis/test*.py
 new_sis/test*.ipynb
 .ipynb_checkpoints
+.~lock*
+models/

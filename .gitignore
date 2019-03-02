@@ -1,4 +1,6 @@
 __pycache__
 .vscode
 .idea/
-
+new_sis/test*.py
+new_sis/test*.ipynb
+.ipynb_checkpoints

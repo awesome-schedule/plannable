@@ -25,7 +25,6 @@ def readData():
         DICT[course] = DICT.get(course, []) + [sheet.row_values(i)]
 
 
-
 def readTitle():
     """
     Get all the class titles and output the classTitle.csv
@@ -92,7 +91,8 @@ def Algorithm(classList: List):
         # print("debug 3: ClassList",classNum,choiceNum,timeNum)
         # get date and time block
         try:
-            (date, timeBlock) = parseTime(classList[classNum][choiceNum][timeNum])
+            (date, timeBlock) = parseTime(
+                classList[classNum][choiceNum][timeNum])
         except IndexError:
             # it will stuck in loop : retract method: choiceNum >= len(classList[classNum]) - 1 not choiceNum == len(classList[classNum]) - 1
             print("indexError", classList[classNum], choiceNum, timeNum)

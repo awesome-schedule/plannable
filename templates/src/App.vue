@@ -21,7 +21,8 @@
         <ul class="navbar-nav mr-auto">
           <!-- first item -->
           <li class="nav-item">
-            <a class="nav-link text-light" href="#" aria-disabled="true">Contact
+            <a class="nav-link text-light" href="#" aria-disabled="true">
+              Contact
               <span class="sr-only">(current)</span>
             </a>
           </li>
@@ -34,9 +35,9 @@
       </div>
     </nav>
     <!-- end of navigation bar -->
-    <table style="width:30%">
+    <table style="width: 95%; margin: auto auto">
       <tr>
-        <td style="width: 30%;">
+        <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
           <!-- term selection dropdown -->
           <div class="dropdown">
             <button
@@ -46,11 +47,7 @@
               id="semester"
               data-toggle="dropdown"
             >Select Term</button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">Spring 2019</a>
-              <a class="dropdown-item" href="#">Fall 2018</a>
-              <a class="dropdown-item" href="#">Spring 2018</a>
-            </div>
+            <Semesters v-bind:semesters="semesters"></Semesters>
           </div>
 
           <div class="input-group">
@@ -138,61 +135,69 @@
             <!--display added class-->
           </div>
 
+          <Active v-bind:schedule="schedule"></Active>
+
           <!--create button-->
           <div>
             <button type="button" class="btn button mt-3 mb-3" style="position:inherit;">Create</button>
           </div>
+        </td>
+        <td style="width: 68%; vertical-align: top;">
+          <!-- Tab links -->
+          <div class="tab mt-3">
+            <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
+            <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
+            <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
+          </div>
 
-          <!--popover button for current active course list-->
-          <button
-            type="button"
-            class="btn btn-lg btn-danger"
-            data-toggle="popover"
-            title="Current Schedule"
-            data-content="Something."
-          >Current Active Schedule</button>
+          <!-- Tab content -->
+          <div id="Schedule 1" class="tabcontent">
+            <h3>Schedule 1</h3>
+            <p>Something.</p>
+          </div>
+
+          <div id="Schedule 2" class="tabcontent">
+            <h3>Schedule 2</h3>
+            <p>Something.</p>
+          </div>
+
+          <div id="Schedule 3" class="tabcontent">
+            <h3>Schedule 3</h3>
+            <p>Something.</p>
+          </div>
         </td>
       </tr>
     </table>
-
-    <!-- Tab links -->
-    <div class="tab">
-      <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
-      <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
-      <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
-    </div>
-
-    <!-- Tab content -->
-    <div id="Schedule 1" class="tabcontent">
-      <h3>Schedule 1</h3>
-      <p>Something.</p>
-    </div>
-
-    <div id="Schedule 2" class="tabcontent">
-      <h3>Schedule 2</h3>
-      <p>Something.</p>
-    </div>
-
-    <div id="Schedule 3" class="tabcontent">
-      <h3>Schedule 3</h3>
-      <p>Something.</p>
-    </div>
-    <Active></Active>
   </div>
 </template>
 
 <script>
 import Active from './components/Active';
+import Semesters from './components/Semesters';
 
 export default {
     name: 'app',
     components: {
-        Active
+        Active,
+        Semesters
     },
     data() {
         return {
             api: 'http://localhost:8000/api',
-            semesters: []
+            semesters: [],
+            schedule: {
+                title: 'Dummy asdsad',
+                courses: [
+                    {
+                        id: 'asd',
+                        title: 'asd'
+                    },
+                    {
+                        id: 'asd1',
+                        title: 'asd1'
+                    }
+                ]
+            }
         };
     },
     mounted() {
@@ -203,13 +208,75 @@ export default {
 };
 </script>
 
-<style>
-#app {
+<style scoped>
+/* #app {
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
     margin-top: 60px;
+} */
+.button {
+    border-radius: 3px;
+    font-size: 12px;
+    text-decoration: none;
+    color: #1b3866;
+    background-color: #f1c40f;
+    box-shadow: 0px 4px 0px 0px #d8ab00;
+    position: inherit;
+}
+
+.button:active {
+    transform: translate(0px, 5px);
+    -webkit-transform: translate(0px, 5px);
+    box-shadow: 0px 1px 0px 0px;
+}
+
+.button:hover {
+    background-color: rgb(241, 206, 3);
+}
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    /* 
+    width: 68%;
+    position: fixed;
+    left: 32%;
+    top: 10%; */
+}
+/* Style the buttons that are used to open the tab content */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 10px 30px;
+    transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: rgb(116, 218, 95);
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: rgb(161, 236, 110);
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+    /* 
+    width: 68%;
+    position: fixed;
+    left: 32%;
+    top: 16%; */
 }
 </style>

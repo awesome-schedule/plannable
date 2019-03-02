@@ -1,0 +1,17 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 7,
+        "sourceType": "module"
+    },
+    "rules": {
+        "semi": "error",
+        "prettier/prettier": "error"
+    },
+    "env": {
+        "browser": true,
+        "jquery": true,
+        "node": true
+    },
+    "plugins": ["vue", "prettier"],
+    "extends": ["plugin:vue/essential", "plugin:prettier/recommended"]
+}

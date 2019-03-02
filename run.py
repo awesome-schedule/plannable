@@ -30,15 +30,6 @@ def get_semesters():
 
 
 def callAlgorithm(classes):
-    """classes=  [
-        "CS2110Lecture",
-        "CS2110Laboratory",
-        "SPAN2020Lecture",
-        "CS2102Lecture",
-        "STS1500Discussion",
-        "MATH3354Lecture",
-        "STS1500Lecture",
-        "ECE2630Studio",]"""
     classList = []
     for i in classes:
         classList.append(DICT[i])

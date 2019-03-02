@@ -7,3 +7,4 @@ new_sis/test*.ipynb
 .~lock*
 models/
 *.ipynb
+node_modules

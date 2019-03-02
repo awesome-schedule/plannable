@@ -34,36 +34,35 @@
 			<li class="events-group">
 				<div class="top-info"><span>Monday</span></div>
 				<ul>
-          <course v-for="c in courses" :key="c.id" ></course>
-					<course start_time="10:00" end_time="11:00" title="Feeding Cats" color_type="event-1"></course>
+          <course v-for="c in courses" :key="c.id" v-if="c[15].includes('Monday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Tuesday</span></div>
 				<ul>
-					<course start_time="13:00" end_time="14:00" title="Feeding Cats" color_type="event-2"></course>
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Tuesday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Wednesday</span></div>
 				<ul>
-					
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Wednesday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Thursday</span></div>
 				<ul>
-					
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Thursday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Friday</span></div>
 				<ul>
-					
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Friday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
 				</ul>
 			</li>
         </ul>

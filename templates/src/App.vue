@@ -30,15 +30,14 @@
           <li class="nav-item">
             <a class="nav-link text-light" href="#" aria-disabled="true">nav-item2</a>
           </li>
-        </ul>        
+        </ul>
       </div>
     </nav>
     <!-- end of navigation bar -->
-
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
-          <!-- term selection dropdown -->      
+          <!-- term selection dropdown -->
           <div class="dropdown">
             <button
               class="button mt-2 mx-auto"
@@ -55,7 +54,7 @@
                 v-for="semester in semesters"
                 v-bind:key="semester.id"
                 v-on:click="selectSemester(semester.id)"
-              >{{ semester.name }}</a>    
+              >{{ semester.name }}</a>
             </div>
           </div>
 
@@ -94,6 +93,7 @@
               placeholder="Algorithm"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
+              @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
           <!--filter button-->
@@ -103,8 +103,14 @@
             <!--input earliest time-->
             <div class="input-group-prepend">
               <span class="input-group-text" id="earliest" style="font-size:10pt">Earliest Time</span>
-              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="sr-only">Toggle Dropdown</span>
+              <button
+                type="button"
+                class="button dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="#">8:00am</a>
@@ -143,15 +149,21 @@
               placeholder="8:00am"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
-            >  
+            >
           </div>
 
           <div class="input-group mt-2">
             <!--input latest time-->
             <div class="input-group-prepend">
               <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>
-              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="sr-only">Toggle Dropdown</span>
+              <button
+                type="button"
+                class="button dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="#">8:00am</a>
@@ -208,7 +220,11 @@
           </div>
 
           <!--submit button-->
-          <button type="button" class="btn btn-outline-success mt-1 mb-1" onClick="add_class();">Submit</button>
+          <button
+            type="button"
+            class="btn btn-outline-success mt-1 mb-1"
+            onClick="add_class();"
+          >Submit</button>
 
           <div id="courses">
             <p>Current Selected Classes:</p>
@@ -219,7 +235,11 @@
 
           <!--create button-->
           <div>
-            <button type="button" class="btn btn-outline-success mt-1 mb-1" style="position:inherit;">Create</button>
+            <button
+              type="button"
+              class="btn btn-outline-success mt-1 mb-1"
+              style="position:inherit;"
+            >Create</button>
           </div>
         </td>
         <td style="width: 68%; vertical-align: top;">
@@ -328,11 +348,15 @@ export default {
             }
 
             if (target_idx === -1) {
-                for (const course of this.courses) {
-                    if (course[9].indexOf(query) !== -1) return course;
+                for (const key in this.courses) {
+                    const course = this.courses[key];
+                    if (course[9].toLowerCase().indexOf(query) !== -1) return course;
                 }
                 return null;
-            } else return this.courses[target_idx];
+            } else return this.courses[this.courseKeys[target_idx]];
+        },
+        expandClass(course) {
+            console.log(course);
         },
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
@@ -354,14 +378,14 @@ export default {
     color: #2c3e50;
     margin-top: 60px;
 } */
-.dropdown-menu{
-  overflow: auto;
-  max-height:100px;
+.dropdown-menu {
+    overflow: auto;
+    max-height: 100px;
 }
-.filter-button{
-  border-radius: 3px;
-  background-color:#78a7ec;
-  width: 100%;
+.filter-button {
+    border-radius: 3px;
+    background-color: #78a7ec;
+    width: 100%;
 }
 .button {
     border-radius: 3px;

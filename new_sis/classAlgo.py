@@ -78,7 +78,7 @@ def sortReq(classList):
     return classList
 
 
-def filterBefore(date, timeBlock, professor,availability,**kwargs):
+def filterBefore(date, timeBlock, professor, availability, **kwargs):
     """
 
     :param classList: the list with time
@@ -88,7 +88,7 @@ def filterBefore(date, timeBlock, professor,availability,**kwargs):
     :return: true if being filtered
     """
     for key, value in kwargs.items():
-        if key == "time":
+        if key == "Days":
             # check timeLimit
             filterDates = []
             placeHolder = 0
@@ -98,12 +98,11 @@ def filterBefore(date, timeBlock, professor,availability,**kwargs):
 
             if checkTimeConflict(filterDates, date, timeBlock):
                 return True
-        if key == "professor" and professor != value:
-                return True
-
-        if key == "availability" and availability != value:
+        if key == "Instructor" and professor != value:
             return True
-        pass
+
+        if key == "Status" and availability != value:
+            return True
 
 
 def getReq(classes: list, **kwargs):
@@ -120,7 +119,8 @@ def getReq(classes: list, **kwargs):
             date, timeBlock = parseTime(time)
             professor = eachClass[j][6]
             availability = eachClass[j][11]
-            if filterBefore(date, timeBlock, professor,availability, **kwargs):
+
+            if filterBefore(date, timeBlock, professor, availability, **kwargs):
                 continue
             temp.append([identifier, date, timeBlock])
         classList.append(temp.copy())
@@ -292,8 +292,8 @@ if __name__ == "__main__":
         "CS2102Lecture",
 
     ]
-    kwargs = {"time":["MoTuWeThFr 00:00AM - 08:00AM","MoTuWeThFr 08:00PM - 10:00PM"],"availability" : "Open"}
-    k = getReq(classLists,**kwargs)
+    kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM", "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open"}
+    k = getReq(classLists, **kwargs)
     # for i in k:
     #     for j in i:
     #         print(j)

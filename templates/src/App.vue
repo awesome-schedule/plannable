@@ -61,7 +61,7 @@
             <!-- input department-->
             <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="dept" style="font-size:10pt">Department</span>
-            </div> -->
+            </div>-->
             <input
               type="text"
               class="form-control"
@@ -72,7 +72,7 @@
             <!--input course number-->
             <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="num" style="font-size:10pt">Course#</span>
-            </div> -->
+            </div>-->
             <input
               type="text"
               class="form-control"
@@ -85,7 +85,7 @@
           <div class="input-group mt-2">
             <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="title" style="font-size:10pt">Course Name</span>
-            </div> -->
+            </div>-->
             <input
               type="text"
               class="form-control"
@@ -115,47 +115,47 @@
             <div class="input-group">
               <!--input earliest time-->
               <!-- <div class="input-group-prepend">
-                <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span> -->
-                <button
-                  type="button"
-                  class="button dropdown-toggle dropdown-toggle-split"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <div class="dropdown-menu" style="width:100%">
-                  <a class="dropdown-item" href="#">8:00am</a>
-                  <a class="dropdown-item" href="#">8:30am</a>
-                  <a class="dropdown-item" href="#">9:00am</a>
-                  <a class="dropdown-item" href="#">9:30am</a>
-                  <a class="dropdown-item" href="#">10:00am</a>
-                  <a class="dropdown-item" href="#">10:30am</a>
-                  <a class="dropdown-item" href="#">11:00am</a>
-                  <a class="dropdown-item" href="#">11:30am</a>
-                  <a class="dropdown-item" href="#">12:00am</a>
-                  <a class="dropdown-item" href="#">12:30am</a>
-                  <a class="dropdown-item" href="#">13:00am</a>
-                  <a class="dropdown-item" href="#">13:30am</a>
-                  <a class="dropdown-item" href="#">14:00am</a>
-                  <a class="dropdown-item" href="#">14:30am</a>
-                  <a class="dropdown-item" href="#">15:00am</a>
-                  <a class="dropdown-item" href="#">15:30am</a>
-                  <a class="dropdown-item" href="#">16:00am</a>
-                  <a class="dropdown-item" href="#">16:30am</a>
-                  <a class="dropdown-item" href="#">17:00am</a>
-                  <a class="dropdown-item" href="#">17:30am</a>
-                  <a class="dropdown-item" href="#">18:00am</a>
-                  <a class="dropdown-item" href="#">18:30am</a>
-                  <a class="dropdown-item" href="#">19:00am</a>
-                  <a class="dropdown-item" href="#">19:30am</a>
-                  <a class="dropdown-item" href="#">20:00am</a>
-                  <a class="dropdown-item" href="#">20:30am</a>
-                  <a class="dropdown-item" href="#">21:00am</a>
-                  <a class="dropdown-item" href="#">21:30am</a>
-                </div>
-              
+              <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
+              <button
+                type="button"
+                class="button dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <div class="dropdown-menu" style="width:100%">
+                <a class="dropdown-item" href="#">8:00am</a>
+                <a class="dropdown-item" href="#">8:30am</a>
+                <a class="dropdown-item" href="#">9:00am</a>
+                <a class="dropdown-item" href="#">9:30am</a>
+                <a class="dropdown-item" href="#">10:00am</a>
+                <a class="dropdown-item" href="#">10:30am</a>
+                <a class="dropdown-item" href="#">11:00am</a>
+                <a class="dropdown-item" href="#">11:30am</a>
+                <a class="dropdown-item" href="#">12:00am</a>
+                <a class="dropdown-item" href="#">12:30am</a>
+                <a class="dropdown-item" href="#">13:00am</a>
+                <a class="dropdown-item" href="#">13:30am</a>
+                <a class="dropdown-item" href="#">14:00am</a>
+                <a class="dropdown-item" href="#">14:30am</a>
+                <a class="dropdown-item" href="#">15:00am</a>
+                <a class="dropdown-item" href="#">15:30am</a>
+                <a class="dropdown-item" href="#">16:00am</a>
+                <a class="dropdown-item" href="#">16:30am</a>
+                <a class="dropdown-item" href="#">17:00am</a>
+                <a class="dropdown-item" href="#">17:30am</a>
+                <a class="dropdown-item" href="#">18:00am</a>
+                <a class="dropdown-item" href="#">18:30am</a>
+                <a class="dropdown-item" href="#">19:00am</a>
+                <a class="dropdown-item" href="#">19:30am</a>
+                <a class="dropdown-item" href="#">20:00am</a>
+                <a class="dropdown-item" href="#">20:30am</a>
+                <a class="dropdown-item" href="#">21:00am</a>
+                <a class="dropdown-item" href="#">21:30am</a>
+              </div>
+
               <input
                 type="text"
                 class="form-control"
@@ -168,46 +168,46 @@
             <div class="input-group mt-2">
               <!--input latest time-->
               <!-- <div class="input-group-prepend">
-                <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span> -->
-                <button
-                  type="button"
-                  class="button dropdown-toggle dropdown-toggle-split"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <div class="dropdown-menu" style="width:100%">
-                  <a class="dropdown-item" href="#">8:00am</a>
-                  <a class="dropdown-item" href="#">8:30am</a>
-                  <a class="dropdown-item" href="#">9:00am</a>
-                  <a class="dropdown-item" href="#">9:30am</a>
-                  <a class="dropdown-item" href="#">10:00am</a>
-                  <a class="dropdown-item" href="#">10:30am</a>
-                  <a class="dropdown-item" href="#">11:00am</a>
-                  <a class="dropdown-item" href="#">11:30am</a>
-                  <a class="dropdown-item" href="#">12:00am</a>
-                  <a class="dropdown-item" href="#">12:30am</a>
-                  <a class="dropdown-item" href="#">13:00am</a>
-                  <a class="dropdown-item" href="#">13:30am</a>
-                  <a class="dropdown-item" href="#">14:00am</a>
-                  <a class="dropdown-item" href="#">14:30am</a>
-                  <a class="dropdown-item" href="#">15:00am</a>
-                  <a class="dropdown-item" href="#">15:30am</a>
-                  <a class="dropdown-item" href="#">16:00am</a>
-                  <a class="dropdown-item" href="#">16:30am</a>
-                  <a class="dropdown-item" href="#">17:00am</a>
-                  <a class="dropdown-item" href="#">17:30am</a>
-                  <a class="dropdown-item" href="#">18:00am</a>
-                  <a class="dropdown-item" href="#">18:30am</a>
-                  <a class="dropdown-item" href="#">19:00am</a>
-                  <a class="dropdown-item" href="#">19:30am</a>
-                  <a class="dropdown-item" href="#">20:00am</a>
-                  <a class="dropdown-item" href="#">20:30am</a>
-                  <a class="dropdown-item" href="#">21:00am</a>
-                  <a class="dropdown-item" href="#">21:30am</a>
-                </div>
+              <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
+              <button
+                type="button"
+                class="button dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <div class="dropdown-menu" style="width:100%">
+                <a class="dropdown-item" href="#">8:00am</a>
+                <a class="dropdown-item" href="#">8:30am</a>
+                <a class="dropdown-item" href="#">9:00am</a>
+                <a class="dropdown-item" href="#">9:30am</a>
+                <a class="dropdown-item" href="#">10:00am</a>
+                <a class="dropdown-item" href="#">10:30am</a>
+                <a class="dropdown-item" href="#">11:00am</a>
+                <a class="dropdown-item" href="#">11:30am</a>
+                <a class="dropdown-item" href="#">12:00am</a>
+                <a class="dropdown-item" href="#">12:30am</a>
+                <a class="dropdown-item" href="#">13:00am</a>
+                <a class="dropdown-item" href="#">13:30am</a>
+                <a class="dropdown-item" href="#">14:00am</a>
+                <a class="dropdown-item" href="#">14:30am</a>
+                <a class="dropdown-item" href="#">15:00am</a>
+                <a class="dropdown-item" href="#">15:30am</a>
+                <a class="dropdown-item" href="#">16:00am</a>
+                <a class="dropdown-item" href="#">16:30am</a>
+                <a class="dropdown-item" href="#">17:00am</a>
+                <a class="dropdown-item" href="#">17:30am</a>
+                <a class="dropdown-item" href="#">18:00am</a>
+                <a class="dropdown-item" href="#">18:30am</a>
+                <a class="dropdown-item" href="#">19:00am</a>
+                <a class="dropdown-item" href="#">19:30am</a>
+                <a class="dropdown-item" href="#">20:00am</a>
+                <a class="dropdown-item" href="#">20:30am</a>
+                <a class="dropdown-item" href="#">21:00am</a>
+                <a class="dropdown-item" href="#">21:30am</a>
+              </div>
               <!-- </div> -->
               <input
                 type="text"
@@ -233,30 +233,30 @@
             </div>
           </div>
           <!--submit button-->
-          <button
-            type="button"
-            class="btn btn-outline-success mt-2"
-            onClick="add_class();"
-          >Submit</button>
+          <button type="button" class="btn btn-outline-success mt-2" onClick="add_class();">Submit</button>
 
           <div class="mt-3">
-            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#currentSelectedClass" aria-expanded="false" aria-controls="currentSelectedClass" style="width:100%">
-              Current Selected Classes
-            </button>
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-toggle="collapse"
+              data-target="#currentSelectedClass"
+              aria-expanded="false"
+              aria-controls="currentSelectedClass"
+              style="width:100%"
+            >Current Selected Classes</button>
           </div>
           <div class="collapse" id="currentSelectedClass">
             <div class="card card-body">
               <Active v-bind:schedule="currentSchedule"></Active>
             </div>
           </div>
-          
+
           <!-- <div id="courses"> -->
-            <!-- <p>Current Selected Classes:</p> -->
-            <!--display added class-->
+          <!-- <p>Current Selected Classes:</p> -->
+          <!--display added class-->
           <!-- </div> -->
-
           <!-- <Active v-bind:schedule="currentSchedule"></Active> -->
-
           <!--create button-->
           <div>
             <button
@@ -403,10 +403,9 @@ export default {
                 this.schedules.push(schedule);
 
                 for (let y = 0; y < raw_schedule.length; y++) {
-                    const course = {
+                    let course = {
                         color: `event-${y % 4}`
                     };
-                    schedule.All.push(course);
 
                     // get course_data from course id
                     const course_data = meta.course_data[raw_schedule[y]];
@@ -414,12 +413,16 @@ export default {
                         // bind properties to each course object
                         course[meta.attr_map[idx]] = course_data[idx];
                     }
+
+                    schedule.All.push(course);
+
                     // parse MoWeFr 11:00PM - 11:50PM style time
                     const [days, start, , end] = course.days.split(' ');
                     /**
                      * @type {string}
                      */
                     for (let i = 0; i < days.length; i += 2) {
+                        course = Object.assign({}, course);
                         switch (days.substr(i, 2)) {
                             case 'Mo':
                                 schedule.Monday.push(course);
@@ -437,14 +440,16 @@ export default {
                                 schedule.Friday.push(course);
                                 break;
                         }
-                        let suffix = start.substr(start.length - 3, 2);
+                        let suffix = start.substr(start.length - 2, 2);
                         if (suffix == 'PM') {
-                            const [hour, minute] = start.substring(0, start.length - 2).split(':');
+                            let [hour, minute] = start.substring(0, start.length - 2).split(':');
                             course.start = `${(+hour % 12) + 12}:${minute}`;
+
+                            [hour, minute] = end.substring(0, end.length - 2).split(':');
                             course.end = `${(+hour % 12) + 12}:${minute}`;
                         } else {
                             course.start = start.substring(0, start.length - 2);
-                            suffix = end.substr(end.length - 3, 2);
+                            suffix = end.substr(end.length - 2, 2);
                             const end_time = end.substring(0, end.length - 2);
                             if (suffix == 'PM') {
                                 const [hour, minute] = end_time.split(':');

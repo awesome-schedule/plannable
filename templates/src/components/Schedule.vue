@@ -34,35 +34,35 @@
 			<li class="events-group">
 				<div class="top-info"><span>Monday</span></div>
 				<ul>
-          <course v-for="c in courses" :key="c.id" v-if="c[15].includes('Monday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
+          <course v-for="c in courses" :key="c.id" v-if="c[15].includes('Monday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]" v-bind:title="c[0] + ' ' + c[1] + ' ' + c[14]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Tuesday</span></div>
 				<ul>
-					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Tuesday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Tuesday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]" v-bind:title="c[0] + ' ' + c[1] + ' ' + c[14]" v-bind:room="c[7]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Wednesday</span></div>
 				<ul>
-					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Wednesday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Wednesday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]" v-bind:title="c[0] + ' ' + c[1] + ' ' + c[14]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Thursday</span></div>
 				<ul>
-					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Thursday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Thursday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]" v-bind:title="c[0] + ' ' + c[1] + ' ' + c[14]"></course>
 				</ul>
 			</li>
 
             <li class="events-group">
 				<div class="top-info"><span>Friday</span></div>
 				<ul>
-					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Friday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]"></course>
+					<course v-for="c in courses" :key="c.id" v-if="c[15].includes('Friday')" v-bind:start_time="c[16]" v-bind:end_time="c[17]" v-bind:color_type="c[18]" v-bind:title="c[0] + ' ' + c[1] + ' ' + c[14]"></course>
 				</ul>
 			</li>
         </ul>
@@ -380,37 +380,45 @@ Main Components
 .cd-schedule [data-event="event-1"] .header-bg {
   /* this is used to set a background color for the event and the modal window */
   background: #577F92;
+  color: #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-1"]:hover {
   background: #618da1;
+  color : #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-2"],
 .cd-schedule [data-event="event-2"] .header-bg {
   background: #443453;
+  color: #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-2"]:hover {
   background: #513e63;
+  color: #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-3"],
 .cd-schedule [data-event="event-3"] .header-bg {
   background: #A2B9B2;
+  color: #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-3"]:hover {
   background: #b1c4be;
+  color: #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-4"],
 .cd-schedule [data-event="event-4"] .header-bg {
   background: #f6b067;
+  color: #f9f9f7;
 }
 
 .cd-schedule .single-event[data-event="event-4"]:hover {
   background: #f7bd7f;
+  color: #f9f9f7;
 }
 
 .cd-schedule .event-modal {

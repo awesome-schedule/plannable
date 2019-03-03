@@ -30,15 +30,8 @@
       </div>
     </nav>
     <!-- end of navigation bar -->
-<<<<<<< HEAD
-    <div>" "</div><br>
-    <table style="width: 95%; margin: auto auto;">
-      
-      <tr style="margin-top:5%">
-=======
     <table style="width: 95%; margin: auto auto">
       <tr>
->>>>>>> 8de996ca007f611e74fd273dcb8960d937679163
         <td
           id="leftBar"
           class="leftside"
@@ -284,24 +277,6 @@
             <tr>
               <td>
                 <table style="width:100%">
-<<<<<<< HEAD
-                <tr>
-                  <td style="width:40%;right:0px">
-                    <button
-                      class="btn btn-secondary"
-                      data-toggle="popover"
-                      data-target="#leftBar"
-                      data-placement="bottom"
-                      data-content="Click to hide or show left side-bar."
-                      v-on:click="sideBar = !sideBar; refreshPopover()"
-                    >§</button>
-                  </td>
-                  <td>
-                    <Pagination class="mt-3" style="width:50%;"></Pagination>
-                  </td>
-                </tr>
-              </table>
-=======
                   <tr>
                     <td>
                       <button
@@ -323,7 +298,6 @@
                     </td>
                   </tr>
                 </table>
->>>>>>> 8de996ca007f611e74fd273dcb8960d937679163
               </td>
             </tr>
             <tr>

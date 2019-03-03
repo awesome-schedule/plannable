@@ -88,7 +88,7 @@
                 v-bind:start_time="c.start"
                 v-bind:end_time="c.end"
                 v-bind:color_type="c.color"
-                v-bind:title="c.title"
+                v-bind:title="c.department + ' ' + c.number"
                 v-bind:room="c.room"
               ></course>
             </ul>
@@ -105,7 +105,7 @@
                 v-bind:start_time="c.start"
                 v-bind:end_time="c.end"
                 v-bind:color_type="c.color"
-                v-bind:title="c.title"
+                v-bind:title="c.department + ' ' + c.number"
                 v-bind:room="c.room"
               ></course>
             </ul>
@@ -122,7 +122,7 @@
                 v-bind:start_time="c.start"
                 v-bind:end_time="c.end"
                 v-bind:color_type="c.color"
-                v-bind:title="c.title"
+                v-bind:title="c.department + ' ' + c.number"
                 v-bind:room="c.room"
               ></course>
             </ul>
@@ -139,7 +139,7 @@
                 v-bind:start_time="c.start"
                 v-bind:end_time="c.end"
                 v-bind:color_type="c.color"
-                v-bind:title="c.title"
+                v-bind:title="c.department + ' ' + c.number"
                 v-bind:room="c.room"
               ></course>
             </ul>
@@ -156,7 +156,7 @@
                 v-bind:start_time="c.start"
                 v-bind:end_time="c.end"
                 v-bind:color_type="c.color"
-                v-bind:title="c.title"
+                v-bind:title="c.department + ' ' + c.number"
                 v-bind:room="c.room"
               ></course>
             </ul>

@@ -33,13 +33,15 @@
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td
+          id="leftBar"
           class="leftside"
           style="width: 15%; vertical-align: top; padding-top: 0; padding-right: 2%"
+          v-if="sideBar"
         >
           <!-- term selection dropdown -->
           <div class="dropdown">
             <button
-              class="btn btn-primary mt-2 mx-auto"
+              class="btn btn-primary mt-4 mx-auto"
               style="width: 100%;"
               type="button"
               id="semester"
@@ -271,22 +273,36 @@
         </td>
 
         <td style="width: 68%; vertical-align: top;">
-          <!-- Tab links -->
-          <button
-            class="bt-sidebar"
-            data-toggle="popover"
-            data-placement="bottom"
-            data-content="Click to hide or show left side-bar."
-          >§</button>
-          <Pagination
-            v-if="schedules !== null && schedules.length > 0"
-            @switch_page="switchPage"
-            v-bind:indices="scheduleIndices"
-          ></Pagination>
+          <table style="width:100%">
+            <tr>
+              <td>
+                <table style="width:100%">
+                  <tr>
+                    <td style="width:40%;right:0px">
+                      <button
+                        class="btn btn-secondary"
+                        data-toggle="popover"
+                        data-target="#leftBar"
+                        data-placement="bottom"
+                        data-content="Click to hide or show left side-bar."
+                        v-on:click="sideBar = !sideBar"
+                      >§</button>
+                    </td>
+                    <td>
+                      <Pagination class="mt-3" style="width:50%;"></Pagination>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="tab mt-2"></div>
 
-          <div class="tab mt-2"></div>
-
-          <Schedule v-bind:courses="this.currentSchedule"></Schedule>
+                <Schedule v-bind:courses="this.currentSchedule"></Schedule>
+              </td>
+            </tr>
+          </table>
         </td>
       </tr>
     </table>
@@ -318,6 +334,7 @@ export default {
             schedules: null,
             attr_map: null,
             isEntering: false,
+            sideBar: true,
             inputCourses: null
         };
     },

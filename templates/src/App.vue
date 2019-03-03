@@ -35,12 +35,13 @@
     <!-- end of navigation bar -->
     <div>" "</div>
     <br>
+    <br>
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td
           id="leftBar"
           class="leftside"
-          style="width: 15%; vertical-align: top; padding-top: 0; padding-right: 2%"
+          style="width: 20%; vertical-align: top; padding-top: 0; padding-right: 2%"
           v-if="sideBar"
         >
           <!-- term selection dropdown -->
@@ -100,6 +101,7 @@
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
               @input="getClass($event.target.value.toLowerCase())"
+              v-on:keyup.esc="$event.target.value = ''; isEntering = false "
             >
           </div>
           <div v-if="!isEntering">
@@ -242,7 +244,7 @@
                 <button
                   type="button"
                   class="btn btn-outline-success mt-2"
-                  onClick="add_class();"
+                  v-on:click="sendRequest"
                 >Submit</button>
               </div>
             </div>
@@ -340,7 +342,15 @@ export default {
             currentSemester: null,
             courses: null,
             courseKeys: null,
-            currentSchedule: null,
+            currentSchedule: {
+                Monday: [],
+                Tuesday: [],
+                Wednesday: [],
+                Thursday: [],
+                Friday: [],
+                All: [],
+                title: `Schedule`
+            },
             schedules: null,
             attr_map: null,
             isEntering: false,
@@ -353,7 +363,6 @@ export default {
             this.semesters = res.data;
             this.selectSemester(0);
         });
-        this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
     },
     computed: {
         scheduleIndices() {
@@ -398,7 +407,7 @@ export default {
             let start = 0,
                 end = arr.length - 1;
 
-            const results = [];
+            let results = [];
 
             // do a binary search on the keys of courses for efficiency
             while (start <= end) {
@@ -412,7 +421,7 @@ export default {
                     results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
                     let increment = 1;
                     while (
-                        results.length < max_results &&
+                        results.length < max_results * 2 &&
                         arr[mid + increment].substr(0, len) === query
                     ) {
                         results.push(
@@ -426,7 +435,7 @@ export default {
                     }
                     increment = -1;
                     while (
-                        results.length < max_results &&
+                        results.length < max_results * 2 &&
                         arr[mid + increment].substr(0, len) === query
                     ) {
                         results.push(
@@ -444,8 +453,13 @@ export default {
                 } else end = mid - 1;
             }
 
-            // if not sufficient results are found, we perform linear search in the array of titles
-            if (results.length < max_results) {
+            if (results.length > max_results) {
+                const margin = Math.floor((results.length - max_results) / 2);
+                results = results.slice(margin, results.length - margin);
+            }
+
+            // if no results are found, we perform linear search in the array of titles
+            if (results.length === 0) {
                 for (const key in this.courses) {
                     const course = this.courses[key];
                     if (course[9].toLowerCase().indexOf(query) !== -1) {
@@ -460,6 +474,8 @@ export default {
         },
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
+
+            // fetch basic class data for the given semester for fast class search
             this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.courses = res.data.data;
                 this.courseKeys = res.data.keys;
@@ -491,6 +507,7 @@ export default {
             const data = res.data.data;
             const meta = res.data.meta;
             const schedules = [];
+
             // raw data is a list of list
             for (let x = 0; x < data.length; x++) {
                 // raw schedule is a list of course ids
@@ -545,6 +562,8 @@ export default {
                                 schedule.Friday.push(course);
                                 break;
                         }
+
+                        // convert to 24h format
                         let suffix = start.substr(start.length - 2, 2);
                         if (suffix == 'PM') {
                             let [hour, minute] = start.substring(0, start.length - 2).split(':');
@@ -566,23 +585,34 @@ export default {
                     }
                 }
             }
+
+            // avoid updating style-binded variable in loops for better performace
             this.schedules = schedules;
             this.currentSchedule = this.schedules[0];
             this.refreshStyle();
+        },
+        sendRequest() {
+            if (this.currentSchedule.All.length < 2) return;
+            const request = {
+                classes: [],
+                semester: this.currentSemester,
+                num: 10
+            };
+
+            for (const course of this.currentSchedule.All) {
+                request.classes.push(
+                    `${course.department}${course.number}${course.type}`.toLowerCase()
+                );
+            }
+            this.$http.post(`${this.api}/classes`, request).then(res => {
+                this.parseResponse(res);
+            });
         }
     }
 };
 </script>
 
 <style scoped>
-/* #app {
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-    margin-top: 60px;
-} */
 .dropdown-menu {
     overflow: auto;
     max-height: 100px;

@@ -406,13 +406,13 @@ $(window).on('resize', function() {
     }
 });
 
-$(window).keyup(function(event) {
-    if (event.keyCode == 27) {
-        objSchedulesPlan.forEach(function(element) {
-            element.closeModal(element.eventsGroup.find('.selected-event'));
-        });
-    }
-});
+// $(window).keyup(function(event) {
+//     if (event.keyCode == 27) {
+//         objSchedulesPlan.forEach(function(element) {
+//             element.closeModal(element.eventsGroup.find('.selected-event'));
+//         });
+//     }
+// });
 
 function checkResize() {
     objSchedulesPlan.forEach(function(element) {

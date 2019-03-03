@@ -4,10 +4,9 @@ from flask import Flask, render_template, jsonify, request
 from new_sis.classAlgo import readData, DICT, getReq, RECORD
 from collections import OrderedDict
 from flask_cors import CORS
+from typing import List, Any, Dict, Tuple
 
 app = Flask(__name__)
-CORS(app)
-
 RECORDS_DICT = OrderedDict()
 RECORDS_KEYS = []
 
@@ -37,6 +36,22 @@ def get_semesters():
     return jsonify(semesters)
 
 
+def raw_result_to_response(raw_result: List[List[Any]]) -> Tuple[List[List[Any]], Dict[int, List[Any]]]:
+    course_data = dict()
+    result = []
+    for raw_schedule in raw_result:
+        schedule = []
+        for raw_course in raw_schedule:
+            cid = raw_course[0]
+            schedule.append(cid)
+            if not course_data.get(cid):
+                course_data[cid] = RECORD[cid]
+
+        result.append(schedule)
+
+    return result, course_data
+
+
 @app.route('/api/classes', methods=['GET', 'POST'])
 def get_classes():
     if request.method == "GET":
@@ -63,18 +78,8 @@ def get_classes():
                 "math3354lecture",
                 "sts1500lecture",
             ], 10)
-            course_data = dict()
 
-            result = []
-            for raw_schedule in raw_result:
-                schedule = []
-                for raw_course in raw_schedule:
-                    cid = raw_course[0]
-                    schedule.append(cid)
-                    if not course_data.get(cid):
-                        course_data[cid] = RECORD[cid]
-
-                result.append(schedule)
+            result, course_data = raw_result_to_response(raw_result)
 
             return jsonify({
                 'meta': {
@@ -83,24 +88,40 @@ def get_classes():
                 },
                 'data': result
             })
-        return "!!!"
+        return "Missing Request Parameters"
 
     elif request.method == "POST":
-        return jsonify({
-            'meta': {
-                'attr_map': ATTR_MAP
-            },
-            'data': getReq([
-                "CS2110Lecture",
-                "CS2110Laboratory",
-                "SPAN2020Lecture",
-                "CS2102Lecture",
-                "STS1500Discussion",
-                "MATH3354Lecture",
-                "STS1500Lecture",
-            ], None)
-        })
-    return "haha"
+        json = request.get_json()
+        classes = json.get('classes')
+        num = json.get('num')
+        try:
+            if type(classes) == list and float(num):
+                result, course_data = raw_result_to_response(
+                    getReq(classes, num))
+                return jsonify({
+                    'status': {
+                        'err': ''
+                    },
+                    'meta': {
+                        'attr_map': ATTR_MAP,
+                        'course_data': course_data
+                    },
+                    'data': result
+                })
+            else:
+                return jsonify({
+                    'status': {
+                        'err': 'Invalid class list or number'
+                    }
+                })
+
+        except Exception as e:
+            print(e)
+            return jsonify({
+                'status': {
+                    'err': str(e)
+                }
+            })
 
 
 @app.route('/<any_text>')
@@ -110,7 +131,7 @@ def default_handler(any_text):
 
 def to_short():
     for k, v in DICT.items():
-        RECORDS_DICT[k] = v[0][:10]
+        RECORDS_DICT[k] = v[0][:11]
         RECORDS_KEYS.append(k)
 
 
@@ -119,5 +140,7 @@ if __name__ == "__main__":
     readData()
     to_short()
     logging.info('Running...')
+
+    CORS(app)
 
     app.run(host='0.0.0.0', port=8000, debug=True)

@@ -1,17 +1,29 @@
 <template>
   <div class="card" style="width:100%">
-    <div class="card-body" style="width:100%;padding:2%;">
-      <div v-for="crs in courses" :key="crs.id" style="width:100%">
-        <table style="width:100%">
+    <div class="card-body">
+      <div v-for="crs in courses" :key="crs.id">
+        <table style="width:100%; margin-top: 5px; margin-bottom: 5px;">
           <tr>
             <td style="width:80%">
               <p style="margin:0">{{crs.department}} {{crs.number}}</p>
-              <p style="font-size:0.7rem">{{crs.title}}</p>
+              <p class="subtitle">{{crs.title}}</p>
+              <p
+                class="subtitle"
+                v-if="crs.topic !== undefined && crs.topic.length > 0"
+                style
+              >{{crs.topic}}</p>
             </td>
             <td>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="$emit('add_course', crs)" style="align:center">
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+                v-on:click="$emit('add_course', crs)"
+                style="align:center"
+              >
                 <span aria-hidden="true">+</span>
-                </button>
+              </button>
             </td>
           </tr>
         </table>
@@ -28,5 +40,9 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.subtitle {
+    margin: 0;
+    font-size: 0.7rem;
+}
 </style>

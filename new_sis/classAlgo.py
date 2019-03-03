@@ -3,6 +3,7 @@ from typing import *
 import re
 import os
 from collections import OrderedDict
+import random
 
 DICT = OrderedDict()
 lectureType = (
@@ -105,7 +106,7 @@ def filterBefore(date, timeBlock, professor, availability, **kwargs):
             return True
 
 
-def getReq(classes: list, **kwargs):
+def getReq(classes: list, num, **kwargs):
     # return a list contain a lists of classes 3 dimension: classname, classtime, class info
     classList = []
     for i in classes:
@@ -126,7 +127,16 @@ def getReq(classes: list, **kwargs):
         classList.append(temp.copy())
     classList = sortReq(classList)
     table = Algorithm(classList)
-    return table
+    return returnTable(table, num)
+
+
+def returnTable(table, num):
+    if num <= len(table):
+        return table
+    newTable = set()
+    for i in range(num):
+        newTable.add(table[random.randint(0, len(table))])
+    return newTable
 
 
 def Algorithm(classList: List):

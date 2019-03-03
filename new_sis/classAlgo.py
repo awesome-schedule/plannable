@@ -71,6 +71,10 @@ def readTime():
     print(len(aSet))
 
 
+def parseTable():
+    pass
+
+
 def sortReq(classList):
     """
     Use selection sort to sort the classList based on each category's length from smallest to biggest
@@ -138,7 +142,7 @@ def getReq(classes: list, num, **kwargs):
             professor = eachClass[j][6]
             availability = eachClass[j][11]
 
-            #filter here
+            # filter here
             if filterBefore(date, timeBlock, professor, availability, **kwargs):
                 continue
             temp.append([identifier, date, timeBlock])
@@ -176,7 +180,6 @@ def Algorithm(classList: List):
             classNum -= 1
             choiceNum = pathMemory[classNum]
             timeTable.pop()
-
 
         classList, classNum, choiceNum, pathMemory, timeTable, exhausted = AlgorithmRetract(classList,
                                                                                             classNum,
@@ -288,7 +291,6 @@ def parseTime(classTime: str):
     return date, timeBlock
 
 
-
 if __name__ == "__main__":
     readData()
     # date, time = parseTime("MoTuWeThFr 8:00AM - 10:00PM")
@@ -322,9 +324,9 @@ if __name__ == "__main__":
         "sts1500lecture"
     ]
 
-
-    kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM", "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open","Instructor":"Nada Basit"}
-    k = getReq(classLists3,100)
+    kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM", "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open",
+              "Instructor": "Nada Basit"}
+    k = getReq(classLists3, 100)
     # for i in k:
     #     for j in i:
     #         print(j)

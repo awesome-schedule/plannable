@@ -97,7 +97,9 @@ def get_classes():
         num = json.get('num')
         try:
             if type(classes) == list and float(num):
-                days = json.get('days')
+                days = None
+                if json.get('filter') is not None:
+                    days = json.get('filter').get('days')
 
                 if days is not None and len(days) == 2:
                     result, course_data = raw_result_to_response(

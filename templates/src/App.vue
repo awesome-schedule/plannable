@@ -343,7 +343,6 @@ export default {
             }
             f = !f;
         }
-        console.log(this.allTimes);
     },
     computed: {
         scheduleIndices() {
@@ -632,7 +631,9 @@ export default {
                 classes: [],
                 semester: this.currentSemester,
                 num: 10,
-                filter: {}
+                filter: {
+                    days: [`MoTuWeThFr ${startTime} - ${endTime}`]
+                }
             };
 
             for (const course of this.currentSchedule.All) {

@@ -25,7 +25,7 @@
           <!-- first item -->
           <li class="nav-item">
             <a class="nav-link text-light" href="#" aria-disabled="true">
-              Contact
+              About
               <span class="sr-only">(current)</span>
             </a>
           </li>

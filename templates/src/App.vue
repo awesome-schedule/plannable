@@ -318,7 +318,7 @@
         </td>
       </tr>
     </table>
-     <course-modal id="modal" v-if="activeCourse !== null" v-bind:course="activeCourse"></course-modal>
+    <course-modal id="modal" v-if="activeCourse !== null" v-bind:course="activeCourse"></course-modal>
   </div>
 </template>
 
@@ -352,7 +352,8 @@ export default {
                 Thursday: [],
                 Friday: [],
                 All: [],
-                title: `Schedule`
+                title: `Schedule`,
+                id: 0
             },
             schedules: null,
             attr_map: null,
@@ -376,14 +377,14 @@ export default {
         }
     },
     methods: {
-        refreshPopover(){
-          setTimeout(() => {
-
+        refreshPopover() {
+            setTimeout(() => {
                 // eslint-disable-next-line
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
             }, 10);
         },
 
+<<<<<<< HEAD
         removeCourse(id){
           for(const i = 0; i < this.currentSchedule.All.length; i ++){
             if(this.currentSchedule.All[i].id === id){
@@ -398,12 +399,18 @@ export default {
           for(const c of this.currentSchedule.All){
             if(c.id == id){
               this.activeCourse = c;
+=======
+        triggerModal(id) {
+            for (const c of this.currentSchedule.All) {
+                if (c.id == id) {
+                    this.activeCourse = c;
+>>>>>>> 77d0653ea4019e7aaad590d284dbd5755c398e4b
 
-              // eslint-disable-next-line
-              $('#course-modal-div').modal('show');
-              return;
+                    // eslint-disable-next-line
+                    $('#course-modal-div').modal('show');
+                    return;
+                }
             }
-          }
         },
 
         addClass(crs) {
@@ -411,6 +418,7 @@ export default {
                 if (c.id === crs.id) return;
             }
             this.currentSchedule.All.push(crs);
+            this.saveStatus();
         },
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
@@ -508,6 +516,7 @@ export default {
                 this.courses = res.data.data;
                 this.courseKeys = res.data.keys;
                 this.attr_map = res.data.meta.attr_map;
+                this.loadStatus();
             });
         },
         refreshStyle() {
@@ -617,6 +626,7 @@ export default {
             // avoid updating style-binded variable in loops for better performace
             this.schedules = schedules;
             this.currentSchedule = this.schedules[0];
+            this.saveStatus();
             this.refreshStyle();
         },
         sendRequest() {
@@ -624,7 +634,8 @@ export default {
             const request = {
                 classes: [],
                 semester: this.currentSemester,
-                num: 10
+                num: 10,
+                filter: {}
             };
 
             for (const course of this.currentSchedule.All) {
@@ -633,8 +644,37 @@ export default {
                 );
             }
             this.$http.post(`${this.api}/classes`, request).then(res => {
+                if (res.data.status.err.length > 0) {
+                    console.log(res.data.status.err);
+                    return;
+                }
+                if (res.data.data.length === 0) {
+                    console.log('No match!');
+                    return;
+                }
                 this.parseResponse(res);
             });
+        },
+        saveStatus() {
+            localStorage.setItem(
+                this.currentSemester.id,
+                JSON.stringify({
+                    schedules: this.schedules,
+                    currentSchedule: this.currentSchedule
+                })
+            );
+        },
+        loadStatus() {
+            const raw_data = JSON.parse(localStorage.getItem(this.currentSemester.id));
+            if (
+                raw_data !== null &&
+                raw_data.schedules !== undefined &&
+                raw_data.currentSchedule !== undefined
+            ) {
+                this.schedules = raw_data.schedules;
+                this.currentSchedule = raw_data.currentSchedule;
+                this.refreshStyle();
+            }
         }
     }
 };

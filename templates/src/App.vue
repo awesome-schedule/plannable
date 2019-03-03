@@ -265,20 +265,21 @@
               </div>
             </div>
           </div>
-
-          <ClassList v-if="isEntering" v-bind:courses="inputCourses" @add_course="addClass"></ClassList>
+          <div class="mt-2">
+            <ClassList v-if="isEntering" v-bind:courses="inputCourses" @add_course="addClass"></ClassList>
+          </div>
         </td>
 
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
+          <button
+            class="bt-sidebar"
+            data-toggle="popover"
+            data-placement="bottom"
+            data-content="Click to hide or show left side-bar."
+          >§</button>
           <nav aria-label="...">
             <ul class="pagination">
-              <button
-                class="bt-sidebar"
-                data-toggle="popover"
-                data-placement="bottom"
-                data-content="Click to hide or show left side-bar."
-              >§</button>
               <li class="page-item disabled">
                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
               </li>
@@ -349,6 +350,9 @@ export default {
             }
             this.currentSchedule.All.push(crs);
         },
+        nextSchedule(idx) {
+            if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
+        },
         /**
          * @param {string} query
          * @returns {any[]}
@@ -370,7 +374,7 @@ export default {
 
             const results = [];
 
-            // do a binary search on the keys of courses
+            // do a binary search on the keys of courses for efficiency
             while (start <= end) {
                 let mid = Math.floor((start + end) / 2);
 

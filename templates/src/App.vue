@@ -401,6 +401,12 @@ export default {
                 this.courseKeys = res.data.keys;
             });
         },
+        refreshStyle() {
+            setTimeout(() => {
+                $('[data-toggle="popover"]').popover({ trigger: 'hover' });
+                objSchedulesPlan[0].placeEvents();
+            }, 10);
+        },
         parseResponse(res) {
             const data = res.data.data;
             const meta = res.data.meta;
@@ -481,9 +487,7 @@ export default {
                 }
             }
             this.currentSchedule = this.schedules[0];
-            setTimeout(() => {
-                objSchedulesPlan[0].placeEvents();
-            }, 1);
+            this.refreshStyle();
         }
     }
 };

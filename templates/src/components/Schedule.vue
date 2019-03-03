@@ -82,15 +82,17 @@
               <span>Monday</span>
             </div>
             <ul>
-              <course
-                v-for="c in courses.Monday"
-                :key="c.id"
-                v-bind:start_time="c.start"
-                v-bind:end_time="c.end"
-                v-bind:color_type="c.color"
-                v-bind:title="c[1] + ' ' + c[2] + ' ' + c[9]"
-                v-bind:room="c[8]"
-              ></course>
+              <ul v-if="courses !== null">
+                <course
+                  v-for="c in courses.Monday"
+                  :key="c.id"
+                  v-bind:start_time="c.start"
+                  v-bind:end_time="c.end"
+                  v-bind:color_type="c.color"
+                  v-bind:title="c.title"
+                  v-bind:room="c.room"
+                ></course>
+              </ul>
             </ul>
           </li>
 
@@ -99,15 +101,15 @@
               <span>Tuesday</span>
             </div>
             <ul>
-              <ul>
+              <ul v-if="courses !== null">
                 <course
                   v-for="c in courses.Tuesday"
                   :key="c.id"
                   v-bind:start_time="c.start"
                   v-bind:end_time="c.end"
                   v-bind:color_type="c.color"
-                  v-bind:title="c[1] + ' ' + c[2] + ' ' + c[9]"
-                  v-bind:room="c[8]"
+                  v-bind:title="c.title"
+                  v-bind:room="c.room"
                 ></course>
               </ul>
             </ul>
@@ -118,15 +120,15 @@
               <span>Wednesday</span>
             </div>
             <ul>
-              <ul>
+              <ul v-if="courses !== null">
                 <course
                   v-for="c in courses.Wednesday"
                   :key="c.id"
                   v-bind:start_time="c.start"
                   v-bind:end_time="c.end"
                   v-bind:color_type="c.color"
-                  v-bind:title="c[1] + ' ' + c[2] + ' ' + c[9]"
-                  v-bind:room="c[8]"
+                  v-bind:title="c.title"
+                  v-bind:room="c.room"
                 ></course>
               </ul>
             </ul>
@@ -137,15 +139,15 @@
               <span>Thursday</span>
             </div>
             <ul>
-              <ul>
+              <ul v-if="courses !== null">
                 <course
                   v-for="c in courses.Thursday"
                   :key="c.id"
                   v-bind:start_time="c.start"
                   v-bind:end_time="c.end"
                   v-bind:color_type="c.color"
-                  v-bind:title="c[1] + ' ' + c[2] + ' ' + c[9]"
-                  v-bind:room="c[8]"
+                  v-bind:title="c.title"
+                  v-bind:room="c.room"
                 ></course>
               </ul>
             </ul>
@@ -156,15 +158,15 @@
               <span>Friday</span>
             </div>
             <ul>
-              <ul>
+              <ul v-if="courses !== null">
                 <course
                   v-for="c in courses.Friday"
                   :key="c.id"
                   v-bind:start_time="c.start"
                   v-bind:end_time="c.end"
                   v-bind:color_type="c.color"
-                  v-bind:title="c[1] + ' ' + c[2] + ' ' + c[9]"
-                  v-bind:room="c[8]"
+                  v-bind:title="c.title"
+                  v-bind:room="c.room"
                 ></course>
               </ul>
             </ul>
@@ -180,7 +182,7 @@ import Course from './Course.vue';
 export default {
     name: 'Schedule',
     props: {
-        courses: Array
+        courses: Object
     },
     components: {
         Course

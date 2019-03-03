@@ -54,19 +54,34 @@ def get_classes():
             )
 
         if test:
+            raw_result = getReq([
+                "cs2110lecture",
+                "cs2110laboratory",
+                "span2020lecture",
+                "cs2102lecture",
+                "sts1500discussion",
+                "math3354lecture",
+                "sts1500lecture",
+            ], 5)
+            course_data = dict()
+
+            result = []
+            for raw_schedule in raw_result:
+                schedule = []
+                for raw_course in raw_schedule:
+                    cid = raw_course[0]
+                    schedule.append(cid)
+                    if not course_data.get(cid):
+                        course_data[cid] = RECORD[cid]
+
+                result.append(schedule)
+
             return jsonify({
                 'meta': {
-                    'attr_map': ATTR_MAP
+                    'attr_map': ATTR_MAP,
+                    'course_data': course_data
                 },
-                'data': getReq([
-                    "cs2110lecture",
-                    "cs2110laboratory",
-                    "span2020lecture",
-                    "cs2102lecture",
-                    "sts1500discussion",
-                    "math3354lecture",
-                    "sts1500lecture",
-                ], 100)
+                'data': result
             })
         return "!!!"
 

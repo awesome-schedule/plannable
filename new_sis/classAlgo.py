@@ -30,22 +30,25 @@ def readData():
     file = xlrd.open_workbook(getDataPath('CS1192Data.xlsx'))
     sheet = file.sheet_by_index(0)
     for i in range(1, sheet.nrows):
-        category = str(sheet.cell_value(i, 1)).lower()
-        number = str(int(sheet.cell_value(i, 2)))
-        lecture = str(sheet.cell_value(i, 4)).lower()
-        course = category + number + lecture
-        id = str(int(sheet.cell_value(i,0)))
-        if DICT.get(course):
-            DICT[course].append(sheet.row_values(i))
-        else:
-            DICT[course] = [sheet.row_values(i)]
+        row = sheet.row_values(i)
 
+        row[0] = int(row[0])
+
+        category = str(row[1]).lower()
+        number = str(int(row[2]))
+        lecture = str(row[4]).lower()
+        course = category + number + lecture
+
+        if DICT.get(course):
+            DICT[course].append(row)
+        else:
+            DICT[course] = [row]
+
+        id = row[0]
         if RECORD.get(id):
             raise ValueError('Duplicated ID')
         else:
-            RECORD[id] = sheet.row_values(i)
-
-
+            RECORD[id] = row
 
 
 def readTitle():
@@ -154,12 +157,12 @@ def returnTable(table, num):
     :param num: the number limit of the matches
     :return:
     """
-    if num <= len(table):
+    if num >= len(table):
         return table
-    newTable = set()
+    newTable = []
     for i in range(num):
-        newTable.add(table[random.randint(0, len(table))])
-    return list(newTable)
+        newTable.append(table[random.randint(0, len(table))])
+    return newTable
 
 
 def Algorithm(classList: List):

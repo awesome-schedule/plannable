@@ -287,7 +287,7 @@
             <!-- <p>Something.</p> -->
             <!-- <Schedule></Schedule> -->
           </div>
-          <Schedule v-bind:courses="asd"></Schedule>
+          <Schedule v-bind:courses="this.currentSchedule"></Schedule>
           <div id="Schedule 2" class="tabcontent">
             <h3>Schedule 2</h3>
             <p>Something.</p>
@@ -320,50 +320,6 @@ export default {
             currentSemester: null,
             courses: [],
             courseKeys: [],
-            asd: [
-                [
-                    'CS',
-                    '2150',
-                    '001',
-                    'Lecture',
-                    3,
-                    'Mark',
-                    'MoWeFr11:00',
-                    'olsson120',
-                    'pdr',
-                    'cs',
-                    'closed',
-                    150,
-                    150,
-                    150,
-                    'pdr',
-                    ['Monday', 'Wednesday', 'Friday'],
-                    '11:00',
-                    '11:50',
-                    'event-1'
-                ],
-                [
-                    'CS',
-                    '3102',
-                    '001',
-                    'Lecture',
-                    3,
-                    'Nathan',
-                    'MoWeFr12:00',
-                    'olsson120',
-                    'theory',
-                    'cs',
-                    'closed',
-                    150,
-                    150,
-                    150,
-                    'dfa',
-                    ['Tuesday', 'Thursday'],
-                    '12:00',
-                    '13:50',
-                    'event-2'
-                ]
-            ],
             currentSchedule: null,
             schedules: []
         };
@@ -373,6 +329,7 @@ export default {
             this.semesters = res.data;
             this.selectSemester(0);
         });
+        this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
     },
     methods: {
         /**
@@ -380,7 +337,7 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
-            const max_results = 10;
+            // const max_results = 10;
             /**
              * @type {string[]}
              */
@@ -429,7 +386,9 @@ export default {
             const data = res.data.data;
             const meta = res.data.meta;
             this.schedules = [];
+            // raw data is a list of list
             for (let x = 0; x < data.length; x++) {
+                // raw schedule is a list of course ids
                 const raw_schedule = data[x];
                 const schedule = {
                     Monday: [],
@@ -441,22 +400,26 @@ export default {
                     title: `Schedule ${x}`,
                     id: x
                 };
-                const course = {};
+                this.schedules.push(schedule);
 
                 for (let y = 0; y < raw_schedule.length; y++) {
-                    const raw_course = raw_schedule[y];
-                    for (const idx in meta) {
-                        course[meta] = raw_course[+idx];
+                    const course = {
+                        color: 'yellow'
+                    };
+                    schedule.All.push(course);
+
+                    // get course_data from course id
+                    const course_data = meta.course_data[raw_schedule[y]];
+                    for (const idx in meta.attr_map) {
+                        // bind properties to each course object
+                        course[meta.attr_map[idx]] = course_data[idx];
                     }
-                    /**
-                     * @type {string}
-                     */
                     // parse MoWeFr 11:00PM - 11:50PM style time
-                    const [days, start, end] = course.days.split(' ');
+                    const [days, start, , end] = course.days.split(' ');
                     /**
                      * @type {string}
                      */
-                    for (let i = 0; i < days; i += 2) {
+                    for (let i = 0; i < days.length; i += 2) {
                         switch (days.substr(i, 2)) {
                             case 'Mo':
                                 schedule.Monday.push(course);
@@ -474,7 +437,6 @@ export default {
                                 schedule.Friday.push(course);
                                 break;
                         }
-                        schedule.All.push(course);
                         let suffix = start.substr(start.length - 3, 2);
                         if (suffix == 'PM') {
                             const [hour, minute] = start.substring(0, start.length - 2).split(':');
@@ -495,11 +457,10 @@ export default {
                 }
             }
             this.currentSchedule = this.schedules[0];
+            console.log(this.schedules);
         }
     }
 };
-
-
 </script>
 
 <style scoped>

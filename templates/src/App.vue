@@ -245,9 +245,9 @@
             </button>
           </div>
           <div class="collapse" id="currentSelectedClass">
-            <!-- <div class="card card-body"> -->
+            <div class="card card-body">
               <Active v-bind:schedule="currentSchedule"></Active>
-            <!-- </div> -->
+            </div>
           </div>
           
           <!-- <div id="courses"> -->

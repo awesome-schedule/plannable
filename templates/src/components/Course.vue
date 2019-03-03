@@ -7,7 +7,7 @@
             <em style="margin-left:5%;font-style:normal;font-size: 0.9rem;color:#e0e0de;line-height:1px">{{room}}</em>
         <!-- </a> -->
 
-        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <!-- <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
             <div class="modal-header">
@@ -24,7 +24,7 @@
             </div>
             </div>
         </div>
-        </div>
+        </div> -->
     </li>
 </template>
 

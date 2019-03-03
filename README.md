@@ -1,22 +1,30 @@
 # UVaAutoScheduler
 
-A website which allows UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters. Once finalize your class selection, hit Create button and get all the possible schedules corresponding to your requirements.
+A website which allows UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters. (After you click the "+" button, the course you selected will be added to the section below automatically. Delete your input from Course Title to view the change.) Once finalize your class selection, hit "Create" button and get all the possible schedules corresponding to your requirements.
 
-### Getting Started
+## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-### Prerequisites
+## Prerequisites
 
-Node.js version 8.10
+* Node.js version 8.10
+* Python version 3.5 or higher
 
-### How to Use
+## How to Use
 
-Once installed Node.js and have its package npm, run this command inside your project's directory:
+Once installed Node.js and have its package npm, run this command inside  ```templates``` directory:
 
 ```
 npm run serve
 ```
+
+Open a new terminal and run this command:
+```
+python run.py
+```
+
+Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:8080/).
 
 ## Built With
 

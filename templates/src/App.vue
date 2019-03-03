@@ -6,7 +6,7 @@
       style="background-color:#F9A348;position:fixed;width:100%;z-index:5"
     >
       <!-- brand -->
-      <a class="navbar-brand text-white" href="#">UNOne</a>
+      <a class="navbar-brand text-white" href="#">UVaAuotoScheduler</a>
       
       <button
         class="navbar-toggler"

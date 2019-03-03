@@ -171,6 +171,7 @@
                       style="font-size: 10pt;"
                       aria-describedby="basic-addon1"
                       v-bind:value="startTime"
+                      @input="startTime = $event.target.value; saveStatus()"
                     >
                   </div>
 
@@ -204,6 +205,7 @@
                       style="font-size: 10pt"
                       aria-describedby="basic-addon1"
                       v-bind:value="endTime"
+                      @input="endTime = $event.target.value; saveStatus()"
                     >
                   </div>
 
@@ -658,15 +660,19 @@ export default {
         },
         sendRequest() {
             // if (this.currentSchedule.All.length < 2) return;
+            const days = [];
+            if (this.allTimes.includes(this.startTime)) {
+                days.push(this.startTime);
+            }
+            if (this.allTimes.includes(this.endTime)) {
+                days.push(this.endTime);
+            }
             const request = {
                 classes: [],
                 semester: this.currentSemester,
                 num: 10,
                 filter: {
-                    days: [
-                        `MoTuWeThFr 00:00AM - ${this.startTime}`,
-                        `MoTuWeThFr ${this.endTime} - 10:00PM`
-                    ]
+                    days: days
                 }
             };
 

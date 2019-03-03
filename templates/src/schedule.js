@@ -1,3 +1,4 @@
+/* global $ */
 // var loadSchedule = function($) {
 var transitionEnd =
     'webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend';
@@ -386,40 +387,44 @@ SchedulePlan.prototype.checkEventModal = function(device) {
     }
 };
 
-var schedules = $('.cd-schedule');
-var objSchedulesPlan = [],
-    windowResize = false;
+$(() => {
+    var schedules = $('.cd-schedule');
 
-if (schedules.length > 0) {
-    schedules.each(function() {
-        //create SchedulePlan objects
-        objSchedulesPlan.push(new SchedulePlan($(this)));
+    var objSchedulesPlan = [],
+        windowResize = false;
+    window.objSchedulesPlan = objSchedulesPlan;
+
+    if (schedules.length > 0) {
+        schedules.each(function() {
+            //create SchedulePlan objects
+            objSchedulesPlan.push(new SchedulePlan($(this)));
+        });
+    }
+
+    $(window).on('resize', function() {
+        if (!windowResize) {
+            windowResize = true;
+            !window.requestAnimationFrame
+                ? setTimeout(checkResize)
+                : window.requestAnimationFrame(checkResize);
+        }
     });
-}
 
-$(window).on('resize', function() {
-    if (!windowResize) {
-        windowResize = true;
-        !window.requestAnimationFrame
-            ? setTimeout(checkResize)
-            : window.requestAnimationFrame(checkResize);
+    // $(window).keyup(function(event) {
+    //     if (event.keyCode == 27) {
+    //         objSchedulesPlan.forEach(function(element) {
+    //             element.closeModal(element.eventsGroup.find('.selected-event'));
+    //         });
+    //     }
+    // });
+
+    function checkResize() {
+        objSchedulesPlan.forEach(function(element) {
+            element.scheduleReset();
+        });
+        windowResize = false;
     }
 });
-
-// $(window).keyup(function(event) {
-//     if (event.keyCode == 27) {
-//         objSchedulesPlan.forEach(function(element) {
-//             element.closeModal(element.eventsGroup.find('.selected-event'));
-//         });
-//     }
-// });
-
-function checkResize() {
-    objSchedulesPlan.forEach(function(element) {
-        element.scheduleReset();
-    });
-    windowResize = false;
-}
 
 function getScheduleTimestamp(time) {
     //accepts hh:mm format - convert hh:mm to timestamp
@@ -438,5 +443,8 @@ function transformElement(element, value) {
         transform: value
     });
 }
+
+export default {
+    objSchedulesPlan: window.objSchedulesPlan
+};
 // };
-// jQuery(document).ready(loadSchedule);

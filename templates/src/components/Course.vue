@@ -5,7 +5,6 @@
     v-bind:data-end="end_time"
     v-bind:data-content="title"
     v-bind:data-event="color_type"
-    v-on:click="pop"
     data-toggle="modal"
   >
     <!-- <a href="#0"> -->
@@ -67,9 +66,7 @@ export default {
         return {};
     },
     methods: {
-        pop: function(event) {
-            // alert(this.start_time);
-        }
+        
     }
 };
 </script>

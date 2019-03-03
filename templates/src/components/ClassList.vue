@@ -1,15 +1,15 @@
 <template>
   <div class="card" style="width:100%;">
     <div class="card-body">
-      <div v-for="crs in courses" :key="crs.id">
-        <table>
+      <div v-for="crs in courses" :key="crs.id" style="width:100%">
+        <table style="width:100%">
           <tr>
             <td style="width:80%">
               <p>{{crs.department}} {{crs.number}}</p>
               <br>
               <p>{{crs.description}}</p>
             </td>
-            <a v-on:click="$emit('add_course', crs)">+</a>
+            <button class="btn btn-primary" v-on:click="$emit('add_course', crs)">+</button>
             <td></td>
           </tr>
         </table>
@@ -21,7 +21,7 @@
 <script>
 export default {
     props: {
-        courses: Object
+        courses: Array
     }
 };
 </script>

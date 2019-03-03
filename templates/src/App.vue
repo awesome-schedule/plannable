@@ -632,10 +632,10 @@ export default {
             // if (this.currentSchedule.All.length < 2) return;
             const days = [];
             if (this.allTimes.includes(this.startTime)) {
-                days.push(this.startTime);
+                days.push(`MoTuWeThFr 00:00AM - ${this.startTime}`);
             }
             if (this.allTimes.includes(this.endTime)) {
-                days.push(this.endTime);
+                days.push(`MoTuWeThFr ${this.endTime} - 10:00PM`);
             }
             const request = {
                 classes: [],

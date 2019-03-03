@@ -68,7 +68,7 @@ export default {
     },
     methods: {
         pop: function(event) {
-            alert(this.start_time);
+            // alert(this.start_time);
         }
     }
 };

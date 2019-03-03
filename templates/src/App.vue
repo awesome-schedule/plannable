@@ -36,6 +36,9 @@
     <div>" "</div>
     <br>
     <br>
+    <div class="alert alert-danger" role="alert" style="width:94%;margin-left:3%">
+      A simple danger alert—check it out!
+    </div>
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td
@@ -253,7 +256,7 @@
                         data-placement="bottom"
                         data-content="Click to hide or show left side-bar."
                         v-on:click="sideBar = !sideBar"
-                      >§</button>
+                      > Hide/Show </button>
                     </td>
                     <td>
                       <Pagination

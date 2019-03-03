@@ -1,7 +1,10 @@
 <template>
   <div id="app">
     <!-- navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#F9A348;position:fixed;width:100%;z-index:5">
+    <nav
+      class="navbar navbar-expand-lg navbar-light"
+      style="background-color:#F9A348;position:fixed;width:100%;z-index:5"
+    >
       <!-- brand -->
       <a class="navbar-brand text-white" href="#">UNOne</a>
       
@@ -30,6 +33,8 @@
       </div>
     </nav>
     <!-- end of navigation bar -->
+    <div>" "</div>
+    <br>
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td
@@ -358,8 +363,8 @@ export default {
         }
     },
     methods: {
-        refreshPopover(){
-          setTimeout(() => {
+        refreshPopover() {
+            setTimeout(() => {
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
             }, 10);
         },

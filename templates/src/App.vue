@@ -11,7 +11,7 @@
         data-toggle="collapse"
         data-target="#navbarSupportedContent"
         aria-controls="navbarSupportedContent"
-        aria-expanded="false"
+        aria-expanded="true"
         aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
@@ -102,7 +102,7 @@
               type="button"
               data-toggle="collapse"
               data-target="#filter"
-              aria-expanded="false"
+              aria-expanded="true"
               aria-controls="filter"
               style="width:100%"
             >Filters</button>
@@ -260,13 +260,13 @@
               type="button"
               data-toggle="collapse"
               data-target="#currentSelectedClass"
-              aria-expanded="false"
+              aria-expanded="true"
               aria-controls="currentSelectedClass"
               style="width:100%"
             >Current Selected Classes</button>
           </div>
           <div class="collapse" id="currentSelectedClass">
-            <div class="card card-body">
+            <div class="card card-body" style="padding:5px">
               <Active v-bind:schedule="currentSchedule"></Active>
               <div>
                 <button

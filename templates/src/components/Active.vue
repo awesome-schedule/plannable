@@ -1,7 +1,7 @@
 <template>
-  <div v-if="schedule !== null" class="card" style="width: 98%; margin: auto auto">
+  <div v-if="schedule !== null" style="width: 98%; margin: auto auto">
     <!-- <img class="card-img-top" src="..." alt="Card image cap"> -->
-    <div class="card-body">
+    <div >
       <h5 class="card-title">Current Schedule</h5>
       <p class="card-text">{{ schedule.title }}</p>
     </div>

@@ -6,6 +6,7 @@ from collections import OrderedDict, defaultdict
 import random
 
 DICT = OrderedDict()
+RECORD = OrderedDict()
 lectureType = (
     "Laboratory", "Studio", "Seminar", "Clinical", "Practicum", "Discussion", "Drill", "Independent Study", "Lecture",
     "Workshop")
@@ -33,11 +34,18 @@ def readData():
         number = str(int(sheet.cell_value(i, 2)))
         lecture = str(sheet.cell_value(i, 4)).lower()
         course = category + number + lecture
-
+        id = str(int(sheet.cell_value(i,0)))
         if DICT.get(course):
-            DICT[course].append([sheet.row_values(i)])
+            DICT[course].append(sheet.row_values(i))
         else:
             DICT[course] = [sheet.row_values(i)]
+
+        if RECORD.get(id):
+            raise ValueError('Duplicated ID')
+        else:
+            RECORD[id] = sheet.row_values(i)
+
+
 
 
 def readTitle():

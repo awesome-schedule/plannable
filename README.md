@@ -8,33 +8,55 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Prerequisites
 
-* Node.js version 8.10
-* Python version 3.5 or higher
+-   Node.js >= 8.10
+-   Python >= 3.5
+-   Flask >= 1.0
+-   xlrd >= 1.0
 
 ## How to Use
 
-Once installed Node.js and have its package npm, run this command inside  ```templates``` directory:
+Install necessary python packages
 
 ```
-npm run serve
+pip install xlrd flask
 ```
 
-Open a new terminal and run this command:
+Install development dependencies
+
+```
+git clone https://github.com/OAHC2022/UVaAutoScheduler
+cd UVaAutoScheduler
+npm install
+```
+
+Install front end dependencies and compile assets
+
+```
+cd templates
+npm install
+npm run build
+```
+
+To launch the server
+
 ```
 python run.py
 ```
 
-Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:8080/).
+Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:8000/).
 
 ## Built With
 
-* [Vue](https://cn.vuejs.org/index.html) - JavaScript framework used
-* [Bootstrap](https://getbootstrap.com/) - The web template used
-* [Flask](http://flask.pocoo.org/) - Python framwork used
+-   [Vue.js](https://vuejs.org) - JavaScript framework used
+-   [Bootstrap](https://getbootstrap.com/) - The web template used
+-   [Flask](http://flask.pocoo.org/) - Python framwork used
 
 ## Authors
 
-* **Zichao Hu** - *Initial work* - [OAHC2022](https://github.com/OAHC2022)
+-   **Zichao Hu** - _Initial work_ - [OAHC2022](https://github.com/OAHC2022)
+-   **Hanzhi Zhou** - _Initial work_ - [hanzhi713](https://github.com/hanzhi713)-
+-   **Kaiying Shan** - _Initial work_ - [kaiyingshan](https://github.com/kaiyingshan)
+-   **Minjun Long** - _Initial work_ - [Elena6918](https://github.com/Elena6918)
 
 See also the list of [contributors](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors) who participated in this project.
 
@@ -44,5 +66,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* [schedule-template](https://github.com/CodyHouse/schedule-template) for making schedule template.
-
+-   [schedule-template](https://github.com/CodyHouse/schedule-template) for making schedule template.

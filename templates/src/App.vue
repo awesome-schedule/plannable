@@ -86,35 +86,9 @@
             </div>
           </div>
 
-          <div class="input-group mt-2">
-            <!-- input department-->
-            <!-- <div class="input-group-prepend">
-              <span class="input-group-text" id="dept" style="font-size:10pt">Department</span>
-            </div>-->
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Dept"
-              style="font-size: 10pt; align-content: center"
-              aria-describedby="basic-addon1"
-            >
-            <!--input course number-->
-            <!-- <div class="input-group-prepend">
-              <span class="input-group-text" id="num" style="font-size:10pt">Course#</span>
-            </div>-->
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Course#"
-              style="font-size: 10pt"
-              aria-describedby="basic-addon1"
-            >
-          </div>
+          
           <!--input title-->
           <div class="input-group mt-2">
-            <!-- <div class="input-group-prepend">
-              <span class="input-group-text" id="title" style="font-size:10pt">Course Name</span>
-            </div>-->
             <input
               type="text"
               class="form-control"

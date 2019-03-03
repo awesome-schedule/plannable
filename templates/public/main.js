@@ -1,10 +1,11 @@
-jQuery(document).ready(function ($) {
-    var transitionEnd = 'webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend';
-    var transitionsSupported = ($('.csstransitions').length > 0);
+var loadSchedule = function($) {
+    var transitionEnd =
+        'webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend';
+    var transitionsSupported = $('.csstransitions').length > 0;
     //if browser does not support transitions - use a different event to trigger them
     if (!transitionsSupported) transitionEnd = 'noTransition';
 
-    //should add a loding while the events are organized 
+    //should add a loding while the events are organized
 
     function SchedulePlan(element) {
         this.element = element;
@@ -13,12 +14,17 @@ jQuery(document).ready(function ($) {
         this.timelineItemsNumber = this.timelineItems.length;
         this.timelineStart = getScheduleTimestamp(this.timelineItems.eq(0).text());
         //need to store delta (in our case half hour) timestamp
-        this.timelineUnitDuration = getScheduleTimestamp(this.timelineItems.eq(1).text()) - getScheduleTimestamp(this.timelineItems.eq(0).text());
+        this.timelineUnitDuration =
+            getScheduleTimestamp(this.timelineItems.eq(1).text()) -
+            getScheduleTimestamp(this.timelineItems.eq(0).text());
 
         this.eventsWrapper = this.element.find('.events');
         this.eventsGroup = this.eventsWrapper.find('.events-group');
         this.singleEvents = this.eventsGroup.find('.single-event');
-        this.eventSlotHeight = this.eventsGroup.eq(0).children('.top-info').outerHeight();
+        this.eventSlotHeight = this.eventsGroup
+            .eq(0)
+            .children('.top-info')
+            .outerHeight();
 
         this.modal = this.element.find('.event-modal');
         this.modalHeader = this.modal.find('.header');
@@ -33,23 +39,29 @@ jQuery(document).ready(function ($) {
         this.initSchedule();
     }
 
-    SchedulePlan.prototype.initSchedule = function () {
+    SchedulePlan.prototype.initSchedule = function() {
         this.scheduleReset();
         this.initEvents();
     };
 
-    SchedulePlan.prototype.scheduleReset = function () {
+    SchedulePlan.prototype.scheduleReset = function() {
         var mq = this.mq();
         if (mq == 'desktop' && !this.element.hasClass('js-full')) {
             //in this case you are on a desktop version (first load or resize from mobile)
-            this.eventSlotHeight = this.eventsGroup.eq(0).children('.top-info').outerHeight();
+            this.eventSlotHeight = this.eventsGroup
+                .eq(0)
+                .children('.top-info')
+                .outerHeight();
             this.element.addClass('js-full');
             this.placeEvents();
             this.element.hasClass('modal-is-open') && this.checkEventModal();
         } else if (mq == 'mobile' && this.element.hasClass('js-full')) {
             //in this case you are on a mobile version (first load or resize from desktop)
             this.element.removeClass('js-full loading');
-            this.eventsGroup.children('ul').add(this.singleEvents).removeAttr('style');
+            this.eventsGroup
+                .children('ul')
+                .add(this.singleEvents)
+                .removeAttr('style');
             this.eventsWrapper.children('.grid-line').remove();
             this.element.hasClass('modal-is-open') && this.checkEventModal();
         } else if (mq == 'desktop' && this.element.hasClass('modal-is-open')) {
@@ -61,53 +73,63 @@ jQuery(document).ready(function ($) {
         }
     };
 
-    SchedulePlan.prototype.initEvents = function () {
+    SchedulePlan.prototype.initEvents = function() {
         var self = this;
 
-        this.singleEvents.each(function () {
+        this.singleEvents.each(function() {
             //create the .event-date element for each event
-            var durationLabel = '<span class="event-date">' + $(this).data('start') + ' - ' + $(this).data('end') + '</span>';
-            $(this).children('a').prepend($(durationLabel));
+            var durationLabel =
+                '<span class="event-date">' +
+                $(this).data('start') +
+                ' - ' +
+                $(this).data('end') +
+                '</span>';
+            $(this)
+                .children('a')
+                .prepend($(durationLabel));
 
             //detect click on the event and open the modal
-            $(this).on('click', 'a', function (event) {
+            $(this).on('click', 'a', function(event) {
                 event.preventDefault();
                 if (!self.animating) self.openModal($(this));
             });
         });
 
         //close modal window
-        this.modal.on('click', '.close', function (event) {
+        this.modal.on('click', '.close', function(event) {
             event.preventDefault();
             if (!self.animating) self.closeModal(self.eventsGroup.find('.selected-event'));
         });
-        this.element.on('click', '.cover-layer', function (event) {
-            if (!self.animating && self.element.hasClass('modal-is-open')) self.closeModal(self.eventsGroup.find('.selected-event'));
+        this.element.on('click', '.cover-layer', function(event) {
+            if (!self.animating && self.element.hasClass('modal-is-open'))
+                self.closeModal(self.eventsGroup.find('.selected-event'));
         });
     };
 
-    SchedulePlan.prototype.placeEvents = function () {
+    SchedulePlan.prototype.placeEvents = function() {
         var self = this;
-        this.singleEvents.each(function () {
+        this.singleEvents.each(function() {
             //place each event in the grid -> need to set top position and height
             var start = getScheduleTimestamp($(this).attr('data-start')),
                 duration = getScheduleTimestamp($(this).attr('data-end')) - start;
 
-            var eventTop = self.eventSlotHeight * (start - self.timelineStart) * 1.1 / self.timelineUnitDuration
+            var eventTop =
+                (self.eventSlotHeight * (start - self.timelineStart) * 1.1) /
+                self.timelineUnitDuration;
 
             // var eventTop = (start - self.timelineStart) * 55
-            var eventHeight = 1.1 * self.eventSlotHeight * duration / self.timelineUnitDuration;
+            var eventHeight = (1.1 * self.eventSlotHeight * duration) / self.timelineUnitDuration;
 
             $(this).css({
-                top: (eventTop - 1) + 'px',
-                height: (eventHeight + 1) + 'px'
+                top: eventTop - 1 + 'px',
+                height: eventHeight + 1 + 'px'
             });
         });
 
         this.element.removeClass('loading');
     };
 
-    SchedulePlan.prototype.openModal = function (event) {
+    SchedulePlan.prototype.openModal = function(event) {
         var self = this;
         var mq = self.mq();
         this.animating = true;
@@ -118,20 +140,22 @@ jQuery(document).ready(function ($) {
         this.modal.attr('data-event', event.parent().attr('data-event'));
 
         //update event content
-        this.modalBody.find('.event-info').load( event.parent().attr('data-content') + '.html .event-info > *', function (data) {
-            //once the event content has been loaded
-            self.element.addClass('content-loaded');
-        });
+        this.modalBody
+            .find('.event-info')
+            .load(event.parent().attr('data-content') + '.html .event-info > *', function(data) {
+                //once the event content has been loaded
+                self.element.addClass('content-loaded');
+            });
 
         this.element.addClass('modal-is-open');
 
-        setTimeout(function () {
+        setTimeout(function() {
             //fixes a flash when an event is selected - desktop version only
             event.parent('li').addClass('selected-event');
         }, 10);
 
         if (mq == 'mobile') {
-            self.modal.one(transitionEnd, function () {
+            self.modal.one(transitionEnd, function() {
                 self.modal.off(transitionEnd);
                 self.animating = false;
             });
@@ -144,48 +168,58 @@ jQuery(document).ready(function ($) {
             var windowWidth = $(window).width(),
                 windowHeight = $(window).height();
 
-            var modalWidth = (windowWidth * .8 > self.modalMaxWidth) ? self.modalMaxWidth : windowWidth * .8,
-                modalHeight = (windowHeight * .8 > self.modalMaxHeight) ? self.modalMaxHeight : windowHeight * .8;
+            var modalWidth =
+                    windowWidth * 0.8 > self.modalMaxWidth ? self.modalMaxWidth : windowWidth * 0.8,
+                modalHeight =
+                    windowHeight * 0.8 > self.modalMaxHeight
+                        ? self.modalMaxHeight
+                        : windowHeight * 0.8;
 
             var modalTranslateX = parseInt((windowWidth - modalWidth) / 2 - eventLeft),
                 modalTranslateY = parseInt((windowHeight - modalHeight) / 2 - eventTop);
 
             var HeaderBgScaleY = modalHeight / eventHeight,
-                BodyBgScaleX = (modalWidth - eventWidth);
+                BodyBgScaleX = modalWidth - eventWidth;
 
             //change modal height/width and translate it
             self.modal.css({
                 top: eventTop + 'px',
                 left: eventLeft + 'px',
                 height: modalHeight + 'px',
-                width: modalWidth + 'px',
+                width: modalWidth + 'px'
             });
-            transformElement(self.modal, 'translateY(' + modalTranslateY + 'px) translateX(' + modalTranslateX + 'px)');
+            transformElement(
+                self.modal,
+                'translateY(' + modalTranslateY + 'px) translateX(' + modalTranslateX + 'px)'
+            );
 
             //set modalHeader width
             self.modalHeader.css({
-                width: eventWidth + 'px',
+                width: eventWidth + 'px'
             });
             //set modalBody left margin
             self.modalBody.css({
-                marginLeft: eventWidth + 'px',
+                marginLeft: eventWidth + 'px'
             });
 
             //change modalBodyBg height/width ans scale it
             self.modalBodyBg.css({
                 height: eventHeight + 'px',
-                width: '1px',
+                width: '1px'
             });
-            transformElement(self.modalBodyBg, 'scaleY(' + HeaderBgScaleY + ') scaleX(' + BodyBgScaleX + ')');
+            transformElement(
+                self.modalBodyBg,
+                'scaleY(' + HeaderBgScaleY + ') scaleX(' + BodyBgScaleX + ')'
+            );
 
             //change modal modalHeaderBg height/width and scale it
             self.modalHeaderBg.css({
                 height: eventHeight + 'px',
-                width: eventWidth + 'px',
+                width: eventWidth + 'px'
             });
             transformElement(self.modalHeaderBg, 'scaleY(' + HeaderBgScaleY + ')');
 
-            self.modalHeaderBg.one(transitionEnd, function () {
+            self.modalHeaderBg.one(transitionEnd, function() {
                 //wait for the  end of the modalHeaderBg transformation and show the modal content
                 self.modalHeaderBg.off(transitionEnd);
                 self.animating = false;
@@ -197,7 +231,7 @@ jQuery(document).ready(function ($) {
         if (!transitionsSupported) self.modal.add(self.modalHeaderBg).trigger(transitionEnd);
     };
 
-    SchedulePlan.prototype.closeModal = function (event) {
+    SchedulePlan.prototype.closeModal = function(event) {
         var self = this;
         var mq = self.mq();
 
@@ -205,7 +239,7 @@ jQuery(document).ready(function ($) {
 
         if (mq == 'mobile') {
             this.element.removeClass('modal-is-open');
-            this.modal.one(transitionEnd, function () {
+            this.modal.one(transitionEnd, function() {
                 self.modal.off(transitionEnd);
                 self.animating = false;
                 self.element.removeClass('content-loaded');
@@ -230,21 +264,29 @@ jQuery(document).ready(function ($) {
                 width: eventWidth + 'px',
                 height: eventHeight + 'px'
             });
-            transformElement(self.modal, 'translateX(' + modalTranslateX + 'px) translateY(' + modalTranslateY + 'px)');
+            transformElement(
+                self.modal,
+                'translateX(' + modalTranslateX + 'px) translateY(' + modalTranslateY + 'px)'
+            );
 
             //scale down modalBodyBg element
             transformElement(self.modalBodyBg, 'scaleX(0) scaleY(1)');
             //scale down modalHeaderBg element
             transformElement(self.modalHeaderBg, 'scaleY(1)');
 
-            this.modalHeaderBg.one(transitionEnd, function () {
+            this.modalHeaderBg.one(transitionEnd, function() {
                 //wait for the  end of the modalHeaderBg transformation and reset modal style
                 self.modalHeaderBg.off(transitionEnd);
                 self.modal.addClass('no-transition');
-                setTimeout(function () {
-                    self.modal.add(self.modalHeader).add(self.modalBody).add(self.modalHeaderBg).add(self.modalBodyBg).attr('style', '');
+                setTimeout(function() {
+                    self.modal
+                        .add(self.modalHeader)
+                        .add(self.modalBody)
+                        .add(self.modalHeaderBg)
+                        .add(self.modalBodyBg)
+                        .attr('style', '');
                 }, 10);
-                setTimeout(function () {
+                setTimeout(function() {
                     self.modal.removeClass('no-transition');
                 }, 20);
 
@@ -256,22 +298,30 @@ jQuery(document).ready(function ($) {
 
         //browser do not support transitions -> no need to wait for the end of it
         if (!transitionsSupported) self.modal.add(self.modalHeaderBg).trigger(transitionEnd);
-    }
-
-    SchedulePlan.prototype.mq = function () {
-        //get MQ value ('desktop' or 'mobile') 
-        var self = this;
-        return window.getComputedStyle(this.element.get(0), '::before').getPropertyValue('content').replace(/["']/g, '');
     };
 
-    SchedulePlan.prototype.checkEventModal = function (device) {
+    SchedulePlan.prototype.mq = function() {
+        //get MQ value ('desktop' or 'mobile')
+        var self = this;
+        return window
+            .getComputedStyle(this.element.get(0), '::before')
+            .getPropertyValue('content')
+            .replace(/["']/g, '');
+    };
+
+    SchedulePlan.prototype.checkEventModal = function(device) {
         this.animating = true;
         var self = this;
         var mq = this.mq();
 
         if (mq == 'mobile') {
             //reset modal style on mobile
-            self.modal.add(self.modalHeader).add(self.modalHeaderBg).add(self.modalBody).add(self.modalBodyBg).attr('style', '');
+            self.modal
+                .add(self.modalHeader)
+                .add(self.modalHeaderBg)
+                .add(self.modalBody)
+                .add(self.modalBodyBg)
+                .attr('style', '');
             self.modal.removeClass('no-transition');
             self.animating = false;
         } else if (mq == 'desktop' && self.element.hasClass('modal-is-open')) {
@@ -287,43 +337,47 @@ jQuery(document).ready(function ($) {
             var windowWidth = $(window).width(),
                 windowHeight = $(window).height();
 
-            var modalWidth = (windowWidth * .8 > self.modalMaxWidth) ? self.modalMaxWidth : windowWidth * .8,
-                modalHeight = (windowHeight * .8 > self.modalMaxHeight) ? self.modalMaxHeight : windowHeight * .8;
+            var modalWidth =
+                    windowWidth * 0.8 > self.modalMaxWidth ? self.modalMaxWidth : windowWidth * 0.8,
+                modalHeight =
+                    windowHeight * 0.8 > self.modalMaxHeight
+                        ? self.modalMaxHeight
+                        : windowHeight * 0.8;
 
             var HeaderBgScaleY = modalHeight / eventHeight,
-                BodyBgScaleX = (modalWidth - eventWidth);
+                BodyBgScaleX = modalWidth - eventWidth;
 
-            setTimeout(function () {
+            setTimeout(function() {
                 self.modal.css({
                     width: modalWidth + 'px',
                     height: modalHeight + 'px',
-                    top: (windowHeight / 2 - modalHeight / 2) + 'px',
-                    left: (windowWidth / 2 - modalWidth / 2) + 'px',
+                    top: windowHeight / 2 - modalHeight / 2 + 'px',
+                    left: windowWidth / 2 - modalWidth / 2 + 'px'
                 });
                 transformElement(self.modal, 'translateY(0) translateX(0)');
                 //change modal modalBodyBg height/width
                 self.modalBodyBg.css({
                     height: modalHeight + 'px',
-                    width: '1px',
+                    width: '1px'
                 });
                 transformElement(self.modalBodyBg, 'scaleX(' + BodyBgScaleX + ')');
                 //set modalHeader width
                 self.modalHeader.css({
-                    width: eventWidth + 'px',
+                    width: eventWidth + 'px'
                 });
                 //set modalBody left margin
                 self.modalBody.css({
-                    marginLeft: eventWidth + 'px',
+                    marginLeft: eventWidth + 'px'
                 });
                 //change modal modalHeaderBg height/width and scale it
                 self.modalHeaderBg.css({
                     height: eventHeight + 'px',
-                    width: eventWidth + 'px',
+                    width: eventWidth + 'px'
                 });
                 transformElement(self.modalHeaderBg, 'scaleY(' + HeaderBgScaleY + ')');
             }, 10);
 
-            setTimeout(function () {
+            setTimeout(function() {
                 self.modal.removeClass('no-transition');
                 self.animating = false;
             }, 20);
@@ -335,29 +389,31 @@ jQuery(document).ready(function ($) {
         windowResize = false;
 
     if (schedules.length > 0) {
-        schedules.each(function () {
+        schedules.each(function() {
             //create SchedulePlan objects
             objSchedulesPlan.push(new SchedulePlan($(this)));
         });
     }
 
-    $(window).on('resize', function () {
+    $(window).on('resize', function() {
         if (!windowResize) {
             windowResize = true;
-            (!window.requestAnimationFrame) ? setTimeout(checkResize) : window.requestAnimationFrame(checkResize);
+            !window.requestAnimationFrame
+                ? setTimeout(checkResize)
+                : window.requestAnimationFrame(checkResize);
         }
     });
 
-    $(window).keyup(function (event) {
+    $(window).keyup(function(event) {
         if (event.keyCode == 27) {
-            objSchedulesPlan.forEach(function (element) {
+            objSchedulesPlan.forEach(function(element) {
                 element.closeModal(element.eventsGroup.find('.selected-event'));
             });
         }
     });
 
     function checkResize() {
-        objSchedulesPlan.forEach(function (element) {
+        objSchedulesPlan.forEach(function(element) {
             element.scheduleReset();
         });
         windowResize = false;
@@ -377,7 +433,8 @@ jQuery(document).ready(function ($) {
             '-webkit-transform': value,
             '-ms-transform': value,
             '-o-transform': value,
-            'transform': value
+            transform: value
         });
     }
-});
+};
+jQuery(document).ready(loadSchedule);

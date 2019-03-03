@@ -10,6 +10,7 @@
         class="list-group-item"
         v-for="course in schedule.All"
         v-bind:key="course.id"
+        v-bind:onclick="`alert('${course.days}')`"
       >{{ course.title }}</li>
     </ul>
     <!-- <div class="card-body">

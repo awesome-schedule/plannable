@@ -422,10 +422,9 @@ export default {
                 this.schedules.push(schedule);
 
                 for (let y = 0; y < raw_schedule.length; y++) {
-                    const course = {
+                    let course = {
                         color: `event-${y % 4}`
                     };
-                    schedule.All.push(course);
 
                     // get course_data from course id
                     const course_data = meta.course_data[raw_schedule[y]];
@@ -433,12 +432,16 @@ export default {
                         // bind properties to each course object
                         course[meta.attr_map[idx]] = course_data[idx];
                     }
+
+                    schedule.All.push(course);
+
                     // parse MoWeFr 11:00PM - 11:50PM style time
                     const [days, start, , end] = course.days.split(' ');
                     /**
                      * @type {string}
                      */
                     for (let i = 0; i < days.length; i += 2) {
+                        course = Object.assign({}, course);
                         switch (days.substr(i, 2)) {
                             case 'Mo':
                                 schedule.Monday.push(course);
@@ -456,14 +459,16 @@ export default {
                                 schedule.Friday.push(course);
                                 break;
                         }
-                        let suffix = start.substr(start.length - 3, 2);
+                        let suffix = start.substr(start.length - 2, 2);
                         if (suffix == 'PM') {
-                            const [hour, minute] = start.substring(0, start.length - 2).split(':');
+                            let [hour, minute] = start.substring(0, start.length - 2).split(':');
                             course.start = `${(+hour % 12) + 12}:${minute}`;
+
+                            [hour, minute] = end.substring(0, end.length - 2).split(':');
                             course.end = `${(+hour % 12) + 12}:${minute}`;
                         } else {
                             course.start = start.substring(0, start.length - 2);
-                            suffix = end.substr(end.length - 3, 2);
+                            suffix = end.substr(end.length - 2, 2);
                             const end_time = end.substring(0, end.length - 2);
                             if (suffix == 'PM') {
                                 const [hour, minute] = end_time.split(':');

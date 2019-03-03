@@ -228,11 +228,11 @@
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
                 <div>
-                  <button
+                  <!-- <button
                     type="button"
                     class="btn btn-outline-success mt-2"
                     style="position:inherit;"
-                  >Create</button>
+                  >Create</button> -->
                 </div>
               </div>
             </div>
@@ -375,7 +375,7 @@ export default {
                         const day = this.currentSchedule[key];
                         for (let j = 0; j < day.length; j++) {
                             if (day[j].id === id) {
-                                day.splice(i, 1);
+                                day.splice(j, 1);
                                 break;
                             }
                         }

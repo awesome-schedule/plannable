@@ -25,7 +25,7 @@
           <!-- first item -->
           <li class="nav-item">
             <a class="nav-link text-light" href="#" aria-disabled="true">
-              Contact
+              About
               <span class="sr-only">(current)</span>
             </a>
           </li>
@@ -388,6 +388,7 @@ export default {
           for(const i = 0; i < this.currentSchedule.All.length; i ++){
             if(this.currentSchedule.All[i].id === id){
               this.currentSchedule.All.splice(i, 1);
+              
               break;
             }
           }

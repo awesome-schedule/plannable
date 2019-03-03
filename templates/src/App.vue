@@ -107,7 +107,7 @@
               style="width:100%"
             >Filters</button>
           </div>
-          <div class="collapse" id="filter">
+          <div id="filter" class="collapse show">
             <div class="card card-body">
               <div class="filter mt-2">
                 <div class="input-group">
@@ -265,7 +265,7 @@
               style="width:100%"
             >Current Selected Classes</button>
           </div>
-          <div class="collapse" id="currentSelectedClass">
+          <div class="collapse show" id="currentSelectedClass">
             <div class="card card-body" style="padding:5px">
               <Active v-bind:schedule="currentSchedule"></Active>
               <div>
@@ -351,6 +351,14 @@ export default {
         this.$http.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
             this.selectSemester(0);
+            this.$on('add_course', function(crs){
+              for(const c of All){
+                if((c.department + c.number + c.type) === (crs.department + crs.number + crs.type)){
+                  return;
+                }
+              }
+              schedules.All.append(crs);
+            });
         });
         this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
     },

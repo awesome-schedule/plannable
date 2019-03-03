@@ -105,6 +105,8 @@ def filterBefore(date, timeBlock, professor, availability, **kwargs):
             placeHolder = 0
             for times in value:
                 d, t = parseTime(times)
+                t[0] = t[0] - 1
+                t[1] = t[1] + 1
                 filterDates.append([placeHolder, d, t])
 
             if checkTimeConflict(filterDates, date, timeBlock):

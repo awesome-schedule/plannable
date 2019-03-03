@@ -31,15 +31,18 @@
     </nav>
     <!-- end of navigation bar -->
     <table style="width: 95%; margin: auto auto">
+      
       <tr>
         <td
+          id="leftBar"
           class="leftside"
           style="width: 15%; vertical-align: top; padding-top: 0; padding-right: 2%"
+          v-if="sideBar"
         >
           <!-- term selection dropdown -->
           <div class="dropdown">
             <button
-              class="btn btn-primary mt-2 mx-auto"
+              class="btn btn-primary mt-4 mx-auto"
               style="width: 100%;"
               type="button"
               id="semester"
@@ -271,18 +274,46 @@
         </td>
 
         <td style="width: 68%; vertical-align: top;">
+          <table style="width:100%">
+            <tr>
+              <td>
+                <table style="width:100%">
+                <tr>
+                  <td style="width:40%;right:0px">
+                    <button
+                      class="btn btn-secondary"
+                      data-toggle="popover"
+                      data-target="#leftBar"
+                      data-placement="bottom"
+                      data-content="Click to hide or show left side-bar."
+                      v-on:click="sideBar = !sideBar"
+                    >§</button>
+                  </td>
+                  <td>
+                    <Pagination class="mt-3" style="width:50%;"></Pagination>
+                  </td>
+                </tr>
+              </table>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="tab mt-2"></div>
+
+          <Schedule v-bind:courses="this.currentSchedule"></Schedule>
+              </td>
+            </tr>
+          </table>
           <!-- Tab links -->
-          <button
+          <!-- <button
             class="bt-sidebar"
             data-toggle="popover"
             data-placement="bottom"
             data-content="Click to hide or show left side-bar."
           >§</button>
-          <Pagination></Pagination>
+          <Pagination style="width:50%;margin:0"></Pagination> -->
 
-          <div class="tab mt-2"></div>
-
-          <Schedule v-bind:courses="this.currentSchedule"></Schedule>
+          
         </td>
       </tr>
     </table>
@@ -314,6 +345,7 @@ export default {
             schedules: [],
             attr_map: null,
             isEntering: false,
+            sideBar: true,
             inputCourses: null
         };
     },

@@ -39,7 +39,7 @@
           <!-- term selection dropdown -->
           <div class="dropdown">
             <button
-              class="button mt-2 mx-auto"
+              class="btn btn-primary mt-2 mx-auto"
               style="width: 100%;"
               type="button"
               id="semester"
@@ -61,7 +61,7 @@
             <!-- input department-->
             <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="dept" style="font-size:10pt">Department</span>
-            </div> -->
+            </div>-->
             <input
               type="text"
               class="form-control"
@@ -72,7 +72,7 @@
             <!--input course number-->
             <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="num" style="font-size:10pt">Course#</span>
-            </div> -->
+            </div>-->
             <input
               type="text"
               class="form-control"
@@ -85,7 +85,7 @@
           <div class="input-group mt-2">
             <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="title" style="font-size:10pt">Course Name</span>
-            </div> -->
+            </div>-->
             <input
               type="text"
               class="form-control"
@@ -96,180 +96,199 @@
             >
           </div>
 
-          <div class="input-group mt-2">
-            <!--filter button-->
-            <div class="input-group-prepend" style="width: 100%;">
-              <button type="button" class="button mt-2" style="width:90%;">Filter</button>
+          <div class="mt-3">
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-toggle="collapse"
+              data-target="#filter"
+              aria-expanded="false"
+              aria-controls="filter"
+              style="width:100%"
+            >Filters</button>
+          </div>
+          <div class="collapse" id="filter">
+            <div class="card card-body">
+              <div class="filter mt-2">
+                <div class="input-group">
+                  <!--input earliest time-->
+                  <!-- <div class="input-group-prepend">
+                  <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
+                  <button
+                    type="button"
+                    class="button dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu" style="width:100%">
+                    <a class="dropdown-item" href="#">8:00am</a>
+                    <a class="dropdown-item" href="#">8:30am</a>
+                    <a class="dropdown-item" href="#">9:00am</a>
+                    <a class="dropdown-item" href="#">9:30am</a>
+                    <a class="dropdown-item" href="#">10:00am</a>
+                    <a class="dropdown-item" href="#">10:30am</a>
+                    <a class="dropdown-item" href="#">11:00am</a>
+                    <a class="dropdown-item" href="#">11:30am</a>
+                    <a class="dropdown-item" href="#">12:00am</a>
+                    <a class="dropdown-item" href="#">12:30am</a>
+                    <a class="dropdown-item" href="#">13:00am</a>
+                    <a class="dropdown-item" href="#">13:30am</a>
+                    <a class="dropdown-item" href="#">14:00am</a>
+                    <a class="dropdown-item" href="#">14:30am</a>
+                    <a class="dropdown-item" href="#">15:00am</a>
+                    <a class="dropdown-item" href="#">15:30am</a>
+                    <a class="dropdown-item" href="#">16:00am</a>
+                    <a class="dropdown-item" href="#">16:30am</a>
+                    <a class="dropdown-item" href="#">17:00am</a>
+                    <a class="dropdown-item" href="#">17:30am</a>
+                    <a class="dropdown-item" href="#">18:00am</a>
+                    <a class="dropdown-item" href="#">18:30am</a>
+                    <a class="dropdown-item" href="#">19:00am</a>
+                    <a class="dropdown-item" href="#">19:30am</a>
+                    <a class="dropdown-item" href="#">20:00am</a>
+                    <a class="dropdown-item" href="#">20:30am</a>
+                    <a class="dropdown-item" href="#">21:00am</a>
+                    <a class="dropdown-item" href="#">21:30am</a>
+                  </div>
+
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Earliest Time"
+                    style="font-size: 10pt;"
+                    aria-describedby="basic-addon1"
+                  >
+                </div>
+
+                <div class="input-group mt-2">
+                  <!--input latest time-->
+                  <!-- <div class="input-group-prepend">
+                  <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
+                  <button
+                    type="button"
+                    class="button dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu" style="width:100%">
+                    <a class="dropdown-item" href="#">8:00am</a>
+                    <a class="dropdown-item" href="#">8:30am</a>
+                    <a class="dropdown-item" href="#">9:00am</a>
+                    <a class="dropdown-item" href="#">9:30am</a>
+                    <a class="dropdown-item" href="#">10:00am</a>
+                    <a class="dropdown-item" href="#">10:30am</a>
+                    <a class="dropdown-item" href="#">11:00am</a>
+                    <a class="dropdown-item" href="#">11:30am</a>
+                    <a class="dropdown-item" href="#">12:00am</a>
+                    <a class="dropdown-item" href="#">12:30am</a>
+                    <a class="dropdown-item" href="#">13:00am</a>
+                    <a class="dropdown-item" href="#">13:30am</a>
+                    <a class="dropdown-item" href="#">14:00am</a>
+                    <a class="dropdown-item" href="#">14:30am</a>
+                    <a class="dropdown-item" href="#">15:00am</a>
+                    <a class="dropdown-item" href="#">15:30am</a>
+                    <a class="dropdown-item" href="#">16:00am</a>
+                    <a class="dropdown-item" href="#">16:30am</a>
+                    <a class="dropdown-item" href="#">17:00am</a>
+                    <a class="dropdown-item" href="#">17:30am</a>
+                    <a class="dropdown-item" href="#">18:00am</a>
+                    <a class="dropdown-item" href="#">18:30am</a>
+                    <a class="dropdown-item" href="#">19:00am</a>
+                    <a class="dropdown-item" href="#">19:30am</a>
+                    <a class="dropdown-item" href="#">20:00am</a>
+                    <a class="dropdown-item" href="#">20:30am</a>
+                    <a class="dropdown-item" href="#">21:00am</a>
+                    <a class="dropdown-item" href="#">21:30am</a>
+                  </div>
+                  <!-- </div> -->
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Latest Time"
+                    style="font-size: 10pt"
+                    aria-describedby="basic-addon1"
+                  >
+                </div>
+
+                <!--input maximum class number per day-->
+                <div class="input-group mt-2">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="max" style="font-size:10pt">max classes/day</span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="2"
+                    style="font-size: 10pt"
+                    aria-describedby="basic-addon1"
+                  >
+                </div>
+              </div>
+              <!--submit button-->
               <button
                 type="button"
-                class="filter-button dropdown-toggle dropdown-toggle-split mt-2"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <span class="sr-only">Toggle Dropdown</span>
-              </button>
+                class="btn btn-outline-success mt-2"
+                onClick="add_class();"
+              >Submit</button>
             </div>
           </div>
-          <div class="filter mt-2">
-            <div class="input-group">
-              <!--input earliest time-->
-              <!-- <div class="input-group-prepend">
-                <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span> -->
-                <button
-                  type="button"
-                  class="button dropdown-toggle dropdown-toggle-split"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <div class="dropdown-menu" style="width:100%">
-                  <a class="dropdown-item" href="#">8:00am</a>
-                  <a class="dropdown-item" href="#">8:30am</a>
-                  <a class="dropdown-item" href="#">9:00am</a>
-                  <a class="dropdown-item" href="#">9:30am</a>
-                  <a class="dropdown-item" href="#">10:00am</a>
-                  <a class="dropdown-item" href="#">10:30am</a>
-                  <a class="dropdown-item" href="#">11:00am</a>
-                  <a class="dropdown-item" href="#">11:30am</a>
-                  <a class="dropdown-item" href="#">12:00am</a>
-                  <a class="dropdown-item" href="#">12:30am</a>
-                  <a class="dropdown-item" href="#">13:00am</a>
-                  <a class="dropdown-item" href="#">13:30am</a>
-                  <a class="dropdown-item" href="#">14:00am</a>
-                  <a class="dropdown-item" href="#">14:30am</a>
-                  <a class="dropdown-item" href="#">15:00am</a>
-                  <a class="dropdown-item" href="#">15:30am</a>
-                  <a class="dropdown-item" href="#">16:00am</a>
-                  <a class="dropdown-item" href="#">16:30am</a>
-                  <a class="dropdown-item" href="#">17:00am</a>
-                  <a class="dropdown-item" href="#">17:30am</a>
-                  <a class="dropdown-item" href="#">18:00am</a>
-                  <a class="dropdown-item" href="#">18:30am</a>
-                  <a class="dropdown-item" href="#">19:00am</a>
-                  <a class="dropdown-item" href="#">19:30am</a>
-                  <a class="dropdown-item" href="#">20:00am</a>
-                  <a class="dropdown-item" href="#">20:30am</a>
-                  <a class="dropdown-item" href="#">21:00am</a>
-                  <a class="dropdown-item" href="#">21:30am</a>
-                </div>
-              
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Earliest Time"
-                style="font-size: 10pt;"
-                aria-describedby="basic-addon1"
-              >
-            </div>
 
-            <div class="input-group mt-2">
-              <!--input latest time-->
-              <!-- <div class="input-group-prepend">
-                <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span> -->
-                <button
-                  type="button"
-                  class="button dropdown-toggle dropdown-toggle-split"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <div class="dropdown-menu" style="width:100%">
-                  <a class="dropdown-item" href="#">8:00am</a>
-                  <a class="dropdown-item" href="#">8:30am</a>
-                  <a class="dropdown-item" href="#">9:00am</a>
-                  <a class="dropdown-item" href="#">9:30am</a>
-                  <a class="dropdown-item" href="#">10:00am</a>
-                  <a class="dropdown-item" href="#">10:30am</a>
-                  <a class="dropdown-item" href="#">11:00am</a>
-                  <a class="dropdown-item" href="#">11:30am</a>
-                  <a class="dropdown-item" href="#">12:00am</a>
-                  <a class="dropdown-item" href="#">12:30am</a>
-                  <a class="dropdown-item" href="#">13:00am</a>
-                  <a class="dropdown-item" href="#">13:30am</a>
-                  <a class="dropdown-item" href="#">14:00am</a>
-                  <a class="dropdown-item" href="#">14:30am</a>
-                  <a class="dropdown-item" href="#">15:00am</a>
-                  <a class="dropdown-item" href="#">15:30am</a>
-                  <a class="dropdown-item" href="#">16:00am</a>
-                  <a class="dropdown-item" href="#">16:30am</a>
-                  <a class="dropdown-item" href="#">17:00am</a>
-                  <a class="dropdown-item" href="#">17:30am</a>
-                  <a class="dropdown-item" href="#">18:00am</a>
-                  <a class="dropdown-item" href="#">18:30am</a>
-                  <a class="dropdown-item" href="#">19:00am</a>
-                  <a class="dropdown-item" href="#">19:30am</a>
-                  <a class="dropdown-item" href="#">20:00am</a>
-                  <a class="dropdown-item" href="#">20:30am</a>
-                  <a class="dropdown-item" href="#">21:00am</a>
-                  <a class="dropdown-item" href="#">21:30am</a>
-                </div>
-              <!-- </div> -->
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Latest Time"
-                style="font-size: 10pt"
-                aria-describedby="basic-addon1"
-              >
-            </div>
-
-            <!--input maximum class number per day-->
-            <div class="input-group mt-2">
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="max" style="font-size:10pt">max classes/day</span>
-              </div>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="2"
-                style="font-size: 10pt"
-                aria-describedby="basic-addon1"
-              >
-            </div>
-          </div>
-          <!--submit button-->
-          <button
-            type="button"
-            class="btn btn-outline-success mt-2"
-            onClick="add_class();"
-          >Submit</button>
-
+          <!-- <div class="input-group mt-2"> -->
+          <!--filter button-->
+          <!-- <div class="input-group-prepend" style="width: 100%;"> -->
+          <!-- <button type="button" class="button mt-2" style="width:90%;">Filter</button> -->
+          <!-- <button -->
+          <!-- type="button" -->
+          <!-- class="filter-button dropdown-toggle dropdown-toggle-split mt-2" -->
+          <!-- data-toggle="dropdown" -->
+          <!-- aria-haspopup="true" -->
+          <!-- aria-expanded="false" -->
+          <!-- > -->
+          <!-- <span class="sr-only">Toggle Dropdown</span> -->
+          <!-- </button> -->
+          <!-- </div> -->
+          <!-- </div> -->
           <div class="mt-3">
-            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#currentSelectedClass" aria-expanded="false" aria-controls="currentSelectedClass" style="width:100%">
-              Current Selected Classes
-            </button>
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-toggle="collapse"
+              data-target="#currentSelectedClass"
+              aria-expanded="false"
+              aria-controls="currentSelectedClass"
+              style="width:100%"
+            >Current Selected Classes</button>
           </div>
           <div class="collapse" id="currentSelectedClass">
             <div class="card card-body">
               <Active v-bind:schedule="currentSchedule"></Active>
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-outline-success mt-2"
+                  style="position:inherit;"
+                >Create</button>
+              </div>
             </div>
           </div>
-          
+
           <!-- <div id="courses"> -->
-            <!-- <p>Current Selected Classes:</p> -->
-            <!--display added class-->
+          <!-- <p>Current Selected Classes:</p> -->
+          <!--display added class-->
           <!-- </div> -->
-
           <!-- <Active v-bind:schedule="currentSchedule"></Active> -->
-
           <!--create button-->
-          <div>
-            <button
-              type="button"
-              class="btn btn-outline-success mt-2"
-              style="position:inherit;"
-            >Create</button>
-          </div>
         </td>
 
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
-          <div class="tab mt-2">
+          <div class="tab mt-2" >
             <button
               class="bt-sidebar"
               data-toggle="popover"

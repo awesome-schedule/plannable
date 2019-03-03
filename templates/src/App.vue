@@ -34,7 +34,7 @@
       <tr>
         <td
           class="leftside"
-          style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%"
+          style="width: 15%; vertical-align: top; padding-top: 0; padding-right: 2%"
         >
           <!-- term selection dropdown -->
           <div class="dropdown">
@@ -57,46 +57,46 @@
             </div>
           </div>
 
-          <div class="input-group">
+          <div class="input-group mt-2">
             <!-- input department-->
-            <div class="input-group-prepend">
+            <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="dept" style="font-size:10pt">Department</span>
-            </div>
+            </div> -->
             <input
               type="text"
               class="form-control"
-              placeholder="CS"
+              placeholder="Dept"
               style="font-size: 10pt; align-content: center"
               aria-describedby="basic-addon1"
             >
             <!--input course number-->
-            <div class="input-group-prepend">
+            <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="num" style="font-size:10pt">Course#</span>
-            </div>
+            </div> -->
             <input
               type="text"
               class="form-control"
-              placeholder="1110"
+              placeholder="Course#"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
             >
           </div>
           <!--input title-->
           <div class="input-group mt-2">
-            <div class="input-group-prepend">
+            <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="title" style="font-size:10pt">Course Name</span>
-            </div>
+            </div> -->
             <input
               type="text"
               class="form-control"
-              placeholder="Algorithm"
+              placeholder="Course Title"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
               @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
 
-          <div class="input-group">
+          <div class="input-group mt-2">
             <!--filter button-->
             <div class="input-group-prepend" style="width: 100%;">
               <button type="button" class="button mt-2" style="width:90%;">Filter</button>
@@ -111,11 +111,11 @@
               </button>
             </div>
           </div>
-          <div class="filter">
+          <div class="filter mt-2">
             <div class="input-group">
               <!--input earliest time-->
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>
+              <!-- <div class="input-group-prepend">
+                <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span> -->
                 <button
                   type="button"
                   class="button dropdown-toggle dropdown-toggle-split"
@@ -125,7 +125,7 @@
                 >
                   <span class="sr-only">Toggle Dropdown</span>
                 </button>
-                <div class="dropdown-menu">
+                <div class="dropdown-menu" style="width:100%">
                   <a class="dropdown-item" href="#">8:00am</a>
                   <a class="dropdown-item" href="#">8:30am</a>
                   <a class="dropdown-item" href="#">9:00am</a>
@@ -155,11 +155,11 @@
                   <a class="dropdown-item" href="#">21:00am</a>
                   <a class="dropdown-item" href="#">21:30am</a>
                 </div>
-              </div>
+              
               <input
                 type="text"
                 class="form-control"
-                placeholder="8:00am"
+                placeholder="Earliest Time"
                 style="font-size: 10pt;"
                 aria-describedby="basic-addon1"
               >
@@ -167,8 +167,8 @@
 
             <div class="input-group mt-2">
               <!--input latest time-->
-              <div class="input-group-prepend">
-                <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>
+              <!-- <div class="input-group-prepend">
+                <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span> -->
                 <button
                   type="button"
                   class="button dropdown-toggle dropdown-toggle-split"
@@ -178,7 +178,7 @@
                 >
                   <span class="sr-only">Toggle Dropdown</span>
                 </button>
-                <div class="dropdown-menu">
+                <div class="dropdown-menu" style="width:100%">
                   <a class="dropdown-item" href="#">8:00am</a>
                   <a class="dropdown-item" href="#">8:30am</a>
                   <a class="dropdown-item" href="#">9:00am</a>
@@ -208,11 +208,11 @@
                   <a class="dropdown-item" href="#">21:00am</a>
                   <a class="dropdown-item" href="#">21:30am</a>
                 </div>
-              </div>
+              <!-- </div> -->
               <input
                 type="text"
                 class="form-control"
-                placeholder="5:00pm"
+                placeholder="Latest Time"
                 style="font-size: 10pt"
                 aria-describedby="basic-addon1"
               >
@@ -235,22 +235,33 @@
           <!--submit button-->
           <button
             type="button"
-            class="btn btn-outline-success mt-1 mb-1"
+            class="btn btn-outline-success mt-2"
             onClick="add_class();"
           >Submit</button>
 
-          <div id="courses">
-            <p>Current Selected Classes:</p>
-            <!--display added class-->
+          <div class="mt-3">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#currentSelectedClass" aria-expanded="false" aria-controls="currentSelectedClass" style="width:100%">
+              Current Selected Classes
+            </button>
           </div>
+          <div class="collapse" id="currentSelectedClass">
+            <!-- <div class="card card-body"> -->
+              <Active v-bind:schedule="currentSchedule"></Active>
+            <!-- </div> -->
+          </div>
+          
+          <!-- <div id="courses"> -->
+            <!-- <p>Current Selected Classes:</p> -->
+            <!--display added class-->
+          <!-- </div> -->
 
-          <Active v-bind:schedule="currentSchedule"></Active>
+          <!-- <Active v-bind:schedule="currentSchedule"></Active> -->
 
           <!--create button-->
           <div>
             <button
               type="button"
-              class="btn btn-outline-success mt-1 mb-1"
+              class="btn btn-outline-success mt-2"
               style="position:inherit;"
             >Create</button>
           </div>

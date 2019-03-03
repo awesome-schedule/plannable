@@ -9,8 +9,8 @@
       <li
         class="list-group-item"
         v-for="course in schedule.All"
-        v-bind:key="course[0]"
-      >{{ course[1] + course[2] }}</li>
+        v-bind:key="course.id"
+      >{{ course.title }}</li>
     </ul>
     <!-- <div class="card-body">
       <a href="#" class="card-link">Card link</a>

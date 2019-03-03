@@ -327,7 +327,7 @@ export default {
                     150,
                     150,
                     'dfa',
-                    ['Tuesday'],
+                    ['Tuesday', 'Thursday'],
                     '12:00',
                     '13:50',
                     'event-2'
@@ -407,6 +407,8 @@ export default {
         }
     }
 };
+
+
 </script>
 
 <style scoped>

@@ -1,5 +1,5 @@
 <template>
-    <li class="single-event" v-bind:data-start="start_time" v-bind:data-end="end_time" v-bind:data-content="title" v-bind:data-event="color_type">
+    <li class="single-event" v-bind:data-start="start_time" v-bind:data-end="end_time" v-bind:data-content="title" v-bind:data-event="color_type" v-on:click="pop">
         <!-- <a href="#0"> -->
             
             <em style="margin-left:5%;font-style:normal;font-size: 1rem;">{{title}}</em><br>
@@ -36,6 +36,11 @@ export default {
     data(){
         return {
             
+        }
+    },
+    methods :{
+        pop : function(event){
+            alert(this.title);
         }
     }
 }

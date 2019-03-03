@@ -2,7 +2,7 @@ import xlrd  # CSV file does not work well, so I decide to use excel instead
 from typing import *
 import re
 import os
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import random
 
 DICT = OrderedDict()
@@ -33,7 +33,11 @@ def readData():
         number = str(int(sheet.cell_value(i, 2)))
         lecture = str(sheet.cell_value(i, 4)).lower()
         course = category + number + lecture
-        DICT[course] = DICT.get(course, []) + [sheet.row_values(i)]
+
+        if DICT.get(course):
+            DICT[course].append([sheet.row_values(i)])
+        else:
+            DICT[course] = [sheet.row_values(i)]
 
 
 def readTitle():

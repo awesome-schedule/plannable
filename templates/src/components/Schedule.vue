@@ -81,18 +81,16 @@
             <div class="top-info">
               <span>Monday</span>
             </div>
-            <ul>
-              <ul v-if="courses !== null">
-                <course
-                  v-for="c in courses.Monday"
-                  :key="c.id"
-                  v-bind:start_time="c.start"
-                  v-bind:end_time="c.end"
-                  v-bind:color_type="c.color"
-                  v-bind:title="c.title"
-                  v-bind:room="c.room"
-                ></course>
-              </ul>
+            <ul v-if="courses !== null">
+              <course
+                v-for="c in courses.Monday"
+                :key="c.id"
+                v-bind:start_time="c.start"
+                v-bind:end_time="c.end"
+                v-bind:color_type="c.color"
+                v-bind:title="c.title"
+                v-bind:room="c.room"
+              ></course>
             </ul>
           </li>
 
@@ -100,18 +98,16 @@
             <div class="top-info">
               <span>Tuesday</span>
             </div>
-            <ul>
-              <ul v-if="courses !== null">
-                <course
-                  v-for="c in courses.Tuesday"
-                  :key="c.id"
-                  v-bind:start_time="c.start"
-                  v-bind:end_time="c.end"
-                  v-bind:color_type="c.color"
-                  v-bind:title="c.title"
-                  v-bind:room="c.room"
-                ></course>
-              </ul>
+            <ul v-if="courses !== null">
+              <course
+                v-for="c in courses.Tuesday"
+                :key="c.id"
+                v-bind:start_time="c.start"
+                v-bind:end_time="c.end"
+                v-bind:color_type="c.color"
+                v-bind:title="c.title"
+                v-bind:room="c.room"
+              ></course>
             </ul>
           </li>
 
@@ -119,18 +115,16 @@
             <div class="top-info">
               <span>Wednesday</span>
             </div>
-            <ul>
-              <ul v-if="courses !== null">
-                <course
-                  v-for="c in courses.Wednesday"
-                  :key="c.id"
-                  v-bind:start_time="c.start"
-                  v-bind:end_time="c.end"
-                  v-bind:color_type="c.color"
-                  v-bind:title="c.title"
-                  v-bind:room="c.room"
-                ></course>
-              </ul>
+            <ul v-if="courses !== null">
+              <course
+                v-for="c in courses.Wednesday"
+                :key="c.id"
+                v-bind:start_time="c.start"
+                v-bind:end_time="c.end"
+                v-bind:color_type="c.color"
+                v-bind:title="c.title"
+                v-bind:room="c.room"
+              ></course>
             </ul>
           </li>
 
@@ -138,18 +132,16 @@
             <div class="top-info">
               <span>Thursday</span>
             </div>
-            <ul>
-              <ul v-if="courses !== null">
-                <course
-                  v-for="c in courses.Thursday"
-                  :key="c.id"
-                  v-bind:start_time="c.start"
-                  v-bind:end_time="c.end"
-                  v-bind:color_type="c.color"
-                  v-bind:title="c.title"
-                  v-bind:room="c.room"
-                ></course>
-              </ul>
+            <ul v-if="courses !== null">
+              <course
+                v-for="c in courses.Thursday"
+                :key="c.id"
+                v-bind:start_time="c.start"
+                v-bind:end_time="c.end"
+                v-bind:color_type="c.color"
+                v-bind:title="c.title"
+                v-bind:room="c.room"
+              ></course>
             </ul>
           </li>
 
@@ -157,18 +149,16 @@
             <div class="top-info">
               <span>Friday</span>
             </div>
-            <ul>
-              <ul v-if="courses !== null">
-                <course
-                  v-for="c in courses.Friday"
-                  :key="c.id"
-                  v-bind:start_time="c.start"
-                  v-bind:end_time="c.end"
-                  v-bind:color_type="c.color"
-                  v-bind:title="c.title"
-                  v-bind:room="c.room"
-                ></course>
-              </ul>
+            <ul v-if="courses !== null">
+              <course
+                v-for="c in courses.Friday"
+                :key="c.id"
+                v-bind:start_time="c.start"
+                v-bind:end_time="c.end"
+                v-bind:color_type="c.color"
+                v-bind:title="c.title"
+                v-bind:room="c.room"
+              ></course>
             </ul>
           </li>
         </ul>

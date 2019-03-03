@@ -288,7 +288,7 @@
 
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
-          <div class="tab mt-2" >
+          <div class="tab mt-2">
             <button
               class="bt-sidebar"
               data-toggle="popover"
@@ -423,7 +423,7 @@ export default {
 
                 for (let y = 0; y < raw_schedule.length; y++) {
                     let course = {
-                        color: `event-${y % 4}`
+                        color: `event-${(y % 4) + 1}`
                     };
 
                     // get course_data from course id
@@ -481,8 +481,9 @@ export default {
                 }
             }
             this.currentSchedule = this.schedules[0];
-            console.log(this.schedules);
-            // setTimeout(loadSchedule($), 500);
+            setTimeout(() => {
+                objSchedulesPlan[0].placeEvents();
+            }, 1);
         }
     }
 };

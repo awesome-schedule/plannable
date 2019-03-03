@@ -77,7 +77,8 @@ def get_classes():
                 "sts1500discussion",
                 "math3354lecture",
                 "sts1500lecture",
-            ], 10)
+            ], 10, Days=["MoTuWeThFr 00:00AM - 08:00AM",
+                         "MoTuWeThFr 08:00PM - 10:00PM"])
 
             result, course_data = raw_result_to_response(raw_result)
 
@@ -96,8 +97,17 @@ def get_classes():
         num = json.get('num')
         try:
             if type(classes) == list and float(num):
-                result, course_data = raw_result_to_response(
-                    getReq(classes, num))
+                days = None
+                if json.get('filter') is not None:
+                    days = json.get('filter').get('days')
+
+                if days is not None and len(days) == 2:
+                    result, course_data = raw_result_to_response(
+                        getReq(classes, num, Days=days))
+                else:
+                    result, course_data = raw_result_to_response(
+                        getReq(classes, num))
+
                 return jsonify({
                     'status': {
                         'err': ''

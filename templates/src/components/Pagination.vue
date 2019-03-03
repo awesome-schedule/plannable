@@ -20,7 +20,7 @@
           <span v-if="idx === index" class="sr-only">(current)</span>
         </a>
       </li>
-      <li v-bind:class="'page-item' + (idx >= indices.length  ? ' disabled' : '')">
+      <li v-bind:class="'page-item' + (idx >= indices.length - 1 ? ' disabled' : '')">
         <a class="page-link" v-on:click="switchPage(idx + 1)">Next</a>
       </li>
     </ul>
@@ -39,8 +39,10 @@ export default {
     },
     methods: {
         switchPage(idx) {
-            this.idx = idx;
-            this.$emit('switch_page', idx);
+            if (idx >= 0 && idx < this.indices.length) {
+                this.idx = idx;
+                this.$emit('switch_page', idx);
+            }
         }
     }
 };

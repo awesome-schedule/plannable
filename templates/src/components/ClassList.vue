@@ -21,6 +21,7 @@
                 aria-label="Close"
                 v-on:click="$emit('add_course', crs)"
                 style="align:center"
+                role="button" data-toggle="popover" data-trigger="focus" data-content="Added!"
               >
                 <span aria-hidden="true">+</span>
               </button>

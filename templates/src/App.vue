@@ -24,7 +24,7 @@
         <ul class="navbar-nav mr-auto">
           <!-- first item -->
           <li class="nav-item">
-            <a class="nav-link text-light" href="#" aria-disabled="true">
+            <a class="nav-link text-light" href="./contact.html" aria-disabled="true">
               About
               <span class="sr-only">(current)</span>
             </a>
@@ -36,6 +36,9 @@
     <div>" "</div>
     <br>
     <br>
+
+    <div class="alert alert-danger" role="alert" style="width:94%;margin-left:3%">{{errMsg}}</div>
+
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td
@@ -134,34 +137,13 @@
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" style="width:100%">
-                      <a class="dropdown-item" href="#">8:00am</a>
-                      <a class="dropdown-item" href="#">8:30am</a>
-                      <a class="dropdown-item" href="#">9:00am</a>
-                      <a class="dropdown-item" href="#">9:30am</a>
-                      <a class="dropdown-item" href="#">10:00am</a>
-                      <a class="dropdown-item" href="#">10:30am</a>
-                      <a class="dropdown-item" href="#">11:00am</a>
-                      <a class="dropdown-item" href="#">11:30am</a>
-                      <a class="dropdown-item" href="#">12:00am</a>
-                      <a class="dropdown-item" href="#">12:30am</a>
-                      <a class="dropdown-item" href="#">13:00am</a>
-                      <a class="dropdown-item" href="#">13:30am</a>
-                      <a class="dropdown-item" href="#">14:00am</a>
-                      <a class="dropdown-item" href="#">14:30am</a>
-                      <a class="dropdown-item" href="#">15:00am</a>
-                      <a class="dropdown-item" href="#">15:30am</a>
-                      <a class="dropdown-item" href="#">16:00am</a>
-                      <a class="dropdown-item" href="#">16:30am</a>
-                      <a class="dropdown-item" href="#">17:00am</a>
-                      <a class="dropdown-item" href="#">17:30am</a>
-                      <a class="dropdown-item" href="#">18:00am</a>
-                      <a class="dropdown-item" href="#">18:30am</a>
-                      <a class="dropdown-item" href="#">19:00am</a>
-                      <a class="dropdown-item" href="#">19:30am</a>
-                      <a class="dropdown-item" href="#">20:00am</a>
-                      <a class="dropdown-item" href="#">20:30am</a>
-                      <a class="dropdown-item" href="#">21:00am</a>
-                      <a class="dropdown-item" href="#">21:30am</a>
+                      <a
+                        class="dropdown-item"
+                        href="#"
+                        v-for="t in allTimes"
+                        :key="t"
+                        v-on:click="startTime = t"
+                      >{{ t }}</a>
                     </div>
 
                     <input
@@ -170,6 +152,7 @@
                       placeholder="Earliest Time"
                       style="font-size: 10pt;"
                       aria-describedby="basic-addon1"
+                      v-bind:value="startTime"
                     >
                   </div>
 
@@ -187,34 +170,13 @@
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" style="width:100%">
-                      <a class="dropdown-item" href="#">8:00am</a>
-                      <a class="dropdown-item" href="#">8:30am</a>
-                      <a class="dropdown-item" href="#">9:00am</a>
-                      <a class="dropdown-item" href="#">9:30am</a>
-                      <a class="dropdown-item" href="#">10:00am</a>
-                      <a class="dropdown-item" href="#">10:30am</a>
-                      <a class="dropdown-item" href="#">11:00am</a>
-                      <a class="dropdown-item" href="#">11:30am</a>
-                      <a class="dropdown-item" href="#">12:00am</a>
-                      <a class="dropdown-item" href="#">12:30am</a>
-                      <a class="dropdown-item" href="#">13:00am</a>
-                      <a class="dropdown-item" href="#">13:30am</a>
-                      <a class="dropdown-item" href="#">14:00am</a>
-                      <a class="dropdown-item" href="#">14:30am</a>
-                      <a class="dropdown-item" href="#">15:00am</a>
-                      <a class="dropdown-item" href="#">15:30am</a>
-                      <a class="dropdown-item" href="#">16:00am</a>
-                      <a class="dropdown-item" href="#">16:30am</a>
-                      <a class="dropdown-item" href="#">17:00am</a>
-                      <a class="dropdown-item" href="#">17:30am</a>
-                      <a class="dropdown-item" href="#">18:00am</a>
-                      <a class="dropdown-item" href="#">18:30am</a>
-                      <a class="dropdown-item" href="#">19:00am</a>
-                      <a class="dropdown-item" href="#">19:30am</a>
-                      <a class="dropdown-item" href="#">20:00am</a>
-                      <a class="dropdown-item" href="#">20:30am</a>
-                      <a class="dropdown-item" href="#">21:00am</a>
-                      <a class="dropdown-item" href="#">21:30am</a>
+                      <a
+                        class="dropdown-item"
+                        href="#"
+                        v-for="t in allTimes"
+                        :key="t"
+                        v-on:click="endTime = t"
+                      >{{ t }}</a>
                     </div>
                     <!-- </div> -->
                     <input
@@ -223,6 +185,7 @@
                       placeholder="Latest Time"
                       style="font-size: 10pt"
                       aria-describedby="basic-addon1"
+                      v-bind:value="endTime"
                     >
                   </div>
 
@@ -265,11 +228,11 @@
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
                 <div>
-                  <button
+                  <!-- <button
                     type="button"
                     class="btn btn-outline-success mt-2"
                     style="position:inherit;"
-                  >Create</button>
+                  >Create</button> -->
                 </div>
               </div>
             </div>
@@ -293,7 +256,7 @@
                         data-placement="bottom"
                         data-content="Click to hide or show left side-bar."
                         v-on:click="sideBar = !sideBar"
-                      >§</button>
+                      >Hide/Show</button>
                     </td>
                     <td>
                       <Pagination
@@ -318,6 +281,7 @@
         </td>
       </tr>
     </table>
+
     <course-modal id="modal" v-if="activeCourse !== null" v-bind:course="activeCourse"></course-modal>
   </div>
 </template>
@@ -360,7 +324,11 @@ export default {
             isEntering: false,
             sideBar: true,
             inputCourses: null,
-            activeCourse: null
+            activeCourse: null,
+            startTime: '',
+            endTime: '',
+            allTimes: [],
+            errMsg: ''
         };
     },
     mounted() {
@@ -368,6 +336,17 @@ export default {
             this.semesters = res.data;
             this.selectSemester(0);
         });
+        let f = false;
+        for (let i = 8; i < 21; ) {
+            let time = (i % 12) + 1;
+            if (f) {
+                i++;
+                this.allTimes.push(time + ':30' + (i >= 12 ? 'PM' : 'AM'));
+            } else {
+                this.allTimes.push(time + ':00' + (i >= 12 ? 'PM' : 'AM'));
+            }
+            f = !f;
+        }
     },
     computed: {
         scheduleIndices() {
@@ -387,16 +366,22 @@ export default {
         removeCourse(id) {
             for (let i = 0; i < this.currentSchedule.All.length; i++) {
                 if (this.currentSchedule.All[i].id === id) {
+                    // eslint-disable-next-line
+                    $('[data-toggle="popover"]').popover('hide');
+                    // eslint-disable-next-line
+                    $('[data-toggle="popover"]').popover('disable');
                     this.currentSchedule.All.splice(i, 1);
                     for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
                         const day = this.currentSchedule[key];
                         for (let j = 0; j < day.length; j++) {
                             if (day[j].id === id) {
-                                day.splice(i, 1);
+                                day.splice(j, 1);
                                 break;
                             }
                         }
                     }
+                    // eslint-disable-next-line
+                    $('[data-toggle="popover"]').popover('enable');
                     this.saveStatus();
                     this.$forceUpdate();
                     this.refreshStyle();
@@ -434,76 +419,86 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
+            query = query.toLowerCase();
             if (query.length === 0) {
                 this.isEntering = false;
                 this.inputCourses = null;
                 return null;
             }
             const max_results = 10;
+            let results = [];
             /**
              * @type {string[]}
              */
-            const arr = this.courseKeys;
-            const len = query.length;
-            let start = 0,
-                end = arr.length - 1;
+            // const arr = this.courseKeys;
+            // const len = query.length;
+            // let start = 0,
+            //     end = arr.length - 1;
 
-            let results = [];
+            // // do a binary search on the keys of courses for efficiency
+            // while (start <= end) {
+            //     let mid = Math.floor((start + end) / 2);
 
-            // do a binary search on the keys of courses for efficiency
-            while (start <= end) {
-                let mid = Math.floor((start + end) / 2);
+            //     // for course number (e.g. CS3102), we only check the beginning
+            //     const ele = arr[mid].substr(0, len);
 
-                // for course number (e.g. CS3102), we only check the beginning
-                const ele = arr[mid].substr(0, len);
+            //     if (ele === query) {
+            //         // when a match is found, we go up and down to look up more choices
+            //         results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
+            //         let increment = 1;
+            //         while (
+            //             results.length < max_results * 2 &&
+            //             arr[mid + increment].substr(0, len) === query
+            //         ) {
+            //             results.push(
+            //                 this.courseArrToObj(
+            //                     this.courses[arr[mid + increment]],
+            //                     this.attr_map,
+            //                     {}
+            //                 )
+            //             );
+            //             increment += 1;
+            //         }
+            //         increment = -1;
+            //         while (
+            //             results.length < max_results * 2 &&
+            //             arr[mid + increment].substr(0, len) === query
+            //         ) {
+            //             results.push(
+            //                 this.courseArrToObj(
+            //                     this.courses[arr[mid + increment]],
+            //                     this.attr_map,
+            //                     {}
+            //                 )
+            //             );
+            //             increment -= 1;
+            //         }
+            //         break;
+            //     } else if (ele < query) {
+            //         start = mid + 1;
+            //     } else end = mid - 1;
+            // }
 
-                if (ele === query) {
-                    // when a match is found, we go up and down to look up more choices
-                    results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
-                    let increment = 1;
-                    while (
-                        results.length < max_results * 2 &&
-                        arr[mid + increment].substr(0, len) === query
-                    ) {
-                        results.push(
-                            this.courseArrToObj(
-                                this.courses[arr[mid + increment]],
-                                this.attr_map,
-                                {}
-                            )
-                        );
-                        increment += 1;
-                    }
-                    increment = -1;
-                    while (
-                        results.length < max_results * 2 &&
-                        arr[mid + increment].substr(0, len) === query
-                    ) {
-                        results.push(
-                            this.courseArrToObj(
-                                this.courses[arr[mid + increment]],
-                                this.attr_map,
-                                {}
-                            )
-                        );
-                        increment -= 1;
-                    }
-                    break;
-                } else if (ele < query) {
-                    start = mid + 1;
-                } else end = mid - 1;
-            }
-
-            if (results.length > max_results) {
-                const margin = Math.floor((results.length - max_results) / 2);
-                results = results.slice(margin, results.length - margin);
-            }
+            // if (results.length > max_results) {
+            //     const margin = Math.floor((results.length - max_results) / 2);
+            //     results = results.slice(margin, results.length - margin);
+            // }
 
             // if no results are found, we perform linear search in the array of titles
+            const exist = x => {
+                return results.some(ele => ele.id === x[0]);
+            };
             if (results.length === 0) {
+                for (const key of this.courseKeys) {
+                    const course = this.courses[key];
+                    if (key.indexOf(query) !== -1 && !exist(course)) {
+                        results.push(this.courseArrToObj(this.courses[key], this.attr_map, {}));
+                        if (results.length >= max_results) break;
+                    }
+                }
                 for (const key in this.courses) {
                     const course = this.courses[key];
-                    if (course[9].toLowerCase().indexOf(query) !== -1) {
+                    if (course[9].toLowerCase().indexOf(query) !== -1 && !exist(course)) {
                         results.push(this.courseArrToObj(course, this.attr_map, {}));
                         if (results.length >= max_results) break;
                     }
@@ -635,12 +630,14 @@ export default {
             this.refreshStyle();
         },
         sendRequest() {
-            if (this.currentSchedule.All.length < 2) return;
+            // if (this.currentSchedule.All.length < 2) return;
             const request = {
                 classes: [],
                 semester: this.currentSemester,
                 num: 10,
-                filter: {}
+                filter: {
+                    days: [`MoTuWeThFr ${this.startTime} - ${this.endTime}`]
+                }
             };
 
             for (const course of this.currentSchedule.All) {
@@ -650,11 +647,11 @@ export default {
             }
             this.$http.post(`${this.api}/classes`, request).then(res => {
                 if (res.data.status.err.length > 0) {
-                    console.log(res.data.status.err);
+                    this.errMsg = res.data.status.err;
                     return;
                 }
                 if (res.data.data.length === 0) {
-                    console.log('No match!');
+                    this.errMsg = 'No matching schedule satisfying the given constraints';
                     return;
                 }
                 this.parseResponse(res);
@@ -665,7 +662,9 @@ export default {
                 this.currentSemester.id,
                 JSON.stringify({
                     schedules: this.schedules,
-                    currentSchedule: this.currentSchedule
+                    currentSchedule: this.currentSchedule,
+                    startTime: this.startTime,
+                    endTime: this.endTime
                 })
             );
         },
@@ -678,6 +677,8 @@ export default {
             ) {
                 this.schedules = raw_data.schedules;
                 this.currentSchedule = raw_data.currentSchedule;
+                this.startTime = raw_data.startTime;
+                this.endTime = raw_data.endTime;
                 this.refreshStyle();
             }
         }

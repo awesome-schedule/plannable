@@ -83,7 +83,7 @@ def readTime():
     with open("classTime.csv", "w") as f:
         for element in aSet:
             print(element, file=f)
-    print(len(aSet))
+    # print(len(aSet))
 
 
 def filterBefore(date, timeBlock, professor, availability, **kwargs):
@@ -205,7 +205,7 @@ def Algorithm(classList: List):
             choiceNum = 0
         else:
             choiceNum += 1
-    print(len(finalTable))
+    # print(len(finalTable))
     return finalTable
 
 
@@ -218,7 +218,7 @@ def AlgorithmRetract(classList, classNum, choiceNum, pathMemory, timeTable):
         classNum -= 1
 
         if classNum < 0:
-            print("no more matches")
+            # print("no more matches")
             return classList, classNum, choiceNum, pathMemory, timeTable, True
 
         timeTable.pop()
@@ -329,13 +329,13 @@ if __name__ == "__main__":
     ]
 
     kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM",
-                       "MoTuWeThFr 09:00AM - 10:00PM"]}
+                       "MoTuWeThFr 06:00PM - 12:00PM"]}
 
     k = getReq(["span2020lecture"], 100,**kwargs)
-    for i in k:
-        for j in i:
-            print(j)
-        print()
+    # for i in k:
+    #     for j in i:
+    #         print(j)
+    #     print()
 
 """
 classLists2 = [

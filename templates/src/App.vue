@@ -183,19 +183,6 @@
                     >
                   </div>
 
-                  <!--input maximum class number per day-->
-                  <div class="input-group mt-2">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text" id="max" style="font-size:10pt">max classes/day</span>
-                    </div>
-                    <input
-                      type="text"
-                      class="form-control"
-                      placeholder="2"
-                      style="font-size: 10pt"
-                      aria-describedby="basic-addon1"
-                    >
-                  </div>
                   <div>
                     <label for="awt">Wait List</label>&nbsp;&nbsp;
                     <input type="checkbox" id="awt" v-bind="allowWaitlist">&nbsp;&nbsp;

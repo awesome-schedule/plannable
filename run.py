@@ -8,8 +8,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-RECORDS_SHORT = OrderedDict()
-RECORD_KEYS = []
+RECORDS_DICT = OrderedDict()
+RECORDS_KEYS = []
 
 ATTR_MAP = {
     0: 'department', 1: 'number', 2: 'section', 3: 'type', 4: 'units', 5: 'instructor', 6: 'days', 7: 'room',
@@ -41,32 +41,34 @@ def get_semesters():
 def get_classes():
     if request.method == "GET":
         semester = request.args.get('semester')
+        test = request.args.get('test')
         if semester:
             return jsonify(
                 {
                     'meta': {
                         'attr_map': ATTR_MAP
                     },
-                    'data': RECORDS_SHORT,
-                    'keys': RECORD_KEYS,
+                    'data': RECORDS_DICT,
+                    'keys': RECORDS_KEYS,
                 }
             )
-        else:
-            return "!!!"
-        # if t is not None:
-        #     return jsonify(
-        #         {
-        #             'meta': {
-        #                 'attr_map': ATTR_MAP
-        #             },
-        #             'data': getReq([
-        #                 "CS2110Lecture",
-        #                 "CS2110Laboratory",
 
-        #             ], None)
-        #         }
-        #     )
-        # else:
+        if test:
+            return jsonify({
+                'meta': {
+                    'attr_map': ATTR_MAP
+                },
+                'data': getReq([
+                    "cs2110lecture",
+                    "cs2110laboratory",
+                    "span2020lecture",
+                    "cs2102lecture",
+                    "sts1500discussion",
+                    "math3354lecture",
+                    "sts1500lecture",
+                ], 100)
+            })
+        return "!!!"
 
     elif request.method == "POST":
         return jsonify({
@@ -93,8 +95,8 @@ def default_handler(any_text):
 
 def to_short():
     for k, v in DICT.items():
-        RECORDS_SHORT[k] = v[0][:10]
-        RECORD_KEYS.append(k)
+        RECORDS_DICT[k] = v[0][:10]
+        RECORDS_KEYS.append(k)
 
 
 if __name__ == "__main__":

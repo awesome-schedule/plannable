@@ -57,6 +57,15 @@ if __name__ == "__main__":
         "MATH2310Discussion",
         "CS2102Lecture"
     ]
+    classLists3 = [
+        "cs2110lecture",
+        "cs2110laboratory",
+        "span2020lecture",
+        "cs2102lecture",
+        "sts1500discussion",
+        "math3354lecture",
+        "sts1500lecture"
+    ]
     callAlgorithm(classLists2)
 import unittest
 

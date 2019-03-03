@@ -53,7 +53,7 @@
                 v-for="semester in semesters"
                 v-bind:key="semester.id"
                 v-on:click="selectSemester(semester.id)"
-              >{{ semester.name }}</a>    
+              >{{ semester.name }}</a>
             </div>
           </div>
 
@@ -92,6 +92,7 @@
               placeholder="Algorithm"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
+              @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
 
@@ -149,15 +150,21 @@
               placeholder="8:00am"
               style="font-size: 10pt;"
               aria-describedby="basic-addon1"
-            >  
+            >
           </div>
 
           <div class="input-group mt-2">
             <!--input latest time-->
             <div class="input-group-prepend">
               <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>
-              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="sr-only">Toggle Dropdown</span>
+              <button
+                type="button"
+                class="button dropdown-toggle dropdown-toggle-split"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="#">8:00am</a>
@@ -214,7 +221,11 @@
           </div>
         </div>
           <!--submit button-->
-          <button type="button" class="btn btn-outline-success mt-1 mb-1" onClick="add_class();">Submit</button>
+          <button
+            type="button"
+            class="btn btn-outline-success mt-1 mb-1"
+            onClick="add_class();"
+          >Submit</button>
 
           <div id="courses">
             <p>Current Selected Classes:</p>
@@ -225,7 +236,11 @@
 
           <!--create button-->
           <div>
-            <button type="button" class="btn btn-outline-success mt-1 mb-1" style="position:inherit;">Create</button>
+            <button
+              type="button"
+              class="btn btn-outline-success mt-1 mb-1"
+              style="position:inherit;"
+            >Create</button>
           </div>
         </td>
     
@@ -244,7 +259,7 @@
             <!-- <p>Something.</p> -->
             <!-- <Schedule></Schedule> -->
           </div>
-          <Schedule></Schedule>
+          <Schedule v-bind:courses="asd"></Schedule>
           <div id="Schedule 2" class="tabcontent">
             <h3>Schedule 2</h3>
             <p>Something.</p>
@@ -277,6 +292,50 @@ export default {
             currentSemester: null,
             courses: [],
             courseKeys: [],
+            asd: [
+                [
+                    'CS',
+                    '2150',
+                    '001',
+                    'Lecture',
+                    3,
+                    'Mark',
+                    'MoWeFr11:00',
+                    'olsson120',
+                    'pdr',
+                    'cs',
+                    'closed',
+                    150,
+                    150,
+                    150,
+                    'pdr',
+                    ['Monday', 'Wednesday', 'Friday'],
+                    '11:00',
+                    '11:50',
+                    'event-1'
+                ],
+                [
+                    'CS',
+                    '3102',
+                    '001',
+                    'Lecture',
+                    3,
+                    'Nathan',
+                    'MoWeFr12:00',
+                    'olsson120',
+                    'theory',
+                    'cs',
+                    'closed',
+                    150,
+                    150,
+                    150,
+                    'dfa',
+                    ['Tuesday'],
+                    '12:00',
+                    '13:50',
+                    'event-2'
+                ]
+            ],
             schedule: {
                 title: 'Dummy asdsad',
                 courses: [
@@ -304,6 +363,7 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
+            const max_results = 10;
             const arr = this.courseKeys;
             const len = query.length;
             let start = 0,
@@ -328,11 +388,15 @@ export default {
             }
 
             if (target_idx === -1) {
-                for (const course of this.courses) {
-                    if (course[9].indexOf(query) !== -1) return course;
+                for (const key in this.courses) {
+                    const course = this.courses[key];
+                    if (course[9].toLowerCase().indexOf(query) !== -1) return course;
                 }
                 return null;
-            } else return this.courses[target_idx];
+            } else return this.courses[this.courseKeys[target_idx]];
+        },
+        expandClass(course) {
+            console.log(course);
         },
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
@@ -340,6 +404,9 @@ export default {
                 this.courses = res.data.data;
                 this.courseKeys = res.data.keys;
             });
+        },
+        parseResponse(res) {
+            const data = res.data;
         }
     }
 };
@@ -354,9 +421,9 @@ export default {
     color: #2c3e50;
     margin-top: 60px;
 } */
-.dropdown-menu{
-  overflow: auto;
-  max-height:100px;
+.dropdown-menu {
+    overflow: auto;
+    max-height: 100px;
 }
 .filter-button{
   border-radius: 3px;

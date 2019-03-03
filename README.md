@@ -8,15 +8,23 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-Node.js version 8.10
+* Node.js version 8.10
+* Python version 3.5 or higher
 
 ### How to Use
 
-Once installed Node.js and have its package npm, run this command inside your project's directory:
+Once installed Node.js and have its package npm, run this command inside  ```templates``` directory:
 
 ```
 npm run serve
 ```
+
+Open a new terminal and run this command:
+```
+python run.py
+```
+
+Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:8080/).
 
 ## Built With
 

@@ -387,6 +387,8 @@ export default {
         removeCourse(id) {
             for (let i = 0; i < this.currentSchedule.All.length; i++) {
                 if (this.currentSchedule.All[i].id === id) {
+                    $('[data-toggle="popover"]').popover('hide');
+                    $('[data-toggle="popover"]').popover('disable');
                     this.currentSchedule.All.splice(i, 1);
                     for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
                         const day = this.currentSchedule[key];
@@ -397,6 +399,7 @@ export default {
                             }
                         }
                     }
+                    $('[data-toggle="popover"]').popover('enable');
                     this.saveStatus();
                     this.$forceUpdate();
                     this.refreshStyle();
@@ -434,6 +437,7 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
+            query = query.toLowerCase();
             if (query.length === 0) {
                 this.isEntering = false;
                 this.inputCourses = null;
@@ -450,60 +454,70 @@ export default {
 
             let results = [];
 
-            // do a binary search on the keys of courses for efficiency
-            while (start <= end) {
-                let mid = Math.floor((start + end) / 2);
+            // // do a binary search on the keys of courses for efficiency
+            // while (start <= end) {
+            //     let mid = Math.floor((start + end) / 2);
 
-                // for course number (e.g. CS3102), we only check the beginning
-                const ele = arr[mid].substr(0, len);
+            //     // for course number (e.g. CS3102), we only check the beginning
+            //     const ele = arr[mid].substr(0, len);
 
-                if (ele === query) {
-                    // when a match is found, we go up and down to look up more choices
-                    results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
-                    let increment = 1;
-                    while (
-                        results.length < max_results * 2 &&
-                        arr[mid + increment].substr(0, len) === query
-                    ) {
-                        results.push(
-                            this.courseArrToObj(
-                                this.courses[arr[mid + increment]],
-                                this.attr_map,
-                                {}
-                            )
-                        );
-                        increment += 1;
-                    }
-                    increment = -1;
-                    while (
-                        results.length < max_results * 2 &&
-                        arr[mid + increment].substr(0, len) === query
-                    ) {
-                        results.push(
-                            this.courseArrToObj(
-                                this.courses[arr[mid + increment]],
-                                this.attr_map,
-                                {}
-                            )
-                        );
-                        increment -= 1;
-                    }
-                    break;
-                } else if (ele < query) {
-                    start = mid + 1;
-                } else end = mid - 1;
-            }
+            //     if (ele === query) {
+            //         // when a match is found, we go up and down to look up more choices
+            //         results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
+            //         let increment = 1;
+            //         while (
+            //             results.length < max_results * 2 &&
+            //             arr[mid + increment].substr(0, len) === query
+            //         ) {
+            //             results.push(
+            //                 this.courseArrToObj(
+            //                     this.courses[arr[mid + increment]],
+            //                     this.attr_map,
+            //                     {}
+            //                 )
+            //             );
+            //             increment += 1;
+            //         }
+            //         increment = -1;
+            //         while (
+            //             results.length < max_results * 2 &&
+            //             arr[mid + increment].substr(0, len) === query
+            //         ) {
+            //             results.push(
+            //                 this.courseArrToObj(
+            //                     this.courses[arr[mid + increment]],
+            //                     this.attr_map,
+            //                     {}
+            //                 )
+            //             );
+            //             increment -= 1;
+            //         }
+            //         break;
+            //     } else if (ele < query) {
+            //         start = mid + 1;
+            //     } else end = mid - 1;
+            // }
 
-            if (results.length > max_results) {
-                const margin = Math.floor((results.length - max_results) / 2);
-                results = results.slice(margin, results.length - margin);
-            }
+            // if (results.length > max_results) {
+            //     const margin = Math.floor((results.length - max_results) / 2);
+            //     results = results.slice(margin, results.length - margin);
+            // }
 
             // if no results are found, we perform linear search in the array of titles
+            const exist = x => {
+                return results.some(ele => ele.id === x[0]);
+            };
             if (results.length === 0) {
+                for (const key of this.courseKeys) {
+                    const course = this.courses[key];
+                    if (key.indexOf(query) !== -1 && !exist(course)) {
+                        results.push(this.courseArrToObj(this.courses[key], this.attr_map, {}));
+                        if (results.length >= max_results) break;
+                    }
+                }
                 for (const key in this.courses) {
                     const course = this.courses[key];
-                    if (course[9].toLowerCase().indexOf(query) !== -1) {
+                    if (course[9].toLowerCase().indexOf(query) !== -1 && !exist(course)) {
                         results.push(this.courseArrToObj(course, this.attr_map, {}));
                         if (results.length >= max_results) break;
                     }

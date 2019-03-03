@@ -384,21 +384,32 @@ export default {
             }, 10);
         },
 
-        removeCourse(id){
-          for(const i = 0; i < this.currentSchedule.All.length; i ++){
-            if(this.currentSchedule.All[i].id === id){
-              this.currentSchedule.All.splice(i, 1);
-              
-              break;
+        removeCourse(id) {
+            for (let i = 0; i < this.currentSchedule.All.length; i++) {
+                if (this.currentSchedule.All[i].id === id) {
+                    this.currentSchedule.All.splice(i, 1);
+                    for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
+                        const day = this.currentSchedule[key];
+                        for (let j = 0; j < day.length; j++) {
+                            if (day[j].id === id) {
+                                day.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+                    this.saveStatus();
+                    this.$forceUpdate();
+                    this.refreshStyle();
+                    break;
+                }
             }
-          }
         },
 
-        triggerModal(id){
-          console.log(id);
-          for(const c of this.currentSchedule.All){
-            if(c.id == id){
-              this.activeCourse = c;
+        triggerModal(id) {
+            console.log(id);
+            for (const c of this.currentSchedule.All) {
+                if (c.id == id) {
+                    this.activeCourse = c;
 
                     // eslint-disable-next-line
                     $('#course-modal-div').modal('show');
@@ -519,7 +530,7 @@ export default {
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
                 // eslint-disable-next-line
                 objSchedulesPlan[0].placeEvents();
-            }, 10);
+            }, 20);
         },
         /**
          * @param {any[]} arr

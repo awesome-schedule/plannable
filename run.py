@@ -1,7 +1,7 @@
 import csv
 import logging
 from flask import Flask, render_template, jsonify, request
-from new_sis.classAlgo import readData, DICT, getReq
+from new_sis.classAlgo import readData, DICT, getReq, RECORD
 from collections import OrderedDict
 from flask_cors import CORS
 
@@ -12,8 +12,8 @@ RECORDS_DICT = OrderedDict()
 RECORDS_KEYS = []
 
 ATTR_MAP = {
-    0: 'department', 1: 'number', 2: 'section', 3: 'type', 4: 'units', 5: 'instructor', 6: 'days', 7: 'room',
-    8: 'title', 9: 'topic', 10: 'status', 11: 'enrollment', 12: 'enrollment_limit', 13: 'wait_list', 14: 'description'
+    0: 'id', 1: 'department', 2: 'number', 3: 'section', 4: 'type', 5: 'units', 6: 'instructor', 7: 'days', 8: 'room',
+    9: 'title', 10: 'topic', 11: 'status', 12: 'enrollment', 13: 'enrollment_limit', 14: 'wait_list', 15: 'description'
 }
 
 
@@ -54,19 +54,34 @@ def get_classes():
             )
 
         if test:
+            raw_result = getReq([
+                "cs2110lecture",
+                "cs2110laboratory",
+                "span2020lecture",
+                "cs2102lecture",
+                "sts1500discussion",
+                "math3354lecture",
+                "sts1500lecture",
+            ], 5)
+            course_data = dict()
+
+            result = []
+            for raw_schedule in raw_result:
+                schedule = []
+                for raw_course in raw_schedule:
+                    cid = raw_course[0]
+                    schedule.append(cid)
+                    if not course_data.get(cid):
+                        course_data[cid] = RECORD[cid]
+
+                result.append(schedule)
+
             return jsonify({
                 'meta': {
-                    'attr_map': ATTR_MAP
+                    'attr_map': ATTR_MAP,
+                    'course_data': course_data
                 },
-                'data': getReq([
-                    "cs2110lecture",
-                    "cs2110laboratory",
-                    "span2020lecture",
-                    "cs2102lecture",
-                    "sts1500discussion",
-                    "math3354lecture",
-                    "sts1500lecture",
-                ], 100)
+                'data': result
             })
         return "!!!"
 

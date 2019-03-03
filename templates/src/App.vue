@@ -26,20 +26,20 @@
               <span class="sr-only">(current)</span>
             </a>
           </li>
-          
-        </ul>        
+        </ul>
       </div>
     </nav>
     <!-- end of navigation bar -->
-
-  
     <table style="width: 95%; margin: auto auto">
       <tr>
-        <td class="leftside" style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
-          <!-- term selection dropdown -->      
+        <td
+          class="leftside"
+          style="width: 15%; vertical-align: top; padding-top: 0; padding-right: 2%"
+        >
+          <!-- term selection dropdown -->
           <div class="dropdown">
             <button
-              class="button mt-2 mx-auto"
+              class="btn btn-primary mt-2 mx-auto"
               style="width: 100%;"
               type="button"
               id="semester"
@@ -57,197 +57,244 @@
             </div>
           </div>
 
-          <div class="input-group">
+          <div class="input-group mt-2">
             <!-- input department-->
-            <div class="input-group-prepend">
+            <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="dept" style="font-size:10pt">Department</span>
-            </div>
+            </div>-->
             <input
               type="text"
               class="form-control"
-              placeholder="CS"
+              placeholder="Dept"
               style="font-size: 10pt; align-content: center"
               aria-describedby="basic-addon1"
             >
             <!--input course number-->
-            <div class="input-group-prepend">
+            <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="num" style="font-size:10pt">Course#</span>
-            </div>
+            </div>-->
             <input
               type="text"
               class="form-control"
-              placeholder="1110"
+              placeholder="Course#"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
             >
           </div>
           <!--input title-->
           <div class="input-group mt-2">
-            <div class="input-group-prepend">
+            <!-- <div class="input-group-prepend">
               <span class="input-group-text" id="title" style="font-size:10pt">Course Name</span>
-            </div>
+            </div>-->
             <input
               type="text"
               class="form-control"
-              placeholder="Algorithm"
+              placeholder="Course Title"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
               @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
 
-          <div class="input-group">
-            <!--filter button-->
-            <div class="input-group-prepend" style="width: 100%;">
-              <button type="button" class="button mt-2" style="width:90%;">Filter</button>
-              <button type="button" class="filter-button dropdown-toggle dropdown-toggle-split mt-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="sr-only">Toggle Dropdown</span>
-              </button>
-            </div>
+          <div class="mt-3">
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-toggle="collapse"
+              data-target="#filter"
+              aria-expanded="false"
+              aria-controls="filter"
+              style="width:100%"
+            >Filters</button>
           </div>
-        <div class="filter">
-          <div class="input-group">
-            <!--input earliest time-->
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>
-              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              <span class="sr-only">Toggle Dropdown</span>
-              </button>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">8:00am</a>
-                <a class="dropdown-item" href="#">8:30am</a>
-                <a class="dropdown-item" href="#">9:00am</a>
-                <a class="dropdown-item" href="#">9:30am</a>
-                <a class="dropdown-item" href="#">10:00am</a>
-                <a class="dropdown-item" href="#">10:30am</a>
-                <a class="dropdown-item" href="#">11:00am</a>
-                <a class="dropdown-item" href="#">11:30am</a>
-                <a class="dropdown-item" href="#">12:00am</a>
-                <a class="dropdown-item" href="#">12:30am</a>
-                <a class="dropdown-item" href="#">13:00am</a>
-                <a class="dropdown-item" href="#">13:30am</a>
-                <a class="dropdown-item" href="#">14:00am</a>
-                <a class="dropdown-item" href="#">14:30am</a>
-                <a class="dropdown-item" href="#">15:00am</a>
-                <a class="dropdown-item" href="#">15:30am</a>
-                <a class="dropdown-item" href="#">16:00am</a>
-                <a class="dropdown-item" href="#">16:30am</a>
-                <a class="dropdown-item" href="#">17:00am</a>
-                <a class="dropdown-item" href="#">17:30am</a>
-                <a class="dropdown-item" href="#">18:00am</a>
-                <a class="dropdown-item" href="#">18:30am</a>
-                <a class="dropdown-item" href="#">19:00am</a>
-                <a class="dropdown-item" href="#">19:30am</a>
-                <a class="dropdown-item" href="#">20:00am</a>
-                <a class="dropdown-item" href="#">20:30am</a>
-                <a class="dropdown-item" href="#">21:00am</a>
-                <a class="dropdown-item" href="#">21:30am</a>
-              </div>
-            </div>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="8:00am"
-              style="font-size: 10pt;"
-              aria-describedby="basic-addon1"
-            >
-          </div>
+          <div class="collapse" id="filter">
+            <div class="card card-body">
+              <div class="filter mt-2">
+                <div class="input-group">
+                  <!--input earliest time-->
+                  <!-- <div class="input-group-prepend">
+                  <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
+                  <button
+                    type="button"
+                    class="button dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu" style="width:100%">
+                    <a class="dropdown-item" href="#">8:00am</a>
+                    <a class="dropdown-item" href="#">8:30am</a>
+                    <a class="dropdown-item" href="#">9:00am</a>
+                    <a class="dropdown-item" href="#">9:30am</a>
+                    <a class="dropdown-item" href="#">10:00am</a>
+                    <a class="dropdown-item" href="#">10:30am</a>
+                    <a class="dropdown-item" href="#">11:00am</a>
+                    <a class="dropdown-item" href="#">11:30am</a>
+                    <a class="dropdown-item" href="#">12:00am</a>
+                    <a class="dropdown-item" href="#">12:30am</a>
+                    <a class="dropdown-item" href="#">13:00am</a>
+                    <a class="dropdown-item" href="#">13:30am</a>
+                    <a class="dropdown-item" href="#">14:00am</a>
+                    <a class="dropdown-item" href="#">14:30am</a>
+                    <a class="dropdown-item" href="#">15:00am</a>
+                    <a class="dropdown-item" href="#">15:30am</a>
+                    <a class="dropdown-item" href="#">16:00am</a>
+                    <a class="dropdown-item" href="#">16:30am</a>
+                    <a class="dropdown-item" href="#">17:00am</a>
+                    <a class="dropdown-item" href="#">17:30am</a>
+                    <a class="dropdown-item" href="#">18:00am</a>
+                    <a class="dropdown-item" href="#">18:30am</a>
+                    <a class="dropdown-item" href="#">19:00am</a>
+                    <a class="dropdown-item" href="#">19:30am</a>
+                    <a class="dropdown-item" href="#">20:00am</a>
+                    <a class="dropdown-item" href="#">20:30am</a>
+                    <a class="dropdown-item" href="#">21:00am</a>
+                    <a class="dropdown-item" href="#">21:30am</a>
+                  </div>
 
-          <div class="input-group mt-2">
-            <!--input latest time-->
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Earliest Time"
+                    style="font-size: 10pt;"
+                    aria-describedby="basic-addon1"
+                  >
+                </div>
+
+                <div class="input-group mt-2">
+                  <!--input latest time-->
+                  <!-- <div class="input-group-prepend">
+                  <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
+                  <button
+                    type="button"
+                    class="button dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <span class="sr-only">Toggle Dropdown</span>
+                  </button>
+                  <div class="dropdown-menu" style="width:100%">
+                    <a class="dropdown-item" href="#">8:00am</a>
+                    <a class="dropdown-item" href="#">8:30am</a>
+                    <a class="dropdown-item" href="#">9:00am</a>
+                    <a class="dropdown-item" href="#">9:30am</a>
+                    <a class="dropdown-item" href="#">10:00am</a>
+                    <a class="dropdown-item" href="#">10:30am</a>
+                    <a class="dropdown-item" href="#">11:00am</a>
+                    <a class="dropdown-item" href="#">11:30am</a>
+                    <a class="dropdown-item" href="#">12:00am</a>
+                    <a class="dropdown-item" href="#">12:30am</a>
+                    <a class="dropdown-item" href="#">13:00am</a>
+                    <a class="dropdown-item" href="#">13:30am</a>
+                    <a class="dropdown-item" href="#">14:00am</a>
+                    <a class="dropdown-item" href="#">14:30am</a>
+                    <a class="dropdown-item" href="#">15:00am</a>
+                    <a class="dropdown-item" href="#">15:30am</a>
+                    <a class="dropdown-item" href="#">16:00am</a>
+                    <a class="dropdown-item" href="#">16:30am</a>
+                    <a class="dropdown-item" href="#">17:00am</a>
+                    <a class="dropdown-item" href="#">17:30am</a>
+                    <a class="dropdown-item" href="#">18:00am</a>
+                    <a class="dropdown-item" href="#">18:30am</a>
+                    <a class="dropdown-item" href="#">19:00am</a>
+                    <a class="dropdown-item" href="#">19:30am</a>
+                    <a class="dropdown-item" href="#">20:00am</a>
+                    <a class="dropdown-item" href="#">20:30am</a>
+                    <a class="dropdown-item" href="#">21:00am</a>
+                    <a class="dropdown-item" href="#">21:30am</a>
+                  </div>
+                  <!-- </div> -->
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Latest Time"
+                    style="font-size: 10pt"
+                    aria-describedby="basic-addon1"
+                  >
+                </div>
+
+                <!--input maximum class number per day-->
+                <div class="input-group mt-2">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="max" style="font-size:10pt">max classes/day</span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="2"
+                    style="font-size: 10pt"
+                    aria-describedby="basic-addon1"
+                  >
+                </div>
+              </div>
+              <!--submit button-->
               <button
                 type="button"
-                class="button dropdown-toggle dropdown-toggle-split"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <span class="sr-only">Toggle Dropdown</span>
-              </button>
-              <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">8:00am</a>
-                <a class="dropdown-item" href="#">8:30am</a>
-                <a class="dropdown-item" href="#">9:00am</a>
-                <a class="dropdown-item" href="#">9:30am</a>
-                <a class="dropdown-item" href="#">10:00am</a>
-                <a class="dropdown-item" href="#">10:30am</a>
-                <a class="dropdown-item" href="#">11:00am</a>
-                <a class="dropdown-item" href="#">11:30am</a>
-                <a class="dropdown-item" href="#">12:00am</a>
-                <a class="dropdown-item" href="#">12:30am</a>
-                <a class="dropdown-item" href="#">13:00am</a>
-                <a class="dropdown-item" href="#">13:30am</a>
-                <a class="dropdown-item" href="#">14:00am</a>
-                <a class="dropdown-item" href="#">14:30am</a>
-                <a class="dropdown-item" href="#">15:00am</a>
-                <a class="dropdown-item" href="#">15:30am</a>
-                <a class="dropdown-item" href="#">16:00am</a>
-                <a class="dropdown-item" href="#">16:30am</a>
-                <a class="dropdown-item" href="#">17:00am</a>
-                <a class="dropdown-item" href="#">17:30am</a>
-                <a class="dropdown-item" href="#">18:00am</a>
-                <a class="dropdown-item" href="#">18:30am</a>
-                <a class="dropdown-item" href="#">19:00am</a>
-                <a class="dropdown-item" href="#">19:30am</a>
-                <a class="dropdown-item" href="#">20:00am</a>
-                <a class="dropdown-item" href="#">20:30am</a>
-                <a class="dropdown-item" href="#">21:00am</a>
-                <a class="dropdown-item" href="#">21:30am</a>
+                class="btn btn-outline-success mt-2"
+                onClick="add_class();"
+              >Submit</button>
+            </div>
+          </div>
+
+          <!-- <div class="input-group mt-2"> -->
+          <!--filter button-->
+          <!-- <div class="input-group-prepend" style="width: 100%;"> -->
+          <!-- <button type="button" class="button mt-2" style="width:90%;">Filter</button> -->
+          <!-- <button -->
+          <!-- type="button" -->
+          <!-- class="filter-button dropdown-toggle dropdown-toggle-split mt-2" -->
+          <!-- data-toggle="dropdown" -->
+          <!-- aria-haspopup="true" -->
+          <!-- aria-expanded="false" -->
+          <!-- > -->
+          <!-- <span class="sr-only">Toggle Dropdown</span> -->
+          <!-- </button> -->
+          <!-- </div> -->
+          <!-- </div> -->
+          <div class="mt-3">
+            <button
+              class="btn btn-primary"
+              type="button"
+              data-toggle="collapse"
+              data-target="#currentSelectedClass"
+              aria-expanded="false"
+              aria-controls="currentSelectedClass"
+              style="width:100%"
+            >Current Selected Classes</button>
+          </div>
+          <div class="collapse" id="currentSelectedClass">
+            <div class="card card-body">
+              <Active v-bind:schedule="currentSchedule"></Active>
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-outline-success mt-2"
+                  style="position:inherit;"
+                >Create</button>
               </div>
             </div>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="5:00pm"
-              style="font-size: 10pt"
-              aria-describedby="basic-addon1"
-            >
           </div>
 
-          <!--input maximum class number per day-->
-          <div class="input-group mt-2">
-            <div class="input-group-prepend">
-              <span class="input-group-text" id="max" style="font-size:10pt">max classes/day</span>
-            </div>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="2"
-              style="font-size: 10pt"
-              aria-describedby="basic-addon1"
-            >
-          </div>
-        </div>
-          <!--submit button-->
-          <button
-            type="button"
-            class="btn btn-outline-success mt-1 mb-1"
-            onClick="add_class();"
-          >Submit</button>
-
-          <div id="courses">
-            <p>Current Selected Classes:</p>
-            <!--display added class-->
-          </div>
-
-          <Active v-bind:schedule="schedule"></Active>
-
+          <!-- <div id="courses"> -->
+          <!-- <p>Current Selected Classes:</p> -->
+          <!--display added class-->
+          <!-- </div> -->
+          <!-- <Active v-bind:schedule="currentSchedule"></Active> -->
           <!--create button-->
-          <div>
-            <button
-              type="button"
-              class="btn btn-outline-success mt-1 mb-1"
-              style="position:inherit;"
-            >Create</button>
-          </div>
         </td>
-    
+
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
-          <div class="tab mt-2">
-            <button class="bt-sidebar" data-toggle="popover" data-placement="bottom" data-content="Click to hide or show left side-bar.">§</button>
+          <div class="tab mt-2" >
+            <button
+              class="bt-sidebar"
+              data-toggle="popover"
+              data-placement="bottom"
+              data-content="Click to hide or show left side-bar."
+            >§</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
@@ -259,7 +306,7 @@
             <!-- <p>Something.</p> -->
             <!-- <Schedule></Schedule> -->
           </div>
-          <Schedule v-bind:courses="asd"></Schedule>
+          <Schedule v-bind:courses="this.currentSchedule"></Schedule>
           <div id="Schedule 2" class="tabcontent">
             <h3>Schedule 2</h3>
             <p>Something.</p>
@@ -292,63 +339,8 @@ export default {
             currentSemester: null,
             courses: [],
             courseKeys: [],
-            asd: [
-                [
-                    'CS',
-                    '2150',
-                    '001',
-                    'Lecture',
-                    3,
-                    'Mark',
-                    'MoWeFr11:00',
-                    'olsson120',
-                    'pdr',
-                    'cs',
-                    'closed',
-                    150,
-                    150,
-                    150,
-                    'pdr',
-                    ['Monday', 'Wednesday', 'Friday'],
-                    '11:00',
-                    '11:50',
-                    'event-1'
-                ],
-                [
-                    'CS',
-                    '3102',
-                    '001',
-                    'Lecture',
-                    3,
-                    'Nathan',
-                    'MoWeFr12:00',
-                    'olsson120',
-                    'theory',
-                    'cs',
-                    'closed',
-                    150,
-                    150,
-                    150,
-                    'dfa',
-                    ['Tuesday'],
-                    '12:00',
-                    '13:50',
-                    'event-2'
-                ]
-            ],
-            schedule: {
-                title: 'Dummy asdsad',
-                courses: [
-                    {
-                        id: 'asd',
-                        title: 'asd'
-                    },
-                    {
-                        id: 'asd1',
-                        title: 'asd1'
-                    }
-                ]
-            }
+            currentSchedule: null,
+            schedules: []
         };
     },
     mounted() {
@@ -356,6 +348,7 @@ export default {
             this.semesters = res.data;
             this.selectSemester(0);
         });
+        this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
     },
     methods: {
         /**
@@ -363,7 +356,10 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
-            const max_results = 10;
+            // const max_results = 10;
+            /**
+             * @type {string[]}
+             */
             const arr = this.courseKeys;
             const len = query.length;
             let start = 0,
@@ -406,7 +402,87 @@ export default {
             });
         },
         parseResponse(res) {
-            const data = res.data;
+            const data = res.data.data;
+            const meta = res.data.meta;
+            this.schedules = [];
+            // raw data is a list of list
+            for (let x = 0; x < data.length; x++) {
+                // raw schedule is a list of course ids
+                const raw_schedule = data[x];
+                const schedule = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    All: [],
+                    title: `Schedule ${x}`,
+                    id: x
+                };
+                this.schedules.push(schedule);
+
+                for (let y = 0; y < raw_schedule.length; y++) {
+                    let course = {
+                        color: `event-${y % 4}`
+                    };
+
+                    // get course_data from course id
+                    const course_data = meta.course_data[raw_schedule[y]];
+                    for (const idx in meta.attr_map) {
+                        // bind properties to each course object
+                        course[meta.attr_map[idx]] = course_data[idx];
+                    }
+
+                    schedule.All.push(course);
+
+                    // parse MoWeFr 11:00PM - 11:50PM style time
+                    const [days, start, , end] = course.days.split(' ');
+                    /**
+                     * @type {string}
+                     */
+                    for (let i = 0; i < days.length; i += 2) {
+                        course = Object.assign({}, course);
+                        switch (days.substr(i, 2)) {
+                            case 'Mo':
+                                schedule.Monday.push(course);
+                                break;
+                            case 'Tu':
+                                schedule.Tuesday.push(course);
+                                break;
+                            case 'We':
+                                schedule.Wednesday.push(course);
+                                break;
+                            case 'Th':
+                                schedule.Thursday.push(course);
+                                break;
+                            case 'Fr':
+                                schedule.Friday.push(course);
+                                break;
+                        }
+                        let suffix = start.substr(start.length - 2, 2);
+                        if (suffix == 'PM') {
+                            let [hour, minute] = start.substring(0, start.length - 2).split(':');
+                            course.start = `${(+hour % 12) + 12}:${minute}`;
+
+                            [hour, minute] = end.substring(0, end.length - 2).split(':');
+                            course.end = `${(+hour % 12) + 12}:${minute}`;
+                        } else {
+                            course.start = start.substring(0, start.length - 2);
+                            suffix = end.substr(end.length - 2, 2);
+                            const end_time = end.substring(0, end.length - 2);
+                            if (suffix == 'PM') {
+                                const [hour, minute] = end_time.split(':');
+                                course.end = `${(+hour % 12) + 12}:${minute}`;
+                            } else {
+                                course.end = end_time;
+                            }
+                        }
+                    }
+                }
+            }
+            this.currentSchedule = this.schedules[0];
+            console.log(this.schedules);
+            // setTimeout(loadSchedule($), 500);
         }
     }
 };
@@ -425,9 +501,9 @@ export default {
     overflow: auto;
     max-height: 100px;
 }
-.filter-button{
-  border-radius: 3px;
-  background-color:#78a7ec;
+.filter-button {
+    border-radius: 3px;
+    background-color: #78a7ec;
 }
 .button {
     border-radius: 3px;

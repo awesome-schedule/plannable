@@ -7,6 +7,7 @@
             <td style="width:80%">
               <p style="margin:0">{{crs.department}} {{crs.number}}</p>
               <p class="subtitle">{{crs.title}}</p>
+              <p class="subtitle">{{crs.type}}</p>
               <p
                 class="subtitle"
                 v-if="crs.topic !== undefined && crs.topic.length > 0"

@@ -7,7 +7,7 @@
           href="#"
           tabindex="-1"
           aria-disabled="true"
-          v-on:click="switchPage(idx + 1)"
+          v-on:click="switchPage(idx - 1)"
         >Previous</a>
       </li>
       <li

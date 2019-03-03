@@ -26,18 +26,17 @@
               <span class="sr-only">(current)</span>
             </a>
           </li>
-          <!-- second item -->
-          <li class="nav-item">
-            <a class="nav-link text-light" href="#" aria-disabled="true">nav-item2</a>
-          </li>
-        </ul>
+          
+        </ul>        
       </div>
     </nav>
     <!-- end of navigation bar -->
+
+  
     <table style="width: 95%; margin: auto auto">
       <tr>
-        <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
-          <!-- term selection dropdown -->
+        <td class="leftside" style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
+          <!-- term selection dropdown -->      
           <div class="dropdown">
             <button
               class="button mt-2 mx-auto"
@@ -96,21 +95,23 @@
               @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
-          <!--filter button-->
-          <button type="button" class="filter-button mt-2">Filter (Optional)</button>
 
+          <div class="input-group">
+            <!--filter button-->
+            <div class="input-group-prepend" style="width: 100%;">
+              <button type="button" class="button mt-2" style="width:90%;">Filter</button>
+              <button type="button" class="filter-button dropdown-toggle dropdown-toggle-split mt-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+            </div>
+          </div>
+        <div class="filter">
           <div class="input-group">
             <!--input earliest time-->
             <div class="input-group-prepend">
-              <span class="input-group-text" id="earliest" style="font-size:10pt">Earliest Time</span>
-              <button
-                type="button"
-                class="button dropdown-toggle dropdown-toggle-split"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <span class="sr-only">Toggle Dropdown</span>
+              <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>
+              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="#">8:00am</a>
@@ -147,7 +148,7 @@
               type="text"
               class="form-control"
               placeholder="8:00am"
-              style="font-size: 10pt"
+              style="font-size: 10pt;"
               aria-describedby="basic-addon1"
             >
           </div>
@@ -218,7 +219,7 @@
               aria-describedby="basic-addon1"
             >
           </div>
-
+        </div>
           <!--submit button-->
           <button
             type="button"
@@ -242,9 +243,11 @@
             >Create</button>
           </div>
         </td>
+    
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
           <div class="tab mt-2">
+            <button class="bt-sidebar" data-toggle="popover" data-placement="bottom" data-content="Click to hide or show left side-bar.">§</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
@@ -333,7 +336,7 @@ export default {
                     'event-2'
                 ]
             ],
-            schedule: {
+            currentSchedule: {
                 title: 'Dummy asdsad',
                 courses: [
                     {
@@ -345,7 +348,8 @@ export default {
                         title: 'asd1'
                     }
                 ]
-            }
+            },
+            schedules: []
         };
     },
     mounted() {
@@ -361,6 +365,9 @@ export default {
          */
         getClass(query) {
             const max_results = 10;
+            /**
+             * @type {string[]}
+             */
             const arr = this.courseKeys;
             const len = query.length;
             let start = 0,
@@ -403,7 +410,68 @@ export default {
             });
         },
         parseResponse(res) {
-            const data = res.data;
+            const data = res.data.data;
+            this.schedules = [];
+            for (let x = 0; x < data.length; x++) {
+                const schedule = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    All: [],
+                    title: `Schedule ${x}`,
+                    id: x
+                };
+                for (const course of schedule) {
+                    /**
+                     * @type {string}
+                     */
+                    const time = course[7];
+                    // parse MoWeFr 11:00PM - 11:50PM style time
+                    const [days, start, end] = time.split(' ');
+                    /**
+                     * @type {string}
+                     */
+                    for (let i = 0; i < days; i += 2) {
+                        switch (days.substr(i, 2)) {
+                            case 'Mo':
+                                schedule.Monday.push(course);
+                                break;
+                            case 'Tu':
+                                schedule.Tuesday.push(course);
+                                break;
+                            case 'We':
+                                schedule.Wednesday.push(course);
+                                break;
+                            case 'Th':
+                                schedule.Thursday.push(course);
+                                break;
+                            case 'Fr':
+                                schedule.Friday.push(course);
+                                break;
+                        }
+                        schedule.All.push(course);
+                        let suffix = start.substr(start.length - 3, 2);
+                        if (suffix == 'PM') {
+                            const [hour, minute] = start.substring(0, start.length - 2).split(':');
+                            course.start = `${(+hour % 12) + 12}:${minute}`;
+                            course.end = `${(+hour % 12) + 12}:${minute}`;
+                        } else {
+                            course.start = start.substring(0, start.length - 2);
+                            suffix = end.substr(end.length - 3, 2);
+                            const end_time = end.substring(0, end.length - 2);
+                            if (suffix == 'PM') {
+                                const [hour, minute] = end_time.split(':');
+                                course.end = `${(+hour % 12) + 12}:${minute}`;
+                            } else {
+                                course.end = end_time;
+                            }
+                        }
+                    }
+                }
+            }
+            this.currentSchedule = this.schedules[0];
         }
     }
 };
@@ -424,10 +492,9 @@ export default {
     overflow: auto;
     max-height: 100px;
 }
-.filter-button {
-    border-radius: 3px;
-    background-color: #78a7ec;
-    width: 100%;
+.filter-button{
+  border-radius: 3px;
+  background-color:#78a7ec;
 }
 .button {
     border-radius: 3px;
@@ -443,7 +510,7 @@ export default {
 }
 
 .button:hover {
-    background-color: rgb(243, 218, 74);
+    background-color: rgb(56, 124, 212);
 }
 .tab {
     overflow: hidden;

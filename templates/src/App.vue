@@ -263,7 +263,7 @@
 
             <div class="collapse show" id="currentSelectedClass">
               <div class="card card-body" style="padding:5px">
-                <Active v-bind:schedule="currentSchedule"></Active>
+                <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
                 <div>
                   <button
                     type="button"
@@ -382,6 +382,15 @@ export default {
                 // eslint-disable-next-line
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
             }, 10);
+        },
+
+        removeCourse(id){
+          for(const i = 0; i < this.currentSchedule.All.length; i ++){
+            if(this.currentSchedule.All[i].id === id){
+              this.currentSchedule.All.splice(i, 1);
+              break;
+            }
+          }
         },
 
         triggerModal(id){

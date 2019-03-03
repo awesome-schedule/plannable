@@ -36,8 +36,26 @@
     <div>" "</div>
     <br>
     <br>
-
-    <div class="alert alert-danger" role="alert" style="width:94%;margin-left:3%">{{errMsg}}</div>
+    <transition name="fade">
+      <div
+        class="alert alert-danger"
+        role="alert"
+        style="width:94%;margin-left:3%"
+        v-if="errMsg.length > 0"
+      >
+        {{errMsg}}
+        <button
+          type="button"
+          class="close"
+          aria-label="Close"
+          v-on:click="errMsg = ''"
+          style="align:center"
+          role="button"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    </transition>
 
     <table style="width: 95%; margin: auto auto">
       <tr>
@@ -336,9 +354,11 @@ export default {
             this.semesters = res.data;
             this.selectSemester(0);
         });
+
+        // generate a series of time
         let f = false;
-        for (let i = 8; i < 21; ) {
-            let time = (i % 12) + 1;
+        for (let i = 7; i < 21; ) {
+            const time = (i % 12) + 1;
             if (f) {
                 i++;
                 this.allTimes.push(time + ':30' + (i >= 12 ? 'PM' : 'AM'));
@@ -745,5 +765,12 @@ export default {
     padding: 10px 12px;
     border: 1px solid #ccc;
     border-top: none;
+}
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
 }
 </style>

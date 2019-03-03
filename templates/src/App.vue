@@ -670,11 +670,9 @@ export default {
             const request = {
                 classes: [],
                 semester: this.currentSemester,
-                num: 10,
-                filter: {
-                    days: days
-                }
+                num: 10
             };
+            if (days.length > 0) request.filter = days;
 
             for (const course of this.currentSchedule.All) {
                 request.classes.push(

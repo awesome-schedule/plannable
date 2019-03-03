@@ -202,6 +202,10 @@
                       aria-describedby="basic-addon1"
                     >
                   </div>
+                  <div>
+                    <input type="checkbox" v-bind="allowWaitlist">
+                    <input type="checkbox" v-bind="allowClosed">
+                  </div>
                 </div>
                 <!--submit button-->
                 <button
@@ -317,7 +321,7 @@ export default {
                 Friday: [],
                 All: [],
                 title: `Schedule`,
-                id: 0
+                id: 0,
             },
             schedules: null,
             attr_map: null,
@@ -328,7 +332,9 @@ export default {
             startTime: '',
             endTime: '',
             allTimes: [],
-            errMsg: ''
+            errMsg: '',
+            allowWaitlist : false,
+            allowClosed : false,
         };
     },
     mounted() {

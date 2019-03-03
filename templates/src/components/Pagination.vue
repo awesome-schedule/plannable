@@ -10,9 +10,6 @@
           v-on:click="switchPage(idx + 1)"
         >Previous</a>
       </li>
-      <!-- <li class="page-item"  aria-current="page">
-        <a class="page-link" href="#">1</a>
-      </li>-->
       <li
         v-for="index in indices"
         :key="index"

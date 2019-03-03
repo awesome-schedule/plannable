@@ -12,7 +12,7 @@
         v-bind:data-content="course.title"
         v-for="course in schedule.All"
         v-bind:key="course.id"
-      >{{ course.department + course.number }}</a>
+      >{{ `${course.department} ${course.number}` }}</a>
     </ul>
     <!-- <div class="card-body">
       <a href="#" class="card-link">Card link</a>

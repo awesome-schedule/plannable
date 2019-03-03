@@ -288,34 +288,37 @@
 
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
-          <div class="tab mt-2">
-            <button
-              class="bt-sidebar"
-              data-toggle="popover"
-              data-placement="bottom"
-              data-content="Click to hide or show left side-bar."
-            >§</button>
-            <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
-            <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
-            <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
-          </div>
+          <nav aria-label="...">
+            <ul class="pagination">
+              <button
+                class="bt-sidebar"
+                data-toggle="popover"
+                data-placement="bottom"
+                data-content="Click to hide or show left side-bar."
+              >§</button>
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">1</a>
+              </li>
+              <li class="page-item active" aria-current="page">
+                <a class="page-link" href="#">
+                  2
+                  <span class="sr-only">(current)</span>
+                </a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">3</a>
+              </li>
+              <li class="page-item">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+          <div class="tab mt-2"></div>
 
-          <!-- Tab content -->
-          <div id="Schedule 1" class="tabcontent">
-            <h3>Schedule 1</h3>
-            <!-- <p>Something.</p> -->
-            <!-- <Schedule></Schedule> -->
-          </div>
           <Schedule v-bind:courses="this.currentSchedule"></Schedule>
-          <div id="Schedule 2" class="tabcontent">
-            <h3>Schedule 2</h3>
-            <p>Something.</p>
-          </div>
-
-          <div id="Schedule 3" class="tabcontent">
-            <h3>Schedule 3</h3>
-            <p>Something.</p>
-          </div>
         </td>
       </tr>
     </table>

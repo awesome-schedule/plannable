@@ -289,13 +289,49 @@ export default {
             currentSemester: null,
             courses: [],
             courseKeys: [],
-            asd : [
-              [
-                'CS', '2150', '001', 'Lecture', 3, 'Mark', 'MoWeFr11:00', 'olsson120', 'pdr', 'cs', 'closed', 150, 150, 150, 'pdr', ['Monday', 'Wednesday', 'Friday'], '11:00', '11:50', 'event-1' 
-              ],
-              [
-                'CS', '3102', '001', 'Lecture', 3, 'Nathan', 'MoWeFr12:00', 'olsson120', 'theory', 'cs', 'closed', 150, 150, 150, 'dfa', ['Tuesday'], '12:00', '13:50', 'event-2'
-              ]
+            asd: [
+                [
+                    'CS',
+                    '2150',
+                    '001',
+                    'Lecture',
+                    3,
+                    'Mark',
+                    'MoWeFr11:00',
+                    'olsson120',
+                    'pdr',
+                    'cs',
+                    'closed',
+                    150,
+                    150,
+                    150,
+                    'pdr',
+                    ['Monday', 'Wednesday', 'Friday'],
+                    '11:00',
+                    '11:50',
+                    'event-1'
+                ],
+                [
+                    'CS',
+                    '3102',
+                    '001',
+                    'Lecture',
+                    3,
+                    'Nathan',
+                    'MoWeFr12:00',
+                    'olsson120',
+                    'theory',
+                    'cs',
+                    'closed',
+                    150,
+                    150,
+                    150,
+                    'dfa',
+                    ['Tuesday'],
+                    '12:00',
+                    '13:50',
+                    'event-2'
+                ]
             ],
             schedule: {
                 title: 'Dummy asdsad',
@@ -324,6 +360,7 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
+            const max_results = 10;
             const arr = this.courseKeys;
             const len = query.length;
             let start = 0,
@@ -364,6 +401,9 @@ export default {
                 this.courses = res.data.data;
                 this.courseKeys = res.data.keys;
             });
+        },
+        parseResponse(res) {
+            const data = res.data;
         }
     }
 };

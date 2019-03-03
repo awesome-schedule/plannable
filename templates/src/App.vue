@@ -137,34 +137,13 @@
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" style="width:100%">
-                      <a class="dropdown-item" href="#">8:00am</a>
-                      <a class="dropdown-item" href="#">8:30am</a>
-                      <a class="dropdown-item" href="#">9:00am</a>
-                      <a class="dropdown-item" href="#">9:30am</a>
-                      <a class="dropdown-item" href="#">10:00am</a>
-                      <a class="dropdown-item" href="#">10:30am</a>
-                      <a class="dropdown-item" href="#">11:00am</a>
-                      <a class="dropdown-item" href="#">11:30am</a>
-                      <a class="dropdown-item" href="#">12:00am</a>
-                      <a class="dropdown-item" href="#">12:30am</a>
-                      <a class="dropdown-item" href="#">13:00am</a>
-                      <a class="dropdown-item" href="#">13:30am</a>
-                      <a class="dropdown-item" href="#">14:00am</a>
-                      <a class="dropdown-item" href="#">14:30am</a>
-                      <a class="dropdown-item" href="#">15:00am</a>
-                      <a class="dropdown-item" href="#">15:30am</a>
-                      <a class="dropdown-item" href="#">16:00am</a>
-                      <a class="dropdown-item" href="#">16:30am</a>
-                      <a class="dropdown-item" href="#">17:00am</a>
-                      <a class="dropdown-item" href="#">17:30am</a>
-                      <a class="dropdown-item" href="#">18:00am</a>
-                      <a class="dropdown-item" href="#">18:30am</a>
-                      <a class="dropdown-item" href="#">19:00am</a>
-                      <a class="dropdown-item" href="#">19:30am</a>
-                      <a class="dropdown-item" href="#">20:00am</a>
-                      <a class="dropdown-item" href="#">20:30am</a>
-                      <a class="dropdown-item" href="#">21:00am</a>
-                      <a class="dropdown-item" href="#">21:30am</a>
+                      <a
+                        class="dropdown-item"
+                        href="#"
+                        v-for="t in allTimes"
+                        :key="t"
+                        v-on:click="startTime = t"
+                      >{{ t }}</a>
                     </div>
 
                     <input
@@ -173,6 +152,7 @@
                       placeholder="Earliest Time"
                       style="font-size: 10pt;"
                       aria-describedby="basic-addon1"
+                      v-bind:value="startTime"
                     >
                   </div>
 
@@ -190,34 +170,13 @@
                       <span class="sr-only">Toggle Dropdown</span>
                     </button>
                     <div class="dropdown-menu" style="width:100%">
-                      <a class="dropdown-item" href="#">8:00am</a>
-                      <a class="dropdown-item" href="#">8:30am</a>
-                      <a class="dropdown-item" href="#">9:00am</a>
-                      <a class="dropdown-item" href="#">9:30am</a>
-                      <a class="dropdown-item" href="#">10:00am</a>
-                      <a class="dropdown-item" href="#">10:30am</a>
-                      <a class="dropdown-item" href="#">11:00am</a>
-                      <a class="dropdown-item" href="#">11:30am</a>
-                      <a class="dropdown-item" href="#">12:00am</a>
-                      <a class="dropdown-item" href="#">12:30am</a>
-                      <a class="dropdown-item" href="#">13:00am</a>
-                      <a class="dropdown-item" href="#">13:30am</a>
-                      <a class="dropdown-item" href="#">14:00am</a>
-                      <a class="dropdown-item" href="#">14:30am</a>
-                      <a class="dropdown-item" href="#">15:00am</a>
-                      <a class="dropdown-item" href="#">15:30am</a>
-                      <a class="dropdown-item" href="#">16:00am</a>
-                      <a class="dropdown-item" href="#">16:30am</a>
-                      <a class="dropdown-item" href="#">17:00am</a>
-                      <a class="dropdown-item" href="#">17:30am</a>
-                      <a class="dropdown-item" href="#">18:00am</a>
-                      <a class="dropdown-item" href="#">18:30am</a>
-                      <a class="dropdown-item" href="#">19:00am</a>
-                      <a class="dropdown-item" href="#">19:30am</a>
-                      <a class="dropdown-item" href="#">20:00am</a>
-                      <a class="dropdown-item" href="#">20:30am</a>
-                      <a class="dropdown-item" href="#">21:00am</a>
-                      <a class="dropdown-item" href="#">21:30am</a>
+                      <a
+                        class="dropdown-item"
+                        href="#"
+                        v-for="t in allTimes"
+                        :key="t"
+                        v-on:click="endTime = t"
+                      >{{ t }}</a>
                     </div>
                     <!-- </div> -->
                     <input
@@ -226,6 +185,7 @@
                       placeholder="Latest Time"
                       style="font-size: 10pt"
                       aria-describedby="basic-addon1"
+                      v-bind:value="endTime"
                     >
                   </div>
 
@@ -321,6 +281,7 @@
         </td>
       </tr>
     </table>
+
     <course-modal id="modal" v-if="activeCourse !== null" v-bind:course="activeCourse"></course-modal>
   </div>
 </template>
@@ -363,7 +324,10 @@ export default {
             isEntering: false,
             sideBar: true,
             inputCourses: null,
-            activeCourse: null
+            activeCourse: null,
+            startTime: '',
+            endTime: '',
+            allTimes: []
         };
     },
     mounted() {
@@ -371,6 +335,18 @@ export default {
             this.semesters = res.data;
             this.selectSemester(0);
         });
+        let f = false;
+        for (let i = 8; i < 21; ) {
+            let time = (i % 12) + 1;
+            if (f) {
+                i++;
+                this.allTimes.push(time + ':30' + (i >= 12 ? 'PM' : 'AM'));
+            } else {
+                this.allTimes.push(time + ':00' + (i >= 12 ? 'PM' : 'AM'));
+            }
+            f = !f;
+        }
+        console.log(this.allTimes);
     },
     computed: {
         scheduleIndices() {
@@ -390,7 +366,9 @@ export default {
         removeCourse(id) {
             for (let i = 0; i < this.currentSchedule.All.length; i++) {
                 if (this.currentSchedule.All[i].id === id) {
+                    // eslint-disable-next-line
                     $('[data-toggle="popover"]').popover('hide');
+                    // eslint-disable-next-line
                     $('[data-toggle="popover"]').popover('disable');
                     this.currentSchedule.All.splice(i, 1);
                     for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
@@ -402,6 +380,7 @@ export default {
                             }
                         }
                     }
+                    // eslint-disable-next-line
                     $('[data-toggle="popover"]').popover('enable');
                     this.saveStatus();
                     this.$forceUpdate();
@@ -447,15 +426,14 @@ export default {
                 return null;
             }
             const max_results = 10;
+            let results = [];
             /**
              * @type {string[]}
              */
-            const arr = this.courseKeys;
-            const len = query.length;
-            let start = 0,
-                end = arr.length - 1;
-
-            let results = [];
+            // const arr = this.courseKeys;
+            // const len = query.length;
+            // let start = 0,
+            //     end = arr.length - 1;
 
             // // do a binary search on the keys of courses for efficiency
             // while (start <= end) {

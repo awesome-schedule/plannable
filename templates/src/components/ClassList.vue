@@ -9,8 +9,9 @@
               <br>
               <p>{{crs.description}}</p>
             </td>
-            <button class="btn btn-primary" v-on:click="$emit('add_course', crs)">+</button>
-            <td></td>
+            <td>
+                <button class="btn btn-primary" v-on:click="$emit('add_course', crs)">+</button>
+            </td>
           </tr>
         </table>
       </div>

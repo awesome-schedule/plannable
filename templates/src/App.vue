@@ -266,7 +266,7 @@
             </div>
           </div>
 
-          <ClassList v-if="isEntering" v-bind:courses="inputCourses"></ClassList>
+          <ClassList v-if="isEntering" v-bind:courses="inputCourses" @add_course="addClass"></ClassList>
         </td>
 
         <td style="width: 68%; vertical-align: top;">
@@ -338,18 +338,17 @@ export default {
         this.$http.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
             this.selectSemester(0);
-            this.$on('add_course', function(crs) {
-                for (const c of this.currentSchedule.All) {
-                    if (c.id === crs.id) {
-                        return;
-                    }
-                }
-                this.currentSchedule.All.append(crs);
-            });
         });
         this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
     },
     methods: {
+        addClass(crs) {
+            console.log('asd');
+            for (const c of this.currentSchedule.All) {
+                if (c.id === crs.id) return;
+            }
+            this.currentSchedule.All.push(crs);
+        },
         /**
          * @param {string} query
          * @returns {any[]}

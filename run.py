@@ -1,7 +1,7 @@
 import csv
 import logging
 from flask import Flask, render_template, jsonify, request
-from new_sis.classAlgo import readData, DICT, getReq
+from new_sis.classAlgo import readData, DICT, getReq, RECORD
 from collections import OrderedDict
 from flask_cors import CORS
 

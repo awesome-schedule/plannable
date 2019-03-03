@@ -333,7 +333,7 @@ export default {
                     'event-2'
                 ]
             ],
-            schedule: {
+            currentSchedule: {
                 title: 'Dummy asdsad',
                 courses: [
                     {
@@ -345,7 +345,8 @@ export default {
                         title: 'asd1'
                     }
                 ]
-            }
+            },
+            schedules: []
         };
     },
     mounted() {
@@ -361,6 +362,9 @@ export default {
          */
         getClass(query) {
             const max_results = 10;
+            /**
+             * @type {string[]}
+             */
             const arr = this.courseKeys;
             const len = query.length;
             let start = 0,
@@ -403,7 +407,68 @@ export default {
             });
         },
         parseResponse(res) {
-            const data = res.data;
+            const data = res.data.data;
+            this.schedules = [];
+            for (let x = 0; x < data.length; x++) {
+                const schedule = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    All: [],
+                    title: `Schedule ${x}`,
+                    id: x
+                };
+                for (const course of schedule) {
+                    /**
+                     * @type {string}
+                     */
+                    const time = course[7];
+                    // parse MoWeFr 11:00PM - 11:50PM style time
+                    const [days, start, end] = time.split(' ');
+                    /**
+                     * @type {string}
+                     */
+                    for (let i = 0; i < days; i += 2) {
+                        switch (days.substr(i, 2)) {
+                            case 'Mo':
+                                schedule.Monday.push(course);
+                                break;
+                            case 'Tu':
+                                schedule.Tuesday.push(course);
+                                break;
+                            case 'We':
+                                schedule.Wednesday.push(course);
+                                break;
+                            case 'Th':
+                                schedule.Thursday.push(course);
+                                break;
+                            case 'Fr':
+                                schedule.Friday.push(course);
+                                break;
+                        }
+                        schedule.All.push(course);
+                        let suffix = start.substr(start.length - 3, 2);
+                        if (suffix == 'PM') {
+                            const [hour, minute] = start.substring(0, start.length - 2).split(':');
+                            course.start = `${(+hour % 12) + 12}:${minute}`;
+                            course.end = `${(+hour % 12) + 12}:${minute}`;
+                        } else {
+                            course.start = start.substring(0, start.length - 2);
+                            suffix = end.substr(end.length - 3, 2);
+                            const end_time = end.substring(0, end.length - 2);
+                            if (suffix == 'PM') {
+                                const [hour, minute] = end_time.split(':');
+                                course.end = `${(+hour % 12) + 12}:${minute}`;
+                            } else {
+                                course.end = end_time;
+                            }
+                        }
+                    }
+                }
+            }
+            this.currentSchedule = this.schedules[0];
         }
     }
 };

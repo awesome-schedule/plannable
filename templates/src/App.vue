@@ -26,18 +26,17 @@
               <span class="sr-only">(current)</span>
             </a>
           </li>
-          <!-- second item -->
-          <li class="nav-item">
-            <a class="nav-link text-light" href="#" aria-disabled="true">nav-item2</a>
-          </li>
-        </ul>
+          
+        </ul>        
       </div>
     </nav>
     <!-- end of navigation bar -->
+
+  
     <table style="width: 95%; margin: auto auto">
       <tr>
-        <td style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
-          <!-- term selection dropdown -->
+        <td class="leftside" style="width: 25%; vertical-align: top; padding-top: 0; padding-right: 2%">
+          <!-- term selection dropdown -->      
           <div class="dropdown">
             <button
               class="button mt-2 mx-auto"
@@ -96,21 +95,23 @@
               @input="expandClass(getClass($event.target.value.toLowerCase()))"
             >
           </div>
-          <!--filter button-->
-          <button type="button" class="filter-button mt-2">Filter (Optional)</button>
 
+          <div class="input-group">
+            <!--filter button-->
+            <div class="input-group-prepend" style="width: 100%;">
+              <button type="button" class="button mt-2" style="width:90%;">Filter</button>
+              <button type="button" class="filter-button dropdown-toggle dropdown-toggle-split mt-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+            </div>
+          </div>
+        <div class="filter">
           <div class="input-group">
             <!--input earliest time-->
             <div class="input-group-prepend">
-              <span class="input-group-text" id="earliest" style="font-size:10pt">Earliest Time</span>
-              <button
-                type="button"
-                class="button dropdown-toggle dropdown-toggle-split"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <span class="sr-only">Toggle Dropdown</span>
+              <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>
+              <button type="button" class="button dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <span class="sr-only">Toggle Dropdown</span>
               </button>
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="#">8:00am</a>
@@ -147,7 +148,7 @@
               type="text"
               class="form-control"
               placeholder="8:00am"
-              style="font-size: 10pt"
+              style="font-size: 10pt;"
               aria-describedby="basic-addon1"
             >
           </div>
@@ -218,7 +219,7 @@
               aria-describedby="basic-addon1"
             >
           </div>
-
+        </div>
           <!--submit button-->
           <button
             type="button"
@@ -242,9 +243,11 @@
             >Create</button>
           </div>
         </td>
+    
         <td style="width: 68%; vertical-align: top;">
           <!-- Tab links -->
           <div class="tab mt-2">
+            <button class="bt-sidebar" data-toggle="popover" data-placement="bottom" data-content="Click to hide or show left side-bar.">§</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 1')">Schedule 1</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 2')">Schedule 2</button>
             <button class="tablinks" onclick="openSchedule(event, 'Schedule 3')">Schedule 3</button>
@@ -487,10 +490,9 @@ export default {
     overflow: auto;
     max-height: 100px;
 }
-.filter-button {
-    border-radius: 3px;
-    background-color: #78a7ec;
-    width: 100%;
+.filter-button{
+  border-radius: 3px;
+  background-color:#78a7ec;
 }
 .button {
     border-radius: 3px;
@@ -506,7 +508,7 @@ export default {
 }
 
 .button:hover {
-    background-color: rgb(243, 218, 74);
+    background-color: rgb(56, 124, 212);
 }
 .tab {
     overflow: hidden;

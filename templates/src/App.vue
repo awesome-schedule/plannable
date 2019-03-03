@@ -278,28 +278,8 @@
             data-placement="bottom"
             data-content="Click to hide or show left side-bar."
           >§</button>
-          <nav aria-label="...">
-            <ul class="pagination">
-              <li class="page-item disabled">
-                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">1</a>
-              </li>
-              <li class="page-item active" aria-current="page">
-                <a class="page-link" href="#">
-                  2
-                  <span class="sr-only">(current)</span>
-                </a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">3</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">Next</a>
-              </li>
-            </ul>
-          </nav>
+          <Pagination></Pagination>
+
           <div class="tab mt-2"></div>
 
           <Schedule v-bind:courses="this.currentSchedule"></Schedule>
@@ -313,13 +293,15 @@
 import Schedule from './components/Schedule';
 import Active from './components/Active';
 import ClassList from './components/ClassList';
+import Pagination from './components/Pagination';
 
 export default {
     name: 'app',
     components: {
         Active,
         Schedule,
-        ClassList
+        ClassList,
+        Pagination
     },
     data() {
         return {
@@ -344,7 +326,6 @@ export default {
     },
     methods: {
         addClass(crs) {
-            console.log('asd');
             for (const c of this.currentSchedule.All) {
                 if (c.id === crs.id) return;
             }
@@ -442,7 +423,9 @@ export default {
         },
         refreshStyle() {
             setTimeout(() => {
+                // eslint-disable-next-line
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
+                // eslint-disable-next-line
                 objSchedulesPlan[0].placeEvents();
             }, 10);
         },

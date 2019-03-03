@@ -213,6 +213,7 @@
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
                 <div>
+                  <button class="btn btn-primary mt-3" v-on:click="clear">Clean</button>
                   <!-- <button
                     type="button"
                     class="btn btn-outline-success mt-2"
@@ -350,6 +351,15 @@ export default {
                 // eslint-disable-next-line
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
             }, 10);
+        },
+
+        clear() {
+            for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
+                this.currentSchedule[key] = [];
+            }
+            this.currentSchedule.All = [];
+            this.schedules = [];
+            this.saveStatus();
         },
 
         removeCourse(id) {

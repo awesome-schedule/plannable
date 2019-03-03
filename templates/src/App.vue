@@ -24,7 +24,7 @@
         <ul class="navbar-nav mr-auto">
           <!-- first item -->
           <li class="nav-item">
-            <a class="nav-link text-light" href="#" aria-disabled="true">
+            <a class="nav-link text-light" href="./contact.html" aria-disabled="true">
               About
               <span class="sr-only">(current)</span>
             </a>

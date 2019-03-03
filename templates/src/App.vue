@@ -354,12 +354,16 @@ export default {
         },
 
         clear() {
-            for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
-                this.currentSchedule[key] = [];
-            }
+            this.cleanSchedule(this.currentSchedule);
             this.currentSchedule.All = [];
             this.schedules = [];
             this.saveStatus();
+        },
+
+        cleanSchedule(schedule) {
+            for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
+                this.currentSchedule[key] = [];
+            }
         },
 
         removeCourse(id) {
@@ -654,11 +658,13 @@ export default {
                 if (res.data.status.err.length > 0) {
                     this.errMsg = res.data.status.err;
                     this.schedules = [];
+                    cleanSchedule(this.currentSchedule);
                     return;
                 }
                 if (res.data.data.length === 0) {
                     this.errMsg = 'No matching schedule satisfying the given constraints';
                     this.schedules = [];
+                    cleanSchedule(this.currentSchedule);
                     return;
                 }
                 this.parseResponse(res);

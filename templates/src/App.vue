@@ -404,7 +404,7 @@ export default {
 
                 for (let y = 0; y < raw_schedule.length; y++) {
                     const course = {
-                        color: 'yellow'
+                        color: `event-${y % 4}`
                     };
                     schedule.All.push(course);
 
@@ -458,6 +458,7 @@ export default {
             }
             this.currentSchedule = this.schedules[0];
             console.log(this.schedules);
+            // setTimeout(loadSchedule($), 500);
         }
     }
 };

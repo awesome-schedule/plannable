@@ -1,29 +1,51 @@
 <template>
   <nav aria-label="...">
     <ul class="pagination">
-      <li class="page-item disabled">
-        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+      <li v-bind:class="'page-item' + (idx <= 0 ? ' disabled' : '')">
+        <a
+          class="page-link"
+          href="#"
+          tabindex="-1"
+          aria-disabled="true"
+          v-on:click="switchPage(idx + 1)"
+        >Previous</a>
       </li>
-      <li class="page-item">
+      <!-- <li class="page-item"  aria-current="page">
         <a class="page-link" href="#">1</a>
-      </li>
-      <li class="page-item active" aria-current="page">
-        <a class="page-link" href="#">
-          2
-          <span class="sr-only">(current)</span>
+      </li>-->
+      <li
+        v-for="index in indices"
+        :key="index"
+        v-bind:class="'page-item' + (idx === index ? ' active' : '')"
+      >
+        <a class="page-link" href="#" v-on:click="switchPage(index)">
+          {{ index + 1 }}
+          <span v-if="idx === index" class="sr-only">(current)</span>
         </a>
       </li>
-      <li class="page-item">
-        <a class="page-link" href="#">3</a>
-      </li>
-      <li class="page-item">
-        <a class="page-link" href="#">Next</a>
+      <li v-bind:class="'page-item' + (idx >= indices.length  ? ' disabled' : '')">
+        <a class="page-link" v-on:click="switchPage(idx + 1)">Next</a>
       </li>
     </ul>
   </nav>
 </template>
 
 <script>
-export default {};
+export default {
+    props: {
+        indices: Array
+    },
+    data() {
+        return {
+            idx: 0
+        };
+    },
+    methods: {
+        switchPage(idx) {
+            this.idx = idx;
+            this.$emit('switch_page', idx);
+        }
+    }
+};
 </script>
 

@@ -62,7 +62,7 @@ def get_classes():
                 "sts1500discussion",
                 "math3354lecture",
                 "sts1500lecture",
-            ], 5)
+            ], 10)
             course_data = dict()
 
             result = []

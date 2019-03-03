@@ -278,7 +278,11 @@
             data-placement="bottom"
             data-content="Click to hide or show left side-bar."
           >§</button>
-          <Pagination></Pagination>
+          <Pagination
+            v-if="schedules !== null && schedules.length > 0"
+            @switch_page="switchPage"
+            v-bind:indices="scheduleIndices"
+          ></Pagination>
 
           <div class="tab mt-2"></div>
 
@@ -306,12 +310,12 @@ export default {
     data() {
         return {
             api: 'http://localhost:8000/api',
-            semesters: [],
+            semesters: null,
             currentSemester: null,
-            courses: [],
-            courseKeys: [],
+            courses: null,
+            courseKeys: null,
             currentSchedule: null,
-            schedules: [],
+            schedules: null,
             attr_map: null,
             isEntering: false,
             inputCourses: null
@@ -324,6 +328,13 @@ export default {
         });
         this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
     },
+    computed: {
+        scheduleIndices() {
+            const indices = new Array(this.schedules.length);
+            for (let i = 0; i < indices.length; i++) indices[i] = i;
+            return indices;
+        }
+    },
     methods: {
         addClass(crs) {
             for (const c of this.currentSchedule.All) {
@@ -331,8 +342,9 @@ export default {
             }
             this.currentSchedule.All.push(crs);
         },
-        nextSchedule(idx) {
+        switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
+            this.refreshStyle();
         },
         /**
          * @param {string} query
@@ -445,7 +457,7 @@ export default {
         parseResponse(res) {
             const data = res.data.data;
             const meta = res.data.meta;
-            this.schedules = [];
+            const schedules = [];
             // raw data is a list of list
             for (let x = 0; x < data.length; x++) {
                 // raw schedule is a list of course ids
@@ -462,7 +474,7 @@ export default {
                     id: x
                 };
 
-                this.schedules.push(schedule);
+                schedules.push(schedule);
 
                 for (let y = 0; y < raw_schedule.length; y++) {
                     let course = {
@@ -521,6 +533,7 @@ export default {
                     }
                 }
             }
+            this.schedules = schedules;
             this.currentSchedule = this.schedules[0];
             this.refreshStyle();
         }

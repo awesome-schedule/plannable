@@ -12,8 +12,8 @@ RECORDS_DICT = OrderedDict()
 RECORDS_KEYS = []
 
 ATTR_MAP = {
-    0: 'department', 1: 'number', 2: 'section', 3: 'type', 4: 'units', 5: 'instructor', 6: 'days', 7: 'room',
-    8: 'title', 9: 'topic', 10: 'status', 11: 'enrollment', 12: 'enrollment_limit', 13: 'wait_list', 14: 'description'
+    0: 'id', 1: 'department', 2: 'number', 3: 'section', 4: 'type', 5: 'units', 6: 'instructor', 7: 'days', 8: 'room',
+    9: 'title', 10: 'topic', 11: 'status', 12: 'enrollment', 13: 'enrollment_limit', 14: 'wait_list', 15: 'description'
 }
 
 

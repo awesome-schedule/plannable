@@ -24,7 +24,7 @@
         <ul class="navbar-nav mr-auto">
           <!-- first item -->
           <li class="nav-item">
-            <a class="nav-link text-light" href="./contact.html" aria-disabled="true">
+            <a class="nav-link text-light" href="/about" aria-disabled="true">
               About
               <span class="sr-only">(current)</span>
             </a>
@@ -213,12 +213,8 @@
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
                 <div>
-                  <button class="btn btn-primary mt-3" v-on:click="clear">Clean</button>
-                  <!-- <button
-                    type="button"
-                    class="btn btn-outline-success mt-2"
-                    style="position:inherit;"
-                  >Create</button>-->
+                  <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp;
+                  <button class="btn btn-warning mt-3" v-on:click="clear">Clean All</button>
                 </div>
               </div>
             </div>
@@ -366,6 +362,10 @@ export default {
             }
         },
 
+        cleanSchedules() {
+            this.schedules = [];
+            this.cleanSchedule(this.currentSchedule);
+        },
         removeCourse(id) {
             for (let i = 0; i < this.currentSchedule.All.length; i++) {
                 if (this.currentSchedule.All[i].id === id) {

@@ -626,6 +626,7 @@ export default {
             this.schedules = schedules;
             this.currentSchedule = this.schedules[0];
             this.saveStatus();
+            this.errMsg = '';
             this.refreshStyle();
         },
         sendRequest() {
@@ -652,10 +653,12 @@ export default {
             this.$http.post(`${this.api}/classes`, request).then(res => {
                 if (res.data.status.err.length > 0) {
                     this.errMsg = res.data.status.err;
+                    this.schedules = [];
                     return;
                 }
                 if (res.data.data.length === 0) {
                     this.errMsg = 'No matching schedule satisfying the given constraints';
+                    this.schedules = [];
                     return;
                 }
                 this.parseResponse(res);

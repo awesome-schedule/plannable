@@ -314,6 +314,7 @@ if __name__ == "__main__":
 
     kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM",
                        "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open", "Instructor": "Nada Basit"}
+
     k = getReq(classLists3, 100)
     # for i in k:
     #     for j in i:

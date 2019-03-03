@@ -18,7 +18,7 @@ These instructions will get you a copy of the project up and running on your loc
 Install necessary python packages
 
 ```
-pip install xlrd flask
+pip install xlrd flask flask-cors
 ```
 
 Install development dependencies
@@ -31,7 +31,7 @@ npm install
 
 Install front end dependencies and compile assets
 
-```
+```bash
 cd templates
 npm install
 npm run build
@@ -39,7 +39,7 @@ npm run build
 
 To launch the server
 
-```
+```bash
 python run.py
 ```
 

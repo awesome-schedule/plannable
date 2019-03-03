@@ -642,7 +642,7 @@ export default {
                 semester: this.currentSemester,
                 num: 10
             };
-            if (days.length > 0) request.filter = days;
+            if (days.length > 0) request.filter = { days };
 
             for (const course of this.currentSchedule.All) {
                 request.classes.push(

@@ -278,7 +278,7 @@
               <td>
                 <table style="width:100%">
                   <tr>
-                    <td style="width:40%;right:0px">
+                    <td>
                       <button
                         class="btn btn-secondary"
                         data-toggle="popover"
@@ -289,7 +289,12 @@
                       >§</button>
                     </td>
                     <td>
-                      <Pagination class="mt-3" style="width:50%;"></Pagination>
+                      <Pagination
+                        class="mt-3"
+                        v-if="schedules !== null && schedules.length > 0"
+                        @switch_page="switchPage"
+                        v-bind:indices="scheduleIndices"
+                      ></Pagination>
                     </td>
                   </tr>
                 </table>

@@ -1,6 +1,6 @@
 <template>
   <nav aria-label="...">
-    <ul class="pagination">
+    <ul class="pagination justify-content-center">
       <li v-bind:class="'page-item' + (idx <= 0 ? ' disabled' : '')">
         <a
           class="page-link"

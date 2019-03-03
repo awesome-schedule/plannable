@@ -71,25 +71,6 @@ def readTime():
     print(len(aSet))
 
 
-def parseTable():
-    pass
-
-
-def sortReq(classList):
-    """
-    Use selection sort to sort the classList based on each category's length from smallest to biggest
-    :param classList: All categories of classes
-    :return: a increasing ordered classList
-    """
-    for i in range(len(classList)):
-        index = i
-        for j in range(i + 1, len(classList)):
-            if len(classList[index]) > len(classList[j]):
-                index = j
-        classList[i], classList[index] = classList[index], classList[i]
-    return classList
-
-
 def filterBefore(date, timeBlock, professor, availability, **kwargs):
     """
     Filter each of the class based on time, professor and availability
@@ -147,7 +128,9 @@ def getReq(classes: list, num, **kwargs):
                 continue
             temp.append([identifier, date, timeBlock])
         classList.append(temp.copy())
-    classList = sortReq(classList)
+
+    classList.sort(key=lambda x: len(x))
+
     table = Algorithm(classList)
     return returnTable(table, num)
 
@@ -172,7 +155,8 @@ def Algorithm(classList: List):
     choiceNum = 0  # the sequence of the choices within one class
     timeTable = []  # table store all the time so that we can compare
     finalTable = []  # the final result of all the full matches
-    pathMemory = [0] * len(classList)  # the path the search has taken, the number indicates the next search
+    # the path the search has taken, the number indicates the next search
+    pathMemory = [0] * len(classList)
     while True:
         if classNum >= len(classList):
             # made a full match and keep searching in the last class
@@ -324,8 +308,9 @@ if __name__ == "__main__":
         "sts1500lecture"
     ]
 
-    kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM", "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open",
-              "Instructor": "Nada Basit"}
+    kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM",
+                       "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open", "Instructor": "Nada Basit"}
+
     k = getReq(classLists3, 100)
     # for i in k:
     #     for j in i:

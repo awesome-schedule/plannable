@@ -86,7 +86,6 @@
             </div>
           </div>
 
-          
           <!--input title-->
           <div class="input-group mt-2">
             <input
@@ -290,7 +289,7 @@ export default {
     },
     data() {
         return {
-            api: 'http://localhost:8000/api',
+            api: `${window.location.protocol}//${window.location.host}/api`,
             semesters: null,
             currentSemester: null,
             courses: null,

@@ -340,7 +340,8 @@ export default {
             courses: [],
             courseKeys: [],
             currentSchedule: null,
-            schedules: []
+            schedules: [],
+            attr_map: null
         };
     },
     mounted() {
@@ -364,7 +365,7 @@ export default {
          * @returns {any[]}
          */
         getClass(query) {
-            // const max_results = 10;
+            const max_results = 10;
             /**
              * @type {string[]}
              */
@@ -373,31 +374,63 @@ export default {
             let start = 0,
                 end = arr.length - 1;
 
-            let target_idx = -1;
+            const results = [];
 
             // do a binary search on the keys of courses
             while (start <= end) {
                 let mid = Math.floor((start + end) / 2);
 
+                // for course number (e.g. CS3102), we only check the beginning
                 const ele = arr[mid].substr(0, len);
-                // If element is present at mid, return True
+
                 if (ele === query) {
-                    target_idx = mid;
+                    // when a match is found, we go up and down to look up more choices
+                    results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
+                    let increment = 1;
+                    while (
+                        results.length < max_results &&
+                        arr[mid + increment].substr(0, len) === query
+                    ) {
+                        results.push(
+                            this.courseArrToObj(
+                                this.courses[arr[mid + increment]],
+                                this.attr_map,
+                                {}
+                            )
+                        );
+                        increment += 1;
+                    }
+                    increment = -1;
+                    while (
+                        results.length < max_results &&
+                        arr[mid + increment].substr(0, len) === query
+                    ) {
+                        results.push(
+                            this.courseArrToObj(
+                                this.courses[arr[mid + increment]],
+                                this.attr_map,
+                                {}
+                            )
+                        );
+                        increment -= 1;
+                    }
                     break;
-                }
-                // Else look in left or right half accordingly
-                else if (ele < query) {
+                } else if (ele < query) {
                     start = mid + 1;
                 } else end = mid - 1;
             }
 
-            if (target_idx === -1) {
+            // if not sufficient results are found, we perform linear search in the array of titles
+            if (results.length < max_results) {
                 for (const key in this.courses) {
                     const course = this.courses[key];
-                    if (course[9].toLowerCase().indexOf(query) !== -1) return course;
+                    if (course[9].toLowerCase().indexOf(query) !== -1) {
+                        results.push(this.courseArrToObj(course, this.attr_map, {}));
+                        if (results.length >= max_results) break;
+                    }
                 }
-                return null;
-            } else return this.courses[this.courseKeys[target_idx]];
+                return results;
+            } else return results;
         },
         expandClass(course) {
             console.log(course);
@@ -407,7 +440,27 @@ export default {
             this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.courses = res.data.data;
                 this.courseKeys = res.data.keys;
+                this.attr_map = res.data.meta.attr_map;
             });
+        },
+        refreshStyle() {
+            setTimeout(() => {
+                $('[data-toggle="popover"]').popover({ trigger: 'hover' });
+                objSchedulesPlan[0].placeEvents();
+            }, 10);
+        },
+        /**
+         * @param {any[]} arr
+         * @param {Object<string, string>} attr_map
+         * @param {Object<string, string>} obj
+         */
+        courseArrToObj(arr, attr_map, obj) {
+            for (const idx in attr_map) {
+                if (+idx >= arr.length) break;
+                // bind properties to course object
+                obj[attr_map[idx]] = arr[+idx];
+            }
+            return obj;
         },
         parseResponse(res) {
             const data = res.data.data;
@@ -417,6 +470,7 @@ export default {
             for (let x = 0; x < data.length; x++) {
                 // raw schedule is a list of course ids
                 const raw_schedule = data[x];
+
                 const schedule = {
                     Monday: [],
                     Tuesday: [],
@@ -427,6 +481,7 @@ export default {
                     title: `Schedule ${x}`,
                     id: x
                 };
+
                 this.schedules.push(schedule);
 
                 for (let y = 0; y < raw_schedule.length; y++) {
@@ -434,12 +489,9 @@ export default {
                         color: `event-${(y % 4) + 1}`
                     };
 
-                    // get course_data from course id
-                    const course_data = meta.course_data[raw_schedule[y]];
-                    for (const idx in meta.attr_map) {
-                        // bind properties to each course object
-                        course[meta.attr_map[idx]] = course_data[idx];
-                    }
+                    // get course_data from course id. This is an array
+                    const course_arr = meta.course_data[raw_schedule[y]];
+                    this.courseArrToObj(course_arr, meta.attr_map, course);
 
                     schedule.All.push(course);
 
@@ -449,6 +501,7 @@ export default {
                      * @type {string}
                      */
                     for (let i = 0; i < days.length; i += 2) {
+                        // we need a copy of course
                         course = Object.assign({}, course);
                         switch (days.substr(i, 2)) {
                             case 'Mo':
@@ -489,9 +542,7 @@ export default {
                 }
             }
             this.currentSchedule = this.schedules[0];
-            setTimeout(() => {
-                objSchedulesPlan[0].placeEvents();
-            }, 1);
+            this.refreshStyle();
         }
     }
 };

@@ -6,7 +6,7 @@
       style="background-color:#F9A348;position:fixed;width:100%;z-index:5"
     >
       <!-- brand -->
-      <a class="navbar-brand text-white" href="#">UNOne</a>
+      <a class="navbar-brand text-white" href="#">UVaAuotoScheduler</a>
       
       <button
         class="navbar-toggler"
@@ -221,8 +221,10 @@
                     >
                   </div>
                   <div>
-                    <input type="checkbox" v-bind="allowWaitlist">
-                    <input type="checkbox" v-bind="allowClosed">
+                    <label for="awt">Wait List</label>&nbsp;&nbsp;
+                    <input type="checkbox" id="awt" v-bind="allowWaitlist">&nbsp;&nbsp;
+                    <label for="ac">Closed</label>&nbsp;&nbsp;
+                    <input type="checkbox" id="ac" v-bind="allowClosed">
                   </div>
                 </div>
                 <!--submit button-->
@@ -244,8 +246,7 @@
                 aria-controls="currentSelectedClass"
                 style="width:100%"
               >Current Selected Classes</button>
-            </div>
-
+            </div>removeCourse
             <div class="collapse show" id="currentSelectedClass">
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
@@ -254,7 +255,7 @@
                     type="button"
                     class="btn btn-outline-success mt-2"
                     style="position:inherit;"
-                  >Create</button> -->
+                  >Create</button>-->
                 </div>
               </div>
             </div>
@@ -339,7 +340,7 @@ export default {
                 Friday: [],
                 All: [],
                 title: `Schedule`,
-                id: 0,
+                id: 0
             },
             schedules: null,
             attr_map: null,
@@ -351,8 +352,8 @@ export default {
             endTime: '',
             allTimes: [],
             errMsg: '',
-            allowWaitlist : false,
-            allowClosed : false,
+            allowWaitlist: false,
+            allowClosed: false
         };
     },
     mounted() {
@@ -662,7 +663,10 @@ export default {
                 semester: this.currentSemester,
                 num: 10,
                 filter: {
-                    days: [`MoTuWeThFr ${this.startTime} - ${this.endTime}`]
+                    days: [
+                        `MoTuWeThFr 00:00AM - ${this.startTime}`,
+                        `MoTuWeThFr ${this.endTime} - 10:00PM`
+                    ]
                 }
             };
 

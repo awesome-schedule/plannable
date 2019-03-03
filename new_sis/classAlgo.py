@@ -103,8 +103,13 @@ def filterBefore(date, timeBlock, professor, availability, **kwargs):
             # check timeLimit
             filterDates = []
             placeHolder = 0
-            for times in value:
+            for count,times in enumerate(value):
                 d, t = parseTime(times)
+                if count % 2:
+                    t[0] = t[0] + 1
+                else:
+                    t[1] = t[1] - 1
+
                 filterDates.append([placeHolder, d, t])
 
             if checkTimeConflict(filterDates, date, timeBlock):
@@ -324,13 +329,13 @@ if __name__ == "__main__":
     ]
 
     kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM",
-                       "MoTuWeThFr 08:00PM - 10:00PM"], "Status": "Open", "Instructor": "Nada Basit"}
+                       "MoTuWeThFr 09:00AM - 10:00PM"]}
 
-    k = getReq(classLists3, 100)
-    # for i in k:
-    #     for j in i:
-    #         print(j)
-    #     print()
+    k = getReq(["span2020lecture"], 100,**kwargs)
+    for i in k:
+        for j in i:
+            print(j)
+        print()
 
 """
 classLists2 = [

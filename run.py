@@ -1,12 +1,17 @@
 import csv
 import logging
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
+
 from new_sis.classAlgo import readData, DICT, getReq, RECORD
 from collections import OrderedDict
 from flask_cors import CORS
 from typing import List, Any, Dict, Tuple
+import os
 
 app = Flask(__name__)
+
+CORS(app)
+
 RECORDS_DICT = OrderedDict()
 RECORDS_KEYS = []
 
@@ -18,7 +23,7 @@ ATTR_MAP = {
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('dist/index.html')
 
 
 @app.route('/api/semesters')
@@ -101,6 +106,8 @@ def get_classes():
                 if json.get('filter') is not None:
                     days = json.get('filter').get('days')
 
+                print(days)
+
                 if days is not None and len(days) == 2:
                     result, course_data = raw_result_to_response(
                         getReq(classes, num, Days=days))
@@ -134,9 +141,24 @@ def get_classes():
             })
 
 
-@app.route('/<any_text>')
-def default_handler(any_text):
-    return render_template('errors/404.html')
+@app.route('/about')
+def default_handler():
+    return render_template('dist/contact.html')
+
+
+@app.route('/js/<path:path>')
+def send_js(path):
+    return send_from_directory(os.path.join(os.path.dirname(__file__), 'templates', 'dist', 'js'), path)
+
+
+@app.route('/css/<path:path>')
+def send_css(path):
+    return send_from_directory(os.path.join(os.path.dirname(__file__), 'templates', 'dist', 'css'), path)
+
+
+# @app.route('/<any_text>')
+# def default_handler(any_text):
+#     return render_template('errors/404.html')
 
 
 def to_short():
@@ -150,7 +172,5 @@ if __name__ == "__main__":
     readData()
     to_short()
     logging.info('Running...')
-
-    CORS(app)
 
     app.run(host='0.0.0.0', port=8000, debug=True)

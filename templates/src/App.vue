@@ -145,6 +145,7 @@
                       style="font-size: 10pt;"
                       aria-describedby="basic-addon1"
                       v-bind:value="startTime"
+                      @input="startTime = $event.target.value; saveStatus()"
                     >
                   </div>
 
@@ -178,6 +179,7 @@
                       style="font-size: 10pt"
                       aria-describedby="basic-addon1"
                       v-bind:value="endTime"
+                      @input="endTime = $event.target.value; saveStatus()"
                     >
                   </div>
 
@@ -195,8 +197,10 @@
                     >
                   </div>
                   <div>
-                    <input type="checkbox" v-bind="allowWaitlist">
-                    <input type="checkbox" v-bind="allowClosed">
+                    <label for="awt">Wait List</label>&nbsp;&nbsp;
+                    <input type="checkbox" id="awt" v-bind="allowWaitlist">&nbsp;&nbsp;
+                    <label for="ac">Closed</label>&nbsp;&nbsp;
+                    <input type="checkbox" id="ac" v-bind="allowClosed">
                   </div>
                 </div>
                 <!--submit button-->
@@ -218,8 +222,7 @@
                 aria-controls="currentSelectedClass"
                 style="width:100%"
               >Current Selected Classes</button>
-            </div>
-
+            </div>removeCourse
             <div class="collapse show" id="currentSelectedClass">
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
@@ -228,7 +231,7 @@
                     type="button"
                     class="btn btn-outline-success mt-2"
                     style="position:inherit;"
-                  >Create</button> -->
+                  >Create</button>-->
                 </div>
               </div>
             </div>
@@ -313,7 +316,7 @@ export default {
                 Friday: [],
                 All: [],
                 title: `Schedule`,
-                id: 0,
+                id: 0
             },
             schedules: null,
             attr_map: null,
@@ -325,8 +328,8 @@ export default {
             endTime: '',
             allTimes: [],
             errMsg: '',
-            allowWaitlist : false,
-            allowClosed : false,
+            allowWaitlist: false,
+            allowClosed: false
         };
     },
     mounted() {
@@ -631,14 +634,19 @@ export default {
         },
         sendRequest() {
             // if (this.currentSchedule.All.length < 2) return;
+            const days = [];
+            if (this.allTimes.includes(this.startTime)) {
+                days.push(this.startTime);
+            }
+            if (this.allTimes.includes(this.endTime)) {
+                days.push(this.endTime);
+            }
             const request = {
                 classes: [],
                 semester: this.currentSemester,
-                num: 10,
-                filter: {
-                    days: [`MoTuWeThFr ${this.startTime} - ${this.endTime}`]
-                }
+                num: 10
             };
+            if (days.length > 0) request.filter = days;
 
             for (const course of this.currentSchedule.All) {
                 request.classes.push(

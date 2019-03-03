@@ -304,13 +304,14 @@
               <td>
                 <div class="tab mt-2"></div>
 
-                <Schedule v-bind:courses="this.currentSchedule"></Schedule>
+                <Schedule v-bind:courses="this.currentSchedule" @trigget-modal="triggerModal"></Schedule>
               </td>
             </tr>
           </table>
         </td>
       </tr>
     </table>
+     <course-modal id="modal" v-if="activeCourse !== null" v-bind:course="activeCourse"></course-modal>
   </div>
 </template>
 
@@ -319,6 +320,7 @@ import Schedule from './components/Schedule';
 import Active from './components/Active';
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
+import CourseModal from './components/CourseModal';
 
 export default {
     name: 'app',
@@ -326,7 +328,8 @@ export default {
         Active,
         Schedule,
         ClassList,
-        Pagination
+        Pagination,
+        CourseModal
     },
     data() {
         return {
@@ -340,7 +343,8 @@ export default {
             attr_map: null,
             isEntering: false,
             sideBar: true,
-            inputCourses: null
+            inputCourses: null,
+            activeCourse: null
         };
     },
     mounted() {
@@ -360,8 +364,23 @@ export default {
     methods: {
         refreshPopover(){
           setTimeout(() => {
+
+                // eslint-disable-next-line
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
             }, 10);
+        },
+
+        triggerModal(id){
+          console.log(id);
+          for(const c of this.currentSchedule.All){
+            if(c.id == id){
+              this.activeCourse = c;
+
+              // eslint-disable-next-line
+              $('#course-modal-div').modal('show');
+              return;
+            }
+          }
         },
 
         addClass(crs) {

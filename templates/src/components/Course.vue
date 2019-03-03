@@ -1,22 +1,21 @@
 <template>
   <li
     class="single-event"
-    v-bind:data-start="start_time"
-    v-bind:data-end="end_time"
-    v-bind:data-content="title"
-    v-bind:data-event="color_type"
-    data-toggle="modal"
+    v-bind:data-start="course.start"
+    v-bind:data-end="course.end"
+    v-bind:data-content="course.title"
+    v-bind:data-event="course.color"
   >
     <!-- <a href="#0"> -->
-    <em style="margin-left:5%;font-style:normal;font-size: 1rem;">{{title}}</em>
+    <em style="margin-left:5%;font-style:normal;font-size: 1rem;">{{course.department}} {{course.number}}</em>
     <br>
     <em
       style="margin-left:5%;font-style:normal;font-size: 0.9rem;color:#e0e0de;line-height:1px"
-    >{{start_time}}-{{end_time}}</em>
+    >{{course.start}}-{{course.end}}</em>
     <br>
     <em
       style="margin-left:5%;font-style:normal;font-size: 0.9rem;color:#e0e0de;line-height:1px"
-    >{{room}}</em>
+    >{{course.room}}</em>
     <!-- </a> -->
     <!-- <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -36,6 +35,7 @@
             </div>
         </div>
     </div>-->
+    <!-- <course-modal v-if="clicked" v-bind:department="department" v-bind:number="number" v-bind:title="title" v-bind:description="description"></course-modal> -->
   </li>
 </template>
 
@@ -43,27 +43,12 @@
 export default {
     name: 'Course',
     props: {
-        department: String,
-        number: String,
-        section: String,
-        type: String,
-        units: Number,
-        instructor: String,
-        days: String,
-        room: String,
-        title: String,
-        topic: String,
-        status: String,
-        enrollment: Number,
-        enrollment_limit: Number,
-        wait_list: Number,
-        description: String,
-        start_time: String,
-        end_time: String,
-        color_type: String
+        course: Object
     },
     data() {
-        return {};
+        return {
+            // clicked : false,
+        };
     },
     methods: {
         

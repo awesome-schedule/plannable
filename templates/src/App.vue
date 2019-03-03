@@ -384,7 +384,6 @@ export default {
             }, 10);
         },
 
-<<<<<<< HEAD
         removeCourse(id){
           for(const i = 0; i < this.currentSchedule.All.length; i ++){
             if(this.currentSchedule.All[i].id === id){
@@ -399,12 +398,6 @@ export default {
           for(const c of this.currentSchedule.All){
             if(c.id == id){
               this.activeCourse = c;
-=======
-        triggerModal(id) {
-            for (const c of this.currentSchedule.All) {
-                if (c.id == id) {
-                    this.activeCourse = c;
->>>>>>> 77d0653ea4019e7aaad590d284dbd5755c398e4b
 
                     // eslint-disable-next-line
                     $('#course-modal-div').modal('show');

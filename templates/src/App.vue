@@ -36,9 +36,9 @@
     <div>" "</div>
     <br>
     <br>
-    <div class="alert alert-danger" role="alert" style="width:94%;margin-left:3%">
-      A simple danger alert—check it out!
-    </div>
+
+    <div class="alert alert-danger" role="alert" style="width:94%;margin-left:3%">{{errMsg}}</div>
+
     <table style="width: 95%; margin: auto auto">
       <tr>
         <td
@@ -256,7 +256,7 @@
                         data-placement="bottom"
                         data-content="Click to hide or show left side-bar."
                         v-on:click="sideBar = !sideBar"
-                      > Hide/Show </button>
+                      >Hide/Show</button>
                     </td>
                     <td>
                       <Pagination
@@ -327,7 +327,8 @@ export default {
             activeCourse: null,
             startTime: '',
             endTime: '',
-            allTimes: []
+            allTimes: [],
+            errMsg: ''
         };
     },
     mounted() {
@@ -629,13 +630,13 @@ export default {
             this.refreshStyle();
         },
         sendRequest() {
-            if (this.currentSchedule.All.length < 2) return;
+            // if (this.currentSchedule.All.length < 2) return;
             const request = {
                 classes: [],
                 semester: this.currentSemester,
                 num: 10,
                 filter: {
-                    days: [`MoTuWeThFr ${startTime} - ${endTime}`]
+                    days: [`MoTuWeThFr ${this.startTime} - ${this.endTime}`]
                 }
             };
 
@@ -646,11 +647,11 @@ export default {
             }
             this.$http.post(`${this.api}/classes`, request).then(res => {
                 if (res.data.status.err.length > 0) {
-                    console.log(res.data.status.err);
+                    this.errMsg = res.data.status.err;
                     return;
                 }
                 if (res.data.data.length === 0) {
-                    console.log('No match!');
+                    this.errMsg = 'No matching schedule satisfying the given constraints';
                     return;
                 }
                 this.parseResponse(res);
@@ -661,7 +662,9 @@ export default {
                 this.currentSemester.id,
                 JSON.stringify({
                     schedules: this.schedules,
-                    currentSchedule: this.currentSchedule
+                    currentSchedule: this.currentSchedule,
+                    startTime: this.startTime,
+                    endTime: this.endTime
                 })
             );
         },
@@ -674,6 +677,8 @@ export default {
             ) {
                 this.schedules = raw_data.schedules;
                 this.currentSchedule = raw_data.currentSchedule;
+                this.startTime = raw_data.startTime;
+                this.endTime = raw_data.endTime;
                 this.refreshStyle();
             }
         }

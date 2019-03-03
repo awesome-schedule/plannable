@@ -30,10 +30,15 @@
       </div>
     </nav>
     <!-- end of navigation bar -->
+<<<<<<< HEAD
     <div>" "</div><br>
     <table style="width: 95%; margin: auto auto;">
       
       <tr style="margin-top:5%">
+=======
+    <table style="width: 95%; margin: auto auto">
+      <tr>
+>>>>>>> 8de996ca007f611e74fd273dcb8960d937679163
         <td
           id="leftBar"
           class="leftside"
@@ -279,6 +284,7 @@
             <tr>
               <td>
                 <table style="width:100%">
+<<<<<<< HEAD
                 <tr>
                   <td style="width:40%;right:0px">
                     <button
@@ -295,26 +301,39 @@
                   </td>
                 </tr>
               </table>
+=======
+                  <tr>
+                    <td>
+                      <button
+                        class="btn btn-secondary"
+                        data-toggle="popover"
+                        data-target="#leftBar"
+                        data-placement="bottom"
+                        data-content="Click to hide or show left side-bar."
+                        v-on:click="sideBar = !sideBar"
+                      >§</button>
+                    </td>
+                    <td>
+                      <Pagination
+                        class="mt-3"
+                        v-if="schedules !== null && schedules.length > 0"
+                        @switch_page="switchPage"
+                        v-bind:indices="scheduleIndices"
+                      ></Pagination>
+                    </td>
+                  </tr>
+                </table>
+>>>>>>> 8de996ca007f611e74fd273dcb8960d937679163
               </td>
             </tr>
             <tr>
               <td>
                 <div class="tab mt-2"></div>
 
-          <Schedule v-bind:courses="this.currentSchedule"></Schedule>
+                <Schedule v-bind:courses="this.currentSchedule"></Schedule>
               </td>
             </tr>
           </table>
-          <!-- Tab links -->
-          <!-- <button
-            class="bt-sidebar"
-            data-toggle="popover"
-            data-placement="bottom"
-            data-content="Click to hide or show left side-bar."
-          >§</button>
-          <Pagination style="width:50%;margin:0"></Pagination> -->
-
-          
         </td>
       </tr>
     </table>
@@ -338,12 +357,12 @@ export default {
     data() {
         return {
             api: 'http://localhost:8000/api',
-            semesters: [],
+            semesters: null,
             currentSemester: null,
-            courses: [],
-            courseKeys: [],
+            courses: null,
+            courseKeys: null,
             currentSchedule: null,
-            schedules: [],
+            schedules: null,
             attr_map: null,
             isEntering: false,
             sideBar: true,
@@ -356,6 +375,13 @@ export default {
             this.selectSemester(0);
         });
         this.$http.get(`${this.api}/classes?test=1`).then(res => this.parseResponse(res));
+    },
+    computed: {
+        scheduleIndices() {
+            const indices = new Array(this.schedules.length);
+            for (let i = 0; i < indices.length; i++) indices[i] = i;
+            return indices;
+        }
     },
     methods: {
         refreshPopover(){
@@ -370,8 +396,9 @@ export default {
             }
             this.currentSchedule.All.push(crs);
         },
-        nextSchedule(idx) {
+        switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
+            this.refreshStyle();
         },
         /**
          * @param {string} query
@@ -484,7 +511,7 @@ export default {
         parseResponse(res) {
             const data = res.data.data;
             const meta = res.data.meta;
-            this.schedules = [];
+            const schedules = [];
             // raw data is a list of list
             for (let x = 0; x < data.length; x++) {
                 // raw schedule is a list of course ids
@@ -501,7 +528,7 @@ export default {
                     id: x
                 };
 
-                this.schedules.push(schedule);
+                schedules.push(schedule);
 
                 for (let y = 0; y < raw_schedule.length; y++) {
                     let course = {
@@ -560,6 +587,7 @@ export default {
                     }
                 }
             }
+            this.schedules = schedules;
             this.currentSchedule = this.schedules[0];
             this.refreshStyle();
         }

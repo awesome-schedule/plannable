@@ -222,7 +222,7 @@
                 aria-controls="currentSelectedClass"
                 style="width:100%"
               >Current Selected Classes</button>
-            </div>removeCourse
+            </div>
             <div class="collapse show" id="currentSelectedClass">
               <div class="card card-body" style="padding:5px">
                 <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>

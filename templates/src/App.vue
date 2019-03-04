@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <course-modal v-bind:course="activeCourse"></course-modal>
     <!-- navigation bar -->
     <nav
       class="navbar navbar-expand-lg navbar-light"
@@ -256,15 +257,13 @@
               <td>
                 <div class="tab mt-2"></div>
 
-                <Schedule v-bind:courses="this.currentSchedule" @trigget-modal="triggerModal"></Schedule>
+                <Schedule v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></Schedule>
               </td>
             </tr>
           </table>
         </td>
       </tr>
     </table>
-
-    <course-modal id="modal" v-if="activeCourse !== null" v-bind:course="activeCourse"></course-modal>
   </div>
 </template>
 
@@ -286,7 +285,8 @@ export default {
     },
     data() {
         return {
-            api: `${window.location.protocol}//${window.location.host}/api`,
+            // api: `${window.location.protocol}//${window.location.host}/api`,
+            api: 'http://localhost:8000/api',
             semesters: null,
             currentSemester: null,
             courses: null,
@@ -306,7 +306,7 @@ export default {
             isEntering: false,
             sideBar: true,
             inputCourses: null,
-            activeCourse: null,
+            activeCourse: {},
             startTime: '',
             endTime: '',
             allTimes: [],
@@ -355,13 +355,11 @@ export default {
             this.schedules = [];
             this.saveStatus();
         },
-
         cleanSchedule(schedule) {
             for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
-                this.currentSchedule[key] = [];
+                schedule[key] = [];
             }
         },
-
         cleanSchedules() {
             this.schedules = [];
             this.cleanSchedule(this.currentSchedule);
@@ -400,7 +398,7 @@ export default {
                     this.activeCourse = c;
 
                     // eslint-disable-next-line
-                    $('#course-modal-div').modal('show');
+                    $('#course-div-modal').modal('show');
                     return;
                 }
             }
@@ -658,13 +656,13 @@ export default {
                 if (res.data.status.err.length > 0) {
                     this.errMsg = res.data.status.err;
                     this.schedules = [];
-                    cleanSchedule(this.currentSchedule);
+                    this.cleanSchedule(this.currentSchedule);
                     return;
                 }
                 if (res.data.data.length === 0) {
                     this.errMsg = 'No matching schedule satisfying the given constraints';
                     this.schedules = [];
-                    cleanSchedule(this.currentSchedule);
+                    this.cleanSchedule(this.currentSchedule);
                     return;
                 }
                 this.parseResponse(res);
@@ -700,65 +698,6 @@ export default {
 </script>
 
 <style scoped>
-.dropdown-menu {
-    overflow: auto;
-    max-height: 100px;
-}
-.filter-button {
-    border-radius: 3px;
-    background-color: #78a7ec;
-}
-.button {
-    border-radius: 3px;
-    font-size: 20px;
-    text-decoration: none;
-    color: #1b3866;
-    background-color: #78a7ec;
-    position: inherit;
-}
-
-.button:active {
-    box-shadow: 0px 1px 0px 0px;
-}
-
-.button:hover {
-    background-color: rgb(56, 124, 212);
-}
-.tab {
-    overflow: hidden;
-    border: 1px solid #ccc;
-    background-color: #78a7ec;
-    border-radius: 3px;
-}
-/* Style the buttons that are used to open the tab content */
-.tab button {
-    background-color: inherit;
-    float: left;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 6px 20px;
-    transition: 0.3s;
-}
-
-/* Change background color of buttons on hover */
-.tab button:hover {
-    background-color: rgb(56, 124, 212);
-}
-
-/* Create an active/current tablink class */
-.tab button.active {
-    background-color: rgb(136, 224, 47);
-    box-shadow: 0px 1px 0px 0px;
-}
-
-/* Style the tab content */
-.tabcontent {
-    display: none;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-top: none;
-}
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.5s;

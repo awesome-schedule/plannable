@@ -5,9 +5,12 @@
     v-bind:data-end="course.end"
     v-bind:data-content="course.title"
     v-bind:data-event="course.color"
+    v-on:click="triggerModal"
   >
     <!-- <a href="#0"> -->
-    <em style="margin-left:5%;font-style:normal;font-size: 1rem;">{{course.department}} {{course.number}}</em>
+    <em
+      style="margin-left:5%;font-style:normal;font-size: 1rem;"
+    >{{course.department}} {{course.number}}</em>
     <br>
     <em
       style="margin-left:5%;font-style:normal;font-size: 0.9rem;color:#e0e0de;line-height:1px"
@@ -51,7 +54,10 @@ export default {
         };
     },
     methods: {
-        
+        triggerModal() {
+            this.$parent.$emit('trigger-modal', this.course.id);
+            console.log(this.$parent);
+        }
     }
 };
 </script>

@@ -12,6 +12,10 @@ lectureType = (
     "Workshop")
 
 
+TYPES = {'Clinical': 0, 'Discussion': 1, 'Drill': 2, 'Independent Study': 3, 'Laboratory': 4,
+         'Lecture': 5, 'Practicum': 6, 'Seminar': 7, 'Studio': 8, 'Workshop': 9}
+
+
 def getDataPath(filename: str):
     """
     Get the Data Path
@@ -28,14 +32,33 @@ def readData():
     :return:
     """
     file = xlrd.open_workbook(getDataPath('CS1192Data.xlsx'))
+    statuses = {
+        'Open': 1,
+        'Closed': 0,
+        'Wait List': 2
+    }
+
     sheet = file.sheet_by_index(0)
     for i in range(1, sheet.nrows):
         row = sheet.row_values(i)
 
         row[0] = int(row[0])
+        row[2] = int(row[2])
+
+        # a section may be an int or a str
+        try:
+            row[3] = int(row[3])
+        except:
+            row[3] = str(row[3])
+
+        row[4] = TYPES[row[4]]
+
+        row[11] = statuses[row[11]]
+        for i in range(12, 15):
+            row[i] = int(row[i])
 
         category = str(row[1]).lower()
-        number = str(int(row[2]))
+        number = str(row[2])
         lecture = str(row[4]).lower()
         course = category + number + lecture
 
@@ -103,7 +126,7 @@ def filterBefore(date, timeBlock, professor, availability, **kwargs):
             # check timeLimit
             filterDates = []
             placeHolder = 0
-            for count,times in enumerate(value):
+            for count, times in enumerate(value):
                 d, t = parseTime(times)
                 if count % 2:
                     t[0] = t[0] + 1
@@ -331,7 +354,7 @@ if __name__ == "__main__":
     kwargs = {"Days": ["MoTuWeThFr 00:00AM - 08:00AM",
                        "MoTuWeThFr 06:00PM - 12:00PM"]}
 
-    k = getReq(["span2020lecture"], 100,**kwargs)
+    k = getReq(["span2020lecture"], 100, **kwargs)
     # for i in k:
     #     for j in i:
     #         print(j)

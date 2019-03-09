@@ -9,11 +9,12 @@ from typing import List, Any, Dict, Tuple
 import os
 
 app = Flask(__name__)
-
+# app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+# app.json_encoder.item_seperator = ","
+# app.json_encoder.key_seperator = ":"
 CORS(app)
 
 RECORDS_DICT = OrderedDict()
-RECORDS_KEYS = []
 
 ATTR_MAP = {
     0: 'id', 1: 'department', 2: 'number', 3: 'section', 4: 'type', 5: 'units', 6: 'instructor', 7: 'days', 8: 'room',
@@ -69,7 +70,6 @@ def get_classes():
                         'attr_map': ATTR_MAP
                     },
                     'data': RECORDS_DICT,
-                    'keys': RECORDS_KEYS,
                 }
             )
 
@@ -162,9 +162,27 @@ def send_css(path):
 
 
 def to_short():
+    types = set()
     for k, v in DICT.items():
-        RECORDS_DICT[k] = v[0][:11]
-        RECORDS_KEYS.append(k)
+        types.add(v[0][4])
+        RECORDS_DICT[k] = [
+            v[0][0],
+            v[0][1],
+            v[0][2],
+            [a[3] for a in v],
+            v[0][4],
+            v[0][5],
+            [a[6].split(",") for a in v],
+            [a[7] for a in v],
+            [a[8] for a in v],
+            [a[9] for a in v],
+            [a[10] for a in v],
+            [a[11] for a in v],
+            [a[12] for a in v],
+            [a[13] for a in v],
+            [a[14] for a in v],
+            v[0][15]
+        ]
 
 
 if __name__ == "__main__":

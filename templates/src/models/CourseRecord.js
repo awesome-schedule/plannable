@@ -1,7 +1,7 @@
 class AllRecords {
     /**
      *
-     * @param {Object<string, [number, string, number, Object<string, number>, number, number, string[][], string[], string[], string[], string[], number[], number[], number[], number[], string][]>} raw_data
+     * @param {Object<string, [number[], string, number, Object<string, number>, number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string][]>} raw_data
      */
     constructor(raw_data) {
         this.raw_data = raw_data;
@@ -12,8 +12,12 @@ class AllRecords {
      * @param {number} section
      * @returns {CourseRecord}
      */
-    get(key, section = 0) {
-        return new CourseRecord(this.raw_data[key], section);
+    getRecord(key) {
+        return new CourseRecord(this.raw_data[key], key);
+    }
+
+    getCourse(key, section = 0) {
+        return new Course(this.raw_data[key], section);
     }
 
     /**
@@ -22,53 +26,113 @@ class AllRecords {
      * @param {number} max_result
      * @returns {CourseRecord[]}
      */
-    search(query, max_results = 10) {
+    search(query, max_results = 5) {
         query = query.trim().toLowerCase();
         const results = [];
-        const exist = x => {
-            return results.some(ele => ele.id === x[0]);
-        };
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
-            if ((key.indexOf(query) !== -1 || course[9].indexOf(query) !== -1) && !exist(course)) {
-                results.push(new CourseRecord(course));
-                if (results.length >= max_results) break;
+
+            if (key.indexOf(query) !== -1 || course[9].toLowerCase().indexOf(query) !== -1) {
+                results.push([new CourseRecord(course, key), 0]);
+            } else {
+                const matchIdx = [];
+                for (let i = 0; i < course[3].length; i++) {
+                    const topic = course[10][i];
+                    if (topic.toLowerCase().indexOf(query) !== -1) matchIdx.push(i);
+                }
+                if (matchIdx.length > 0) results.push([new CourseRecord(course, key, matchIdx), 1]);
+                else if (course[15].toLowerCase().indexOf(query) !== -1)
+                    results.push([new CourseRecord(course, key), 2]);
             }
+            if (results.length >= max_results) break;
         }
-        return results;
+        return results
+            .sort((a, b) => {
+                if (a[1] == b[1]) return 0;
+                else if (a[1] < b[1]) return -1;
+                else return 1;
+            })
+            .map(x => x[0]);
     }
 }
 
 class CourseRecord {
+    static TYPES = {
+        0: 'Clinical',
+        1: 'Discussion',
+        2: 'Drill',
+        3: 'Independent Study',
+        4: 'Laboratory',
+        5: 'Lecture',
+        6: 'Practicum',
+        7: 'Seminar',
+        8: 'Studio',
+        9: 'Workshop'
+    };
+
+    static STATUSES = {
+        1: 'Open',
+        0: 'Closed',
+        2: 'Wait List'
+    };
+
+    static FIELDS = {
+        0: 'id',
+        1: 'department',
+        2: 'number',
+        3: 'section',
+        4: 'type',
+        5: 'units',
+        6: 'instructor',
+        7: 'days',
+        8: 'room',
+        9: 'title',
+        10: 'topic',
+        11: 'status',
+        12: 'enrollment',
+        13: 'enrollment_limit',
+        14: 'wait_list',
+        15: 'description'
+    };
+
+    static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14, 15];
+
     /**
      *
-     * @param {[number, string, number, Object<string, number>, number, number, string[][], string[], string[], string[], string[], number[], number[], number[], number[], string]} raw
+     * @param {[number[], string, number, Object<string, number>, number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
+     * @param {string} key
      * @param {Object<number, string>} attr_map
      */
-    constructor(raw, section = 0) {
-        const sid = raw[3][section];
+    constructor(raw, key, sids = null) {
+        // const sid = raw[3][section];
+        this.key = key;
 
         this.id = this[0] = raw[0];
         this.department = this[1] = raw[1];
         this.number = this[2] = raw[2];
-        this.section = this[3] = section;
-        this.type = this[4] = raw[4];
+        this.section = this[3] = raw[3];
+        this.type = this[4] = CourseRecord.TYPES[raw[4]];
         this.units = this[5] = raw[5];
-        this.instructor = this[6] = raw[6][sid];
-        this.days = this[7] = raw[7][sid];
-        this.room = this[8] = raw[8][sid];
-        this.title = this[9] = raw[9][sid];
-        this.topic = this[10] = raw[10][sid];
-        this.status = this[11] = raw[11][sid];
-        this.enrollment = this[12] = raw[12][sid];
-        this.enrollment_limit = this[13] = raw[13][sid];
-        this.wait_list = this[14] = raw[14][sid];
+        this.instructor = this[6] = raw[6];
+        this.days = this[7] = raw[7];
+        this.room = this[8] = raw[8];
+        this.title = this[9] = raw[9];
+        this.topic = this[10] = raw[10];
+        this.status = this[11] = raw[11].map(status => CourseRecord.STATUSES[status]);
+        this.enrollment = this[12] = raw[12];
+        this.enrollment_limit = this[13] = raw[13];
+        this.wait_list = this[14] = raw[14];
         this.description = this[15] = raw[15];
 
-        // only used in schedule rendering
-        this.color = '';
-        this.start = '';
-        this.end = '';
+        if (sids != null && sids.length > 0) {
+            for (const i of CourseRecord.LIST) {
+                const field = CourseRecord.FIELDS[i];
+                this[field] = [];
+                for (const idx of sids) {
+                    this[field].push(raw[i][idx]);
+                }
+            }
+        }
     }
 
     /**
@@ -80,6 +144,36 @@ class CourseRecord {
         } else {
             return this.id == object[0];
         }
+    }
+}
+
+class Course {
+    constructor(raw, section = 0) {
+        // if (obj instanceof CourseRecord) {
+
+        // }
+        const sid = raw[3][section];
+        this.id = this[0] = raw[0][sid];
+        this.department = this[1] = raw[1];
+        this.number = this[2] = raw[2];
+        this.section = this[3] = section;
+        this.type = this[4] = CourseRecord.TYPES[raw[4]];
+        this.units = this[5] = raw[5];
+        this.instructor = this[6] = raw[6][sid];
+        this.days = this[7] = raw[7][sid];
+        this.room = this[8] = raw[8][sid];
+        this.title = this[9] = raw[9];
+        this.topic = this[10] = raw[10][sid];
+        this.status = this[11] = CourseRecord.TYPES[raw[11][sid]];
+        this.enrollment = this[12] = raw[12][sid];
+        this.enrollment_limit = this[13] = raw[13][sid];
+        this.wait_list = this[14] = raw[14][sid];
+        this.description = this[15] = raw[15];
+
+        // only used in schedule rendering
+        this.color = '';
+        this.start = '';
+        this.end = '';
     }
 }
 

@@ -7,9 +7,10 @@ class Schedule {
      *
      * @param {[string, int, int][]} raw_schedule
      * @param {string} title
+     * @param {number} id
      * @param {AllRecords} allRecords
      */
-    constructor(raw_schedule, title, allRecords) {
+    constructor(raw_schedule, title, id, allRecords) {
         /**
          * @type {CourseRecord[]}
          */
@@ -35,6 +36,7 @@ class Schedule {
          */
         this.Friday = [];
         this.title = title;
+        this.id = id;
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
@@ -103,4 +105,10 @@ class Schedule {
         }
         return [start_time, end_time];
     }
+
+    clean() {}
 }
+
+export default {
+    Schedule
+};

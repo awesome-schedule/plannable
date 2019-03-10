@@ -1,13 +1,18 @@
 <template>
   <div class="card" style="width:100%">
     <div class="card-body">
-      <div v-for="crs in courses" :key="crs.id">
+      <div v-for="crs in courses" :key="crs.key">
         <table style="width:100%; margin-top: 5px; margin-bottom: 5px;">
           <tr>
             <td style="width:80%">
               <p style="margin:0">{{crs.department}} {{crs.number}}</p>
               <p class="subtitle">{{crs.title}}</p>
               <p class="subtitle">{{crs.type}}</p>
+              <p
+                class="subtitle"
+                v-for="(sec, idx) in crs.section"
+                :key="sec"
+              >{{sec}}:{{crs.days[idx]}}</p>
               <p
                 class="subtitle"
                 v-if="crs.topic !== undefined && crs.topic.length > 0"
@@ -37,6 +42,7 @@
 </template>
 
 <script>
+// import { CourseRecord } from '../models/CourseRecord.js';
 export default {
     props: {
         courses: Array

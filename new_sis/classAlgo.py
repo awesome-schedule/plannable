@@ -15,6 +15,12 @@ lectureType = (
 TYPES = {'Clinical': 0, 'Discussion': 1, 'Drill': 2, 'Independent Study': 3, 'Laboratory': 4,
          'Lecture': 5, 'Practicum': 6, 'Seminar': 7, 'Studio': 8, 'Workshop': 9}
 
+STATUSES = {
+    'Open': 1,
+    'Closed': 0,
+    'Wait List': 2
+}
+
 
 def getDataPath(filename: str):
     """
@@ -53,7 +59,7 @@ def readData():
 
         row[4] = TYPES[row[4]]
 
-        row[11] = statuses[row[11]]
+        row[11] = STATUSES[row[11]]
         for i in range(12, 15):
             row[i] = int(row[i])
 

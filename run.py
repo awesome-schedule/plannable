@@ -166,7 +166,7 @@ def to_short():
     for k, v in DICT.items():
         types.add(v[0][4])
         RECORDS_DICT[k] = [
-            v[0][0],
+            [a[0] for a in v],
             v[0][1],
             v[0][2],
             [a[3] for a in v],
@@ -175,7 +175,8 @@ def to_short():
             [a[6].split(",") for a in v],
             [a[7] for a in v],
             [a[8] for a in v],
-            [a[9] for a in v],
+            v[0][9],
+            # [a[9] for a in v],
             [a[10] for a in v],
             [a[11] for a in v],
             [a[12] for a in v],

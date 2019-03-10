@@ -257,7 +257,7 @@
               <td>
                 <div class="tab mt-2"></div>
 
-                <Schedule v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></Schedule>
+                <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView>
               </td>
             </tr>
           </table>
@@ -268,17 +268,19 @@
 </template>
 
 <script>
-import Schedule from './components/Schedule';
+import ScheduleView from './components/Schedule';
 import Active from './components/Active';
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
 import CourseModal from './components/CourseModal';
+import { AllRecords, CourseRecord } from './models/CourseRecord.js';
+import Schedule from './models/Schedule.js';
 
 export default {
     name: 'app',
     components: {
         Active,
-        Schedule,
+        ScheduleView,
         ClassList,
         Pagination,
         CourseModal
@@ -289,20 +291,9 @@ export default {
             api: 'http://localhost:8000/api',
             semesters: null,
             currentSemester: null,
-            courses: null,
-            courseKeys: null,
-            currentSchedule: {
-                Monday: [],
-                Tuesday: [],
-                Wednesday: [],
-                Thursday: [],
-                Friday: [],
-                All: [],
-                title: `Schedule`,
-                id: 0
-            },
+            allCourses: null,
+            currentSchedule: null,
             schedules: null,
-            attr_map: null,
             isEntering: false,
             sideBar: true,
             inputCourses: null,
@@ -417,96 +408,14 @@ export default {
         },
         /**
          * @param {string} query
-         * @returns {any[]}
          */
         getClass(query) {
-            query = query.toLowerCase();
             if (query.length === 0) {
                 this.isEntering = false;
                 this.inputCourses = null;
-                return null;
+                return;
             }
-            const max_results = 10;
-            let results = [];
-            /**
-             * @type {string[]}
-             */
-            // const arr = this.courseKeys;
-            // const len = query.length;
-            // let start = 0,
-            //     end = arr.length - 1;
-
-            // // do a binary search on the keys of courses for efficiency
-            // while (start <= end) {
-            //     let mid = Math.floor((start + end) / 2);
-
-            //     // for course number (e.g. CS3102), we only check the beginning
-            //     const ele = arr[mid].substr(0, len);
-
-            //     if (ele === query) {
-            //         // when a match is found, we go up and down to look up more choices
-            //         results.push(this.courseArrToObj(this.courses[arr[mid]], this.attr_map, {}));
-            //         let increment = 1;
-            //         while (
-            //             results.length < max_results * 2 &&
-            //             arr[mid + increment].substr(0, len) === query
-            //         ) {
-            //             results.push(
-            //                 this.courseArrToObj(
-            //                     this.courses[arr[mid + increment]],
-            //                     this.attr_map,
-            //                     {}
-            //                 )
-            //             );
-            //             increment += 1;
-            //         }
-            //         increment = -1;
-            //         while (
-            //             results.length < max_results * 2 &&
-            //             arr[mid + increment].substr(0, len) === query
-            //         ) {
-            //             results.push(
-            //                 this.courseArrToObj(
-            //                     this.courses[arr[mid + increment]],
-            //                     this.attr_map,
-            //                     {}
-            //                 )
-            //             );
-            //             increment -= 1;
-            //         }
-            //         break;
-            //     } else if (ele < query) {
-            //         start = mid + 1;
-            //     } else end = mid - 1;
-            // }
-
-            // if (results.length > max_results) {
-            //     const margin = Math.floor((results.length - max_results) / 2);
-            //     results = results.slice(margin, results.length - margin);
-            // }
-
-            // if no results are found, we perform linear search in the array of titles
-            const exist = x => {
-                return results.some(ele => ele.id === x[0]);
-            };
-            if (results.length === 0) {
-                for (const key of this.courseKeys) {
-                    const course = this.courses[key];
-                    if (key.indexOf(query) !== -1 && !exist(course)) {
-                        results.push(this.courseArrToObj(this.courses[key], this.attr_map, {}));
-                        if (results.length >= max_results) break;
-                    }
-                }
-                for (const key in this.courses) {
-                    const course = this.courses[key];
-                    if (course[9].toLowerCase().indexOf(query) !== -1 && !exist(course)) {
-                        results.push(this.courseArrToObj(course, this.attr_map, {}));
-                        if (results.length >= max_results) break;
-                    }
-                }
-            }
-
-            this.inputCourses = results;
+            this.inputCourses = this.allCourses.search(query);
             this.isEntering = true;
         },
         selectSemester(semesterId) {
@@ -514,10 +423,8 @@ export default {
 
             // fetch basic class data for the given semester for fast class search
             this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
-                this.courses = res.data.data;
-                this.courseKeys = res.data.keys;
-                this.attr_map = res.data.meta.attr_map;
-                this.loadStatus();
+                this.allCourses = new AllRecords(res.data.data);
+                // this.loadStatus();
             });
         },
         refreshStyle() {
@@ -527,19 +434,6 @@ export default {
                 // eslint-disable-next-line
                 objSchedulesPlan[0].placeEvents();
             }, 20);
-        },
-        /**
-         * @param {any[]} arr
-         * @param {Object<string, string>} attr_map
-         * @param {Object<string, string>} obj
-         */
-        courseArrToObj(arr, attr_map, obj) {
-            for (const idx in attr_map) {
-                if (+idx >= arr.length) break;
-                // bind properties to course object
-                obj[attr_map[idx]] = arr[+idx];
-            }
-            return obj;
         },
         parseResponse(res) {
             const data = res.data.data;

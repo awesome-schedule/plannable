@@ -53,6 +53,10 @@ class Schedule {
         }
     }
 
+    /**
+     * Get the next available color index
+     * @return {number}
+     */
     getColor() {
         let minSlot = Infinity;
         let minIdx;
@@ -66,6 +70,10 @@ class Schedule {
         return minIdx;
     }
 
+    /**
+     * Free a color slot
+     * @param {number} idx
+     */
     removeColor(idx) {
         this.colorSlots[idx]--;
     }
@@ -146,13 +154,12 @@ class Schedule {
     }
 
     /**
-     *
+     * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
      * @param {string} start
      * @param {string} end
      * @returns {[string, string]}
      */
     static parseTime(start, end) {
-        // convert to 24h format
         let suffix = start.substr(start.length - 2, 2);
         let start_time, end_time;
         if (suffix == 'PM') {

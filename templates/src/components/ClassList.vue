@@ -1,8 +1,16 @@
 <template>
-  <div class="card" style="width:100%">
+  <div id="class-list" class="card" style="width:100%">
     <div class="card-body">
       <div v-for="crs in courses" :key="crs.key">
-        <div @click="select(crs, 0)" style="cursor: pointer">
+        <div
+          @click="select(crs, 0)"
+          style="cursor: pointer"
+          v-bind:data-content="crs.description"
+          v-bind:data-title="crs.title"
+          data-toggle="popover"
+          data-html="true"
+          data-placement="right"
+        >
           <p style="margin:0">{{crs.department}} {{crs.number}} {{crs.type}}</p>
           <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
         </div>

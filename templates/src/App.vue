@@ -96,7 +96,7 @@
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
               @input="getClass($event.target.value)"
-              v-on:keyup.esc="$event.target.value = ''; getClass('')"
+              v-on:keyup.esc="closeClassList($event)"
             >
           </div>
           <div v-if="!isEntering">
@@ -225,6 +225,7 @@
               v-bind:courses="inputCourses"
               @add_course="addCourse"
               @remove_course="removeCourse"
+              @close="closeClassList"
             ></ClassList>
           </div>
         </td>
@@ -272,12 +273,14 @@
 </template>
 
 <script>
+/* global $, objSchedulesPlan */
 import ScheduleView from './components/Schedule';
 import Active from './components/Active';
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
-import CourseModal from './components/CourseModal';
-import { AllRecords, CourseRecord } from './models/CourseRecord';
+// import CourseModal from './components/CourseModal';
+// eslint-disable-next-line
+import { AllRecords, CourseRecord, Course } from './models/CourseRecord';
 import { Schedule } from './models/Schedule';
 
 export default {
@@ -286,8 +289,8 @@ export default {
         Active,
         ScheduleView,
         ClassList,
-        Pagination,
-        CourseModal
+        Pagination
+        // CourseModal
     },
     data() {
         return {
@@ -337,13 +340,6 @@ export default {
         }
     },
     methods: {
-        refreshPopover() {
-            setTimeout(() => {
-                // eslint-disable-next-line
-                $('[data-toggle="popover"]').popover({ trigger: 'hover' });
-            }, 10);
-        },
-
         clear() {
             this.cleanSchedule(this.currentSchedule);
             this.currentSchedule.All = [];
@@ -361,6 +357,7 @@ export default {
         },
 
         triggerModal(id) {
+            return id;
             // console.log(id);
             // for (const c of this.currentSchedule.All) {
             //     if (c.id == id) {
@@ -371,14 +368,25 @@ export default {
             //     }
             // }
         },
-
+        /**
+         * @param {Course} course
+         */
         addCourse(course) {
             this.currentSchedule.add(course, true);
-            this.refreshStyle();
+            this.refreshSchedule();
+            this.saveStatus();
         },
+        /**
+         * @param {Course} course
+         */
         removeCourse(course) {
+            $('#active-list')
+                .find('[data-toggle="popover"]')
+                .popover('dispose');
+            // popover.popover('disable');
             this.currentSchedule.remove(course);
             this.refreshStyle();
+            this.saveStatus();
         },
 
         switchPage(idx) {
@@ -389,6 +397,9 @@ export default {
          * @param {string} query
          */
         getClass(query) {
+            $('#class-list')
+                .find('[data-toggle="popover"]')
+                .popover('dispose');
             if (query === null || query.length === 0) {
                 this.isEntering = false;
                 this.inputCourses = null;
@@ -396,6 +407,11 @@ export default {
             }
             this.inputCourses = this.allCourses.search(query);
             this.isEntering = true;
+            setTimeout(() => {
+                $('#class-list')
+                    .find('[data-toggle="popover"]')
+                    .popover({ trigger: 'hover', html: true });
+            }, 100);
         },
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
@@ -406,11 +422,27 @@ export default {
                 // this.loadStatus();
             });
         },
-        refreshStyle() {
+        refreshSchedule() {
             setTimeout(() => {
-                $('[data-toggle="popover"]').popover({ trigger: 'hover' });
                 objSchedulesPlan[0].placeEvents();
-            }, 20);
+            }, 10);
+        },
+        refreshPopover() {
+            setTimeout(() => {
+                $('#active-list')
+                    .find('[data-toggle="popover"]')
+                    .popover({ trigger: 'hover', html: true });
+            }, 100);
+        },
+        refreshStyle() {
+            this.refreshPopover();
+            this.refreshSchedule();
+        },
+        disablePopover() {},
+        closeClassList(event) {
+            this.getClass('');
+            event.target.value = '';
+            this.refreshPopover();
         },
         parseResponse(res) {
             const data = res.data.data;

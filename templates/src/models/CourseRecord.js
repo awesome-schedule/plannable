@@ -188,7 +188,7 @@ class Course {
         this.description = this[15] = raw[15];
 
         // only used in schedule rendering
-        this.color = '';
+        this.color = 1;
         this.start = '';
         this.end = '';
     }

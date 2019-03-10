@@ -38,18 +38,36 @@ class Schedule {
          * @type {Course[]}
          */
         this.Friday = [];
+
+        this.colorSlots = [0, 0, 0, 0];
+
         this.title = title;
         this.id = id;
-
-        this.colorCounter = 1;
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
             let course = allRecords.getCourse(key, section);
-            course.color = `event-${(i % 4) + 1}`;
+            course.color = i;
 
             this.add(course);
         }
+    }
+
+    getColor() {
+        let minSlot = Infinity;
+        let minIdx;
+        for (const [idx, slot] of this.colorSlots.entries()) {
+            if (slot < minSlot) {
+                minIdx = idx;
+                minSlot = slot;
+            }
+        }
+        this.colorSlots[minIdx]++;
+        return minIdx;
+    }
+
+    removeColor(idx) {
+        this.colorSlots[idx]--;
     }
 
     /**
@@ -66,12 +84,10 @@ class Schedule {
      */
     add(course, force = false) {
         if (this.exist(course)) {
-            if (force) {
-                this.remove(course);
-            } else return;
+            if (force) this.remove(course);
+            else return;
         }
-        this.colorCounter += 1;
-        course.color = `event-${this.colorCounter}`;
+        course.color = this.getColor();
 
         this.All.push(course);
 
@@ -110,9 +126,10 @@ class Schedule {
      */
     remove(course) {
         if (!this.exist(course)) return;
-        this.colorCounter -= 1;
         for (let i = 0; i < this.All.length; i++) {
             if (this.All[i].key === course.key) {
+                // color attribute may not present on the target. Use that on the schedule instead.
+                this.removeColor(this.All[i].color);
                 this.All.splice(i, 1);
                 for (const day of Schedule.days) {
                     const day_course = this[day];

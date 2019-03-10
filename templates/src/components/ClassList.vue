@@ -2,21 +2,16 @@
   <div class="card" style="width:100%">
     <div class="card-body">
       <div v-for="crs in courses" :key="crs.key">
-        <p style="margin:0">{{crs.department}} {{crs.number}} {{crs.type}}</p>
-        <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
-        <!-- <p class="subtitle"></p> -->
-        <!-- <div v-for="(sec, idx) in crs.section" :key="sec">
-                <input type="radio" v-bind:name="crs.key" :checked="idx === 0">
-                <label class="subtitle" for="test">{{sec}} {{crs.days[idx]}}</label>
-                <p class="subtitle">{{ crs.instructor[idx].join(", ") }} {{ crs.room[idx] }}</p>
-        </div>-->
+        <div @click="select(crs, 0)" style="cursor: pointer">
+          <p style="margin:0">{{crs.department}} {{crs.number}} {{crs.type}}</p>
+          <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
+        </div>
         <div
           class="list-group list-group-flush"
           style="width: 100%"
           v-for="(sec, idx) in crs.section"
           :key="sec"
         >
-          <!-- <a href="#" class="list-group-item list-group-item-action active">Cras justo odio</a> -->
           <a
             @click="select(crs, idx)"
             class="list-group-item list-group-item-action"
@@ -38,26 +33,12 @@
             >{{ crs.instructor[idx].join(", ") }} {{ crs.room[idx] }}</p>
           </a>
         </div>
-        <!-- <button
-          type="button"
-          class="close"
-          aria-label="add"
-          v-on:click="$emit('add_course', crs)"
-          style="align:center"
-          role="button"
-          data-toggle="popover"
-          data-trigger="focus"
-          data-content="Added!"
-        >
-          <span aria-hidden="true">+</span>
-        </button>-->
       </div>
     </div>
   </div>
 </template>
 
 <script>
-// import { CourseRecord } from '../models/CourseRecord.js';
 export default {
     props: {
         courses: Array

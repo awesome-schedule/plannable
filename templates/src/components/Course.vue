@@ -4,10 +4,9 @@
     v-bind:data-start="course.start"
     v-bind:data-end="course.end"
     v-bind:data-content="course.title"
-    v-bind:data-event="course.color"
+    v-bind:data-event="`event-${course.color + 1}`"
     v-on:click="triggerModal"
   >
-    <!-- <a href="#0"> -->
     <em
       style="margin-left:5%;font-style:normal;font-size: 1rem;"
     >{{course.department}} {{course.number}}</em>

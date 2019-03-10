@@ -95,8 +95,8 @@
               placeholder="Course Title"
               style="font-size: 10pt"
               aria-describedby="basic-addon1"
-              @input="getClass($event.target.value.toLowerCase())"
-              v-on:keyup.esc="$event.target.value = ''; isEntering = false "
+              @input="getClass($event.target.value)"
+              v-on:keyup.esc="$event.target.value = ''; getClass('')"
             >
           </div>
           <div v-if="!isEntering">
@@ -171,7 +171,6 @@
                         v-on:click="endTime = t"
                       >{{ t }}</a>
                     </div>
-                    <!-- </div> -->
                     <input
                       type="text"
                       class="form-control"
@@ -390,7 +389,7 @@ export default {
          * @param {string} query
          */
         getClass(query) {
-            if (query.length === 0) {
+            if (query === null || query.length === 0) {
                 this.isEntering = false;
                 this.inputCourses = null;
                 return;
@@ -409,9 +408,7 @@ export default {
         },
         refreshStyle() {
             setTimeout(() => {
-                // eslint-disable-next-line
                 $('[data-toggle="popover"]').popover({ trigger: 'hover' });
-                // eslint-disable-next-line
                 objSchedulesPlan[0].placeEvents();
             }, 20);
         },

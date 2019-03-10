@@ -22,7 +22,7 @@
                 class="close"
                 data-dismiss="modal"
                 aria-label="Close"
-                v-on:click="$emit('remove_course', course.id)"
+                @click="$emit('remove_course', course)"
               >
                 <span aria-hidden="true">&times;</span>
               </button>

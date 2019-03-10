@@ -129,10 +129,11 @@
 
 <script>
 import Course from './Course.vue';
+import Schedule from '../models/Schedule.js';
 export default {
     name: 'Schedule',
     props: {
-        courses: Object
+        courses: Schedule
     },
     components: {
         Course

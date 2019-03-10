@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <course-modal v-bind:course="activeCourse"></course-modal>
+    <!-- <course-modal v-bind:course="activeCourse"></course-modal> -->
     <!-- navigation bar -->
     <nav
       class="navbar navbar-expand-lg navbar-light"
@@ -221,7 +221,12 @@
             </div>
           </div>
           <div class="mt-2">
-            <ClassList v-if="isEntering" v-bind:courses="inputCourses" @add_course="addClass"></ClassList>
+            <ClassList
+              v-if="isEntering"
+              v-bind:courses="inputCourses"
+              @add_course="addCourse"
+              @remove_course="removeCourse"
+            ></ClassList>
           </div>
         </td>
 
@@ -273,8 +278,8 @@ import Active from './components/Active';
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
 import CourseModal from './components/CourseModal';
-import { AllRecords, CourseRecord } from './models/CourseRecord.js';
-import Schedule from './models/Schedule.js';
+import { AllRecords, CourseRecord } from './models/CourseRecord';
+import { Schedule } from './models/Schedule';
 
 export default {
     name: 'app',
@@ -292,7 +297,7 @@ export default {
             semesters: null,
             currentSemester: null,
             allCourses: null,
-            currentSchedule: null,
+            currentSchedule: new Schedule(),
             schedules: null,
             isEntering: false,
             sideBar: true,
@@ -355,53 +360,28 @@ export default {
             this.schedules = [];
             this.cleanSchedule(this.currentSchedule);
         },
-        removeCourse(id) {
-            for (let i = 0; i < this.currentSchedule.All.length; i++) {
-                if (this.currentSchedule.All[i].id === id) {
-                    // eslint-disable-next-line
-                    $('[data-toggle="popover"]').popover('hide');
-                    // eslint-disable-next-line
-                    $('[data-toggle="popover"]').popover('disable');
-                    this.currentSchedule.All.splice(i, 1);
-                    for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
-                        const day = this.currentSchedule[key];
-                        for (let j = 0; j < day.length; j++) {
-                            if (day[j].id === id) {
-                                day.splice(j, 1);
-                                break;
-                            }
-                        }
-                    }
-                    // eslint-disable-next-line
-                    $('[data-toggle="popover"]').popover('enable');
-                    this.saveStatus();
-                    this.$forceUpdate();
-                    this.refreshStyle();
-                    break;
-                }
-            }
-        },
 
         triggerModal(id) {
-            console.log(id);
-            for (const c of this.currentSchedule.All) {
-                if (c.id == id) {
-                    this.activeCourse = c;
-
-                    // eslint-disable-next-line
-                    $('#course-div-modal').modal('show');
-                    return;
-                }
-            }
+            // console.log(id);
+            // for (const c of this.currentSchedule.All) {
+            //     if (c.id == id) {
+            //         this.activeCourse = c;
+            //         // eslint-disable-next-line
+            //         $('#course-div-modal').modal('show');
+            //         return;
+            //     }
+            // }
         },
 
-        addClass(crs) {
-            for (const c of this.currentSchedule.All) {
-                if (c.id === crs.id) return;
-            }
-            this.currentSchedule.All.push(crs);
-            this.saveStatus();
+        addCourse(course) {
+            this.currentSchedule.add(course, true);
+            this.refreshStyle();
         },
+        removeCourse(course) {
+            this.currentSchedule.remove(course);
+            this.refreshStyle();
+        },
+
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
             this.refreshStyle();

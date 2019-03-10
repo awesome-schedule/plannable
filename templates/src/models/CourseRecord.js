@@ -1,7 +1,7 @@
 class AllRecords {
     /**
      *
-     * @param {Object<string, [number[], string, number, Object<string, number>, number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string][]>} raw_data
+     * @param {Object<string, [number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string][]>} raw_data
      */
     constructor(raw_data) {
         this.raw_data = raw_data;
@@ -27,32 +27,42 @@ class AllRecords {
      * @returns {CourseRecord[]}
      */
     search(query, max_results = 5) {
+        // console.time('asd');
         query = query.trim().toLowerCase();
         const results = [];
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 
-            if (key.indexOf(query) !== -1 || course[9].toLowerCase().indexOf(query) !== -1) {
+            if (key.indexOf(query) !== -1) {
                 results.push([new CourseRecord(course, key), 0]);
+            } else if (course[9].toLowerCase().indexOf(query) !== -1) {
+                results.push([new CourseRecord(course, key), 1]);
             } else {
                 const matchIdx = [];
                 for (let i = 0; i < course[3].length; i++) {
                     const topic = course[10][i];
                     if (topic.toLowerCase().indexOf(query) !== -1) matchIdx.push(i);
                 }
-                if (matchIdx.length > 0) results.push([new CourseRecord(course, key, matchIdx), 1]);
-                else if (course[15].toLowerCase().indexOf(query) !== -1)
-                    results.push([new CourseRecord(course, key), 2]);
+                if (matchIdx.length > 0) {
+                    results.push([new CourseRecord(course, key, matchIdx), 2]);
+                } else if (course[15].toLowerCase().indexOf(query) !== -1) {
+                    results.push([new CourseRecord(course, key), 3]);
+                }
             }
-            if (results.length >= max_results) break;
+            // if (results.length >= max_results) break;
         }
-        return results
+
+        // console.log(results.length);
+        const res = results
             .sort((a, b) => {
-                if (a[1] == b[1]) return 0;
-                else if (a[1] < b[1]) return -1;
-                else return 1;
+                if (a[1] < b[1]) return -1;
+                else if (a[1] > b[1]) return 1;
+                return 0;
             })
+            .slice(0, max_results)
             .map(x => x[0]);
+        // console.timeEnd('asd');
+        return res;
     }
 }
 
@@ -99,7 +109,7 @@ class CourseRecord {
 
     /**
      *
-     * @param {[number[], string, number, Object<string, number>, number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
+     * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
      * @param {string} key
      * @param {Object<number, string>} attr_map
      */
@@ -127,12 +137,16 @@ class CourseRecord {
         if (sids != null && sids.length > 0) {
             for (const i of CourseRecord.LIST) {
                 const field = CourseRecord.FIELDS[i];
-                this[field] = [];
+                this[field] = this[i] = [];
                 for (const idx of sids) {
                     this[field].push(raw[i][idx]);
                 }
             }
         }
+    }
+
+    getCourse(section) {
+        return new Course(this, this.key, section);
     }
 
     /**
@@ -148,11 +162,14 @@ class CourseRecord {
 }
 
 class Course {
-    constructor(raw, section = 0) {
-        // if (obj instanceof CourseRecord) {
-
-        // }
-        const sid = raw[3][section];
+    /**
+     * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
+     * @param {string} key
+     * @param {number} section
+     */
+    constructor(raw, key, section = 0) {
+        const sid = section;
+        this.key = key;
         this.id = this[0] = raw[0][sid];
         this.department = this[1] = raw[1];
         this.number = this[2] = raw[2];
@@ -181,4 +198,4 @@ export default {
     CourseRecord
 };
 
-export { CourseRecord, AllRecords };
+export { CourseRecord, AllRecords, Course };

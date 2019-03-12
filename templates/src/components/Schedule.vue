@@ -85,7 +85,7 @@
               <span>Monday</span>
             </div>
             <ul v-if="courses !== null">
-              <course v-for="c in courses.Monday" :key="c.id" v-bind:course="c"></course>
+              <course v-for="c in courses.Monday" :key="c.id + c.color" v-bind:course="c"></course>
             </ul>
           </li>
 
@@ -94,7 +94,7 @@
               <span>Tuesday</span>
             </div>
             <ul v-if="courses !== null">
-              <course v-for="c in courses.Tuesday" :key="c.id" v-bind:course="c"></course>
+              <course v-for="c in courses.Tuesday" :key="c.id + c.color" v-bind:course="c"></course>
             </ul>
           </li>
 
@@ -103,7 +103,7 @@
               <span>Wednesday</span>
             </div>
             <ul v-if="courses !== null">
-              <course v-for="c in courses.Wednesday" :key="c.id" v-bind:course="c"></course>
+              <course v-for="c in courses.Wednesday" :key="c.id + c.color" v-bind:course="c"></course>
             </ul>
           </li>
 
@@ -112,7 +112,7 @@
               <span>Thursday</span>
             </div>
             <ul v-if="courses !== null">
-              <course v-for="c in courses.Thursday" :key="c.id" v-bind:course="c"></course>
+              <course v-for="c in courses.Thursday" :key="c.id + c.color" v-bind:course="c"></course>
             </ul>
           </li>
 
@@ -121,7 +121,7 @@
               <span>Friday</span>
             </div>
             <ul v-if="courses !== null">
-              <course v-for="c in courses.Friday" :key="c.id" v-bind:course="c"></course>
+              <course v-for="c in courses.Friday" :key="c.id + c.color" v-bind:course="c"></course>
             </ul>
           </li>
         </ul>

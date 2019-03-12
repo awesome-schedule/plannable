@@ -18,7 +18,7 @@ class Schedule {
         /**
          * @type {Object<string, Set<number>|number>}
          */
-        this.All = [];
+        this.All = {};
         /**
          * @type {Course[]}
          */
@@ -41,7 +41,7 @@ class Schedule {
         this.Friday = [];
 
         this.colorSlots = [0, 0, 0, 0];
-        this.sections = [];
+        this.previous = [null, null];
 
         this.title = title;
         this.id = id;
@@ -49,10 +49,7 @@ class Schedule {
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
-            let course = allRecords.getCourse(key, section);
-            course.color = i;
-
-            this.add(course);
+            this.add(key, section, false);
         }
     }
 
@@ -63,9 +60,9 @@ class Schedule {
     getColor() {
         let minSlot = Infinity;
         let minIdx;
-        for (const [idx, slot] of this.colorSlots.entries()) {
+        for (const [sections, slot] of this.colorSlots.entries()) {
             if (slot < minSlot) {
-                minIdx = idx;
+                minIdx = sections;
                 minSlot = slot;
             }
         }
@@ -75,10 +72,10 @@ class Schedule {
 
     /**
      * Free a color slot
-     * @param {number} idx
+     * @param {number} sections
      */
-    removeColor(idx) {
-        this.colorSlots[idx]--;
+    removeColor(sections) {
+        this.colorSlots[sections]--;
     }
 
     /**
@@ -91,26 +88,88 @@ class Schedule {
 
     /**
      * Add a course to schedule
-     * @param {Course} course
-     * @param {boolean} force If set to true, first attempt to remove the other course with the same key before adding
+     * @param {string} key
+     * @param {number} section
+     * @param {boolean} update
+     * @return {boolean}
      */
-    add(course, force = false) {
-        if (this.exist(course)) {
-            if (force) this.remove(course);
-            else return;
+    add(key, section, update = true) {
+        if (this.All[key] instanceof Set) {
+            if (this.All[key].has(section)) return false;
+            this.All[key].add(section);
+            if (update) this.computeSchedule();
+        } else {
+            this.All[key] = new Set([section]);
+            if (update) this.computeSchedule();
+            return true;
         }
-        course.color = this.getColor();
+    }
 
-        this.All.push(course);
+    /**
+     *
+     * @param {string} key
+     * @param {Set<number> | number} section
+     * @param {boolean} update
+     */
+    update(key, section, update = true) {
+        if (section === -1) {
+            if (this.All[key] === -1) delete this.All[key];
+            else this.All[key] = -1;
+        } else {
+            if (this.All[key] instanceof Set) {
+                if (!this.All[key].delete(section)) this.All[key].add(section);
+            } else {
+                this.All[key] = new Set([section]);
+            }
+        }
+        if (update) this.computeSchedule();
+    }
+
+    removePreview() {
+        this.previous = [null, null];
+        this.computeSchedule();
+    }
+
+    preview(key, section) {
+        this.previous = [key, section];
+        this.computeSchedule();
+    }
+
+    computeSchedule() {
+        if (!this.allRecords) return;
+        this.cleanSchedule();
+        for (const key in this.All) {
+            const sections = this.All[key];
+            // we only render those which has only one section given
+            if (sections instanceof Set && sections.size === 1) {
+                // we need a copy of course
+                const course = Object.assign(
+                    {},
+                    this.allRecords.getCourse(key, [...sections.values()][0])
+                );
+
+                this.place(course);
+            }
+        }
+
+        const [k, v] = this.previous;
+        if (k !== null && v !== null) {
+            const course = this.allRecords.getCourse(k, v);
+            course.key += 'preview';
+            this.place(course);
+        }
+    }
+
+    /**
+     *
+     * @param {Course} course
+     */
+    place(course) {
+        course.color = this.getColor();
 
         // parse MoWeFr 11:00PM - 11:50PM style time
         const [days, start, , end] = course.days.split(' ');
-        /**
-         * @type {string}
-         */
         for (let i = 0; i < days.length; i += 2) {
-            // we need a copy of course
-            course = Object.assign({}, course);
             switch (days.substr(i, 2)) {
                 case 'Mo':
                     this.Monday.push(course);
@@ -133,99 +192,54 @@ class Schedule {
     }
 
     /**
-     *
-     * @param {string} key
-     * @param {Set<number> | number} sections
-     */
-    update(key, sections) {
-        // if (this.All[key] === undefined && sections === undefined) return;
-        this.All[key] = sections;
-        this.computeSchedule();
-    }
-
-    computeSchedule() {
-        if (!this.allRecords) return;
-        this.cleanSchedule();
-        for (const key in this.All) {
-            const sections = this.All[key];
-            // we only render those which has only one section given
-            if (sections instanceof Set && sections.size === 1) {
-                // we need a copy of course
-                const course = Object.assign(
-                    {},
-                    this.allRecords.getCourse(key, [...sections.values()][0])
-                );
-
-                // parse MoWeFr 11:00PM - 11:50PM style time
-                const [days, start, , end] = course.days.split(' ');
-                /**
-                 * @type {string}
-                 */
-                for (let i = 0; i < days.length; i += 2) {
-                    switch (days.substr(i, 2)) {
-                        case 'Mo':
-                            this.Monday.push(course);
-                            break;
-                        case 'Tu':
-                            this.Tuesday.push(course);
-                            break;
-                        case 'We':
-                            this.Wednesday.push(course);
-                            break;
-                        case 'Th':
-                            this.Thursday.push(course);
-                            break;
-                        case 'Fr':
-                            this.Friday.push(course);
-                            break;
-                    }
-                    [course.start, course.end] = Schedule.parseTime(start, end);
-                }
-            }
-        }
-    }
-
-    /**
      * Remove a course from schedule
-     * @param {Course} course
+     * @param {string} course
      */
-    remove(course) {
-        if (!this.exist(course)) return;
-        for (let i = 0; i < this.All.length; i++) {
-            if (this.All[i].key === course.key) {
-                // color attribute may not present on the target. Use that on the schedule instead.
-                this.removeColor(this.All[i].color);
-                this.All.splice(i, 1);
-                for (const day of Schedule.days) {
-                    const day_course = this[day];
-                    for (let j = 0; j < day_course.length; j++) {
-                        if (day_course[j].key === course.key) {
-                            day_course.splice(j, 1);
-                            break;
-                        }
-                    }
-                }
-                break;
-            }
-        }
+    remove(key) {
+        delete this.All[key];
+        this.computeSchedule();
     }
 
     cleanSchedule() {
         for (const key of Schedule.days) {
             this[key] = [];
         }
+        this.colorSlots = [0, 0, 0, 0];
     }
     /**
      *
      * @param {Object<string, any>} obj
      * @return {Schedule}
      */
-    static fromJSON(obj) {
+    static fromJSON(obj, allRecords) {
         const schedule = new Schedule();
+        schedule.allRecords = allRecords;
         for (const field of Schedule.fields) {
             schedule[field] = obj[field];
         }
+        // convert array to set
+        for (const key in obj.All) {
+            if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
+        }
         return schedule;
+    }
+
+    /**
+     * @return {Object<string, any>}
+     */
+    toJSON() {
+        const obj = {};
+        for (const field of Schedule.fields) {
+            obj[field] = this[field];
+        }
+        // convert set to array
+        for (const key in obj.All) {
+            if (this.All[key] instanceof Set) {
+                obj.All[key] = [...this.All[key].values()];
+            }
+        }
+        console.log(this);
+        return obj;
     }
 
     /**

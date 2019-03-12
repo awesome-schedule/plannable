@@ -18,7 +18,7 @@
         v-for="course in schedule.All"
         v-bind:data-content="section(course)"
         v-bind:data-title="course.title"
-        v-bind:key="course.id"
+        v-bind:key="course.key"
       >
         <table style="width:100%">
           <tr>

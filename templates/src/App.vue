@@ -211,7 +211,15 @@
             </div>
             <div class="collapse show" id="currentSelectedClass">
               <div class="card card-body" style="padding:5px">
-                <Active v-bind:schedule="currentSchedule" @remove_course="removeCourse"></Active>
+                <ClassList
+                  v-bind:courses="currentCourses"
+                  v-bind:schedule="currentSchedule"
+                  v-bind:isEntering="isEntering"
+                  @update_course="updateCourse"
+                  @remove_course="removeCourse"
+                  @remove_preview="removePreview"
+                  @preview="preview"
+                ></ClassList>
                 <div>
                   <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp;
                   <button class="btn btn-warning mt-3" v-on:click="clear">Clean All</button>
@@ -223,7 +231,11 @@
             <ClassList
               v-if="isEntering"
               v-bind:courses="inputCourses"
+              v-bind:schedule="currentSchedule"
+              v-bind:isEntering="isEntering"
               @update_course="updateCourse"
+              @remove_preview="removePreview"
+              @preview="preview"
               @close="closeClassList"
             ></ClassList>
           </div>
@@ -260,8 +272,8 @@
             <tr>
               <td>
                 <div class="tab mt-2"></div>
-                <grid-schedule v-bind:courses="this.currentSchedule"></grid-schedule>
-                <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
+                <!-- <GridSchedule></GridSchedule> -->
+                <ScheduleView v-bind:courses="currentSchedule" @trigger-modal="triggerModal"></ScheduleView>
               </td>
             </tr>
           </table>
@@ -273,25 +285,22 @@
 
 <script>
 /* global $, objSchedulesPlan */
-import ScheduleView from './components/Schedule';
-import Active from './components/Active';
-import ClassList from './components/ClassList';
-import Pagination from './components/Pagination';
-import GridSchedule from './components/GridSchedule.vue';
+import ScheduleView from './components/Schedule.vue';
+// import Active from './components/Active.vue';
+import ClassList from './components/ClassList.vue';
+import Pagination from './components/Pagination.vue';
 // import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
 import { Schedule } from './models/Schedule.js';
 
-
 export default {
     name: 'app',
     components: {
-        Active,
+        // Active,
         ScheduleView,
         ClassList,
-        Pagination,
-        GridSchedule,
+        Pagination
         // CourseModal
     },
     data() {
@@ -302,6 +311,7 @@ export default {
             currentSemester: null,
             allCourses: null,
             currentSchedule: new Schedule(),
+            currentCourses: [],
             schedules: null,
             isEntering: false,
             sideBar: true,
@@ -342,6 +352,12 @@ export default {
         }
     },
     methods: {
+        getCurrentCourses() {
+            const courses = [];
+            for (const key in this.currentSchedule.All)
+                courses.push(this.allCourses.getRecord(key));
+            return courses;
+        },
         clear() {
             this.currentSchedule.cleanSchedule();
             this.currentSchedule.All = [];
@@ -357,26 +373,30 @@ export default {
             return id;
         },
         /**
-         * @param {Course} course
+         * @param {string} key
          */
-        addCourse(course) {
-            this.currentSchedule.add(course, true);
-            this.refreshSchedule();
-            this.saveStatus();
-        },
-        /**
-         * @param {Course} course
-         */
-        removeCourse(course) {
+        removeCourse(key) {
             $('#active-list')
                 .find('[data-toggle="popover"]')
                 .popover('dispose');
-            this.currentSchedule.remove(course);
+            this.currentSchedule.remove(key);
+            this.currentCourses = this.getCurrentCourses();
+            this.$forceUpdate();
             this.refreshStyle();
             this.saveStatus();
         },
-        updateCourse(key, sections) {
-            this.currentSchedule.update(key, sections);
+        updateCourse(key, section) {
+            this.currentSchedule.update(key, section);
+            this.currentCourses = this.getCurrentCourses();
+            this.refreshStyle();
+            this.saveStatus();
+        },
+        preview(key, section) {
+            this.currentSchedule.preview(key, section);
+            this.refreshStyle();
+        },
+        removePreview() {
+            this.currentSchedule.removePreview();
             this.refreshStyle();
         },
         switchPage(idx) {
@@ -409,14 +429,13 @@ export default {
             // fetch basic class data for the given semester for fast class search
             this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allCourses = new AllRecords(res.data.data);
-                this.currentSchedule.allRecords = this.allCourses;
                 this.loadStatus();
             });
         },
         refreshSchedule() {
             setTimeout(() => {
                 objSchedulesPlan[0].placeEvents();
-            }, 10);
+            }, 1);
         },
         refreshPopover() {
             setTimeout(() => {
@@ -430,9 +449,11 @@ export default {
             this.refreshSchedule();
         },
         closeClassList(event) {
-            this.getClass('');
             event.target.value = '';
-            this.refreshPopover();
+            this.getClass(null);
+            this.currentCourses = this.getCurrentCourses();
+            this.$forceUpdate();
+            this.refreshStyle();
         },
         parseResponse(res) {
             const data = res.data.data;
@@ -490,7 +511,7 @@ export default {
                 this.currentSemester.id,
                 JSON.stringify({
                     schedules: this.schedules,
-                    currentSchedule: this.currentSchedule,
+                    currentSchedule: this.currentSchedule.toJSON(),
                     startTime: this.startTime,
                     endTime: this.endTime
                 })
@@ -506,7 +527,9 @@ export default {
                 raw_data.currentSchedule !== undefined
             ) {
                 this.schedules = raw_data.schedules;
-                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule);
+                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule, this.allCourses);
+                console.log(this.currentSchedule);
+                this.currentCourses = this.getCurrentCourses();
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;
                 this.refreshStyle();

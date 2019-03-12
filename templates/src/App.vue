@@ -323,7 +323,8 @@ export default {
             allTimes: [],
             errMsg: '',
             allowWaitlist: false,
-            allowClosed: false
+            allowClosed: false,
+            cache: false
         };
     },
     mounted() {
@@ -429,7 +430,7 @@ export default {
             // fetch basic class data for the given semester for fast class search
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allCourses = new AllRecords(res.data.data);
-                this.loadStatus();
+                if (this.cache) this.loadStatus();
             });
         },
         refreshSchedule() {

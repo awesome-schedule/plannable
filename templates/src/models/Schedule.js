@@ -7,6 +7,17 @@ import { AllRecords, CourseRecord, Course } from './CourseRecord';
 class Schedule {
     static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     static fields = ['All', ...Schedule.days, 'colorSlots', 'title', 'id'];
+    static bgColors = [
+        '#f7867e',
+        '#ffb74c',
+        '#ffff60',
+        '#ccff6d',
+        '#6dffa9',
+        '#70e4ff',
+        '#7790ff',
+        '#c0a5ff',
+        '#ffe0f6'
+    ];
     /**
      *
      * @param {[string, int, int][]} raw_schedule
@@ -40,7 +51,7 @@ class Schedule {
          */
         this.Friday = [];
 
-        this.colorSlots = [0, 0, 0, 0];
+        this.colorSlots = new Array(Schedule.bgColors.length).fill(0);
         this.previous = [null, null];
 
         this.title = title;
@@ -55,28 +66,35 @@ class Schedule {
 
     /**
      * Get the next available color index
-     * @return {number}
+     * @return {string}
      */
     getColor() {
-        let minSlot = Infinity;
-        let minIdx;
-        for (const [sections, slot] of this.colorSlots.entries()) {
-            if (slot < minSlot) {
-                minIdx = sections;
-                minSlot = slot;
-            }
+        const availableColors = [];
+        for (const [idx, num] of this.colorSlots.entries()) {
+            if (num === 0) availableColors.push(idx);
         }
-        this.colorSlots[minIdx]++;
-        return minIdx;
+        const colorIdx = availableColors[Math.floor(Math.random() * availableColors.length)];
+        this.colorSlots[colorIdx] += 1;
+        return Schedule.bgColors[colorIdx];
+        // let minSlot = Infinity;
+        // let minIdx;
+        // for (const [sections, slot] of this.colorSlots.entries()) {
+        //     if (slot < minSlot) {
+        //         minIdx = sections;
+        //         minSlot = slot;
+        //     }
+        // }
+        // this.colorSlots[minIdx]++;
+        // return minIdx;
     }
 
-    /**
-     * Free a color slot
-     * @param {number} sections
-     */
-    removeColor(sections) {
-        this.colorSlots[sections]--;
-    }
+    // /**
+    //  * Free a color slot
+    //  * @param {number} sections
+    //  */
+    // removeColor(sections) {
+    //     this.colorSlots[sections]--;
+    // }
 
     /**
      * Check if a course already exist
@@ -165,7 +183,7 @@ class Schedule {
      * @param {Course} course
      */
     place(course) {
-        course.color = this.getColor();
+        course.backgroundColor = this.getColor();
 
         // parse MoWeFr 11:00PM - 11:50PM style time
         const [days, start, , end] = course.days.split(' ');
@@ -201,11 +219,10 @@ class Schedule {
     }
 
     cleanSchedule() {
-        console.log(this);
         for (const key of Schedule.days) {
             this[key] = [];
         }
-        this.colorSlots = [0, 0, 0, 0];
+        this.colorSlots = new Array(Schedule.bgColors.length).fill(0);
     }
     /**
      *

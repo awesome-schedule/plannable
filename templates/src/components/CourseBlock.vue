@@ -11,10 +11,10 @@
         }"
   >
   <div class="mt-2 ml-2" style="color:white; font-size:13px">{{course.department}} {{course.number}} {{course.title}}</div>
-  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.type}}</div>
-  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.days}}</div>
-  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.instructor.join(', ')}}</div>
-  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.room}}</div>
+  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.type}}</div>
+  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.days}}</div>
+  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.instructor.join(', ')}}</div>
+  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.room}}</div>
   </div>
 </template>
 

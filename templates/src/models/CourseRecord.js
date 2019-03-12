@@ -249,6 +249,19 @@ class Course {
         cp.default = this.default;
         return cp;
     }
+
+    hash() {
+        let hash = 0,
+            i,
+            chr;
+        if (this.key.length === 0) return hash;
+        for (i = 0; i < this.key.length; i++) {
+            chr = this.key.charCodeAt(i);
+            hash = (hash << 5) - hash + chr;
+            hash |= 0; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+    }
 }
 
 export { CourseRecord, AllRecords, Course };

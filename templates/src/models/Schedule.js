@@ -10,13 +10,15 @@ class Schedule {
     static bgColors = [
         '#f7867e',
         '#ffb74c',
-        '#ffff60',
-        '#ccff6d',
-        '#6dffa9',
-        '#70e4ff',
+        '#D8C120',
+        '#4B993D',
+        '#28BA93',
+        '#00d3be',
+        '#355dff',
         '#7790ff',
-        '#c0a5ff',
-        '#ffe0f6'
+        '#c277ff',
+        '#e0a1ca',
+        '#993D5F'
     ];
     /**
      *
@@ -65,36 +67,13 @@ class Schedule {
     }
 
     /**
-     * Get the next available color index
+     * Get the background color of a course
+     * @param {Course} course
      * @return {string}
      */
-    getColor() {
-        const availableColors = [];
-        for (const [idx, num] of this.colorSlots.entries()) {
-            if (num === 0) availableColors.push(idx);
-        }
-        const colorIdx = availableColors[Math.floor(Math.random() * availableColors.length)];
-        this.colorSlots[colorIdx] += 1;
-        return Schedule.bgColors[colorIdx];
-        // let minSlot = Infinity;
-        // let minIdx;
-        // for (const [sections, slot] of this.colorSlots.entries()) {
-        //     if (slot < minSlot) {
-        //         minIdx = sections;
-        //         minSlot = slot;
-        //     }
-        // }
-        // this.colorSlots[minIdx]++;
-        // return minIdx;
+    getColor(course) {
+        return Schedule.bgColors[course.hash() % Schedule.bgColors.length];
     }
-
-    // /**
-    //  * Free a color slot
-    //  * @param {number} sections
-    //  */
-    // removeColor(sections) {
-    //     this.colorSlots[sections]--;
-    // }
 
     /**
      * Check if a course already exist
@@ -183,7 +162,7 @@ class Schedule {
      * @param {Course} course
      */
     place(course) {
-        course.backgroundColor = this.getColor();
+        course.backgroundColor = this.getColor(course);
 
         // parse MoWeFr 11:00PM - 11:50PM style time
         const [days, start, , end] = course.days.split(' ');

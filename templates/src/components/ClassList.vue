@@ -54,7 +54,7 @@
             class="list-group-item list-group-item-action class-section"
             v-bind:class="{active: schedule.All[crs.key] === -1}"
           >Any Section</a>
-          <a
+          <div
             @click="select(crs, idx)"
             class="list-group-item list-group-item-action class-section"
             v-bind:class="{active: isActive(crs.key, idx)}"
@@ -66,7 +66,7 @@
               <li>{{crs.topic[idx]}}</li>
               <li>{{ crs.instructor[idx].join(", ") }} {{ crs.room[idx] }}</li>
             </ul>
-          </a>
+          </div>
         </div>
       </div>
     </div>

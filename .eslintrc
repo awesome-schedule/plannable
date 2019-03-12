@@ -6,7 +6,6 @@
     "rules": {
         "semi": "error",
         "prettier/prettier": "error",
-        "no-use-v-if-with-v-for": "off",
         "no-console": "off"
     },
     "env": {

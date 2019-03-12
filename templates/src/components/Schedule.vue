@@ -72,6 +72,9 @@
           <li>
             <span>19:00</span>
           </li>
+          <li>
+            <span>20:00</span>
+          </li>
         </ul>
       </div>
 

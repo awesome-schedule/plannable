@@ -223,8 +223,7 @@
             <ClassList
               v-if="isEntering"
               v-bind:courses="inputCourses"
-              @add_course="addCourse"
-              @remove_course="removeCourse"
+              @update_course="updateCourse"
               @close="closeClassList"
             ></ClassList>
           </div>
@@ -274,15 +273,14 @@
 
 <script>
 /* global $, objSchedulesPlan */
-import ScheduleView from './components/Schedule';
-import Active from './components/Active';
-import ClassList from './components/ClassList';
-import Pagination from './components/Pagination';
-import GridSchedule from './components/GridSchedule.vue';
+import ScheduleView from './components/Schedule.vue';
+import Active from './components/Active.vue';
+import ClassList from './components/ClassList.vue';
+import Pagination from './components/Pagination.vue';
 // import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
-import { AllRecords, CourseRecord, Course } from './models/CourseRecord';
-import { Schedule } from './models/Schedule';
+import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
+import { Schedule } from './models/Schedule.js';
 
 
 export default {
@@ -344,32 +342,18 @@ export default {
     },
     methods: {
         clear() {
-            this.cleanSchedule(this.currentSchedule);
+            this.currentSchedule.cleanSchedule();
             this.currentSchedule.All = [];
             this.schedules = [];
             this.saveStatus();
         },
-        cleanSchedule(schedule) {
-            for (const key of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']) {
-                schedule[key] = [];
-            }
-        },
         cleanSchedules() {
             this.schedules = [];
-            this.cleanSchedule(this.currentSchedule);
+            this.currentSchedule.cleanSchedule();
         },
 
         triggerModal(id) {
             return id;
-            // console.log(id);
-            // for (const c of this.currentSchedule.All) {
-            //     if (c.id == id) {
-            //         this.activeCourse = c;
-            //         // eslint-disable-next-line
-            //         $('#course-div-modal').modal('show');
-            //         return;
-            //     }
-            // }
         },
         /**
          * @param {Course} course
@@ -386,12 +370,14 @@ export default {
             $('#active-list')
                 .find('[data-toggle="popover"]')
                 .popover('dispose');
-            // popover.popover('disable');
             this.currentSchedule.remove(course);
             this.refreshStyle();
             this.saveStatus();
         },
-
+        updateCourse(key, sections) {
+            this.currentSchedule.update(key, sections);
+            this.refreshStyle();
+        },
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
             this.refreshStyle();
@@ -422,7 +408,8 @@ export default {
             // fetch basic class data for the given semester for fast class search
             this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allCourses = new AllRecords(res.data.data);
-                // this.loadStatus();
+                this.currentSchedule.allRecords = this.allCourses;
+                this.loadStatus();
             });
         },
         refreshSchedule() {
@@ -441,7 +428,6 @@ export default {
             this.refreshPopover();
             this.refreshSchedule();
         },
-        disablePopover() {},
         closeClassList(event) {
             this.getClass('');
             event.target.value = '';
@@ -452,90 +438,14 @@ export default {
             const meta = res.data.meta;
             const schedules = [];
 
-            // raw data is a list of list
-            for (let x = 0; x < data.length; x++) {
-                // raw schedule is a list of course ids
-                const raw_schedule = data[x];
-
-                const schedule = {
-                    Monday: [],
-                    Tuesday: [],
-                    Wednesday: [],
-                    Thursday: [],
-                    Friday: [],
-                    All: [],
-                    title: `Schedule ${x}`,
-                    id: x
-                };
-
-                schedules.push(schedule);
-
-                for (let y = 0; y < raw_schedule.length; y++) {
-                    let course = {
-                        color: `event-${(y % 4) + 1}`
-                    };
-
-                    // get course_data from course id. This is an array
-                    const course_arr = meta.course_data[raw_schedule[y]];
-                    this.courseArrToObj(course_arr, meta.attr_map, course);
-
-                    schedule.All.push(course);
-
-                    // parse MoWeFr 11:00PM - 11:50PM style time
-                    const [days, start, , end] = course.days.split(' ');
-                    /**
-                     * @type {string}
-                     */
-                    for (let i = 0; i < days.length; i += 2) {
-                        // we need a copy of course
-                        course = Object.assign({}, course);
-                        switch (days.substr(i, 2)) {
-                            case 'Mo':
-                                schedule.Monday.push(course);
-                                break;
-                            case 'Tu':
-                                schedule.Tuesday.push(course);
-                                break;
-                            case 'We':
-                                schedule.Wednesday.push(course);
-                                break;
-                            case 'Th':
-                                schedule.Thursday.push(course);
-                                break;
-                            case 'Fr':
-                                schedule.Friday.push(course);
-                                break;
-                        }
-
-                        // convert to 24h format
-                        let suffix = start.substr(start.length - 2, 2);
-                        if (suffix == 'PM') {
-                            let [hour, minute] = start.substring(0, start.length - 2).split(':');
-                            course.start = `${(+hour % 12) + 12}:${minute}`;
-
-                            [hour, minute] = end.substring(0, end.length - 2).split(':');
-                            course.end = `${(+hour % 12) + 12}:${minute}`;
-                        } else {
-                            course.start = start.substring(0, start.length - 2);
-                            suffix = end.substr(end.length - 2, 2);
-                            const end_time = end.substring(0, end.length - 2);
-                            if (suffix == 'PM') {
-                                const [hour, minute] = end_time.split(':');
-                                course.end = `${(+hour % 12) + 12}:${minute}`;
-                            } else {
-                                course.end = end_time;
-                            }
-                        }
-                    }
-                }
-            }
-
             // avoid updating style-binded variable in loops for better performace
             this.schedules = schedules;
             this.currentSchedule = this.schedules[0];
             this.saveStatus();
             this.errMsg = '';
             this.refreshStyle();
+
+            return res;
         },
         sendRequest() {
             // if (this.currentSchedule.All.length < 2) return;
@@ -586,14 +496,16 @@ export default {
             );
         },
         loadStatus() {
-            const raw_data = JSON.parse(localStorage.getItem(this.currentSemester.id));
+            const data = localStorage.getItem(this.currentSemester.id);
+            if (data.length === 0) return;
+            const raw_data = JSON.parse(data);
             if (
                 raw_data !== null &&
                 raw_data.schedules !== undefined &&
                 raw_data.currentSchedule !== undefined
             ) {
                 this.schedules = raw_data.schedules;
-                this.currentSchedule = raw_data.currentSchedule;
+                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule);
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;
                 this.refreshStyle();

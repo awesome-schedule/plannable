@@ -120,6 +120,9 @@ class CourseRecord {
         15: 'description'
     };
 
+    /**
+     * The list of indices at which the field is a list
+     */
     static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14, 15];
 
     /**
@@ -160,8 +163,22 @@ class CourseRecord {
         }
     }
 
+    /**
+     *
+     * @param {number} section
+     * @return {Course}
+     */
     getCourse(section) {
         return new Course(this, this.key, section);
+    }
+
+    /**
+     *
+     * @param {number[]} sections
+     * @return {CourseRecord}
+     */
+    getCourses(sections) {
+        return new CourseRecord(this, this.key, sections);
     }
 
     /**

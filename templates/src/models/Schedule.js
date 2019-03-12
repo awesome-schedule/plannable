@@ -270,7 +270,11 @@ class Schedule {
         return [start_time, end_time];
     }
 
-    clean() {}
+    clean() {
+        this.cleanSchedule();
+        this.All = {};
+        this.preview = [null, null];
+    }
 }
 
 export default {

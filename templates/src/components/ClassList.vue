@@ -10,7 +10,7 @@
           v-bind:data-target="`#${crs.key}`"
           @click="collapse(crs.key)"
         >
-          <table>
+          <table style="width: 100%">
             <tr>
               <td style="padding-right: 0.5rem">
                 <i

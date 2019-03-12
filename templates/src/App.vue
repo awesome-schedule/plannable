@@ -221,7 +221,7 @@
                   @preview="preview"
                 ></ClassList>
                 <div>
-                  <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp;
+                  <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
                   <button class="btn btn-warning mt-3" v-on:click="clear">Clean All</button>
                 </div>
               </div>
@@ -293,6 +293,7 @@ import Pagination from './components/Pagination.vue';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
 import { Schedule } from './models/Schedule.js';
+import axios from 'axios';
 
 export default {
     name: 'app',
@@ -326,7 +327,7 @@ export default {
         };
     },
     mounted() {
-        this.$http.get(`${this.api}/semesters`).then(res => {
+        axios.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
             this.selectSemester(0);
         });
@@ -359,9 +360,8 @@ export default {
             return courses;
         },
         clear() {
-            this.currentSchedule.cleanSchedule();
-            this.currentSchedule.All = [];
-            this.schedules = [];
+            this.currentSchedule.clean();
+            this.$forceUpdate();
             this.saveStatus();
         },
         cleanSchedules() {
@@ -427,7 +427,7 @@ export default {
             this.currentSemester = this.semesters[semesterId];
 
             // fetch basic class data for the given semester for fast class search
-            this.$http.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
+            axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allCourses = new AllRecords(res.data.data);
                 this.loadStatus();
             });
@@ -490,7 +490,7 @@ export default {
                     `${course.department}${course.number}${course.type}`.toLowerCase()
                 );
             }
-            this.$http.post(`${this.api}/classes`, request).then(res => {
+            axios.post(`${this.api}/classes`, request).then(res => {
                 if (res.data.status.err.length > 0) {
                     this.errMsg = res.data.status.err;
                     this.schedules = [];

@@ -284,13 +284,11 @@
 </template>
 
 <script>
-/* global $, objSchedulesPlan */
-import ScheduleView from './components/Schedule';
-import Active from './components/Active';
+/* global $ */
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
 import GridSchedule from './components/GridSchedule.vue';
-// import CourseModal from './components/CourseModal';
+
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
 import { Schedule } from './models/Schedule.js';
@@ -299,12 +297,9 @@ import axios from 'axios';
 export default {
     name: 'app',
     components: {
-        // Active,
-        ScheduleView,
         ClassList,
         Pagination,
         GridSchedule
-        // CourseModal
     },
     data() {
         return {

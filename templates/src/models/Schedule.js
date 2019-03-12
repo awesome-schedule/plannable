@@ -6,7 +6,7 @@ import { AllRecords, CourseRecord, Course } from './CourseRecord';
 
 class Schedule {
     static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    static fields = ['All', ...Schedule.days, 'colorSlots', 'title', 'id'];
+    static fields = ['All', ...Schedule.days, 'title', 'id'];
     static bgColors = [
         '#f7867e',
         '#ffb74c',
@@ -53,7 +53,6 @@ class Schedule {
          */
         this.Friday = [];
 
-        this.colorSlots = new Array(Schedule.bgColors.length).fill(0);
         this.previous = [null, null];
 
         this.title = title;
@@ -201,7 +200,6 @@ class Schedule {
         for (const key of Schedule.days) {
             this[key] = [];
         }
-        this.colorSlots = new Array(Schedule.bgColors.length).fill(0);
     }
     /**
      *

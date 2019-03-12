@@ -229,7 +229,7 @@ class Course {
         this.description = this[15] = raw[15];
 
         // only used in schedule rendering
-        this.color = 1;
+        this.backgroundColor = 'white';
         this.start = '';
         this.end = '';
 
@@ -243,7 +243,7 @@ class Course {
      */
     copy() {
         const cp = new Course(this.raw, this.key, this.sid);
-        cp.color = this.color;
+        cp.backgroundColor = this.backgroundColor;
         cp.start = this.start;
         cp.end = this.end;
         cp.default = this.default;

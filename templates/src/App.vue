@@ -261,8 +261,8 @@
             <tr>
               <td>
                 <div class="tab mt-2"></div>
-
-                <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView>
+                <GridSchedule></GridSchedule>
+                <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
               </td>
             </tr>
           </table>
@@ -278,10 +278,12 @@ import ScheduleView from './components/Schedule';
 import Active from './components/Active';
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
+import GridSchedule from './components/GridSchedule.vue';
 // import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord';
 import { Schedule } from './models/Schedule';
+
 
 export default {
     name: 'app',
@@ -289,7 +291,8 @@ export default {
         Active,
         ScheduleView,
         ClassList,
-        Pagination
+        Pagination,
+        GridSchedule,
         // CourseModal
     },
     data() {

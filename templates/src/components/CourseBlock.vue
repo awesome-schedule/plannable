@@ -1,10 +1,10 @@
 <template>
   <div
     v-bind:style="{
-        'margin-top': startPx,
+        'margin-top': startPx  + 'px',
         'position': 'absolute',
         'width': '20%',
-        'height': endPx - startPx,
+        'height': endPx - startPx + 'px',
         'background-color': 'green',
         'z-index': '2'
         }"

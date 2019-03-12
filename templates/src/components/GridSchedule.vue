@@ -89,9 +89,9 @@
           </div>
           <div v-for="item in items" :key="item" style="z-index:1"></div>
 
-          <div
+          <!-- <div
             style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2; left:20%"
-          >
+          > -->
             <course-block
               v-for="course in courses.Monday"
               :key="course.id"
@@ -127,7 +127,7 @@
               v-bind:heightInfo="heightInfo"
               style="left:80%"
             ></course-block>
-          </div>
+          <!-- </div> -->
         </div>
       </td>
     </tr>

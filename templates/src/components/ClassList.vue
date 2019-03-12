@@ -15,7 +15,7 @@
               <td style="padding-right: 0.5rem">
                 <i
                   class="fas"
-                  v-bind:class="collapsed[crs.key] === undefined ? 'fa-chevron-down' : 'fa-chevron-right'"
+                  v-bind:class="collapsed[crs.key] !== undefined ^ isEntering ? 'fa-chevron-down' : 'fa-chevron-right'"
                 ></i>
               </td>
               <td>
@@ -27,25 +27,39 @@
                 >{{crs.department}} {{crs.number}} {{crs.type}}</h6>
                 <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
               </td>
+              <td v-if="!isEntering" style="padding-left: 0.5rem">
+                <button
+                  type="button"
+                  class="close"
+                  aria-label="Close"
+                  @click="$emit('remove_course', crs.key)"
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </td>
             </tr>
           </table>
         </div>
-        <a
-          style="font-size: 1rem; padding: 0.5rem 1rem"
-          @click="select(crs, -1)"
-          class="list-group-item list-group-item-action class-section"
-          v-bind:class="{active: selected[crs.key] === -1}"
-        >Any Section</a>
         <div
-          class="list-group collapse show multi-collapse"
+          class="list-group collapse multi-collapse"
+          v-bind:class="{show: isEntering}"
           v-for="(sec, idx) in crs.section"
           :key="sec"
           v-bind:id="crs.key"
         >
           <a
+            v-if="idx === 0"
+            style="font-size: 1rem; padding: 0.5rem 1rem"
+            @click="select(crs, -1)"
+            class="list-group-item list-group-item-action class-section"
+            v-bind:class="{active: schedule.All[crs.key] === -1}"
+          >Any Section</a>
+          <a
             @click="select(crs, idx)"
             class="list-group-item list-group-item-action class-section"
             v-bind:class="{active: isActive(crs.key, idx)}"
+            @mouseover="preview(crs.key, idx)"
+            @mouseleave="removePreview()"
           >
             <ul class="list-unstyled class-info">
               <li>{{sec}} {{crs.days[idx]}}</li>
@@ -61,9 +75,12 @@
 
 <script>
 import { CourseRecord } from '../models/CourseRecord';
+import { Schedule } from '../models/Schedule';
 export default {
     props: {
-        courses: Array
+        courses: Array,
+        schedule: Schedule,
+        isEntering: Boolean
     },
     data() {
         return {
@@ -77,29 +94,22 @@ export default {
          */
         select(crs, idx) {
             const key = crs.key;
-            let course;
-            if (idx === -1) {
-                this.selected[key] === -1
-                    ? (this.selected[key] = undefined)
-                    : (this.selected[key] = -1);
-            } else {
-                if (this.selected[key] instanceof Set) {
-                    if (!this.selected[key].delete(idx)) this.selected[key].add(idx);
-                } else {
-                    this.selected[key] = new Set([idx]);
-                }
-            }
-            this.$emit('update_course', crs.key, this.selected[key]);
+            this.$emit('update_course', crs.key, idx);
             this.$forceUpdate();
         },
         collapse(key) {
             this.collapsed[key] === undefined
-                ? (this.collapsed[key] = key)
-                : (this.collapsed[key] = undefined);
-            this.$forceUpdate();
+                ? this.$set(this.collapsed, key, key)
+                : this.$set(this.collapsed, key, undefined);
         },
         isActive(key, idx) {
-            return this.selected[key] instanceof Set && this.selected[key].has(idx);
+            return this.schedule.All[key] instanceof Set && this.schedule.All[key].has(idx);
+        },
+        preview(key, idx) {
+            this.$emit('preview', key, idx);
+        },
+        removePreview() {
+            this.$emit('remove_preview');
         }
     }
 };

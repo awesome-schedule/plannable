@@ -272,7 +272,7 @@
             <tr>
               <td>
                 <div class="tab mt-2"></div>
-                <grid-schedule v-bind:courses="this.currentSchedule"></grid-schedule>
+                <grid-schedule v-bind:courses="currentSchedule"></grid-schedule>
                 <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
               </td>
             </tr>

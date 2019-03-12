@@ -1,8 +1,10 @@
 <template>
-    <table style="width:100%">
-        <tr style="width:100%">
-            <td style="width:5%">
-                <div class="grid-container time mb-3" v-bind:style="{
+  <table style="width:100%">
+    <tr style="width:100%">
+      <td style="width:5%">
+        <div
+          class="grid-container time mb-3"
+          v-bind:style="{
         'grid-template-columns': 'auto',
         'width' : '100%', 
         'grid-template-rows': '48px '
@@ -30,13 +32,16 @@
                             + heightInfo[21] + 'px '
                             + heightInfo[22] + 'px '
 
-     }">
-        <div></div>
-        <div v-for="hour in hours" :key="hour">{{hour}}</div>
-     </div>
-            </td>
-            <td>
-            <div class="grid-container main mb-3" v-bind:style="{
+     }"
+        >
+          <div></div>
+          <div v-for="hour in hours" :key="hour">{{hour}}</div>
+        </div>
+      </td>
+      <td>
+        <div
+          class="grid-container main mb-3"
+          v-bind:style="{
         'grid-template-columns': '20% 20% 20% 20% 20%',
         'position': 'relative', 
         'grid-template-rows': '48px '
@@ -64,34 +69,75 @@
                             + heightInfo[21] + 'px '
                             + heightInfo[22] + 'px '
 
-     }" id="grid">
-    <div class="day"><br>Monday</div><div class="day"><br>Tuesday</div><div class="day"><br>Wednesday</div><div class="day"><br>Thursday</div><div 
-    class="day"><br>Friday</div>
-    <div v-for="item in items" :key="item" style="z-index:1"></div>
+     }"
+          id="grid"
+        >
+          <div class="day">
+            <br>Monday
+          </div>
+          <div class="day">
+            <br>Tuesday
+          </div>
+          <div class="day">
+            <br>Wednesday
+          </div>
+          <div class="day">
+            <br>Thursday
+          </div>
+          <div class="day">
+            <br>Friday
+          </div>
+          <div v-for="item in items" :key="item" style="z-index:1"></div>
 
-    <div style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2; left:20%">
-
-    <course-block v-for="course in courses.Monday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:0%"></course-block>
-    <course-block v-for="course in courses.Tuesday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:20%"></course-block>
-    <course-block v-for="course in courses.Wednesday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:40%"></course-block>
-    <course-block v-for="course in courses.Thursday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:60%"></course-block>
-    <course-block v-for="course in courses.Friday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:80%"></course-block>
-
-
-    </div>
-
-    </div>
-    
-            </td>
-        </tr>
-    </table>
-    
+          <div
+            style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2; left:20%"
+          >
+            <course-block
+              v-for="course in courses.Monday"
+              :key="course.id"
+              v-bind:course="course"
+              v-bind:heightInfo="heightInfo"
+              style="left:0%"
+            ></course-block>
+            <course-block
+              v-for="course in courses.Tuesday"
+              :key="course.id"
+              v-bind:course="course"
+              v-bind:heightInfo="heightInfo"
+              style="left:20%"
+            ></course-block>
+            <course-block
+              v-for="course in courses.Wednesday"
+              :key="course.id"
+              v-bind:course="course"
+              v-bind:heightInfo="heightInfo"
+              style="left:40%"
+            ></course-block>
+            <course-block
+              v-for="course in courses.Thursday"
+              :key="course.id"
+              v-bind:course="course"
+              v-bind:heightInfo="heightInfo"
+              style="left:60%"
+            ></course-block>
+            <course-block
+              v-for="course in courses.Friday"
+              :key="course.id"
+              v-bind:course="course"
+              v-bind:heightInfo="heightInfo"
+              style="left:80%"
+            ></course-block>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
 </template>
 
 <script>
 import CourseBlock from './CourseBlock.vue';
-import {Schedule} from '../models/Schedule.js';
-import {Course} from '../models/CourseRecord.js';
+import { Schedule } from '../models/Schedule.js';
+import { Course } from '../models/CourseRecord.js';
 
 export default {
     name: 'GridSchedule',
@@ -103,17 +149,17 @@ export default {
         CourseBlock
     },
 
-    data : function(){
+    data() {
         let partial = 25;
         let full = 60;
 
         let arr = [];
-        for(let i = 0; i < 115; i++){
+        for (let i = 0; i < 115; i++) {
             arr.push(i + 1);
         }
 
         let time = [];
-        for(let i = 8; i < 19; i++){
+        for (let i = 8; i < 19; i++) {
             time.push((i / 10 > 0 ? i : 0 + i) + ': 00');
             time.push((i / 10 > 0 ? i : 0 + i) + ': 30');
         }
@@ -121,129 +167,139 @@ export default {
         time.push('19: 00');
 
         let height = [];
-        for(let i = 0; i < 23; i++){
+        for (let i = 0; i < 23; i++) {
             height.push(partial);
         }
 
-        return{
-            partialHeight : partial,
-            fullHeight : full,
-            items : arr,
-            hours : time,
+        return {
+            partialHeight: partial,
+            fullHeight: full,
+            items: arr,
+            hours: time
             // heightInfo : height,
-        }   
+        };
     },
-    
-    computed : {
-        heightInfo : function(){
-            let info  = new Array(23);
+
+    computed: {
+        heightInfo: function() {
+            let info = new Array(23);
             info.fill(this.partialHeight);
 
-            for(const course in this.courses.Monday){
+            for (const course in this.courses.Monday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
-                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+                let h2 =
+                    t2[1] === '00'
+                        ? (parseInt(t2[0]) - 8) * 2
+                        : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for(let i = h1; i <= h2; i++){
+                for (let i = h1; i <= h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
 
-            for(const course in this.courses.Tuesday){
+            for (const course in this.courses.Tuesday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
-                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+                let h2 =
+                    t2[1] === '00'
+                        ? (parseInt(t2[0]) - 8) * 2
+                        : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for(let i = h1; i <= h2; i++){
+                for (let i = h1; i <= h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
 
-            for(const course in this.courses.Wednesday){
+            for (const course in this.courses.Wednesday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
-                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+                let h2 =
+                    t2[1] === '00'
+                        ? (parseInt(t2[0]) - 8) * 2
+                        : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for(let i = h1; i <= h2; i++){
+                for (let i = h1; i <= h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
 
-            for(const course in this.courses.Thursday){
+            for (const course in this.courses.Thursday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
-                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+                let h2 =
+                    t2[1] === '00'
+                        ? (parseInt(t2[0]) - 8) * 2
+                        : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for(let i = h1; i <= h2; i++){
+                for (let i = h1; i <= h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
 
-            for(const course in this.courses.Friday){
+            for (const course in this.courses.Friday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
-                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+                let h2 =
+                    t2[1] === '00'
+                        ? (parseInt(t2[0]) - 8) * 2
+                        : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for(let i = h1; i <= h2; i++){
+                for (let i = h1; i <= h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
             return info;
         }
     }
-}
-
-
+};
 </script>
 
 <style scoped>
-    .grid-container {
+.grid-container {
     display: grid;
     grid-gap: 0px;
     background-color: white;
-    
+
     padding: 0px;
-    }
+}
 
-    .main{
-        border-right: 0.7px solid #e5e3dc;
-        border-bottom:  0.7px solid #e5e3dc;
-    }
+.main {
+    border-right: 0.7px solid #e5e3dc;
+    border-bottom: 0.7px solid #e5e3dc;
+}
 
-    .main > div {
+.main > div {
     background-color: rgba(255, 255, 255, 0.8);
     padding: 0px 0;
     font-size: 10px;
     border-left: 0.7px solid #e5e3dc;
     border-top: 0.7px solid #e5e3dc;
-    }
+}
 
-    .time{
+.time {
+}
 
-    }
+.time > div {
+    text-align: right;
+    font-size: 10px;
+}
 
-    .time > div {
-        text-align : right;
-        font-size: 10px;
-    }
-
-    .item1 {
+.item1 {
     grid-column: 1 / 3;
+}
 
-    }
+.day {
+    text-align: center;
+    border-top: 40%;
+    vertical-align: middle;
+}
 
-    .day{
-        text-align: center;
-        border-top: 40%;
-        vertical-align: middle;
-    }
-
-    .time{
-        
-    }
+.time {
+}
 </style>

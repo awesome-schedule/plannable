@@ -69,7 +69,15 @@
     class="day"><br>Friday</div>
     <div v-for="item in items" :key="item" style="z-index:1"></div>
 
-    <div style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2">
+    <div style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2; left:20%">
+
+    <course-block v-for="course in courses.Monday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:0%"></course-block>
+    <course-block v-for="course in courses.Tuesday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:20%"></course-block>
+    <course-block v-for="course in courses.Wednesday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:40%"></course-block>
+    <course-block v-for="course in courses.Thursday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:60%"></course-block>
+    <course-block v-for="course in courses.Friday" :key="course.id" v-bind:course="course" v-bind:heightInfo="heightInfo" style="left:80%"></course-block>
+
+
     </div>
 
     </div>
@@ -81,8 +89,9 @@
 </template>
 
 <script>
-import Course from './Course.vue';
-import Schedule from '../models/Schedule.js';
+import CourseBlock from './CourseBlock.vue';
+import {Schedule} from '../models/Schedule.js';
+import {Course} from '../models/CourseRecord.js';
 
 export default {
     name: 'GridSchedule',
@@ -91,7 +100,7 @@ export default {
     },
 
     components: {
-        Course
+        CourseBlock
     },
 
     data : function(){
@@ -121,13 +130,70 @@ export default {
             fullHeight : full,
             items : arr,
             hours : time,
-            heightInfo : height,
+            // heightInfo : height,
         }   
     },
     
     computed : {
-        heightInfo2 : function(){
+        heightInfo : function(){
+            let info  = new Array(23);
+            info.fill(this.partialHeight);
 
+            for(const course in this.courses.Monday){
+                let t1 = course.start.split(':');
+                let t2 = course.end.split(':');
+                let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
+                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+
+                for(let i = h1; i <= h2; i++){
+                    info[i] = this.fullHeight;
+                }
+            }
+
+            for(const course in this.courses.Tuesday){
+                let t1 = course.start.split(':');
+                let t2 = course.end.split(':');
+                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+
+                for(let i = h1; i <= h2; i++){
+                    info[i] = this.fullHeight;
+                }
+            }
+
+            for(const course in this.courses.Wednesday){
+                let t1 = course.start.split(':');
+                let t2 = course.end.split(':');
+                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+
+                for(let i = h1; i <= h2; i++){
+                    info[i] = this.fullHeight;
+                }
+            }
+
+            for(const course in this.courses.Thursday){
+                let t1 = course.start.split(':');
+                let t2 = course.end.split(':');
+                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+
+                for(let i = h1; i <= h2; i++){
+                    info[i] = this.fullHeight;
+                }
+            }
+
+            for(const course in this.courses.Friday){
+                let t1 = course.start.split(':');
+                let t2 = course.end.split(':');
+                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
+
+                for(let i = h1; i <= h2; i++){
+                    info[i] = this.fullHeight;
+                }
+            }
+            return info;
         }
     }
 }

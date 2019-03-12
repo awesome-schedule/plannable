@@ -260,7 +260,7 @@
             <tr>
               <td>
                 <div class="tab mt-2"></div>
-                <GridSchedule></GridSchedule>
+                <grid-schedule v-bind:courses="this.currentSchedule"></grid-schedule>
                 <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
               </td>
             </tr>
@@ -273,10 +273,11 @@
 
 <script>
 /* global $, objSchedulesPlan */
-import ScheduleView from './components/Schedule.vue';
-import Active from './components/Active.vue';
-import ClassList from './components/ClassList.vue';
-import Pagination from './components/Pagination.vue';
+import ScheduleView from './components/Schedule';
+import Active from './components/Active';
+import ClassList from './components/ClassList';
+import Pagination from './components/Pagination';
+import GridSchedule from './components/GridSchedule.vue';
 // import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';

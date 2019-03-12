@@ -1,4 +1,5 @@
 /* global $ */
+/* eslint-disable */
 // var loadSchedule = function($) {
 var transitionEnd =
     'webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend';

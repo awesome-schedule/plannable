@@ -6,6 +6,7 @@ import { AllRecords, CourseRecord, Course } from './CourseRecord';
 
 class Schedule {
     static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    static fields = ['All', ...Schedule.days, 'colorSlots', 'title', 'id'];
     /**
      *
      * @param {[string, int, int][]} raw_schedule
@@ -15,7 +16,7 @@ class Schedule {
      */
     constructor(raw_schedule = [], title = 'Schedule', id = 0, allRecords = null) {
         /**
-         * @type {Course[]}
+         * @type {Object<string, Set<number>|number>}
          */
         this.All = [];
         /**
@@ -40,9 +41,11 @@ class Schedule {
         this.Friday = [];
 
         this.colorSlots = [0, 0, 0, 0];
+        this.sections = [];
 
         this.title = title;
         this.id = id;
+        this.allRecords = allRecords;
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
@@ -89,6 +92,7 @@ class Schedule {
     /**
      * Add a course to schedule
      * @param {Course} course
+     * @param {boolean} force If set to true, first attempt to remove the other course with the same key before adding
      */
     add(course, force = false) {
         if (this.exist(course)) {
@@ -129,6 +133,59 @@ class Schedule {
     }
 
     /**
+     *
+     * @param {string} key
+     * @param {Set<number> | number} sections
+     */
+    update(key, sections) {
+        // if (this.All[key] === undefined && sections === undefined) return;
+        this.All[key] = sections;
+        this.computeSchedule();
+    }
+
+    computeSchedule() {
+        if (!this.allRecords) return;
+        this.cleanSchedule();
+        for (const key in this.All) {
+            const sections = this.All[key];
+            // we only render those which has only one section given
+            if (sections instanceof Set && sections.size === 1) {
+                // we need a copy of course
+                const course = Object.assign(
+                    {},
+                    this.allRecords.getCourse(key, [...sections.values()][0])
+                );
+
+                // parse MoWeFr 11:00PM - 11:50PM style time
+                const [days, start, , end] = course.days.split(' ');
+                /**
+                 * @type {string}
+                 */
+                for (let i = 0; i < days.length; i += 2) {
+                    switch (days.substr(i, 2)) {
+                        case 'Mo':
+                            this.Monday.push(course);
+                            break;
+                        case 'Tu':
+                            this.Tuesday.push(course);
+                            break;
+                        case 'We':
+                            this.Wednesday.push(course);
+                            break;
+                        case 'Th':
+                            this.Thursday.push(course);
+                            break;
+                        case 'Fr':
+                            this.Friday.push(course);
+                            break;
+                    }
+                    [course.start, course.end] = Schedule.parseTime(start, end);
+                }
+            }
+        }
+    }
+
+    /**
      * Remove a course from schedule
      * @param {Course} course
      */
@@ -151,6 +208,24 @@ class Schedule {
                 break;
             }
         }
+    }
+
+    cleanSchedule() {
+        for (const key of Schedule.days) {
+            this[key] = [];
+        }
+    }
+    /**
+     *
+     * @param {Object<string, any>} obj
+     * @return {Schedule}
+     */
+    static fromJSON(obj) {
+        const schedule = new Schedule();
+        for (const field of Schedule.fields) {
+            schedule[field] = obj[field];
+        }
+        return schedule;
     }
 
     /**

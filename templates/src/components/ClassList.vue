@@ -1,44 +1,57 @@
 <template>
-  <div id="class-list" class="card" style="width:100%">
-    <div class="card-body">
-      <div v-for="crs in courses" :key="crs.key">
+  <div id="class-list" class="card" style="width: 100%">
+    <div class="card-body" style="padding: 0.25rem">
+      <div class="list-group list-group-flush" v-for="crs in courses" :key="crs.key">
         <div
-          @click="select(crs, 0)"
-          style="cursor: pointer"
+          class="list-group-item list-group-item-action class-title"
           v-bind:data-content="crs.description"
           v-bind:data-title="crs.title"
-          data-toggle="popover"
-          data-html="true"
-          data-placement="right"
+          data-toggle="collapse"
+          v-bind:data-target="`#${crs.key}`"
+          @click="collapse(crs.key)"
         >
-          <p style="margin:0">{{crs.department}} {{crs.number}} {{crs.type}}</p>
-          <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
+          <table>
+            <tr>
+              <td style="padding-right: 0.5rem">
+                <i
+                  class="fas"
+                  v-bind:class="collapsed[crs.key] === undefined ? 'fa-chevron-down' : 'fa-chevron-right'"
+                ></i>
+              </td>
+              <td>
+                <h6
+                  data-toggle="popover"
+                  data-html="true"
+                  data-placement="right"
+                  style="margin-bottom: 0.25rem"
+                >{{crs.department}} {{crs.number}} {{crs.type}}</h6>
+                <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
+              </td>
+            </tr>
+          </table>
         </div>
+        <a
+          style="font-size: 1rem; padding: 0.5rem 1rem"
+          @click="select(crs, -1)"
+          class="list-group-item list-group-item-action class-section"
+          v-bind:class="{active: selected[crs.key] === -1}"
+        >Any Section</a>
         <div
-          class="list-group list-group-flush"
-          style="width: 100%"
+          class="list-group collapse show multi-collapse"
           v-for="(sec, idx) in crs.section"
           :key="sec"
+          v-bind:id="crs.key"
         >
           <a
             @click="select(crs, idx)"
-            class="list-group-item list-group-item-action"
-            v-bind:class="{active: selected[crs.key] === idx}"
-            style="padding: 2px; cursor: pointer"
+            class="list-group-item list-group-item-action class-section"
+            v-bind:class="{active: isActive(crs.key, idx)}"
           >
-            <p
-              class="subtitle"
-              v-bind:class="{w: selected[crs.key] === idx}"
-            >{{sec}} {{crs.days[idx]}}</p>
-            <p
-              class="subtitle"
-              v-if="crs.topic[idx].length > 0"
-              v-bind:class="{w: selected[crs.key] === idx}"
-            >{{crs.topic[idx]}}</p>
-            <p
-              class="subtitle"
-              v-bind:class="{w: selected[crs.key] === idx}"
-            >{{ crs.instructor[idx].join(", ") }} {{ crs.room[idx] }}</p>
+            <ul class="list-unstyled class-info">
+              <li>{{sec}} {{crs.days[idx]}}</li>
+              <li>{{crs.topic[idx]}}</li>
+              <li>{{ crs.instructor[idx].join(", ") }} {{ crs.room[idx] }}</li>
+            </ul>
           </a>
         </div>
       </div>
@@ -47,26 +60,46 @@
 </template>
 
 <script>
+import { CourseRecord } from '../models/CourseRecord';
 export default {
     props: {
         courses: Array
     },
     data() {
         return {
-            selected: {}
+            selected: {},
+            collapsed: {}
         };
     },
     methods: {
+        /**
+         * @param {CourseRecord} crs
+         */
         select(crs, idx) {
             const key = crs.key;
-            if (this.selected[key] === idx) {
-                this.selected[key] = undefined;
-                this.$emit('remove_course', crs.getCourse(idx));
+            let course;
+            if (idx === -1) {
+                this.selected[key] === -1
+                    ? (this.selected[key] = undefined)
+                    : (this.selected[key] = -1);
             } else {
-                this.selected[key] = idx;
-                this.$emit('add_course', crs.getCourse(idx));
+                if (this.selected[key] instanceof Set) {
+                    if (!this.selected[key].delete(idx)) this.selected[key].add(idx);
+                } else {
+                    this.selected[key] = new Set([idx]);
+                }
             }
+            this.$emit('update_course', crs.key, this.selected[key]);
             this.$forceUpdate();
+        },
+        collapse(key) {
+            this.collapsed[key] === undefined
+                ? (this.collapsed[key] = key)
+                : (this.collapsed[key] = undefined);
+            this.$forceUpdate();
+        },
+        isActive(key, idx) {
+            return this.selected[key] instanceof Set && this.selected[key].has(idx);
         }
     }
 };
@@ -74,11 +107,28 @@ export default {
 
 <style scoped>
 .subtitle {
-    margin: 0;
     font-size: 0.7rem;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
-.w {
-    color: white;
+.active {
+    color: white !important;
+}
+
+.class-title {
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.class-section {
+    padding: 0.1rem 0 0.1rem 1rem;
+    font-size: 0.75rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.class-info {
+    margin: 0;
 }
 </style>

@@ -143,11 +143,7 @@ class Schedule {
             // we only render those which has only one section given
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
-                const course = Object.assign(
-                    {},
-                    this.allRecords.getCourse(key, [...sections.values()][0])
-                );
-
+                const course = this.allRecords.getCourse(key, [...sections.values()][0]).copy();
                 this.place(course);
             }
         }

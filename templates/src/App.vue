@@ -435,6 +435,7 @@ export default {
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allCourses = new AllRecords(res.data.data);
                 if (this.cache) this.loadStatus();
+                else this.currentSchedule = new Schedule([], 'Schedule', 1, this.allCourses);
             });
         },
         refreshSchedule() {
@@ -512,6 +513,7 @@ export default {
             });
         },
         saveStatus() {
+            console.log(this.currentSchedule);
             localStorage.setItem(
                 this.currentSemester.id,
                 JSON.stringify({
@@ -533,7 +535,6 @@ export default {
             ) {
                 this.schedules = raw_data.schedules;
                 this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule, this.allCourses);
-                console.log(this.currentSchedule);
                 this.currentCourses = this.getCurrentCourses();
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;

@@ -230,6 +230,15 @@ class Course {
         //
         this.default = true;
     }
+
+    copy() {
+        const cp = new Course(this, this.key, this.section);
+        cp.color = this.color;
+        cp.start = this.start;
+        cp.end = this.end;
+        cp.default = this.default;
+        return cp;
+    }
 }
 
 export default {

@@ -153,7 +153,7 @@ export default {
             for(const course in this.courses.Tuesday){
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
-                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
                 let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
 
                 for(let i = h1; i <= h2; i++){
@@ -164,7 +164,7 @@ export default {
             for(const course in this.courses.Wednesday){
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
-                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
                 let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
 
                 for(let i = h1; i <= h2; i++){
@@ -175,7 +175,7 @@ export default {
             for(const course in this.courses.Thursday){
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
-                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
                 let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
 
                 for(let i = h1; i <= h2; i++){
@@ -186,7 +186,7 @@ export default {
             for(const course in this.courses.Friday){
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
-                let h1 = (parseInt(t1[0]) - 8) * 2;
+                let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
                 let h2 = t2[1] === '00' ? (parseInt(t2[0]) - 8) * 2 : ((parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1));
 
                 for(let i = h1; i <= h2; i++){

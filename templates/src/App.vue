@@ -272,8 +272,8 @@
             <tr>
               <td>
                 <div class="tab mt-2"></div>
-                <!-- <GridSchedule></GridSchedule> -->
-                <ScheduleView v-bind:courses="currentSchedule" @trigger-modal="triggerModal"></ScheduleView>
+                <grid-schedule v-bind:courses="this.currentSchedule"></grid-schedule>
+                <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
               </td>
             </tr>
           </table>
@@ -285,10 +285,11 @@
 
 <script>
 /* global $, objSchedulesPlan */
-import ScheduleView from './components/Schedule.vue';
-// import Active from './components/Active.vue';
-import ClassList from './components/ClassList.vue';
-import Pagination from './components/Pagination.vue';
+import ScheduleView from './components/Schedule';
+import Active from './components/Active';
+import ClassList from './components/ClassList';
+import Pagination from './components/Pagination';
+import GridSchedule from './components/GridSchedule.vue';
 // import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
@@ -300,7 +301,8 @@ export default {
         // Active,
         ScheduleView,
         ClassList,
-        Pagination
+        Pagination,
+        GridSchedule
         // CourseModal
     },
     data() {
@@ -393,10 +395,12 @@ export default {
         },
         preview(key, section) {
             this.currentSchedule.preview(key, section);
+            this.$forceUpdate();
             this.refreshStyle();
         },
         removePreview() {
             this.currentSchedule.removePreview();
+            this.$forceUpdate();
             this.refreshStyle();
         },
         switchPage(idx) {
@@ -433,9 +437,9 @@ export default {
             });
         },
         refreshSchedule() {
-            setTimeout(() => {
-                objSchedulesPlan[0].placeEvents();
-            }, 1);
+            // setTimeout(() => {
+            //     objSchedulesPlan[0].placeEvents();
+            // }, 1);
         },
         refreshPopover() {
             setTimeout(() => {

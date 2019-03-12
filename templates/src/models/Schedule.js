@@ -232,13 +232,12 @@ class Schedule {
         for (const field of Schedule.fields) {
             obj[field] = this[field];
         }
+        // deep copy All
+        obj.All = Object.assign({}, this.All);
         // convert set to array
         for (const key in obj.All) {
-            if (this.All[key] instanceof Set) {
-                obj.All[key] = [...this.All[key].values()];
-            }
+            if (this.All[key] instanceof Set) obj.All[key] = [...this.All[key].values()];
         }
-        console.log(this);
         return obj;
     }
 
@@ -271,7 +270,11 @@ class Schedule {
         return [start_time, end_time];
     }
 
-    clean() {}
+    clean() {
+        this.cleanSchedule();
+        this.All = {};
+        this.preview = [null, null];
+    }
 }
 
 export default {

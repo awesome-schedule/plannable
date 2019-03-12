@@ -200,6 +200,7 @@ class Course {
      * @param {number} section
      */
     constructor(raw, key, section = 0) {
+        this.raw = raw;
         const sid = section;
         this.sid = sid;
         this.key = key;
@@ -232,7 +233,7 @@ class Course {
     }
 
     copy() {
-        const cp = new Course(this, this.key, this.section);
+        const cp = new Course(this.raw, this.key, this.sid);
         cp.color = this.color;
         cp.start = this.start;
         cp.end = this.end;

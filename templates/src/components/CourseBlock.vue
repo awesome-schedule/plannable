@@ -5,15 +5,15 @@
         'position': 'absolute',
         'width': '20%',
         'height': endPx - startPx + 'px',
-        'background-color': course.background-color,
+        'background-color': course.backgroundColor,
         'z-index': '2',
         'color' : 'white',
         }"
   >
-  <p class="mt-2 ml-2" style="color:white; font-size:13px">{{course.title}}</p>
-  <p class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.days}}</p>
-  <p class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.instructor}}</p>
-  <p class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.room}}</p>
+  <div class="mt-2 ml-2" style="color:white; font-size:13px">{{course.title}}</div>
+  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.days}}</div>
+  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.instructor}}</div>
+  <div class="ml-2" style="color:#e0e0e0; font-size:11px">{{course.room}}</div>
   </div>
 </template>
 

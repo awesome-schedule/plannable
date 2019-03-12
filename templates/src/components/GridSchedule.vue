@@ -194,7 +194,7 @@ export default {
                         ? (parseInt(t2[0]) - 8) * 2
                         : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for (let i = h1; i <= h2; i++) {
+                for (let i = h1; i < h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
@@ -208,7 +208,7 @@ export default {
                         ? (parseInt(t2[0]) - 8) * 2
                         : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for (let i = h1; i <= h2; i++) {
+                for (let i = h1; i < h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
@@ -222,7 +222,7 @@ export default {
                         ? (parseInt(t2[0]) - 8) * 2
                         : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for (let i = h1; i <= h2; i++) {
+                for (let i = h1; i < h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
@@ -236,7 +236,7 @@ export default {
                         ? (parseInt(t2[0]) - 8) * 2
                         : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for (let i = h1; i <= h2; i++) {
+                for (let i = h1; i < h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }
@@ -250,7 +250,7 @@ export default {
                         ? (parseInt(t2[0]) - 8) * 2
                         : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
 
-                for (let i = h1; i <= h2; i++) {
+                for (let i = h1; i < h2; i++) {
                     info[i] = this.fullHeight;
                 }
             }

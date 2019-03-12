@@ -28,10 +28,12 @@ export default {
                 start += this.heightInfo[i];
             }
             if (parseInt(t[1]) >= 30) {
-                start += 60;
+                start += this.heightInfo[temp];
                 if (parseInt(t[1]) > 30) {
                     start += ((parseFloat(t[1]) - 30) / 30) * 60;
                 }
+            }else{
+                start += parseFloat(t[1]) / 30 * 60;
             }
             return start;
         },
@@ -44,10 +46,12 @@ export default {
                 end += this.heightInfo[i];
             }
             if (parseInt(t[1]) >= 30) {
-                end += 60;
+                end += this.heightInfo[temp];
                 if (parseInt(t[1]) > 30) {
                     end += ((parseFloat(t[1]) - 30) / 30) * 60;
                 }
+            }else{
+                end += parseFloat(t[1]) / 30 * 60;
             }
             return end;
         }

@@ -181,11 +181,11 @@ export default {
     },
 
     computed: {
-        heightInfo: function() {
+        heightInfo() {
             let info = new Array(23);
             info.fill(this.partialHeight);
 
-            for (const course in this.courses.Monday) {
+            for (const course of this.courses.Monday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
@@ -199,7 +199,7 @@ export default {
                 }
             }
 
-            for (const course in this.courses.Tuesday) {
+            for (const course of this.courses.Tuesday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
@@ -213,7 +213,7 @@ export default {
                 }
             }
 
-            for (const course in this.courses.Wednesday) {
+            for (const course of this.courses.Wednesday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
@@ -227,7 +227,7 @@ export default {
                 }
             }
 
-            for (const course in this.courses.Thursday) {
+            for (const course of this.courses.Thursday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
@@ -241,7 +241,7 @@ export default {
                 }
             }
 
-            for (const course in this.courses.Friday) {
+            for (const course of this.courses.Friday) {
                 let t1 = course.start.split(':');
                 let t2 = course.end.split(':');
                 let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);

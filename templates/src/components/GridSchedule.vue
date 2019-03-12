@@ -91,42 +91,42 @@
 
           <!-- <div
             style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2; left:20%"
-          > -->
-            <course-block
-              v-for="course in courses.Monday"
-              :key="course.id"
-              v-bind:course="course"
-              v-bind:heightInfo="heightInfo"
-              style="left:0%"
-            ></course-block>
-            <course-block
-              v-for="course in courses.Tuesday"
-              :key="course.id"
-              v-bind:course="course"
-              v-bind:heightInfo="heightInfo"
-              style="left:20%"
-            ></course-block>
-            <course-block
-              v-for="course in courses.Wednesday"
-              :key="course.id"
-              v-bind:course="course"
-              v-bind:heightInfo="heightInfo"
-              style="left:40%"
-            ></course-block>
-            <course-block
-              v-for="course in courses.Thursday"
-              :key="course.id"
-              v-bind:course="course"
-              v-bind:heightInfo="heightInfo"
-              style="left:60%"
-            ></course-block>
-            <course-block
-              v-for="course in courses.Friday"
-              :key="course.id"
-              v-bind:course="course"
-              v-bind:heightInfo="heightInfo"
-              style="left:80%"
-            ></course-block>
+          >-->
+          <course-block
+            v-for="course in courses.Monday"
+            :key="course.key + 'Mo' "
+            v-bind:course="course"
+            v-bind:heightInfo="heightInfo"
+            style="left:0%"
+          ></course-block>
+          <course-block
+            v-for="course in courses.Tuesday"
+            :key="course.key + 'Tu'"
+            v-bind:course="course"
+            v-bind:heightInfo="heightInfo"
+            style="left:20%"
+          ></course-block>
+          <course-block
+            v-for="course in courses.Wednesday"
+            :key="course.key + 'We'"
+            v-bind:course="course"
+            v-bind:heightInfo="heightInfo"
+            style="left:40%"
+          ></course-block>
+          <course-block
+            v-for="course in courses.Thursday"
+            :key="course.key + 'Th'"
+            v-bind:course="course"
+            v-bind:heightInfo="heightInfo"
+            style="left:60%"
+          ></course-block>
+          <course-block
+            v-for="course in courses.Friday"
+            :key="course.key + 'Fr'"
+            v-bind:course="course"
+            v-bind:heightInfo="heightInfo"
+            style="left:80%"
+          ></course-block>
           <!-- </div> -->
         </div>
       </td>

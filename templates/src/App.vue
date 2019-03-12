@@ -513,7 +513,7 @@ export default {
             });
         },
         saveStatus() {
-            console.log(this.currentSchedule);
+            // console.log(this.currentSchedule);
             localStorage.setItem(
                 this.currentSemester.id,
                 JSON.stringify({

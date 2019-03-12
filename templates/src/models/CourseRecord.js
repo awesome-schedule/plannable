@@ -82,6 +82,9 @@ class AllRecords {
 }
 
 class CourseRecord {
+    /**
+     * lecture type number => meaning
+     */
     static TYPES = {
         0: 'Clinical',
         1: 'Discussion',
@@ -95,6 +98,9 @@ class CourseRecord {
         9: 'Workshop'
     };
 
+    /**
+     * status number => meaning
+     */
     static STATUSES = {
         1: 'Open',
         0: 'Closed',
@@ -129,10 +135,9 @@ class CourseRecord {
      *
      * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
      * @param {string} key
-     * @param {Object<number, string>} attr_map
+     * @param {number[]} sid A list of section indices
      */
     constructor(raw, key, sids = null) {
-        // const sid = raw[3][section];
         this.key = key;
 
         this.id = this[0] = raw[0];
@@ -152,7 +157,7 @@ class CourseRecord {
         this.wait_list = this[14] = raw[14];
         this.description = this[15] = raw[15];
 
-        if (sids != null && sids.length > 0) {
+        if (sids !== null && sids.length > 0) {
             for (const i of CourseRecord.LIST) {
                 const field = CourseRecord.FIELDS[i];
                 this[field] = this[i] = [];
@@ -164,7 +169,7 @@ class CourseRecord {
     }
 
     /**
-     *
+     * Get the course of a given section
      * @param {number} section
      * @return {Course}
      */
@@ -173,11 +178,11 @@ class CourseRecord {
     }
 
     /**
-     *
+     * Get the CourseRecord at a given range of sections
      * @param {number[]} sections
      * @return {CourseRecord}
      */
-    getCourses(sections) {
+    getRecord(sections) {
         return new CourseRecord(this, this.key, sections);
     }
 
@@ -232,6 +237,10 @@ class Course {
         this.default = true;
     }
 
+    /**
+     * get a copy of Course
+     * @return {Course}
+     */
     copy() {
         const cp = new Course(this.raw, this.key, this.sid);
         cp.color = this.color;
@@ -241,9 +250,5 @@ class Course {
         return cp;
     }
 }
-
-export default {
-    CourseRecord
-};
 
 export { CourseRecord, AllRecords, Course };

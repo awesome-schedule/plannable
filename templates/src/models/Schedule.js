@@ -135,6 +135,9 @@ class Schedule {
         this.computeSchedule();
     }
 
+    /**
+     * Compute the schedule view based on this.All and this.preview
+     */
     computeSchedule() {
         if (!this.allRecords) return;
         this.cleanSchedule();
@@ -157,7 +160,8 @@ class Schedule {
     }
 
     /**
-     *
+     * Place the course on the schedule
+     * Specifically, this method places the course into one of the Monday - Friday array
      * @param {Course} course
      */
     place(course) {
@@ -197,6 +201,7 @@ class Schedule {
     }
 
     cleanSchedule() {
+        console.log(this);
         for (const key of Schedule.days) {
             this[key] = [];
         }

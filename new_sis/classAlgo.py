@@ -7,9 +7,6 @@ import random
 
 DICT = OrderedDict()
 RECORD = OrderedDict()
-lectureType = (
-    "Laboratory", "Studio", "Seminar", "Clinical", "Practicum", "Discussion", "Drill", "Independent Study", "Lecture",
-    "Workshop")
 
 
 TYPES = {'Clinical': 0, 'Discussion': 1, 'Drill': 2, 'Independent Study': 3, 'Laboratory': 4,
@@ -38,11 +35,6 @@ def readData():
     :return:
     """
     file = xlrd.open_workbook(getDataPath('CS1192Data.xlsx'))
-    statuses = {
-        'Open': 1,
-        'Closed': 0,
-        'Wait List': 2
-    }
 
     sheet = file.sheet_by_index(0)
     for i in range(1, sheet.nrows):

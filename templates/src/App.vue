@@ -290,7 +290,6 @@ import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
 import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
-// import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
 import { Schedule } from './models/Schedule.js';
@@ -365,6 +364,7 @@ export default {
         clear() {
             this.currentSchedule.clean();
             this.currentCourses = [];
+            this.schedules = [];
             this.$forceUpdate();
             this.saveStatus();
         },
@@ -399,7 +399,10 @@ export default {
             this.$forceUpdate();
         },
         switchPage(idx) {
-            if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
+            if (0 <= idx && idx < this.schedules.length) {
+                this.currentSchedule = new Schedule(this.schedules[idx], 'Schedule', idx + 1);
+                this.currentCourses = this.getCurrentCourses();
+            }
         },
         /**
          * @param {string} query
@@ -419,8 +422,9 @@ export default {
             // fetch basic class data for the given semester for fast class search
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allRecords = new AllRecords(res.data.data);
+                Schedule.allRecords = this.allRecords;
                 if (this.cache) this.loadStatus();
-                else this.currentSchedule = new Schedule([], 'Schedule', 1, this.allRecords);
+                else this.currentSchedule = new Schedule([], 'Schedule', 1);
             });
         },
         closeClassList(event) {
@@ -430,16 +434,11 @@ export default {
             this.$forceUpdate();
         },
         parseResponse(res) {
-            const data = res.data.data;
-            const meta = res.data.meta;
-            const schedules = [];
-
-            // avoid updating style-binded variable in loops for better performace
-            this.schedules = schedules;
-            this.currentSchedule = this.schedules[0];
+            this.schedules = res.data.data;
+            this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
+            this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
             this.errMsg = '';
-            return res;
         },
         sendRequest() {
             // if (this.currentSchedule.All.length < 2) return;
@@ -457,10 +456,8 @@ export default {
             };
             if (days.length > 0) request.filter = { days };
 
-            for (const course of this.currentSchedule.All) {
-                request.classes.push(
-                    `${course.department}${course.number}${course.type}`.toLowerCase()
-                );
+            for (const key in this.currentSchedule.All) {
+                request.classes.push(key);
             }
             axios.post(`${this.api}/classes`, request).then(res => {
                 if (res.data.status.err.length > 0) {
@@ -498,7 +495,7 @@ export default {
                 raw_data.currentSchedule !== undefined
             ) {
                 this.schedules = raw_data.schedules;
-                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule, this.allRecords);
+                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule);
                 this.currentCourses = this.getCurrentCourses();
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;

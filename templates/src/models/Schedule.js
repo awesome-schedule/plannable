@@ -21,13 +21,17 @@ class Schedule {
         '#993D5F'
     ];
     /**
+     * @type {AllRecords}
+     */
+    static allRecords;
+    /**
      *
      * @param {[string, int, int][]} raw_schedule
      * @param {string} title
      * @param {number} id
      * @param {AllRecords} allRecords
      */
-    constructor(raw_schedule = [], title = 'Schedule', id = 0, allRecords = null) {
+    constructor(raw_schedule = [], title = 'Schedule', id = 0) {
         /**
          * @type {Object<string, Set<number>|number>}
          */
@@ -57,12 +61,12 @@ class Schedule {
 
         this.title = title;
         this.id = id;
-        this.allRecords = allRecords;
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
             this.add(key, section, false);
         }
+        this.computeSchedule();
     }
 
     /**
@@ -99,6 +103,7 @@ class Schedule {
             if (update) this.computeSchedule();
             return true;
         }
+        return true;
     }
 
     /**
@@ -135,21 +140,21 @@ class Schedule {
      * Compute the schedule view based on this.All and this.preview
      */
     computeSchedule() {
-        if (!this.allRecords) return;
+        if (!Schedule.allRecords) return;
         this.cleanSchedule();
         for (const key in this.All) {
             const sections = this.All[key];
             // we only render those which has only one section given
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
-                const course = this.allRecords.getCourse(key, [...sections.values()][0]).copy();
+                const course = Schedule.allRecords.getCourse(key, [...sections.values()][0]).copy();
                 this.place(course);
             }
         }
 
         const [k, v] = this.previous;
         if (k !== null && v !== null) {
-            const course = this.allRecords.getCourse(k, v);
+            const course = Schedule.allRecords.getCourse(k, v);
             course.key += 'preview';
             this.place(course);
         }
@@ -206,9 +211,8 @@ class Schedule {
      * @param {Object<string, any>} obj
      * @return {Schedule}
      */
-    static fromJSON(obj, allRecords) {
+    static fromJSON(obj) {
         const schedule = new Schedule();
-        schedule.allRecords = allRecords;
         for (const field of Schedule.fields) {
             schedule[field] = obj[field];
         }
@@ -268,8 +272,8 @@ class Schedule {
         return [start_time, end_time];
     }
 
-    static empty(allRecords) {
-        return new Schedule([], 'Schedule', 1, allRecords);
+    static empty() {
+        return new Schedule([], 'Schedule', 1);
     }
 
     clean() {

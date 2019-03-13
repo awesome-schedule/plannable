@@ -7,7 +7,7 @@
           v-bind:style="{
         'grid-template-columns': 'auto',
         'width' : '100%', 
-        'grid-template-rows': '48px '
+        'grid-template-rows': '35px '
                             + heightInfo[0] + 'px ' 
                             + heightInfo[1] + 'px ' 
                             + heightInfo[2] + 'px '
@@ -200,7 +200,7 @@ export default {
                     }
                 }
             }
-            
+
             return info;
         }
     }
@@ -223,6 +223,13 @@ export default {
 
 .main > div {
     background-color: rgba(255, 255, 255, 0.8);
+    padding: 0px 0;
+    font-size: 10px;
+    border-left: 0.7px solid #e5e3dc;
+    border-top: 0.7px solid #e5e3dc;
+}
+
+.courseBlock{
     padding: 0px 0;
     font-size: 10px;
     border-left: 0.7px solid #e5e3dc;

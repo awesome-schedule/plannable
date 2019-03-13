@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <modal id="modal" v-bind:course="modalCourse"></modal>
     <!-- <course-modal v-bind:course="activeCourse"></course-modal> -->
     <!-- navigation bar -->
     <nav
@@ -272,7 +273,7 @@
             <tr>
               <td>
                 <div class="tab mt-2"></div>
-                <grid-schedule v-bind:courses="currentSchedule"></grid-schedule>
+                <grid-schedule v-bind:courses="currentSchedule" @trigger-modal="showModal"></grid-schedule>
                 <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
               </td>
             </tr>
@@ -290,6 +291,7 @@ import Active from './components/Active';
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
 import GridSchedule from './components/GridSchedule.vue';
+import Modal from './components/Modal.vue';
 // import CourseModal from './components/CourseModal';
 // eslint-disable-next-line
 import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
@@ -303,7 +305,8 @@ export default {
         ScheduleView,
         ClassList,
         Pagination,
-        GridSchedule
+        GridSchedule,
+        Modal
         // CourseModal
     },
     data() {
@@ -326,7 +329,8 @@ export default {
             errMsg: '',
             allowWaitlist: false,
             allowClosed: false,
-            cache: false
+            cache: false,
+            modalCourse : null,
         };
     },
     mounted() {
@@ -372,8 +376,8 @@ export default {
             this.currentSchedule.cleanSchedule();
         },
 
-        triggerModal(id) {
-            return id;
+        showModal(course) {
+            this.modalCourse = course;
         },
         /**
          * @param {string} key

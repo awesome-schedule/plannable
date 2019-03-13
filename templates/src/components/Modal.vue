@@ -18,7 +18,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <div style="color:#a0a0a0">{{course.type}}</div>
+          <div style="color:#a0a0a0">{{course.type}} | {{course.units}} units</div>
           <div style="color:#a0a0a0">{{course.days}}</div>
           <div style="color:#a0a0a0">{{course.room}}</div>
           <div style="color:#a0a0a0">{{course.instructor.join(', ')}}</div>

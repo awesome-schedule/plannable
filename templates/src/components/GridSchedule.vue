@@ -229,13 +229,6 @@ export default {
     border-top: 0.7px solid #e5e3dc;
 }
 
-.courseBlock{
-    padding: 0px 0;
-    font-size: 10px;
-    border-left: 0.7px solid #e5e3dc;
-    border-top: 0.7px solid #e5e3dc;
-}
-
 .time {
 }
 

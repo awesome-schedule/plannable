@@ -34,7 +34,6 @@ Install development dependencies
 ```
 git clone https://github.com/OAHC2022/UVaAutoScheduler
 cd UVaAutoScheduler
-npm install
 ```
 
 Install front end dependencies and compile assets

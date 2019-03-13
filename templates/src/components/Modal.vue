@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { Course } from '../models/CourseRecord.js';
+import Course from '../models/CourseRecord.js';
 export default {
     props: {
         course: Course

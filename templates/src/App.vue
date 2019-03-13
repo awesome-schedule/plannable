@@ -1,7 +1,6 @@
 <template>
   <div id="app">
     <modal id="modal" v-bind:course="modalCourse"></modal>
-    <!-- <course-modal v-bind:course="activeCourse"></course-modal> -->
     <!-- navigation bar -->
     <nav
       class="navbar navbar-expand-lg navbar-light"
@@ -291,8 +290,11 @@ import Pagination from './components/Pagination';
 import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 // eslint-disable-next-line
-import { AllRecords, CourseRecord, Course } from './models/CourseRecord.js';
-import { Schedule } from './models/Schedule.js';
+import CourseRecord from './models/CourseRecord.js';
+import Schedule from './models/Schedule.js';
+// eslint-disable-next-line
+import Course from './models/Course.js';
+import AllRecords from './models/AllRecords.js';
 import axios from 'axios';
 
 export default {

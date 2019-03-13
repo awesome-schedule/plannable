@@ -1,5 +1,8 @@
 // eslint-disable-next-line
-import { AllRecords, CourseRecord, Course } from './CourseRecord';
+import CourseRecord from './CourseRecord';
+// eslint-disable-next-line
+import AllRecords from './AllRecords';
+import Course from './Course';
 /**
  * A schedule is a list of courses
  */
@@ -284,8 +287,4 @@ class Schedule {
     }
 }
 
-export default {
-    Schedule
-};
-
-export { Schedule };
+export default Schedule;

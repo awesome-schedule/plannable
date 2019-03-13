@@ -1,11 +1,14 @@
 <template>
   <div id="class-list" class="card" style="width: 100%">
-    <div class="card-body" style="padding: 0.25rem">
+    <div class="card-body" style="padding: 0.25rem; max-height: 560px; overflow-y: auto">
       <div class="list-group list-group-flush" v-for="crs in courses" :key="crs.key">
+        <!-- data-toggle="popover"
+          data-html="true"
+          data-placement="right"
+          v-bind:data-content="crs.description"
+        v-bind:data-title="crs.title"-->
         <div
           class="list-group-item list-group-item-action class-title"
-          v-bind:data-content="crs.description"
-          v-bind:data-title="crs.title"
           data-toggle="collapse"
           v-bind:data-target="`#${crs.key}`"
           @click="collapse(crs.key)"
@@ -13,18 +16,13 @@
           <table style="width: 100%">
             <tr>
               <td style="padding-right: 0.5rem">
-                <i
-                  class="fas"
-                  v-bind:class="collapsed[crs.key] !== undefined ^ isEntering ? 'fa-chevron-down' : 'fa-chevron-right'"
-                ></i>
+                <i class="fas" v-bind:class="expanded(crs)"></i>
               </td>
               <td>
-                <h6
-                  data-toggle="popover"
-                  data-html="true"
-                  data-placement="right"
-                  style="margin-bottom: 0.25rem"
-                >{{crs.department}} {{crs.number}} {{crs.type}}</h6>
+                <h6 style="margin-bottom: 0.25rem">
+                  {{crs.department}} {{crs.number}} {{crs.type}}
+                  <i class="fas fa-info-circle"></i>
+                </h6>
                 <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
               </td>
               <td v-if="!isEntering" style="padding-left: 0.5rem">
@@ -84,7 +82,6 @@ export default {
     },
     data() {
         return {
-            selected: {},
             collapsed: {}
         };
     },
@@ -104,6 +101,11 @@ export default {
         },
         isActive(key, idx) {
             return this.schedule.All[key] instanceof Set && this.schedule.All[key].has(idx);
+        },
+        expanded(crs) {
+            return (this.collapsed[crs.key] !== undefined) ^ this.isEntering
+                ? 'fa-chevron-down'
+                : 'fa-chevron-right';
         },
         preview(key, idx) {
             this.$emit('preview', key, idx);

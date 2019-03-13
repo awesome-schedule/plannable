@@ -14,12 +14,14 @@
         'color' : 'white',
         }"
   >
-  <div class="mt-2 ml-2" style="color:white; font-size:13px">{{course.department}} {{course.number}}</div>
-  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.type}}</div>
-  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.days}}</div>
-  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.instructor.join(', ')}}</div>
-  <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.room}}</div>
-
+    <div
+      class="mt-2 ml-2"
+      style="color:white; font-size:13px"
+    >{{course.department}} {{course.number}} {{course.title}}</div>
+    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.type}}</div>
+    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.days}}</div>
+    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.instructor.join(', ')}}</div>
+    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.room}}</div>
   </div>
 </template>
 
@@ -44,8 +46,8 @@ export default {
                 if (parseInt(t[1]) > 30) {
                     start += ((parseFloat(t[1]) - 30) / 30) * 60;
                 }
-            }else{
-                start += parseFloat(t[1]) / 30 * 60;
+            } else {
+                start += (parseFloat(t[1]) / 30) * 60;
             }
             return start;
         },
@@ -62,8 +64,8 @@ export default {
                 if (parseInt(t[1]) > 30) {
                     end += ((parseFloat(t[1]) - 30) / 30) * 60;
                 }
-            }else{
-                end += parseFloat(t[1]) / 30 * 60;
+            } else {
+                end += (parseFloat(t[1]) / 30) * 60;
             }
             return end;
         }

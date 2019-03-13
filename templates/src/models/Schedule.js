@@ -6,7 +6,7 @@ import { AllRecords, CourseRecord, Course } from './CourseRecord';
 
 class Schedule {
     static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    static fields = ['All', ...Schedule.days, 'colorSlots', 'title', 'id'];
+    static fields = ['All', ...Schedule.days, 'title', 'id'];
     static bgColors = [
         '#f7867e',
         '#ffb74c',
@@ -53,7 +53,6 @@ class Schedule {
          */
         this.Friday = [];
 
-        this.colorSlots = new Array(Schedule.bgColors.length).fill(0);
         this.previous = [null, null];
 
         this.title = title;
@@ -201,7 +200,6 @@ class Schedule {
         for (const key of Schedule.days) {
             this[key] = [];
         }
-        this.colorSlots = new Array(Schedule.bgColors.length).fill(0);
     }
     /**
      *
@@ -217,6 +215,9 @@ class Schedule {
         // convert array to set
         for (const key in obj.All) {
             if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
+        }
+        for (const day of Schedule.days) {
+            schedule[day].map(x => Object.setPrototypeOf(x, Course.prototype));
         }
         return schedule;
     }
@@ -265,6 +266,10 @@ class Schedule {
             }
         }
         return [start_time, end_time];
+    }
+
+    static empty(allRecords) {
+        return new Schedule([], 'Schedule', 1, allRecords);
     }
 
     clean() {

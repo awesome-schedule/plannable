@@ -70,7 +70,7 @@
           <div class="dropdown">
             <button
               class="btn btn-primary mt-4 mx-auto"
-              style="width: 100%;"
+              style="width: 100%; margin-top: 0 !important"
               type="button"
               id="semester"
               data-toggle="dropdown"
@@ -307,7 +307,7 @@ export default {
             api: 'http://localhost:8000/api',
             semesters: null,
             currentSemester: null,
-            allCourses: null,
+            allRecords: null,
             currentSchedule: new Schedule(),
             currentCourses: [],
             schedules: null,
@@ -321,7 +321,7 @@ export default {
             errMsg: '',
             allowWaitlist: false,
             allowClosed: false,
-            cache: false
+            cache: true
         };
     },
     mounted() {
@@ -354,11 +354,12 @@ export default {
         getCurrentCourses() {
             const courses = [];
             for (const key in this.currentSchedule.All)
-                courses.push(this.allCourses.getRecord(key));
+                courses.push(this.allRecords.getRecord(key));
             return courses;
         },
         clear() {
             this.currentSchedule.clean();
+            this.currentCourses = [];
             this.$forceUpdate();
             this.saveStatus();
         },
@@ -374,87 +375,54 @@ export default {
          * @param {string} key
          */
         removeCourse(key) {
-            $('#active-list')
-                .find('[data-toggle="popover"]')
-                .popover('dispose');
             this.currentSchedule.remove(key);
             this.currentCourses = this.getCurrentCourses();
             this.$forceUpdate();
-            this.refreshStyle();
             this.saveStatus();
         },
         updateCourse(key, section) {
             this.currentSchedule.update(key, section);
             this.currentCourses = this.getCurrentCourses();
-            this.refreshStyle();
             this.saveStatus();
         },
         preview(key, section) {
             this.currentSchedule.preview(key, section);
             this.$forceUpdate();
-            this.refreshStyle();
         },
         removePreview() {
             this.currentSchedule.removePreview();
             this.$forceUpdate();
-            this.refreshStyle();
         },
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) this.currentSchedule = this.schedules[idx];
-            this.refreshStyle();
         },
         /**
          * @param {string} query
          */
         getClass(query) {
-            $('#class-list')
-                .find('[data-toggle="popover"]')
-                .popover('dispose');
             if (query === null || query.length === 0) {
                 this.isEntering = false;
                 this.inputCourses = null;
                 return;
             }
-            this.inputCourses = this.allCourses.search(query);
+            this.inputCourses = this.allRecords.search(query);
             this.isEntering = true;
-            setTimeout(() => {
-                $('#class-list')
-                    .find('[data-toggle="popover"]')
-                    .popover({ trigger: 'hover', html: true });
-            }, 100);
         },
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
 
             // fetch basic class data for the given semester for fast class search
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
-                this.allCourses = new AllRecords(res.data.data);
+                this.allRecords = new AllRecords(res.data.data);
                 if (this.cache) this.loadStatus();
-                else this.currentSchedule = new Schedule([], 'Schedule', 1, this.allCourses);
+                else this.currentSchedule = new Schedule([], 'Schedule', 1, this.allRecords);
             });
-        },
-        refreshSchedule() {
-            // setTimeout(() => {
-            //     objSchedulesPlan[0].placeEvents();
-            // }, 1);
-        },
-        refreshPopover() {
-            setTimeout(() => {
-                $('#active-list')
-                    .find('[data-toggle="popover"]')
-                    .popover({ trigger: 'hover', html: true });
-            }, 100);
-        },
-        refreshStyle() {
-            this.refreshPopover();
-            this.refreshSchedule();
         },
         closeClassList(event) {
             event.target.value = '';
             this.getClass(null);
             this.currentCourses = this.getCurrentCourses();
             this.$forceUpdate();
-            this.refreshStyle();
         },
         parseResponse(res) {
             const data = res.data.data;
@@ -466,8 +434,6 @@ export default {
             this.currentSchedule = this.schedules[0];
             this.saveStatus();
             this.errMsg = '';
-            this.refreshStyle();
-
             return res;
         },
         sendRequest() {
@@ -529,11 +495,10 @@ export default {
                 raw_data.currentSchedule !== undefined
             ) {
                 this.schedules = raw_data.schedules;
-                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule, this.allCourses);
+                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule, this.allRecords);
                 this.currentCourses = this.getCurrentCourses();
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;
-                this.refreshStyle();
             }
         }
     }

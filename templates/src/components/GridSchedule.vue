@@ -150,7 +150,7 @@ export default {
     },
 
     data() {
-        let partial = 25;
+        let partial = 20;
         let full = 60;
 
         let arr = [];
@@ -185,8 +185,8 @@ export default {
             let info = new Array(23);
             info.fill(this.partialHeight);
 
-            for(const key of Schedule.days){
-                for(const course of this.courses[key]){
+            for (const key of Schedule.days) {
+                for (const course of this.courses[key]) {
                     let t1 = course.start.split(':');
                     let t2 = course.end.split(':');
                     let h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
@@ -200,7 +200,7 @@ export default {
                     }
                 }
             }
-            
+
             return info;
         }
     }

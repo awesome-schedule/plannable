@@ -216,6 +216,9 @@ class Schedule {
         for (const key in obj.All) {
             if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
         }
+        for (const day of Schedule.days) {
+            schedule[day].map(x => Object.setPrototypeOf(x, Course.prototype));
+        }
         return schedule;
     }
 
@@ -263,6 +266,10 @@ class Schedule {
             }
         }
         return [start_time, end_time];
+    }
+
+    static empty(allRecords) {
+        return new Schedule([], 'Schedule', 1, allRecords);
     }
 
     clean() {

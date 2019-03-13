@@ -24,22 +24,22 @@
           }"
           id="grid"
         >
-          <div class="day">
+          <div class="day placeholder">
             <br>Monday
           </div>
-          <div class="day">
+          <div class="day placeholder">
             <br>Tuesday
           </div>
-          <div class="day">
+          <div class="day placeholder">
             <br>Wednesday
           </div>
-          <div class="day">
+          <div class="day placeholder">
             <br>Thursday
           </div>
-          <div class="day">
+          <div class="day placeholder">
             <br>Friday
           </div>
-          <div v-for="item in items" :key="item" style="z-index:1"></div>
+          <div class="placeholder" v-for="item in items" :key="item" style="z-index:1"></div>
 
           <course-block
             v-for="course in courses.Monday"
@@ -153,7 +153,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .grid-container {
     display: grid;
     grid-gap: 0px;
@@ -167,7 +167,7 @@ export default {
     border-bottom: 0.7px solid #e5e3dc;
 }
 
-.main > div {
+.placeholder {
     background-color: rgba(255, 255, 255, 0.8);
     padding: 0px 0;
     font-size: 10px;
@@ -193,6 +193,4 @@ export default {
     vertical-align: middle;
 }
 
-.time {
-}
 </style>

@@ -251,12 +251,14 @@
                     <td>
                       <button
                         class="btn btn-secondary"
-                        data-toggle="popover"
                         data-target="#leftBar"
                         data-placement="bottom"
                         data-content="Click to hide or show left side-bar."
                         v-on:click="sideBar = !sideBar"
-                      >Hide/Show</button>
+                        style="font-size:10px"
+                      >Hide/Show Sidebar</button><br>
+                      <button class="btn btn-primary mt-1" v-if="isEntering" v-on:click="closeClassList" style="font-size:10px">Hide Class List</button>
+                      
                     </td>
                     <td>
                       <Pagination

@@ -326,7 +326,7 @@ export default {
             allowWaitlist: false,
             allowClosed: false,
             cache: true,
-            modalCourse : null,
+            modalCourse: null
         };
     },
     mounted() {
@@ -466,13 +466,11 @@ export default {
                 if (res.data.status.err.length > 0) {
                     this.errMsg = res.data.status.err;
                     this.schedules = [];
-                    this.cleanSchedule(this.currentSchedule);
                     return;
                 }
                 if (res.data.data.length === 0) {
                     this.errMsg = 'No matching schedule satisfying the given constraints';
                     this.schedules = [];
-                    this.cleanSchedule(this.currentSchedule);
                     return;
                 }
                 this.parseResponse(res);

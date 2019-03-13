@@ -1,7 +1,7 @@
 <template>
-<div
+  <div
     class="courseBlock"
-    data-toggle='modal'
+    data-toggle="modal"
     data-target="#modal"
     v-on:click="$parent.$emit('trigger-modal', course)"
     v-bind:style="{

@@ -36,12 +36,14 @@ class AllRecords {
     search(query, max_results = 5) {
         console.time('query');
         query = query.trim().toLowerCase();
+        // query no space
+        const query_no_sp = query.split(' ').join('');
         const matches = [[], [], [], []];
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 
             // match with the course number
-            if (key.indexOf(query) !== -1) {
+            if (key.indexOf(query_no_sp) !== -1) {
                 matches[0].push(new CourseRecord(course, key));
 
                 // match with the title
@@ -251,12 +253,10 @@ class Course {
     }
 
     hash() {
-        let hash = 0,
-            i,
-            chr;
+        let hash = 0;
         if (this.key.length === 0) return hash;
-        for (i = 0; i < this.key.length; i++) {
-            chr = this.key.charCodeAt(i);
+        for (let i = 0; i < this.key.length; i++) {
+            const chr = this.key.charCodeAt(i);
             hash = (hash << 5) - hash + chr;
             hash |= 0; // Convert to 32bit integer
         }

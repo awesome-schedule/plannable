@@ -21,6 +21,7 @@ class Schedule {
         '#993D5F'
     ];
     /**
+     * this field must be initialized before calling any instance method of the Schedule class
      * @type {AllRecords}
      */
     static allRecords;

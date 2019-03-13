@@ -73,8 +73,8 @@
 
 <script>
 // eslint-disable-next-line
-import { CourseRecord } from '../models/CourseRecord';
-import { Schedule } from '../models/Schedule';
+import CourseRecord from '../models/CourseRecord';
+import Schedule from '../models/Schedule';
 export default {
     props: {
         courses: Array,

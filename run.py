@@ -42,20 +42,23 @@ def get_semesters():
     return jsonify(semesters)
 
 
-def raw_result_to_response(raw_result: List[List[Any]]) -> Tuple[List[List[Any]], Dict[int, List[Any]]]:
-    course_data = dict()
+def raw_result_to_response(raw_result: List[List[Any]]) -> Tuple[List[List[Any]]]:
     result = []
     for raw_schedule in raw_result:
         schedule = []
         for raw_course in raw_schedule:
             cid = raw_course[0]
-            schedule.append(cid)
-            if not course_data.get(cid):
-                course_data[cid] = RECORD[cid]
+            record = RECORD[cid]
+            key = str(record[1]).lower() + str(record[2]) + str(record[4])
+            for i, v in enumerate(RECORDS_DICT[key][0]):
+                if v == cid:
+                    sec = i
+                    break
+            schedule.append([key, sec, cid])
 
         result.append(schedule)
 
-    return result, course_data
+    return result
 
 
 @app.route('/api/classes', methods=['GET', 'POST'])
@@ -75,22 +78,21 @@ def get_classes():
 
         if test:
             raw_result = getReq([
-                "cs2110lecture",
-                "cs2110laboratory",
-                "span2020lecture",
-                "cs2102lecture",
-                "sts1500discussion",
-                "math3354lecture",
-                "sts1500lecture",
+                "cs21105",
+                "cs21104",
+                "span20205",
+                "cs21025",
+                "sts15001",
+                "math33545",
+                "sts15005",
             ], 10, Days=["MoTuWeThFr 00:00AM - 08:00AM",
                          "MoTuWeThFr 08:00PM - 10:00PM"])
 
-            result, course_data = raw_result_to_response(raw_result)
+            result = raw_result_to_response(raw_result)
 
             return jsonify({
                 'meta': {
                     'attr_map': ATTR_MAP,
-                    'course_data': course_data
                 },
                 'data': result
             })
@@ -109,10 +111,10 @@ def get_classes():
                 print(days)
 
                 if days is not None and len(days) == 2:
-                    result, course_data = raw_result_to_response(
+                    result = raw_result_to_response(
                         getReq(classes, num, Days=days))
                 else:
-                    result, course_data = raw_result_to_response(
+                    result = raw_result_to_response(
                         getReq(classes, num))
 
                 return jsonify({
@@ -121,7 +123,6 @@ def get_classes():
                     },
                     'meta': {
                         'attr_map': ATTR_MAP,
-                        'course_data': course_data
                     },
                     'data': result
                 })

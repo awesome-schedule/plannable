@@ -55,9 +55,9 @@ Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:80
 
 ## Built With
 
--   [Vue.js](https://vuejs.org) - JavaScript framework used
--   [Bootstrap](https://getbootstrap.com/) - The web template used
--   [Flask](http://flask.pocoo.org/) - Python framwork used
+-   [Vue.js](https://vuejs.org) - Front-end framework
+-   [Bootstrap](https://getbootstrap.com/) - Front-end component library
+-   [Flask](http://flask.pocoo.org/) - Back-end framework
 
 ## Authors
 
@@ -71,7 +71,3 @@ See also the list of [contributors](https://github.com/OAHC2022/UVaAutoScheduler
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
--   [schedule-template](https://github.com/CodyHouse/schedule-template) for making schedule template.

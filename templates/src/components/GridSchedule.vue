@@ -5,34 +5,10 @@
         <div
           class="grid-container time mb-3"
           v-bind:style="{
-        'grid-template-columns': 'auto',
-        'width' : '100%', 
-        'grid-template-rows': '35px '
-                            + heightInfo[0] + 'px ' 
-                            + heightInfo[1] + 'px ' 
-                            + heightInfo[2] + 'px '
-                            + heightInfo[3] + 'px '
-                            + heightInfo[4] + 'px '
-                            + heightInfo[5] + 'px '
-                            + heightInfo[6] + 'px '
-                            + heightInfo[7] + 'px '
-                            + heightInfo[8] + 'px '
-                            + heightInfo[9] + 'px '
-                            + heightInfo[10] + 'px '
-                            + heightInfo[11] + 'px '
-                            + heightInfo[12] + 'px '
-                            + heightInfo[13] + 'px '
-                            + heightInfo[14] + 'px '
-                            + heightInfo[15] + 'px '
-                            + heightInfo[16] + 'px '
-                            + heightInfo[17] + 'px '
-                            + heightInfo[18] + 'px '
-                            + heightInfo[19] + 'px '
-                            + heightInfo[20] + 'px '
-                            + heightInfo[21] + 'px '
-                            + heightInfo[22] + 'px '
-
-     }"
+            'grid-template-columns': 'auto',
+            'width' : '100%', 
+            'grid-template-rows': heightInfo.reduce((acc, x) => acc + (x + 'px '), '35px ')
+          }"
         >
           <div></div>
           <div v-for="hour in hours" :key="hour">{{hour}}</div>
@@ -42,34 +18,10 @@
         <div
           class="grid-container main mb-3"
           v-bind:style="{
-        'grid-template-columns': '20% 20% 20% 20% 20%',
-        'position': 'relative', 
-        'grid-template-rows': '48px '
-                            + heightInfo[0] + 'px ' 
-                            + heightInfo[1] + 'px ' 
-                            + heightInfo[2] + 'px '
-                            + heightInfo[3] + 'px '
-                            + heightInfo[4] + 'px '
-                            + heightInfo[5] + 'px '
-                            + heightInfo[6] + 'px '
-                            + heightInfo[7] + 'px '
-                            + heightInfo[8] + 'px '
-                            + heightInfo[9] + 'px '
-                            + heightInfo[10] + 'px '
-                            + heightInfo[11] + 'px '
-                            + heightInfo[12] + 'px '
-                            + heightInfo[13] + 'px '
-                            + heightInfo[14] + 'px '
-                            + heightInfo[15] + 'px '
-                            + heightInfo[16] + 'px '
-                            + heightInfo[17] + 'px '
-                            + heightInfo[18] + 'px '
-                            + heightInfo[19] + 'px '
-                            + heightInfo[20] + 'px '
-                            + heightInfo[21] + 'px '
-                            + heightInfo[22] + 'px '
-
-     }"
+            'grid-template-columns': '20% 20% 20% 20% 20%',
+            'position': 'relative', 
+            'grid-template-rows': heightInfo.reduce((acc, x) => acc + (x + 'px '), '48px ')
+          }"
           id="grid"
         >
           <div class="day">
@@ -89,9 +41,6 @@
           </div>
           <div v-for="item in items" :key="item" style="z-index:1"></div>
 
-          <!-- <div
-            style="margin-top:48px; position:absolute; width:20%; height:25px; background-color:green; z-index:2; left:20%"
-          >-->
           <course-block
             v-for="course in courses.Monday"
             :key="course.key + 'Mo' "
@@ -127,7 +76,6 @@
             v-bind:heightInfo="heightInfo"
             style="left:80%"
           ></course-block>
-          <!-- </div> -->
         </div>
       </td>
     </tr>
@@ -137,7 +85,6 @@
 <script>
 import CourseBlock from './CourseBlock.vue';
 import { Schedule } from '../models/Schedule.js';
-import { Course } from '../models/CourseRecord.js';
 
 export default {
     name: 'GridSchedule',
@@ -166,17 +113,11 @@ export default {
 
         time.push('19: 00');
 
-        let height = [];
-        for (let i = 0; i < 23; i++) {
-            height.push(partial);
-        }
-
         return {
             partialHeight: partial,
             fullHeight: full,
             items: arr,
             hours: time
-            // heightInfo : height,
         };
     },
 

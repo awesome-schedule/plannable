@@ -274,7 +274,6 @@
               <td>
                 <div class="tab mt-2"></div>
                 <grid-schedule v-bind:courses="currentSchedule" @trigger-modal="showModal"></grid-schedule>
-                <!-- <ScheduleView v-bind:courses="this.currentSchedule" @trigger-modal="triggerModal"></ScheduleView> -->
               </td>
             </tr>
           </table>
@@ -285,6 +284,7 @@
 </template>
 
 <script>
+// eslint-disable-next-line
 /* global $ */
 import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
@@ -302,12 +302,14 @@ export default {
         Pagination,
         GridSchedule,
         Modal
-        // CourseModal
     },
     data() {
         return {
-            // api: `${window.location.protocol}//${window.location.host}/api`,
-            api: 'http://localhost:8000/api',
+            api:
+                window.location.host.indexOf('localhost') === -1 &&
+                window.location.host.indexOf('127.0.0.1') === -1
+                    ? `${window.location.protocol}//${window.location.host}/api`
+                    : 'http://localhost:8000/api',
             semesters: null,
             currentSemester: null,
             allRecords: null,

@@ -72,6 +72,7 @@
 </template>
 
 <script>
+// eslint-disable-next-line
 import { CourseRecord } from '../models/CourseRecord';
 import { Schedule } from '../models/Schedule';
 export default {
@@ -86,11 +87,7 @@ export default {
         };
     },
     methods: {
-        /**
-         * @param {CourseRecord} crs
-         */
         select(crs, idx) {
-            const key = crs.key;
             this.$emit('update_course', crs.key, idx);
             this.$forceUpdate();
         },

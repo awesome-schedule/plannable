@@ -1,7 +1,7 @@
 <template>
-<div
+  <div
     class="courseBlock"
-    data-toggle='modal'
+    data-toggle="modal"
     data-target="#modal"
     v-on:click="$parent.$emit('trigger-modal', course)"
     v-bind:style="{
@@ -17,7 +17,7 @@
     <div
       class="mt-2 ml-2"
       style="color:white; font-size:13px"
-    >{{course.department}} {{course.number}} {{course.title}}</div>
+    >{{course.department}} {{course.number}}</div>
     <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.type}}</div>
     <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.days}}</div>
     <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.instructor.join(', ')}}</div>

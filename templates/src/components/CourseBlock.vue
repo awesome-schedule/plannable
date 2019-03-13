@@ -17,8 +17,7 @@
     <div
       class="mt-2 ml-2"
       style="color:white; font-size:13px"
-    >{{course.department}} {{course.number}}</div>
-    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.type}}</div>
+    >{{course.department}} {{course.number}} {{course.type}}</div>
     <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.days}}</div>
     <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.instructor.join(', ')}}</div>
     <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.room}}</div>
@@ -31,7 +30,8 @@ export default {
     name: 'CourseBlock',
     props: {
         course: Course,
-        heightInfo: Array
+        heightInfo: Array,
+        fullHeight: Number,
     },
     computed: {
         startPx: function() {
@@ -44,10 +44,10 @@ export default {
             if (parseInt(t[1]) >= 30) {
                 start += this.heightInfo[temp];
                 if (parseInt(t[1]) > 30) {
-                    start += ((parseFloat(t[1]) - 30) / 30) * 60;
+                    start += ((parseFloat(t[1]) - 30) / 30) * this.fullHeight;
                 }
             } else {
-                start += (parseFloat(t[1]) / 30) * 60;
+                start += (parseFloat(t[1]) / 30) * this.fullHeight;
             }
             return start;
         },
@@ -62,10 +62,10 @@ export default {
             if (parseInt(t[1]) >= 30) {
                 end += this.heightInfo[temp];
                 if (parseInt(t[1]) > 30) {
-                    end += ((parseFloat(t[1]) - 30) / 30) * 60;
+                    end += ((parseFloat(t[1]) - 30) / 30) * this.fullHeight;
                 }
             } else {
-                end += (parseFloat(t[1]) / 30) * 60;
+                end += (parseFloat(t[1]) / 30) * this.fullHeight;
             }
             return end;
         }

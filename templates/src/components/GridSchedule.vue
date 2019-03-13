@@ -46,6 +46,7 @@
             :key="course.key + 'Mo' "
             v-bind:course="course"
             v-bind:heightInfo="heightInfo"
+            v-bind:fullHeight="fullHeight"
             style="left:0%"
           ></course-block>
           <course-block
@@ -53,6 +54,7 @@
             :key="course.key + 'Tu'"
             v-bind:course="course"
             v-bind:heightInfo="heightInfo"
+            v-bind:fullHeight="fullHeight"
             style="left:20%"
           ></course-block>
           <course-block
@@ -60,6 +62,7 @@
             :key="course.key + 'We'"
             v-bind:course="course"
             v-bind:heightInfo="heightInfo"
+            v-bind:fullHeight="fullHeight"
             style="left:40%"
           ></course-block>
           <course-block
@@ -67,6 +70,7 @@
             :key="course.key + 'Th'"
             v-bind:course="course"
             v-bind:heightInfo="heightInfo"
+            v-bind:fullHeight="fullHeight"
             style="left:60%"
           ></course-block>
           <course-block
@@ -74,6 +78,7 @@
             :key="course.key + 'Fr'"
             v-bind:course="course"
             v-bind:heightInfo="heightInfo"
+            v-bind:fullHeight="fullHeight"
             style="left:80%"
           ></course-block>
         </div>
@@ -98,7 +103,7 @@ export default {
 
     data() {
         let partial = 20;
-        let full = 60;
+        let full = 50;
 
         let arr = [];
         for (let i = 0; i < 115; i++) {

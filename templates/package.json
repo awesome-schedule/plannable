@@ -12,49 +12,13 @@
         "vue": "^2.6.6"
     },
     "devDependencies": {
-        "@vue/cli-plugin-babel": "^3.4.0",
-        "@vue/cli-plugin-eslint": "^3.4.0",
-        "@vue/cli-service": "^3.4.0",
+        "@vue/cli-plugin-babel": "^3.5.0",
+        "@vue/cli-plugin-eslint": "^3.5.0",
+        "@vue/cli-service": "^3.5.0",
+        "@vue/eslint-config-prettier": "^4.0.1",
         "babel-eslint": "^10.0.1",
         "eslint": "^5.8.0",
         "eslint-plugin-vue": "^5.0.0",
-        "vue-template-compiler": "^2.5.21",
-        "prettier": "^1.16.4",
-        "eslint-config-prettier": "^3.3.0",
-        "eslint-plugin-import": "^2.14.0",
-        "eslint-plugin-prettier": "^3.0.1"
-    },
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "node": true,
-            "browser": true,
-            "jquery": true
-        },
-        "extends": [
-            "prettier",
-            "plugin:vue/recommended",
-            "plugin:prettier/recommended",
-            "eslint:recommended"
-        ],
-        "rules": {
-            "no-console": "off",
-            "no-unused-vars": "warn",
-            "prettier/prettier": "warn",
-            "prefer-const": "error"
-        },
-        "parserOptions": {
-            "parser": "babel-eslint"
-        }
-    },
-    "postcss": {
-        "plugins": {
-            "autoprefixer": {}
-        }
-    },
-    "browserslist": [
-        "> 1%",
-        "last 2 versions",
-        "not ie <= 8"
-    ]
+        "vue-template-compiler": "^2.5.21"
+    }
 }

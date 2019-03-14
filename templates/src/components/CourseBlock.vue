@@ -1,27 +1,28 @@
 <template>
-  <div
-    class="courseBlock"
-    data-toggle="modal"
-    data-target="#modal"
-    v-on:click="$parent.$emit('trigger-modal', course)"
-    v-bind:style="{
-        'margin-top': startPx  + 'px',
-        'position': 'absolute',
-        'width': '20%',
-        'height': endPx - startPx + 'px',
-        'background-color': course.backgroundColor,
-        'z-index': '2',
-        'color' : 'white',
-        }"
-  >
     <div
-      class="mt-2 ml-2"
-      style="color:white; font-size:13px"
-    >{{course.department}} {{course.number}} {{course.type}}</div>
-    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.days}}</div>
-    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.instructor.join(', ')}}</div>
-    <div class="ml-2" style="color:#eaeaea; font-size:11px">{{course.room}}</div>
-  </div>
+        class="courseBlock"
+        data-toggle="modal"
+        data-target="#modal"
+        :style="{
+            'margin-top': startPx + 'px',
+            position: 'absolute',
+            width: '20%',
+            height: endPx - startPx + 'px',
+            'background-color': course.backgroundColor,
+            'z-index': '2',
+            color: 'white'
+        }"
+        @click="$parent.$emit('trigger-modal', course)"
+    >
+        <div class="mt-2 ml-2" style="color:white; font-size:13px">
+            {{ course.department }} {{ course.number }} {{ course.type }}
+        </div>
+        <div class="ml-2" style="color:#eaeaea; font-size:11px">{{ course.days }}</div>
+        <div class="ml-2" style="color:#eaeaea; font-size:11px">
+            {{ course.instructor.join(', ') }}
+        </div>
+        <div class="ml-2" style="color:#eaeaea; font-size:11px">{{ course.room }}</div>
+    </div>
 </template>
 
 <script>
@@ -36,8 +37,8 @@ export default {
     computed: {
         startPx: function() {
             let start = 48;
-            let t = this.course.start.split(':');
-            let temp = (parseFloat(t[0]) - 8) * 2;
+            const t = this.course.start.split(':');
+            const temp = (parseFloat(t[0]) - 8) * 2;
             for (let i = 0; i < temp; i++) {
                 start += this.heightInfo[i];
             }
@@ -54,8 +55,8 @@ export default {
 
         endPx: function() {
             let end = 48;
-            let t = this.course.end.split(':');
-            let temp = (parseFloat(t[0]) - 8) * 2;
+            const t = this.course.end.split(':');
+            const temp = (parseFloat(t[0]) - 8) * 2;
             for (let i = 0; i < temp; i++) {
                 end += this.heightInfo[i];
             }

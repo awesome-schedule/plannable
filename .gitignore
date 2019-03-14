@@ -9,3 +9,4 @@ new_sis/test*.ipynb
 *.ipynb
 node_modules
 .DS_Store
+tests/

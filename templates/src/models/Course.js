@@ -1,5 +1,4 @@
 import CourseRecord from './CourseRecord';
-
 class Course {
     /**
      * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
@@ -35,7 +34,7 @@ class Course {
         this.start = '';
         this.end = '';
 
-        //
+        // whether is the default section
         this.default = true;
     }
 
@@ -52,15 +51,29 @@ class Course {
         return cp;
     }
 
-    hash() {
-        let hash = 0;
-        if (this.key.length === 0) return hash;
-        for (let i = 0; i < this.key.length; i++) {
-            const chr = this.key.charCodeAt(i);
-            hash = (hash << 5) - hash + chr;
-            hash |= 0; // Convert to 32bit integer
+    /**
+     * Calculate a 32 bit FNV-1a hash
+     * Found here: https://gist.github.com/vaiorabbit/5657561
+     * Ref.: http://isthe.com/chongo/tech/comp/fnv/
+     *
+     * @param {string} str the input value
+     * @returns {number}
+     */
+    static hashCode(str) {
+        let hval = 0x811c9dc5;
+
+        for (let i = 0, l = str.length; i < l; i++) {
+            hval ^= str.charCodeAt(i);
+            hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
         }
-        return Math.abs(hash);
+        return hval >>> 0;
+    }
+
+    /**
+     * compute the hash of this course using its key
+     */
+    hash() {
+        return Course.hashCode(this.key);
     }
 }
 

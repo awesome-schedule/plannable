@@ -1,9 +1,10 @@
+// @ts-check
 import Course from './Course';
 import CourseRecord from './CourseRecord';
 class AllRecords {
     /**
      *
-     * @param {Object<string, [number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string][]>} raw_data
+     * @param {Object<string, [number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]>} raw_data
      */
     constructor(raw_data) {
         this.raw_data = raw_data;
@@ -12,7 +13,6 @@ class AllRecords {
     /**
      * Get a CourseRecord associated with the given key
      * @param {string} key
-     * @param {number} section
      * @returns {CourseRecord}
      */
     getRecord(key) {
@@ -32,7 +32,7 @@ class AllRecords {
     /**
      *
      * @param {string} query
-     * @param {number} max_result
+     * @param {number} max_results
      * @returns {CourseRecord[]}
      */
     search(query, max_results = 5) {
@@ -71,7 +71,7 @@ class AllRecords {
         }
 
         let len = 0;
-        let indices = [];
+        const indices = [];
         for (let i = 0; i < matches.length; i++) {
             indices.push(Math.min(matches[i].length, max_results - len));
             len += matches[i].length;

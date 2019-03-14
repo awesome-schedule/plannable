@@ -33,13 +33,15 @@
         },
         "extends": [
             "prettier",
-            "plugin:vue/essential",
+            "plugin:vue/recommended",
             "plugin:prettier/recommended",
             "eslint:recommended"
         ],
         "rules": {
             "no-console": "off",
-            "no-unused-vars": "warn"
+            "no-unused-vars": "warn",
+            "prettier/prettier": "warn",
+            "prefer-const": "error"
         },
         "parserOptions": {
             "parser": "babel-eslint"

@@ -1,6 +1,6 @@
 <template>
-    <nav aria-label="...">
-        <ul class="pagination justify-content-center">
+    <nav>
+        <ul class="pagination justify-content-center" style="margin-bottom: 0">
             <li :class="'page-item' + (idx <= 0 ? ' disabled' : '')">
                 <a
                     class="page-link"

@@ -17,21 +17,24 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div>{{ course.type }}</div>
-                    <table style="color:#a0a0a0;font-size:11px;width:80%">
-                        <tr v-for="sec in sections" :key="sec">
-                            <td style="width:10%">Section:&nbsp;{{ sec[0] }}</td>
-                            <td v-if="sec[1] != ''" style="width:13%">{{ sec[1] }}</td>
-                            <td style="width:13%">{{ sec[2] }}</td>
-                            <td style="width:13%">{{ sec[3] }}</td>
-                            <td style="width:16.7%">{{ sec[4] }}</td>
-                            <td style="width:5%">{{ sec[5] }}</td>
-                            <td style="width:13%">{{ sec[6] }}</td>
+                    <h6>{{ course.type }}</h6>
+                    <table style="color:#808080; font-size:0.75rem; width:95%">
+                        <tr v-for="(_, i) in course.section" :key="i">
+                            <td class="info">Section:&nbsp;{{ course.section[i] }}</td>
+                            <td v-if="course.topic[i] !== ''" class="info">
+                                {{ course.topic[i] }}
+                            </td>
+                            <td class="info" width="20%">{{ course.instructor[i].join(' ') }}</td>
+                            <td class="info">{{ course.days[i] }}</td>
+                            <td class="info">{{ course.room[i] }}</td>
+                            <td class="info">{{ course.status[i] }}</td>
+                            <td class="info">
+                                {{ course.enrollment[i] + '/' + course.enrollment_limit[i] }}
+                            </td>
                         </tr>
                     </table>
 
-                    <br />
-                    <div>{{ course.description }}</div>
+                    <p style="margin-top: 0.5rem">{{ course.description }}</p>
                 </div>
             </div>
         </div>
@@ -43,25 +46,12 @@ import CourseRecord from '../models/CourseRecord.js';
 export default {
     props: {
         course: CourseRecord
-    },
-    computed: {
-        sections() {
-            const secs = [];
-            for (let i = 0; i < this.course.section.length; i++) {
-                secs.push([
-                    this.course.section[i],
-                    this.course.topic[i],
-                    this.course.instructor[i].join(', '),
-                    this.course.days[i],
-                    this.course.room[i],
-                    this.course.status[i],
-                    this.course.enrollment[i] + '/' + this.course.enrollment_limit[i]
-                ]);
-            }
-            return secs;
-        }
     }
 };
 </script>
 
-<style></style>
+<style scoped>
+.info {
+    padding-right: 10px;
+}
+</style>

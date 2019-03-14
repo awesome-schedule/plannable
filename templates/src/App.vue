@@ -12,7 +12,7 @@
             style="background-color:#F9A348;position:fixed;width:100%;z-index:5"
         >
             <!-- brand -->
-            <a class="navbar-brand text-white" href="#">UVaAuotoScheduler</a>
+            <a class="navbar-brand text-white">UVaAutoScheduler</a>
 
             <button
                 class="navbar-toggler"
@@ -136,6 +136,112 @@
                         />
                     </div>
                     <div v-if="!isEntering">
+                        <div class="mt-3">
+                            <button
+                                class="btn btn-primary"
+                                type="button"
+                                data-toggle="collapse"
+                                data-target="#filter"
+                                aria-expanded="true"
+                                aria-controls="filter"
+                                style="width:100%"
+                            >
+                                Filters
+                            </button>
+                        </div>
+
+                        <div id="filter" class="collapse show">
+                            <div class="card card-body">
+                                <div class="filter mt-2">
+                                    <div class="input-group">
+                                        <button
+                                            type="button"
+                                            class="button dropdown-toggle dropdown-toggle-split"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false"
+                                        >
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </button>
+                                        <div class="dropdown-menu" style="width:100%">
+                                            <a
+                                                v-for="t in allTimes"
+                                                :key="t"
+                                                class="dropdown-item"
+                                                href="#"
+                                                @click="startTime = t"
+                                                >{{ t }}</a
+                                            >
+                                        </div>
+
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Earliest Time"
+                                            style="font-size: 10pt;"
+                                            aria-describedby="basic-addon1"
+                                            :value="startTime"
+                                            @input="
+                                                startTime = $event.target.value;
+                                                saveStatus();
+                                            "
+                                        />
+                                    </div>
+                                    <div class="input-group mt-2">
+                                        <button
+                                            type="button"
+                                            class="button dropdown-toggle dropdown-toggle-split"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false"
+                                        >
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </button>
+                                        <div class="dropdown-menu" style="width:100%">
+                                            <a
+                                                v-for="t in allTimes"
+                                                :key="t"
+                                                class="dropdown-item"
+                                                href="#"
+                                                @click="endTime = t"
+                                                >{{ t }}</a
+                                            >
+                                        </div>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Latest Time"
+                                            style="font-size: 10pt"
+                                            aria-describedby="basic-addon1"
+                                            :value="endTime"
+                                            @input="
+                                                endTime = $event.target.value;
+                                                saveStatus();
+                                            "
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label for="awt">Wait List</label>&nbsp;&nbsp;
+                                        <input
+                                            id="awt"
+                                            type="checkbox"
+                                            v-bind="allowWaitlist"
+                                        />&nbsp;&nbsp; <label for="ac">Closed</label>&nbsp;&nbsp;
+                                        <input id="ac" type="checkbox" v-bind="allowClosed" />
+                                    </div>
+                                </div>
+                                <!--submit button-->
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-success mt-2"
+                                    @click="sendRequest"
+                                >
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="mt-3">
                             <button
                                 class="btn btn-primary"
@@ -327,7 +433,6 @@
                             <td>
                                 <Pagination
                                     v-if="schedules !== null && schedules.length > 0"
-                                    class="mt-3"
                                     :indices="scheduleIndices"
                                     @switch_page="switchPage"
                                 ></Pagination>

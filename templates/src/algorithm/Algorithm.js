@@ -1,5 +1,10 @@
-import { AllRecords, CourseRecord, Course } from '../models/CourseRecord';
-import Schedule from '../models/Schedule';
+//@ts-check
+
+
+import CourseRecord from '../models/CourseRecord.js';
+import Course from '../models/Course.js';
+import AllRecords from '../models/AllRecords.js';
+import Schedule from '../models/Schedule.js';
 
 class InstantiateAlgo{
     constructor(raw_data,keys){
@@ -18,72 +23,70 @@ class Algorithm{
     createSchedule(classList){
         /*I need a three dimensional array containing only days*/
         /*convert a day and a time into an integer --> day * 1440 + hr *60 + min * 1 
-        classList --> [(keys,start,end)]*/
-        var classNum = 0
-        var choiceNum = 0
+        classList --> [keys,[days],[start,end]]
+        finatable --> [keys,[days],[start,end],index]*/
+        var classNum = 0;
+        var choiceNum = 0;
         var pathMem = Array.from({length: classList.length}, (x, i) => 0);
-        var timeTable = new Array()
-        var tempTable = new Array()
-        var finalTable = new FinalTable()
+        var timeTable = new Array();
+        var finalTable = new FinalTable();
+        var exhausted;
         while(true){
-            if(classNum >= length(classList)){
-                finalTable.add(tempTable)
-                classNum -= 1
-                choiceNum = pathMem[classNum]
-                timeTable.pop()
-                tempTable.pop()
+            if(classNum >= classList.length){
+                finalTable.add(timeTable);
+                classNum -= 1;
+                choiceNum = pathMem[classNum];
+                timeTable.pop();
             }
         
-            classNum, choiceNum, pathMemory, timeTable,tempTable, exhausted = AlgorithmRetract(classList,
+            [classNum, choiceNum, pathMem, timeTable, exhausted] = this.AlgorithmRetract(classList,
                 classNum,
                 choiceNum,
-                pathMemory,
-                timeTable,
-                tempTable)
+                pathMem,
+                timeTable);
             
             if(exhausted){
-                break
+                break;
             }
 
-            timeBlock = classList[classNum][choiceNum].slice(1,3)
+            var date = classList[classNum][choiceNum][1]
+            var timeBlock = classList[classNum][choiceNum][2];
 
-            if(!checkTimeConflict(timeTable, timeBlock)){
+            if(!this.checkTimeConflict(timeTable, date,timeBlock)){
                 //if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
-                timeTable.push(timeBlock)
-                tempTable.push([classList[classNum][choiceNum][0],choiceNum])
-                pathMemory[classNum] = choiceNum + 1
-                classNum += 1
-                choiceNum = 0
+                timeTable.push(classList[classNum][choiceNum].concat(choiceNum));
+                pathMem[classNum] = choiceNum + 1;
+                classNum += 1;
+                choiceNum = 0;
             }
             else{
-                choiceNum += 1
+                choiceNum += 1;
             }
         }
-        return finalTable
+        return finalTable;
 
     }
 
-    AlgorithmRetract(classNum, choiceNum, pathMemory, timeTable,tempTable){
+    AlgorithmRetract(classList,classNum, choiceNum, pathMemory, timeTable){
     /*when all possibilities in on class have exhausted, retract one class
          explore the next possibilities in the nearest possible class
         reset the memory path forward to zero
         */
-        while (choiceNum >= length(classList[classNum])){
-            classNum -= 1
+        while (choiceNum >= classList[classNum].length){
+            classNum -= 1;
             if(classNum < 0){
-                return classNum, choiceNum, pathMemory, timeTable,tempTable, True
+                return [classNum, choiceNum, pathMemory, timeTable,true];
             }
-            timeTable.pop()
-            tempTable.pop()
-            choiceNum = pathMemory[classNum]
-            for (i in range(classNum + 1, len(pathMemory))){
-                pathMemory[i] = 0
+            timeTable.pop();
+            choiceNum = pathMemory[classNum];
+            for (var i = classNum+1 ; i < pathMemory.length;i++){
+                pathMemory[i] = 0;
             }
         }
-        return classNum, choiceNum, pathMemory, timeTable,tempTable, False
+        return [classNum, choiceNum, pathMemory, timeTable,false];
     }
 
-    checkTimeConflict(timeTable, timeBlock){
+    checkTimeConflict(timeTable, date, timeBlock){
         /*
         compare the new class to see if it has conflicts with the existing time table
         :param timeTable: three entries: 1. the class serial number, 2. the date 3. the time
@@ -91,33 +94,82 @@ class Algorithm{
         :param timeBlock: contains beginTime and endTime of a class
         :return: Boolean type: true if it has conflict, else false
         */
-        if(None in timeBlock){
+        if(date === "None" ||"None" in timeBlock){
             //do not include any TBA
-            return True
+            return true;
         }
         if(timeTable === []){
-            return False
+            return false;
         }
-        beginTime = timeBlock[0]
-        endTime = timeBlock[1]
-        for(times in timeTable){
-            begin = times[0]
-            end = times[1]
-            if((begin <= beginTime <= end || begin <= endTime <= end)){
-                return True
-            }  
+        var beginTime = timeBlock[0];
+        var endTime = timeBlock[1];
+        for(var times in timeTable){
+            var dates = times[1];
+            var begin = times[2][0];
+            var end = times[2][1];
+            for(var d in date){
+                if (!(dates.includes(d))){
+                    continue;
+                }
+                if((begin <= beginTime || beginTime <= end || begin <= endTime || endTime <= end)){
+                    return true;
+                }  
+            }
         }
-        return False
+        return false;
+    }
+    
+    parseTime(classTime){
+        /*
+        parse the classTime and return which day the class is on and what time it takes place
+        remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
+        :param classTime: give the clclassList[classNum][choiceNum][0ass time in form of String
+        :return: date: List, timeBlock: List
+        */
+        if(classTime === "TBA"){
+            /*there is TBA*/
+            return ["None", "None"];
+        }
+        var pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
+        var match = classTime.match(pattern);
+
+        var dates = match.group(1);
+        var times = match.group(2);
+
+        var date = [];
+        for(var i = 0; i < dates.length; i+=2){
+            date.push(dates.slice(i,i+2));
+        }
+        var time = times.strip().split("-");
+        var timeBlock = [0, 0];
+        var count = 0;
+        var tempTime;
+        for(var j in time){
+            if (j.includes("12") && j.includes("PM")){
+                tempTime = j.replace("PM","").trim().split(":");
+                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
+            }
+            else if(j.includes("AM")){
+                tempTime = j.replace("AM","").trim().split(":");
+                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
+            }
+            else if(j.includes("PM")){
+                tempTime = j.replace("PM","").trim().split(":");
+                timeBlock[count] += (Number(tempTime[0]) + 12) * 60 + Number(tempTime[1]);
+            }
+            count++ ;
+        }
+        return [date, timeBlock];
     }
 }
 
 
 class FinalTable{
     constructor(){
-        this.finalTable = new Array()
+        this.finalTable = new Array();
     }
     add(timeTable){
-        schedule = new Schedule(timeTable)
-        this.finalTable.push(schedule)
+        var schedule = new Schedule(timeTable);
+        this.finalTable.push(schedule);
     }
 }

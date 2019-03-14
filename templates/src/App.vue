@@ -1,5 +1,5 @@
 <template>
-    <div id="app">
+    <div id="app" style="width:100%">
         <modal id="modal" :course="modalCourse"></modal>
         <ClassListModal
             v-if="classListModalCourse !== null"
@@ -39,9 +39,6 @@
             </div>
         </nav>
         <!-- end of navigation bar -->
-        <div>" "</div>
-        <br />
-        <br />
         <transition name="fade">
             <div
                 v-if="errMsg.length > 0"
@@ -63,16 +60,42 @@
             </div>
         </transition>
 
-        <table style="width: 95%; margin: auto auto">
+        <table style="width:97%;margin:auto auto">
             <tr>
+                <td style="width:3%;vertical-align:top;background-color:#ffffff;">
+                    <br /><br /><br />
+                    <span
+                        class="side-button"
+                        style="font-size:2rem;position:fixed"
+                        @click="
+                            selectClass = !selectClass;
+                            filter = false;
+                        "
+                    >
+                        <i class="far fa-calendar-alt"></i> </span
+                    ><br /><br />
+                    <span
+                        class="side-button"
+                        style="font-size:2rem;position:fixed"
+                        @click="
+                            filter = !filter;
+                            selectClass = false;
+                        "
+                    >
+                        <i class="fas fa-filter"></i> </span
+                    ><br /><br />
+                    <span style="font-size:2rem;position:fixed" class="side-button">
+                        <i class="fas fa-cog"></i>
+                    </span>
+                </td>
                 <td
-                    v-if="sideBar"
+                    v-if="sideBar && selectClass"
                     id="leftBar"
                     class="leftside"
-                    style="width: 20%; vertical-align: top; padding-top: 0; padding-right: 2%"
+                    style="width: 20%; vertical-align:top; padding-top:0; position:fixed;"
                 >
                     <!-- term selection dropdown -->
-                    <div class="dropdown">
+                    <div class="dropdown" style="margin-top:60px">
                         <button
                             id="semester"
                             class="btn btn-primary mt-4 mx-auto"
@@ -118,119 +141,6 @@
                                 class="btn btn-primary"
                                 type="button"
                                 data-toggle="collapse"
-                                data-target="#filter"
-                                aria-expanded="true"
-                                aria-controls="filter"
-                                style="width:100%"
-                            >
-                                Filters
-                            </button>
-                        </div>
-
-                        <div id="filter" class="collapse show">
-                            <div class="card card-body">
-                                <div class="filter mt-2">
-                                    <div class="input-group">
-                                        <!--input earliest time-->
-                                        <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
-                                        <button
-                                            type="button"
-                                            class="button dropdown-toggle dropdown-toggle-split"
-                                            data-toggle="dropdown"
-                                            aria-haspopup="true"
-                                            aria-expanded="false"
-                                        >
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" style="width:100%">
-                                            <a
-                                                v-for="t in allTimes"
-                                                :key="t"
-                                                class="dropdown-item"
-                                                href="#"
-                                                @click="startTime = t"
-                                                >{{ t }}</a
-                                            >
-                                        </div>
-
-                                        <input
-                                            type="text"
-                                            class="form-control"
-                                            placeholder="Earliest Time"
-                                            style="font-size: 10pt;"
-                                            aria-describedby="basic-addon1"
-                                            :value="startTime"
-                                            @input="
-                                                startTime = $event.target.value;
-                                                saveStatus();
-                                            "
-                                        />
-                                    </div>
-
-                                    <div class="input-group mt-2">
-                                        <!--input latest time-->
-                                        <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
-                                        <button
-                                            type="button"
-                                            class="button dropdown-toggle dropdown-toggle-split"
-                                            data-toggle="dropdown"
-                                            aria-haspopup="true"
-                                            aria-expanded="false"
-                                        >
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </button>
-                                        <div class="dropdown-menu" style="width:100%">
-                                            <a
-                                                v-for="t in allTimes"
-                                                :key="t"
-                                                class="dropdown-item"
-                                                href="#"
-                                                @click="endTime = t"
-                                                >{{ t }}</a
-                                            >
-                                        </div>
-                                        <input
-                                            type="text"
-                                            class="form-control"
-                                            placeholder="Latest Time"
-                                            style="font-size: 10pt"
-                                            aria-describedby="basic-addon1"
-                                            :value="endTime"
-                                            @input="
-                                                endTime = $event.target.value;
-                                                saveStatus();
-                                            "
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label for="awt">Wait List</label>&nbsp;&nbsp;
-                                        <input
-                                            id="awt"
-                                            type="checkbox"
-                                            v-bind="allowWaitlist"
-                                        />&nbsp;&nbsp; <label for="ac">Closed</label>&nbsp;&nbsp;
-                                        <input id="ac" type="checkbox" v-bind="allowClosed" />
-                                    </div>
-                                </div>
-                                <!--submit button-->
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-success mt-2"
-                                    @click="sendRequest"
-                                >
-                                    Submit
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <button
-                                class="btn btn-primary"
-                                type="button"
-                                data-toggle="collapse"
                                 data-target="#currentSelectedClass"
                                 aria-expanded="true"
                                 aria-controls="currentSelectedClass"
@@ -240,7 +150,7 @@
                             </button>
                         </div>
                         <div id="currentSelectedClass" class="collapse show">
-                            <div class="card card-body" style="padding:5px">
+                            <div class="card card-body" style="padding:5px;">
                                 <ClassList
                                     :courses="currentCourses"
                                     :schedule="currentSchedule"
@@ -253,6 +163,13 @@
                                 ></ClassList>
                                 <div>
                                     <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-success mt-2"
+                                        @click="sendRequest"
+                                    >
+                                        Submit
+                                    </button>
                                     <button class="btn btn-warning mt-3" @click="clear">
                                         Clean All
                                     </button>
@@ -275,21 +192,129 @@
                     </div>
                 </td>
 
-                <td style="width: 68%; vertical-align: top;">
-                    <table style="width:100%">
+                <td
+                    v-if="sideBar && filter"
+                    class="leftside"
+                    style="width: 20%; vertical-align:top; padding-top:0;position:fixed"
+                >
+                    <div style="margin-top:60px">
+                        <button
+                            class="btn btn-primary"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#filter"
+                            aria-expanded="true"
+                            aria-controls="filter"
+                            style="width:100%n;"
+                        >
+                            Filters
+                        </button>
+                    </div>
+
+                    <div id="filter" class="collapse show">
+                        <div class="card card-body">
+                            <div class="filter mt-2">
+                                <div class="input-group">
+                                    <!--input earliest time-->
+                                    <!-- <div class="input-group-prepend">
+                    <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
+                                    <button
+                                        type="button"
+                                        class="button dropdown-toggle dropdown-toggle-split"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                    >
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu" style="width:100%">
+                                        <a
+                                            v-for="t in allTimes"
+                                            :key="t"
+                                            class="dropdown-item"
+                                            href="#"
+                                            @click="startTime = t"
+                                            >{{ t }}</a
+                                        >
+                                    </div>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Earliest Time"
+                                        style="font-size: 10pt;"
+                                        aria-describedby="basic-addon1"
+                                        :value="startTime"
+                                        @input="
+                                            startTime = $event.target.value;
+                                            saveStatus();
+                                        "
+                                    />
+                                </div>
+
+                                <div class="input-group mt-2">
+                                    <!--input latest time-->
+                                    <!-- <div class="input-group-prepend">
+                    <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
+                                    <button
+                                        type="button"
+                                        class="button dropdown-toggle dropdown-toggle-split"
+                                        data-toggle="dropdown"
+                                        aria-haspopup="true"
+                                        aria-expanded="false"
+                                    >
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu" style="width:100%">
+                                        <a
+                                            v-for="t in allTimes"
+                                            :key="t"
+                                            class="dropdown-item"
+                                            href="#"
+                                            @click="endTime = t"
+                                            >{{ t }}</a
+                                        >
+                                    </div>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Latest Time"
+                                        style="font-size: 10pt"
+                                        aria-describedby="basic-addon1"
+                                        :value="endTime"
+                                        @input="
+                                            endTime = $event.target.value;
+                                            saveStatus();
+                                        "
+                                    />
+                                </div>
+
+                                <div>
+                                    <label for="awt">Wait List</label>&nbsp;&nbsp;
+                                    <input
+                                        id="awt"
+                                        type="checkbox"
+                                        v-bind="allowWaitlist"
+                                    />&nbsp;&nbsp; <label for="ac">Closed</label>&nbsp;&nbsp;
+                                    <input id="ac" type="checkbox" v-bind="allowClosed" />
+                                </div>
+                            </div>
+                            <!--submit button-->
+                            <button
+                                type="button"
+                                class="btn btn-outline-success mt-2"
+                                @click="sendRequest"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    </div>
+                </td>
+
+                <td style="width:77%;vertical-align: top;">
+                    <table style="width:100%;margin-top:60px">
                         <tr>
                             <td>
-                                <button
-                                    class="btn btn-secondary"
-                                    data-target="#leftBar"
-                                    data-placement="bottom"
-                                    data-content="Click to hide or show left side-bar."
-                                    style="font-size:10px"
-                                    @click="sideBar = !sideBar"
-                                >
-                                    Hide/Show Sidebar
-                                </button>
-                                <br />
                                 <button
                                     v-if="isEntering"
                                     class="btn btn-primary mt-1"
@@ -313,6 +338,7 @@
                     <div class="tab mt-2"></div>
                     <grid-schedule
                         :courses="currentSchedule"
+                        style="width:100%"
                         @trigger-modal="showModal"
                     ></grid-schedule>
                 </td>
@@ -361,6 +387,8 @@ export default {
             schedules: null,
             isEntering: false,
             sideBar: true,
+            selectClass: true,
+            filter: false,
             inputCourses: null,
             activeCourse: {},
             startTime: '',
@@ -562,5 +590,11 @@ export default {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
     opacity: 0;
+}
+.side-button {
+    color: #5e5e5e;
+}
+.side-button:hover {
+    color: #3e3e3e;
 }
 </style>

@@ -12,7 +12,7 @@
             style="background-color:#F9A348;position:fixed;width:100%;z-index:5"
         >
             <!-- brand -->
-            <a class="navbar-brand text-white" href="#">UVaAuotoScheduler</a>
+            <a class="navbar-brand text-white">UVaAutoScheduler</a>
 
             <button
                 class="navbar-toggler"
@@ -131,9 +131,6 @@
                             <div class="card card-body">
                                 <div class="filter mt-2">
                                     <div class="input-group">
-                                        <!--input earliest time-->
-                                        <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
                                         <button
                                             type="button"
                                             class="button dropdown-toggle dropdown-toggle-split"
@@ -167,11 +164,7 @@
                                             "
                                         />
                                     </div>
-
                                     <div class="input-group mt-2">
-                                        <!--input latest time-->
-                                        <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
                                         <button
                                             type="button"
                                             class="button dropdown-toggle dropdown-toggle-split"
@@ -302,7 +295,6 @@
                             <td>
                                 <Pagination
                                     v-if="schedules !== null && schedules.length > 0"
-                                    class="mt-3"
                                     :indices="scheduleIndices"
                                     @switch_page="switchPage"
                                 ></Pagination>

@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <modal id="modal" v-bind:course="modalCourse"></modal>
+    <ClassListModal id="class-list-modal" v-bind:course="classListModalCourse"></ClassListModal>
     <!-- navigation bar -->
     <nav
       class="navbar navbar-expand-lg navbar-light"
@@ -218,6 +219,7 @@
                   @update_course="updateCourse"
                   @remove_course="removeCourse"
                   @remove_preview="removePreview"
+                  @trigger-classlist-modal="showClassListModal"
                   @preview="preview"
                 ></ClassList>
                 <div>
@@ -237,6 +239,7 @@
               @remove_preview="removePreview"
               @preview="preview"
               @close="closeClassList"
+              @trigger-classlist-modal="showClassListModal"
             ></ClassList>
           </div>
         </td>
@@ -255,9 +258,14 @@
                         data-content="Click to hide or show left side-bar."
                         v-on:click="sideBar = !sideBar"
                         style="font-size:10px"
-                      >Hide/Show Sidebar</button><br>
-                      <button class="btn btn-primary mt-1" v-if="isEntering" v-on:click="closeClassList" style="font-size:10px">Hide Class List</button>
-                      
+                      >Hide/Show Sidebar</button>
+                      <br>
+                      <button
+                        class="btn btn-primary mt-1"
+                        v-if="isEntering"
+                        v-on:click="closeClassList"
+                        style="font-size:10px"
+                      >Hide Class List</button>
                     </td>
                     <td>
                       <Pagination
@@ -291,6 +299,7 @@ import ClassList from './components/ClassList';
 import Pagination from './components/Pagination';
 import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
+import ClassListModal from './components/ClassListModal.vue';
 // eslint-disable-next-line
 import CourseRecord from './models/CourseRecord.js';
 import Schedule from './models/Schedule.js';
@@ -305,7 +314,8 @@ export default {
         ClassList,
         Pagination,
         GridSchedule,
-        Modal
+        Modal,
+        ClassListModal
     },
     data() {
         return {
@@ -331,7 +341,8 @@ export default {
             allowWaitlist: false,
             allowClosed: false,
             cache: true,
-            modalCourse: null
+            modalCourse: null,
+            classListModalCourse: null
         };
     },
     mounted() {
@@ -381,6 +392,10 @@ export default {
 
         showModal(course) {
             this.modalCourse = course;
+        },
+
+        showClassListModal(course) {
+            this.classListModalCourse = course;
         },
         /**
          * @param {string} key

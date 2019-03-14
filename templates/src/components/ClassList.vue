@@ -7,21 +7,26 @@
           data-placement="right"
           v-bind:data-content="crs.description"
         v-bind:data-title="crs.title"-->
-        <div
-          class="list-group-item list-group-item-action class-title"
-          data-toggle="collapse"
-          v-bind:data-target="`#${crs.key}`"
-          @click="collapse(crs.key)"
-        >
+        <div class="list-group-item list-group-item-action class-title">
           <table style="width: 100%">
             <tr>
-              <td style="padding-right: 0.5rem">
+              <td
+                style="padding-right: 0.5rem"
+                data-toggle="collapse"
+                v-bind:data-target="`#${crs.key}`"
+                @click="collapse(crs.key)"
+              >
                 <i class="fas" v-bind:class="expanded(crs)"></i>
               </td>
               <td>
                 <h6 style="margin-bottom: 0.25rem">
                   {{crs.department}} {{crs.number}} {{crs.type}}
-                  <i class="fas fa-info-circle"></i>
+                  <i
+                    v-on:click="$emit('trigger-classlist-modal', crs)"
+                    data-toggle="modal"
+                    data-target="#class-list-modal"
+                    class="fas fa-info-circle"
+                  ></i>
                 </h6>
                 <p style="font-size: 0.85rem; margin: 0">{{crs.title}}</p>
               </td>

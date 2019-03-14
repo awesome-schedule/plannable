@@ -1,5 +1,4 @@
 import Course from './Course';
-
 class CourseRecord {
     /**
      * lecture type number => meaning
@@ -54,10 +53,11 @@ class CourseRecord {
      *
      * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
      * @param {string} key
-     * @param {number[]} sid A list of section indices
+     * @param {number[]} sids A list of section indices
      */
     constructor(raw, key, sids = null) {
         this.key = key;
+        this.raw = raw;
 
         this.id = this[0] = raw[0];
         this.department = this[1] = raw[1];
@@ -93,7 +93,7 @@ class CourseRecord {
      * @return {Course}
      */
     getCourse(section) {
-        return new Course(this, this.key, section);
+        return new Course(this.raw, this.key, section);
     }
 
     /**
@@ -102,17 +102,18 @@ class CourseRecord {
      * @return {CourseRecord}
      */
     getRecord(sections) {
-        return new CourseRecord(this, this.key, sections);
+        return new CourseRecord(this.raw, this.key, sections);
     }
 
     /**
      * @param {Object} object
+     * @return {boolean}
      */
     equals(object) {
         if (object instanceof CourseRecord) {
-            return this.id == object.id;
+            return this.key === object.key;
         } else {
-            return this.id == object[0];
+            return false;
         }
     }
 }

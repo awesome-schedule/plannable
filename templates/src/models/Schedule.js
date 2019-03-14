@@ -29,14 +29,16 @@ class Schedule {
      */
     static allRecords;
     /**
-     *
-     * @param {[string, int, int][]} raw_schedule
+     * Construct a `Schedule` object from its raw representation
+     * @param {[string, number, number][]} raw_schedule
      * @param {string} title
      * @param {number} id
-     * @param {AllRecords} allRecords
      */
     constructor(raw_schedule = [], title = 'Schedule', id = 0) {
         /**
+         * represents all courses in this schedule, stored as [key, **section**] pair
+         * note that if **section** is -1, it means that all sections are allowed.
+         * Otherwise **section** should be a Set of integers
          * @type {Object<string, Set<number>|number>}
          */
         this.All = {};
@@ -61,7 +63,10 @@ class Schedule {
          */
         this.Friday = [];
 
-        this.previous = [null, null];
+        /**
+         * @type{[string, number]}
+         */
+        this.previous = null;
 
         this.title = title;
         this.id = id;
@@ -83,18 +88,10 @@ class Schedule {
     }
 
     /**
-     * Check if a course already exist
-     * @param {Course} course
-     */
-    exist(course) {
-        return this.All.some(c => c.key === course.key);
-    }
-
-    /**
      * Add a course to schedule
      * @param {string} key
      * @param {number} section
-     * @param {boolean} update
+     * @param {boolean} update whether to re-compute the schedule
      * @return {boolean}
      */
     add(key, section, update = true) {
@@ -111,7 +108,9 @@ class Schedule {
     }
 
     /**
-     *
+     * Update a course in the schedule
+     * - If the course is **already in** the schedule, delete it from the schedule
+     * - If the course is **not** in the schedule, add it to the schedule
      * @param {string} key
      * @param {Set<number> | number} section
      * @param {boolean} update
@@ -131,17 +130,23 @@ class Schedule {
     }
 
     removePreview() {
-        this.previous = [null, null];
+        this.previous = null;
         this.computeSchedule();
     }
 
+    /**
+     *
+     * @param {string} key
+     * @param {number} section
+     */
     preview(key, section) {
         this.previous = [key, section];
         this.computeSchedule();
     }
 
     /**
-     * Compute the schedule view based on this.All and this.preview
+     * Compute the schedule view based on `this.All` and `this.preview`
+     * @see {@link computeSchedule}
      */
     computeSchedule() {
         if (!Schedule.allRecords) return;
@@ -156,17 +161,15 @@ class Schedule {
             }
         }
 
-        const [k, v] = this.previous;
-        if (k !== null && v !== null) {
-            const course = Schedule.allRecords.getCourse(k, v);
+        if (this.previous !== null) {
+            const course = Schedule.allRecords.getCourse(...this.previous);
             course.key += 'preview';
             this.place(course);
         }
     }
 
     /**
-     * Place the course on the schedule
-     * Specifically, this method places the course into one of the Monday - Friday array
+     * places the course into one of the `Monday` to `Friday` array according to its `days` property
      * @param {Course} course
      */
     place(course) {
@@ -197,8 +200,8 @@ class Schedule {
     }
 
     /**
-     * Remove a course from schedule
-     * @param {string} course
+     * Remove a course (and all its sections) from the schedule
+     * @param {string} key
      */
     remove(key) {
         delete this.All[key];
@@ -211,7 +214,7 @@ class Schedule {
         }
     }
     /**
-     *
+     * instantiate a `Schedule` object from its JSON representation
      * @param {Object<string, any>} obj
      * @return {Schedule}
      */
@@ -231,6 +234,7 @@ class Schedule {
     }
 
     /**
+     * Serialize `this` to JSON
      * @return {Object<string, any>}
      */
     toJSON() {

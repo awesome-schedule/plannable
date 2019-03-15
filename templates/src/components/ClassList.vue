@@ -1,6 +1,6 @@
 <template>
-    <div id="class-list" class="card" style="width: 100%">
-        <div class="card-body" style="padding: 0.25rem; max-height: 500px; overflow-y: auto">
+    <div id="class-list" style="width: 100%">
+        <div class="card-body" style="padding: 0.25rem; ">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
                 <!-- data-toggle="popover"
           data-html="true"

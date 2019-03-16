@@ -177,12 +177,12 @@
                                     <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
                                     <button
                                         type="button"
-                                        class="btn btn-outline-success mt-2"
+                                        class="btn btn-success mt-2"
                                         @click="sendRequest"
                                     >
                                         Submit
                                     </button>
-                                    <button class="btn btn-warning mt-3" @click="clear">
+                                    <button class="btn btn-warning mt-2 ml-1" @click="clear">
                                         Clean All
                                     </button>
                                 </div>
@@ -334,18 +334,21 @@
                     >
                         Primary
                     </button>
-                    <input
-                        v-model="fullHeight"
-                        type="number"
-                        class="form-control mb-3"
-                        value="50"
-                    />
-                    <input
-                        v-model="partialHeight"
-                        type="number"
-                        class="form-control mb-3"
-                        value="20"
-                    />
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">full height</span>
+                        </div>
+                        <input v-model="fullHeight" type="number" class="form-control" />
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">partial height</span>
+                        </div>
+                        <input v-model="partialHeight" type="number" class="form-control" />
+                    </div>
+
                     <div>
                         Display Options:
                         <div>

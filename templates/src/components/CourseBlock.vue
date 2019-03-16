@@ -17,11 +17,15 @@
         <div class="mt-2 ml-2" style="color:white; font-size:13px">
             {{ course.department }} {{ course.number }} {{ course.type }}
         </div>
-        <div class="ml-2" style="color:#eaeaea; font-size:11px">{{ course.days }}</div>
-        <div class="ml-2" style="color:#eaeaea; font-size:11px">
+        <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+            {{ course.days }}
+        </div>
+        <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
             {{ course.instructor.join(', ') }}
         </div>
-        <div class="ml-2" style="color:#eaeaea; font-size:11px">{{ course.room }}</div>
+        <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
+            {{ course.room }}
+        </div>
     </div>
 </template>
 
@@ -32,7 +36,10 @@ export default {
     props: {
         course: Course,
         heightInfo: Array,
-        fullHeight: Number
+        fullHeight: Number,
+        showTime: Boolean,
+        showRoom: Boolean,
+        showInstructor: Boolean
     },
     computed: {
         startPx: function() {

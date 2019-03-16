@@ -48,6 +48,9 @@
                         :course="course"
                         :height-info="heightInfo"
                         :full-height="fullHeight"
+                        :show-time="showTime"
+                        :show-room="showRoom"
+                        :show-instructor="showInstructor"
                         style="left:0%"
                     ></course-block>
                     <course-block
@@ -56,6 +59,9 @@
                         :course="course"
                         :height-info="heightInfo"
                         :full-height="fullHeight"
+                        :show-time="showTime"
+                        :show-room="showRoom"
+                        :show-instructor="showInstructor"
                         style="left:20%"
                     ></course-block>
                     <course-block
@@ -64,6 +70,9 @@
                         :course="course"
                         :height-info="heightInfo"
                         :full-height="fullHeight"
+                        :show-time="showTime"
+                        :show-room="showRoom"
+                        :show-instructor="showInstructor"
                         style="left:40%"
                     ></course-block>
                     <course-block
@@ -72,6 +81,9 @@
                         :course="course"
                         :height-info="heightInfo"
                         :full-height="fullHeight"
+                        :show-time="showTime"
+                        :show-room="showRoom"
+                        :show-instructor="showInstructor"
                         style="left:60%"
                     ></course-block>
                     <course-block
@@ -80,6 +92,9 @@
                         :course="course"
                         :height-info="heightInfo"
                         :full-height="fullHeight"
+                        :show-time="showTime"
+                        :show-room="showRoom"
+                        :show-instructor="showInstructor"
                         style="left:80%"
                     ></course-block>
                 </div>
@@ -99,13 +114,15 @@ export default {
         CourseBlock
     },
     props: {
-        courses: Schedule
+        courses: Schedule,
+        showTime: Boolean,
+        showRoom: Boolean,
+        showInstructor: Boolean,
+        partialHeight: Number,
+        fullHeight: Number
     },
 
     data() {
-        const partial = 20;
-        const full = 50;
-
         const arr = [];
         for (let i = 0; i < 115; i++) {
             arr.push(i + 1);
@@ -120,8 +137,6 @@ export default {
         time.push('19: 00');
 
         return {
-            partialHeight: partial,
-            fullHeight: full,
             items: arr,
             hours: time
         };
@@ -149,6 +164,12 @@ export default {
             }
             return info;
         }
+        // fullHeight() {
+        //     return parseInt(this.fullHeightProp);
+        // },
+        // partialHeight() {
+        //     return parseInt(this.partialHeightProp);
+        // }
     }
 };
 </script>

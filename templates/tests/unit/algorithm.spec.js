@@ -24,6 +24,10 @@ describe('ScheduleGenerator Test', () => {
             cs21025: -1,
             ece26308: -1
         };
-        generator.getSchedules(schedule);
+        try {
+            generator.getSchedules(schedule);
+        } catch (e) {
+            console.log(e);
+        }
     });
 });

@@ -52,7 +52,7 @@ class FinalTable {
                 fr += minutes;
             }
         }
-        const stdev = math.std(mo, tu, we, th, fr);
+        const stdev = math.std([mo, tu, we, th, fr]);
 
         timeTable = timeTable.concat(stdev);
 

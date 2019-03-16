@@ -2,6 +2,7 @@ import AllRecords from '../models/AllRecords';
 import Schedule from '../models/Schedule';
 import CourseRecord from '../models/CourseRecord';
 import { FinalTable } from './FinalTable';
+import Course from '../models/Course';
 
 class ScheduleGenerator {
     /**
@@ -15,9 +16,9 @@ class ScheduleGenerator {
     /**
      *
      * @param {Schedule} schedule
-     * @param {Object<string, any>} filter
+     * @param {{timeSlots: [number, number][], status: string[]}} constraint
      */
-    getSchedules(schedule, filter = { a: 0 }) {
+    getSchedules(schedule, constraint = { timeSlots: [], status: 'Open' }) {
         /**
          * The entrance of the schedule generator
          * Read from **schedule.All** and collect data from **allRecords**
@@ -34,30 +35,63 @@ class ScheduleGenerator {
         const classList = [];
         for (const key in courses) {
             const classes = [];
-            const info = this.allRecords.getRecord(key);
-            const day = info.getRecord(courses[key]).days;
-            for (const d of day) {
-                const [date, timeBlock] = this.parseTime(d);
-                if (date === 'None' || 'None' in timeBlock) {
-                    //do not include any TBA
-                    continue;
+            //get full course records
+            const courseRecFull = this.allRecords.getRecord(key);
+
+            //get course with specific sections
+            if (courses[key] === -1) {
+                for (let section = 0; section < courseRecFull.section.length; section++) {
+                    const course = courseRecFull.getCourse(section);
+                    //insert filter method
+                    if (this.filterStatus(course, constraint)) {
+                        continue;
+                    }
+
+                    const day = course.days;
+                    const [date, timeBlock] = this.parseTime(day);
+                    if (date === 'None' || 'None' in timeBlock) {
+                        //do not include any TBA
+                        continue;
+                    }
+                    classes.push([key, date, timeBlock, section]);
                 }
-                classes.push([key, date, timeBlock]);
+            } else {
+                for (const section of courses[key]) {
+                    const course = courseRecFull.getCourse(section);
+                    //insert filter method
+                    if (this.filterStatus(course, constraint)) {
+                        continue;
+                    }
+
+                    const day = course.days;
+                    const [date, timeBlock] = this.parseTime(day);
+                    if (date === 'None' || 'None' in timeBlock) {
+                        //do not include any TBA
+                        continue;
+                    }
+                    classes.push([key, date, timeBlock, section]);
+                }
+            }
+            if (classes.length === 0) {
+                const error = courseRecFull.department + courseRecFull.number + courseRecFull.type;
+                throw `No ${error}`;
             }
             classList.push(classes);
+            console.log(classList);
         }
+
         const result = this.createSchedule(classList);
-        console.log(result.finalTable);
+        console.log(result.finalTable.toArray());
         return result;
     }
 
     /**
      *
-     * @param {[string,string[],number[]]} classList
+     * @param {[string,string[],number[],number]} classList
      * */
     createSchedule(classList) {
         /**
-         * classList Array --> [keys,[days],[start,end]] --> 3D array
+         * classList Array --> [keys,[days],[start,end],index] --> 3D array
          * finatable Object --> [keys,[days],[start,end],index] --> 2D array
          */
 
@@ -92,7 +126,7 @@ class ScheduleGenerator {
 
             if (!this.checkTimeConflict(timeTable, date, timeBlock)) {
                 //if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
-                timeTable.push(classList[classNum][choiceNum].concat(choiceNum));
+                timeTable.push(classList[classNum][choiceNum]);
                 pathMemory[classNum] = choiceNum + 1;
                 classNum += 1;
                 choiceNum = 0;
@@ -225,6 +259,24 @@ class ScheduleGenerator {
             count++;
         }
         return [date, timeBlock];
+    }
+
+    /**
+     *
+     * @param {Course} course
+     * @param {{timeSlots: [number, number][], status: string[]}} constraint
+     */
+    filterStatus(course, constraint) {
+        const standard = Object.values(CourseRecord.STATUSES);
+        console.log(constraint.status.includes(course.status), constraint.status, course.status);
+        if (!standard.includes(course.status)) {
+            return true;
+        }
+
+        if (constraint.status.includes(course.status)) {
+            return true;
+        }
+        return false;
     }
 }
 

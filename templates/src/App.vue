@@ -62,40 +62,49 @@
 
         <table style="width:97%;margin:auto auto">
             <tr>
-                <td style="width:3%;vertical-align:top;background-color:#ffffff;">
+                <td style="width:3%; vertical-align:top;">
                     <br /><br /><br />
-                    <span
-                        class="side-button"
-                        style="font-size:2rem;position:fixed"
-                        @click="
-                            selectClass = !selectClass;
-                            filter = false;
-                        "
-                    >
-                        <i class="far fa-calendar-alt"></i> </span
-                    ><br /><br />
-                    <span
-                        class="side-button"
-                        style="font-size:2rem;position:fixed"
-                        @click="
-                            filter = !filter;
-                            selectClass = false;
-                        "
-                    >
-                        <i class="fas fa-filter"></i> </span
-                    ><br /><br />
-                    <span style="font-size:2rem;position:fixed" class="side-button">
-                        <i class="fas fa-cog"></i>
-                    </span>
+                    <div style="position:fixed;background-color:#00c0ff;width:3rem">
+                        <span
+                            class="side-button"
+                            style="font-size:2rem;margin-left:20%; display:block;"
+                            @click="
+                                showSelectClass = !showSelectClass;
+                                showFilter = false;
+                                showSetting = false;
+                            "
+                        >
+                            <i class="far fa-calendar-alt"></i>
+                        </span>
+                        <br />
+                        <span
+                            class="side-button mt-2"
+                            style="font-size:1.7rem;margin-left:20%; display:block;"
+                            @click="
+                                showFilter = !showFilter;
+                                showSelectClass = false;
+                                showSetting = false;
+                            "
+                        >
+                            <i class="fas fa-filter"></i>
+                        </span>
+                        <br />
+                        <span
+                            style="font-size:1.8rem;margin-left:20%; display:block;"
+                            class="side-button mt-2"
+                            @click="
+                                showSetting = !showSetting;
+                                showSelectClass = false;
+                                showFilter = false;
+                            "
+                        >
+                            <i class="fas fa-cog"></i>
+                        </span>
+                    </div>
                 </td>
-                <td
-                    v-if="sideBar && selectClass"
-                    id="leftBar"
-                    class="leftside"
-                    style="width: 20%; vertical-align:top; padding-top:0; position:fixed;"
-                >
+                <td v-if="sideBar && showSelectClass" id="leftBar" class="leftside">
                     <!-- term selection dropdown -->
-                    <div class="dropdown" style="margin-top:60px">
+                    <div class="dropdown" style="margin-top:70px">
                         <button
                             id="semester"
                             class="btn btn-primary mt-4 mx-auto"
@@ -168,12 +177,12 @@
                                     <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
                                     <button
                                         type="button"
-                                        class="btn btn-outline-success mt-2"
+                                        class="btn btn-success mt-2"
                                         @click="sendRequest"
                                     >
                                         Submit
                                     </button>
-                                    <button class="btn btn-warning mt-3" @click="clear">
+                                    <button class="btn btn-warning mt-2 ml-1" @click="clear">
                                         Clean All
                                     </button>
                                 </div>
@@ -199,11 +208,11 @@
                 </td>
 
                 <td
-                    v-if="sideBar && filter"
+                    v-if="sideBar && showFilter"
                     class="leftside"
-                    style="width: 20%; vertical-align:top; padding-top:0;position:fixed"
+                    style="width: 20%; vertical-align:top; padding-left:2%;position:fixed"
                 >
-                    <div style="margin-top:60px">
+                    <div style="margin-top:70px">
                         <button
                             class="btn btn-primary"
                             type="button"
@@ -317,7 +326,47 @@
                     </div>
                 </td>
 
-                <td style="width:77%;vertical-align: top;">
+                <td v-if="sideBar && showSetting" class="leftside">
+                    <button
+                        type="button"
+                        style="margin-top:70px;width:100%"
+                        class="btn btn-primary mb-3"
+                    >
+                        Primary
+                    </button>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">full height</span>
+                        </div>
+                        <input v-model="fullHeight" type="number" class="form-control" />
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">partial height</span>
+                        </div>
+                        <input v-model="partialHeight" type="number" class="form-control" />
+                    </div>
+
+                    <div>
+                        Display Options:
+                        <div>
+                            <input id="displayTime" v-model="showTime" type="checkbox" checked />
+                            <label for="displayTime">&nbsp;Show time</label><br />
+                            <input id="displayRoom" v-model="showRoom" type="checkbox" checked />
+                            <label for="displayRoom">&nbsp;Show room</label> <br />
+                            <input
+                                id="displayInstructor"
+                                v-model="showInstructor"
+                                type="checkbox"
+                                checked
+                            /><label for="displayInstructor">&nbsp;Show instructor</label>
+                        </div>
+                    </div>
+                </td>
+
+                <td style="width:75%;vertical-align: top;text-align-left">
                     <table style="width:100%;margin-top:60px">
                         <tr>
                             <td>
@@ -344,6 +393,11 @@
                     <grid-schedule
                         :courses="currentSchedule"
                         style="width:100%"
+                        :show-time="showTime"
+                        :show-room="showRoom"
+                        :show-instructor="showInstructor"
+                        :full-height="+fullHeight"
+                        :partial-height="+partialHeight"
                         @trigger-modal="showModal"
                     ></grid-schedule>
                 </td>
@@ -392,8 +446,9 @@ export default {
             schedules: null,
             isEntering: false,
             sideBar: true,
-            selectClass: true,
-            filter: false,
+            showSelectClass: true,
+            showFilter: false,
+            showSetting: false,
             inputCourses: null,
             activeCourse: {},
             startTime: '',
@@ -404,7 +459,12 @@ export default {
             allowClosed: false,
             cache: true,
             modalCourse: null,
-            classListModalCourse: null
+            classListModalCourse: null,
+            showTime: true,
+            showRoom: true,
+            showInstructor: true,
+            fullHeight: 50,
+            partialHeight: 20
         };
     },
     computed: {
@@ -604,5 +664,13 @@ export default {
 }
 .side-button:active {
     color: #bbbbbb;
+}
+
+.leftside {
+    width: 20%;
+    padding-left: 2%;
+    vertical-align: top;
+    padding-top: 0;
+    position: fixed;
 }
 </style>

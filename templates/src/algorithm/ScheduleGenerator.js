@@ -27,7 +27,8 @@ class ScheduleGenerator {
          * concatonate with the **key** and push into the **classList** to form a 3D array
          * e.g. [ [ ["span20205",["Mo","Tu"],[600,650]], ["span20205",["Th","Fr"],[720,770]] ],
          *        [ ["cs21105"  ,["Mo","We"],[400,450]], ["cs21105"  ,["We","Fr"],[900,975]] ] ]
-         * Pass the **ClassList** into the **createSchedule** and return a **FinalTable** Object
+         * Pass the **ClassList** into the **createSchedule**
+         * return a **FinalTable** Object
          */
         const courses = schedule.All;
         const classList = [];
@@ -37,11 +38,16 @@ class ScheduleGenerator {
             const day = info.getRecord(courses[key]).days;
             for (const d of day) {
                 const [date, timeBlock] = this.parseTime(d);
+                if (date === 'None' || 'None' in timeBlock) {
+                    //do not include any TBA
+                    continue;
+                }
                 classes.push([key, date, timeBlock]);
             }
             classList.push(classes);
         }
         const result = this.createSchedule(classList);
+        console.log(result.finalTable);
         return result;
     }
 
@@ -51,8 +57,8 @@ class ScheduleGenerator {
      * */
     createSchedule(classList) {
         /**
-         * classList --> [keys,[days],[start,end]]
-         * finatable --> [keys,[days],[start,end],index]
+         * classList Array --> [keys,[days],[start,end]] --> 3D array
+         * finatable Object --> [keys,[days],[start,end],index] --> 2D array
          */
 
         let classNum = 0;

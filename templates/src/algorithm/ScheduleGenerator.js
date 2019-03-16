@@ -1,6 +1,7 @@
 import AllRecords from '../models/AllRecords';
 import Schedule from '../models/Schedule';
 import CourseRecord from '../models/CourseRecord';
+import { FinalTable } from './FinalTable';
 
 class ScheduleGenerator {
     /**
@@ -16,49 +17,63 @@ class ScheduleGenerator {
      * @param {Schedule} schedule
      * @param {Object<string, any>} filter
      */
-    getSchedules(schedule, filter = {"a":0}) {
+    getSchedules(schedule, filter = { a: 0 }) {
+        /**
+         * The entrance of the schedule generator
+         * Read from **schedule.All** and collect data from **allRecords**
+         * Collect data from **section(index)[7]**
+         * Parse the **days** into desired format: **{[ string[], number[] ]}**
+         * e.g. [ ["Mo","Tu"],[600,650] ]
+         * concatonate with the **key** and push into the **classList** to form a 3D array
+         * e.g. [ [ ["span20205",["Mo","Tu"],[600,650]], ["span20205",["Th","Fr"],[720,770]] ],
+         *        [ ["cs21105"  ,["Mo","We"],[400,450]], ["cs21105"  ,["We","Fr"],[900,975]] ] ]
+         * Pass the **ClassList** into the **createSchedule** and return a **FinalTable** Object
+         */
         const courses = schedule.All;
         const classList = [];
-        for(const key in courses){
+        for (const key in courses) {
             const classes = [];
             const info = this.allRecords.getRecord(key);
             const day = info.getRecord(courses[key]).days;
-            for(const d of day){
-                const [date,timeBlock] = this.parseTime(d);
-                console.log(d);
-                classes.push([key,date,timeBlock]);
+            for (const d of day) {
+                const [date, timeBlock] = this.parseTime(d);
+                classes.push([key, date, timeBlock]);
             }
-            classList.push(classes,);
+            classList.push(classes);
         }
-        const results = [];
-        console.log(classList[0][0][2]);
-        return results;
+        const result = this.createSchedule(classList);
+        return result;
     }
 
+    /**
+     *
+     * @param {[string,string[],number[]]} classList
+     * */
     createSchedule(classList) {
-        /*I need a three dimensional array containing only days*/
-        /*convert a day and a time into an integer --> day * 1440 + hr *60 + min * 1 
-        classList --> [keys,[days],[start,end]]
-        finatable --> [keys,[days],[start,end],index]*/
+        /**
+         * classList --> [keys,[days],[start,end]]
+         * finatable --> [keys,[days],[start,end],index]
+         */
+
         let classNum = 0;
         let choiceNum = 0;
-        let pathMem = Array.from({ length: classList.length }, (x, i) => 0);
+        let pathMemory = Array.from({ length: classList.length }, (x, i) => 0);
         let timeTable = new Array();
         const finalTable = new FinalTable();
-        let exhausted;
+        let exhausted = false;
         while (true) {
             if (classNum >= classList.length) {
                 finalTable.add(timeTable);
                 classNum -= 1;
-                choiceNum = pathMem[classNum];
+                choiceNum = pathMemory[classNum];
                 timeTable.pop();
             }
 
-            [classNum, choiceNum, pathMem, timeTable, exhausted] = this.AlgorithmRetract(
+            [classNum, choiceNum, pathMemory, timeTable, exhausted] = this.AlgorithmRetract(
                 classList,
                 classNum,
                 choiceNum,
-                pathMem,
+                pathMemory,
                 timeTable
             );
 
@@ -72,7 +87,7 @@ class ScheduleGenerator {
             if (!this.checkTimeConflict(timeTable, date, timeBlock)) {
                 //if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
                 timeTable.push(classList[classNum][choiceNum].concat(choiceNum));
-                pathMem[classNum] = choiceNum + 1;
+                pathMemory[classNum] = choiceNum + 1;
                 classNum += 1;
                 choiceNum = 0;
             } else {
@@ -82,11 +97,21 @@ class ScheduleGenerator {
         return finalTable;
     }
 
+    /**
+     *
+     * @param {[string,string[],number[]]} classList
+     * @param {number} classNum
+     * @param {number} choiceNum
+     * @param {number[]} pathMemory
+     * @param {string,string[],number[],number} timeTable
+     * */
     AlgorithmRetract(classList, classNum, choiceNum, pathMemory, timeTable) {
-        /*when all possibilities in on class have exhausted, retract one class
-         explore the next possibilities in the nearest possible class
-        reset the memory path forward to zero
-        */
+        /**
+         * when all possibilities in on class have exhausted, retract one class
+         * explore the next possibilities in the nearest possible class
+         * reset the memory path forward to zero
+         */
+
         while (choiceNum >= classList[classNum].length) {
             classNum -= 1;
             if (classNum < 0) {
@@ -97,11 +122,16 @@ class ScheduleGenerator {
             for (let i = classNum + 1; i < pathMemory.length; i++) {
                 pathMemory[i] = 0;
             }
-
         }
         return [classNum, choiceNum, pathMemory, timeTable, false];
     }
 
+    /**
+     *
+     * @param {string,string[],number[],number} timeTable
+     * @param {string[]} date
+     * @param {number[]} timeBlock
+     * */
     checkTimeConflict(timeTable, date, timeBlock) {
         /*
         compare the new class to see if it has conflicts with the existing time table
@@ -119,15 +149,18 @@ class ScheduleGenerator {
         }
         const beginTime = timeBlock[0];
         const endTime = timeBlock[1];
-        for (const times in timeTable) {
+        for (const times of timeTable) {
             const dates = times[1];
             const begin = times[2][0];
             const end = times[2][1];
-            for (const d in date) {
+            for (const d of date) {
                 if (!dates.includes(d)) {
                     continue;
                 }
-                if (begin <= beginTime || beginTime <= end || begin <= endTime || endTime <= end) {
+                if (
+                    (begin <= beginTime && beginTime <= end) ||
+                    (begin <= endTime && endTime <= end)
+                ) {
                     return true;
                 }
             }
@@ -135,6 +168,10 @@ class ScheduleGenerator {
         return false;
     }
 
+    /**
+     *
+     * @param {string} classTime
+     */
     parseTime(classTime) {
         /*
         parse the classTime and return which day the class is on and what time it takes place
@@ -151,7 +188,6 @@ class ScheduleGenerator {
 
         const dates = match[1];
         const times = match[2];
-
         const date = [];
         for (let i = 0; i < dates.length; i += 2) {
             date.push(dates.slice(i, i + 2));
@@ -160,7 +196,7 @@ class ScheduleGenerator {
         const timeBlock = [0, 0];
         let count = 0;
         let tempTime;
-        for (const j in time) {
+        for (const j of time) {
             if (j.includes('12') && j.includes('PM')) {
                 tempTime = j
                     .replace('PM', '')
@@ -186,16 +222,4 @@ class ScheduleGenerator {
     }
 }
 
-class FinalTable {
-    constructor() {
-        this.finalTable = new Array();
-    }
-    add(timeTable) {
-        const schedule = new Schedule(timeTable);
-        this.finalTable.push(schedule);
-    }
-}
-
 export { ScheduleGenerator };
-
-

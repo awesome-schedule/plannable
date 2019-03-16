@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "axios": "^0.18",
+        "heap-js": "^1.2.2",
         "mathjs": "^5.7.0",
         "vue": "^2.6.6"
     },
@@ -30,6 +31,7 @@
         "eslint-plugin-vue": "^5.0.0",
         "node-xlsx": "^0.14.1",
         "vue-template-compiler": "^2.5.21",
-        "mathjs": "^5.7.0"
+        "mathjs": "^5.7.0",
+        "heap-js": "^1.2.2"
     }
 }

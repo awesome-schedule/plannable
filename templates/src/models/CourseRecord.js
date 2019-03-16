@@ -51,7 +51,7 @@ class CourseRecord {
 
     /**
      *
-     * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
+     * @param {import('./AllRecords').RawRecord} raw
      * @param {string} key
      * @param {number[]} sids A list of section indices
      */

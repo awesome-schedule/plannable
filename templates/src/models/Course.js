@@ -1,7 +1,7 @@
 import CourseRecord from './CourseRecord';
 class Course {
     /**
-     * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
+     * @param {import('./AllRecords').RawRecord} raw
      * @param {string} key
      * @param {number} section
      */

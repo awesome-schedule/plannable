@@ -163,9 +163,7 @@ def send_css(path):
 
 
 def to_short():
-    types = set()
     for k, v in DICT.items():
-        types.add(v[0][4])
         RECORDS_DICT[k] = [
             [a[0] for a in v],
             v[0][1],

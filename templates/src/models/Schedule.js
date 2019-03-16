@@ -36,7 +36,7 @@ class Schedule {
      */
     constructor(raw_schedule = [], title = 'Schedule', id = 0) {
         /**
-         * represents all courses in this schedule, stored as [key, **section**] pair
+         * represents all courses in this schedule, stored as `[key, section]` pair
          * note that if **section** is -1, it means that all sections are allowed.
          * Otherwise **section** should be a Set of integers
          * @type {Object<string, Set<number>|number>}
@@ -64,12 +64,14 @@ class Schedule {
         this.Friday = [];
 
         /**
-         * @type{[string, number]}
+         * @type {[string, number]}
          */
         this.previous = null;
 
         this.title = title;
         this.id = id;
+
+        this.colors = new Set();
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
@@ -84,7 +86,15 @@ class Schedule {
      * @return {string}
      */
     getColor(course) {
-        return Schedule.bgColors[course.hash() % Schedule.bgColors.length];
+        let hash = course.hash();
+        let idx = hash % Schedule.bgColors.length;
+        // avoid color collision by linear probing
+        while (this.colors.has(idx)) {
+            hash += 1;
+            idx = hash % Schedule.bgColors.length;
+        }
+        this.colors.add(idx);
+        return Schedule.bgColors[idx];
     }
 
     /**
@@ -102,7 +112,6 @@ class Schedule {
         } else {
             this.All[key] = new Set([section]);
             if (update) this.computeSchedule();
-            return true;
         }
         return true;
     }
@@ -212,6 +221,7 @@ class Schedule {
         for (const key of Schedule.days) {
             this[key] = [];
         }
+        this.colors.clear();
     }
     /**
      * instantiate a `Schedule` object from its JSON representation
@@ -287,7 +297,7 @@ class Schedule {
     clean() {
         this.cleanSchedule();
         this.All = {};
-        this.preview = [null, null];
+        this.previous = null;
     }
 }
 

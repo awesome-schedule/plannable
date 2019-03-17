@@ -332,21 +332,31 @@
                         style="margin-top:70px;width:100%"
                         class="btn btn-primary mb-3"
                     >
-                        Primary
+                        Schedule Display Settings
                     </button>
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">full height</span>
                         </div>
-                        <input v-model="fullHeight" type="number" class="form-control" />
+                        <input
+                            v-model="fullHeight"
+                            type="number"
+                            class="form-control"
+                            @input="saveStatus()"
+                        />
                     </div>
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">partial height</span>
                         </div>
-                        <input v-model="partialHeight" type="number" class="form-control" />
+                        <input
+                            v-model="partialHeight"
+                            type="number"
+                            class="form-control"
+                            @input="saveStatus()"
+                        />
                     </div>
 
                     <div>
@@ -617,14 +627,16 @@ export default {
             });
         },
         saveStatus() {
-            // console.log(this.currentSchedule);
+            console.log(this.showTime);
             localStorage.setItem(
                 this.currentSemester.id,
                 JSON.stringify({
                     schedules: this.schedules,
                     currentSchedule: this.currentSchedule.toJSON(),
                     startTime: this.startTime,
-                    endTime: this.endTime
+                    endTime: this.endTime,
+                    fullHeight: this.fullHeight,
+                    partialHeight: this.partialHeight
                 })
             );
         },
@@ -642,6 +654,11 @@ export default {
                 this.currentCourses = this.getCurrentCourses();
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;
+
+                this.fullHeight = isNaN(raw_data.fullHeight) ? 50 : parseInt(raw_data.fullHeight);
+                this.partialHeight = isNaN(raw_data.partialHeight)
+                    ? 20
+                    : parseInt(raw_data.partialHeight);
             }
         }
     }

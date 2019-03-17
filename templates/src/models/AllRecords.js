@@ -1,10 +1,12 @@
 // @ts-check
 import Course from './Course';
 import CourseRecord from './CourseRecord';
+/**
+ * @typedef {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} RawRecord
+ */
 class AllRecords {
     /**
-     *
-     * @param {Object<string, [number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]>} raw_data
+     * @param {Object<string, RawRecord>} raw_data
      */
     constructor(raw_data) {
         this.raw_data = raw_data;

@@ -1,7 +1,3 @@
-// eslint-disable-next-line
-import CourseRecord from './CourseRecord';
-// eslint-disable-next-line
-import AllRecords from './AllRecords';
 import Course from './Course';
 /**
  * A schedule is a list of courses
@@ -25,7 +21,7 @@ class Schedule {
     ];
     /**
      * this field must be initialized before calling any instance method of the Schedule class
-     * @type {AllRecords}
+     * @type {import "./AllRecords".default}
      */
     static allRecords;
     /**

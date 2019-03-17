@@ -21,6 +21,8 @@ These instructions will get you a copy of the project up and running on your loc
 -   Flask >= 1.0
 -   xlrd >= 1.0
 
+We recommend [VS Code](https://code.visualstudio.com/) for development
+
 ## How to Use
 
 Install necessary python packages
@@ -58,14 +60,9 @@ Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:80
 -   [Bootstrap](https://getbootstrap.com/) - Front-end component library
 -   [Flask](http://flask.pocoo.org/) - Back-end framework
 
-## Authors
+## Contributors
 
--   **Zichao Hu** - _Initial work_ - [OAHC2022](https://github.com/OAHC2022)
--   **Hanzhi Zhou** - _Initial work_ - [hanzhi713](https://github.com/hanzhi713)-
--   **Kaiying Shan** - _Initial work_ - [kaiyingshan](https://github.com/kaiyingshan)
--   **Minjun Long** - _Initial work_ - [Elena6918](https://github.com/Elena6918)
-
-See also the list of [contributors](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors) who participated in this project.
+Please refer to our [Contribution Log](/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)
 
 ## License
 

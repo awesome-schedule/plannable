@@ -1,16 +1,28 @@
+// @ts-check
 import Schedule from '../models/Schedule';
 import * as math from 'mathjs';
 import Heap from 'heap-js';
 class FinalTable {
+    /**
+     * @typedef {[string,string[],number[],number]} TimeTable
+     */
+
     constructor() {
-        this.finalTable = new Heap(function(a, b) {
-            return a[a.length - 1] - b[b.length - 1];
-        });
+        this.finalTable = new Heap(
+            /**
+             *
+             * @param {TimeTable} a
+             * @param {TimeTable} b
+             */
+            function(a, b) {
+                return a[a.length - 1] - b[b.length - 1];
+            }
+        );
     }
 
     /**
      *
-     * @param {[string,string[],number[],number]} timeTable
+     * @param {TimeTable} timeTable
      */
     add(timeTable) {
         /**
@@ -40,7 +52,7 @@ class FinalTable {
                 fr += minutes;
             }
         }
-        const stdev = math.std(mo, tu, we, th, fr);
+        const stdev = math.std([mo, tu, we, th, fr]);
 
         timeTable = timeTable.concat(stdev);
 

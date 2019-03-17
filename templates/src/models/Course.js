@@ -1,7 +1,7 @@
 import CourseRecord from './CourseRecord';
 class Course {
     /**
-     * @param {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} raw
+     * @param {import('./AllRecords').RawRecord} raw
      * @param {string} key
      * @param {number} section
      */
@@ -23,7 +23,7 @@ class Course {
         this.topic = this[10] = raw[10][sid];
         this.status = this[11] = isNaN(+raw[11][sid])
             ? raw[11][sid]
-            : CourseRecord.TYPES[raw[11][sid]];
+            : CourseRecord.STATUSES[raw[11][sid]];
         this.enrollment = this[12] = raw[12][sid];
         this.enrollment_limit = this[13] = raw[13][sid];
         this.wait_list = this[14] = raw[14][sid];

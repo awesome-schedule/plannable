@@ -2,27 +2,29 @@
 import Schedule from '../models/Schedule';
 import * as math from 'mathjs';
 import Heap from 'heap-js';
+/**
+ * @typedef {import("./ScheduleGenerator").RawSchedule} RawSchedule
+ */
+/**
+ * @typedef {{schedule: RawSchedule, coeff: number}} ComparableSchedule
+ */
 class FinalTable {
-    /**
-     * @typedef {[string,string[],number[],number]} TimeTable
-     */
-
     constructor() {
         this.finalTable = new Heap(
             /**
              *
-             * @param {TimeTable} a
-             * @param {TimeTable} b
+             * @param {ComparableSchedule} a
+             * @param {ComparableSchedule} b
              */
             function(a, b) {
-                return a[a.length - 1] - b[b.length - 1];
+                return a.coeff - b.coeff;
             }
         );
     }
 
     /**
      *
-     * @param {TimeTable} timeTable
+     * @param {RawSchedule} timeTable
      */
     add(timeTable) {
         /**
@@ -54,9 +56,10 @@ class FinalTable {
         }
         const stdev = math.std([mo, tu, we, th, fr]);
 
-        timeTable = timeTable.concat(stdev);
-
-        this.finalTable.push(timeTable);
+        this.finalTable.push({
+            schedule: timeTable.concat(),
+            coeff: stdev
+        });
     }
 }
 export { FinalTable };

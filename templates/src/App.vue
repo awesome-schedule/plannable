@@ -178,7 +178,7 @@
                                     <button
                                         type="button"
                                         class="btn btn-success mt-2"
-                                        @click="sendRequest"
+                                        @click="generateSchedules"
                                     >
                                         Submit
                                     </button>
@@ -431,6 +431,7 @@ import Schedule from './models/Schedule.js';
 import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
 import axios from 'axios';
+import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
 
 export default {
     name: 'App',
@@ -592,6 +593,27 @@ export default {
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
             this.errMsg = '';
+        },
+        generateSchedules() {
+            const generator = new ScheduleGenerator(this.allRecords);
+            const table = generator.getSchedules(this.currentSchedule);
+            const heap = table.finalTable;
+            const raw_data = heap.top(10);
+
+            /**
+             * @type {[string, number, number][]}
+             */
+            const translated_raw = [];
+            for (const rd of raw_data) {
+                const raw_schedule = [];
+                for (const raw_course of rd.schedule) {
+                    raw_schedule.push([raw_course[0], raw_course[3], -1]);
+                }
+                translated_raw.push(raw_schedule);
+            }
+            this.schedules = translated_raw;
+            this.currentSchedule = new Schedule(this.schedules[0]);
+            this.saveStatus();
         },
         sendRequest() {
             // if (this.currentSchedule.All.length < 2) return;

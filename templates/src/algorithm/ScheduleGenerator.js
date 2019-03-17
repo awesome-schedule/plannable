@@ -3,7 +3,9 @@ import Schedule from '../models/Schedule';
 import CourseRecord from '../models/CourseRecord';
 import { FinalTable } from './FinalTable';
 import Course from '../models/Course';
-
+/**
+ * @typedef {[string,string[],number[],number][]} RawSchedule
+ */
 class ScheduleGenerator {
     /**
      *
@@ -18,7 +20,7 @@ class ScheduleGenerator {
      * @param {Schedule} schedule
      * @param {{timeSlots: [number, number][], status: string[]}} constraint
      */
-    getSchedules(schedule, constraint = { timeSlots: [], status: 'Open' }) {
+    getSchedules(schedule, constraint = { timeSlots: [], status: [] }) {
         /**
          * The entrance of the schedule generator
          * Read from **schedule.All** and collect data from **allRecords**
@@ -33,11 +35,12 @@ class ScheduleGenerator {
          */
         const courses = schedule.All;
         const classList = [];
+        console.log('fuck you');
         for (const key in courses) {
             const classes = [];
             //get full course records
             const courseRecFull = this.allRecords.getRecord(key);
-
+            console.log(key);
             //get course with specific sections
             if (courses[key] === -1) {
                 for (let section = 0; section < courseRecFull.section.length; section++) {
@@ -56,6 +59,7 @@ class ScheduleGenerator {
                     classes.push([key, date, timeBlock, section]);
                 }
             } else {
+                console.log(courses[key]);
                 for (const section of courses[key]) {
                     const course = courseRecFull.getCourse(section);
                     //insert filter method
@@ -69,6 +73,7 @@ class ScheduleGenerator {
                         //do not include any TBA
                         continue;
                     }
+                    console.log(section);
                     classes.push([key, date, timeBlock, section]);
                 }
             }
@@ -77,17 +82,17 @@ class ScheduleGenerator {
                 throw `No ${error}`;
             }
             classList.push(classes);
-            console.log(classList);
+            // console.log(classList);
         }
 
         const result = this.createSchedule(classList);
-        console.log(result.finalTable.toArray());
+        // console.log(result.finalTable.toArray());
         return result;
     }
 
     /**
      *
-     * @param {[string,string[],number[],number]} classList
+     * @param {*} classList
      * */
     createSchedule(classList) {
         /**
@@ -143,7 +148,7 @@ class ScheduleGenerator {
      * @param {number} classNum
      * @param {number} choiceNum
      * @param {number[]} pathMemory
-     * @param {string,string[],number[],number} timeTable
+     * @param {RawSchedule} timeTable
      * */
     AlgorithmRetract(classList, classNum, choiceNum, pathMemory, timeTable) {
         /**
@@ -168,7 +173,7 @@ class ScheduleGenerator {
 
     /**
      *
-     * @param {string,string[],number[],number} timeTable
+     * @param {RawSchedule} timeTable
      * @param {string[]} date
      * @param {number[]} timeBlock
      * */
@@ -268,7 +273,7 @@ class ScheduleGenerator {
      */
     filterStatus(course, constraint) {
         const standard = Object.values(CourseRecord.STATUSES);
-        console.log(constraint.status.includes(course.status), constraint.status, course.status);
+        // console.log(constraint.status.includes(course.status), constraint.status, course.status);
         if (!standard.includes(course.status)) {
             return true;
         }

@@ -1,15 +1,12 @@
-import AllRecords from '../models/AllRecords';
-import Schedule from '../models/Schedule';
 import CourseRecord from '../models/CourseRecord';
 import { FinalTable } from './FinalTable';
-import Course from '../models/Course';
 /**
  * @typedef {[string,string[],number[],number][]} RawSchedule
  */
 class ScheduleGenerator {
     /**
      *
-     * @param {AllRecords} allRecords
+     * @param {import('../models/AllRecords').RawRecord} allRecords
      */
     constructor(allRecords) {
         this.allRecords = allRecords;
@@ -26,7 +23,7 @@ class ScheduleGenerator {
      *        [ ["cs21105"  ,["Mo","We"],[400,450]], ["cs21105"  ,["We","Fr"],[900,975]] ] ]
      * Pass the **ClassList** into the **createSchedule**
      * return a **FinalTable** Object
-     * @param {Schedule} schedule
+     * @param {import('../models/Schedule').default} schedule
      * @param {{timeSlots: [number, number][], status: string[]}} constraint
      * @return {FinalTable}
      */
@@ -186,7 +183,7 @@ class ScheduleGenerator {
         :param timeBlock: contains beginTime and endTime of a class
         :return: Boolean type: true if it has conflict, else false
         */
-        if (date === 'None' || 'None' in timeBlock) {
+        if (date === null) {
             //do not include any TBA
             return true;
         }

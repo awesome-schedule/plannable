@@ -10,3 +10,4 @@ new_sis/test*.ipynb
 node_modules
 .DS_Store
 .mypy_cache
+backend/data

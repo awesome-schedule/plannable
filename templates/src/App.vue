@@ -122,12 +122,12 @@
                             style="width: 100%;"
                         >
                             <a
-                                v-for="semester in semesters"
+                                v-for="(semester, index) in semesters"
                                 :key="semester.id"
                                 class="dropdown-item"
                                 style="width: 100%;"
                                 href="#"
-                                @click="selectSemester(semester.id)"
+                                @click="selectSemester(index)"
                                 >{{ semester.name }}</a
                             >
                         </div>
@@ -258,7 +258,7 @@
                                             <span
                                                 aria-hidden="true"
                                                 @click="removeATimeConstraint(n)"
-                                                >&times</span
+                                                >&times;</span
                                             >
                                         </button>
                                     </li>
@@ -498,7 +498,8 @@ export default {
     mounted() {
         axios.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
-            this.selectSemester(0);
+            // get the latest semester
+            this.selectSemester(this.semesters.length - 1);
         });
 
         // generate a series of time
@@ -685,7 +686,7 @@ export default {
         },
         loadStatus() {
             const data = localStorage.getItem(this.currentSemester.id);
-            if (data.length === 0) return;
+            if (data === null || data.length === 0) return;
             const raw_data = JSON.parse(data);
             if (
                 raw_data !== null &&

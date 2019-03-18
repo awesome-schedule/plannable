@@ -2,7 +2,7 @@ import csv
 import logging
 from flask import Flask, render_template, jsonify, request, send_from_directory
 
-from backend.data_loader import readData, DICT, RECORD, RECORDS_DICT, ATTR_MAP, TYPES, STATUSES
+from backend.data_loader import load_all_data, update_local_data, ATTR_MAP, CLASS_TYPES, STATUSES, SEMESTERS, ALL_SEMESTER_RECORDS
 from collections import OrderedDict
 from flask_cors import CORS
 from typing import List, Any, Dict, Tuple
@@ -21,17 +21,7 @@ def home():
 
 @app.route('/api/semesters')
 def get_semesters():
-    semesters = [
-        {
-            "id": 0,
-            "name": "Spring 2019"
-        },
-        {
-            "id": 1,
-            "name": "Fall 2018"
-        }
-    ]
-    return jsonify(semesters)
+    return jsonify(SEMESTERS)
 
 
 @app.route('/api/classes', methods=['GET', 'POST'])
@@ -40,14 +30,18 @@ def get_classes():
         semester = request.args.get('semester')
         test = request.args.get('test')
         if semester:
+            try:
+                semester = int(semester)
+            except:
+                return "Semester id must be an integer"
             return jsonify(
                 {
                     'meta': {
                         'attr_map': ATTR_MAP,
-                        'types': TYPES,
+                        'types': CLASS_TYPES,
                         'statuses': STATUSES
                     },
-                    'data': RECORDS_DICT,
+                    'data': ALL_SEMESTER_RECORDS[semester],
                 }
             )
 
@@ -75,7 +69,6 @@ def send_css(path):
 
 
 if __name__ == "__main__":
-    logging.info('Loading data...')
-    readData()
-    logging.info('Running...')
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    update_local_data()
+    load_all_data()
+    app.run(host='0.0.0.0', port=8000, debug=False)

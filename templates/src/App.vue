@@ -227,91 +227,69 @@
                     </div>
 
                     <div id="filter" class="collapse show">
-                        <div class="card card-body">
+                        <div class="card card-body" style="padding:3%">
                             <div class="filter mt-2">
-                                <div class="input-group">
-                                    <!--input earliest time-->
-                                    <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
-                                    <button
-                                        type="button"
-                                        class="button dropdown-toggle dropdown-toggle-split"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
+                                <ul class="list-group list-group-flush" style="width:100%">
+                                    <li
+                                        v-for="n in timeSlots"
+                                        :key="n"
+                                        class="list-group-item"
+                                        style="padding:2%"
                                     >
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <div class="dropdown-menu" style="width:100%">
-                                        <a
-                                            v-for="t in allTimes"
-                                            :key="t"
-                                            class="dropdown-item"
-                                            href="#"
-                                            @click="startTime = t"
-                                            >{{ t }}</a
+                                        <input
+                                            type="time"
+                                            min="8:00"
+                                            max="22:00"
+                                            style="-webkit-appearance:button"
+                                        />
+                                        -
+                                        <input
+                                            type="time"
+                                            min="8:00"
+                                            max="22:00"
+                                            style="-webkit-appearance:button"
+                                        />
+                                        <button
+                                            type="button"
+                                            class="close"
+                                            aria-label="Close"
+                                            role="button"
                                         >
-                                    </div>
+                                            <span
+                                                aria-hidden="true"
+                                                @click="removeATimeConstraint(n)"
+                                                >&times</span
+                                            >
+                                        </button>
+                                    </li>
 
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Earliest Time"
-                                        style="font-size: 10pt;"
-                                        aria-describedby="basic-addon1"
-                                        :value="startTime"
-                                        @input="
-                                            startTime = $event.target.value;
-                                            saveStatus();
-                                        "
-                                    />
-                                </div>
-
-                                <div class="input-group mt-2">
-                                    <!--input latest time-->
-                                    <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
-                                    <button
-                                        type="button"
-                                        class="button dropdown-toggle dropdown-toggle-split"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
-                                    >
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <div class="dropdown-menu" style="width:100%">
-                                        <a
-                                            v-for="t in allTimes"
-                                            :key="t"
-                                            class="dropdown-item"
-                                            href="#"
-                                            @click="endTime = t"
-                                            >{{ t }}</a
+                                    <li class="list-group-item" style="text-align:center">
+                                        <button
+                                            type="button"
+                                            class="close"
+                                            aria-label="Close"
+                                            role="button"
                                         >
-                                    </div>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Latest Time"
-                                        style="font-size: 10pt"
-                                        aria-describedby="basic-addon1"
-                                        :value="endTime"
-                                        @input="
-                                            endTime = $event.target.value;
-                                            saveStatus();
-                                        "
-                                    />
-                                </div>
+                                            <span
+                                                aria-hidden="true"
+                                                @click="
+                                                    timeSlots.push(numberOfTimeSlots);
+                                                    numberOfTimeSlots += 1;
+                                                "
+                                                >+</span
+                                            >
+                                        </button>
+                                    </li>
+                                </ul>
 
-                                <div>
+                                <div style="padding:10%">
                                     <label for="awt">Wait List</label>&nbsp;&nbsp;
                                     <input
                                         id="awt"
                                         v-model="allowWaitlist"
                                         type="checkbox"
                                         checked
-                                    />&nbsp;&nbsp; <label for="ac">Closed</label>&nbsp;&nbsp;
+                                    />&nbsp;&nbsp; <br /><label for="ac">Closed</label>&nbsp;&nbsp;
                                     <input id="ac" v-model="allowClosed" type="checkbox" checked />
                                 </div>
                             </div>
@@ -476,7 +454,9 @@ export default {
             showRoom: true,
             showInstructor: true,
             fullHeight: 50,
-            partialHeight: 20
+            partialHeight: 20,
+            timeSlots: [],
+            numberOfTimeSlots: 0
         };
     },
     computed: {
@@ -694,6 +674,10 @@ export default {
                     ? 20
                     : parseInt(raw_data.partialHeight);
             }
+        },
+        removeATimeConstraint(n) {
+            this.timeSlots.splice(this.timeSlots.indexOf(n), 1);
+            this.numberOfTimeSlots -= 1;
         }
     }
 };

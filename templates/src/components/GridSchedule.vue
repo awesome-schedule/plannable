@@ -30,11 +30,11 @@
                         )
                     }"
                 >
-                    <div class="day placeholder"><br />Monday</div>
-                    <div class="day placeholder"><br />Tuesday</div>
-                    <div class="day placeholder"><br />Wednesday</div>
-                    <div class="day placeholder"><br />Thursday</div>
-                    <div class="day placeholder"><br />Friday</div>
+                    <div class="placeholder">Monday</div>
+                    <div class="placeholder">Tuesday</div>
+                    <div class="placeholder">Wednesday</div>
+                    <div class="placeholder">Thursday</div>
+                    <div class="placeholder">Friday</div>
                     <div
                         v-for="item in items"
                         :key="item"
@@ -179,7 +179,6 @@ export default {
     display: grid;
     grid-gap: 0px;
     background-color: white;
-
     padding: 0px;
 }
 
@@ -190,10 +189,11 @@ export default {
 
 .placeholder {
     background-color: rgba(255, 255, 255, 0.8);
-    padding: 0px 0;
-    font-size: 10px;
+    padding: 12px 0 10px;
+    font-size: 14px;
     border-left: 0.7px solid #e5e3dc;
     border-top: 0.7px solid #e5e3dc;
+    text-align: center;
 }
 
 .time {
@@ -206,11 +206,5 @@ export default {
 
 .item1 {
     grid-column: 1 / 3;
-}
-
-.day {
-    text-align: center;
-    border-top: 40%;
-    vertical-align: middle;
 }
 </style>

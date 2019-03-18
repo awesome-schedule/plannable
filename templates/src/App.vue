@@ -316,7 +316,7 @@
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">full height</span>
+                            <span class="input-group-text">Class Block</span>
                         </div>
                         <input
                             v-model="fullHeight"
@@ -324,11 +324,14 @@
                             class="form-control"
                             @input="saveStatus()"
                         />
+                        <div class="input-group-append">
+                            <span class="input-group-text">px</span>
+                        </div>
                     </div>
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">partial height</span>
+                            <span class="input-group-text">Placeholder</span>
                         </div>
                         <input
                             v-model="partialHeight"
@@ -336,21 +339,47 @@
                             class="form-control"
                             @input="saveStatus()"
                         />
+                        <div class="input-group-append">
+                            <span class="input-group-text">px</span>
+                        </div>
                     </div>
 
                     <div>
                         Display Options:
                         <div>
-                            <input id="displayTime" v-model="showTime" type="checkbox" checked />
-                            <label for="displayTime">&nbsp;Show time</label><br />
-                            <input id="displayRoom" v-model="showRoom" type="checkbox" checked />
-                            <label for="displayRoom">&nbsp;Show room</label> <br />
-                            <input
-                                id="displayInstructor"
-                                v-model="showInstructor"
-                                type="checkbox"
-                                checked
-                            /><label for="displayInstructor">&nbsp;Show instructor</label>
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    id="displayTime"
+                                    v-model="showTime"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                />
+                                <label for="displayTime" class="custom-control-label">
+                                    Show Time
+                                </label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    id="displayRoom"
+                                    v-model="showRoom"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                />
+                                <label for="displayRoom" class="custom-control-label">
+                                    Show Room
+                                </label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    id="displayInstructor"
+                                    v-model="showInstructor"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                />
+                                <label for="displayInstructor" class="custom-control-label">
+                                    Show instructor
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </td>

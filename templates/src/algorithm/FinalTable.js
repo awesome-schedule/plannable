@@ -3,10 +3,7 @@ import Schedule from '../models/Schedule';
 import * as math from 'mathjs';
 import Heap from 'heap-js';
 /**
- * @typedef {import("./ScheduleGenerator").RawSchedule} RawSchedule
- */
-/**
- * @typedef {{schedule: RawSchedule, coeff: number}} ComparableSchedule
+ * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */
 class FinalTable {
     constructor() {
@@ -24,7 +21,7 @@ class FinalTable {
 
     /**
      *
-     * @param {RawSchedule} timeTable
+     * @param {import("./ScheduleGenerator").RawSchedule} timeTable
      */
     add(timeTable) {
         /**

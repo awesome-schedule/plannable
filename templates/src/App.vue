@@ -308,10 +308,11 @@
                                     <label for="awt">Wait List</label>&nbsp;&nbsp;
                                     <input
                                         id="awt"
+                                        v-model="allowWaitlist"
                                         type="checkbox"
-                                        v-bind="allowWaitlist"
+                                        checked
                                     />&nbsp;&nbsp; <label for="ac">Closed</label>&nbsp;&nbsp;
-                                    <input id="ac" type="checkbox" v-bind="allowClosed" />
+                                    <input id="ac" v-model="allowClosed" type="checkbox" checked />
                                 </div>
                             </div>
                             <!--submit button-->
@@ -495,8 +496,8 @@ export default {
             endTime: '',
             allTimes: [],
             errMsg: '',
-            allowWaitlist: false,
-            allowClosed: false,
+            allowWaitlist: true,
+            allowClosed: true,
             cache: true,
             modalCourse: null,
             classListModalCourse: null,
@@ -624,8 +625,18 @@ export default {
             this.errMsg = '';
         },
         generateSchedules() {
+            const constraintStatus = [];
+            if (!this.allowWaitlist) {
+                constraintStatus.push('Wait List');
+            }
+            if (!this.allowClosed) {
+                constraintStatus.push('Closed');
+            }
             const generator = new ScheduleGenerator(this.allRecords);
-            const table = generator.getSchedules(this.currentSchedule);
+            const table = generator.getSchedules(this.currentSchedule, {
+                timeSlots: [],
+                status: constraintStatus
+            });
             const heap = table.finalTable;
             const raw_data = heap.top(10);
 
@@ -642,6 +653,7 @@ export default {
             }
             this.schedules = translated_raw;
             this.currentSchedule = new Schedule(this.schedules[0]);
+            this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
         },
         sendRequest() {

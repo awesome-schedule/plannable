@@ -246,25 +246,26 @@
                                 <ul class="list-group list-group-flush" style="width:100%">
                                     <li
                                         v-for="(value, n) in timeSlots"
+                                        v-if="value !== undefined"
                                         :key="n"
                                         class="list-group-item"
                                         style="padding:2%"
                                     >
+                                        <!-- @input="timeSlots[n][0] = $event.target.value" -->
                                         <input
+                                            v-model="value[0]"
                                             type="time"
                                             min="8:00"
                                             max="22:00"
                                             style="-webkit-appearance:button"
-                                            @input="timeSlots[n][0] = $event.target.value"
                                         />
                                         -
                                         <input
-                                            :id="'time-end-' + n"
+                                            v-model="value[1]"
                                             type="time"
                                             min="8:00"
                                             max="22:00"
                                             style="-webkit-appearance:button"
-                                            @input="timeSlots[n][1] = $event.target.value"
                                         />
                                         <button
                                             type="button"
@@ -676,7 +677,6 @@ export default Vue.extend({
             if (!this.allowClosed) {
                 constraintStatus.push('Closed');
             }
-            console.log(this.timeSlotsRecord);
             const generator = new ScheduleGenerator(this.allRecords);
             const table = generator.getSchedules(this.currentSchedule, {
                 timeSlots: this.timeSlotsRecord,
@@ -735,7 +735,6 @@ export default Vue.extend({
             });
         },
         saveStatus() {
-            console.log(this.showTime);
             localStorage.setItem(
                 this.currentSemester.id,
                 JSON.stringify({
@@ -779,11 +778,10 @@ export default Vue.extend({
         addFilter() {
             for (const i in this.timeSlots) {
                 if (this.timeSlots[i] === undefined) {
-                    return;
+                    continue;
                 }
                 const startTime = this.timeSlots[i][0].split(':');
                 const endTime = this.timeSlots[i][1].split(':');
-                console.log(startTime);
                 if (
                     isNaN(startTime[0]) ||
                     isNaN(startTime[1]) ||

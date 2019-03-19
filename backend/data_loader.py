@@ -82,7 +82,10 @@ def get_data_path(filename: str):
     :return: the path to "data" directory which the file is located
     """
     dir_path = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(dir_path, "data", filename)
+    data_dir = os.path.join(dir_path, "data")
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
+    return os.path.join(data_dir, filename)
 
 
 def load_semester_data(semester_index):

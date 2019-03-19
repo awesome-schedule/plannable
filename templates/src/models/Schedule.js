@@ -2,7 +2,9 @@ import Course from './Course';
 /**
  * A schedule is a list of courses
  */
-
+/**
+ * @typedef {[string, number, number][]} RawSchedule
+ */
 class Schedule {
     static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     static fields = ['All', ...Schedule.days, 'title', 'id'];
@@ -26,7 +28,7 @@ class Schedule {
     static allRecords;
     /**
      * Construct a `Schedule` object from its raw representation
-     * @param {[string, number, number][]} raw_schedule
+     * @param {RawSchedule} raw_schedule
      * @param {string} title
      * @param {number} id
      */

@@ -29,7 +29,8 @@
 </template>
 
 <script>
-export default {
+import Vue from 'vue';
+export default Vue.extend({
     props: {
         indices: Array
     },
@@ -46,5 +47,5 @@ export default {
             }
         }
     }
-};
+});
 </script>

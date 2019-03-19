@@ -1,11 +1,10 @@
 // @ts-check
-import Schedule from '../models/Schedule';
 import * as math from 'mathjs';
 import Heap from 'heap-js';
 /**
  * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */
-class FinalTable {
+class ScheduleEvaluator {
     constructor() {
         this.finalTable = new Heap(
             /**
@@ -59,4 +58,4 @@ class FinalTable {
         });
     }
 }
-export { FinalTable };
+export { ScheduleEvaluator };

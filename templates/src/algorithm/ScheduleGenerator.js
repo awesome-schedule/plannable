@@ -1,12 +1,12 @@
 import CourseRecord from '../models/CourseRecord';
-import { FinalTable } from './FinalTable';
+import { ScheduleEvaluator } from './ScheduleEvaluator';
 /**
  * @typedef {[string,string[],number[],number][]} RawSchedule
  */
 class ScheduleGenerator {
     /**
      *
-     * @param {import('../models/AllRecords').RawRecord} allRecords
+     * @param {import('../models/AllRecords').default} allRecords
      */
     constructor(allRecords) {
         this.allRecords = allRecords;
@@ -102,7 +102,7 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new FinalTable();
+        const finalTable = new ScheduleEvaluator();
         let exhausted = false;
         while (true) {
             if (classNum >= classList.length) {

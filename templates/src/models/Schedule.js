@@ -7,7 +7,7 @@ import Course from './Course';
  */
 class Schedule {
     static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    static fields = ['All', ...Schedule.days, 'title', 'id'];
+    static fields = ['All', 'title', 'id'];
     static bgColors = [
         '#f7867e',
         '#ffb74c',
@@ -235,9 +235,7 @@ class Schedule {
         for (const key in obj.All) {
             if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
         }
-        for (const day of Schedule.days) {
-            schedule[day].map(x => Object.setPrototypeOf(x, Course.prototype));
-        }
+        schedule.computeSchedule();
         return schedule;
     }
 

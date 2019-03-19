@@ -653,6 +653,8 @@ export default Vue.extend({
             // fetch basic class data for the given semester for fast class search
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allRecords = new AllRecords(res.data.data);
+
+                // important: assign all records
                 Schedule.allRecords = this.allRecords;
                 if (this.cache) this.loadStatus();
                 else this.currentSchedule = new Schedule([], 'Schedule', 1);

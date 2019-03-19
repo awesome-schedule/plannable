@@ -411,6 +411,16 @@
                                     @switch_page="switchPage"
                                 ></Pagination>
                             </td>
+                            <td style="width:15%">
+                                <button
+                                    v-if="generated"
+                                    class="btn btn-primary"
+                                    style="font-size:12px"
+                                    @click="currentSchedule = proposedSchedule"
+                                >
+                                    Proposed Schedule
+                                </button>
+                            </td>
                         </tr>
                     </table>
 
@@ -593,6 +603,7 @@ export default Vue.extend({
         },
         clear() {
             this.currentSchedule.clean();
+            this.generated = false;
             this.currentCourses = [];
             this.schedules = [];
             this.saveStatus();

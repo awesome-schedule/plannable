@@ -7,6 +7,7 @@
                     :style="{
                         'grid-template-columns': 'auto',
                         width: '100%',
+                        height: mainHeight,
                         'grid-template-rows': heightInfo.reduce(
                             (acc, x) => acc + (x + 'px '),
                             '35px '
@@ -159,6 +160,13 @@ export default Vue.extend({
                 }
             }
             return info;
+        },
+        mainHeight() {
+            let h = 0;
+            for (const i of this.heightInfo) {
+                h += i;
+            }
+            return h;
         }
     }
 });

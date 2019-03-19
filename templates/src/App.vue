@@ -486,6 +486,11 @@ export default Vue.extend({
              */
             currentSchedule: new Schedule(),
             /**
+             * @type {Schedule}
+             */
+            proposedSchedule: new Schedule(),
+            generated: false,
+            /**
              * @type {Course[]}
              */
             currentCourses: [],
@@ -494,17 +499,26 @@ export default Vue.extend({
              */
             schedules: null,
             isEntering: false,
+            /***
+             * sideBar: show left sidebar when true, and hide when false
+             */
             sideBar: true,
+            /**
+             * showSelectClass: when true, show the select-class sidebar if 'sideBar' is also true
+             */
             showSelectClass: true,
+            /**
+             * showFilter: when true, show the filter sidebar if 'sideBar' is also true
+             */
             showFilter: false,
+            /**
+             * showSetting: when true, show the settings sidebar if 'sideBar' is also true
+             */
             showSetting: false,
             /**
              * @type {Course[]}
              */
             inputCourses: null,
-            startTime: '',
-            endTime: '',
-            allTimes: [],
             errMsg: '',
             allowWaitlist: true,
             allowClosed: true,
@@ -699,6 +713,8 @@ export default Vue.extend({
                 translated_raw.push(raw_schedule);
             }
             this.schedules = translated_raw;
+            this.proposedSchedule = this.currentSchedule;
+            this.generated = true;
             this.currentSchedule = new Schedule(this.schedules[0]);
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();

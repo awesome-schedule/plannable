@@ -396,7 +396,7 @@
                         <tr>
                             <td>
                                 <button
-                                    v-if="isEntering"
+                                    v-if="isEntering && showSelectClass"
                                     class="btn btn-primary mt-1"
                                     style="font-size:10px"
                                     @click="closeClassList"
@@ -758,8 +758,6 @@ export default Vue.extend({
                 JSON.stringify({
                     schedules: this.schedules,
                     currentSchedule: this.currentSchedule.toJSON(),
-                    startTime: this.startTime,
-                    endTime: this.endTime,
                     fullHeight: this.fullHeight,
                     partialHeight: this.partialHeight
                 })
@@ -767,7 +765,13 @@ export default Vue.extend({
         },
         loadStatus() {
             const data = localStorage.getItem(this.currentSemester.id);
-            if (data === null || data.length === 0) return;
+            if (data === null || data.length === 0) {
+                this.schedules = [];
+                this.currentSchedule = new Schedule();
+                this.currentCourses = [];
+                this.fullHeight = 50;
+                this.partialHeight = 20;
+            }
             const raw_data = JSON.parse(data);
             if (
                 raw_data !== null &&
@@ -777,8 +781,6 @@ export default Vue.extend({
                 this.schedules = raw_data.schedules;
                 this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule);
                 this.currentCourses = this.getCurrentCourses();
-                this.startTime = raw_data.startTime;
-                this.endTime = raw_data.endTime;
 
                 this.fullHeight = isNaN(raw_data.fullHeight) ? 50 : parseInt(raw_data.fullHeight);
                 this.partialHeight = isNaN(raw_data.partialHeight)

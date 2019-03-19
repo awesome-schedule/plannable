@@ -2,11 +2,6 @@
     <div id="class-list" style="width: 100%">
         <div class="card-body" style="padding: 0.25rem; ">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
-                <!-- data-toggle="popover"
-          data-html="true"
-          data-placement="right"
-          v-bind:data-content="crs.description"
-        v-bind:data-title="crs.title"-->
                 <div class="list-group-item list-group-item-action class-title">
                     <table style="width: 100%">
                         <tr>
@@ -25,6 +20,7 @@
                                         data-toggle="modal"
                                         data-target="#class-list-modal"
                                         class="fas fa-info-circle"
+                                        title="View class description"
                                         @click="$emit('trigger-classlist-modal', crs)"
                                     ></i>
                                 </h6>
@@ -52,12 +48,16 @@
                 >
                     <a
                         v-if="idx === 0"
-                        style="font-size: 1rem; padding: 0.5rem 1rem"
+                        style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
                         class="list-group-item list-group-item-action class-section"
                         :class="{ active: schedule.All[crs.key] === -1 }"
                         @click="select(crs, -1)"
-                        >Any Section</a
-                    >
+                        >Any Section
+                        <div v-if="schedule.All[crs.key] === -1" style="float:right;">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </a>
+
                     <div
                         class="list-group-item list-group-item-action class-section"
                         :class="{ active: isActive(crs.key, idx) }"
@@ -65,11 +65,25 @@
                         @mouseover="preview(crs.key, idx)"
                         @mouseleave="removePreview()"
                     >
-                        <ul class="list-unstyled class-info">
-                            <li>{{ sec }} {{ crs.days[idx] }}</li>
-                            <li>{{ crs.topic[idx] }}</li>
-                            <li>{{ crs.instructor[idx].join(', ') }} {{ crs.room[idx] }}</li>
-                        </ul>
+                        <table style="width: 100%">
+                            <tr>
+                                <td>
+                                    <ul class="list-unstyled class-info" style="float:left">
+                                        <li>{{ sec }} {{ crs.days[idx] }}</li>
+                                        <li>{{ crs.topic[idx] }}</li>
+                                        <li>
+                                            {{ crs.instructor[idx].join(', ') }} {{ crs.room[idx] }}
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td
+                                    v-if="isActive(crs.key, idx)"
+                                    style="vertical-align: middle; font-size: 0.85rem"
+                                >
+                                    <i class="fas fa-check"></i>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>

@@ -1,12 +1,12 @@
 <template>
     <div id="class-list" style="width: 100%">
-        <div class="card-body" style="padding: 0.25rem; ">
+        <div class="card-body p-1">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
                 <div class="list-group-item list-group-item-action class-title">
                     <table style="width: 100%">
                         <tr>
                             <td
-                                style="padding-right: 0.5rem"
+                                class="pr-2"
                                 data-toggle="collapse"
                                 :data-target="`#${crs.key}`"
                                 @click="collapse(crs.key)"
@@ -14,7 +14,7 @@
                                 <i class="fas" :class="expanded(crs)"></i>
                             </td>
                             <td>
-                                <h6 style="margin-bottom: 0.25rem">
+                                <h6 class="mb-1">
                                     {{ crs.department }} {{ crs.number }} {{ crs.type }}
                                     <i
                                         data-toggle="modal"
@@ -26,7 +26,7 @@
                                 </h6>
                                 <p style="font-size: 0.85rem; margin: 0">{{ crs.title }}</p>
                             </td>
-                            <td v-if="!isEntering" style="padding-left: 0.5rem">
+                            <td v-if="!isEntering" class="pl-2">
                                 <button
                                     type="button"
                                     class="close"
@@ -51,6 +51,9 @@
                         style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
                         class="list-group-item list-group-item-action class-section"
                         :class="{ active: schedule.All[crs.key] === -1 }"
+                        :title="
+                            schedule.All[crs.key] === -1 ? 'click to unselect' : 'click to select'
+                        "
                         @click="select(crs, -1)"
                         >Any Section
                         <div v-if="schedule.All[crs.key] === -1" style="float:right;">
@@ -59,31 +62,32 @@
                     </a>
 
                     <div
-                        class="list-group-item list-group-item-action class-section"
+                        class="list-group-item list-group-item-action class-section container-fluid"
                         :class="{ active: isActive(crs.key, idx) }"
+                        :title="isActive(crs.key, idx) ? 'click to unselect' : 'click to select'"
                         @click="select(crs, idx)"
                         @mouseover="preview(crs.key, idx)"
                         @mouseleave="removePreview()"
                     >
-                        <table style="width: 100%">
-                            <tr>
-                                <td>
-                                    <ul class="list-unstyled class-info" style="float:left">
-                                        <li>{{ sec }} {{ crs.days[idx] }}</li>
-                                        <li>{{ crs.topic[idx] }}</li>
-                                        <li>
-                                            {{ crs.instructor[idx].join(', ') }} {{ crs.room[idx] }}
-                                        </li>
-                                    </ul>
-                                </td>
-                                <td
+                        <div class="row no-gutters">
+                            <div class="col-md-auto mr-auto">
+                                <ul class="list-unstyled class-info">
+                                    <li>{{ sec }} {{ crs.days[idx] }}</li>
+                                    <li>{{ crs.topic[idx] }}</li>
+                                    <li>
+                                        {{ crs.instructor[idx].join(', ') }}
+                                        <!-- {{ crs.room[idx] }} -->
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col col-sm-1 align-self-center">
+                                <i
                                     v-if="isActive(crs.key, idx)"
-                                    style="vertical-align: middle; font-size: 0.85rem"
-                                >
-                                    <i class="fas fa-check"></i>
-                                </td>
-                            </tr>
-                        </table>
+                                    style="font-size: 0.85rem"
+                                    class="fas fa-check"
+                                ></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

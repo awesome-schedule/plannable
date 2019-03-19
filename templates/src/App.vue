@@ -171,8 +171,8 @@
                         </div>
                         <div id="currentSelectedClass" class="collapse show">
                             <div
-                                class="card card-body"
-                                style="padding:5px; overflow-y: auto;"
+                                class="card card-body p-1"
+                                style="overflow-y: auto;"
                                 :style="`max-height:${staticCardHeight}px`"
                             >
                                 <ClassList
@@ -204,8 +204,8 @@
                     <div
                         v-if="isEntering"
                         ref="classList"
-                        class="card card-body"
-                        style="padding:5px; overflow-y: auto;"
+                        class="card card-body p-1"
+                        style="overflow-y: auto;"
                         :style="`max-height:${enteringCardHeight}px`"
                     >
                         <ClassList
@@ -293,15 +293,23 @@
                                     </li>
                                 </ul>
 
-                                <div style="padding:10%">
-                                    <label for="awt">Wait List</label>&nbsp;&nbsp;
+                                <div class="custom-control custom-checkbox mt-2">
                                     <input
                                         id="awt"
                                         v-model="allowWaitlist"
                                         type="checkbox"
-                                        checked
-                                    />&nbsp;&nbsp; <br /><label for="ac">Closed</label>&nbsp;&nbsp;
-                                    <input id="ac" v-model="allowClosed" type="checkbox" checked />
+                                        class="custom-control-input"
+                                    />
+                                    <label class="custom-control-label" for="awt">Wait List</label>
+                                </div>
+                                <div class="custom-control custom-checkbox mt-1">
+                                    <input
+                                        id="ac"
+                                        v-model="allowClosed"
+                                        type="checkbox"
+                                        class="custom-control-input"
+                                    />
+                                    <label class="custom-control-label" for="ac">Closed</label>
                                 </div>
                             </div>
                             <!--submit button-->
@@ -682,7 +690,7 @@ export default Vue.extend({
 
             // fetch basic class data for the given semester for fast class search
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
-                this.allRecords = new AllRecords(res.data.data);
+                this.allRecords = new AllRecords(this.currentSemester, res.data.data);
 
                 // important: assign all records
                 Schedule.allRecords = this.allRecords;

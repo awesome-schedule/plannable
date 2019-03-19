@@ -4,11 +4,17 @@ import CourseRecord from './CourseRecord';
 /**
  * @typedef {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} RawRecord
  */
+/**
+ * @typedef {{id: string, name: string}} Semester
+ */
+
 class AllRecords {
     /**
+     * @param {Semester} semester
      * @param {Object<string, RawRecord>} raw_data
      */
-    constructor(raw_data) {
+    constructor(semester, raw_data) {
+        this.semester = semester;
         this.raw_data = raw_data;
     }
 
@@ -22,7 +28,7 @@ class AllRecords {
     }
 
     /**
-     * Get a Course associated with the given key and section
+     * Get a Course associated with the given key and section index
      * @param {string} key
      * @param {number} section
      * @returns {Course}

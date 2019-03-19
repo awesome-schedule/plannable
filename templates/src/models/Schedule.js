@@ -23,7 +23,7 @@ class Schedule {
     ];
     /**
      * this field must be initialized before calling any instance method of the Schedule class
-     * @type {import "./AllRecords".default}
+     * @type {import('./AllRecords').default}
      */
     static allRecords;
     /**

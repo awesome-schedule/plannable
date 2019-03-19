@@ -38,32 +38,43 @@
                 </ul>
             </div>
         </nav>
+        <nav
+            class="navbar navbar-expand-lg navbar-light mb-4"
+            style="background-color:#F9A348;position:relative;width:100%;z-index:4"
+        >
+            <a>?</a>
+        </nav>
         <!-- end of navigation bar -->
-        <transition name="fade">
-            <div
-                v-if="errMsg.length > 0"
-                class="alert alert-danger"
-                role="alert"
-                style="width:94%;margin-left:3%"
-            >
-                {{ errMsg }}
-                <button
-                    type="button"
-                    class="close"
-                    aria-label="Close"
-                    style="align:center"
-                    role="button"
-                    @click="errMsg = ''"
-                >
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        </transition>
 
         <table style="width:97%;margin:auto auto">
             <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <transition name="fade">
+                        <div
+                            v-if="errMsg.length > 0"
+                            class="alert alert-danger"
+                            role="alert"
+                            style="width:94%;margin-left:3%;"
+                        >
+                            {{ errMsg }}
+                            <button
+                                type="button"
+                                class="close"
+                                aria-label="Close"
+                                style="align:center"
+                                role="button"
+                                @click="errMsg = ''"
+                            >
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </transition>
+                </td>
+            </tr>
+            <tr>
                 <td style="width:3%; vertical-align:top;">
-                    <br /><br /><br />
                     <div style="position:fixed;background-color:#00c0ff;width:3rem">
                         <span
                             class="side-button"
@@ -104,7 +115,7 @@
                 </td>
                 <td v-if="sideBar && showSelectClass" id="leftBar" class="leftside">
                     <!-- term selection dropdown -->
-                    <div class="dropdown" style="margin-top:70px">
+                    <div class="dropdown" style="">
                         <button
                             id="semester"
                             class="btn btn-primary mt-4 mx-auto"
@@ -122,18 +133,18 @@
                             style="width: 100%;"
                         >
                             <a
-                                v-for="semester in semesters"
+                                v-for="(semester, index) in semesters"
                                 :key="semester.id"
                                 class="dropdown-item"
                                 style="width: 100%;"
                                 href="#"
-                                @click="selectSemester(semester.id)"
+                                @click="selectSemester(index)"
                                 >{{ semester.name }}</a
                             >
                         </div>
                     </div>
                     <!--input title-->
-                    <div class="input-group mt-2">
+                    <div ref="enteringCardTop" class="input-group mt-2">
                         <input
                             type="text"
                             class="form-control"
@@ -145,7 +156,7 @@
                         />
                     </div>
                     <div v-if="!isEntering">
-                        <div class="mt-3">
+                        <div ref="staticCardTop" class="mt-3">
                             <button
                                 class="btn btn-primary"
                                 type="button"
@@ -161,7 +172,8 @@
                         <div id="currentSelectedClass" class="collapse show">
                             <div
                                 class="card card-body"
-                                style="padding:5px;max-height: 460px; overflow-y: auto"
+                                style="padding:5px; overflow-y: auto;"
+                                :style="`max-height:${staticCardHeight}px`"
                             >
                                 <ClassList
                                     :courses="currentCourses"
@@ -178,7 +190,7 @@
                                     <button
                                         type="button"
                                         class="btn btn-success mt-2"
-                                        @click="sendRequest"
+                                        @click="generateSchedules"
                                     >
                                         Submit
                                     </button>
@@ -191,8 +203,10 @@
                     </div>
                     <div
                         v-if="isEntering"
+                        ref="classList"
                         class="card card-body"
-                        style="padding:5px;max-height: 500px; overflow-y: auto"
+                        style="padding:5px; overflow-y: auto;"
+                        :style="`max-height:${enteringCardHeight}px`"
                     >
                         <ClassList
                             :courses="inputCourses"
@@ -212,7 +226,7 @@
                     class="leftside"
                     style="width: 20%; vertical-align:top; padding-left:2%;position:fixed"
                 >
-                    <div style="margin-top:70px">
+                    <div style="">
                         <button
                             class="btn btn-primary"
                             type="button"
@@ -227,98 +241,73 @@
                     </div>
 
                     <div id="filter" class="collapse show">
-                        <div class="card card-body">
+                        <div class="card card-body" style="padding:3%">
                             <div class="filter mt-2">
-                                <div class="input-group">
-                                    <!--input earliest time-->
-                                    <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="earliest" style="font-size:10pt;">Earliest Time</span>-->
-                                    <button
-                                        type="button"
-                                        class="button dropdown-toggle dropdown-toggle-split"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
+                                <ul class="list-group list-group-flush" style="width:100%">
+                                    <li
+                                        v-for="(value, n) in timeSlots"
+                                        :key="n"
+                                        class="list-group-item"
+                                        style="padding:2%"
                                     >
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <div class="dropdown-menu" style="width:100%">
-                                        <a
-                                            v-for="t in allTimes"
-                                            :key="t"
-                                            class="dropdown-item"
-                                            href="#"
-                                            @click="startTime = t"
-                                            >{{ t }}</a
+                                        <input
+                                            type="time"
+                                            min="8:00"
+                                            max="22:00"
+                                            style="-webkit-appearance:button"
+                                            @input="timeSlots[n][0] = $event.target.value"
+                                        />
+                                        -
+                                        <input
+                                            :id="'time-end-' + n"
+                                            type="time"
+                                            min="8:00"
+                                            max="22:00"
+                                            style="-webkit-appearance:button"
+                                            @input="timeSlots[n][1] = $event.target.value"
+                                        />
+                                        <button
+                                            type="button"
+                                            class="close"
+                                            aria-label="Close"
+                                            role="button"
                                         >
-                                    </div>
+                                            <span
+                                                aria-hidden="true"
+                                                @click="removeATimeConstraint(n)"
+                                                >&times;</span
+                                            >
+                                        </button>
+                                    </li>
 
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Earliest Time"
-                                        style="font-size: 10pt;"
-                                        aria-describedby="basic-addon1"
-                                        :value="startTime"
-                                        @input="
-                                            startTime = $event.target.value;
-                                            saveStatus();
-                                        "
-                                    />
-                                </div>
-
-                                <div class="input-group mt-2">
-                                    <!--input latest time-->
-                                    <!-- <div class="input-group-prepend">
-                    <span class="input-group-text" id="latest" style="font-size:10pt">Latest Time</span>-->
-                                    <button
-                                        type="button"
-                                        class="button dropdown-toggle dropdown-toggle-split"
-                                        data-toggle="dropdown"
-                                        aria-haspopup="true"
-                                        aria-expanded="false"
-                                    >
-                                        <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <div class="dropdown-menu" style="width:100%">
-                                        <a
-                                            v-for="t in allTimes"
-                                            :key="t"
-                                            class="dropdown-item"
-                                            href="#"
-                                            @click="endTime = t"
-                                            >{{ t }}</a
+                                    <li class="list-group-item" style="text-align:center">
+                                        <button
+                                            type="button"
+                                            class="close"
+                                            aria-label="Close"
+                                            role="button"
                                         >
-                                    </div>
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Latest Time"
-                                        style="font-size: 10pt"
-                                        aria-describedby="basic-addon1"
-                                        :value="endTime"
-                                        @input="
-                                            endTime = $event.target.value;
-                                            saveStatus();
-                                        "
-                                    />
-                                </div>
+                                            <span aria-hidden="true" @click="addTimeSlot">+</span>
+                                        </button>
+                                    </li>
+                                </ul>
 
-                                <div>
+                                <div style="padding:10%">
                                     <label for="awt">Wait List</label>&nbsp;&nbsp;
                                     <input
                                         id="awt"
+                                        v-model="allowWaitlist"
                                         type="checkbox"
-                                        v-bind="allowWaitlist"
-                                    />&nbsp;&nbsp; <label for="ac">Closed</label>&nbsp;&nbsp;
-                                    <input id="ac" type="checkbox" v-bind="allowClosed" />
+                                        checked
+                                    />&nbsp;&nbsp; <br /><label for="ac">Closed</label>&nbsp;&nbsp;
+                                    <input id="ac" v-model="allowClosed" type="checkbox" checked />
                                 </div>
                             </div>
                             <!--submit button-->
                             <button
                                 type="button"
                                 class="btn btn-outline-success mt-2"
-                                @click="sendRequest"
+                                @click="addFilter"
                             >
                                 Submit
                             </button>
@@ -327,47 +316,82 @@
                 </td>
 
                 <td v-if="sideBar && showSetting" class="leftside">
-                    <button
-                        type="button"
-                        style="margin-top:70px;width:100%"
-                        class="btn btn-primary mb-3"
-                    >
-                        Primary
+                    <button type="button" style=";width:100%" class="btn btn-primary mb-3">
+                        Schedule Display Settings
                     </button>
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">full height</span>
+                            <span class="input-group-text">Class Block</span>
                         </div>
-                        <input v-model="fullHeight" type="number" class="form-control" />
+                        <input
+                            v-model="fullHeight"
+                            type="number"
+                            class="form-control"
+                            @input="saveStatus()"
+                        />
+                        <div class="input-group-append">
+                            <span class="input-group-text">px</span>
+                        </div>
                     </div>
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">partial height</span>
+                            <span class="input-group-text">Placeholder</span>
                         </div>
-                        <input v-model="partialHeight" type="number" class="form-control" />
+                        <input
+                            v-model="partialHeight"
+                            type="number"
+                            class="form-control"
+                            @input="saveStatus()"
+                        />
+                        <div class="input-group-append">
+                            <span class="input-group-text">px</span>
+                        </div>
                     </div>
 
                     <div>
                         Display Options:
                         <div>
-                            <input id="displayTime" v-model="showTime" type="checkbox" checked />
-                            <label for="displayTime">&nbsp;Show time</label><br />
-                            <input id="displayRoom" v-model="showRoom" type="checkbox" checked />
-                            <label for="displayRoom">&nbsp;Show room</label> <br />
-                            <input
-                                id="displayInstructor"
-                                v-model="showInstructor"
-                                type="checkbox"
-                                checked
-                            /><label for="displayInstructor">&nbsp;Show instructor</label>
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    id="displayTime"
+                                    v-model="showTime"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                />
+                                <label for="displayTime" class="custom-control-label">
+                                    Show Time
+                                </label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    id="displayRoom"
+                                    v-model="showRoom"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                />
+                                <label for="displayRoom" class="custom-control-label">
+                                    Show Room
+                                </label>
+                            </div>
+                            <div class="custom-control custom-checkbox">
+                                <input
+                                    id="displayInstructor"
+                                    v-model="showInstructor"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                />
+                                <label for="displayInstructor" class="custom-control-label">
+                                    Show instructor
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </td>
 
                 <td style="width:75%;vertical-align: top;text-align-left">
-                    <table style="width:100%;margin-top:60px">
+                    <table style="width:100%;">
                         <tr>
                             <td>
                                 <button
@@ -409,8 +433,9 @@
 <script>
 // eslint-disable-next-line
 /* global $ */
-import ClassList from './components/ClassList';
-import Pagination from './components/Pagination';
+import Vue from 'vue';
+import ClassList from './components/ClassList.vue';
+import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
@@ -421,8 +446,13 @@ import Schedule from './models/Schedule.js';
 import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
 import axios from 'axios';
+import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
 
-export default {
+/**
+ * @typedef {{id: string, name: string}} Semester
+ */
+
+export default Vue.extend({
     name: 'App',
     components: {
         ClassList,
@@ -438,36 +468,71 @@ export default {
                 window.location.host.indexOf('127.0.0.1') === -1
                     ? `${window.location.protocol}//${window.location.host}/api`
                     : 'http://localhost:8000/api',
+            /**
+             * @type {Semester[]}
+             */
             semesters: null,
+            /**
+             * @type {Semester}
+             */
             currentSemester: null,
+            /**
+             * @type {AllRecords}
+             */
             allRecords: null,
+            /**
+             * @type {Schedule}
+             */
             currentSchedule: new Schedule(),
+            /**
+             * @type {Course[]}
+             */
             currentCourses: [],
+            /**
+             * @type {import('./models/Schedule').RawSchedule[]}
+             */
             schedules: null,
             isEntering: false,
             sideBar: true,
             showSelectClass: true,
             showFilter: false,
             showSetting: false,
+            /**
+             * @type {Course[]}
+             */
             inputCourses: null,
-            activeCourse: {},
             startTime: '',
             endTime: '',
             allTimes: [],
             errMsg: '',
-            allowWaitlist: false,
-            allowClosed: false,
+            allowWaitlist: true,
+            allowClosed: true,
             cache: true,
+            /**
+             * @type {Course}
+             */
             modalCourse: null,
+            /**
+             * A course record to be displayed on Modal
+             * @type {CourseRecord}
+             */
             classListModalCourse: null,
             showTime: true,
             showRoom: true,
             showInstructor: true,
             fullHeight: 50,
-            partialHeight: 20
+            partialHeight: 20,
+            timeSlots: {},
+            numberOfTimeSlots: 0,
+            staticCardHeight: 500,
+            enteringCardHeight: 500,
+            timeSlotsRecord: []
         };
     },
     computed: {
+        /**
+         * @return {number[]}
+         */
         scheduleIndices() {
             const indices = new Array(this.schedules.length);
             for (let i = 0; i < indices.length; i++) indices[i] = i;
@@ -477,8 +542,19 @@ export default {
     mounted() {
         axios.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
-            this.selectSemester(0);
+            // get the latest semester
+            this.selectSemester(this.semesters.length - 1);
         });
+
+        this.staticCardHeight =
+            document.documentElement.clientHeight -
+            this.$refs.staticCardTop.getBoundingClientRect().bottom -
+            10;
+
+        this.enteringCardHeight =
+            document.documentElement.clientHeight -
+            this.$refs.enteringCardTop.getBoundingClientRect().bottom -
+            10;
 
         // generate a series of time
         let f = false;
@@ -504,7 +580,6 @@ export default {
             this.currentSchedule.clean();
             this.currentCourses = [];
             this.schedules = [];
-            this.$forceUpdate();
             this.saveStatus();
         },
         cleanSchedules() {
@@ -512,10 +587,16 @@ export default {
             this.currentSchedule.cleanSchedule();
         },
 
+        /**
+         * @param {Course} course
+         */
         showModal(course) {
             this.modalCourse = course;
         },
 
+        /**
+         * @param {CourseRecord} course
+         */
         showClassListModal(course) {
             this.classListModalCourse = course;
         },
@@ -525,22 +606,30 @@ export default {
         removeCourse(key) {
             this.currentSchedule.remove(key);
             this.currentCourses = this.getCurrentCourses();
-            this.$forceUpdate();
             this.saveStatus();
         },
+        /**
+         * @param {string} key
+         * @param {number} section
+         */
         updateCourse(key, section) {
             this.currentSchedule.update(key, section);
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
         },
+        /**
+         * @param {string} key
+         * @param {number} section
+         */
         preview(key, section) {
             this.currentSchedule.preview(key, section);
-            this.$forceUpdate();
         },
         removePreview() {
             this.currentSchedule.removePreview();
-            this.$forceUpdate();
         },
+        /**
+         * @param {number} idx
+         */
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) {
                 this.currentSchedule = new Schedule(this.schedules[idx], 'Schedule', idx + 1);
@@ -559,6 +648,9 @@ export default {
             this.inputCourses = this.allRecords.search(query);
             this.isEntering = true;
         },
+        /**
+         * @param {number} semesterId
+         */
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
 
@@ -576,12 +668,38 @@ export default {
             this.currentCourses = this.getCurrentCourses();
             this.$forceUpdate();
         },
-        parseResponse(res) {
-            this.schedules = res.data.data;
-            this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
+        generateSchedules() {
+            const constraintStatus = [];
+            if (!this.allowWaitlist) {
+                constraintStatus.push('Wait List');
+            }
+            if (!this.allowClosed) {
+                constraintStatus.push('Closed');
+            }
+            console.log(this.timeSlotsRecord);
+            const generator = new ScheduleGenerator(this.allRecords);
+            const table = generator.getSchedules(this.currentSchedule, {
+                timeSlots: this.timeSlotsRecord,
+                status: constraintStatus
+            });
+            const heap = table.finalTable;
+            const raw_data = heap.top(10);
+
+            /**
+             * @type {[string, number, number][]}
+             */
+            const translated_raw = [];
+            for (const rd of raw_data) {
+                const raw_schedule = [];
+                for (const raw_course of rd.schedule) {
+                    raw_schedule.push([raw_course[0], raw_course[3], -1]);
+                }
+                translated_raw.push(raw_schedule);
+            }
+            this.schedules = translated_raw;
+            this.currentSchedule = new Schedule(this.schedules[0]);
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
-            this.errMsg = '';
         },
         sendRequest() {
             // if (this.currentSchedule.All.length < 2) return;
@@ -617,20 +735,22 @@ export default {
             });
         },
         saveStatus() {
-            // console.log(this.currentSchedule);
+            console.log(this.showTime);
             localStorage.setItem(
                 this.currentSemester.id,
                 JSON.stringify({
                     schedules: this.schedules,
                     currentSchedule: this.currentSchedule.toJSON(),
                     startTime: this.startTime,
-                    endTime: this.endTime
+                    endTime: this.endTime,
+                    fullHeight: this.fullHeight,
+                    partialHeight: this.partialHeight
                 })
             );
         },
         loadStatus() {
             const data = localStorage.getItem(this.currentSemester.id);
-            if (data.length === 0) return;
+            if (data === null || data.length === 0) return;
             const raw_data = JSON.parse(data);
             if (
                 raw_data !== null &&
@@ -642,10 +762,43 @@ export default {
                 this.currentCourses = this.getCurrentCourses();
                 this.startTime = raw_data.startTime;
                 this.endTime = raw_data.endTime;
+
+                this.fullHeight = isNaN(raw_data.fullHeight) ? 50 : parseInt(raw_data.fullHeight);
+                this.partialHeight = isNaN(raw_data.partialHeight)
+                    ? 20
+                    : parseInt(raw_data.partialHeight);
+            }
+        },
+        removeATimeConstraint(n) {
+            this.$set(this.timeSlots, n, undefined);
+        },
+        addTimeSlot() {
+            this.$set(this.timeSlots, this.numberOfTimeSlots, {});
+            this.numberOfTimeSlots++;
+        },
+        addFilter() {
+            for (const i in this.timeSlots) {
+                if (this.timeSlots[i] === undefined) {
+                    return;
+                }
+                const startTime = this.timeSlots[i][0].split(':');
+                const endTime = this.timeSlots[i][1].split(':');
+                console.log(startTime);
+                if (
+                    isNaN(startTime[0]) ||
+                    isNaN(startTime[1]) ||
+                    isNaN(endTime[0]) ||
+                    isNaN(endTime[1])
+                ) {
+                    this.errMsg = 'Illegal time input.';
+                }
+                const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
+                const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
+                this.timeSlotsRecord.push([startMin, endMin]);
             }
         }
     }
-};
+});
 </script>
 
 <style scoped>

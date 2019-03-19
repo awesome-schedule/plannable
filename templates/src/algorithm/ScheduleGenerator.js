@@ -1,43 +1,46 @@
-import AllRecords from '../models/AllRecords';
-import Schedule from '../models/Schedule';
 import CourseRecord from '../models/CourseRecord';
 import { FinalTable } from './FinalTable';
-import Course from '../models/Course';
-
+/**
+ * @typedef {[string,string[],number[],number][]} RawSchedule
+ */
 class ScheduleGenerator {
     /**
      *
-     * @param {AllRecords} allRecords
+     * @param {import('../models/AllRecords').RawRecord} allRecords
      */
     constructor(allRecords) {
         this.allRecords = allRecords;
     }
 
     /**
-     *
-     * @param {Schedule} schedule
-     * @param {{timeSlots: [number, number][], status: string[], noClassDay: string[]}} constraint
+     * The entrance of the schedule generator
+     * Read from **schedule.All** and collect data from **allRecords**
+     * Collect data from **section(index)[7]**
+     * Parse the **days** into desired format: **{[ string[], number[] ]}**
+     * e.g. [ ["Mo","Tu"],[600,650] ]
+     * concatenate with the **key** and push into the **classList** to form a 3D array
+     * e.g. [ [ ["span20205",["Mo","Tu"],[600,650]], ["span20205",["Th","Fr"],[720,770]] ],
+     *        [ ["cs21105"  ,["Mo","We"],[400,450]], ["cs21105"  ,["We","Fr"],[900,975]] ] ]
+     * Pass the **ClassList** into the **createSchedule**
+     * return a **FinalTable** Object
+     * @param {import('../models/Schedule').default} schedule
+     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
+     * @return {FinalTable}
      */
-    getSchedules(schedule, constraint = { timeSlots: [], status: 'Open' }) {
-        /**
-         * The entrance of the schedule generator
-         * Read from **schedule.All** and collect data from **allRecords**
-         * Collect data from **section(index)[7]**
-         * Parse the **days** into desired format: **{[ string[], number[] ]}**
-         * e.g. [ ["Mo","Tu"],[600,650] ]
-         * concatonate with the **key** and push into the **classList** to form a 3D array
-         * e.g. [ [ ["span20205",["Mo","Tu"],[600,650]], ["span20205",["Th","Fr"],[720,770]] ],
-         *        [ ["cs21105"  ,["Mo","We"],[400,450]], ["cs21105"  ,["We","Fr"],[900,975]] ] ]
-         * Pass the **ClassList** into the **createSchedule**
-         * return a **FinalTable** Object
-         */
+    getSchedules(schedule, constraint = { timeSlots: [], status: [] }) {
         const courses = schedule.All;
+
+        /**
+         * @type {RawSchedule[]}
+         */
         const classList = [];
         for (const key in courses) {
+            /**
+             * @type {RawSchedule}
+             */
             const classes = [];
             //get full course records
             const courseRecFull = this.allRecords.getRecord(key);
-
             //get course with specific sections
             if (courses[key] === -1) {
                 for (let section = 0; section < courseRecFull.section.length; section++) {
@@ -49,7 +52,7 @@ class ScheduleGenerator {
 
                     const day = course.days;
                     const [date, timeBlock] = this.parseTime(day);
-                    if (date === 'None' || 'None' in timeBlock) {
+                    if (date === null) {
                         //do not include any TBA
                         continue;
                     }
@@ -69,7 +72,7 @@ class ScheduleGenerator {
 
                     const day = course.days;
                     const [date, timeBlock] = this.parseTime(day);
-                    if (date === 'None' || 'None' in timeBlock) {
+                    if (date === null) {
                         //do not include any TBA
                         continue;
                     }
@@ -85,17 +88,17 @@ class ScheduleGenerator {
                 throw `No ${error}`;
             }
             classList.push(classes);
-            console.log(classList);
+            // console.log(classList);
         }
 
         const result = this.createSchedule(classList);
-        console.log(result.finalTable.toArray());
+        // console.log(result.finalTable.toArray());
         return result;
     }
 
     /**
      *
-     * @param {[string,string[],number[],number]} classList
+     * @param {RawSchedule[]} classList
      * */
     createSchedule(classList) {
         /**
@@ -105,7 +108,7 @@ class ScheduleGenerator {
 
         let classNum = 0;
         let choiceNum = 0;
-        let pathMemory = Array.from({ length: classList.length }, (x, i) => 0);
+        let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
         const finalTable = new FinalTable();
         let exhausted = false;
@@ -151,7 +154,7 @@ class ScheduleGenerator {
      * @param {number} classNum
      * @param {number} choiceNum
      * @param {number[]} pathMemory
-     * @param {string,string[],number[],number} timeTable
+     * @param {RawSchedule} timeTable
      * */
     AlgorithmRetract(classList, classNum, choiceNum, pathMemory, timeTable) {
         /**
@@ -176,7 +179,7 @@ class ScheduleGenerator {
 
     /**
      *
-     * @param {string,string[],number[],number} timeTable
+     * @param {RawSchedule} timeTable
      * @param {string[]} date
      * @param {number[]} timeBlock
      * */
@@ -188,7 +191,7 @@ class ScheduleGenerator {
         :param timeBlock: contains beginTime and endTime of a class
         :return: Boolean type: true if it has conflict, else false
         */
-        if (date === 'None' || 'None' in timeBlock) {
+        if (date === null) {
             //do not include any TBA
             return true;
         }
@@ -219,6 +222,7 @@ class ScheduleGenerator {
     /**
      *
      * @param {string} classTime
+     * @return {[string[], number[]]}
      */
     parseTime(classTime) {
         /*
@@ -229,7 +233,7 @@ class ScheduleGenerator {
         */
         if (classTime === 'TBA') {
             /*there is TBA*/
-            return ['None', 'None'];
+            return [null, null];
         }
         const pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
         const match = classTime.match(pattern);
@@ -238,7 +242,7 @@ class ScheduleGenerator {
         const times = match[2];
         const date = [];
         for (let i = 0; i < dates.length; i += 2) {
-            date.push(dates.slice(i, i + 2));
+            date.push(dates.substring(i, i + 2));
         }
         const time = times.trim().split('-');
         const timeBlock = [0, 0];
@@ -276,7 +280,7 @@ class ScheduleGenerator {
      */
     filterStatus(course, constraint) {
         const standard = Object.values(CourseRecord.STATUSES);
-        console.log(constraint.status.includes(course.status), constraint.status, course.status);
+        // console.log(constraint.status.includes(course.status), constraint.status, course.status);
         if (!standard.includes(course.status)) {
             return true;
         }

@@ -34,7 +34,7 @@
                         </tr>
                     </table>
 
-                    <p style="margin-top: 0.5rem">{{ course.description }}</p>
+                    <p class="mt-2">{{ course.description }}</p>
                 </div>
             </div>
         </div>

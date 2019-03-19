@@ -3,13 +3,33 @@ import { ScheduleEvaluator } from './ScheduleEvaluator';
 /**
  * @typedef {[string,string[],number[],number][]} RawSchedule
  */
+/**
+ * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[]}} Constraint
+ */
 class ScheduleGenerator {
+    static constraintDefaults = {
+        timeSlots: [],
+        status: [],
+        noClassDay: []
+    };
     /**
      *
      * @param {import('../models/AllRecords').default} allRecords
      */
     constructor(allRecords) {
         this.allRecords = allRecords;
+    }
+
+    /**
+     * check if constraint fields satisfy the required format
+     * @param {Constraint} constraint
+     */
+    validateConstraints(constraint) {
+        for (const field in ScheduleGenerator.constraintDefaults) {
+            if (constraint[field] === undefined) {
+                constraint[field] = ScheduleGenerator.constraintDefaults[field];
+            }
+        }
     }
 
     /**
@@ -24,10 +44,12 @@ class ScheduleGenerator {
      * Pass the **ClassList** into the **createSchedule**
      * return a **FinalTable** Object
      * @param {import('../models/Schedule').default} schedule
-     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
+     * @param {Constraint} constraint
      * @return {FinalTable}
      */
-    getSchedules(schedule, constraint = { timeSlots: [], status: [] }) {
+    getSchedules(schedule, constraint = ScheduleGenerator.constraintDefaults) {
+        this.validateConstraints(constraint);
+
         const courses = schedule.All;
 
         /**

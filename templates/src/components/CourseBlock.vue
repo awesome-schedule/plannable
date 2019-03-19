@@ -31,7 +31,8 @@
 
 <script>
 import Course from '../models/Course';
-export default {
+import Vue from 'vue';
+export default Vue.extend({
     name: 'CourseBlock',
     props: {
         course: Course,
@@ -42,7 +43,7 @@ export default {
         showInstructor: Boolean
     },
     computed: {
-        startPx: function() {
+        startPx() {
             let start = 48;
             const t = this.course.start.split(':');
             const temp = (parseFloat(t[0]) - 8) * 2;
@@ -60,7 +61,7 @@ export default {
             return start;
         },
 
-        endPx: function() {
+        endPx() {
             let end = 48;
             const t = this.course.end.split(':');
             const temp = (parseFloat(t[0]) - 8) * 2;
@@ -78,7 +79,7 @@ export default {
             return end;
         }
     }
-};
+});
 </script>
 
 <style scoped>

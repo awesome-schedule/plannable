@@ -104,12 +104,11 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule.js';
-
-export default {
+export default Vue.extend({
     name: 'GridSchedule',
-
     components: {
         CourseBlock
     },
@@ -121,7 +120,6 @@ export default {
         partialHeight: Number,
         fullHeight: Number
     },
-
     data() {
         const arr = [];
         for (let i = 0; i < 115; i++) {
@@ -135,13 +133,11 @@ export default {
         }
 
         time.push('19: 00');
-
         return {
             items: arr,
             hours: time
         };
     },
-
     computed: {
         heightInfo() {
             const info = new Array(23);
@@ -164,14 +160,8 @@ export default {
             }
             return info;
         }
-        // fullHeight() {
-        //     return parseInt(this.fullHeightProp);
-        // },
-        // partialHeight() {
-        //     return parseInt(this.partialHeightProp);
-        // }
     }
-};
+});
 </script>
 
 <style>

@@ -144,7 +144,7 @@
                         </div>
                     </div>
                     <!--input title-->
-                    <div class="input-group mt-2">
+                    <div ref="enteringCardTop" class="input-group mt-2">
                         <input
                             type="text"
                             class="form-control"
@@ -156,7 +156,7 @@
                         />
                     </div>
                     <div v-if="!isEntering">
-                        <div class="mt-3">
+                        <div ref="staticCardTop" class="mt-3">
                             <button
                                 class="btn btn-primary"
                                 type="button"
@@ -172,7 +172,8 @@
                         <div id="currentSelectedClass" class="collapse show">
                             <div
                                 class="card card-body"
-                                style="padding:5px;max-height: 460px; overflow-y: auto"
+                                style="padding:5px; overflow-y: auto;"
+                                :style="`max-height:${staticCardHeight}px`"
                             >
                                 <ClassList
                                     :courses="currentCourses"
@@ -202,8 +203,10 @@
                     </div>
                     <div
                         v-if="isEntering"
+                        ref="classList"
                         class="card card-body"
-                        style="padding:5px;max-height: 500px; overflow-y: auto"
+                        style="padding:5px; overflow-y: auto;"
+                        :style="`max-height:${enteringCardHeight}px`"
                     >
                         <ClassList
                             :courses="inputCourses"
@@ -242,17 +245,17 @@
                             <div class="filter mt-2">
                                 <ul class="list-group list-group-flush" style="width:100%">
                                     <li
-                                        v-for="n in timeSlots"
+                                        v-for="(value, n) in timeSlots"
                                         :key="n"
                                         class="list-group-item"
                                         style="padding:2%"
                                     >
                                         <input
-                                            :id="'time-start-' + n"
                                             type="time"
                                             min="8:00"
                                             max="22:00"
                                             style="-webkit-appearance:button"
+                                            @input="timeSlots[n][0] = $event.target.value"
                                         />
                                         -
                                         <input
@@ -261,6 +264,7 @@
                                             min="8:00"
                                             max="22:00"
                                             style="-webkit-appearance:button"
+                                            @input="timeSlots[n][1] = $event.target.value"
                                         />
                                         <button
                                             type="button"
@@ -429,8 +433,9 @@
 <script>
 // eslint-disable-next-line
 /* global $ */
-import ClassList from './components/ClassList';
-import Pagination from './components/Pagination';
+import Vue from 'vue';
+import ClassList from './components/ClassList.vue';
+import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
@@ -443,7 +448,11 @@ import AllRecords from './models/AllRecords.js';
 import axios from 'axios';
 import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
 
-export default {
+/**
+ * @typedef {{id: string, name: string}} Semester
+ */
+
+export default Vue.extend({
     name: 'App',
     components: {
         ClassList,
@@ -459,19 +468,39 @@ export default {
                 window.location.host.indexOf('127.0.0.1') === -1
                     ? `${window.location.protocol}//${window.location.host}/api`
                     : 'http://localhost:8000/api',
+            /**
+             * @type {Semester[]}
+             */
             semesters: null,
+            /**
+             * @type {Semester}
+             */
             currentSemester: null,
+            /**
+             * @type {AllRecords}
+             */
             allRecords: null,
+            /**
+             * @type {Schedule}
+             */
             currentSchedule: new Schedule(),
+            /**
+             * @type {Course[]}
+             */
             currentCourses: [],
+            /**
+             * @type {import('./models/Schedule').RawSchedule[]}
+             */
             schedules: null,
             isEntering: false,
             sideBar: true,
             showSelectClass: true,
             showFilter: false,
             showSetting: false,
+            /**
+             * @type {Course[]}
+             */
             inputCourses: null,
-            activeCourse: {},
             startTime: '',
             endTime: '',
             allTimes: [],
@@ -479,19 +508,31 @@ export default {
             allowWaitlist: true,
             allowClosed: true,
             cache: true,
+            /**
+             * @type {Course}
+             */
             modalCourse: null,
+            /**
+             * A course record to be displayed on Modal
+             * @type {CourseRecord}
+             */
             classListModalCourse: null,
             showTime: true,
             showRoom: true,
             showInstructor: true,
             fullHeight: 50,
             partialHeight: 20,
-            timeSlots: [],
+            timeSlots: {},
             numberOfTimeSlots: 0,
+            staticCardHeight: 500,
+            enteringCardHeight: 500,
             timeSlotsRecord: []
         };
     },
     computed: {
+        /**
+         * @return {number[]}
+         */
         scheduleIndices() {
             const indices = new Array(this.schedules.length);
             for (let i = 0; i < indices.length; i++) indices[i] = i;
@@ -504,6 +545,16 @@ export default {
             // get the latest semester
             this.selectSemester(this.semesters.length - 1);
         });
+
+        this.staticCardHeight =
+            document.documentElement.clientHeight -
+            this.$refs.staticCardTop.getBoundingClientRect().bottom -
+            10;
+
+        this.enteringCardHeight =
+            document.documentElement.clientHeight -
+            this.$refs.enteringCardTop.getBoundingClientRect().bottom -
+            10;
 
         // generate a series of time
         let f = false;
@@ -529,7 +580,6 @@ export default {
             this.currentSchedule.clean();
             this.currentCourses = [];
             this.schedules = [];
-            this.$forceUpdate();
             this.saveStatus();
         },
         cleanSchedules() {
@@ -537,10 +587,16 @@ export default {
             this.currentSchedule.cleanSchedule();
         },
 
+        /**
+         * @param {Course} course
+         */
         showModal(course) {
             this.modalCourse = course;
         },
 
+        /**
+         * @param {CourseRecord} course
+         */
         showClassListModal(course) {
             this.classListModalCourse = course;
         },
@@ -550,22 +606,30 @@ export default {
         removeCourse(key) {
             this.currentSchedule.remove(key);
             this.currentCourses = this.getCurrentCourses();
-            this.$forceUpdate();
             this.saveStatus();
         },
+        /**
+         * @param {string} key
+         * @param {number} section
+         */
         updateCourse(key, section) {
             this.currentSchedule.update(key, section);
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
         },
+        /**
+         * @param {string} key
+         * @param {number} section
+         */
         preview(key, section) {
             this.currentSchedule.preview(key, section);
-            this.$forceUpdate();
         },
         removePreview() {
             this.currentSchedule.removePreview();
-            this.$forceUpdate();
         },
+        /**
+         * @param {number} idx
+         */
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) {
                 this.currentSchedule = new Schedule(this.schedules[idx], 'Schedule', idx + 1);
@@ -584,6 +648,9 @@ export default {
             this.inputCourses = this.allRecords.search(query);
             this.isEntering = true;
         },
+        /**
+         * @param {number} semesterId
+         */
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
 
@@ -600,13 +667,6 @@ export default {
             this.getClass(null);
             this.currentCourses = this.getCurrentCourses();
             this.$forceUpdate();
-        },
-        parseResponse(res) {
-            this.schedules = res.data.data;
-            this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
-            this.currentCourses = this.getCurrentCourses();
-            this.saveStatus();
-            this.errMsg = '';
         },
         generateSchedules() {
             const constraintStatus = [];
@@ -710,15 +770,20 @@ export default {
             }
         },
         removeATimeConstraint(n) {
-            this.timeSlots.splice(this.timeSlots.indexOf(n), 1);
-            this.numberOfTimeSlots -= 1;
+            this.$set(this.timeSlots, n, undefined);
+        },
+        addTimeSlot() {
+            this.$set(this.timeSlots, this.numberOfTimeSlots, {});
+            this.numberOfTimeSlots++;
         },
         addFilter() {
-            for (const i of this.timeSlots) {
-                const start = document.getElementById('time-start-' + i).value;
-                const end = document.getElementById('time-end-' + i).value;
-                const startTime = start.split(':');
-                const endTime = end.split(':');
+            for (const i in this.timeSlots) {
+                if (this.timeSlots[i] === undefined) {
+                    return;
+                }
+                const startTime = this.timeSlots[i][0].split(':');
+                const endTime = this.timeSlots[i][1].split(':');
+                console.log(startTime);
                 if (
                     isNaN(startTime[0]) ||
                     isNaN(startTime[1]) ||
@@ -733,7 +798,7 @@ export default {
             }
         }
     }
-};
+});
 </script>
 
 <style scoped>

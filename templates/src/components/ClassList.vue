@@ -78,10 +78,12 @@
 </template>
 
 <script>
+import Vue from 'vue';
 // eslint-disable-next-line
 import CourseRecord from '../models/CourseRecord';
 import Schedule from '../models/Schedule';
-export default {
+export default Vue.extend({
+    name: 'ClassList',
     props: {
         courses: Array,
         schedule: Schedule,
@@ -92,6 +94,7 @@ export default {
             collapsed: {}
         };
     },
+    computed: {},
     methods: {
         select(crs, idx) {
             this.$emit('update_course', crs.key, idx);
@@ -117,7 +120,7 @@ export default {
             this.$emit('remove_preview');
         }
     }
-};
+});
 </script>
 
 <style scoped>

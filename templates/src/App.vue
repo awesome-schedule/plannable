@@ -38,32 +38,43 @@
                 </ul>
             </div>
         </nav>
+        <nav
+            class="navbar navbar-expand-lg navbar-light mb-4"
+            style="background-color:#F9A348;position:relative;width:100%;z-index:4"
+        >
+            <a>?</a>
+        </nav>
         <!-- end of navigation bar -->
-        <transition name="fade">
-            <div
-                v-if="errMsg.length > 0"
-                class="alert alert-danger"
-                role="alert"
-                style="width:94%;margin-left:3%"
-            >
-                {{ errMsg }}
-                <button
-                    type="button"
-                    class="close"
-                    aria-label="Close"
-                    style="align:center"
-                    role="button"
-                    @click="errMsg = ''"
-                >
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        </transition>
 
         <table style="width:97%;margin:auto auto">
             <tr>
+                <td></td>
+                <td></td>
+                <td>
+                    <transition name="fade">
+                        <div
+                            v-if="errMsg.length > 0"
+                            class="alert alert-danger"
+                            role="alert"
+                            style="width:94%;margin-left:3%;"
+                        >
+                            {{ errMsg }}
+                            <button
+                                type="button"
+                                class="close"
+                                aria-label="Close"
+                                style="align:center"
+                                role="button"
+                                @click="errMsg = ''"
+                            >
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    </transition>
+                </td>
+            </tr>
+            <tr>
                 <td style="width:3%; vertical-align:top;">
-                    <br /><br /><br />
                     <div style="position:fixed;background-color:#00c0ff;width:3rem">
                         <span
                             class="side-button"
@@ -104,7 +115,7 @@
                 </td>
                 <td v-if="sideBar && showSelectClass" id="leftBar" class="leftside">
                     <!-- term selection dropdown -->
-                    <div class="dropdown" style="margin-top:70px">
+                    <div class="dropdown" style="">
                         <button
                             id="semester"
                             class="btn btn-primary mt-4 mx-auto"
@@ -215,7 +226,7 @@
                     class="leftside"
                     style="width: 20%; vertical-align:top; padding-left:2%;position:fixed"
                 >
-                    <div style="margin-top:70px">
+                    <div style="">
                         <button
                             class="btn btn-primary"
                             type="button"
@@ -234,12 +245,15 @@
                             <div class="filter mt-2">
                                 <ul class="list-group list-group-flush" style="width:100%">
                                     <li
-                                        v-for="n in timeSlots"
+                                        v-for="(value, n) in timeSlots"
+                                        v-if="value !== undefined"
                                         :key="n"
                                         class="list-group-item"
                                         style="padding:2%"
                                     >
+                                        <!-- @input="timeSlots[n][0] = $event.target.value" -->
                                         <input
+                                            v-model="value[0]"
                                             type="time"
                                             min="8:00"
                                             max="22:00"
@@ -247,6 +261,7 @@
                                         />
                                         -
                                         <input
+                                            v-model="value[1]"
                                             type="time"
                                             min="8:00"
                                             max="22:00"
@@ -273,14 +288,7 @@
                                             aria-label="Close"
                                             role="button"
                                         >
-                                            <span
-                                                aria-hidden="true"
-                                                @click="
-                                                    timeSlots.push(numberOfTimeSlots);
-                                                    numberOfTimeSlots += 1;
-                                                "
-                                                >+</span
-                                            >
+                                            <span aria-hidden="true" @click="addTimeSlot">+</span>
                                         </button>
                                     </li>
                                 </ul>
@@ -300,7 +308,7 @@
                             <button
                                 type="button"
                                 class="btn btn-outline-success mt-2"
-                                @click="sendRequest"
+                                @click="addFilter"
                             >
                                 Submit
                             </button>
@@ -309,11 +317,7 @@
                 </td>
 
                 <td v-if="sideBar && showSetting" class="leftside">
-                    <button
-                        type="button"
-                        style="margin-top:70px;width:100%"
-                        class="btn btn-primary mb-3"
-                    >
+                    <button type="button" style=";width:100%" class="btn btn-primary mb-3">
                         Schedule Display Settings
                     </button>
 
@@ -388,7 +392,7 @@
                 </td>
 
                 <td style="width:75%;vertical-align: top;text-align-left">
-                    <table style="width:100%;margin-top:60px">
+                    <table style="width:100%;">
                         <tr>
                             <td>
                                 <button
@@ -519,10 +523,11 @@ export default Vue.extend({
             showInstructor: true,
             fullHeight: 50,
             partialHeight: 20,
-            timeSlots: [],
+            timeSlots: {},
             numberOfTimeSlots: 0,
             staticCardHeight: 500,
-            enteringCardHeight: 500
+            enteringCardHeight: 500,
+            timeSlotsRecord: []
         };
     },
     computed: {
@@ -676,7 +681,7 @@ export default Vue.extend({
             }
             const generator = new ScheduleGenerator(this.allRecords);
             const table = generator.getSchedules(this.currentSchedule, {
-                timeSlots: [],
+                timeSlots: this.timeSlotsRecord,
                 status: constraintStatus
             });
             const heap = table.finalTable;
@@ -732,7 +737,6 @@ export default Vue.extend({
             });
         },
         saveStatus() {
-            console.log(this.showTime);
             localStorage.setItem(
                 this.currentSemester.id,
                 JSON.stringify({
@@ -767,8 +771,31 @@ export default Vue.extend({
             }
         },
         removeATimeConstraint(n) {
-            this.timeSlots.splice(this.timeSlots.indexOf(n), 1);
-            this.numberOfTimeSlots -= 1;
+            this.$set(this.timeSlots, n, undefined);
+        },
+        addTimeSlot() {
+            this.$set(this.timeSlots, this.numberOfTimeSlots, {});
+            this.numberOfTimeSlots++;
+        },
+        addFilter() {
+            for (const i in this.timeSlots) {
+                if (this.timeSlots[i] === undefined) {
+                    continue;
+                }
+                const startTime = this.timeSlots[i][0].split(':');
+                const endTime = this.timeSlots[i][1].split(':');
+                if (
+                    isNaN(startTime[0]) ||
+                    isNaN(startTime[1]) ||
+                    isNaN(endTime[0]) ||
+                    isNaN(endTime[1])
+                ) {
+                    this.errMsg = 'Illegal time input.';
+                }
+                const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
+                const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
+                this.timeSlotsRecord.push([startMin, endMin]);
+            }
         }
     }
 });

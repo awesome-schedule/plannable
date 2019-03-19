@@ -24,7 +24,7 @@ class ScheduleGenerator {
      * Pass the **ClassList** into the **createSchedule**
      * return a **FinalTable** Object
      * @param {import('../models/Schedule').default} schedule
-     * @param {{timeSlots: [number, number][], status: string[]}} constraint
+     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      * @return {FinalTable}
      */
     getSchedules(schedule, constraint = { timeSlots: [], status: [] }) {
@@ -56,6 +56,10 @@ class ScheduleGenerator {
                         //do not include any TBA
                         continue;
                     }
+                    if (this.filterTimeSlots(date, timeBlock, constraint)) {
+                        continue;
+                    }
+
                     classes.push([key, date, timeBlock, section]);
                 }
             } else {
@@ -72,6 +76,10 @@ class ScheduleGenerator {
                         //do not include any TBA
                         continue;
                     }
+                    if (this.filterTimeSlots(date, timeBlock, constraint)) {
+                        continue;
+                    }
+
                     classes.push([key, date, timeBlock, section]);
                 }
             }
@@ -268,7 +276,7 @@ class ScheduleGenerator {
     /**
      *
      * @param {Course} course
-     * @param {{timeSlots: [number, number][], status: string[]}} constraint
+     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      */
     filterStatus(course, constraint) {
         const standard = Object.values(CourseRecord.STATUSES);
@@ -279,6 +287,39 @@ class ScheduleGenerator {
 
         if (constraint.status.includes(course.status)) {
             return true;
+        }
+        return false;
+    }
+
+    /**
+     *
+     * @param {[string,string,string...]} date
+     * @param {[number,number]} timeBlock
+     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
+     */
+    filterTimeSlots(date, timeBlock, constraint) {
+        //ts is the timeslots --> 2D array
+        const ts = constraint.timeSlots;
+
+        //noClassDay is a list of strings of dates, e.g. ['Mo','Tu']
+        const noClassDay = constraint.noClassDay;
+
+        //Compare and check if any time/date overlaps. If yes, return true, else false.
+        const beginTime = timeBlock[0];
+        const endTime = timeBlock[1];
+        for (const times of ts) {
+            const begin = times[0];
+            const end = times[1];
+
+            if ((begin <= beginTime && beginTime <= end) || (begin <= endTime && endTime <= end)) {
+                return true;
+            }
+        }
+
+        for (const d of noClassDay) {
+            if (date.includes(d)) {
+                return true;
+            }
         }
         return false;
     }

@@ -36,7 +36,8 @@ export default Vue.extend({
     },
     data() {
         return {
-            idx: 0
+            idx: 0,
+            batch: 0
         };
     },
     methods: {

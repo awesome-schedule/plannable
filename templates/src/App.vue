@@ -562,6 +562,8 @@ export default Vue.extend({
             staticCardHeight: 500,
             enteringCardHeight: 500,
             timeSlotsRecord: [],
+            scheduleBatch: null,
+            maxNumberOfBatch: 0,
 
             storageFields: [
                 'currentSchedule',
@@ -762,7 +764,9 @@ export default Vue.extend({
                 status: constraintStatus
             });
             const heap = table.finalTable;
+            this.scheduleBatch = heap;
             const raw_data = heap.top(10);
+            heap.pop();
 
             /**
              * @type {RawSchedule}
@@ -778,6 +782,22 @@ export default Vue.extend({
             this.schedules = translated_raw;
             this.proposedSchedule = this.currentSchedule;
             this.generated = true;
+            this.currentSchedule = new Schedule(this.schedules[0]);
+            this.currentCourses = this.getCurrentCourses();
+            this.saveStatus();
+        },
+        getNextBatch(i) {
+            const batch = this.scheduleBatch.top(i * 10);
+            const raw_data = batch.splice((i - 1) * 10, 10);
+            const translated_raw = [];
+            for (const data of raw_data) {
+                const translation = [];
+                for (const raw_course of data.schedule) {
+                    translation.push([raw_course[0], raw_course[3], -1]);
+                }
+                translated_raw.push(translation);
+            }
+            this.schedules = translated_raw;
             this.currentSchedule = new Schedule(this.schedules[0]);
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();

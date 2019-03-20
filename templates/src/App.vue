@@ -160,16 +160,23 @@
                             <button
                                 class="btn btn-primary"
                                 type="button"
-                                data-toggle="collapse"
-                                data-target="#currentSelectedClass"
-                                aria-expanded="true"
-                                aria-controls="currentSelectedClass"
                                 style="width:100%"
+                                @click="
+                                    if (schedules !== null && schedules.length > 0) {
+                                        if (generated) currentSchedule = proposedSchedule;
+                                        else switchPage(currentScheduleIndex);
+                                        generated = !generated;
+                                    }
+                                "
                             >
-                                Current Selected Classes
+                                {{
+                                    generated
+                                        ? `Generated Schedule: ${currentScheduleIndex + 1}`
+                                        : 'Proposed Schedule'
+                                }}
                             </button>
                         </div>
-                        <div id="currentSelectedClass" class="collapse show">
+                        <div id="currentSelectedClass">
                             <div
                                 class="card card-body p-1"
                                 style="overflow-y: auto;"
@@ -400,9 +407,9 @@
                 </td>
 
                 <td style="width:75%;vertical-align: top;text-align-left">
-                    <table style="width:100%;">
-                        <tr>
-                            <td>
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col col-md-1 align-self-left">
                                 <button
                                     v-if="isEntering && showSelectClass"
                                     class="btn btn-primary mt-1"
@@ -411,26 +418,17 @@
                                 >
                                     Hide Class List
                                 </button>
-                            </td>
-                            <td>
+                            </div>
+                            <div class="col col-md-12 mr-auto">
                                 <Pagination
-                                    v-if="schedules !== null && schedules.length > 0"
+                                    v-if="generated && schedules !== null && schedules.length > 0"
                                     :indices="scheduleIndices"
                                     @switch_page="switchPage"
                                 ></Pagination>
-                            </td>
-                            <td style="width:15%">
-                                <button
-                                    v-if="generated"
-                                    class="btn btn-primary"
-                                    style="font-size:12px"
-                                    @click="currentSchedule = proposedSchedule"
-                                >
-                                    Proposed Schedule
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                            </div>
+                            <div class="col col-1"></div>
+                        </div>
+                    </div>
 
                     <div class="tab mt-2"></div>
                     <grid-schedule
@@ -470,6 +468,9 @@ import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
 /**
  * @typedef {{id: string, name: string}} Semester
  */
+/**
+ * @typedef {[string, number, number][]} RawSchedule
+ */
 
 export default Vue.extend({
     name: 'App',
@@ -499,6 +500,7 @@ export default Vue.extend({
              * @type {AllRecords}
              */
             allRecords: null,
+            currentScheduleIndex: 0,
             /**
              * @type {Schedule}
              */
@@ -513,7 +515,7 @@ export default Vue.extend({
              */
             currentCourses: [],
             /**
-             * @type {import('./models/Schedule').RawSchedule[]}
+             * @type {RawSchedule[]}
              */
             schedules: null,
             isEntering: false,
@@ -559,7 +561,21 @@ export default Vue.extend({
             numberOfTimeSlots: 0,
             staticCardHeight: 500,
             enteringCardHeight: 500,
-            timeSlotsRecord: []
+            timeSlotsRecord: [],
+
+            storageFields: [
+                'currentSchedule',
+                'proposedSchedule',
+                'schedules',
+                'allowWaitList',
+                'allowClosed',
+                'showTime',
+                'showRoom',
+                'showInstructor',
+                'fullHeight',
+                'partialHeight',
+                'timeSlots'
+            ]
         };
     },
     computed: {
@@ -588,19 +604,6 @@ export default Vue.extend({
             document.documentElement.clientHeight -
             this.$refs.enteringCardTop.getBoundingClientRect().bottom -
             10;
-
-        // generate a series of time
-        let f = false;
-        for (let i = 7; i < 21; ) {
-            const time = (i % 12) + 1;
-            if (f) {
-                i++;
-                this.allTimes.push(time + ':30' + (i >= 12 ? 'PM' : 'AM'));
-            } else {
-                this.allTimes.push(time + ':00' + (i >= 12 ? 'PM' : 'AM'));
-            }
-            f = !f;
-        }
     },
     methods: {
         getCurrentCourses() {
@@ -666,6 +669,7 @@ export default Vue.extend({
          */
         switchPage(idx) {
             if (0 <= idx && idx < this.schedules.length) {
+                this.currentScheduleIndex = idx;
                 this.currentSchedule = new Schedule(this.schedules[idx], 'Schedule', idx + 1);
                 this.currentCourses = this.getCurrentCourses();
             }
@@ -687,15 +691,52 @@ export default Vue.extend({
          */
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
+            const data = localStorage.getItem(this.currentSemester.id);
+            if (data === null || data.length === 0) {
+                this.fetchSemesterData(semesterId);
+                return;
+            }
+            const raw_data = JSON.parse(data);
+            // must assign allRecords prior to any other fields
+            const temp = AllRecords.fromJSON(raw_data.allRecords);
 
-            // fetch basic class data for the given semester for fast class search
+            // things to do after allRecord is loaded
+            const callback = () => {
+                this.parseLocalData(raw_data);
+                if (this.schedules !== null && this.schedules.length > 0) {
+                    this.generated = true;
+                }
+                this.currentCourses = this.getCurrentCourses();
+            };
+            if (temp === null) {
+                this.fetchSemesterData(semesterId, callback);
+            } else {
+                const now = new Date().getTime();
+                const dataTime = new Date(raw_data.modified).getTime();
+
+                // if data expires
+                if (now - dataTime > 3600 * 1000) this.fetchSemesterData(semesterId, callback);
+                else {
+                    this.allRecords = temp;
+                    Schedule.allRecords = temp;
+                    callback();
+                }
+            }
+        },
+        /**
+         * fetch basic class data for the given semester for fast class search and rendering
+         * @param {number} semeseterId
+         * @param {*} callback
+         */
+        fetchSemesterData(semesterId, callback) {
+            console.info(`Loading semester ${semesterId} data from remote...`);
             axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
                 this.allRecords = new AllRecords(this.currentSemester, res.data.data);
-
                 // important: assign all records
                 Schedule.allRecords = this.allRecords;
-                if (this.cache) this.loadStatus();
-                else this.currentSchedule = new Schedule([], 'Schedule', 1);
+                if (typeof callback === 'function') {
+                    callback();
+                }
             });
         },
         closeClassList(event) {
@@ -712,6 +753,9 @@ export default Vue.extend({
             if (!this.allowClosed) {
                 constraintStatus.push('Closed');
             }
+            if (this.generated) {
+                this.currentSchedule = this.proposedSchedule;
+            }
             const generator = new ScheduleGenerator(this.allRecords);
             const table = generator.getSchedules(this.currentSchedule, {
                 timeSlots: this.timeSlotsRecord,
@@ -721,7 +765,7 @@ export default Vue.extend({
             const raw_data = heap.top(10);
 
             /**
-             * @type {[string, number, number][]}
+             * @type {RawSchedule}
              */
             const translated_raw = [];
             for (const rd of raw_data) {
@@ -738,73 +782,25 @@ export default Vue.extend({
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
         },
-        sendRequest() {
-            // if (this.currentSchedule.All.length < 2) return;
-            const days = [];
-            if (this.allTimes.includes(this.startTime)) {
-                days.push(`MoTuWeThFr 00:00AM - ${this.startTime}`);
-            }
-            if (this.allTimes.includes(this.endTime)) {
-                days.push(`MoTuWeThFr ${this.endTime} - 10:00PM`);
-            }
-            const request = {
-                classes: [],
-                semester: this.currentSemester,
-                num: 10
-            };
-            if (days.length > 0) request.filter = { days };
-
-            for (const key in this.currentSchedule.All) {
-                request.classes.push(key);
-            }
-            axios.post(`${this.api}/classes`, request).then(res => {
-                if (res.data.status.err.length > 0) {
-                    this.errMsg = res.data.status.err;
-                    this.schedules = [];
-                    return;
-                }
-                if (res.data.data.length === 0) {
-                    this.errMsg = 'No matching schedule satisfying the given constraints';
-                    this.schedules = [];
-                    return;
-                }
-                this.parseResponse(res);
-            });
-        },
         saveStatus() {
-            localStorage.setItem(
-                this.currentSemester.id,
-                JSON.stringify({
-                    schedules: this.schedules,
-                    currentSchedule: this.currentSchedule.toJSON(),
-                    fullHeight: this.fullHeight,
-                    partialHeight: this.partialHeight
-                })
-            );
-        },
-        loadStatus() {
-            const data = localStorage.getItem(this.currentSemester.id);
-            if (data === null || data.length === 0) {
-                this.schedules = [];
-                this.currentSchedule = new Schedule();
-                this.currentCourses = [];
-                this.fullHeight = 50;
-                this.partialHeight = 20;
+            localStorage.clear();
+            const obj = { modifled: new Date().toJSON(), allRecords: this.allRecords.toJSON() };
+            for (const field of this.storageFields) {
+                if (this[field] instanceof Object && typeof this[field].toJSON === 'function')
+                    obj[field] = this[field].toJSON();
+                else obj[field] = this[field];
             }
-            const raw_data = JSON.parse(data);
-            if (
-                raw_data !== null &&
-                raw_data.schedules !== undefined &&
-                raw_data.currentSchedule !== undefined
-            ) {
-                this.schedules = raw_data.schedules;
-                this.currentSchedule = Schedule.fromJSON(raw_data.currentSchedule);
-                this.currentCourses = this.getCurrentCourses();
-
-                this.fullHeight = isNaN(raw_data.fullHeight) ? 50 : parseInt(raw_data.fullHeight);
-                this.partialHeight = isNaN(raw_data.partialHeight)
-                    ? 20
-                    : parseInt(raw_data.partialHeight);
+            localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
+        },
+        /**
+         * @param {Object} raw_data
+         */
+        parseLocalData(raw_data) {
+            for (const field of this.storageFields) {
+                if (this[field] instanceof Object && typeof this[field].fromJSON === 'function')
+                    this[field] = this[field].fromJSON(raw_data[field]);
+                else if (raw_data[field] !== undefined && raw_data[field] !== null)
+                    this[field] = raw_data[field];
             }
         },
         removeATimeConstraint(n) {

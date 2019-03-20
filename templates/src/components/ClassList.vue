@@ -80,7 +80,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="col col-sm-1 align-self-center">
+                            <div class="col col-sm-1 align-self-center mr-1">
                                 <i
                                     v-if="isActive(crs.key, idx)"
                                     style="font-size: 0.85rem"
@@ -127,6 +127,7 @@ export default Vue.extend({
             return this.schedule.All[key] instanceof Set && this.schedule.All[key].has(idx);
         },
         expanded(crs) {
+            // return false;
             return (this.collapsed[crs.key] !== undefined) ^ this.isEntering
                 ? 'fa-chevron-down'
                 : 'fa-chevron-right';

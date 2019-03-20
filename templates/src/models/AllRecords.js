@@ -10,12 +10,39 @@ import CourseRecord from './CourseRecord';
 
 class AllRecords {
     /**
+     *
+     * @param {{semester: Semester, raw_data: Object<string, RawRecord>}} data
+     */
+    static fromJSON(data) {
+        if (data !== undefined && data.semester !== undefined && data.raw_data !== undefined) {
+            return new AllRecords(data.semester, data.raw_data);
+        }
+        return null;
+    }
+    /**
+     *
+     * @param {{semester: Semester, raw_data: Object<string, RawRecord>}} data
+     */
+    fromJSON(data) {
+        return AllRecords.fromJSON(data);
+    }
+    /**
      * @param {Semester} semester
      * @param {Object<string, RawRecord>} raw_data
      */
     constructor(semester, raw_data) {
         this.semester = semester;
         this.raw_data = raw_data;
+    }
+
+    /**
+     * @return {{semester: Semester, raw_data: Object<string, RawRecord>}}
+     */
+    toJSON() {
+        return {
+            semester: this.semester,
+            raw_data: this.raw_data
+        };
     }
 
     /**

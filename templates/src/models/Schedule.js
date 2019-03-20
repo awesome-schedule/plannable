@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import Course from './Course';
 /**
  * A schedule is a list of courses
@@ -237,6 +238,15 @@ class Schedule {
         }
         schedule.computeSchedule();
         return schedule;
+    }
+
+    /**
+     * instantiate a `Schedule` object from its JSON representation
+     * @param {Object<string, any>} obj
+     * @return {Schedule}
+     */
+    fromJSON(obj) {
+        return Schedule.fromJSON(obj);
     }
 
     /**

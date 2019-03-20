@@ -128,12 +128,13 @@
                             }}
                         </button>
                         <div
+                            v-if="semesters !== null"
                             class="dropdown-menu"
                             aria-labelledby="dropdownMenuButton"
                             style="width: 100%;"
                         >
                             <a
-                                v-for="(semester, index) in semesters"
+                                v-for="(semester, index) in semesters.slice().reverse()"
                                 :key="semester.id"
                                 class="dropdown-item"
                                 style="width: 100%;"
@@ -409,7 +410,7 @@
                 <td style="width:75%;vertical-align: top;text-align-left">
                     <div class="container-fluid">
                         <div class="row justify-content-center">
-                            <div class="col col-md-1 align-self-left">
+                            <div style="float:left">
                                 <button
                                     v-if="isEntering && showSelectClass"
                                     class="btn btn-primary mt-1"
@@ -419,14 +420,14 @@
                                     Hide Class List
                                 </button>
                             </div>
-                            <div class="col col-md-12 mr-auto">
+                            <div class="col">
                                 <Pagination
                                     v-if="generated && schedules !== null && schedules.length > 0"
                                     :indices="scheduleIndices"
                                     @switch_page="switchPage"
                                 ></Pagination>
                             </div>
-                            <div class="col col-1"></div>
+                            <!-- <div class="col col-1"></div> -->
                         </div>
                     </div>
 
@@ -693,7 +694,15 @@ export default Vue.extend({
             this.currentSemester = this.semesters[semesterId];
             const data = localStorage.getItem(this.currentSemester.id);
             if (data === null || data.length === 0) {
-                this.fetchSemesterData(semesterId);
+                // set to default values
+                this.fetchSemesterData(semesterId, () => {
+                    this.schedules = null;
+                    this.currentSchedule = new Schedule();
+                    this.proposedSchedule = new Schedule();
+                    this.generated = false;
+                    this.currentScheduleIndex = 0;
+                    this.currentCourses = [];
+                });
                 return;
             }
             const raw_data = JSON.parse(data);
@@ -778,13 +787,29 @@ export default Vue.extend({
             this.schedules = translated_raw;
             this.proposedSchedule = this.currentSchedule;
             this.generated = true;
-            this.currentSchedule = new Schedule(this.schedules[0]);
+            this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
             this.currentCourses = this.getCurrentCourses();
             this.saveStatus();
         },
         saveStatus() {
-            localStorage.clear();
-            const obj = { modifled: new Date().toJSON(), allRecords: this.allRecords.toJSON() };
+            localStorage.removeItem(this.currentSemester.id);
+
+            // remove all stored allRecords field if it exists to free some storage space
+            for (let i = 0; i < localStorage.length; i++) {
+                let storedObj;
+                try {
+                    storedObj = JSON.parse(localStorage.getItem(localStorage.key(i)));
+                } catch (e) {
+                    continue;
+                }
+
+                if (storedObj.allRecords !== undefined) {
+                    delete storedObj.allRecords;
+                    localStorage.setItem(localStorage.key(i), JSON.stringify(storedObj));
+                }
+            }
+
+            const obj = { modified: new Date().toJSON(), allRecords: this.allRecords.toJSON() };
             for (const field of this.storageFields) {
                 if (this[field] instanceof Object && typeof this[field].toJSON === 'function')
                     obj[field] = this[field].toJSON();

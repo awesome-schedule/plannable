@@ -6,16 +6,20 @@ import Heap from 'heap-js';
  */
 class ScheduleEvaluator {
     constructor() {
-        this.finalTable = new Heap(
-            /**
-             *
-             * @param {ComparableSchedule} a
-             * @param {ComparableSchedule} b
-             */
-            function(a, b) {
-                return a.coeff - b.coeff;
-            }
-        );
+        // this.finalTable = new Heap(
+        //     /**
+        //      *
+        //      * @param {ComparableSchedule} a
+        //      * @param {ComparableSchedule} b
+        //      */
+        //     function(a, b) {
+        //         return a.coeff - b.coeff;
+        //     }
+        // );
+        /**
+         * @type {ComparableSchedule[]}
+         */
+        this.schedules = [];
     }
 
     /**
@@ -52,10 +56,14 @@ class ScheduleEvaluator {
         }
         const stdev = math.std([mo, tu, we, th, fr]);
 
-        this.finalTable.push({
+        this.schedules.push({
             schedule: timeTable.concat(),
             coeff: stdev
         });
+    }
+
+    sort() {
+        this.schedules.sort((a, b) => a.coeff - b.coeff);
     }
 }
 export { ScheduleEvaluator };

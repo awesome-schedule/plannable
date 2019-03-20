@@ -1,7 +1,7 @@
 <template>
     <nav>
         <ul class="pagination justify-content-center" style="margin-bottom: 0">
-            <li :class="'page-item' + (idx <= 0 ? ' disabled' : '')">
+            <li :class="'page-item' + (start < 0 ? ' disabled' : '')">
                 <a
                     class="page-link"
                     href="#"
@@ -12,16 +12,16 @@
                 >
             </li>
             <li
-                v-for="index in indices"
+                v-for="index in 10"
                 :key="index"
-                :class="'page-item' + (idx === index ? ' active' : '')"
+                :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
             >
-                <a class="page-link" href="#" @click="switchPage(index)">
-                    {{ index + 1 }}
-                    <span v-if="idx === index" class="sr-only">(current)</span>
+                <a class="page-link" href="#" @click="switchPage(index + start - 1)">
+                    {{ index + start }}
+                    <span v-if="idx === index + 9" class="sr-only">(current)</span>
                 </a>
             </li>
-            <li :class="'page-item' + (idx >= indices.length - 1 ? ' disabled' : '')">
+            <li :class="'page-item' + (end >= indices.length ? ' disabled' : '')">
                 <a class="page-link" @click="switchPage(idx + 1)">Next</a>
             </li>
         </ul>
@@ -37,12 +37,23 @@ export default Vue.extend({
     data() {
         return {
             idx: 0,
-            batch: 0
+            start: 0,
+            end: 10
         };
     },
     methods: {
         switchPage(idx) {
-            if (idx >= 0 && idx < this.indices.length) {
+            if (idx >= this.start && idx < this.end) {
+                this.idx = idx;
+                this.$emit('switch_page', idx);
+            } else if (idx < this.start && this.start > 0) {
+                this.start -= 1;
+                this.end -= 1;
+                this.idx = idx;
+                this.$emit('switch_page', idx);
+            } else if (idx >= this.end && this.end < this.indices.length - 1) {
+                this.start += 1;
+                this.end += 1;
                 this.idx = idx;
                 this.$emit('switch_page', idx);
             }

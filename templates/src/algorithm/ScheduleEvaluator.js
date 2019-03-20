@@ -1,6 +1,5 @@
 // @ts-check
 import * as math from 'mathjs';
-import Heap from 'heap-js';
 /**
  * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */

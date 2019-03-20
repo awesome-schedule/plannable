@@ -1,7 +1,7 @@
 <template>
     <nav>
         <ul class="pagination justify-content-center" style="margin-bottom: 0">
-            <li :class="'page-item' + (start < 0 ? ' disabled' : '')">
+            <li :class="'page-item' + (start <= 0 && idx <= start ? ' disabled' : '')">
                 <a
                     class="page-link"
                     href="#"
@@ -21,8 +21,12 @@
                     <span v-if="idx === index + 9" class="sr-only">(current)</span>
                 </a>
             </li>
-            <li :class="'page-item' + (end >= indices.length ? ' disabled' : '')">
-                <a class="page-link" @click="switchPage(idx + 1)">Next</a>
+            <li
+                :class="
+                    'page-item' + (end >= indices.length - 1 && idx >= end - 1 ? ' disabled' : '')
+                "
+            >
+                <a class="page-link" href="#" @click="switchPage(idx + 1)">Next</a>
             </li>
         </ul>
     </nav>

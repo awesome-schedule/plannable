@@ -149,7 +149,7 @@
                         <input
                             type="text"
                             class="form-control"
-                            placeholder="Course Title"
+                            placeholder="Title/Number/Topic/Professor"
                             style="font-size: 10pt"
                             aria-describedby="basic-addon1"
                             @input="getClass($event.target.value)"
@@ -564,6 +564,8 @@ export default Vue.extend({
             enteringCardHeight: 500,
             timeSlotsRecord: [],
 
+            storageVersion: 1,
+
             storageFields: [
                 'currentSchedule',
                 'proposedSchedule',
@@ -575,7 +577,8 @@ export default Vue.extend({
                 'showInstructor',
                 'fullHeight',
                 'partialHeight',
-                'timeSlots'
+                'timeSlots',
+                'storageVersion'
             ]
         };
     },
@@ -688,25 +691,39 @@ export default Vue.extend({
             this.isEntering = true;
         },
         /**
+         * select a semester and fetch all its associated data
+         * This method will assign a correct AllRecords object to `this.allRecords` and `Schedule.allRecords`
+         * which will be either requested from remote or parsed from `localStorage`
          * @param {number} semesterId
          */
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
             const data = localStorage.getItem(this.currentSemester.id);
+            const defaultCallback = () => {
+                this.schedules = null;
+                this.currentSchedule = new Schedule();
+                this.proposedSchedule = new Schedule();
+                this.generated = false;
+                this.currentScheduleIndex = 0;
+                this.currentCourses = [];
+                this.saveStatus();
+            };
             if (data === null || data.length === 0) {
                 // set to default values
-                this.fetchSemesterData(semesterId, () => {
-                    this.schedules = null;
-                    this.currentSchedule = new Schedule();
-                    this.proposedSchedule = new Schedule();
-                    this.generated = false;
-                    this.currentScheduleIndex = 0;
-                    this.currentCourses = [];
-                });
+                this.fetchSemesterData(semesterId, defaultCallback);
                 return;
             }
             const raw_data = JSON.parse(data);
             // must assign allRecords prior to any other fields
+            const storageVersion = raw_data.storageVersion;
+
+            // storage version mismatch implies API update: use dafault data instead
+            if (storageVersion !== this.storageVersion) {
+                // clear local storage
+                localStorage.clear();
+                this.fetchSemesterData(semesterId, defaultCallback);
+                return;
+            }
             const temp = AllRecords.fromJSON(raw_data.allRecords);
 
             // things to do after allRecord is loaded
@@ -734,6 +751,7 @@ export default Vue.extend({
         },
         /**
          * fetch basic class data for the given semester for fast class search and rendering
+         * this method will assign `this.allRecords` and `Schedule.allRecords`
          * @param {number} semeseterId
          * @param {*} callback
          */
@@ -810,6 +828,7 @@ export default Vue.extend({
 
             const obj = { modified: new Date().toJSON(), allRecords: this.allRecords.toJSON() };
             for (const field of this.storageFields) {
+                // use toJSON method if it exists
                 if (this[field] instanceof Object && typeof this[field].toJSON === 'function')
                     obj[field] = this[field].toJSON();
                 else obj[field] = this[field];

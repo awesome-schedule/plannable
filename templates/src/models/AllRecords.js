@@ -70,12 +70,12 @@ class AllRecords {
      * @param {number} max_results
      * @returns {CourseRecord[]}
      */
-    search(query, max_results = 5) {
+    search(query, max_results = 10) {
         console.time('query');
         query = query.trim().toLowerCase();
         // query no space
         const query_no_sp = query.split(' ').join('');
-        const matches = [[], [], [], []];
+        const matches = [[], [], [], [], []];
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 
@@ -87,16 +87,25 @@ class AllRecords {
             } else if (course[9].toLowerCase().indexOf(query) !== -1) {
                 matches[1].push(new CourseRecord(course, key));
             } else {
-                // check any topic match. Select the sections which only match the topic
-                const matchIdx = [];
+                // check any topic/professor match. Select the sections which only match the topic/professor
+                const topicMatchIdx = [];
+                const profMatchIdx = [];
+
                 for (let i = 0; i < course[3].length; i++) {
                     const topic = course[10][i];
-                    if (topic.toLowerCase().indexOf(query) !== -1) matchIdx.push(i);
+                    if (topic.toLowerCase().indexOf(query) !== -1) topicMatchIdx.push(i);
+                    const profs = course[6][i];
+                    for (const prof of profs) {
+                        if (prof.toLowerCase().indexOf(query) !== -1) {
+                            profMatchIdx.push(i);
+                            break;
+                        }
+                    }
                 }
-                // match the course topics
-                if (matchIdx.length > 0) {
-                    matches[2].push(new CourseRecord(course, key));
-
+                if (topicMatchIdx.length > 0) {
+                    matches[2].push(new CourseRecord(course, key, topicMatchIdx));
+                } else if (profMatchIdx.length > 0) {
+                    matches[4].push(new CourseRecord(course, key, profMatchIdx));
                     // lastly, check description match
                 } else if (course[15].toLowerCase().indexOf(query) !== -1) {
                     matches[3].push(new CourseRecord(course, key));

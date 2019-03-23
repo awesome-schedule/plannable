@@ -1,17 +1,22 @@
 <template>
     <div id="class-list" style="width: 100%">
-        <div class="card-body p-1">
+        <div class="card-body p-0">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
-                <div class="list-group-item list-group-item-action class-title">
+                <div class="list-group-item class-title pt-1 pb-1 pl-0 pr-0">
                     <table style="width: 100%">
                         <tr>
-                            <td
-                                class="pr-2"
-                                data-toggle="collapse"
-                                :data-target="`#${crs.key}`"
-                                @click="collapse(crs.key)"
-                            >
-                                <i class="fas" :class="expanded(crs)"></i>
+                            <td class="expand-icon pr-2">
+                                <button
+                                    type="button"
+                                    class="close"
+                                    aria-label="Close"
+                                    data-toggle="collapse"
+                                    :data-target="`#${crs.key}`"
+                                    style="font-size: 1.2rem"
+                                    @click="collapse(crs.key)"
+                                >
+                                    <i class="fas" :class="expanded(crs)"></i>
+                                </button>
                             </td>
                             <td>
                                 <h6 class="mb-1">
@@ -24,6 +29,7 @@
                                         @click="$emit('trigger-classlist-modal', crs)"
                                     ></i>
                                 </h6>
+
                                 <p style="font-size: 0.85rem; margin: 0">{{ crs.title }}</p>
                             </td>
                             <td v-if="!isEntering" class="pl-2">
@@ -38,13 +44,53 @@
                             </td>
                         </tr>
                     </table>
+
+                    <!-- <div class="container-fluid" style="padding: 0">
+                        <div
+                            class="row justify-content-md-center no-gutters"
+                            style="flex-wrap: nowrap"
+                        >
+                            <div
+                                class="col col-xs-1 expand-icon pr-1"
+                                data-toggle="collapse"
+                                :data-target="`#${crs.key}`"
+                                @click="collapse(crs.key)"
+                            >
+                                <i class="fas" :class="expanded(crs)"></i>
+                            </div>
+                            <div class="col-xs-10">
+                                <h6 class="mb-1">
+                                    {{ crs.department }} {{ crs.number }} {{ crs.type }}
+                                    <i
+                                        data-toggle="modal"
+                                        data-target="#class-list-modal"
+                                        class="fas fa-info-circle"
+                                        title="View class description"
+                                        @click="$emit('trigger-classlist-modal', crs)"
+                                    ></i>
+                                </h6>
+                                <p style="font-size: 0.85rem; margin: 0">{{ crs.title }}</p>
+                            </div>
+                            <div class="col col-xs-1 pl-1">
+                                <button
+                                    v-if="!isEntering"
+                                    type="button"
+                                    class="close"
+                                    aria-label="Close"
+                                    @click="$emit('remove_course', crs.key)"
+                                >
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div> -->
                 </div>
                 <div
                     v-for="(sec, idx) in crs.section"
                     :id="crs.key"
                     :key="sec"
                     class="list-group collapse multi-collapse"
-                    :class="{ show: isEntering }"
+                    :class="{ show: isEntering && expandOnEntering }"
                 >
                     <a
                         v-if="idx === 0"
@@ -109,7 +155,8 @@ export default Vue.extend({
     },
     data() {
         return {
-            collapsed: {}
+            collapsed: {},
+            expandOnEntering: false
         };
     },
     computed: {},
@@ -128,7 +175,8 @@ export default Vue.extend({
         },
         expanded(crs) {
             // return false;
-            return (this.collapsed[crs.key] !== undefined) ^ this.isEntering
+            return (this.collapsed[crs.key] !== undefined) ^
+                (this.isEntering && this.expandOnEntering)
                 ? 'fa-chevron-down'
                 : 'fa-chevron-right';
         },
@@ -154,7 +202,6 @@ export default Vue.extend({
 }
 
 .class-title {
-    cursor: pointer;
     padding: 0.25rem;
 }
 
@@ -167,5 +214,9 @@ export default Vue.extend({
 
 .class-info {
     margin: 0;
+}
+
+.expand-icon {
+    width: 10%;
 }
 </style>

@@ -6,407 +6,361 @@
             id="class-list-modal"
             :course="classListModalCourse"
         ></ClassListModal>
-        <!-- navigation bar -->
-        <nav
-            class="navbar navbar-expand-lg navbar-light"
-            style="background-color:#F9A348;position:fixed;width:100%;z-index:5"
-        >
-            <!-- brand -->
-            <a class="navbar-brand text-white">UVaAutoScheduler</a>
 
-            <button
-                class="navbar-toggler"
-                type="button"
-                data-toggle="collapse"
-                data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="true"
-                aria-label="Toggle navigation"
+        <transition name="fade" style="width:100%">
+            <div
+                v-if="errMsg.length > 0"
+                class="alert alert-danger"
+                role="alert"
+                style="width:94%;margin-left:3%;"
             >
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <div id="navbarSupportedContent" class="collapse navbar-collapse">
-                <ul class="navbar-nav mr-auto">
-                    <!-- first item -->
-                    <li class="nav-item">
-                        <a class="nav-link text-light" href="/about" aria-disabled="true">
-                            About
-                            <span class="sr-only">(current)</span>
-                        </a>
-                    </li>
-                </ul>
+                {{ errMsg }}
+                <button
+                    type="button"
+                    class="close"
+                    aria-label="Close"
+                    style="align:center"
+                    role="button"
+                    @click="errMsg = ''"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        </nav>
-        <nav
-            class="navbar navbar-expand-lg navbar-light mb-4"
-            style="background-color:#F9A348;position:relative;width:100%;z-index:4"
-        >
-            <a>?</a>
-        </nav>
-        <!-- end of navigation bar -->
+        </transition>
 
-        <table style="width:97%;margin:auto auto">
-            <tr>
-                <td></td>
-                <td></td>
-                <td>
-                    <transition name="fade">
-                        <div
-                            v-if="errMsg.length > 0"
-                            class="alert alert-danger"
-                            role="alert"
-                            style="width:94%;margin-left:3%;"
-                        >
-                            {{ errMsg }}
-                            <button
-                                type="button"
-                                class="close"
-                                aria-label="Close"
-                                style="align:center"
-                                role="button"
-                                @click="errMsg = ''"
-                            >
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    </transition>
-                </td>
-            </tr>
-            <tr>
-                <td style="width:3%; vertical-align:top;">
-                    <div style="position:fixed;background-color:#00c0ff;width:3rem">
-                        <span
-                            class="side-button"
-                            style="font-size:2rem;margin-left:20%; display:block;"
-                            @click="
-                                showSelectClass = !showSelectClass;
-                                showFilter = false;
-                                showSetting = false;
-                            "
-                        >
-                            <i class="far fa-calendar-alt"></i>
-                        </span>
-                        <br />
-                        <span
-                            class="side-button mt-2"
-                            style="font-size:1.7rem;margin-left:20%; display:block;"
-                            @click="
-                                showFilter = !showFilter;
-                                showSelectClass = false;
-                                showSetting = false;
-                            "
-                        >
-                            <i class="fas fa-filter"></i>
-                        </span>
-                        <br />
-                        <span
-                            style="font-size:1.8rem;margin-left:20%; display:block;"
-                            class="side-button mt-2"
-                            @click="
-                                showSetting = !showSetting;
-                                showSelectClass = false;
-                                showFilter = false;
-                            "
-                        >
-                            <i class="fas fa-cog"></i>
-                        </span>
-                    </div>
-                </td>
-                <td v-if="sideBar && showSelectClass" id="leftBar" class="leftside">
-                    <!-- term selection dropdown -->
-                    <div class="dropdown" style="">
-                        <button
-                            id="semester"
-                            class="btn btn-primary mt-4 mx-auto"
-                            style="width: 100%; margin-top: 0 !important"
-                            type="button"
-                            data-toggle="dropdown"
-                        >
-                            {{
-                                currentSemester === null ? 'Select Semester' : currentSemester.name
-                            }}
-                        </button>
-                        <div
-                            v-if="semesters !== null"
-                            class="dropdown-menu"
-                            aria-labelledby="dropdownMenuButton"
-                            style="width: 100%;"
-                        >
-                            <a
-                                v-for="(semester, index) in semesters.slice().reverse()"
-                                :key="semester.id"
-                                class="dropdown-item"
-                                style="width: 100%;"
-                                href="#"
-                                @click="selectSemester(index)"
-                                >{{ semester.name }}</a
-                            >
-                        </div>
-                    </div>
-                    <!--input title-->
-                    <div ref="enteringCardTop" class="input-group mt-2">
-                        <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Course Title"
-                            style="font-size: 10pt"
-                            aria-describedby="basic-addon1"
-                            @input="getClass($event.target.value)"
-                            @keyup.esc="closeClassList($event)"
-                        />
-                    </div>
-                    <div v-if="!isEntering">
-                        <div ref="staticCardTop" class="mt-3">
-                            <button
-                                class="btn btn-primary"
-                                type="button"
-                                style="width:100%"
-                                @click="
-                                    if (schedules !== null && schedules.length > 0) {
-                                        if (generated) currentSchedule = proposedSchedule;
-                                        else switchPage(currentScheduleIndex);
-                                        generated = !generated;
-                                    }
-                                "
-                            >
-                                {{
-                                    generated
-                                        ? `Generated Schedule: ${currentScheduleIndex + 1}`
-                                        : 'Proposed Schedule'
-                                }}
-                            </button>
-                        </div>
-                        <div id="currentSelectedClass">
-                            <div
-                                class="card card-body p-1"
-                                style="overflow-y: auto;"
-                                :style="`max-height:${staticCardHeight}px`"
-                            >
-                                <ClassList
-                                    :courses="currentCourses"
-                                    :schedule="currentSchedule"
-                                    :is-entering="isEntering"
-                                    @update_course="updateCourse"
-                                    @remove_course="removeCourse"
-                                    @remove_preview="removePreview"
-                                    @trigger-classlist-modal="showClassListModal"
-                                    @preview="preview"
-                                ></ClassList>
-                                <div>
-                                    <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
-                                    <button
-                                        type="button"
-                                        class="btn btn-success mt-2"
-                                        @click="generateSchedules"
-                                    >
-                                        Submit
-                                    </button>
-                                    <button class="btn btn-warning mt-2 ml-1" @click="clear">
-                                        Clean All
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        <nav class="d-none d-md-block bg-light sidebar" style="width:3rem">
+            <span
+                class="side-button"
+                style="font-size:2rem;margin-left:20%; display:block;"
+                @click="
+                    showSelectClass = !showSelectClass;
+                    showFilter = false;
+                    showSetting = false;
+                "
+            >
+                <i class="far fa-calendar-alt"></i>
+            </span>
+            <br />
+            <span
+                class="side-button mt-2"
+                style="font-size:1.7rem;margin-left:20%; display:block;"
+                @click="
+                    showFilter = !showFilter;
+                    showSelectClass = false;
+                    showSetting = false;
+                "
+            >
+                <i class="fas fa-filter"></i>
+            </span>
+            <br />
+            <span
+                style="font-size:1.8rem;margin-left:20%; display:block;"
+                class="side-button mt-2"
+                @click="
+                    showSetting = !showSetting;
+                    showSelectClass = false;
+                    showFilter = false;
+                "
+            >
+                <i class="fas fa-cog"></i>
+            </span>
+        </nav>
+
+        <nav
+            v-if="sideBar && showSelectClass"
+            class="d-none d-md-block bg-light sidebar"
+            style="left:3rem;width:15rem"
+        >
+            <div class="dropdown" style="">
+                <button
+                    id="semester"
+                    class="btn btn-primary mt-4 mx-auto"
+                    style="width: 100%; margin-top: 0 !important"
+                    type="button"
+                    data-toggle="dropdown"
+                >
+                    {{ currentSemester === null ? 'Select Semester' : currentSemester.name }}
+                </button>
+                <div
+                    v-if="semesters !== null"
+                    class="dropdown-menu"
+                    aria-labelledby="dropdownMenuButton"
+                    style="width: 100%;"
+                >
+                    <a
+                        v-for="(semester, index) in semesters.slice().reverse()"
+                        :key="semester.id"
+                        class="dropdown-item"
+                        style="width: 100%;"
+                        href="#"
+                        @click="selectSemester(index)"
+                        >{{ semester.name }}</a
+                    >
+                </div>
+            </div>
+            <!--input title-->
+            <div ref="enteringCardTop" class="input-group mt-2">
+                <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Course Title"
+                    style="font-size: 10pt"
+                    aria-describedby="basic-addon1"
+                    @input="getClass($event.target.value)"
+                    @keyup.esc="closeClassList($event)"
+                />
+            </div>
+            <div v-if="!isEntering">
+                <div ref="staticCardTop" class="mt-3">
+                    <button
+                        class="btn btn-primary"
+                        type="button"
+                        style="width:100%"
+                        @click="
+                            if (schedules !== null && schedules.length > 0) {
+                                if (generated) currentSchedule = proposedSchedule;
+                                else switchPage(currentScheduleIndex);
+                                generated = !generated;
+                            }
+                        "
+                    >
+                        {{
+                            generated
+                                ? `Generated Schedule: ${currentScheduleIndex + 1}`
+                                : 'Proposed Schedule'
+                        }}
+                    </button>
+                </div>
+                <div id="currentSelectedClass">
                     <div
-                        v-if="isEntering"
-                        ref="classList"
                         class="card card-body p-1"
                         style="overflow-y: auto;"
-                        :style="`max-height:${enteringCardHeight}px`"
+                        :style="`max-height:${staticCardHeight}px`"
                     >
                         <ClassList
-                            :courses="inputCourses"
+                            :courses="currentCourses"
                             :schedule="currentSchedule"
                             :is-entering="isEntering"
                             @update_course="updateCourse"
+                            @remove_course="removeCourse"
                             @remove_preview="removePreview"
-                            @preview="preview"
-                            @close="closeClassList"
                             @trigger-classlist-modal="showClassListModal"
+                            @preview="preview"
                         ></ClassList>
-                    </div>
-                </td>
-
-                <td
-                    v-if="sideBar && showFilter"
-                    class="leftside"
-                    style="width: 20%; vertical-align:top; padding-left:2%;position:fixed"
-                >
-                    <div style="">
-                        <button
-                            class="btn btn-primary"
-                            type="button"
-                            data-toggle="collapse"
-                            data-target="#filter"
-                            aria-expanded="true"
-                            aria-controls="filter"
-                            style="width:100%;"
-                        >
-                            Filters
-                        </button>
-                    </div>
-
-                    <div id="filter" class="collapse show">
-                        <div class="card card-body" style="padding:3%">
-                            <div class="filter mt-2">
-                                <ul class="list-group list-group-flush" style="width:100%">
-                                    <li
-                                        v-for="(value, n) in timeSlots"
-                                        v-if="value !== undefined"
-                                        :key="n"
-                                        class="list-group-item"
-                                        style="padding:2%"
-                                    >
-                                        <!-- @input="timeSlots[n][0] = $event.target.value" -->
-                                        <input
-                                            v-model="value[0]"
-                                            type="time"
-                                            min="8:00"
-                                            max="22:00"
-                                            style="-webkit-appearance:button"
-                                        />
-                                        -
-                                        <input
-                                            v-model="value[1]"
-                                            type="time"
-                                            min="8:00"
-                                            max="22:00"
-                                            style="-webkit-appearance:button"
-                                        />
-                                        <button
-                                            type="button"
-                                            class="close"
-                                            aria-label="Close"
-                                            role="button"
-                                        >
-                                            <span
-                                                aria-hidden="true"
-                                                @click="removeATimeConstraint(n)"
-                                                >&times;</span
-                                            >
-                                        </button>
-                                    </li>
-
-                                    <li class="list-group-item" style="text-align:center">
-                                        <button
-                                            type="button"
-                                            class="close"
-                                            aria-label="Close"
-                                            role="button"
-                                        >
-                                            <span aria-hidden="true" @click="addTimeSlot">+</span>
-                                        </button>
-                                    </li>
-                                </ul>
-
-                                <div class="custom-control custom-checkbox mt-2">
-                                    <input
-                                        id="awt"
-                                        v-model="allowWaitlist"
-                                        type="checkbox"
-                                        class="custom-control-input"
-                                    />
-                                    <label class="custom-control-label" for="awt">Wait List</label>
-                                </div>
-                                <div class="custom-control custom-checkbox mt-1">
-                                    <input
-                                        id="ac"
-                                        v-model="allowClosed"
-                                        type="checkbox"
-                                        class="custom-control-input"
-                                    />
-                                    <label class="custom-control-label" for="ac">Closed</label>
-                                </div>
-                            </div>
-                            <!--submit button-->
+                        <div>
+                            <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
                             <button
                                 type="button"
-                                class="btn btn-outline-success mt-2"
-                                @click="addFilter"
+                                class="btn btn-success mt-2"
+                                @click="generateSchedules"
                             >
                                 Submit
                             </button>
+                            <button class="btn btn-warning mt-2 ml-1" @click="clear">
+                                Clean All
+                            </button>
                         </div>
                     </div>
-                </td>
+                </div>
+            </div>
+            <div
+                v-if="isEntering"
+                ref="classList"
+                class="card card-body p-1"
+                style="overflow-y: auto;"
+                :style="`max-height:${enteringCardHeight}px`"
+            >
+                <ClassList
+                    :courses="inputCourses"
+                    :schedule="currentSchedule"
+                    :is-entering="isEntering"
+                    @update_course="updateCourse"
+                    @remove_preview="removePreview"
+                    @preview="preview"
+                    @close="closeClassList"
+                    @trigger-classlist-modal="showClassListModal"
+                ></ClassList>
+            </div>
+        </nav>
 
-                <td v-if="sideBar && showSetting" class="leftside">
-                    <button type="button" style=";width:100%" class="btn btn-primary mb-3">
-                        Schedule Display Settings
+        <nav
+            v-if="sideBar && showFilter"
+            class="d-none d-md-block bg-light sidebar"
+            style="left:3rem;width:15rem"
+        >
+            <div style="">
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#filter"
+                    aria-expanded="true"
+                    aria-controls="filter"
+                    style="width:100%;"
+                >
+                    Filters
+                </button>
+            </div>
+
+            <div id="filter" class="collapse show">
+                <div class="card card-body" style="padding:3%">
+                    <div class="filter mt-2">
+                        <ul class="list-group list-group-flush" style="width:100%">
+                            <li
+                                v-for="(value, n) in timeSlots"
+                                v-if="value !== undefined"
+                                :key="n"
+                                class="list-group-item"
+                                style="padding:2%"
+                            >
+                                <!-- @input="timeSlots[n][0] = $event.target.value" -->
+                                <input
+                                    v-model="value[0]"
+                                    type="time"
+                                    min="8:00"
+                                    max="22:00"
+                                    style="-webkit-appearance:button"
+                                />
+                                -
+                                <input
+                                    v-model="value[1]"
+                                    type="time"
+                                    min="8:00"
+                                    max="22:00"
+                                    style="-webkit-appearance:button"
+                                />
+                                <button
+                                    type="button"
+                                    class="close"
+                                    aria-label="Close"
+                                    role="button"
+                                >
+                                    <span aria-hidden="true" @click="removeATimeConstraint(n)"
+                                        >&times;</span
+                                    >
+                                </button>
+                            </li>
+
+                            <li class="list-group-item" style="text-align:center">
+                                <button
+                                    type="button"
+                                    class="close"
+                                    aria-label="Close"
+                                    role="button"
+                                >
+                                    <span aria-hidden="true" @click="addTimeSlot">+</span>
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="custom-control custom-checkbox mt-2">
+                            <input
+                                id="awt"
+                                v-model="allowWaitlist"
+                                type="checkbox"
+                                class="custom-control-input"
+                            />
+                            <label class="custom-control-label" for="awt">Wait List</label>
+                        </div>
+                        <div class="custom-control custom-checkbox mt-1">
+                            <input
+                                id="ac"
+                                v-model="allowClosed"
+                                type="checkbox"
+                                class="custom-control-input"
+                            />
+                            <label class="custom-control-label" for="ac">Closed</label>
+                        </div>
+                    </div>
+                    <!--submit button-->
+                    <button type="button" class="btn btn-outline-success mt-2" @click="addFilter">
+                        Submit
                     </button>
+                </div>
+            </div>
+        </nav>
 
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Class Block</span>
-                        </div>
-                        <input
-                            v-model="fullHeight"
-                            type="number"
-                            class="form-control"
-                            @input="saveStatus()"
-                        />
-                        <div class="input-group-append">
-                            <span class="input-group-text">px</span>
-                        </div>
+        <nav
+            v-if="sideBar && showSetting"
+            class="d-none d-md-block bg-light sidebar"
+            style="left:3rem;width:15rem"
+        >
+            <div class="sidebar-sticky">
+                <div class="sidebar-brand">SCHEDULE DISPLAY SETTINGS</div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Class Block</span>
                     </div>
-
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Placeholder</span>
-                        </div>
-                        <input
-                            v-model="partialHeight"
-                            type="number"
-                            class="form-control"
-                            @input="saveStatus()"
-                        />
-                        <div class="input-group-append">
-                            <span class="input-group-text">px</span>
-                        </div>
+                    <input
+                        v-model="fullHeight"
+                        type="number"
+                        class="form-control"
+                        @input="saveStatus()"
+                    />
+                    <div class="input-group-append">
+                        <span class="input-group-text">px</span>
                     </div>
+                </div>
 
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Placeholder</span>
+                    </div>
+                    <input
+                        v-model="partialHeight"
+                        type="number"
+                        class="form-control"
+                        @input="saveStatus()"
+                    />
+                    <div class="input-group-append">
+                        <span class="input-group-text">px</span>
+                    </div>
+                </div>
+
+                <div>
+                    Display Options:
                     <div>
-                        Display Options:
-                        <div>
-                            <div class="custom-control custom-checkbox">
-                                <input
-                                    id="displayTime"
-                                    v-model="showTime"
-                                    type="checkbox"
-                                    class="custom-control-input"
-                                />
-                                <label for="displayTime" class="custom-control-label">
-                                    Show Time
-                                </label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input
-                                    id="displayRoom"
-                                    v-model="showRoom"
-                                    type="checkbox"
-                                    class="custom-control-input"
-                                />
-                                <label for="displayRoom" class="custom-control-label">
-                                    Show Room
-                                </label>
-                            </div>
-                            <div class="custom-control custom-checkbox">
-                                <input
-                                    id="displayInstructor"
-                                    v-model="showInstructor"
-                                    type="checkbox"
-                                    class="custom-control-input"
-                                />
-                                <label for="displayInstructor" class="custom-control-label">
-                                    Show instructor
-                                </label>
-                            </div>
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="displayTime"
+                                v-model="showTime"
+                                type="checkbox"
+                                class="custom-control-input"
+                            />
+                            <label for="displayTime" class="custom-control-label">
+                                Show Time
+                            </label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="displayRoom"
+                                v-model="showRoom"
+                                type="checkbox"
+                                class="custom-control-input"
+                            />
+                            <label for="displayRoom" class="custom-control-label">
+                                Show Room
+                            </label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="displayInstructor"
+                                v-model="showInstructor"
+                                type="checkbox"
+                                class="custom-control-input"
+                            />
+                            <label for="displayInstructor" class="custom-control-label">
+                                Show instructor
+                            </label>
                         </div>
                     </div>
-                </td>
+                </div>
+            </div>
+        </nav>
 
+        <table :style="`width:${scheduleWidth}%; margin-left:${scheduleLeft}rem;`">
+            <tr>
                 <td style="width:75%;vertical-align: top;text-align-left">
                     <div class="container-fluid">
                         <div class="row justify-content-center">
@@ -587,6 +541,16 @@ export default Vue.extend({
             const indices = new Array(this.schedules.length);
             for (let i = 0; i < indices.length; i++) indices[i] = i;
             return indices;
+        },
+        scheduleWidth() {
+            return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
+                ? 100 - 15 - 3 - 3
+                : 100 - 3 - 3;
+        },
+        scheduleLeft() {
+            return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
+                ? 18
+                : 3;
         }
     },
     mounted() {
@@ -766,29 +730,33 @@ export default Vue.extend({
                 this.currentSchedule = this.proposedSchedule;
             }
             const generator = new ScheduleGenerator(this.allRecords);
-            const table = generator.getSchedules(this.currentSchedule, {
-                timeSlots: this.timeSlotsRecord,
-                status: constraintStatus
-            });
-            table.sort();
+            try {
+                const table = generator.getSchedules(this.currentSchedule, {
+                    timeSlots: this.timeSlotsRecord,
+                    status: constraintStatus
+                });
+                table.sort();
 
-            /**
-             * @type {RawSchedule}
-             */
-            const translated_raw = [];
-            for (const rd of table.schedules.slice(0, 100)) {
-                const raw_schedule = [];
-                for (const raw_course of rd.schedule) {
-                    raw_schedule.push([raw_course[0], raw_course[3], -1]);
+                /**
+                 * @type {RawSchedule}
+                 */
+                const translated_raw = [];
+                for (const rd of table.schedules.slice(0, 100)) {
+                    const raw_schedule = [];
+                    for (const raw_course of rd.schedule) {
+                        raw_schedule.push([raw_course[0], raw_course[3], -1]);
+                    }
+                    translated_raw.push(raw_schedule);
                 }
-                translated_raw.push(raw_schedule);
+                this.schedules = translated_raw;
+                this.proposedSchedule = this.currentSchedule;
+                this.generated = true;
+                this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
+                this.currentCourses = this.getCurrentCourses();
+                this.saveStatus();
+            } catch (error) {
+                this.errMsg = 'Bad constraint. Abort.';
             }
-            this.schedules = translated_raw;
-            this.proposedSchedule = this.currentSchedule;
-            this.generated = true;
-            this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
-            this.currentCourses = this.getCurrentCourses();
-            this.saveStatus();
         },
         saveStatus() {
             localStorage.removeItem(this.currentSemester.id);
@@ -882,5 +850,35 @@ export default Vue.extend({
     vertical-align: top;
     padding-top: 0;
     position: fixed;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100; /* Behind the navbar */
+    padding: 26px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: 0.5rem;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+.sidebar-brand {
+    background-color: #d0d0d0;
+    color: white;
+    width: 100%;
+}
+
+.sidebar-item {
+    margin: 10px 0px 10px;
+    width: 100%;
 }
 </style>

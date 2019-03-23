@@ -1,6 +1,6 @@
 # Contribution Log
 
-Those with the most contributions are listed first.
+Contribution log by Hanzhi Zhou
 
 ## Project Idea
 
@@ -11,11 +11,13 @@ This project is a continuation of our hackathon project of the same name. Initia
 -   **Kaiying Shan** - [kaiyingshan](https://github.com/kaiyingshan)
 -   **Minjun Long** - [Elena6918](https://github.com/Elena6918)
 
+For the following parts, those with the most contributions are listed first.
+
 ## Front-end
 
 ### Design
 
-Kaiying Shan, Hanzhi Zhou, Zichao Hu Elena Long
+Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
 ### Main Component: [App.vue](/templates/src/App.vue)
 
@@ -23,28 +25,31 @@ Kaiying Shan, Hanzhi Zhou, Zichao Hu Elena Long
 | ------------------------ | ------------------------- |
 | Schedule Rendering       | Kaiying Shan              |
 | Tab Switching            | Kaiying Shan              |
+| Semester Switching       | Hanzhi Zhou               |
 | Course Manipulation      | Hanzhi Zhou               |
 | Storage                  | Hanzhi Zhou, Kaiying Shan |
-| Communication /w Backend | Hanzhi Zhou               |
-| Options                  | Kaiying Shan              |
-| Nav Bar                  | Elena Long                |
+| Communication \w Backend | Hanzhi Zhou               |
+| Filters                  | Kaiying Shan              |
+| Display Options          | Kaiying Shan              |
+| Nav Bar                  | Kaiying Shan, Elena Long  |
+| Algorithm Integration    | Kaiying Shan              |
 
 ### Child Components
 
 Child components are located at [components](/templates/src/components)
 
-| Name           | Description                                                             | Contributor  |
-| -------------- | ----------------------------------------------------------------------- | ------------ |
-| ClassList      | Displaying the list of classes that are selected/match the query string | Hanzhi Zhou  |
-| ClassListModal | Displaying information of a CourseRecord object                         | Kaiying Shan |
-| CourseBlock    | A block component for placing a course on GridSchedule                  | Kaiying Shan |
-| GridSchedule   | A component for rendering a schedule                                    | Kaiying Shan |
-| Modal          | For displaying information of a specific course                         | Kaiying Shan |
-| Pagination     | For showing a list of pages and switching between generated schedules   | Hanzhi Zhou  |
+| Name           | Description                                                             | Contributor               |
+| -------------- | ----------------------------------------------------------------------- | ------------------------- |
+| ClassList      | Displaying the list of classes that are selected/match the query string | Hanzhi Zhou               |
+| ClassListModal | Displaying information of a CourseRecord object                         | Kaiying Shan              |
+| CourseBlock    | A block component for placing a course on GridSchedule                  | Kaiying Shan              |
+| GridSchedule   | A component for rendering a schedule                                    | Kaiying Shan              |
+| Modal          | For displaying information of a specific course                         | Kaiying Shan              |
+| Pagination     | For showing a list of pages and switching between generated schedules   | Hanzhi Zhou, Kaiying Shan |
 
 ### Tool chain
 
-Configuration of linting, formatting and testing tools
+Configuration of linting, formatting, building and testing tools
 
 Hanzhi Zhou
 
@@ -63,7 +68,10 @@ These are mainly JavaScript files in [models](/templates/src/models)
 
 These are mainly JavaScript files in [algorithm](/templates/src/algorithm)
 
-Zichao Hu, Hanzhi Zhou
+| Part             | Description                                       | Contributor |
+| ---------------- | ------------------------------------------------- | ----------- |
+| Main Algorithm   | -                                                 | Zichao Hu   |
+| Type Annotations | JSDoc Annotations to make the script type-checked | Hanzhi Zhou |
 
 ## Back-End
 

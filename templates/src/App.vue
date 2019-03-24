@@ -28,7 +28,7 @@
             </div>
         </transition>
 
-        <nav class="d-none d-md-block bg-light button-bar" style="width:3rem">
+        <nav class="d-none d-md-block bg-light button-bar" style="width:3vw">
             <span
                 class="side-button"
                 style="font-size:2rem;margin-left:20%; display:block;"
@@ -69,7 +69,7 @@
         <nav
             v-if="sideBar && showSelectClass"
             class="d-none d-md-block bg-light sidebar"
-            style="left:3rem;width:15rem"
+            style="left:3vw;width:17vw"
         >
             <div class="dropdown" style="">
                 <button
@@ -186,7 +186,7 @@
         <nav
             v-if="sideBar && showFilter"
             class="d-none d-md-block bg-light sidebar"
-            style="left:3rem;width:15rem"
+            style="left:3vw;width:17vw"
         >
             <ul class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Filters</li>
@@ -198,26 +198,42 @@
                     style="padding:2%"
                 >
                     <!-- @input="timeSlots[n][0] = $event.target.value" -->
-                    <input
-                        v-model="value[0]"
-                        type="time"
-                        min="8:00"
-                        max="22:00"
-                        style="-webkit-appearance:button"
-                    />
-                    -
-                    <input
-                        v-model="value[1]"
-                        type="time"
-                        min="8:00"
-                        max="22:00"
-                        style="-webkit-appearance:button"
-                    />
-                    <button type="button" class="close" aria-label="Close" role="button">
-                        <span aria-hidden="true" @click="removeATimeConstraint(n)">&times;</span>
-                    </button>
+                    <table style="width:100%">
+                        <tr>
+                            <td>
+                                <input
+                                    v-model="value[0]"
+                                    type="time"
+                                    min="8:00"
+                                    max="22:00"
+                                    style="-webkit-appearance:button"
+                                />
+                                -
+                                <input
+                                    v-model="value[1]"
+                                    type="time"
+                                    min="8:00"
+                                    max="22:00"
+                                    style="-webkit-appearance:button"
+                                />
+                            </td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="close"
+                                    aria-label="Close"
+                                    role="button"
+                                    style="font-size:2rem"
+                                >
+                                    <span aria-hidden="true" @click="removeATimeConstraint(n)"
+                                        >&times;</span
+                                    >
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
                 </li>
-                <li class="list-group-item" @click="addTimeSlot">Add</li>
+                <li class="list-group-item filter-add" @click="addTimeSlot">Add</li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox mt-2">
                         <input
@@ -226,7 +242,7 @@
                             type="checkbox"
                             class="custom-control-input"
                         />
-                        <label class="custom-control-label" for="awt">Wait List</label>
+                        <label class="custom-control-label" for="awt">Allow Wait List</label>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -237,11 +253,11 @@
                             type="checkbox"
                             class="custom-control-input"
                         />
-                        <label class="custom-control-label" for="ac">Closed</label>
+                        <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
                 <li class="list-group-item" @click="addFilter">
-                    Does nothing
+                    <!-- Does nothing -->
                 </li>
             </ul>
         </nav>
@@ -249,7 +265,7 @@
         <nav
             v-if="sideBar && showSetting"
             class="d-none d-md-block bg-light sidebar"
-            style="left:3rem;width:15rem"
+            style="left:3vw;width:17vw"
         >
             <div class="sidebar-sticky">
                 <ul class="list-group list-group-flush" style="width:99%">
@@ -327,7 +343,7 @@
             </div>
         </nav>
 
-        <table :style="`width:${scheduleWidth}%; margin-left:${scheduleLeft}rem;`">
+        <table :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
             <tr>
                 <td style="width:75%;vertical-align: top;text-align-left">
                     <div class="container-fluid">
@@ -516,12 +532,12 @@ export default Vue.extend({
         },
         scheduleWidth() {
             return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
-                ? 100 - 15 - 3 - 3
+                ? 100 - 17 - 3 - 3
                 : 100 - 3 - 3;
         },
         scheduleLeft() {
             return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
-                ? 18
+                ? 19
                 : 3;
         }
     },
@@ -882,5 +898,9 @@ export default Vue.extend({
 
 .list-group-item {
     background-color: #f8f8f8;
+}
+
+.filter-add:hover {
+    background-color: rgba(223, 223, 223, 0.5);
 }
 </style>

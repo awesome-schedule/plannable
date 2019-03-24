@@ -93,7 +93,7 @@
                         class="dropdown-item"
                         style="width: 100%;"
                         href="#"
-                        @click="selectSemester(index)"
+                        @click="selectSemester(semesters.length - index - 1)"
                         >{{ semester.name }}</a
                     >
                 </div>
@@ -392,6 +392,7 @@ import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
  * @typedef {{id: string, name: string}} Semester
  */
 /**
+ * Raw Schedule
  * @typedef {[string, number, number][]} RawSchedule
  */
 
@@ -486,7 +487,7 @@ export default Vue.extend({
             enteringCardHeight: 500,
             timeSlotsRecord: [],
 
-            storageVersion: 1,
+            storageVersion: 2,
 
             storageFields: [
                 'currentSchedule',
@@ -631,6 +632,7 @@ export default Vue.extend({
         selectSemester(semesterId) {
             this.currentSemester = this.semesters[semesterId];
             const data = localStorage.getItem(this.currentSemester.id);
+            const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
             const defaultCallback = () => {
                 this.schedules = null;
                 this.currentSchedule = new Schedule();
@@ -638,6 +640,7 @@ export default Vue.extend({
                 this.generated = false;
                 this.currentScheduleIndex = 0;
                 this.currentCourses = [];
+                this.saveAllRecords();
                 this.saveStatus();
             };
             if (data === null || data.length === 0) {
@@ -656,7 +659,7 @@ export default Vue.extend({
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
             }
-            const temp = AllRecords.fromJSON(raw_data.allRecords);
+            const temp = AllRecords.fromJSON(JSON.parse(allRecords_raw));
 
             // things to do after allRecord is loaded
             const callback = () => {
@@ -667,7 +670,11 @@ export default Vue.extend({
                 this.currentCourses = this.getCurrentCourses();
             };
             if (temp === null) {
-                this.fetchSemesterData(semesterId, callback);
+                // in this case, we only need to update allRecords. Save a set of fresh data
+                this.fetchSemesterData(semesterId, () => {
+                    callback();
+                    this.saveAllRecords();
+                });
             } else {
                 const now = new Date().getTime();
                 const dataTime = new Date(raw_data.modified).getTime();
@@ -681,11 +688,23 @@ export default Vue.extend({
                 }
             }
         },
+        saveAllRecords() {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.endsWith('data')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            localStorage.setItem(
+                `${this.currentSemester.id}data`,
+                JSON.stringify(this.allRecords.toJSON())
+            );
+        },
         /**
          * fetch basic class data for the given semester for fast class search and rendering
          * this method will assign `this.allRecords` and `Schedule.allRecords`
          * @param {number} semeseterId
-         * @param {*} callback
+         * @param {()=>void} callback
          */
         fetchSemesterData(semesterId, callback) {
             console.info(`Loading semester ${semesterId} data from remote...`);
@@ -745,24 +764,7 @@ export default Vue.extend({
             }
         },
         saveStatus() {
-            localStorage.removeItem(this.currentSemester.id);
-
-            // remove all stored allRecords field if it exists to free some storage space
-            for (let i = 0; i < localStorage.length; i++) {
-                let storedObj;
-                try {
-                    storedObj = JSON.parse(localStorage.getItem(localStorage.key(i)));
-                } catch (e) {
-                    continue;
-                }
-
-                if (storedObj.allRecords !== undefined) {
-                    delete storedObj.allRecords;
-                    localStorage.setItem(localStorage.key(i), JSON.stringify(storedObj));
-                }
-            }
-
-            const obj = { modified: new Date().toJSON(), allRecords: this.allRecords.toJSON() };
+            const obj = { modified: new Date().toJSON() };
             for (const field of this.storageFields) {
                 // use toJSON method if it exists
                 if (this[field] instanceof Object && typeof this[field].toJSON === 'function')
@@ -772,7 +774,7 @@ export default Vue.extend({
             localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
         },
         /**
-         * @param {Object} raw_data
+         * @param {Object<string, any>} raw_data
          */
         parseLocalData(raw_data) {
             for (const field of this.storageFields) {

@@ -5,16 +5,6 @@ import * as math from 'mathjs';
  */
 class ScheduleEvaluator {
     constructor() {
-        // this.finalTable = new Heap(
-        //     /**
-        //      *
-        //      * @param {ComparableSchedule} a
-        //      * @param {ComparableSchedule} b
-        //      */
-        //     function(a, b) {
-        //         return a.coeff - b.coeff;
-        //     }
-        // );
         /**
          * @type {ComparableSchedule[]}
          */
@@ -22,13 +12,12 @@ class ScheduleEvaluator {
     }
 
     /**
-     *
+     * Add a schedule to the collection of results. Compute its coefficient of quality.
      * @param {import("./ScheduleGenerator").RawSchedule} timeTable
      */
     add(timeTable) {
         /**
          * Use standard deviation to evaluate the class
-         * Use heap to store the data
          */
         let mo = 0;
         let tu = 0;

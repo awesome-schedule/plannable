@@ -1,8 +1,6 @@
 __pycache__
 .vscode
 .idea/
-new_sis/test*.py
-new_sis/test*.ipynb
 .ipynb_checkpoints
 .~lock*
 /models/
@@ -11,3 +9,4 @@ node_modules
 .DS_Store
 .mypy_cache
 backend/data
+templates/tests/temp

@@ -14,7 +14,7 @@ class AllRecords {
      * @param {{semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
     static fromJSON(data) {
-        if (data !== undefined && data.semester !== undefined && data.raw_data !== undefined) {
+        if (data && data.semester !== undefined && data.raw_data !== undefined) {
             return new AllRecords(data.semester, data.raw_data);
         }
         return null;

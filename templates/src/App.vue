@@ -28,7 +28,7 @@
             </div>
         </transition>
 
-        <nav class="d-none d-md-block bg-light sidebar" style="width:3rem">
+        <nav class="d-none d-md-block bg-light button-bar" style="width:3rem">
             <span
                 class="side-button"
                 style="font-size:2rem;margin-left:20%; display:block;"
@@ -103,7 +103,7 @@
                 <input
                     type="text"
                     class="form-control"
-                    placeholder="Course Title"
+                    placeholder="Title/Number/Topic/Professor"
                     style="font-size: 10pt"
                     aria-describedby="basic-addon1"
                     @input="getClass($event.target.value)"
@@ -188,96 +188,62 @@
             class="d-none d-md-block bg-light sidebar"
             style="left:3rem;width:15rem"
         >
-            <div style="">
-                <button
-                    class="btn btn-primary"
-                    type="button"
-                    data-toggle="collapse"
-                    data-target="#filter"
-                    aria-expanded="true"
-                    aria-controls="filter"
-                    style="width:100%;"
+            <ul class="list-group list-group-flush" style="width:99%">
+                <li class="list-group-item">Filters</li>
+                <li
+                    v-for="(value, n) in timeSlots"
+                    v-if="value !== undefined"
+                    :key="n"
+                    class="list-group-item"
+                    style="padding:2%"
                 >
-                    Filters
-                </button>
-            </div>
-
-            <div id="filter" class="collapse show">
-                <div class="card card-body" style="padding:3%">
-                    <div class="filter mt-2">
-                        <ul class="list-group list-group-flush" style="width:100%">
-                            <li
-                                v-for="(value, n) in timeSlots"
-                                v-if="value !== undefined"
-                                :key="n"
-                                class="list-group-item"
-                                style="padding:2%"
-                            >
-                                <!-- @input="timeSlots[n][0] = $event.target.value" -->
-                                <input
-                                    v-model="value[0]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                                -
-                                <input
-                                    v-model="value[1]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                                <button
-                                    type="button"
-                                    class="close"
-                                    aria-label="Close"
-                                    role="button"
-                                >
-                                    <span aria-hidden="true" @click="removeATimeConstraint(n)"
-                                        >&times;</span
-                                    >
-                                </button>
-                            </li>
-
-                            <li class="list-group-item" style="text-align:center">
-                                <button
-                                    type="button"
-                                    class="close"
-                                    aria-label="Close"
-                                    role="button"
-                                >
-                                    <span aria-hidden="true" @click="addTimeSlot">+</span>
-                                </button>
-                            </li>
-                        </ul>
-
-                        <div class="custom-control custom-checkbox mt-2">
-                            <input
-                                id="awt"
-                                v-model="allowWaitlist"
-                                type="checkbox"
-                                class="custom-control-input"
-                            />
-                            <label class="custom-control-label" for="awt">Wait List</label>
-                        </div>
-                        <div class="custom-control custom-checkbox mt-1">
-                            <input
-                                id="ac"
-                                v-model="allowClosed"
-                                type="checkbox"
-                                class="custom-control-input"
-                            />
-                            <label class="custom-control-label" for="ac">Closed</label>
-                        </div>
-                    </div>
-                    <!--submit button-->
-                    <button type="button" class="btn btn-outline-success mt-2" @click="addFilter">
-                        Submit
+                    <!-- @input="timeSlots[n][0] = $event.target.value" -->
+                    <input
+                        v-model="value[0]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    -
+                    <input
+                        v-model="value[1]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    <button type="button" class="close" aria-label="Close" role="button">
+                        <span aria-hidden="true" @click="removeATimeConstraint(n)">&times;</span>
                     </button>
-                </div>
-            </div>
+                </li>
+                <li class="list-group-item" @click="addTimeSlot">Add</li>
+                <li class="list-group-item">
+                    <div class="custom-control custom-checkbox mt-2">
+                        <input
+                            id="awt"
+                            v-model="allowWaitlist"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="awt">Wait List</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="custom-control custom-checkbox mt-1">
+                        <input
+                            id="ac"
+                            v-model="allowClosed"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="ac">Closed</label>
+                    </div>
+                </li>
+                <li class="list-group-item" @click="addFilter">
+                    Does nothing
+                </li>
+            </ul>
         </nav>
 
         <nav
@@ -286,41 +252,41 @@
             style="left:3rem;width:15rem"
         >
             <div class="sidebar-sticky">
-                <div class="sidebar-brand">SCHEDULE DISPLAY SETTINGS</div>
+                <ul class="list-group list-group-flush" style="width:99%">
+                    <li class="list-group-item">Schedule Display settings</li>
+                    <!-- <li class="list-group-item p-0"> -->
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Class Block</span>
+                        </div>
+                        <input
+                            v-model="fullHeight"
+                            type="number"
+                            class="form-control"
+                            @input="saveStatus()"
+                        />
+                        <div class="input-group-append">
+                            <span class="input-group-text">px</span>
+                        </div>
+                    </div>
 
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Class Block</span>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Placeholder</span>
+                        </div>
+                        <input
+                            v-model="partialHeight"
+                            type="number"
+                            class="form-control"
+                            @input="saveStatus()"
+                        />
+                        <div class="input-group-append">
+                            <span class="input-group-text">px</span>
+                        </div>
                     </div>
-                    <input
-                        v-model="fullHeight"
-                        type="number"
-                        class="form-control"
-                        @input="saveStatus()"
-                    />
-                    <div class="input-group-append">
-                        <span class="input-group-text">px</span>
-                    </div>
-                </div>
-
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Placeholder</span>
-                    </div>
-                    <input
-                        v-model="partialHeight"
-                        type="number"
-                        class="form-control"
-                        @input="saveStatus()"
-                    />
-                    <div class="input-group-append">
-                        <span class="input-group-text">px</span>
-                    </div>
-                </div>
-
-                <div>
-                    Display Options:
-                    <div>
+                    <!-- </li> -->
+                    <li class="list-group-item">Display Options</li>
+                    <li class="list-group-item">
                         <div class="custom-control custom-checkbox">
                             <input
                                 id="displayTime"
@@ -354,8 +320,10 @@
                                 Show instructor
                             </label>
                         </div>
-                    </div>
-                </div>
+                    </li>
+
+                    <li class="list-group-item"></li>
+                </ul>
             </div>
         </nav>
 
@@ -877,6 +845,15 @@ export default Vue.extend({
     bottom: 0;
     left: 0;
     z-index: 100; /* Behind the navbar */
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.button-bar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100; /* Behind the navbar */
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
@@ -885,19 +862,23 @@ export default Vue.extend({
     position: relative;
     top: 0;
     height: calc(100vh - 48px);
-    padding-top: 0.5rem;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
 }
 
 .sidebar-brand {
-    background-color: #d0d0d0;
+    background-color: #acacac;
     color: white;
     width: 100%;
+    padding: 5px 3px 5px;
 }
 
 .sidebar-item {
-    margin: 10px 0px 10px;
+    padding: 5px 3px 5px;
     width: 100%;
+}
+
+.list-group-item {
+    background-color: #f8f8f8;
 }
 </style>

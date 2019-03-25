@@ -42,6 +42,7 @@ class ScheduleEvaluator {
                 fr += minutes;
             }
         }
+
         const stdev = math.std([mo, tu, we, th, fr]);
 
         this.schedules.push({

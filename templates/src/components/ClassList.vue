@@ -12,7 +12,7 @@
                                     aria-label="Close"
                                     data-toggle="collapse"
                                     :data-target="`#${crs.key}`"
-                                    style="font-size: 1.2rem"
+                                    style="font-size:1.2rem"
                                     @click="collapse(crs.key)"
                                 >
                                     <i class="fas" :class="expanded(crs)"></i>
@@ -21,16 +21,20 @@
                             <td>
                                 <h6 class="mb-1">
                                     {{ crs.department }} {{ crs.number }} {{ crs.type }}
-                                    <i
-                                        data-toggle="modal"
-                                        data-target="#class-list-modal"
-                                        class="fas fa-info-circle"
-                                        title="View class description"
-                                        @click="$emit('trigger-classlist-modal', crs)"
-                                    ></i>
+                                    <span style="font-size:0.7rem">
+                                        <i
+                                            data-toggle="modal"
+                                            data-target="#class-list-modal"
+                                            class="fas fa-info-circle"
+                                            title="View class description"
+                                            @click="$emit('trigger-classlist-modal', crs)"
+                                        ></i>
+                                    </span>
                                 </h6>
 
-                                <p style="font-size: 0.85rem; margin: 0">{{ crs.title }}</p>
+                                <p v-if="showClasslistTitle" style="font-size: 0.85rem; margin: 0">
+                                    {{ crs.title }}
+                                </p>
                             </td>
                             <td v-if="!isEntering" class="pl-2">
                                 <button
@@ -151,7 +155,8 @@ export default Vue.extend({
     props: {
         courses: Array,
         schedule: Schedule,
-        isEntering: Boolean
+        isEntering: Boolean,
+        showClasslistTitle: Boolean
     },
     data() {
         return {

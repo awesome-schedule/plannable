@@ -28,7 +28,10 @@
             </div>
         </transition>
 
-        <nav class="d-none d-md-block bg-light button-bar" style="width:3vw">
+        <nav
+            class="d-none d-md-block bg-light button-bar"
+            :style="`width:3vw;max-height:${navHeight}`"
+        >
             <span
                 class="side-button"
                 style="font-size:2rem;margin-left:20%; display:block;"
@@ -64,18 +67,27 @@
             >
                 <i class="fas fa-cog"></i>
             </span>
+            <br />
+            <span
+                v-if="isEntering && showSelectClass"
+                style="font-size:1.8rem;margin-left:20%; display:block;"
+                class="side-button mt-2"
+                @click="closeClassList"
+            >
+                <i class="fas fa-caret-square-up"></i>
+            </span>
         </nav>
 
         <nav
             v-if="sideBar && showSelectClass"
             class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:17vw"
+            style="left:3vw;width:19vw"
         >
             <div class="dropdown" style="">
                 <button
                     id="semester"
                     class="btn btn-primary mt-4 mx-auto"
-                    style="width: 100%; margin-top: 0 !important"
+                    style="width: 100%; margin-top: 0 !important; border-radius:0 !important"
                     type="button"
                     data-toggle="dropdown"
                 >
@@ -115,7 +127,7 @@
                     <button
                         class="btn btn-primary"
                         type="button"
-                        style="width:100%"
+                        style="width:100%; border-radius: 0 !important"
                         @click="
                             if (schedules !== null && schedules.length > 0) {
                                 if (generated) currentSchedule = proposedSchedule;
@@ -131,36 +143,33 @@
                         }}
                     </button>
                 </div>
-                <div id="currentSelectedClass">
-                    <div
-                        class="card card-body p-1"
-                        style="overflow-y: auto;"
-                        :style="`max-height:${staticCardHeight}px`"
-                    >
-                        <ClassList
-                            :courses="currentCourses"
-                            :schedule="currentSchedule"
-                            :is-entering="isEntering"
-                            @update_course="updateCourse"
-                            @remove_course="removeCourse"
-                            @remove_preview="removePreview"
-                            @trigger-classlist-modal="showClassListModal"
-                            @preview="preview"
-                        ></ClassList>
-                        <div>
-                            <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
-                            <button
-                                type="button"
-                                class="btn btn-success mt-2"
-                                @click="generateSchedules"
-                            >
-                                Submit
-                            </button>
-                            <button class="btn btn-warning mt-2 ml-1" @click="clear">
-                                Clean All
-                            </button>
-                        </div>
+                <div id="currentSelectedClass" style="width:99%">
+                    <!-- <div class="card card-body p-1"> -->
+                    <ClassList
+                        :courses="currentCourses"
+                        :schedule="currentSchedule"
+                        :is-entering="isEntering"
+                        :show-classlist-title="showClasslistTitle"
+                        @update_course="updateCourse"
+                        @remove_course="removeCourse"
+                        @remove_preview="removePreview"
+                        @trigger-classlist-modal="showClassListModal"
+                        @preview="preview"
+                    ></ClassList>
+                    <div>
+                        <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
+                        <button
+                            type="button"
+                            class="btn btn-success mt-2"
+                            @click="generateSchedules"
+                        >
+                            Submit
+                        </button>
+                        <button class="btn btn-warning mt-2 ml-1" @click="clear">
+                            Clean All
+                        </button>
                     </div>
+                    <!-- </div> -->
                 </div>
             </div>
             <div
@@ -181,15 +190,18 @@
                     @trigger-classlist-modal="showClassListModal"
                 ></ClassList>
             </div>
+            {{ totalCredit }}
         </nav>
 
         <nav
             v-if="sideBar && showFilter"
             class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:17vw"
+            style="left:3vw;width:19vw;"
         >
-            <ul class="list-group list-group-flush" style="width:99%">
-                <li class="list-group-item">Filters</li>
+            <button class="btn btn-primary" style="border-radius: 0 !important;width:100%">
+                Filters
+            </button>
+            <ul class="list-group list-group-flush" style="width:99%;">
                 <li
                     v-for="(value, n) in timeSlots"
                     v-if="value !== undefined"
@@ -233,7 +245,13 @@
                         </tr>
                     </table>
                 </li>
-                <li class="list-group-item filter-add" @click="addTimeSlot">Add</li>
+                <li
+                    class="list-group-item filter-add"
+                    style="text-align:center"
+                    @click="addTimeSlot"
+                >
+                    <i class="fas fa-plus"></i>
+                </li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox mt-2">
                         <input
@@ -265,13 +283,15 @@
         <nav
             v-if="sideBar && showSetting"
             class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:17vw"
+            style="left:3vw;width:19vw"
         >
             <div class="sidebar-sticky">
+                <button class="btn btn-primary" style="border-radius:0 !important;width: 100%">
+                    Schedule Display settings
+                </button>
                 <ul class="list-group list-group-flush" style="width:99%">
-                    <li class="list-group-item">Schedule Display settings</li>
                     <!-- <li class="list-group-item p-0"> -->
-                    <div class="input-group mb-3">
+                    <div class="input-group mt-3 mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Class Block</span>
                         </div>
@@ -300,8 +320,13 @@
                             <span class="input-group-text">px</span>
                         </div>
                     </div>
-                    <!-- </li> -->
-                    <li class="list-group-item">Display Options</li>
+                </ul>
+                <!-- </li> -->
+                <button class="btn btn-primary" style="border-radius:0 !important;width: 100%">
+                    Display Options
+                </button>
+                <ul class="list-group list-group-flush" style="width:99%">
+                    <li class="list-group-item">Course Display</li>
                     <li class="list-group-item">
                         <div class="custom-control custom-checkbox">
                             <input
@@ -337,7 +362,20 @@
                             </label>
                         </div>
                     </li>
-
+                    <li class="list-group-item">Class List Display</li>
+                    <li class="list-group-item">
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="displayClasslistTitle"
+                                v-model="showClasslistTitle"
+                                type="checkbox"
+                                class="custom-control-input"
+                            />
+                            <label for="displayClasslistTitle" class="custom-control-label">
+                                Show title on class list
+                            </label>
+                        </div>
+                    </li>
                     <li class="list-group-item"></li>
                 </ul>
             </div>
@@ -348,16 +386,6 @@
                 <td style="width:75%;vertical-align: top;text-align-left">
                     <div class="container-fluid">
                         <div class="row justify-content-center">
-                            <div style="float:left">
-                                <button
-                                    v-if="isEntering && showSelectClass"
-                                    class="btn btn-primary mt-1"
-                                    style="font-size:10px"
-                                    @click="closeClassList"
-                                >
-                                    Hide Class List
-                                </button>
-                            </div>
                             <div class="col">
                                 <Pagination
                                     v-if="generated && schedules !== null && schedules.length > 0"
@@ -495,12 +523,14 @@ export default Vue.extend({
             showTime: true,
             showRoom: true,
             showInstructor: true,
+            showClasslistTitle: false,
             fullHeight: 50,
             partialHeight: 20,
             timeSlots: {},
             numberOfTimeSlots: 0,
-            staticCardHeight: 500,
-            enteringCardHeight: 500,
+            // staticCardHeight: 500,
+            // enteringCardHeight: 500,
+            navHeight: 500,
             timeSlotsRecord: [],
 
             storageVersion: 2,
@@ -532,13 +562,16 @@ export default Vue.extend({
         },
         scheduleWidth() {
             return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
-                ? 100 - 17 - 3 - 3
+                ? 100 - 19 - 3 - 5
                 : 100 - 3 - 3;
         },
         scheduleLeft() {
             return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
-                ? 19
+                ? 23
                 : 3;
+        },
+        totalCredit() {
+            return this.currentSchedule.totalCredit;
         }
     },
     mounted() {
@@ -557,6 +590,8 @@ export default Vue.extend({
             document.documentElement.clientHeight -
             this.$refs.enteringCardTop.getBoundingClientRect().bottom -
             10;
+
+        this.navHeight = document.documentElement.clientHeight;
     },
     methods: {
         getCurrentCourses() {
@@ -864,6 +899,7 @@ export default Vue.extend({
     left: 0;
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
 }
 
 .button-bar {

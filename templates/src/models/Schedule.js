@@ -72,6 +72,8 @@ class Schedule {
 
         this.colors = new Set();
 
+        this.totalCredit = 0;
+
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
             this.add(key, section, false);
@@ -165,6 +167,7 @@ class Schedule {
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
                 const course = Schedule.allRecords.getCourse(key, [...sections.values()][0]).copy();
+                this.totalCredit += isNaN(course.units) ? 0 : parseFloat(course.units);
                 this.place(course);
             }
         }
@@ -221,6 +224,7 @@ class Schedule {
             this[key] = [];
         }
         this.colors.clear();
+        this.totalCredit = 0;
     }
     /**
      * instantiate a `Schedule` object from its JSON representation

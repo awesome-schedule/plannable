@@ -95,16 +95,12 @@ def load_semester_data(semester_index):
     key_map = defaultdict(list)
 
     def get_key(row: List[str]):
-        return (row[1] + row[2]+row[4]).lower()
+        return (row[1] + row[2] + str(CLASS_TYPES[row[4]])).lower()
 
     def parse(raw_row: List[str]):
         row = raw_row.copy()
         for idx, _type in RAW_DATA_TYPES.items():
-            try:
-                row[idx] = _type(row[idx])
-            except Exception as e:
-                Log.warning('Error Parsing \n {} \n {}'.format(
-                    str(raw_row), traceback.format_exc()))
+            row[idx] = _type(row[idx])
         return row
 
     Log.info('Parsing Course Data of {}'.format(semester['name']))
@@ -115,7 +111,15 @@ def load_semester_data(semester_index):
             line_count += 1
             if line_count == 0:
                 continue
-            key_map[get_key(raw_row)].append(parse(raw_row))
+            try:
+                key_map[get_key(raw_row)].append(parse(raw_row))
+            except Exception as e:
+                Log.warning('Error Parsing \n {} \n {}'.format(
+                    str(raw_row), str(e)))
+                continue
+        for key in list(key_map.keys()):
+            if len(key_map[key]) == 0:
+                del key_map[key]
         Log.info('Processed {} lines.'.format(line_count))
 
     allRecords = dict()

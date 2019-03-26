@@ -96,7 +96,7 @@ class AllRecords {
                     if (topic.toLowerCase().indexOf(query) !== -1) topicMatchIdx.push(i);
                     const profs = course[6][i];
                     for (const prof of profs) {
-                        if (prof.toLowerCase().indexOf(query) !== -1) {
+                        if (prof.toLowerCase().startsWith(query)) {
                             profMatchIdx.push(i);
                             break;
                         }

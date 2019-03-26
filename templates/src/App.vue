@@ -34,7 +34,8 @@
         >
             <span
                 class="side-button"
-                style="font-size:2rem;margin-left:20%; display:block;"
+                style="font-size:2vw;margin-left:20%; display:block;"
+                title="Select Classes"
                 @click="
                     showSelectClass = !showSelectClass;
                     showFilter = false;
@@ -46,7 +47,8 @@
             <br />
             <span
                 class="side-button mt-2"
-                style="font-size:1.7rem;margin-left:20%; display:block;"
+                style="font-size:1.7vw;margin-left:20%; display:block;"
+                title="Filters"
                 @click="
                     showFilter = !showFilter;
                     showSelectClass = false;
@@ -57,8 +59,9 @@
             </span>
             <br />
             <span
-                style="font-size:1.8rem;margin-left:20%; display:block;"
+                style="font-size:1.8vw;margin-left:20%; display:block;"
                 class="side-button mt-2"
+                title="Display Settings"
                 @click="
                     showSetting = !showSetting;
                     showSelectClass = false;
@@ -70,12 +73,17 @@
             <br />
             <span
                 v-if="isEntering && showSelectClass"
-                style="font-size:1.8rem;margin-left:20%; display:block;"
+                style="font-size:1.8vw;margin-left:23%; display:block;"
                 class="side-button mt-2"
                 @click="closeClassList"
             >
                 <i class="fas fa-caret-square-up"></i>
             </span>
+            <!-- <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    
+                </li>
+            </ul> -->
         </nav>
 
         <nav
@@ -190,7 +198,22 @@
                     @trigger-classlist-modal="showClassListModal"
                 ></ClassList>
             </div>
-            {{ totalCredit }}
+            <ul class="list-group list-group-flush" style="width:99%">
+                <button class="btn btn-primary mt-3" style="border-radius:0 !important">
+                    Semester Data
+                </button>
+                <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
+                <li class="list-group-item">
+                    <input type="file" accept="text/json" @change="onUploadJson($event)" /><br />
+                </li>
+                <li class="list-group-item">
+                    <button id="toJson" class="btn btn-info" @click="saveToJson()">
+                        <a :href="downloadURL" download="schedule.json">Export to JSON</a>
+                    </button>
+                    <br />
+                </li>
+                <li class="list-group-item"></li>
+            </ul>
         </nav>
 
         <nav
@@ -533,6 +556,8 @@ export default Vue.extend({
             navHeight: 500,
             timeSlotsRecord: [],
 
+            downloadURL: '',
+
             storageVersion: 2,
 
             storageFields: [
@@ -861,6 +886,27 @@ export default Vue.extend({
                 const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
                 this.timeSlotsRecord.push([startMin, endMin]);
             }
+        },
+        onUploadJson(event) {
+            const input = event.target;
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.selectSemester(this.semesters.length - 1);
+                localStorage.setItem(this.currentSemester.id, reader.result);
+                this.saveStatus();
+                console.log(this.currentSemester);
+            };
+            reader.readAsText(input.files[0]);
+        },
+        saveToJson() {
+            const json = localStorage.getItem(this.currentSemester.id);
+            const blob = new Blob([json], { type: 'text/json' });
+            let url = window.URL.createObjectURL(blob);
+            this.downloadURL = url;
+            url = url.substring(5);
+            console.log(this.currentSemester.id);
+            // console.log(this.currentSchedule);
+            window.URL.revokeObjectURL(url);
         }
     }
 });

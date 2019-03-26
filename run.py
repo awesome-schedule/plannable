@@ -7,6 +7,9 @@ from collections import OrderedDict
 from flask_cors import CORS
 from typing import List, Any, Dict, Tuple
 import os
+import schedule
+import threading
+import time
 
 app = Flask(__name__)
 
@@ -67,8 +70,21 @@ def send_css(path):
 # def default_handler(any_text):
 #     return render_template('errors/404.html')
 
+def update():
+    update_local_data()
+    load_all_data()
+
+
+def run_schedule():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+
+schedule.every(30).minutes.do(update)
 
 if __name__ == "__main__":
     update_local_data()
     load_all_data()
+    threading.Thread(target=run_schedule, args=()).start()
     app.run(host='0.0.0.0', port=8000, debug=False)

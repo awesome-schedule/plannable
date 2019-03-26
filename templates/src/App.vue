@@ -40,6 +40,7 @@
                     showSelectClass = !showSelectClass;
                     showFilter = false;
                     showSetting = false;
+                    showExport = false;
                 "
             >
                 <i class="far fa-calendar-alt"></i>
@@ -53,6 +54,7 @@
                     showFilter = !showFilter;
                     showSelectClass = false;
                     showSetting = false;
+                    showExport = false;
                 "
             >
                 <i class="fas fa-filter"></i>
@@ -66,9 +68,23 @@
                     showSetting = !showSetting;
                     showSelectClass = false;
                     showFilter = false;
+                    showExport = false;
                 "
             >
                 <i class="fas fa-cog"></i>
+            </span>
+            <br />
+            <span
+                style="font-size:1.8vw;margin-left:20%; display:block;"
+                class="side-button mt-2"
+                title="Import/Export Schedule"
+                @click="
+                    showExport = !showExport;
+                    showSelectClass = false;
+                    showFilter = false;
+                    showSetting = false;
+                "
+                ><i class="fas fa-download"></i>
             </span>
             <br />
             <span
@@ -180,13 +196,7 @@
                     <!-- </div> -->
                 </div>
             </div>
-            <div
-                v-if="isEntering"
-                ref="classList"
-                class="card card-body p-1"
-                style="overflow-y: auto;"
-                :style="`max-height:${enteringCardHeight}px`"
-            >
+            <div v-if="isEntering" ref="classList" class="card card-body p-1">
                 <ClassList
                     :courses="inputCourses"
                     :schedule="currentSchedule"
@@ -203,20 +213,6 @@
                     Semester Data
                 </button>
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
-                <li class="list-group-item">
-                    <input type="file" accept="text/json" @change="onUploadJson($event)" /><br />
-                </li>
-                <li class="list-group-item">
-                    <button id="toJson" class="btn btn-info" @click="saveToJson()">
-                        <a
-                            style="color: inherit; text-decoration: inherit"
-                            :href="downloadURL"
-                            download="schedule.json"
-                            >Export to JSON
-                        </a>
-                    </button>
-                    <br />
-                </li>
                 <li class="list-group-item"></li>
             </ul>
         </nav>
@@ -276,6 +272,7 @@
                 <li
                     class="list-group-item filter-add"
                     style="text-align:center"
+                    title="Click to add a time period when you don't want to have class"
                     @click="addTimeSlot"
                 >
                     <i class="fas fa-plus"></i>
@@ -407,6 +404,43 @@
             </div>
         </nav>
 
+        <nav
+            v-if="sideBar && showExport"
+            class="d-none d-md-block bg-light sidebar"
+            style="left:3vw;width:19vw"
+        >
+            <button class="btn btn-primary" style="width:100%;border-radius: 0 !important">
+                Import/Export Schedule
+            </button>
+            <ul class="list-group list-group-flush" style="width:99%">
+                <li class="list-group-item">
+                    <a
+                        class="btn btn-outline-dark"
+                        style="width:100%"
+                        :href="downloadURL"
+                        download="schedule.json"
+                        @click="saveToJson"
+                        >Export
+                    </a>
+                    <br />
+                </li>
+                <li class="list-group-item">
+                    <div class="custom-file">
+                        <input
+                            id="customFile"
+                            type="file"
+                            class="custom-file-input"
+                            accept="text/json"
+                            style="width:100%"
+                            @change="onUploadJson($event)"
+                        />
+                        <label class="custom-file-label" for="customFile">Choose file</label>
+                    </div>
+                </li>
+                <li class="list-group-item"></li>
+            </ul>
+        </nav>
+
         <table :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
             <tr>
                 <td style="width:75%;vertical-align: top;text-align-left">
@@ -529,6 +563,7 @@ export default Vue.extend({
              * showSetting: when true, show the settings sidebar if 'sideBar' is also true
              */
             showSetting: false,
+            showExport: false,
             /**
              * @type {Course[]}
              */
@@ -554,8 +589,6 @@ export default Vue.extend({
             partialHeight: 20,
             timeSlots: {},
             numberOfTimeSlots: 0,
-            // staticCardHeight: 500,
-            // enteringCardHeight: 500,
             navHeight: 500,
             timeSlotsRecord: [],
 
@@ -594,12 +627,14 @@ export default Vue.extend({
             return indices;
         },
         scheduleWidth() {
-            return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
+            return this.sideBar &&
+                (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
                 ? 100 - 19 - 3 - 5
                 : 100 - 3 - 3;
         },
         scheduleLeft() {
-            return this.sideBar && (this.showSelectClass || this.showFilter || this.showSetting)
+            return this.sideBar &&
+                (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
                 ? 23
                 : 3;
         },
@@ -613,16 +648,6 @@ export default Vue.extend({
             // get the latest semester
             this.selectSemester(this.semesters.length - 1);
         });
-
-        this.staticCardHeight =
-            document.documentElement.clientHeight -
-            this.$refs.staticCardTop.getBoundingClientRect().bottom -
-            10;
-
-        this.enteringCardHeight =
-            document.documentElement.clientHeight -
-            this.$refs.enteringCardTop.getBoundingClientRect().bottom -
-            10;
 
         this.navHeight = document.documentElement.clientHeight;
     },
@@ -908,8 +933,6 @@ export default Vue.extend({
                         break;
                     }
                 }
-                this.saveStatus();
-                console.log(this.currentSemester);
             };
             reader.readAsText(input.files[0]);
         },

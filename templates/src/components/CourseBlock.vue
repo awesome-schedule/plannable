@@ -15,7 +15,7 @@
         @click="$parent.$emit('trigger-modal', course)"
     >
         <div class="mt-2 ml-2" style="color:white; font-size:13px">
-            {{ course.department }} {{ course.number }} {{ course.type }}
+            {{ course.department }} {{ course.number }}-{{ course.section }} {{ course.type }}
         </div>
         <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
             {{ course.days }}

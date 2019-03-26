@@ -12,7 +12,7 @@
                 >
             </li>
             <li
-                v-for="index in 10"
+                v-for="index in indices.length < 10 ? indices.length : 10"
                 :key="index"
                 :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
             >
@@ -42,7 +42,7 @@ export default Vue.extend({
         return {
             idx: 0,
             start: 0,
-            end: 10
+            end: this.indices.length < 10 ? this.indices.length : 10
         };
     },
     methods: {

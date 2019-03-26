@@ -1,6 +1,6 @@
 <template>
-    <nav>
-        <ul class="pagination justify-content-center" style="margin-bottom: 0">
+    <nav class="mt-2">
+        <ul class="pagination justify-content-center" style="margin-bottom: 0;">
             <li :class="'page-item' + (start <= 0 && idx <= start ? ' disabled' : '')">
                 <a
                     class="page-link"

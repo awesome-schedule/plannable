@@ -114,8 +114,8 @@
                         style="width: 100%;"
                         href="#"
                         @click="selectSemester(semesters.length - index - 1)"
-                        >{{ semester.name }}</a
-                    >
+                        >{{ semester.name }}
+                    </a>
                 </div>
             </div>
             <!--input title-->
@@ -208,7 +208,12 @@
                 </li>
                 <li class="list-group-item">
                     <button id="toJson" class="btn btn-info" @click="saveToJson()">
-                        <a :href="downloadURL" download="schedule.json">Export to JSON</a>
+                        <a
+                            style="color: inherit; text-decoration: inherit"
+                            :href="downloadURL"
+                            download="schedule.json"
+                            >Export to JSON
+                        </a>
                     </button>
                     <br />
                 </li>
@@ -285,8 +290,6 @@
                         />
                         <label class="custom-control-label" for="awt">Allow Wait List</label>
                     </div>
-                </li>
-                <li class="list-group-item">
                     <div class="custom-control custom-checkbox mt-1">
                         <input
                             id="ac"
@@ -704,12 +707,16 @@ export default Vue.extend({
             this.isEntering = true;
         },
         /**
-         * select a semester and fetch all its associated data
+         * Select a semester and fetch all its associated data.
+         *
          * This method will assign a correct AllRecords object to `this.allRecords` and `Schedule.allRecords`
          * which will be either requested from remote or parsed from `localStorage`
+         *
+         * After that, schedules and settings will be parsed from `localStorage` and assigned to relevant fields of `this`. If no local data is present, then default values will be assigned.
          * @param {number} semesterId
+         * @param {Object<string, any>} parsed_data
          */
-        selectSemester(semesterId) {
+        selectSemester(semesterId, parsed_data = undefined) {
             this.currentSemester = this.semesters[semesterId];
             const data = localStorage.getItem(this.currentSemester.id);
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
@@ -720,12 +727,12 @@ export default Vue.extend({
                 this.saveAllRecords();
                 this.saveStatus();
             };
-            if (data === null || data.length === 0) {
+            if (parsed_data === undefined && (data === null || data.length === 0)) {
                 // set to default values
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
             }
-            const raw_data = JSON.parse(data);
+            const raw_data = parsed_data === undefined ? JSON.parse(data) : parsed_data;
             // must assign allRecords prior to any other fields
             const storageVersion = raw_data.storageVersion;
 

@@ -16,13 +16,14 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Prerequisites
 
-- Node.js >= 8.10
-- Python >= 3.5
-- Flask >= 1.0
-- Requests >= 2.1
+-   Node.js >= 8.10
+-   Python >= 3.5
+-   Flask >= 1.0
+-   Requests >= 2.1
+-   Schedule >= 0.50
 
-```bash
-pip3 install flask flask_cors requests
+```
+pip install flask flask-cors requests schedule
 ```
 
 We recommend [VS Code](https://code.visualstudio.com/) for development
@@ -32,7 +33,7 @@ We recommend [VS Code](https://code.visualstudio.com/) for development
 Install necessary python packages
 
 ```
-pip install xlrd flask flask-cors
+pip install flask flask-cors requests schedule
 ```
 
 Install development dependencies
@@ -60,9 +61,9 @@ Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:80
 
 ## Built With
 
-- [Vue.js](https://vuejs.org) - Front-end framework
-- [Bootstrap](https://getbootstrap.com/) - Front-end component library
-- [Flask](http://flask.pocoo.org/) - Back-end framework
+-   [Vue.js](https://vuejs.org) - Front-end framework
+-   [Bootstrap](https://getbootstrap.com/) - Front-end component library
+-   [Flask](http://flask.pocoo.org/) - Back-end framework
 
 ## Contributors
 

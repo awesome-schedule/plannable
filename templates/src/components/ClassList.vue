@@ -168,6 +168,7 @@ export default Vue.extend({
     methods: {
         select(crs, idx) {
             this.$emit('update_course', crs.key, idx);
+            // note: adding a course to schedule.All cannot be detected by Vue. Must use forceUpdate to rerender component
             this.$forceUpdate();
         },
         collapse(key) {

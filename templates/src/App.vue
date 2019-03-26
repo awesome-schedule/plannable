@@ -562,6 +562,7 @@ export default Vue.extend({
 
             storageFields: [
                 // schedules
+                'currentSemester',
                 'currentSchedule',
                 'proposedSchedule',
                 'schedules',
@@ -891,8 +892,15 @@ export default Vue.extend({
             const input = event.target;
             const reader = new FileReader();
             reader.onload = () => {
-                this.selectSemester(this.semesters.length - 1);
                 localStorage.setItem(this.currentSemester.id, reader.result);
+                const raw_data = JSON.parse(reader.result);
+                const semester = raw_data['currentSemester'];
+                for (let i = 0; i < this.semesters.length; i++) {
+                    if (this.semesters[i].id == semester.id) {
+                        this.selectSemester(i, raw_data);
+                        break;
+                    }
+                }
                 this.saveStatus();
                 console.log(this.currentSemester);
             };

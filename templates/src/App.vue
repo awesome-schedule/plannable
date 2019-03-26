@@ -129,7 +129,7 @@
                         type="button"
                         style="width:100%; border-radius: 0 !important"
                         @click="
-                            if (schedules !== null && schedules.length > 0) {
+                            if (schedules.length > 0) {
                                 if (generated) currentSchedule = proposedSchedule;
                                 else switchPage(currentScheduleIndex);
                                 generated = !generated;
@@ -388,7 +388,7 @@
                         <div class="row justify-content-center">
                             <div class="col">
                                 <Pagination
-                                    v-if="generated && schedules !== null && schedules.length > 0"
+                                    v-if="generated && schedules.length > 0"
                                     :indices="scheduleIndices"
                                     @switch_page="switchPage"
                                 ></Pagination>
@@ -450,7 +450,7 @@ export default Vue.extend({
         ClassListModal
     },
     data() {
-        return {
+        const defaultData = {
             api:
                 window.location.host.indexOf('localhost') === -1 &&
                 window.location.host.indexOf('127.0.0.1') === -1
@@ -485,7 +485,7 @@ export default Vue.extend({
             /**
              * @type {RawSchedule[]}
              */
-            schedules: null,
+            schedules: [],
             isEntering: false,
             /***
              * sideBar: show left sidebar when true, and hide when false
@@ -536,9 +536,11 @@ export default Vue.extend({
             storageVersion: 2,
 
             storageFields: [
+                // schedules
                 'currentSchedule',
                 'proposedSchedule',
                 'schedules',
+                // settings
                 'allowWaitList',
                 'allowClosed',
                 'showTime',
@@ -550,6 +552,8 @@ export default Vue.extend({
                 'storageVersion'
             ]
         };
+        defaultData.defaultData = defaultData;
+        return defaultData;
     },
     computed: {
         /**
@@ -685,12 +689,9 @@ export default Vue.extend({
             const data = localStorage.getItem(this.currentSemester.id);
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
             const defaultCallback = () => {
-                this.schedules = null;
-                this.currentSchedule = new Schedule();
-                this.proposedSchedule = new Schedule();
-                this.generated = false;
-                this.currentScheduleIndex = 0;
-                this.currentCourses = [];
+                for (const field of this.storageFields) {
+                    this[field] = this.defaultData[field];
+                }
                 this.saveAllRecords();
                 this.saveStatus();
             };
@@ -715,10 +716,6 @@ export default Vue.extend({
             // things to do after allRecord is loaded
             const callback = () => {
                 this.parseLocalData(raw_data);
-                if (this.schedules !== null && this.schedules.length > 0) {
-                    this.generated = true;
-                }
-                this.currentCourses = this.getCurrentCourses();
             };
             if (temp === null) {
                 // in this case, we only need to update allRecords. Save a set of fresh data
@@ -772,7 +769,6 @@ export default Vue.extend({
             event.target.value = '';
             this.getClass(null);
             this.currentCourses = this.getCurrentCourses();
-            this.$forceUpdate();
         },
         generateSchedules() {
             const constraintStatus = [];
@@ -834,6 +830,10 @@ export default Vue.extend({
                 else if (raw_data[field] !== undefined && raw_data[field] !== null)
                     this[field] = raw_data[field];
             }
+            if (this.schedules.length > 0) {
+                this.generated = true;
+            }
+            this.currentCourses = this.getCurrentCourses();
         },
         removeATimeConstraint(n) {
             this.$set(this.timeSlots, n, undefined);

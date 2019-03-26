@@ -92,7 +92,7 @@
                 <div
                     v-for="(sec, idx) in crs.section"
                     :id="crs.key"
-                    :key="sec"
+                    :key="sec + idx"
                     class="list-group collapse multi-collapse"
                     :class="{ show: isEntering && expandOnEntering }"
                 >

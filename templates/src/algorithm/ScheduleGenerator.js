@@ -115,7 +115,7 @@ class ScheduleGenerator {
         classList.sort((a, b) => a.length - b.length);
         const result = this.createSchedule(classList);
         // console.log(result.finalTable.toArray());
-        return result.sort();
+        return result;
     }
 
     /**

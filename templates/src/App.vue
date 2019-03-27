@@ -61,6 +61,7 @@
             </div>
             <div
                 v-if="isEntering && showSelectClass"
+                title="collapse searching results"
                 class="side-button mb-4"
                 @click="closeClassList"
             >
@@ -139,15 +140,15 @@
                         @trigger-classlist-modal="showClassListModal"
                         @preview="preview"
                     ></ClassList>
-                    <div>
+                    <div class="btn-group mt-3" role="group" style="width:100%">
                         <button
                             type="button"
-                            class="btn btn-success mt-2"
+                            class="btn btn-outline-info"
                             @click="generateSchedules"
                         >
                             Submit
                         </button>
-                        <button class="btn btn-warning mt-2 ml-1" @click="clear">
+                        <button class="btn btn-outline-info" @click="clear">
                             Clean All
                         </button>
                     </div>
@@ -359,17 +360,6 @@
             </button>
             <ul class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">
-                    <a
-                        class="btn btn-outline-dark"
-                        style="width:100%"
-                        :href="downloadURL"
-                        download="schedule.json"
-                        @click="saveToJson"
-                        >Export
-                    </a>
-                    <br />
-                </li>
-                <li class="list-group-item">
                     <div class="custom-file">
                         <input
                             id="customFile"
@@ -382,16 +372,27 @@
                         <label class="custom-file-label" for="customFile">Choose file</label>
                     </div>
                 </li>
+                <li class="list-group-item">
+                    <a
+                        class="btn btn-outline-dark"
+                        style="width:100%"
+                        :href="downloadURL"
+                        download="schedule.json"
+                        @click="saveToJson"
+                        >Export
+                    </a>
+                    <br />
+                </li>
                 <li class="list-group-item"></li>
             </ul>
         </nav>
 
-        <transition name="fade" style="width:100%;margin-left:${scheduleLeft}vw">
+        <transition name="fade">
             <div
                 v-if="errMsg.length > 0"
                 class="alert alert-danger"
                 role="alert"
-                style="width:94%;margin-left:3%;"
+                :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`"
             >
                 {{ errMsg }}
                 <button

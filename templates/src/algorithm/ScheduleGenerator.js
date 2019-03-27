@@ -134,6 +134,7 @@ class ScheduleGenerator {
         let timeTable = new Array();
         const finalTable = new ScheduleEvaluator();
         let exhausted = false;
+        // eslint-disable-next-line
         while (true) {
             if (classNum >= classList.length) {
                 finalTable.add(timeTable);

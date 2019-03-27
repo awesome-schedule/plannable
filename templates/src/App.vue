@@ -7,27 +7,6 @@
             :course="classListModalCourse"
         ></ClassListModal>
 
-        <transition name="fade" style="width:100%">
-            <div
-                v-if="errMsg.length > 0"
-                class="alert alert-danger"
-                role="alert"
-                style="width:94%;margin-left:3%;"
-            >
-                {{ errMsg }}
-                <button
-                    type="button"
-                    class="close"
-                    aria-label="Close"
-                    style="align:center"
-                    role="button"
-                    @click="errMsg = ''"
-                >
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        </transition>
-
         <nav
             class="d-none d-md-block bg-light button-bar"
             :style="`width:3vw;max-height:${navHeight}`"
@@ -440,6 +419,27 @@
                 <li class="list-group-item"></li>
             </ul>
         </nav>
+
+        <transition name="fade" style="width:100%;margin-left:${scheduleLeft}vw">
+            <div
+                v-if="errMsg.length > 0"
+                class="alert alert-danger"
+                role="alert"
+                style="width:94%;margin-left:3%;"
+            >
+                {{ errMsg }}
+                <button
+                    type="button"
+                    class="close"
+                    aria-label="Close"
+                    style="align:center"
+                    role="button"
+                    @click="errMsg = ''"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        </transition>
 
         <table :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
             <tr>
@@ -902,6 +902,7 @@ export default Vue.extend({
             if (this.schedules.length > 0) {
                 this.generated = true;
             }
+            console.log(this.currentSchedule);
             this.currentCourses = this.getCurrentCourses();
         },
         removeATimeConstraint(n) {

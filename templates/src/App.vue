@@ -936,18 +936,22 @@ export default Vue.extend({
         onUploadJson(event) {
             const input = event.target;
             const reader = new FileReader();
-            reader.onload = () => {
-                localStorage.setItem(this.currentSemester.id, reader.result);
-                const raw_data = JSON.parse(reader.result);
-                const semester = raw_data['currentSemester'];
-                for (let i = 0; i < this.semesters.length; i++) {
-                    if (this.semesters[i].id == semester.id) {
-                        this.selectSemester(i, raw_data);
-                        break;
+            try {
+                reader.onload = () => {
+                    localStorage.setItem(this.currentSemester.id, reader.result);
+                    const raw_data = JSON.parse(reader.result);
+                    const semester = raw_data['currentSemester'];
+                    for (let i = 0; i < this.semesters.length; i++) {
+                        if (this.semesters[i].id == semester.id) {
+                            this.selectSemester(i, raw_data);
+                            break;
+                        }
                     }
-                }
-            };
-            reader.readAsText(input.files[0]);
+                };
+                reader.readAsText(input.files[0]);
+            } catch (error) {
+                this.errMsg = error;
+            }
         },
         saveToJson() {
             const json = localStorage.getItem(this.currentSemester.id);

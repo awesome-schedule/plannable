@@ -1,14 +1,14 @@
 <template>
-    <div id="app" style="width:100%">
+    <div id="app" style="width:100%" @change="onDocChange">
         <modal id="modal" :course="modalCourse"></modal>
         <ClassListModal
             v-if="classListModalCourse !== null"
             id="class-list-modal"
             :course="classListModalCourse"
         ></ClassListModal>
-
+        <!-- Tab Icons Start (Leftmost bar) -->
         <nav
-            class="d-none d-md-block bg-light button-bar"
+            class="d-none d-md-block bg-light tab-bar"
             :style="`width:3vw;max-height:${navHeight}`"
         >
             <div
@@ -67,13 +67,13 @@
                 <i class="fas fa-caret-square-up"></i>
             </div>
         </nav>
+        <!-- Tab Icons End (Leftmost bar) -->
 
         <nav v-if="sideBar && showSelectClass" class="d-none d-md-block bg-light sidebar">
             <div class="dropdown" style="">
                 <button
                     id="semester"
-                    class="btn btn-primary mt-4 mx-auto"
-                    style="width: 100%; margin-top: 0 !important; border-radius:0 !important"
+                    class="btn btn-primary nav-btn mt-0"
                     type="button"
                     data-toggle="dropdown"
                 >
@@ -96,7 +96,6 @@
                     </a>
                 </div>
             </div>
-            <!--input title-->
             <div ref="enteringCardTop" class="input-group mt-2">
                 <input
                     type="text"
@@ -111,9 +110,7 @@
             <div v-if="!isEntering">
                 <div ref="staticCardTop" class="mt-3">
                     <button
-                        class="btn btn-primary"
-                        type="button"
-                        style="width:100%; border-radius: 0 !important"
+                        class="btn btn-primary nav-btn"
                         @click="
                             if (schedules.length > 0) {
                                 if (generated) currentSchedule = proposedSchedule;
@@ -143,7 +140,6 @@
                         @preview="preview"
                     ></ClassList>
                     <div>
-                        <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
                         <button
                             type="button"
                             class="btn btn-success mt-2"
@@ -155,7 +151,6 @@
                             Clean All
                         </button>
                     </div>
-                    <!-- </div> -->
                 </div>
             </div>
             <div v-if="isEntering" ref="classList" class="card card-body p-1">
@@ -172,7 +167,7 @@
                 ></ClassList>
             </div>
             <ul class="list-group list-group-flush" style="width:99%">
-                <button class="btn btn-primary mt-3" style="border-radius:0 !important">
+                <button class="btn btn-primary nav-btn mt-3">
                     Semester Data
                 </button>
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
@@ -181,18 +176,11 @@
         </nav>
 
         <nav v-if="sideBar && showFilter" class="d-none d-md-block bg-light sidebar">
-            <button class="btn btn-primary" style="border-radius: 0 !important;width:100%">
+            <button class="btn btn-primary nav-btn">
                 Filters
             </button>
             <ul class="list-group list-group-flush" style="width:99%;">
-                <li
-                    v-for="(value, n) in timeSlots"
-                    v-if="value !== undefined"
-                    :key="n"
-                    class="list-group-item"
-                    style="padding:2%"
-                >
-                    <!-- @input="timeSlots[n][0] = $event.target.value" -->
+                <li v-for="(value, n) in timeSlots" :key="n" class="list-group-item p-1">
                     <table style="width:100%">
                         <tr>
                             <td>
@@ -219,10 +207,11 @@
                                     aria-label="Close"
                                     role="button"
                                     style="font-size:2rem"
+                                    tabindex="-1"
                                 >
-                                    <span aria-hidden="true" @click="removeATimeConstraint(n)"
-                                        >&times;</span
-                                    >
+                                    <span aria-hidden="true" @click="removeTimeSlot(n)"
+                                        >&times;
+                                    </span>
                                 </button>
                             </td>
                         </tr>
@@ -261,7 +250,7 @@
 
         <nav v-if="sideBar && showSetting" class="d-none d-md-block bg-light sidebar">
             <div class="sidebar-sticky">
-                <button class="btn btn-primary" style="border-radius:0 !important;width: 100%">
+                <button class="btn btn-primary nav-btn">
                     Schedule Display settings
                 </button>
                 <ul class="list-group list-group-flush" style="width:99%">
@@ -297,7 +286,7 @@
                     </div>
                 </ul>
                 <!-- </li> -->
-                <button class="btn btn-primary" style="border-radius:0 !important;width: 100%">
+                <button class="btn btn-primary nav-btn">
                     Display Options
                 </button>
                 <ul class="list-group list-group-flush" style="width:99%">
@@ -365,7 +354,7 @@
         </nav>
 
         <nav v-if="sideBar && showExport" class="d-none d-md-block bg-light sidebar">
-            <button class="btn btn-primary" style="width:100%;border-radius: 0 !important">
+            <button class="btn btn-primary nav-btn">
                 Import/Export Schedule
             </button>
             <ul class="list-group list-group-flush" style="width:99%">
@@ -521,32 +510,34 @@ export default Vue.extend({
              * @type {RawSchedule[]}
              */
             schedules: [],
-            isEntering: false,
+
+            // sidebar display status
             /***
-             * sideBar: show left sidebar when true, and hide when false
+             * show left sidebar when true, and hide when false
              */
             sideBar: true,
             /**
-             * showSelectClass: when true, show the select-class sidebar if 'sideBar' is also true
+             * when true, show the select-class sidebar if 'sideBar' is also true
              */
             showSelectClass: true,
             /**
-             * showFilter: when true, show the filter sidebar if 'sideBar' is also true
+             * when true, show the filter sidebar if 'sideBar' is also true
              */
             showFilter: false,
             /**
-             * showSetting: when true, show the settings sidebar if 'sideBar' is also true
+             * when true, show the settings sidebar if 'sideBar' is also true
              */
             showSetting: false,
             showExport: false,
+
+            // autocompletion related fields
+            isEntering: false,
             /**
              * @type {Course[]}
              */
             inputCourses: null,
-            errMsg: '',
-            allowWaitlist: true,
-            allowClosed: true,
-            cache: true,
+
+            // modal object binding
             /**
              * @type {Course}
              */
@@ -557,20 +548,22 @@ export default Vue.extend({
              */
             classListModalCourse: null,
 
-            // options
+            // input options
             showTime: true,
             showRoom: true,
             showInstructor: false,
             showClasslistTitle: false,
             fullHeight: 45,
             partialHeight: 35,
-            timeSlots: {},
-            numberOfTimeSlots: 0,
+            timeSlots: [],
             navHeight: 500,
+            allowWaitlist: true,
+            allowClosed: true,
 
             downloadURL: '',
-            storageVersion: 2,
 
+            // storage related fields
+            storageVersion: 2,
             storageFields: [
                 // schedules
                 'currentSemester',
@@ -583,11 +576,16 @@ export default Vue.extend({
                 'showTime',
                 'showRoom',
                 'showInstructor',
+                'showClasslistTitle',
                 'fullHeight',
                 'partialHeight',
                 'timeSlots',
                 'storageVersion'
-            ]
+            ],
+
+            // other
+            errMsg: '',
+            cache: true
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -617,7 +615,8 @@ export default Vue.extend({
             return this.currentSchedule.totalCredit;
         }
     },
-    mounted() {
+    watch: {},
+    created() {
         axios.get(`${this.api}/semesters`).then(res => {
             this.semesters = res.data;
             // get the latest semester
@@ -627,6 +626,9 @@ export default Vue.extend({
         this.navHeight = document.documentElement.clientHeight;
     },
     methods: {
+        onDocChange() {
+            console.log('Document changed');
+        },
         getCurrentCourses() {
             const courses = [];
             for (const key in this.currentSchedule.All)
@@ -831,9 +833,13 @@ export default Vue.extend({
              * @type {RawSchedule}
              */
             const translated_raw = [];
+            const timeFilters = this.computeFilter();
+
+            // null means there's an error processing time filters. Don't continue if that's the case
+            if (timeFilters === null) return;
             try {
                 const table = generator.getSchedules(this.currentSchedule, {
-                    timeSlots: this.computeFilter(),
+                    timeSlots: timeFilters,
                     status: constraintStatus
                 });
                 table.sort();
@@ -884,21 +890,22 @@ export default Vue.extend({
             console.log(this.currentSchedule);
             this.currentCourses = this.getCurrentCourses();
         },
-        removeATimeConstraint(n) {
-            this.$set(this.timeSlots, n, undefined);
+        removeTimeSlot(n) {
+            this.timeSlots.splice(n, 1);
         },
         addTimeSlot() {
-            this.$set(this.timeSlots, this.numberOfTimeSlots, {});
-            this.numberOfTimeSlots++;
+            this.timeSlots.push(['', '']);
         },
+        /**
+         * Preprocess the time filters so that they are of the correct format
+         * returns null on parsing error
+         * @returns {[number, number][]}
+         */
         computeFilter() {
             const timeSlotsRecord = [];
-            for (const i in this.timeSlots) {
-                if (this.timeSlots[i] === undefined) {
-                    continue;
-                }
-                const startTime = this.timeSlots[i][0].split(':');
-                const endTime = this.timeSlots[i][1].split(':');
+            for (const time of this.timeSlots) {
+                const startTime = time[0].split(':');
+                const endTime = time[1].split(':');
                 if (
                     isNaN(startTime[0]) ||
                     isNaN(startTime[1]) ||
@@ -906,6 +913,7 @@ export default Vue.extend({
                     isNaN(endTime[1])
                 ) {
                     this.errMsg = 'Illegal time input.';
+                    return null;
                 }
                 const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
                 const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
@@ -979,7 +987,7 @@ export default Vue.extend({
     width: 19vw;
 }
 
-.button-bar {
+.tab-bar {
     position: fixed;
     top: 0;
     bottom: 0;
@@ -987,6 +995,12 @@ export default Vue.extend({
     z-index: 100; /* Behind the navbar */
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+/* for tab icons in navigation bar */
+.nav-btn {
+    border-radius: 0 !important;
+    width: 100%;
 }
 
 .sidebar-sticky {

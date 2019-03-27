@@ -20,19 +20,32 @@
                             </td>
                             <td>
                                 <h6 class="mb-1">
-                                    {{ crs.department }} {{ crs.number }} {{ crs.type }}
-                                    <span style="font-size:0.7rem">
+                                    <span
+                                        data-toggle="collapse"
+                                        :data-target="`#${crs.key}`"
+                                        style="cursor: pointer"
+                                        @click="collapse(crs.key)"
+                                        >{{ crs.department }} {{ crs.number }} {{ crs.type }}
+                                    </span>
+                                    <span class="ml-1" style="font-size:0.8rem">
                                         <i
                                             data-toggle="modal"
                                             data-target="#class-list-modal"
                                             class="fas fa-info-circle"
                                             title="View class description"
+                                            style="cursor: pointer"
                                             @click="$emit('trigger-classlist-modal', crs)"
                                         ></i>
                                     </span>
                                 </h6>
 
-                                <p v-if="showClasslistTitle" style="font-size: 0.85rem; margin: 0">
+                                <p
+                                    v-if="showClasslistTitle || isEntering"
+                                    style="font-size: 0.85rem; margin: 0; cursor: pointer"
+                                    data-toggle="collapse"
+                                    :data-target="`#${crs.key}`"
+                                    @click="collapse(crs.key)"
+                                >
                                     {{ crs.title }}
                                 </p>
                             </td>
@@ -162,9 +175,9 @@ export default Vue.extend({
         return {
             collapsed: {},
             expandOnEntering: false
+            // showClassTitleOnEntering: true
         };
     },
-    computed: {},
     methods: {
         select(crs, idx) {
             this.$emit('update_course', crs.key, idx);

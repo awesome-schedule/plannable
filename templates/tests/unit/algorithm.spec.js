@@ -20,15 +20,22 @@ describe('ScheduleGenerator Test', () => {
         expect('output').toBe('output');
         const schedule = new Schedule();
         schedule.All = {
-            ece26308: -1,
+            cs33304: -1,
+            cs33305: -1,
             ece23305: -1,
-            apma31105: -1,
-            phys24194: -1,
+            ece23308: [0],
             cs41025: -1,
-            cs47745: -1
+            cs47745: -1,
+            apma31105: -1,
+            phys24194: [3],
+            ece26308: -1
         };
         try {
-            generator.getSchedules(schedule);
+            const result = generator.getSchedules(schedule);
+            console.log(result.schedules[1].schedule);
+            // for (const i of result.schedules.schedule[0]) {
+            //     console.log(i);
+            // }
         } catch (e) {
             console.log(e);
         }

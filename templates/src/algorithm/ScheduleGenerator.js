@@ -39,8 +39,8 @@ class ScheduleGenerator {
      * Parse the **days** into desired format: **{[ string[], number[] ]}**
      * e.g. [ ["Mo","Tu"],[600,650] ]
      * concatenate with the **key** and push into the **classList** to form a 3D array
-     * e.g. [ [ ["span20205",["Mo","Tu"],[600,650]], ["span20205",["Th","Fr"],[720,770]] ],
-     *        [ ["cs21105"  ,["Mo","We"],[400,450]], ["cs21105"  ,["We","Fr"],[900,975]] ] ]
+     * e.g. [ [ ["span20205",["Mo","Tu"],[600,650],0], ["span20205",["Th","Fr"],[720,770],1] ],
+     *        [ ["cs21105"  ,["Mo","We"],[400,450],2], ["cs21105"  ,["We","Fr"],[900,975],3] ] ]
      * Pass the **ClassList** into the **createSchedule**
      * return a **FinalTable** Object
      * @param {import('../models/Schedule').default} schedule
@@ -112,10 +112,10 @@ class ScheduleGenerator {
             classList.push(classes);
             // console.log(classList);
         }
-
+        classList.sort((a, b) => a.length - b.length);
         const result = this.createSchedule(classList);
         // console.log(result.finalTable.toArray());
-        return result;
+        return result.sort();
     }
 
     /**
@@ -233,7 +233,8 @@ class ScheduleGenerator {
                 }
                 if (
                     (begin <= beginTime && beginTime <= end) ||
-                    (begin <= endTime && endTime <= end)
+                    (begin <= endTime && endTime <= end) ||
+                    (begin >= beginTime && end <= endTime)
                 ) {
                     return true;
                 }

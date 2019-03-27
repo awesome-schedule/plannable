@@ -97,19 +97,18 @@
                     </a>
                 </div>
             </div>
-            <div ref="enteringCardTop" class="input-group mt-2">
+            <div class="input-group mt-2">
                 <input
                     type="text"
                     class="form-control"
                     placeholder="Title/Number/Topic/Professor"
                     style="font-size: 10pt"
-                    aria-describedby="basic-addon1"
                     @input="getClass($event.target.value)"
                     @keyup.esc="closeClassList($event)"
                 />
             </div>
             <div v-if="!isEntering">
-                <div ref="staticCardTop" class="mt-3">
+                <div class="mt-3">
                     <button
                         class="btn btn-primary nav-btn"
                         @click="
@@ -128,7 +127,6 @@
                     </button>
                 </div>
                 <div id="currentSelectedClass" style="width:99%">
-                    <!-- <div class="card card-body p-1"> -->
                     <ClassList
                         :courses="currentCourses"
                         :schedule="currentSchedule"
@@ -389,19 +387,20 @@
 
         <transition name="fade">
             <div
-                v-if="errMsg.length > 0"
-                class="alert alert-danger"
+                v-if="noti.msg.length > 0"
+                class="alert mt-1 mb-0"
+                :class="`alert-${noti.class}`"
                 role="alert"
                 :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`"
             >
-                {{ errMsg }}
+                {{ noti.msg }}
                 <button
                     type="button"
                     class="close"
                     aria-label="Close"
                     style="align:center"
                     role="button"
-                    @click="errMsg = ''"
+                    @click="noti.clear()"
                 >
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -453,6 +452,7 @@ import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
 import axios from 'axios';
 import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
+import Notification from './models/Notification.js';
 
 /**
  * @typedef {{id: string, name: string}} Semester
@@ -556,6 +556,9 @@ export default Vue.extend({
             showClasslistTitle: false,
             fullHeight: 45,
             partialHeight: 35,
+            /**
+             * @type {[string, string][]}
+             */
             timeSlots: [],
             navHeight: 500,
             allowWaitlist: true,
@@ -585,6 +588,7 @@ export default Vue.extend({
             ],
 
             // other
+            noti: new Notification(),
             errMsg: '',
             cache: true
         };
@@ -628,7 +632,7 @@ export default Vue.extend({
     },
     methods: {
         onDocChange() {
-            console.log('Document changed');
+            this.saveStatus();
         },
         getCurrentCourses() {
             const courses = [];
@@ -674,16 +678,25 @@ export default Vue.extend({
         removeCourse(key) {
             this.currentSchedule.remove(key);
             this.currentCourses = this.getCurrentCourses();
-            this.saveStatus();
+            if (this.generated) {
+                this.noti.warn(`You're editing the generated schedule!`, 3);
+            } else {
+                this.saveStatus();
+            }
         },
         /**
+         * @see Schedule.update
          * @param {string} key
          * @param {number} section
          */
         updateCourse(key, section) {
             this.currentSchedule.update(key, section);
             this.currentCourses = this.getCurrentCourses();
-            this.saveStatus();
+            if (this.generated) {
+                this.noti.warn(`You're editing the generated schedule!`, 3);
+            } else {
+                this.saveStatus();
+            }
         },
         /**
          * @param {string} key
@@ -856,16 +869,18 @@ export default Vue.extend({
                 this.proposedSchedule = this.currentSchedule;
                 this.generated = true;
                 this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
+                this.noti.success('Schedules Generated!', 3);
             } catch (error) {
                 this.generated = false;
                 this.schedules = [];
-                this.errMsg = 'Bad constraint. Abort.';
+                this.noti.error('Bad constraint. Abort.');
             } finally {
                 this.currentCourses = this.getCurrentCourses();
                 this.saveStatus();
             }
         },
         saveStatus() {
+            console.time('saved in');
             const obj = { modified: new Date().toJSON() };
             for (const field of this.storageFields) {
                 // use toJSON method if it exists
@@ -874,6 +889,7 @@ export default Vue.extend({
                 else obj[field] = this[field];
             }
             localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
+            console.timeEnd('saved in');
         },
         /**
          * @param {Object<string, any>} raw_data
@@ -888,7 +904,6 @@ export default Vue.extend({
             if (this.schedules.length > 0) {
                 this.generated = true;
             }
-            console.log(this.currentSchedule);
             this.currentCourses = this.getCurrentCourses();
         },
         removeTimeSlot(n) {
@@ -913,7 +928,7 @@ export default Vue.extend({
                     isNaN(endTime[0]) ||
                     isNaN(endTime[1])
                 ) {
-                    this.errMsg = 'Illegal time input.';
+                    this.noti.error('Invalid time input.');
                     return null;
                 }
                 const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
@@ -939,7 +954,7 @@ export default Vue.extend({
                 };
                 reader.readAsText(input.files[0]);
             } catch (error) {
-                this.errMsg = error;
+                this.noti.error(error);
             }
         },
         saveToJson() {

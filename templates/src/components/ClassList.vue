@@ -9,9 +9,6 @@
                                 <button
                                     type="button"
                                     class="close"
-                                    aria-label="Close"
-                                    data-toggle="collapse"
-                                    :data-target="`#${crs.key}`"
                                     style="font-size:1.2rem"
                                     @click="collapse(crs.key)"
                                 >
@@ -20,11 +17,7 @@
                             </td>
                             <td>
                                 <h6 class="mb-1">
-                                    <span
-                                        data-toggle="collapse"
-                                        :data-target="`#${crs.key}`"
-                                        style="cursor: pointer"
-                                        @click="collapse(crs.key)"
+                                    <span style="cursor: pointer" @click="collapse(crs.key)"
                                         >{{ crs.department }} {{ crs.number }} {{ crs.type }}
                                     </span>
                                     <span class="ml-1" style="font-size:0.8rem">
@@ -42,8 +35,6 @@
                                 <p
                                     v-if="showClasslistTitle || isEntering"
                                     style="font-size: 0.85rem; margin: 0; cursor: pointer"
-                                    data-toggle="collapse"
-                                    :data-target="`#${crs.key}`"
                                     @click="collapse(crs.key)"
                                 >
                                     {{ crs.title }}
@@ -102,57 +93,64 @@
                         </div>
                     </div> -->
                 </div>
-                <div
-                    v-for="(sec, idx) in crs.section"
-                    :id="crs.key"
-                    :key="sec + idx"
-                    class="list-group collapse multi-collapse"
-                    :class="{ show: isEntering && expandOnEntering }"
-                >
-                    <a
-                        v-if="idx === 0"
-                        style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
-                        class="list-group-item list-group-item-action class-section"
-                        :class="{ active: schedule.All[crs.key] === -1 }"
-                        :title="
-                            schedule.All[crs.key] === -1 ? 'click to unselect' : 'click to select'
-                        "
-                        @click="select(crs, -1)"
-                        >Any Section
-                        <div v-if="schedule.All[crs.key] === -1" style="float:right;">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </a>
+                <transition name="smooth">
+                    <div v-show="expanded(crs) === 'fa-chevron-down'" class="trans">
+                        <div
+                            v-for="(sec, idx) in crs.section"
+                            :key="sec + idx"
+                            class="list-group"
+                            :class="{ show: isEntering && expandOnEntering }"
+                        >
+                            <a
+                                v-if="idx === 0"
+                                style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
+                                class="list-group-item list-group-item-action class-section"
+                                :class="{ active: schedule.All[crs.key] === -1 }"
+                                :title="
+                                    schedule.All[crs.key] === -1
+                                        ? 'click to unselect'
+                                        : 'click to select'
+                                "
+                                @click="select(crs, -1)"
+                                >Any Section
+                                <div v-if="schedule.All[crs.key] === -1" style="float:right;">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </a>
 
-                    <div
-                        class="list-group-item list-group-item-action class-section container-fluid"
-                        :class="{ active: isActive(crs.key, idx) }"
-                        :title="isActive(crs.key, idx) ? 'click to unselect' : 'click to select'"
-                        @click="select(crs, idx)"
-                        @mouseover="preview(crs.key, idx)"
-                        @mouseleave="removePreview()"
-                    >
-                        <div class="row no-gutters">
-                            <div class="col-md-auto mr-auto">
-                                <ul class="list-unstyled class-info">
-                                    <li>{{ sec }} {{ crs.days[idx] }}</li>
-                                    <li>{{ crs.topic[idx] }}</li>
-                                    <li>
-                                        {{ crs.instructor[idx].join(', ') }}
-                                        <!-- {{ crs.room[idx] }} -->
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col col-sm-1 align-self-center mr-1">
-                                <i
-                                    v-if="isActive(crs.key, idx)"
-                                    style="font-size: 0.85rem"
-                                    class="fas fa-check"
-                                ></i>
+                            <div
+                                class="list-group-item list-group-item-action class-section container-fluid"
+                                :class="{ active: isActive(crs.key, idx) }"
+                                :title="
+                                    isActive(crs.key, idx) ? 'click to unselect' : 'click to select'
+                                "
+                                @click="select(crs, idx)"
+                                @mouseover="preview(crs.key, idx)"
+                                @mouseleave="removePreview()"
+                            >
+                                <div class="row no-gutters">
+                                    <div class="col-md-auto mr-auto">
+                                        <ul class="list-unstyled class-info">
+                                            <li>{{ sec }} {{ crs.days[idx] }}</li>
+                                            <li>{{ crs.topic[idx] }}</li>
+                                            <li>
+                                                {{ crs.instructor[idx].join(', ') }}
+                                                <!-- {{ crs.room[idx] }} -->
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col col-sm-1 align-self-center mr-1">
+                                        <i
+                                            v-if="isActive(crs.key, idx)"
+                                            style="font-size: 0.85rem"
+                                            class="fas fa-check"
+                                        ></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </transition>
             </div>
         </div>
     </div>
@@ -210,6 +208,21 @@ export default Vue.extend({
 </script>
 
 <style scoped>
+.smooth-enter-to,
+.smooth-leave {
+    max-height: 100vh;
+}
+.smooth-enter-active,
+.smooth-leave-active {
+    transition: max-height 0.6s;
+}
+.smooth-enter,
+.smooth-leave-to {
+    max-height: 0;
+}
+.trans {
+    overflow: hidden;
+}
 .subtitle {
     font-size: 0.7rem;
     margin-top: 0;

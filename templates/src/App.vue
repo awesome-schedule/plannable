@@ -70,6 +70,7 @@
                 v-if="isEntering && showSelectClass"
                 style="font-size:1.8vw;margin-left:23%; display:block;"
                 class="side-button mt-2"
+                title="collapse searching results"
                 @click="closeClassList"
             >
                 <i class="fas fa-caret-square-up"></i>
@@ -159,18 +160,20 @@
                         @trigger-classlist-modal="showClassListModal"
                         @preview="preview"
                     ></ClassList>
-                    <div>
-                        <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
+                    <div class="btn-group mt-3" role="group" style="width:100%">
                         <button
                             type="button"
-                            class="btn btn-success mt-2"
+                            class="btn btn-outline-info"
                             @click="generateSchedules"
                         >
                             Submit
                         </button>
-                        <button class="btn btn-warning mt-2 ml-1" @click="clear">
+                        <button class="btn btn-outline-info" @click="clear">
                             Clean All
                         </button>
+                    </div>
+                    <div>
+                        <!-- <button class="btn btn-primary mt-3" v-on:click="cleanSchedules">Clean Schedule</button>&nbsp;&nbsp; -->
                     </div>
                     <!-- </div> -->
                 </div>
@@ -390,17 +393,6 @@
             </button>
             <ul class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">
-                    <a
-                        class="btn btn-outline-dark"
-                        style="width:100%"
-                        :href="downloadURL"
-                        download="schedule.json"
-                        @click="saveToJson"
-                        >Export
-                    </a>
-                    <br />
-                </li>
-                <li class="list-group-item">
                     <div class="custom-file">
                         <input
                             id="customFile"
@@ -413,16 +405,27 @@
                         <label class="custom-file-label" for="customFile">Choose file</label>
                     </div>
                 </li>
+                <li class="list-group-item">
+                    <a
+                        class="btn btn-outline-dark"
+                        style="width:100%"
+                        :href="downloadURL"
+                        download="schedule.json"
+                        @click="saveToJson"
+                        >Export
+                    </a>
+                    <br />
+                </li>
                 <li class="list-group-item"></li>
             </ul>
         </nav>
 
-        <transition name="fade" style="width:100%;margin-left:${scheduleLeft}vw">
+        <transition name="fade">
             <div
                 v-if="errMsg.length > 0"
                 class="alert alert-danger"
                 role="alert"
-                style="width:94%;margin-left:3%;"
+                :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`"
             >
                 {{ errMsg }}
                 <button
@@ -904,6 +907,7 @@ export default Vue.extend({
         },
         removeATimeConstraint(n) {
             this.$set(this.timeSlots, n, undefined);
+            console.log(n);
         },
         addTimeSlot() {
             this.$set(this.timeSlots, this.numberOfTimeSlots, {});
@@ -911,8 +915,12 @@ export default Vue.extend({
         },
         computeFilter() {
             const timeSlotsRecord = [];
+            this.errMsg = '';
             for (const i in this.timeSlots) {
-                if (this.timeSlots[i] === undefined) {
+                if (
+                    this.timeSlots[i] === undefined ||
+                    Object.keys(this.timeSlots[i]).length === 0
+                ) {
                     continue;
                 }
                 const startTime = this.timeSlots[i][0].split(':');

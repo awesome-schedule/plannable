@@ -537,6 +537,9 @@ export default Vue.extend({
              * @type {Schedule}
              */
             proposedSchedule: new Schedule(),
+            /**
+             * indicates whether the currently showing schedule is the generated schedule
+             */
             generated: false,
             /**
              * @type {Course[]}
@@ -581,6 +584,8 @@ export default Vue.extend({
              * @type {CourseRecord}
              */
             classListModalCourse: null,
+
+            // options
             showTime: true,
             showRoom: true,
             showInstructor: true,
@@ -590,10 +595,8 @@ export default Vue.extend({
             timeSlots: {},
             numberOfTimeSlots: 0,
             navHeight: 500,
-            timeSlotsRecord: [],
 
             downloadURL: '',
-
             storageVersion: 2,
 
             storageFields: [
@@ -729,6 +732,11 @@ export default Vue.extend({
                 this.inputCourses = null;
                 return;
             }
+            // if current schedule is displayed, switch to proposed schedule
+            if (this.generated) {
+                this.generated = !this.generated;
+                this.currentSchedule = this.proposedSchedule;
+            }
             this.inputCourses = this.allRecords.search(query);
             this.isEntering = true;
         },
@@ -840,17 +848,17 @@ export default Vue.extend({
                 this.currentSchedule = this.proposedSchedule;
             }
             const generator = new ScheduleGenerator(this.allRecords);
+            /**
+             * @type {RawSchedule}
+             */
+            const translated_raw = [];
             try {
                 const table = generator.getSchedules(this.currentSchedule, {
-                    timeSlots: this.timeSlotsRecord,
+                    timeSlots: this.computeFilter(),
                     status: constraintStatus
                 });
                 table.sort();
 
-                /**
-                 * @type {RawSchedule}
-                 */
-                const translated_raw = [];
                 for (const rd of table.schedules.slice(0, 100)) {
                     const raw_schedule = [];
                     for (const raw_course of rd.schedule) {
@@ -862,10 +870,13 @@ export default Vue.extend({
                 this.proposedSchedule = this.currentSchedule;
                 this.generated = true;
                 this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
+            } catch (error) {
+                this.generated = false;
+                this.schedules = [];
+                this.errMsg = 'Bad constraint. Abort.';
+            } finally {
                 this.currentCourses = this.getCurrentCourses();
                 this.saveStatus();
-            } catch (error) {
-                this.errMsg = 'Bad constraint. Abort.';
             }
         },
         saveStatus() {
@@ -900,7 +911,8 @@ export default Vue.extend({
             this.$set(this.timeSlots, this.numberOfTimeSlots, {});
             this.numberOfTimeSlots++;
         },
-        addFilter() {
+        computeFilter() {
+            const timeSlotsRecord = [];
             for (const i in this.timeSlots) {
                 if (this.timeSlots[i] === undefined) {
                     continue;
@@ -917,8 +929,9 @@ export default Vue.extend({
                 }
                 const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
                 const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
-                this.timeSlotsRecord.push([startMin, endMin]);
+                timeSlotsRecord.push([startMin, endMin]);
             }
+            return timeSlotsRecord;
         },
         onUploadJson(event) {
             const input = event.target;

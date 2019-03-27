@@ -93,10 +93,14 @@ class AllRecords {
 
                 for (let i = 0; i < course[3].length; i++) {
                     const topic = course[10][i];
-                    if (topic.toLowerCase().indexOf(query) !== -1) topicMatchIdx.push(i);
+                    if (topic.toLowerCase().indexOf(query) !== -1) {
+                        topicMatchIdx.push(i);
+                        continue;
+                    }
                     const profs = course[6][i];
                     for (const prof of profs) {
-                        if (prof.toLowerCase().startsWith(query)) {
+                        // TODO: better prof name match
+                        if (prof.indexOf(query) !== -1) {
                             profMatchIdx.push(i);
                             break;
                         }

@@ -45,7 +45,7 @@ class ScheduleGenerator {
      * return a **FinalTable** Object
      * @param {import('../models/Schedule').default} schedule
      * @param {Constraint} constraint
-     * @return {FinalTable}
+     * @return {ScheduleEvaluator}
      */
     getSchedules(schedule, constraint = ScheduleGenerator.constraintDefaults) {
         this.validateConstraints(constraint);

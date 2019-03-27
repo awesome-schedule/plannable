@@ -3,17 +3,19 @@
  */
 
 const path = require('path');
-const xlsx = require('node-xlsx');
+const parse = require('csv-parse/lib/sync');
+const fs = require('fs');
 
 const data_path = path.join(
     path.dirname(path.dirname(path.dirname(__dirname))),
-    'new_sis',
+    'backend',
     'data',
-    'CS1192Data.xlsx'
+    'CS1198Data.csv'
 );
-
-console.log(`Parsing data from ${data_path}`);
-const raw_data = xlsx.parse(data_path)[0].data;
+const raw_data = parse(fs.readFileSync(data_path).toString(), {
+    columns: false,
+    skip_empty_lines: true
+});
 
 const TYPES = {
     Clinical: 0,
@@ -38,17 +40,22 @@ const STATUSES = {
  * @type {Object<string, any[][]>}
  */
 const DICT = {};
-
-for (let i = 0; i < raw_data.length; i++) {
+console.log(raw_data[0]);
+for (let i = 1; i < raw_data.length; i++) {
     const row = raw_data[i];
-
+    row[0] = Number(row[0]);
+    row[2] = Number(row[2]);
     row[4] = TYPES[row[4]];
     row[11] = STATUSES[row[11]];
 
-    const category = row[1].toLowerCase();
+    for (let i = 12; i < 15; i++) {
+        row[i] = Number(row[i]);
+    }
+
+    const category = row[1];
     const number = row[2];
     const lecture = row[4];
-    const key = category + number + lecture;
+    const key = (category + number + lecture).toLowerCase();
     if (DICT[key]) {
         DICT[key].push(row);
     } else {
@@ -80,5 +87,7 @@ for (const k in DICT) {
         v[0][15]
     ];
 }
+
+// console.log(RECORDS_DICT);
 
 export default RECORDS_DICT;

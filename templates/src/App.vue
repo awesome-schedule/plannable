@@ -276,9 +276,6 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item" @click="addFilter">
-                    <!-- Does nothing -->
-                </li>
             </ul>
         </nav>
 

@@ -3,13 +3,15 @@ import data from './data.js';
 import { ScheduleGenerator } from '../../src/algorithm/ScheduleGenerator';
 import Schedule from '../../src/models/Schedule';
 
-const allRecords = new AllRecords(data);
+const allRecords = new AllRecords({ id: '1198', name: 'Fall 2019' }, data);
 
 describe('ScheduleGenerator Test', () => {
     it('Data Validation', () => {
         expect(typeof data).toBe('object');
-        const course = allRecords.getRecord('aas10201');
-        expect(course.id[0]).toBe(10309);
+        const course = allRecords.getRecord('cs11105');
+        expect(typeof course.id[0]).toBe('number');
+        // console.log(course);
+        // // expect(course.id[0]).toBe(10309);
     });
 
     it('ScheduleGenerator', () => {
@@ -18,7 +20,6 @@ describe('ScheduleGenerator Test', () => {
         expect('output').toBe('output');
         const schedule = new Schedule();
         schedule.All = {
-            span20205: -1,
             cs21105: -1,
             cs21104: -1,
             cs21025: -1,

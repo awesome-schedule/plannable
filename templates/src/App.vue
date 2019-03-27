@@ -12,7 +12,7 @@
             :style="`width:3vw;max-height:${navHeight}`"
         >
             <div
-                class="side-button mt-0 mb-4"
+                class="tab-icon mt-0 mb-4"
                 title="Select Classes"
                 @click="
                     showSelectClass = !showSelectClass;
@@ -24,7 +24,7 @@
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
-                class="side-button mb-4"
+                class="tab-icon mb-4"
                 title="Filters"
                 @click="
                     showFilter = !showFilter;
@@ -36,7 +36,7 @@
                 <i class="fas fa-filter"></i>
             </div>
             <div
-                class="side-button mb-4"
+                class="tab-icon mb-4"
                 title="Display Settings"
                 @click="
                     showSetting = !showSetting;
@@ -48,7 +48,7 @@
                 <i class="fas fa-cog"></i>
             </div>
             <div
-                class="side-button mb-4"
+                class="tab-icon mb-4"
                 title="Import/Export Schedule"
                 @click="
                     showExport = !showExport;
@@ -62,7 +62,7 @@
             <div
                 v-if="isEntering && showSelectClass"
                 title="collapse searching results"
-                class="side-button mb-4"
+                class="tab-icon mb-4"
                 @click="closeClassList"
             >
                 <i class="fas fa-caret-square-up"></i>
@@ -248,108 +248,102 @@
         </nav>
 
         <nav v-if="sideBar && showSetting" class="d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
-                <button class="btn btn-primary nav-btn">
-                    Schedule Display settings
-                </button>
-                <ul class="list-group list-group-flush" style="width:99%">
-                    <!-- <li class="list-group-item p-0"> -->
-                    <div class="input-group mt-3 mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Grid Height</span>
-                        </div>
-                        <input
-                            v-model="fullHeight"
-                            type="number"
-                            class="form-control"
-                            @input="saveStatus()"
-                        />
-                        <div class="input-group-append">
-                            <span class="input-group-text">px</span>
-                        </div>
+            <button class="btn btn-primary nav-btn">
+                Schedule Display settings
+            </button>
+            <ul class="list-group list-group-flush" style="width:99%">
+                <!-- <li class="list-group-item p-0"> -->
+                <div class="input-group mt-3 mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Grid Height</span>
                     </div>
+                    <input
+                        v-model="fullHeight"
+                        type="number"
+                        class="form-control"
+                        @input="saveStatus()"
+                    />
+                    <div class="input-group-append">
+                        <span class="input-group-text">px</span>
+                    </div>
+                </div>
 
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Class Height</span>
-                        </div>
-                        <input
-                            v-model="partialHeight"
-                            type="number"
-                            class="form-control"
-                            @input="saveStatus()"
-                        />
-                        <div class="input-group-append">
-                            <span class="input-group-text">px</span>
-                        </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Class Height</span>
                     </div>
-                </ul>
-                <!-- </li> -->
-                <button class="btn btn-primary nav-btn">
-                    Display Options
-                </button>
-                <ul class="list-group list-group-flush" style="width:99%">
-                    <li class="list-group-item">Course Display</li>
-                    <li class="list-group-item">
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="displayTime"
-                                v-model="showTime"
-                                type="checkbox"
-                                class="custom-control-input"
-                            />
-                            <label for="displayTime" class="custom-control-label">
-                                Show Time
-                            </label>
-                        </div>
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="displayRoom"
-                                v-model="showRoom"
-                                type="checkbox"
-                                class="custom-control-input"
-                            />
-                            <label for="displayRoom" class="custom-control-label">
-                                Show Room
-                            </label>
-                        </div>
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="displayInstructor"
-                                v-model="showInstructor"
-                                type="checkbox"
-                                class="custom-control-input"
-                            />
-                            <label for="displayInstructor" class="custom-control-label">
-                                Show instructor
-                            </label>
-                        </div>
-                    </li>
-                    <li class="list-group-item">Class List Display</li>
-                    <li class="list-group-item">
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="displayClasslistTitle"
-                                v-model="showClasslistTitle"
-                                type="checkbox"
-                                class="custom-control-input"
-                            />
-                            <label for="displayClasslistTitle" class="custom-control-label">
-                                Show title on class list
-                            </label>
-                        </div>
-                    </li>
-                    <li class="list-group-item">
-                        <button
-                            class="btn btn-outline-danger"
-                            style="width: 100%"
-                            @click="clearCache"
-                        >
-                            Reset All and Clean
-                        </button>
-                    </li>
-                </ul>
-            </div>
+                    <input
+                        v-model="partialHeight"
+                        type="number"
+                        class="form-control"
+                        @input="saveStatus()"
+                    />
+                    <div class="input-group-append">
+                        <span class="input-group-text">px</span>
+                    </div>
+                </div>
+            </ul>
+            <!-- </li> -->
+            <button class="btn btn-primary nav-btn">
+                Display Options
+            </button>
+            <ul class="list-group list-group-flush" style="width:99%">
+                <li class="list-group-item">Course Display</li>
+                <li class="list-group-item">
+                    <div class="custom-control custom-checkbox">
+                        <input
+                            id="displayTime"
+                            v-model="showTime"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayTime" class="custom-control-label">
+                            Show Time
+                        </label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input
+                            id="displayRoom"
+                            v-model="showRoom"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayRoom" class="custom-control-label">
+                            Show Room
+                        </label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input
+                            id="displayInstructor"
+                            v-model="showInstructor"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayInstructor" class="custom-control-label">
+                            Show instructor
+                        </label>
+                    </div>
+                </li>
+                <li class="list-group-item">Class List Display</li>
+                <li class="list-group-item">
+                    <div class="custom-control custom-checkbox">
+                        <input
+                            id="displayClasslistTitle"
+                            v-model="showClasslistTitle"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayClasslistTitle" class="custom-control-label">
+                            Show title on class list
+                        </label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
+                        Reset All and Clean
+                    </button>
+                </li>
+            </ul>
         </nav>
 
         <nav v-if="sideBar && showExport" class="d-none d-md-block bg-light sidebar">
@@ -560,7 +554,6 @@ export default Vue.extend({
              * @type {[string, string][]}
              */
             timeSlots: [],
-            navHeight: 500,
             allowWaitlist: true,
             allowClosed: true,
 
@@ -589,8 +582,8 @@ export default Vue.extend({
 
             // other
             noti: new Notification(),
-            errMsg: '',
-            cache: true
+            cache: true,
+            navHeight: 500
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -979,15 +972,15 @@ export default Vue.extend({
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
     opacity: 0;
 }
-.side-button {
+.tab-icon {
     font-size: 1.8vw;
     margin-left: 20%;
     color: #5e5e5e;
 }
-.side-button:hover {
+.tab-icon:hover {
     color: #3e3e3e;
 }
-.side-button:active {
+.tab-icon:active {
     color: #bbbbbb;
 }
 
@@ -1016,26 +1009,6 @@ export default Vue.extend({
 /* for tab icons in navigation bar */
 .nav-btn {
     border-radius: 0 !important;
-    width: 100%;
-}
-
-.sidebar-sticky {
-    position: relative;
-    top: 0;
-    height: calc(100vh - 48px);
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-}
-
-.sidebar-brand {
-    background-color: #acacac;
-    color: white;
-    width: 100%;
-    padding: 5px 3px 5px;
-}
-
-.sidebar-item {
-    padding: 5px 3px 5px;
     width: 100%;
 }
 

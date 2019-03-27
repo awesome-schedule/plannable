@@ -11,9 +11,8 @@
             class="d-none d-md-block bg-light button-bar"
             :style="`width:3vw;max-height:${navHeight}`"
         >
-            <span
-                class="side-button"
-                style="font-size:2vw;margin-left:20%; display:block;"
+            <div
+                class="side-button mt-0 mb-4"
                 title="Select Classes"
                 @click="
                     showSelectClass = !showSelectClass;
@@ -23,11 +22,9 @@
                 "
             >
                 <i class="far fa-calendar-alt"></i>
-            </span>
-            <br />
-            <span
-                class="side-button mt-2"
-                style="font-size:1.7vw;margin-left:20%; display:block;"
+            </div>
+            <div
+                class="side-button mb-4"
                 title="Filters"
                 @click="
                     showFilter = !showFilter;
@@ -37,11 +34,9 @@
                 "
             >
                 <i class="fas fa-filter"></i>
-            </span>
-            <br />
-            <span
-                style="font-size:1.8vw;margin-left:20%; display:block;"
-                class="side-button mt-2"
+            </div>
+            <div
+                class="side-button mb-4"
                 title="Display Settings"
                 @click="
                     showSetting = !showSetting;
@@ -51,11 +46,9 @@
                 "
             >
                 <i class="fas fa-cog"></i>
-            </span>
-            <br />
-            <span
-                style="font-size:1.8vw;margin-left:20%; display:block;"
-                class="side-button mt-2"
+            </div>
+            <div
+                class="side-button mb-4"
                 title="Import/Export Schedule"
                 @click="
                     showExport = !showExport;
@@ -63,29 +56,19 @@
                     showFilter = false;
                     showSetting = false;
                 "
-                ><i class="fas fa-download"></i>
-            </span>
-            <br />
-            <span
+            >
+                <i class="fas fa-download"></i>
+            </div>
+            <div
                 v-if="isEntering && showSelectClass"
-                style="font-size:1.8vw;margin-left:23%; display:block;"
-                class="side-button mt-2"
+                class="side-button mb-4"
                 @click="closeClassList"
             >
                 <i class="fas fa-caret-square-up"></i>
-            </span>
-            <!-- <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    
-                </li>
-            </ul> -->
+            </div>
         </nav>
 
-        <nav
-            v-if="sideBar && showSelectClass"
-            class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:19vw"
-        >
+        <nav v-if="sideBar && showSelectClass" class="d-none d-md-block bg-light sidebar">
             <div class="dropdown" style="">
                 <button
                     id="semester"
@@ -180,6 +163,7 @@
                     :courses="inputCourses"
                     :schedule="currentSchedule"
                     :is-entering="isEntering"
+                    :show-classlist-title="showClasslistTitle"
                     @update_course="updateCourse"
                     @remove_preview="removePreview"
                     @preview="preview"
@@ -196,11 +180,7 @@
             </ul>
         </nav>
 
-        <nav
-            v-if="sideBar && showFilter"
-            class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:19vw;"
-        >
+        <nav v-if="sideBar && showFilter" class="d-none d-md-block bg-light sidebar">
             <button class="btn btn-primary" style="border-radius: 0 !important;width:100%">
                 Filters
             </button>
@@ -279,11 +259,7 @@
             </ul>
         </nav>
 
-        <nav
-            v-if="sideBar && showSetting"
-            class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:19vw"
-        >
+        <nav v-if="sideBar && showSetting" class="d-none d-md-block bg-light sidebar">
             <div class="sidebar-sticky">
                 <button class="btn btn-primary" style="border-radius:0 !important;width: 100%">
                     Schedule Display settings
@@ -292,7 +268,7 @@
                     <!-- <li class="list-group-item p-0"> -->
                     <div class="input-group mt-3 mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Schedule Grid</span>
+                            <span class="input-group-text">Grid Height</span>
                         </div>
                         <input
                             v-model="fullHeight"
@@ -307,7 +283,7 @@
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Class Block</span>
+                            <span class="input-group-text">Class Height</span>
                         </div>
                         <input
                             v-model="partialHeight"
@@ -375,16 +351,20 @@
                             </label>
                         </div>
                     </li>
-                    <li class="list-group-item"></li>
+                    <li class="list-group-item">
+                        <button
+                            class="btn btn-outline-danger"
+                            style="width: 100%"
+                            @click="clearCache"
+                        >
+                            Reset All and Clean
+                        </button>
+                    </li>
                 </ul>
             </div>
         </nav>
 
-        <nav
-            v-if="sideBar && showExport"
-            class="d-none d-md-block bg-light sidebar"
-            style="left:3vw;width:19vw"
-        >
+        <nav v-if="sideBar && showExport" class="d-none d-md-block bg-light sidebar">
             <button class="btn btn-primary" style="width:100%;border-radius: 0 !important">
                 Import/Export Schedule
             </button>
@@ -437,37 +417,32 @@
                 </button>
             </div>
         </transition>
-
-        <table :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
-            <tr>
-                <td style="width:75%;vertical-align: top;text-align-left">
-                    <div class="container-fluid">
-                        <div class="row justify-content-center">
-                            <div class="col">
-                                <Pagination
-                                    v-if="generated && schedules.length > 0"
-                                    :indices="scheduleIndices"
-                                    @switch_page="switchPage"
-                                ></Pagination>
-                            </div>
-                            <!-- <div class="col col-1"></div> -->
-                        </div>
+        <div :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col">
+                        <Pagination
+                            v-if="generated && schedules.length > 0"
+                            :indices="scheduleIndices"
+                            @switch_page="switchPage"
+                        ></Pagination>
                     </div>
+                    <!-- <div class="col col-1"></div> -->
+                </div>
+            </div>
 
-                    <div class="tab mt-2"></div>
-                    <grid-schedule
-                        :courses="currentSchedule"
-                        style="width:100%"
-                        :show-time="showTime"
-                        :show-room="showRoom"
-                        :show-instructor="showInstructor"
-                        :full-height="+fullHeight"
-                        :partial-height="+partialHeight"
-                        @trigger-modal="showModal"
-                    ></grid-schedule>
-                </td>
-            </tr>
-        </table>
+            <div class="tab mt-2"></div>
+            <grid-schedule
+                :courses="currentSchedule"
+                style="width:100%"
+                :show-time="showTime"
+                :show-room="showRoom"
+                :show-instructor="showInstructor"
+                :full-height="+fullHeight"
+                :partial-height="+partialHeight"
+                @trigger-modal="showModal"
+            ></grid-schedule>
+        </div>
     </div>
 </template>
 
@@ -585,10 +560,10 @@ export default Vue.extend({
             // options
             showTime: true,
             showRoom: true,
-            showInstructor: true,
+            showInstructor: false,
             showClasslistTitle: false,
-            fullHeight: 40,
-            partialHeight: 40,
+            fullHeight: 45,
+            partialHeight: 35,
             timeSlots: {},
             numberOfTimeSlots: 0,
             navHeight: 500,
@@ -668,6 +643,13 @@ export default Vue.extend({
         cleanSchedules() {
             this.schedules = [];
             this.currentSchedule.cleanSchedule();
+        },
+        clearCache() {
+            this.currentSchedule.clean();
+            this.generated = false;
+            this.currentCourses = [];
+            this.schedules = [];
+            localStorage.clear();
         },
 
         /**
@@ -974,6 +956,8 @@ export default Vue.extend({
     opacity: 0;
 }
 .side-button {
+    font-size: 1.8vw;
+    margin-left: 20%;
     color: #5e5e5e;
 }
 .side-button:hover {
@@ -981,14 +965,6 @@ export default Vue.extend({
 }
 .side-button:active {
     color: #bbbbbb;
-}
-
-.leftside {
-    width: 20%;
-    padding-left: 2%;
-    vertical-align: top;
-    padding-top: 0;
-    position: fixed;
 }
 
 .sidebar {
@@ -999,6 +975,8 @@ export default Vue.extend({
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     overflow-y: auto;
+    left: 3vw;
+    width: 19vw;
 }
 
 .button-bar {

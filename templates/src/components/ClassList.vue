@@ -93,8 +93,12 @@
                         </div>
                     </div> -->
                 </div>
-                <transition name="smooth">
-                    <div v-show="expanded(crs) === 'fa-chevron-down'" class="trans">
+                <Expand>
+                    <div
+                        v-if="expanded(crs) === 'fa-chevron-down'"
+                        :id="`${crs.key}trans`"
+                        class="trans"
+                    >
                         <div
                             v-for="(sec, idx) in crs.section"
                             :key="sec + idx"
@@ -150,7 +154,7 @@
                             </div>
                         </div>
                     </div>
-                </transition>
+                </Expand>
             </div>
         </div>
     </div>
@@ -161,8 +165,12 @@ import Vue from 'vue';
 // eslint-disable-next-line
 import CourseRecord from '../models/CourseRecord';
 import Schedule from '../models/Schedule';
+import Expand from './Expand.vue';
 export default Vue.extend({
     name: 'ClassList',
+    components: {
+        Expand
+    },
     props: {
         courses: Array,
         schedule: Schedule,
@@ -183,9 +191,13 @@ export default Vue.extend({
             this.$forceUpdate();
         },
         collapse(key) {
-            this.collapsed[key] === undefined
-                ? this.$set(this.collapsed, key, key)
-                : this.$set(this.collapsed, key, undefined);
+            if (this.collapsed[key] === undefined) {
+                this.$set(this.collapsed, key, key);
+            } else {
+                const ele = document.getElementById(`${key}trans`);
+                ele.style.maxHeight = ele.clientHeight + 'px';
+                this.$set(this.collapsed, key, undefined);
+            }
         },
         isActive(key, idx) {
             return this.schedule.All[key] instanceof Set && this.schedule.All[key].has(idx);
@@ -208,18 +220,6 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.smooth-enter-to,
-.smooth-leave {
-    max-height: 100vh;
-}
-.smooth-enter-active,
-.smooth-leave-active {
-    transition: max-height 0.6s;
-}
-.smooth-enter,
-.smooth-leave-to {
-    max-height: 0;
-}
 .trans {
     overflow: hidden;
 }

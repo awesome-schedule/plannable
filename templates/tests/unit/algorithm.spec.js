@@ -20,10 +20,12 @@ describe('ScheduleGenerator Test', () => {
         expect('output').toBe('output');
         const schedule = new Schedule();
         schedule.All = {
-            cs21105: -1,
-            cs21104: -1,
-            cs21025: -1,
-            ece26308: -1
+            ece26308: -1,
+            ece23305: -1,
+            apma31105: -1,
+            phys24194: -1,
+            cs41025: -1,
+            cs47745: -1
         };
         try {
             generator.getSchedules(schedule);

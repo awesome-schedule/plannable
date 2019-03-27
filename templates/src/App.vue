@@ -292,7 +292,7 @@
                     <!-- <li class="list-group-item p-0"> -->
                     <div class="input-group mt-3 mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Class Block</span>
+                            <span class="input-group-text">Schedule Grid</span>
                         </div>
                         <input
                             v-model="fullHeight"
@@ -307,7 +307,7 @@
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Placeholder</span>
+                            <span class="input-group-text">Class Block</span>
                         </div>
                         <input
                             v-model="partialHeight"
@@ -587,8 +587,8 @@ export default Vue.extend({
             showRoom: true,
             showInstructor: true,
             showClasslistTitle: false,
-            fullHeight: 50,
-            partialHeight: 20,
+            fullHeight: 40,
+            partialHeight: 40,
             timeSlots: {},
             numberOfTimeSlots: 0,
             navHeight: 500,

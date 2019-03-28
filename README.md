@@ -5,68 +5,56 @@
 
 A website which allows UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters. (After you click the "+" button, the course you selected will be added to the section below automatically. Delete your input from Course Title to view the change.) Once finalize your class selection, hit "Create" button and get all the possible schedules corresponding to your requirements.
 
-## Website Demo IP Address
+## Demo
 
-Copy the following IP address and paste on the web browser to view the website.
+[https://awesome-schedule.github.io/](https://awesome-schedule.github.io/)
 
-```
-http://54.162.226.166:8000/
-```
+This site is a pure front-end build. It fetches data from Lou's list on page load.
 
-## Getting Started
+## Development
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+> Note: We recommend [VS Code](https://code.visualstudio.com/) for development
 
-## Prerequisites
+### Install Dependencies
+
+> Note: the credit of the repo name goes to [OAHC2022](https://github.com/OAHC2022)
 
 -   Node.js >= 8.10
+
+Clone the repository
+
+```
+git clone https://github.com/awesome-schedule/Awesome-SchedulAR
+```
+
+Install front end dependencies and launch the development server
+
+```bash
+cd Awesome-SchedulAR/templates
+npm install
+npm run serve
+```
+
+Then you can view the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
+
+Note: The back-end is currently abandoned. It has the following dependencies
+
 -   Python >= 3.5
 -   Flask >= 1.0
 -   Requests >= 2.1
 -   Schedule >= 0.50
 
-```
-pip install flask flask-cors requests schedule
-```
-
-We recommend [VS Code](https://code.visualstudio.com/) for development
-
-## How to Use
-
-Install necessary python packages
+which can be installed with
 
 ```
 pip install flask flask-cors requests schedule
 ```
-
-Install development dependencies
-
-```
-git clone https://github.com/OAHC2022/UVaAutoScheduler
-cd UVaAutoScheduler
-```
-
-Install front end dependencies and compile assets
-
-```bash
-cd templates
-npm install
-npm run build
-```
-
-To launch the server
-
-```bash
-python run.py
-```
-
-Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:8000/).
 
 ## Built With
 
 -   [Vue.js](https://vuejs.org) - Front-end framework
 -   [Bootstrap](https://getbootstrap.com/) - Front-end component library
--   [Flask](http://flask.pocoo.org/) - Back-end framework
+-   <s>[Flask](http://flask.pocoo.org/) - Back-end framework</s>
 
 ## Contributors
 

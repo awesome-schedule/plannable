@@ -53,6 +53,10 @@ Configuration of linting, formatting, building and testing tools
 
 Hanzhi Zhou
 
+### Continuous Integration
+
+Hanzhi Zhou
+
 ### Models and Data Structure
 
 These are mainly JavaScript files in [models](/templates/src/models)
@@ -63,6 +67,14 @@ These are mainly JavaScript files in [models](/templates/src/models)
 | CourseRecords | A collection of course sections                         | Hanzhi Zhou |
 | Course        | A specific section of a course                          | Hanzhi Zhou |
 | Schedule      | Schedule data structure, helpers for schedule rendering | Hanzhi Zhou |
+| Notification  | A wrapper for displaying notifications to user          | Hanzhi Zhou |
+
+### Data Fetching
+
+| Name           | Description                                             | Contributor  |
+| -------------- | ------------------------------------------------------- | ------------ |
+| DataLoader     | Script for fetching the list of semesters               | Kaiying Shan |
+| SemesterLoader | Script for fetching course records of a single semester | Hanzhi Zhou  |
 
 ### Algorithm
 

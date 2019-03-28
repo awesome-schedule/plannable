@@ -1,6 +1,7 @@
 # Awesome-SchedulAR
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)
 
 A website which allows UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters. (After you click the "+" button, the course you selected will be added to the section below automatically. Delete your input from Course Title to view the change.) Once finalize your class selection, hit "Create" button and get all the possible schedules corresponding to your requirements.
 
@@ -18,11 +19,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Prerequisites
 
-- Node.js >= 8.10
-- Python >= 3.5
-- Flask >= 1.0
-- Requests >= 2.1
-- Schedule >= 0.50
+-   Node.js >= 8.10
+-   Python >= 3.5
+-   Flask >= 1.0
+-   Requests >= 2.1
+-   Schedule >= 0.50
 
 ```
 pip install flask flask-cors requests schedule
@@ -63,9 +64,9 @@ Then you can view the UVaAutoScheduler from your [127.0.0.1](http://127.0.0.1:80
 
 ## Built With
 
-- [Vue.js](https://vuejs.org) - Front-end framework
-- [Bootstrap](https://getbootstrap.com/) - Front-end component library
-- [Flask](http://flask.pocoo.org/) - Back-end framework
+-   [Vue.js](https://vuejs.org) - Front-end framework
+-   [Bootstrap](https://getbootstrap.com/) - Front-end component library
+-   [Flask](http://flask.pocoo.org/) - Back-end framework
 
 ## Contributors
 

@@ -440,6 +440,8 @@ import Notification from './models/Notification.js';
  * @typedef {[string, number, number][]} RawSchedule
  */
 
+import getSemesterData from './data/SemesterLoader.js';
+
 export default Vue.extend({
     name: 'App',
     components: {
@@ -783,13 +785,21 @@ export default Vue.extend({
         /**
          * fetch basic class data for the given semester for fast class search and rendering
          * this method will assign `this.allRecords` and `Schedule.allRecords`
-         * @param {number} semeseterId
+         * @param {number} semeseterIdx
          * @param {()=>void} callback
          */
-        fetchSemesterData(semesterId, callback) {
-            console.info(`Loading semester ${semesterId} data from remote...`);
-            axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
-                this.allRecords = new AllRecords(this.currentSemester, res.data.data);
+        fetchSemesterData(semesterIdx, callback) {
+            console.info(`Loading semester ${semesterIdx} data from remote...`);
+            // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
+            //     this.allRecords = new AllRecords(this.currentSemester, res.data.data);
+            //     // important: assign all records
+            //     Schedule.allRecords = this.allRecords;
+            //     if (typeof callback === 'function') {
+            //         callback();
+            //     }
+            // });
+            getSemesterData(this.semesters[semesterIdx].id, data => {
+                this.allRecords = new AllRecords(this.currentSemester, data);
                 // important: assign all records
                 Schedule.allRecords = this.allRecords;
                 if (typeof callback === 'function') {

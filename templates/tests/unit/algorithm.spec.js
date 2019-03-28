@@ -10,14 +10,11 @@ describe('ScheduleGenerator Test', () => {
         expect(typeof data).toBe('object');
         const course = allRecords.getRecord('cs11105');
         expect(typeof course.id[0]).toBe('number');
-        // console.log(course);
-        // // expect(course.id[0]).toBe(10309);
     });
 
     it('ScheduleGenerator', () => {
         const generator = new ScheduleGenerator(allRecords);
         expect(typeof generator.createSchedule).toBe('function');
-        expect('output').toBe('output');
         const schedule = new Schedule();
         schedule.All = {
             cs33304: -1,
@@ -30,11 +27,10 @@ describe('ScheduleGenerator Test', () => {
             phys24194: [3],
             ece26308: -1
         };
-        try {
-            const result = generator.getSchedules(schedule);
-            console.log(result.schedules[1].schedule); 
-            //There is problem that 
-            /**   
+        const result = generator.getSchedules(schedule);
+        // console.log(result.schedules[1].schedule);
+        //There is problem that
+        /**   
              *  [ [ 'cs33304', [ 'We' ], [ 750, 825 ], 0 ],
                 [ 'cs33305', [ 'Tu', 'Th' ], [ 750, 825 ], 1 ],
                 [ 'ece23305', [ 'Mo', 'We', 'Fr' ], [ 660, 710 ], 0 ],
@@ -46,11 +42,8 @@ describe('ScheduleGenerator Test', () => {
                 [ 'ece26308', [ 'Mo', 'We', 'Fr' ], [ 540, 650 ], 0 ] ] 
             gives wrong data: cs33305 and cs47745 should switch position
                 */
-            // for (const i of result.schedules.schedule[0]) {
-            //     console.log(i);
-            // }
-        } catch (e) {
-            console.log(e);
-        }
+        // for (const i of result.schedules.schedule[0]) {
+        //     console.log(i);
+        // }
     });
 });

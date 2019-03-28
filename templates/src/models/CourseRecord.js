@@ -78,16 +78,25 @@ class CourseRecord {
         null,
         Number,
         null,
+        /**
+         * @param {string} x
+         */
         x => {
             const temp = CourseRecord.TYPES_PARSE[x];
             return temp ? temp : -1;
         },
         Number,
+        /**
+         * @param {string} x
+         */
         x => x.split(','),
         null,
         null,
         null,
         null,
+        /**
+         * @param {string} x
+         */
         x => {
             const temp = CourseRecord.STATUSES_PARSE[x];
             return temp ? temp : -1;

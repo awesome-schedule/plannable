@@ -429,7 +429,7 @@ import Schedule from './models/Schedule.js';
 // eslint-disable-next-line
 import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
-import axios from 'axios';
+// import axios from 'axios';
 import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
 import getSemesterList from './data/dataLoader.js';
 import Notification from './models/Notification.js';
@@ -811,14 +811,18 @@ export default Vue.extend({
             //         callback();
             //     }
             // });
-            getSemesterData(this.semesters[semesterIdx].id, data => {
-                this.allRecords = new AllRecords(this.currentSemester, data);
-                // important: assign all records
-                Schedule.allRecords = this.allRecords;
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
+            getSemesterData(this.semesters[semesterIdx].id)
+                .then(data => {
+                    this.allRecords = new AllRecords(this.currentSemester, data);
+                    // important: assign all records
+                    Schedule.allRecords = this.allRecords;
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                })
+                .catch(err => {
+                    this.noti.error(err);
+                });
         },
         closeClassList(event) {
             event.target.value = '';

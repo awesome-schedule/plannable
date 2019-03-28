@@ -54,9 +54,8 @@ class Course {
 
     /**
      * Calculate a 32 bit FNV-1a hash
-     * Found here: https://gist.github.com/vaiorabbit/5657561
-     * Ref.: http://isthe.com/chongo/tech/comp/fnv/
-     *
+     * @see https://gist.github.com/vaiorabbit/5657561
+     * @see http://isthe.com/chongo/tech/comp/fnv/
      * @param {string} str the input value
      * @returns {number}
      */

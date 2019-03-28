@@ -9,34 +9,40 @@ import CourseRecord from '../models/CourseRecord';
 
 /**
  * @param {string} semesterId
- * @param {(x: RawAllRecords)=>void} callback
+ * @return {Promise<RawAllRecords>}
  */
-function getSemesterData(semesterId, callback) {
+function getSemesterData(semesterId) {
     const url =
         'https://cors-anywhere.herokuapp.com/https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php';
-    const asd = {
-        Semester: semesterId,
-        Group: 'CS',
-        Description: 'Yes',
-        submit: 'Submit Data Request'
-    };
     console.time('request');
-    axios
-        .post(url, querystring.stringify(asd))
-        .then(res => {
-            console.timeEnd('request');
-            parseSemesterData(res.data, callback);
-        })
-        .catch(err => {
-            console.log(err);
-        });
+    return new Promise((resolve, reject) => {
+        axios
+            .post(
+                url,
+                querystring.stringify({
+                    Semester: semesterId,
+                    Group: 'CS',
+                    Description: 'Yes',
+                    submit: 'Submit Data Request'
+                })
+            )
+            .then(res => {
+                console.timeEnd('request');
+                return parseSemesterData(res.data);
+            })
+            .then(data => {
+                resolve(data);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
 }
 
 /**
  * @param {string} csv_string
- * @param {(x: RawAllRecords)=>void} callback
  */
-function parseSemesterData(csv_string, callback) {
+function parseSemesterData(csv_string) {
     console.time('parseData');
     /**
      * @type {string[][]}
@@ -79,7 +85,7 @@ function parseSemesterData(csv_string, callback) {
         }
     }
     console.timeEnd('parseData');
-    callback(DICT);
+    return DICT;
 }
 
 export default getSemesterData;

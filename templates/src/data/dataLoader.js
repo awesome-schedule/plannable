@@ -8,6 +8,7 @@ import cheerio from 'cheerio';
  * @param {(err: any)=>void} reject
  */
 function getSemesterList(success, reject) {
+    console.time('get semester list');
     axios
         .get('https://cors-anywhere.herokuapp.com/https://rabi.phys.virginia.edu/mySIS/CS2/')
         .then(response => {
@@ -30,6 +31,7 @@ function getSemesterList(success, reject) {
                     });
                 });
                 records.reverse();
+                console.timeEnd('get semester list');
                 success(records);
             }
         })

@@ -257,12 +257,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
-                    <input
-                        v-model="fullHeight"
-                        type="number"
-                        class="form-control"
-                        @input="saveStatus()"
-                    />
+                    <input v-model="fullHeight" type="number" class="form-control" />
                     <div class="input-group-append">
                         <span class="input-group-text">px</span>
                     </div>
@@ -271,12 +266,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Grid Height</span>
                     </div>
-                    <input
-                        v-model="partialHeight"
-                        type="number"
-                        class="form-control"
-                        @input="saveStatus()"
-                    />
+                    <input v-model="partialHeight" type="number" class="form-control" />
                     <div class="input-group-append">
                         <span class="input-group-text">px</span>
                     </div>
@@ -765,6 +755,7 @@ export default Vue.extend({
             const callback = () => {
                 this.parseLocalData(raw_data);
             };
+            // if data is non-existant or data expires
             if (temp === null) {
                 // in this case, we only need to update allRecords. Save a set of fresh data
                 this.fetchSemesterData(semesterId, () => {
@@ -772,16 +763,9 @@ export default Vue.extend({
                     this.saveAllRecords();
                 });
             } else {
-                const now = new Date().getTime();
-                const dataTime = new Date(raw_data.modified).getTime();
-
-                // if data expires
-                if (now - dataTime > 3600 * 1000) this.fetchSemesterData(semesterId, callback);
-                else {
-                    this.allRecords = temp;
-                    Schedule.allRecords = temp;
-                    callback();
-                }
+                this.allRecords = temp;
+                Schedule.allRecords = temp;
+                callback();
             }
         },
         saveAllRecords() {
@@ -868,7 +852,7 @@ export default Vue.extend({
         },
         saveStatus() {
             console.time('saved in');
-            const obj = { modified: new Date().toJSON() };
+            const obj = {};
             for (const field of this.storageFields) {
                 // use toJSON method if it exists
                 if (this[field] instanceof Object && typeof this[field].toJSON === 'function')

@@ -123,15 +123,23 @@ class Schedule {
      * - If the course is **not** in the schedule, add it to the schedule
      * @param {string} key
      * @param {Set<number> | number} section
-     * @param {boolean} update
+     * @param {boolean} update whether to recompute schedule
+     * @param {boolean} remove whether to remove the key if the set of section is empty
      */
-    update(key, section, update = true) {
+    update(key, section, update = true, remove = true) {
         if (section === -1) {
-            if (this.All[key] === -1) delete this.All[key];
-            else this.All[key] = -1;
+            if (this.All[key] === -1) {
+                if (remove) delete this.All[key];
+                // empty set if remove is false
+                else this.All[key] = new Set();
+            } else this.All[key] = -1;
         } else {
             if (this.All[key] instanceof Set) {
-                if (!this.All[key].delete(section)) this.All[key].add(section);
+                if (this.All[key].delete(section)) {
+                    if (this.All[key].size() === 0 && remove) delete this.All[key];
+                } else {
+                    this.All[key].add(section);
+                }
             } else {
                 this.All[key] = new Set([section]);
             }

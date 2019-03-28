@@ -126,7 +126,7 @@
                         }}
                     </button>
                 </div>
-                <div id="currentSelectedClass" style="width:99%">
+                <div class="mx-1">
                     <ClassList
                         :courses="currentCourses"
                         :schedule="currentSchedule"
@@ -165,10 +165,10 @@
                     @trigger-classlist-modal="showClassListModal"
                 ></ClassList>
             </div>
-            <ul class="list-group list-group-flush" style="width:99%">
-                <button class="btn btn-primary nav-btn mt-3">
-                    Semester Data
-                </button>
+            <button class="btn btn-primary nav-btn mt-3">
+                Semester Data
+            </button>
+            <ul class="list-group list-group-flush mx-1">
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
                 <li class="list-group-item"></li>
             </ul>
@@ -178,7 +178,7 @@
             <button class="btn btn-primary nav-btn">
                 Filters
             </button>
-            <ul class="list-group list-group-flush" style="width:99%;">
+            <ul class="list-group list-group-flush mx-1">
                 <li v-for="(value, n) in timeSlots" :key="n" class="list-group-item p-1">
                     <table style="width:100%">
                         <tr>
@@ -244,6 +244,7 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
+                <li class="list-group-item"></li>
             </ul>
         </nav>
 
@@ -251,11 +252,10 @@
             <button class="btn btn-primary nav-btn">
                 Schedule Display settings
             </button>
-            <ul class="list-group list-group-flush" style="width:99%">
-                <!-- <li class="list-group-item p-0"> -->
-                <div class="input-group mt-3 mb-3">
+            <div class="list-group list-group-flush mx-1">
+                <div class="input-group my-3" title="height of a course on schedule">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Grid Height</span>
+                        <span class="input-group-text">Class Height</span>
                     </div>
                     <input
                         v-model="fullHeight"
@@ -267,10 +267,9 @@
                         <span class="input-group-text">px</span>
                     </div>
                 </div>
-
-                <div class="input-group mb-3">
+                <div class="input-group mb-3" title="height of an empty row">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Class Height</span>
+                        <span class="input-group-text">Grid Height</span>
                     </div>
                     <input
                         v-model="partialHeight"
@@ -282,12 +281,11 @@
                         <span class="input-group-text">px</span>
                     </div>
                 </div>
-            </ul>
-            <!-- </li> -->
+            </div>
             <button class="btn btn-primary nav-btn">
                 Display Options
             </button>
-            <ul class="list-group list-group-flush" style="width:99%">
+            <ul class="list-group list-group-flush mx-1">
                 <li class="list-group-item">Course Display</li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox">
@@ -343,6 +341,7 @@
                         Reset All and Clean
                     </button>
                 </li>
+                <li class="list-group-item"></li>
             </ul>
         </nav>
 
@@ -350,7 +349,7 @@
             <button class="btn btn-primary nav-btn">
                 Import/Export Schedule
             </button>
-            <ul class="list-group list-group-flush" style="width:99%">
+            <ul class="list-group list-group-flush mx-1">
                 <li class="list-group-item">
                     <div class="custom-file">
                         <input
@@ -373,7 +372,6 @@
                         @click="saveToJson"
                         >Export
                     </a>
-                    <br />
                 </li>
                 <li class="list-group-item"></li>
             </ul>
@@ -401,7 +399,7 @@
             </div>
         </transition>
         <div :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
-            <div class="container-fluid">
+            <div class="container-fluid mb-2">
                 <div class="row justify-content-center">
                     <div class="col">
                         <Pagination
@@ -410,14 +408,10 @@
                             @switch_page="switchPage"
                         ></Pagination>
                     </div>
-                    <!-- <div class="col col-1"></div> -->
                 </div>
             </div>
-
-            <div class="tab mt-2"></div>
             <grid-schedule
                 :courses="currentSchedule"
-                style="width:100%"
                 :show-time="showTime"
                 :show-room="showRoom"
                 :show-instructor="showInstructor"
@@ -683,7 +677,7 @@ export default Vue.extend({
          * @param {number} section
          */
         updateCourse(key, section) {
-            this.currentSchedule.update(key, section);
+            this.currentSchedule.update(key, section, true, this.isEntering);
             this.currentCourses = this.getCurrentCourses();
             if (this.generated) {
                 this.noti.warn(`You're editing the generated schedule!`, 3);

@@ -2,7 +2,7 @@
     <div id="class-list" style="width: 100%">
         <div class="card-body p-0">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
-                <div class="list-group-item class-title pt-1 pb-1 pl-0 pr-0">
+                <div class="list-group-item class-title py-1 px-0">
                     <table style="width: 100%">
                         <tr>
                             <td class="expand-icon pr-2">

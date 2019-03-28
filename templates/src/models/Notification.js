@@ -1,3 +1,4 @@
+//@ts-check
 class Notification {
     static TYPES = {
         info: 'info',

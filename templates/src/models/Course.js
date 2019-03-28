@@ -1,3 +1,4 @@
+//@ts-check
 import CourseRecord from './CourseRecord';
 class Course {
     /**

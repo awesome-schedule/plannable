@@ -10,7 +10,8 @@
             height: endPx - startPx + 'px',
             'background-color': course.backgroundColor,
             'z-index': '2',
-            color: 'white'
+            color: 'white',
+            cursor: 'pointer'
         }"
         @click="$parent.$emit('trigger-modal', course)"
     >

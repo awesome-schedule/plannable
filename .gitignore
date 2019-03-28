@@ -10,3 +10,4 @@ node_modules
 .mypy_cache
 backend/data
 templates/tests/temp
+deploy_key

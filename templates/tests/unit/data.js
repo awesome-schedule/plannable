@@ -12,6 +12,9 @@ const data_path = path.join(
     'data',
     'CS1198Data.csv'
 );
+/**
+ * @type {string[][]}
+ */
 const raw_data = parse(fs.readFileSync(data_path).toString(), {
     columns: false,
     skip_empty_lines: true

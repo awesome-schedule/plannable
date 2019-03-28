@@ -1,3 +1,4 @@
+// @ts-check
 // eslint-disable-next-line
 import Course from './Course';
 /**
@@ -136,7 +137,7 @@ class Schedule {
         } else {
             if (this.All[key] instanceof Set) {
                 if (this.All[key].delete(section)) {
-                    if (this.All[key].size() === 0 && remove) delete this.All[key];
+                    if (this.All[key].size === 0 && remove) delete this.All[key];
                 } else {
                     this.All[key].add(section);
                 }

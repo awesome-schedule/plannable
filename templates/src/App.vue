@@ -107,7 +107,21 @@
                     @keyup.esc="closeClassList($event)"
                 />
             </div>
-            <div v-if="!isEntering">
+
+            <div v-if="isEntering" ref="classList" class="card card-body p-1">
+                <ClassList
+                    :courses="inputCourses"
+                    :schedule="currentSchedule"
+                    :is-entering="isEntering"
+                    :show-classlist-title="showClasslistTitle"
+                    @update_course="updateCourse"
+                    @remove_preview="removePreview"
+                    @preview="preview"
+                    @close="closeClassList"
+                    @trigger-classlist-modal="showClassListModal"
+                ></ClassList>
+            </div>
+            <div>
                 <div class="mt-3">
                     <button
                         class="btn btn-primary nav-btn"
@@ -152,23 +166,10 @@
                     </div>
                 </div>
             </div>
-            <div v-if="isEntering" ref="classList" class="card card-body p-1">
-                <ClassList
-                    :courses="inputCourses"
-                    :schedule="currentSchedule"
-                    :is-entering="isEntering"
-                    :show-classlist-title="showClasslistTitle"
-                    @update_course="updateCourse"
-                    @remove_preview="removePreview"
-                    @preview="preview"
-                    @close="closeClassList"
-                    @trigger-classlist-modal="showClassListModal"
-                ></ClassList>
-            </div>
-            <button class="btn btn-primary nav-btn mt-3">
-                Semester Data
-            </button>
-            <ul class="list-group list-group-flush mx-1">
+            <ul class="list-group list-group-flush" style="width:99%">
+                <button class="btn btn-primary nav-btn mt-3">
+                    Semester Data
+                </button>
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
                 <li class="list-group-item"></li>
             </ul>
@@ -257,12 +258,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
-                    <input
-                        v-model="fullHeight"
-                        type="number"
-                        class="form-control"
-                        @input="saveStatus()"
-                    />
+                    <input v-model="fullHeight" type="number" class="form-control" />
                     <div class="input-group-append">
                         <span class="input-group-text">px</span>
                     </div>
@@ -271,12 +267,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Grid Height</span>
                     </div>
-                    <input
-                        v-model="partialHeight"
-                        type="number"
-                        class="form-control"
-                        @input="saveStatus()"
-                    />
+                    <input v-model="partialHeight" type="number" class="form-control" />
                     <div class="input-group-append">
                         <span class="input-group-text">px</span>
                     </div>
@@ -438,8 +429,9 @@ import Schedule from './models/Schedule.js';
 // eslint-disable-next-line
 import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
-import axios from 'axios';
+// import axios from 'axios';
 import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
+import getSemesterList from './data/dataLoader.js';
 import Notification from './models/Notification.js';
 
 /**
@@ -449,6 +441,8 @@ import Notification from './models/Notification.js';
  * Raw Schedule
  * @typedef {[string, number, number][]} RawSchedule
  */
+
+import getSemesterData from './data/SemesterLoader.js';
 
 export default Vue.extend({
     name: 'App',
@@ -609,11 +603,22 @@ export default Vue.extend({
     },
     watch: {},
     created() {
-        axios.get(`${this.api}/semesters`).then(res => {
-            this.semesters = res.data;
-            // get the latest semester
-            this.selectSemester(this.semesters.length - 1);
-        });
+        // axios.get(`${this.api}/semesters`).then(res => {
+        //     this.semesters = res.data;
+        //     // get the latest semester
+        //     this.selectSemester(this.semesters.length - 1);
+        // });
+
+        getSemesterList(
+            res => {
+                this.semesters = res;
+                // get the latest semester
+                this.selectSemester(this.semesters.length - 1);
+            },
+            error => {
+                this.noti.error(error);
+            }
+        );
 
         this.navHeight = document.documentElement.clientHeight;
     },
@@ -765,6 +770,7 @@ export default Vue.extend({
             const callback = () => {
                 this.parseLocalData(raw_data);
             };
+            // if data is non-existant or data expires
             if (temp === null) {
                 // in this case, we only need to update allRecords. Save a set of fresh data
                 this.fetchSemesterData(semesterId, () => {
@@ -772,16 +778,9 @@ export default Vue.extend({
                     this.saveAllRecords();
                 });
             } else {
-                const now = new Date().getTime();
-                const dataTime = new Date(raw_data.modified).getTime();
-
-                // if data expires
-                if (now - dataTime > 3600 * 1000) this.fetchSemesterData(semesterId, callback);
-                else {
-                    this.allRecords = temp;
-                    Schedule.allRecords = temp;
-                    callback();
-                }
+                this.allRecords = temp;
+                Schedule.allRecords = temp;
+                callback();
             }
         },
         saveAllRecords() {
@@ -799,19 +798,31 @@ export default Vue.extend({
         /**
          * fetch basic class data for the given semester for fast class search and rendering
          * this method will assign `this.allRecords` and `Schedule.allRecords`
-         * @param {number} semeseterId
+         * @param {number} semeseterIdx
          * @param {()=>void} callback
          */
-        fetchSemesterData(semesterId, callback) {
-            console.info(`Loading semester ${semesterId} data from remote...`);
-            axios.get(`${this.api}/classes?semester=${semesterId}`).then(res => {
-                this.allRecords = new AllRecords(this.currentSemester, res.data.data);
-                // important: assign all records
-                Schedule.allRecords = this.allRecords;
-                if (typeof callback === 'function') {
-                    callback();
-                }
-            });
+        fetchSemesterData(semesterIdx, callback) {
+            console.info(`Loading semester ${semesterIdx} data from remote...`);
+            // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
+            //     this.allRecords = new AllRecords(this.currentSemester, res.data.data);
+            //     // important: assign all records
+            //     Schedule.allRecords = this.allRecords;
+            //     if (typeof callback === 'function') {
+            //         callback();
+            //     }
+            // });
+            getSemesterData(this.semesters[semesterIdx].id)
+                .then(data => {
+                    this.allRecords = new AllRecords(this.currentSemester, data);
+                    // important: assign all records
+                    Schedule.allRecords = this.allRecords;
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                })
+                .catch(err => {
+                    this.noti.error(err);
+                });
         },
         closeClassList(event) {
             event.target.value = '';
@@ -868,7 +879,7 @@ export default Vue.extend({
         },
         saveStatus() {
             console.time('saved in');
-            const obj = { modified: new Date().toJSON() };
+            const obj = {};
             for (const field of this.storageFields) {
                 // use toJSON method if it exists
                 if (this[field] instanceof Object && typeof this[field].toJSON === 'function')

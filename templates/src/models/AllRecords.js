@@ -10,18 +10,29 @@ import CourseRecord from './CourseRecord';
 
 class AllRecords {
     /**
-     *
-     * @param {{semester: Semester, raw_data: Object<string, RawRecord>}} data
+     * Parse AllRecords from parsed JSON
+     * return `null` if data is invalid or data expired
+     * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
     static fromJSON(data) {
-        if (data && data.semester !== undefined && data.raw_data !== undefined) {
-            return new AllRecords(data.semester, data.raw_data);
+        if (
+            data &&
+            typeof data.modified === 'string' &&
+            data.semester instanceof Object &&
+            data.raw_data instanceof Object
+        ) {
+            const now = new Date().getTime();
+            const dataTime = new Date(data.modified).getTime();
+            if (now - dataTime > 3600 * 1000) return null;
+            else {
+                return new AllRecords(data.semester, data.raw_data);
+            }
         }
         return null;
     }
     /**
      *
-     * @param {{semester: Semester, raw_data: Object<string, RawRecord>}} data
+     * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
     fromJSON(data) {
         return AllRecords.fromJSON(data);
@@ -36,12 +47,13 @@ class AllRecords {
     }
 
     /**
-     * @return {{semester: Semester, raw_data: Object<string, RawRecord>}}
+     * @return {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}}
      */
     toJSON() {
         return {
             semester: this.semester,
-            raw_data: this.raw_data
+            raw_data: this.raw_data,
+            modified: new Date().toJSON()
         };
     }
 

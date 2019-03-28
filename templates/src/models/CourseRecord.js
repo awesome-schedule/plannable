@@ -1,9 +1,11 @@
+//@ts-check
 import Course from './Course';
 class CourseRecord {
     /**
      * lecture type number => meaning
      */
     static TYPES = {
+        '-1': '',
         0: 'Clinical',
         1: 'Discussion',
         2: 'Drill',
@@ -20,6 +22,7 @@ class CourseRecord {
      * status number => meaning
      */
     static STATUSES = {
+        '-1': 'TBA',
         1: 'Open',
         0: 'Closed',
         2: 'Wait List'
@@ -44,11 +47,65 @@ class CourseRecord {
         15: 'description'
     };
 
+    static TYPES_PARSE = {
+        Clinical: 0,
+        Discussion: 1,
+        Drill: 2,
+        'Independent Study': 3,
+        Laboratory: 4,
+        Lecture: 5,
+        Practicum: 6,
+        Seminar: 7,
+        Studio: 8,
+        Workshop: 9
+    };
+
+    static STATUSES_PARSE = {
+        Open: 1,
+        Closed: 0,
+        'Wait List': 2
+    };
+
     /**
      * The list of indices at which the field is a list
      */
-    static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14, 15];
+    static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14];
 
+    static LENGTH = 16;
+
+    static PARSE_FUNC = [
+        Number,
+        null,
+        Number,
+        null,
+        /**
+         * @param {string} x
+         */
+        x => {
+            const temp = CourseRecord.TYPES_PARSE[x];
+            return temp ? temp : -1;
+        },
+        Number,
+        /**
+         * @param {string} x
+         */
+        x => x.split(','),
+        null,
+        null,
+        null,
+        null,
+        /**
+         * @param {string} x
+         */
+        x => {
+            const temp = CourseRecord.STATUSES_PARSE[x];
+            return temp ? temp : -1;
+        },
+        Number,
+        Number,
+        Number,
+        null
+    ];
     /**
      *
      * @param {import('./AllRecords').RawRecord} raw

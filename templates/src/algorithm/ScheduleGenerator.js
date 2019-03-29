@@ -9,13 +9,14 @@ import ScheduleEvaluator from './ScheduleEvaluator';
  * @typedef {RawCourse[]} RawSchedule
  */
 /**
- * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[]}} Constraint
+ * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortBy: string}} Constraint
  */
 class ScheduleGenerator {
     static constraintDefaults = {
         timeSlots: [],
         status: [],
-        noClassDay: []
+        noClassDay: [],
+        sortBy: 'variance'
     };
     /**
      *
@@ -54,6 +55,7 @@ class ScheduleGenerator {
      */
     getSchedules(schedule, constraint = ScheduleGenerator.constraintDefaults) {
         this.validateConstraints(constraint);
+        this.constraint = constraint;
 
         const courses = schedule.All;
 
@@ -136,7 +138,7 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new ScheduleEvaluator();
+        const finalTable = new ScheduleEvaluator(this.constraint.sortBy);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
@@ -176,7 +178,7 @@ class ScheduleGenerator {
     }
 
     /**
-     * **incorrent annotation for classlist @OAHC2022**
+     * **incorrect annotation for classlist @OAHC2022**
      * @param {[string,string[],number[]][]} classList
      * @param {number} classNum
      * @param {number} choiceNum

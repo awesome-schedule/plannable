@@ -150,7 +150,7 @@
                 </div>
                 <div class="mx-1">
                     <ClassList
-                        :courses="currentCourses"
+                        :courses="currentSchedule.currentCourses"
                         :schedule="currentSchedule"
                         :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
@@ -256,11 +256,37 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item"></li>
-                <!-- <li class="list-group-item">Sort According to</li>
+                <li class="list-group-item">Sort According to</li>
                 <li class="list-group-item">
-                    <ul class="list-group list-group-flush mx-1"></ul>
-                </li> -->
+                    <ul class="list-group list-group-flush mx-1">
+                        <div class="custom-control custom-radio">
+                            <input
+                                id="compactness"
+                                v-model="sortBy"
+                                type="radio"
+                                class="custom-control-input"
+                                value="compactness"
+                                @click="changeSorting('compactness')"
+                            />
+                            <label class="custom-control-label" for="compactness">
+                                Compactness
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input
+                                id="variance"
+                                v-model="sortBy"
+                                type="radio"
+                                class="custom-control-input"
+                                value="variance"
+                                @click="changeSorting('variance')"
+                            />
+                            <label class="custom-control-label" for="variance">
+                                Variance
+                            </label>
+                        </div>
+                    </ul>
+                </li>
             </ul>
         </nav>
 
@@ -499,15 +525,8 @@ export default Vue.extend({
              * indicates whether the currently showing schedule is the generated schedule
              */
             generated: false,
-            /**
-             * @type {Course[]}
-             */
-            currentCourses: [],
-            /**
-             * @type {RawSchedule[]}
-             */
-            scheduleEvaluator: new ScheduleEvaluator(),
-            maxNumSchedules: 100,
+            scheduleEvaluator: new ScheduleEvaluator('variance'),
+            maxNumSchedules: Infinity,
 
             // sidebar display status
             /***
@@ -559,6 +578,7 @@ export default Vue.extend({
             timeSlots: [],
             allowWaitlist: true,
             allowClosed: true,
+            sortBy: 'variance',
 
             downloadURL: '',
 
@@ -569,6 +589,7 @@ export default Vue.extend({
                 'currentSemester',
                 'currentSchedule',
                 'proposedSchedule',
+                'sortBy',
                 // settings
                 'allowWaitList',
                 'allowClosed',
@@ -645,16 +666,9 @@ export default Vue.extend({
         onDocChange() {
             this.saveStatus();
         },
-        getCurrentCourses() {
-            const courses = [];
-            for (const key in this.currentSchedule.All)
-                courses.push(this.allRecords.getRecord(key));
-            return courses;
-        },
         clear() {
             this.currentSchedule.clean();
             this.generated = false;
-            this.currentCourses = [];
             this.scheduleEvaluator.clear();
             this.saveStatus();
         },
@@ -665,7 +679,6 @@ export default Vue.extend({
         clearCache() {
             this.currentSchedule.clean();
             this.generated = false;
-            this.currentCourses = [];
             this.scheduleEvaluator.clear();
             localStorage.clear();
         },
@@ -688,7 +701,6 @@ export default Vue.extend({
          */
         removeCourse(key) {
             this.currentSchedule.remove(key);
-            this.currentCourses = this.getCurrentCourses();
             if (this.generated) {
                 this.noti.warn(`You're editing the generated schedule!`, 3);
             } else {
@@ -702,7 +714,6 @@ export default Vue.extend({
          */
         updateCourse(key, section) {
             this.currentSchedule.update(key, section, true, this.isEntering);
-            this.currentCourses = this.getCurrentCourses();
             if (this.generated) {
                 this.noti.warn(`You're editing the generated schedule!`, 3);
             } else {
@@ -726,7 +737,6 @@ export default Vue.extend({
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
                 this.currentScheduleIndex = idx;
                 this.currentSchedule = this.scheduleEvaluator.getSchedule(idx);
-                this.currentCourses = this.getCurrentCourses();
             }
         },
         /**
@@ -849,7 +859,6 @@ export default Vue.extend({
         closeClassList(event) {
             event.target.value = '';
             this.getClass(null);
-            this.currentCourses = this.getCurrentCourses();
         },
         generateSchedules() {
             const constraintStatus = [];
@@ -870,8 +879,10 @@ export default Vue.extend({
             try {
                 this.scheduleEvaluator = generator.getSchedules(this.currentSchedule, {
                     timeSlots: timeFilters,
-                    status: constraintStatus
+                    status: constraintStatus,
+                    sortBy: this.sortBy
                 });
+
                 if (this.scheduleEvaluator.empty())
                     throw 'No schedules can be generated: class time conflict';
                 this.scheduleEvaluator.sort();
@@ -885,8 +896,26 @@ export default Vue.extend({
                 this.noti.error('No schedules satisfying the given filter can be found.');
                 return;
             } finally {
-                this.currentCourses = this.getCurrentCourses();
                 this.saveStatus();
+            }
+        },
+        /**
+         * @param {string} sortBy
+         */
+        changeSorting(sortBy) {
+            if (!this.scheduleEvaluator.empty()) {
+                this.scheduleEvaluator.changeSort(sortBy, true);
+                if (!this.generated) {
+                    this.proposedSchedule = this.currentSchedule;
+                    this.currentSchedule = this.scheduleEvaluator.getSchedule(
+                        this.currentScheduleIndex
+                    );
+                    this.generated = true;
+                } else {
+                    this.currentSchedule = this.scheduleEvaluator.getSchedule(
+                        this.currentScheduleIndex
+                    );
+                }
             }
         },
         saveStatus() {
@@ -911,12 +940,10 @@ export default Vue.extend({
                 else if (raw_data[field] !== undefined && raw_data[field] !== null)
                     this[field] = raw_data[field];
             }
-            // TODO
             if (!this.proposedSchedule.empty()) {
                 this.currentSchedule = this.proposedSchedule;
                 this.generateSchedules();
             }
-            this.currentCourses = this.getCurrentCourses();
         },
         removeTimeSlot(n) {
             this.timeSlots.splice(n, 1);
@@ -1099,9 +1126,9 @@ export default Vue.extend({
     }
 
     .tab-icon {
-    font-size: 6vw;
-    margin-left: 20%;
-    color: #5e5e5e;
-}
+        font-size: 6vw;
+        margin-left: 20%;
+        color: #5e5e5e;
+    }
 }
 </style>

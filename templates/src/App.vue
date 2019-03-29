@@ -510,7 +510,7 @@ export default Vue.extend({
             /**
              * when true, show the select-class sidebar if 'sideBar' is also true
              */
-            showSelectClass: true,
+            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
             /**
              * when true, show the filter sidebar if 'sideBar' is also true
              */
@@ -611,10 +611,6 @@ export default Vue.extend({
         }
     },
     watch: {},
-
-    mounted() {
-        this.sideBar = window.screen.width / window.screen.height < 1 ? true : false;
-    },
     created() {
         // axios.get(`${this.api}/semesters`).then(res => {
         //     this.semesters = res.data;
@@ -1070,7 +1066,7 @@ export default Vue.extend({
 @media (max-width: 450px) {
     .schedule {
         width: 90% !important;
-        margin-left: 5% !important;
+        margin-left: 11vw !important;
     }
 
     .sidebar {
@@ -1081,8 +1077,8 @@ export default Vue.extend({
         z-index: 10; /* Behind the navbar */
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
         overflow-y: auto;
-        left: 3vw !important;
-        width: 60vw !important;
+        left: 10vw !important;
+        width: 75vw !important;
     }
 
     .nav-btn {
@@ -1099,7 +1095,13 @@ export default Vue.extend({
         z-index: 10; /* Behind the navbar */
         padding: 26px 0 0;
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-        width: 3vh !important;
+        width: 10vw !important;
     }
+
+    .tab-icon {
+    font-size: 6vw;
+    margin-left: 20%;
+    color: #5e5e5e;
+}
 }
 </style>

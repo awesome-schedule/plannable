@@ -31,11 +31,11 @@
                         )
                     }"
                 >
-                    <div class="placeholder">Monday</div>
-                    <div class="placeholder">Tuesday</div>
-                    <div class="placeholder">Wednesday</div>
-                    <div class="placeholder">Thursday</div>
-                    <div class="placeholder">Friday</div>
+                    <div class="placeholder">{{mon}} </div>
+                    <div class="placeholder">{{tue}} </div>
+                    <div class="placeholder">{{wed}} </div>
+                    <div class="placeholder">{{thu}} </div>
+                    <div class="placeholder">{{fri}} </div>
                     <div
                         v-for="item in items"
                         :key="item"
@@ -133,10 +133,21 @@ export default Vue.extend({
             time.push((i / 10 > 0 ? i : 0 + i) + ': 30');
         }
 
+        const reducedTime = [];
+        for (let i = 8; i < 19; i++) {
+            reducedTime.push(i);
+            reducedTime.push('');
+        }
+
         time.push('19: 00');
         return {
             items: arr,
-            hours: time
+            hours: window.screen.width > 450 ? time : reducedTime,
+            mon: window.screen.width > 450 ? 'Monday' : 'Mon',
+            tue: window.screen.width > 450 ? 'Tuesday' : 'Tue',
+            wed: window.screen.width > 450 ? 'Wednesday' : 'Wed',
+            thu: window.screen.width > 450 ? 'Thursday' : 'Thu',
+            fri: window.screen.width > 450 ? 'Friday' : 'fri'
         };
     },
     computed: {

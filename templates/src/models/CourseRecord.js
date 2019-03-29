@@ -4,7 +4,7 @@ class CourseRecord {
     /**
      * lecture type number => meaning
      */
-    static TYPES = {
+    static TYPES = Object.freeze({
         '-1': '',
         0: 'Clinical',
         1: 'Discussion',
@@ -16,19 +16,19 @@ class CourseRecord {
         7: 'Seminar',
         8: 'Studio',
         9: 'Workshop'
-    };
+    });
 
     /**
      * status number => meaning
      */
-    static STATUSES = {
+    static STATUSES = Object.freeze({
         '-1': 'TBA',
         1: 'Open',
         0: 'Closed',
         2: 'Wait List'
-    };
+    });
 
-    static FIELDS = {
+    static FIELDS = Object.freeze({
         0: 'id',
         1: 'department',
         2: 'number',
@@ -45,9 +45,9 @@ class CourseRecord {
         13: 'enrollment_limit',
         14: 'wait_list',
         15: 'description'
-    };
+    });
 
-    static TYPES_PARSE = {
+    static TYPES_PARSE = Object.freeze({
         Clinical: 0,
         Discussion: 1,
         Drill: 2,
@@ -58,13 +58,13 @@ class CourseRecord {
         Seminar: 7,
         Studio: 8,
         Workshop: 9
-    };
+    });
 
-    static STATUSES_PARSE = {
+    static STATUSES_PARSE = Object.freeze({
         Open: 1,
         Closed: 0,
         'Wait List': 2
-    };
+    });
 
     /**
      * The list of indices at which the field is a list

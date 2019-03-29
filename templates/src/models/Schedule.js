@@ -318,6 +318,10 @@ class Schedule {
         this.All = {};
         this.previous = null;
     }
+
+    empty() {
+        Object.keys(this.All).length === 0;
+    }
 }
 
 export default Schedule;

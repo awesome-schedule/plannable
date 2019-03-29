@@ -12,7 +12,7 @@ const CROS_PROXY = 'https://cors-anywhere.herokuapp.com/';
  * Fetch the list of semesters from Lou's list
  * @param {string} cros_proxy
  * @param {number} count
- * @return {Promise<import('../models/AllRecords').Semester[]>}
+ * @returns {Promise<import('../models/AllRecords').Semester[]>}
  */
 function getSemesterList(cros_proxy = CROS_PROXY, count = 5) {
     console.time('get semester list');

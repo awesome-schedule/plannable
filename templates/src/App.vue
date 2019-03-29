@@ -162,7 +162,7 @@
                             class="btn btn-outline-info"
                             @click="generateSchedules"
                         >
-                            Submit
+                            Generate
                         </button>
                         <button class="btn btn-outline-info" @click="clear">
                             Clean All
@@ -537,8 +537,8 @@ export default Vue.extend({
 
             // input options
             showTime: true,
-            showRoom: true,
-            showInstructor: false,
+            showRoom: false,
+            showInstructor: true,
             showClasslistTitle: false,
             fullHeight: 45,
             partialHeight: 35,

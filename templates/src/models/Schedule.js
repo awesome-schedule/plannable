@@ -1,6 +1,8 @@
 // @ts-check
 // eslint-disable-next-line
 import Course from './Course';
+// eslint-disable-next-line
+import CourseRecord from './CourseRecord';
 /**
  * A schedule is a list of courses
  */
@@ -43,22 +45,27 @@ class Schedule {
          */
         this.All = {};
         /**
+         * computed based on `this.All` by `computeSchedule`
          * @type {Course[]}
          */
         this.Monday = [];
         /**
+         * computed based on `this.All` by `computeSchedule`
          * @type {Course[]}
          */
         this.Tuesday = [];
         /**
+         * computed based on `this.All` by `computeSchedule`
          * @type {Course[]}
          */
         this.Wednesday = [];
         /**
+         * computed based on `this.All` by `computeSchedule`
          * @type {Course[]}
          */
         this.Thursday = [];
         /**
+         * computed based on `this.All` by `computeSchedule`
          * @type {Course[]}
          */
         this.Friday = [];
@@ -71,9 +78,19 @@ class Schedule {
         this.title = title;
         this.id = id;
 
+        /**
+         * computed property
+         */
         this.colors = new Set();
-
+        /**
+         * computed property
+         */
         this.totalCredit = 0;
+        /**
+         * a computed list that's updated by the `computeSchedule method`
+         * @type {CourseRecord[]}
+         */
+        this.currentCourses = [];
 
         for (let i = 0; i < raw_schedule.length; i++) {
             const [key, section] = raw_schedule[i];
@@ -123,7 +140,7 @@ class Schedule {
      * - If the course is **already in** the schedule, delete it from the schedule
      * - If the course is **not** in the schedule, add it to the schedule
      * @param {string} key
-     * @param {Set<number> | number} section
+     * @param {number} section
      * @param {boolean} update whether to recompute schedule
      * @param {boolean} remove whether to remove the key if the set of section is empty
      */
@@ -170,8 +187,10 @@ class Schedule {
     computeSchedule() {
         if (!Schedule.allRecords) return;
         this.cleanSchedule();
+        this.currentCourses = [];
         for (const key in this.All) {
             const sections = this.All[key];
+            this.currentCourses.push(Schedule.allRecords.getRecord(key));
             // we only render those which has only one section given
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
@@ -234,6 +253,7 @@ class Schedule {
         }
         this.colors.clear();
         this.totalCredit = 0;
+        this.currentCourses = [];
     }
     /**
      * instantiate a `Schedule` object from its JSON representation
@@ -317,6 +337,10 @@ class Schedule {
         this.cleanSchedule();
         this.All = {};
         this.previous = null;
+    }
+
+    empty() {
+        Object.keys(this.All).length === 0;
     }
 }
 

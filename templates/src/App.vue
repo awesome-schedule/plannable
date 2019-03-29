@@ -7,10 +7,7 @@
             :course="classListModalCourse"
         ></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
-        <nav
-            class="d-none d-md-block bg-light tab-bar"
-            :style="`width:3vw;max-height:${navHeight}`"
-        >
+        <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
                 class="tab-icon mt-0 mb-4"
                 title="Select Classes"
@@ -74,7 +71,7 @@
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 
-        <nav v-if="sideBar && showSelectClass" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showSelectClass" class="d-block bg-light sidebar">
             <div class="dropdown" style="">
                 <button
                     id="semester"
@@ -82,6 +79,12 @@
                     type="button"
                     data-toggle="dropdown"
                 >
+                    <span
+                        v-if="loading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
                     {{ currentSemester === null ? 'Select Semester' : currentSemester.name }}
                 </button>
                 <div
@@ -130,9 +133,10 @@
                     <button
                         class="btn btn-primary nav-btn"
                         @click="
-                            if (schedules.length > 0) {
-                                if (generated) currentSchedule = proposedSchedule;
-                                else switchPage(currentScheduleIndex);
+                            if (!scheduleEvaluator.empty()) {
+                                if (generated) {
+                                    currentSchedule = proposedSchedule;
+                                } else switchPage(currentScheduleIndex);
                                 generated = !generated;
                             }
                         "
@@ -140,13 +144,13 @@
                         {{
                             generated
                                 ? `Generated Schedule: ${currentScheduleIndex + 1}`
-                                : 'Proposed Schedule'
+                                : 'Selected Classes'
                         }}
                     </button>
                 </div>
                 <div class="mx-1">
                     <ClassList
-                        :courses="currentCourses"
+                        :courses="currentSchedule.currentCourses"
                         :schedule="currentSchedule"
                         :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
@@ -179,11 +183,14 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showFilter" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showFilter" class="d-block bg-light sidebar">
             <button class="btn btn-primary nav-btn">
                 Filters
             </button>
             <ul class="list-group list-group-flush mx-1">
+                <li class="list-group-item" title="Time periods when you don't want to have class">
+                    No Class Time
+                </li>
                 <li v-for="(value, n) in timeSlots" :key="n" class="list-group-item p-1">
                     <table style="width:100%">
                         <tr>
@@ -249,11 +256,41 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item"></li>
+                <li class="list-group-item">Sort According to</li>
+                <li class="list-group-item">
+                    <ul class="list-group list-group-flush mx-1">
+                        <div class="custom-control custom-radio">
+                            <input
+                                id="compactness"
+                                v-model="sortBy"
+                                type="radio"
+                                class="custom-control-input"
+                                value="compactness"
+                                @click="changeSorting('compactness')"
+                            />
+                            <label class="custom-control-label" for="compactness">
+                                Compactness
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input
+                                id="variance"
+                                v-model="sortBy"
+                                type="radio"
+                                class="custom-control-input"
+                                value="variance"
+                                @click="changeSorting('variance')"
+                            />
+                            <label class="custom-control-label" for="variance">
+                                Variance
+                            </label>
+                        </div>
+                    </ul>
+                </li>
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showSetting" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showSetting" class="d-block bg-light sidebar">
             <button class="btn btn-primary nav-btn">
                 Schedule Display settings
             </button>
@@ -276,6 +313,17 @@
                         <span class="input-group-text">px</span>
                     </div>
                 </div>
+            </div>
+            <div v-if="mobile" class="custom-control custom-checkbox mb-3 ml-3">
+                <input
+                    id="scroll"
+                    v-model="scrollable"
+                    type="checkbox"
+                    class="custom-control-input"
+                />
+                <label for="scroll" class="custom-control-label">
+                    scrollable
+                </label>
             </div>
             <button class="btn btn-primary nav-btn">
                 Display Options
@@ -340,7 +388,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showExport" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showExport" class="d-block bg-light sidebar">
             <button class="btn btn-primary nav-btn">
                 Import/Export Schedule
             </button>
@@ -393,12 +441,19 @@
                 </button>
             </div>
         </transition>
-        <div :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
+        <div
+            class="schedule"
+            :style="
+                `width:${
+                    mobile ? (scrollable ? 200 : 90) + '%' : scheduleWidth + 'vw'
+                }; margin-left:${mobile ? 11 : scheduleLeft}vw;`
+            "
+        >
             <div class="container-fluid mb-2">
                 <div class="row justify-content-center">
                     <div class="col">
                         <Pagination
-                            v-if="generated && schedules.length > 0"
+                            v-if="generated && !scheduleEvaluator.empty()"
                             :indices="scheduleIndices"
                             @switch_page="switchPage"
                         ></Pagination>
@@ -434,8 +489,9 @@ import Schedule from './models/Schedule.js';
 import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
 // import axios from 'axios';
-import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
-import getSemesterList from './data/dataLoader.js';
+import ScheduleGenerator from './algorithm/ScheduleGenerator.js';
+import ScheduleEvaluator from './algorithm/ScheduleEvaluator.js';
+import { getSemesterList, getSemesterData } from './data/DataLoader.js';
 import Notification from './models/Notification.js';
 
 /**
@@ -445,8 +501,6 @@ import Notification from './models/Notification.js';
  * Raw Schedule
  * @typedef {[string, number, number][]} RawSchedule
  */
-
-import getSemesterData from './data/SemesterLoader.js';
 
 export default Vue.extend({
     name: 'App',
@@ -489,14 +543,8 @@ export default Vue.extend({
              * indicates whether the currently showing schedule is the generated schedule
              */
             generated: false,
-            /**
-             * @type {Course[]}
-             */
-            currentCourses: [],
-            /**
-             * @type {RawSchedule[]}
-             */
-            schedules: [],
+            scheduleEvaluator: new ScheduleEvaluator('variance'),
+            maxNumSchedules: Infinity,
 
             // sidebar display status
             /***
@@ -506,7 +554,7 @@ export default Vue.extend({
             /**
              * when true, show the select-class sidebar if 'sideBar' is also true
              */
-            showSelectClass: true,
+            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
             /**
              * when true, show the filter sidebar if 'sideBar' is also true
              */
@@ -548,6 +596,7 @@ export default Vue.extend({
             timeSlots: [],
             allowWaitlist: true,
             allowClosed: true,
+            sortBy: 'variance',
 
             downloadURL: '',
 
@@ -558,7 +607,7 @@ export default Vue.extend({
                 'currentSemester',
                 'currentSchedule',
                 'proposedSchedule',
-                'schedules',
+                'sortBy',
                 // settings
                 'allowWaitList',
                 'allowClosed',
@@ -569,13 +618,17 @@ export default Vue.extend({
                 'fullHeight',
                 'partialHeight',
                 'timeSlots',
-                'storageVersion'
+                'storageVersion',
+                'semesters'
             ],
 
             // other
             noti: new Notification(),
             cache: true,
-            navHeight: 500
+            navHeight: 500,
+            loading: false,
+            mobile: window.screen.width < 900,
+            scrollable: false
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -585,7 +638,9 @@ export default Vue.extend({
          * @return {number[]}
          */
         scheduleIndices() {
-            const indices = new Array(this.schedules.length);
+            const indices = new Array(
+                Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)
+            );
             for (let i = 0; i < indices.length; i++) indices[i] = i;
             return indices;
         },
@@ -612,46 +667,40 @@ export default Vue.extend({
         //     // get the latest semester
         //     this.selectSemester(this.semesters.length - 1);
         // });
-
-        getSemesterList(
-            res => {
+        this.loading = true;
+        getSemesterList()
+            .then(res => {
                 this.semesters = res;
                 // get the latest semester
                 this.selectSemester(this.semesters.length - 1);
-            },
-            error => {
+                this.loading = false;
+            })
+            .catch(error => {
                 this.noti.error(error);
-            }
-        );
+                this.loading = false;
+            });
 
         this.navHeight = document.documentElement.clientHeight;
     },
+
     methods: {
         onDocChange() {
             this.saveStatus();
         },
-        getCurrentCourses() {
-            const courses = [];
-            for (const key in this.currentSchedule.All)
-                courses.push(this.allRecords.getRecord(key));
-            return courses;
-        },
         clear() {
             this.currentSchedule.clean();
             this.generated = false;
-            this.currentCourses = [];
-            this.schedules = [];
+            this.scheduleEvaluator.clear();
             this.saveStatus();
         },
         cleanSchedules() {
-            this.schedules = [];
+            this.scheduleEvaluator.clear();
             this.currentSchedule.cleanSchedule();
         },
         clearCache() {
             this.currentSchedule.clean();
             this.generated = false;
-            this.currentCourses = [];
-            this.schedules = [];
+            this.scheduleEvaluator.clear();
             localStorage.clear();
         },
 
@@ -673,7 +722,6 @@ export default Vue.extend({
          */
         removeCourse(key) {
             this.currentSchedule.remove(key);
-            this.currentCourses = this.getCurrentCourses();
             if (this.generated) {
                 this.noti.warn(`You're editing the generated schedule!`, 3);
             } else {
@@ -687,7 +735,6 @@ export default Vue.extend({
          */
         updateCourse(key, section) {
             this.currentSchedule.update(key, section, true, this.isEntering);
-            this.currentCourses = this.getCurrentCourses();
             if (this.generated) {
                 this.noti.warn(`You're editing the generated schedule!`, 3);
             } else {
@@ -708,10 +755,9 @@ export default Vue.extend({
          * @param {number} idx
          */
         switchPage(idx) {
-            if (0 <= idx && idx < this.schedules.length) {
+            if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
                 this.currentScheduleIndex = idx;
-                this.currentSchedule = new Schedule(this.schedules[idx], 'Schedule', idx + 1);
-                this.currentCourses = this.getCurrentCourses();
+                this.currentSchedule = this.scheduleEvaluator.getSchedule(idx);
             }
         },
         /**
@@ -815,6 +861,7 @@ export default Vue.extend({
             //         callback();
             //     }
             // });
+            this.loading = true;
             getSemesterData(this.semesters[semesterIdx].id)
                 .then(data => {
                     this.allRecords = new AllRecords(this.currentSemester, data);
@@ -822,16 +869,17 @@ export default Vue.extend({
                     Schedule.allRecords = this.allRecords;
                     if (typeof callback === 'function') {
                         callback();
+                        this.loading = false;
                     }
                 })
                 .catch(err => {
                     this.noti.error(err);
+                    this.loading = false;
                 });
         },
         closeClassList(event) {
             event.target.value = '';
             this.getClass(null);
-            this.currentCourses = this.getCurrentCourses();
         },
         generateSchedules() {
             const constraintStatus = [];
@@ -845,40 +893,50 @@ export default Vue.extend({
                 this.currentSchedule = this.proposedSchedule;
             }
             const generator = new ScheduleGenerator(this.allRecords);
-            /**
-             * @type {RawSchedule}
-             */
-            const translated_raw = [];
             const timeFilters = this.computeFilter();
 
             // null means there's an error processing time filters. Don't continue if that's the case
             if (timeFilters === null) return;
             try {
-                const table = generator.getSchedules(this.currentSchedule, {
+                this.scheduleEvaluator = generator.getSchedules(this.currentSchedule, {
                     timeSlots: timeFilters,
-                    status: constraintStatus
+                    status: constraintStatus,
+                    sortBy: this.sortBy
                 });
-                table.sort();
 
-                for (const rd of table.schedules.slice(0, 100)) {
-                    const raw_schedule = [];
-                    for (const raw_course of rd.schedule) {
-                        raw_schedule.push([raw_course[0], raw_course[3], -1]);
-                    }
-                    translated_raw.push(raw_schedule);
-                }
-                this.schedules = translated_raw;
+                if (this.scheduleEvaluator.empty())
+                    throw 'No schedules can be generated: class time conflict';
+                this.scheduleEvaluator.sort();
                 this.proposedSchedule = this.currentSchedule;
                 this.generated = true;
-                this.currentSchedule = new Schedule(this.schedules[0], 'Schedule', 1);
+                this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
                 this.noti.success('Schedules Generated!', 3);
             } catch (error) {
                 this.generated = false;
-                this.schedules = [];
-                this.noti.error('Bad constraint. Abort.');
+                this.scheduleEvaluator.clear();
+                this.noti.error('No schedules satisfying the given filter can be found.');
+                return;
             } finally {
-                this.currentCourses = this.getCurrentCourses();
                 this.saveStatus();
+            }
+        },
+        /**
+         * @param {string} sortBy
+         */
+        changeSorting(sortBy) {
+            if (!this.scheduleEvaluator.empty()) {
+                this.scheduleEvaluator.changeSort(sortBy, true);
+                if (!this.generated) {
+                    this.proposedSchedule = this.currentSchedule;
+                    this.currentSchedule = this.scheduleEvaluator.getSchedule(
+                        this.currentScheduleIndex
+                    );
+                    this.generated = true;
+                } else {
+                    this.currentSchedule = this.scheduleEvaluator.getSchedule(
+                        this.currentScheduleIndex
+                    );
+                }
             }
         },
         saveStatus() {
@@ -903,10 +961,10 @@ export default Vue.extend({
                 else if (raw_data[field] !== undefined && raw_data[field] !== null)
                     this[field] = raw_data[field];
             }
-            if (this.schedules.length > 0) {
-                this.generated = true;
+            if (!this.proposedSchedule.empty()) {
+                this.currentSchedule = this.proposedSchedule;
+                this.generateSchedules();
             }
-            this.currentCourses = this.getCurrentCourses();
         },
         removeTimeSlot(n) {
             this.timeSlots.splice(n, 1);
@@ -976,7 +1034,7 @@ export default Vue.extend({
 <style scoped>
 .fade-enter-active,
 .fade-leave-active {
-    transition: opacity 0.5s;
+    transition: opacity 0.4s;
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
     opacity: 0;
@@ -1027,5 +1085,47 @@ export default Vue.extend({
 
 .filter-add:hover {
     background-color: rgba(223, 223, 223, 0.5);
+}
+
+@media (max-width: 900px) {
+    /* .schedule {
+        width: 85% !important;
+        margin-left: 11vw !important;
+    } */
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 10; /* Behind the navbar */
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        left: 10vw !important;
+        width: 75vw !important;
+    }
+
+    .nav-btn {
+        border-radius: 0 !important;
+        width: 100%;
+    }
+
+    .tab-bar {
+        display: block;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 10; /* Behind the navbar */
+        padding: 26px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+        width: 10vw !important;
+    }
+
+    .tab-icon {
+        font-size: 6vw;
+        margin-left: 20%;
+        color: #5e5e5e;
+    }
 }
 </style>

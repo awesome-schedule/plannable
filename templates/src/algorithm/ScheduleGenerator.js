@@ -1,16 +1,22 @@
+// @ts-check
+
 import CourseRecord from '../models/CourseRecord';
-import { ScheduleEvaluator } from './ScheduleEvaluator';
+import ScheduleEvaluator from './ScheduleEvaluator';
 /**
- * @typedef {[string,string[],number[],number][]} RawSchedule
+ * @typedef {[string,string[],number[],number]} RawCourse
  */
 /**
- * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[]}} Constraint
+ * @typedef {RawCourse[]} RawSchedule
+ */
+/**
+ * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortBy: string}} Constraint
  */
 class ScheduleGenerator {
     static constraintDefaults = {
         timeSlots: [],
         status: [],
-        noClassDay: []
+        noClassDay: [],
+        sortBy: 'variance'
     };
     /**
      *
@@ -49,6 +55,7 @@ class ScheduleGenerator {
      */
     getSchedules(schedule, constraint = ScheduleGenerator.constraintDefaults) {
         this.validateConstraints(constraint);
+        this.constraint = constraint;
 
         const courses = schedule.All;
 
@@ -114,7 +121,6 @@ class ScheduleGenerator {
         }
         classList.sort((a, b) => a.length - b.length);
         const result = this.createSchedule(classList);
-        // console.log(result.finalTable.toArray());
         return result;
     }
 
@@ -132,7 +138,7 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new ScheduleEvaluator();
+        const finalTable = new ScheduleEvaluator(this.constraint.sortBy);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
@@ -172,8 +178,8 @@ class ScheduleGenerator {
     }
 
     /**
-     *
-     * @param {[string,string[],number[]]} classList
+     * **incorrect annotation for classlist @OAHC2022**
+     * @param {[string,string[],number[]][]} classList
      * @param {number} classNum
      * @param {number} choiceNum
      * @param {number[]} pathMemory
@@ -299,7 +305,7 @@ class ScheduleGenerator {
 
     /**
      *
-     * @param {Course} course
+     * @param {import('../models/Course').default} course
      * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      */
     filterStatus(course, constraint) {
@@ -317,7 +323,7 @@ class ScheduleGenerator {
 
     /**
      *
-     * @param {[string,string,string...]} date
+     * @param {string[]} date
      * @param {[number,number]} timeBlock
      * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      */
@@ -349,4 +355,4 @@ class ScheduleGenerator {
     }
 }
 
-export { ScheduleGenerator };
+export default ScheduleGenerator;

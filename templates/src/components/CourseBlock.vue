@@ -15,16 +15,21 @@
         }"
         @click="$parent.$emit('trigger-modal', course)"
     >
-        <div class="mt-2 ml-2" style="color:white; font-size:13px">
+        <div v-if="!mobile" class="mt-2 ml-2" style="color:white; font-size:13px">
             {{ course.department }} {{ course.number }}-{{ course.section }} {{ course.type }}
         </div>
-        <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+        <div v-if="mobile" class="mt-2 ml-2" style="color:white; font-size:10px">
+            {{ course.department }} <br />
+            {{ course.number }} <br />
+            {{ course.section }}
+        </div>
+        <div v-if="showTime && !mobile" class="ml-2" style="color:#eaeaea; font-size:11px">
             {{ course.days }}
         </div>
-        <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
+        <div v-if="showInstructor && !mobile" class="ml-2" style="color:#eaeaea; font-size:11px">
             {{ course.instructor.join(', ') }}
         </div>
-        <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
+        <div v-if="showRoom && !mobile" class="ml-2" style="color:#eaeaea; font-size:11px">
             {{ course.room }}
         </div>
     </div>
@@ -42,6 +47,11 @@ export default Vue.extend({
         showTime: Boolean,
         showRoom: Boolean,
         showInstructor: Boolean
+    },
+    data() {
+        return {
+            mobile: window.screen.width < 900
+        };
     },
     computed: {
         startPx() {

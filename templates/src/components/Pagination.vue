@@ -12,13 +12,13 @@
                 >
             </li>
             <li
-                v-for="index in indices.length < 10 ? indices.length : 10"
+                v-for="index in pageNumber"
                 :key="index"
                 :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
             >
                 <a class="page-link" href="#" @click="switchPage(index + start - 1)">
                     {{ index + start }}
-                    <span v-if="idx === index + 9" class="sr-only">(current)</span>
+                    <span v-if="idx === index + end - 1" class="sr-only">(current)</span>
                 </a>
             </li>
             <li
@@ -39,10 +39,18 @@ export default Vue.extend({
         indices: Array
     },
     data() {
+        let e = 10;
+        if (window.screen.width < 900) {
+            e = 3;
+        }
+        if (this.indices.length < e) {
+            e = this.indices.length;
+        }
         return {
             idx: 0,
             start: 0,
-            end: this.indices.length < 10 ? this.indices.length : 10
+            end: e,
+            pageNumber: e
         };
     },
     methods: {

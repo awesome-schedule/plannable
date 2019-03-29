@@ -7,10 +7,7 @@
             :course="classListModalCourse"
         ></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
-        <nav
-            class="d-none d-md-block bg-light tab-bar"
-            :style="`width:3vw;max-height:${navHeight}`"
-        >
+        <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
                 class="tab-icon mt-0 mb-4"
                 title="Select Classes"
@@ -74,7 +71,7 @@
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 
-        <nav v-if="sideBar && showSelectClass" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showSelectClass" class="d-block bg-light sidebar">
             <div class="dropdown" style="">
                 <button
                     id="semester"
@@ -169,7 +166,7 @@
                             class="btn btn-outline-info"
                             @click="generateSchedules"
                         >
-                            Submit
+                            Generate
                         </button>
                         <button class="btn btn-outline-info" @click="clear">
                             Clean All
@@ -186,7 +183,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showFilter" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showFilter" class="d-block bg-light sidebar">
             <button class="btn btn-primary nav-btn">
                 Filters
             </button>
@@ -267,7 +264,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showSetting" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showSetting" class="d-block bg-light sidebar">
             <button class="btn btn-primary nav-btn">
                 Schedule Display settings
             </button>
@@ -354,7 +351,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showExport" class="d-none d-md-block bg-light sidebar">
+        <nav v-if="sideBar && showExport" class="d-block bg-light sidebar">
             <button class="btn btn-primary nav-btn">
                 Import/Export Schedule
             </button>
@@ -407,7 +404,7 @@
                 </button>
             </div>
         </transition>
-        <div :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
+        <div class="schedule" :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
             <div class="container-fluid mb-2">
                 <div class="row justify-content-center">
                     <div class="col">
@@ -551,8 +548,8 @@ export default Vue.extend({
 
             // input options
             showTime: true,
-            showRoom: true,
-            showInstructor: false,
+            showRoom: false,
+            showInstructor: true,
             showClasslistTitle: false,
             fullHeight: 45,
             partialHeight: 35,
@@ -622,6 +619,10 @@ export default Vue.extend({
         }
     },
     watch: {},
+
+    mounted() {
+        this.sideBar = window.screen.width / window.screen.height < 1 ? true : false;
+    },
     created() {
         // axios.get(`${this.api}/semesters`).then(res => {
         //     this.semesters = res.data;
@@ -643,6 +644,7 @@ export default Vue.extend({
 
         this.navHeight = document.documentElement.clientHeight;
     },
+
     methods: {
         onDocChange() {
             this.saveStatus();
@@ -1039,5 +1041,65 @@ export default Vue.extend({
 
 .filter-add:hover {
     background-color: rgba(223, 223, 223, 0.5);
+}
+
+@media screen and (orientation: portrait) {
+    .schedule {
+        width: 90% !important;
+        margin-left: 5% !important;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 100; /* Behind the navbar */
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        left: 3vw;
+        width: 60vw;
+    }
+
+    .nav-btn {
+        border-radius: 0 !important;
+        width: 100%;
+    }
+}
+
+@media (max-width: 450px) {
+    .schedule {
+        width: 90% !important;
+        margin-left: 5% !important;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 10; /* Behind the navbar */
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        left: 3vw !important;
+        width: 60vw !important;
+    }
+
+    .nav-btn {
+        border-radius: 0 !important;
+        width: 100%;
+    }
+
+    .tab-bar {
+        display: block;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 10; /* Behind the navbar */
+        padding: 26px 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+        width: 3vh !important;
+    }
 }
 </style>

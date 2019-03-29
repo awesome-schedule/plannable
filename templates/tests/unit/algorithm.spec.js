@@ -1,6 +1,6 @@
 import AllRecords from '../../src/models/AllRecords';
 import data from './data.js';
-import { ScheduleGenerator } from '../../src/algorithm/ScheduleGenerator';
+import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import Schedule from '../../src/models/Schedule';
 
 const allRecords = new AllRecords({ id: '1198', name: 'Fall 2019' }, data);

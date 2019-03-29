@@ -1,4 +1,6 @@
 //@ts-check
+/// <reference path="../../node_modules/@types/jquery/index.d.ts" />
+/// <reference path="../../node_modules/@types/bootstrap-notify/index.d.ts" />
 class Notification {
     static TYPES = {
         info: 'info',
@@ -23,6 +25,23 @@ class Notification {
         this.msg = msg;
         this.class = Notification.TYPES[type];
         this.clear(timeout);
+        // $.notify(
+        //     {
+        //         // options
+        //         message: msg
+        //     },
+        //     {
+        //         // settings
+        //         type: Notification.TYPES[type],
+        //         timer: 0,
+        //         delay: timeout * 1000,
+        //         position: 'fixed',
+        //         placement: {
+        //             from: 'top',
+        //             align: 'center'
+        //         }
+        //     }
+        // );
     }
     /**
      *

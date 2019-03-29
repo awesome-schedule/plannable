@@ -14,7 +14,7 @@
             <li
                 v-for="index in indices.length < 10 ? indices.length : 10"
                 :key="index"
-                :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
+                :class="'page-item' +  (idx === index - 1 + start ? ' active' : '')"
             >
                 <a class="page-link" href="#" @click="switchPage(index + start - 1)">
                     {{ index + start }}

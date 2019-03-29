@@ -1,4 +1,5 @@
 // @ts-check
+import Schedule from '../models/Schedule';
 /**
  * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */
@@ -94,12 +95,48 @@ class ScheduleEvaluator {
         const schedule = timeTable.concat();
         this.schedules.push({
             schedule: schedule,
-            coeff: ScheduleEvaluator.compactness(schedule) + ScheduleEvaluator.variance(schedule)
+            coeff: ScheduleEvaluator.variance(schedule) // + ScheduleEvaluator.compactness(schedule)
         });
     }
 
+    /**
+     * sort the array of schedules according to their quality coefficients
+     */
     sort() {
+        // if want to be really fast, use Floyd–Rivest algorithm to select first 100 elements and sort only these elements
         this.schedules.sort((a, b) => a.coeff - b.coeff);
     }
+
+    size() {
+        return this.schedules.length;
+    }
+
+    /**
+     * @param {number} idx
+     */
+    getRaw(idx) {
+        /**
+         * @type {import('../models/Schedule').RawSchedule}
+         */
+        const raw_schedule = [];
+        for (const raw_course of this.schedules[idx].schedule) {
+            raw_schedule.push([raw_course[0], raw_course[3], -1]);
+        }
+        return raw_schedule;
+    }
+    /**
+     * @param {number} idx
+     */
+    getSchedule(idx) {
+        return new Schedule(this.getRaw(idx), 'Schedule', idx + 1);
+    }
+
+    empty() {
+        return this.schedules.length === 0;
+    }
+
+    clear() {
+        this.schedules = [];
+    }
 }
-export { ScheduleEvaluator };
+export default ScheduleEvaluator;

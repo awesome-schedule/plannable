@@ -1,7 +1,7 @@
 // @ts-check
 
 import CourseRecord from '../models/CourseRecord';
-import { ScheduleEvaluator } from './ScheduleEvaluator';
+import ScheduleEvaluator from './ScheduleEvaluator';
 /**
  * @typedef {[string,string[],number[],number]} RawCourse
  */
@@ -119,7 +119,6 @@ class ScheduleGenerator {
         }
         classList.sort((a, b) => a.length - b.length);
         const result = this.createSchedule(classList);
-        // console.log(result.finalTable.toArray());
         return result;
     }
 
@@ -177,8 +176,8 @@ class ScheduleGenerator {
     }
 
     /**
-     *
-     * @param {[string,string[],number[]]} classList
+     * **incorrent annotation for classlist @OAHC2022**
+     * @param {[string,string[],number[]][]} classList
      * @param {number} classNum
      * @param {number} choiceNum
      * @param {number[]} pathMemory
@@ -304,7 +303,7 @@ class ScheduleGenerator {
 
     /**
      *
-     * @param {Course} course
+     * @param {import('../models/Course').default} course
      * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      */
     filterStatus(course, constraint) {
@@ -354,4 +353,4 @@ class ScheduleGenerator {
     }
 }
 
-export { ScheduleGenerator };
+export default ScheduleGenerator;

@@ -597,7 +597,8 @@ export default Vue.extend({
                 'fullHeight',
                 'partialHeight',
                 'timeSlots',
-                'storageVersion'
+                'storageVersion',
+                'semesters'
             ],
 
             // other

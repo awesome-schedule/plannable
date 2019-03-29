@@ -190,6 +190,9 @@
                 Filters
             </button>
             <ul class="list-group list-group-flush mx-1">
+                <li class="list-group-item" title="Time periods when you don't want to have class">
+                    No Class Time
+                </li>
                 <li v-for="(value, n) in timeSlots" :key="n" class="list-group-item p-1">
                     <table style="width:100%">
                         <tr>

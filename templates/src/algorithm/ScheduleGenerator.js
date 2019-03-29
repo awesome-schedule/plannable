@@ -1,7 +1,12 @@
+// @ts-check
+
 import CourseRecord from '../models/CourseRecord';
 import { ScheduleEvaluator } from './ScheduleEvaluator';
 /**
- * @typedef {[string,string[],number[],number][]} RawSchedule
+ * @typedef {[string,string[],number[],number]} RawCourse
+ */
+/**
+ * @typedef {RawCourse[]} RawSchedule
  */
 /**
  * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[]}} Constraint
@@ -317,7 +322,7 @@ class ScheduleGenerator {
 
     /**
      *
-     * @param {[string,string,string...]} date
+     * @param {string[]} date
      * @param {[number,number]} timeBlock
      * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      */

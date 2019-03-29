@@ -78,6 +78,12 @@
                     type="button"
                     data-toggle="dropdown"
                 >
+                    <span
+                        v-if="loading"
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                    ></span>
                     {{ currentSemester === null ? 'Select Semester' : currentSemester.name }}
                 </button>
                 <div
@@ -136,7 +142,7 @@
                         {{
                             generated
                                 ? `Generated Schedule: ${currentScheduleIndex + 1}`
-                                : 'Proposed Schedule'
+                                : 'Selected Classes'
                         }}
                     </button>
                 </div>
@@ -431,7 +437,7 @@ import Course from './models/Course.js';
 import AllRecords from './models/AllRecords.js';
 // import axios from 'axios';
 import { ScheduleGenerator } from './algorithm/ScheduleGenerator.js';
-import getSemesterList from './data/dataLoader.js';
+import { getSemesterList, getSemesterData } from './data/DataLoader.js';
 import Notification from './models/Notification.js';
 
 /**
@@ -441,8 +447,6 @@ import Notification from './models/Notification.js';
  * Raw Schedule
  * @typedef {[string, number, number][]} RawSchedule
  */
-
-import getSemesterData from './data/SemesterLoader.js';
 
 export default Vue.extend({
     name: 'App',
@@ -571,7 +575,8 @@ export default Vue.extend({
             // other
             noti: new Notification(),
             cache: true,
-            navHeight: 500
+            navHeight: 500,
+            loading: false
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -608,17 +613,18 @@ export default Vue.extend({
         //     // get the latest semester
         //     this.selectSemester(this.semesters.length - 1);
         // });
-
-        getSemesterList(
-            res => {
+        this.loading = true;
+        getSemesterList()
+            .then(res => {
                 this.semesters = res;
                 // get the latest semester
                 this.selectSemester(this.semesters.length - 1);
-            },
-            error => {
+                this.loading = false;
+            })
+            .catch(error => {
                 this.noti.error(error);
-            }
-        );
+                this.loading = false;
+            });
 
         this.navHeight = document.documentElement.clientHeight;
     },
@@ -811,6 +817,7 @@ export default Vue.extend({
             //         callback();
             //     }
             // });
+            this.loading = true;
             getSemesterData(this.semesters[semesterIdx].id)
                 .then(data => {
                     this.allRecords = new AllRecords(this.currentSemester, data);
@@ -818,10 +825,12 @@ export default Vue.extend({
                     Schedule.allRecords = this.allRecords;
                     if (typeof callback === 'function') {
                         callback();
+                        this.loading = false;
                     }
                 })
                 .catch(err => {
                     this.noti.error(err);
+                    this.loading = false;
                 });
         },
         closeClassList(event) {

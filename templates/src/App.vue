@@ -19,6 +19,7 @@
                     showFilter = false;
                     showSetting = false;
                     showExport = false;
+                    getClass(null);
                 "
             >
                 <i class="far fa-calendar-alt"></i>
@@ -31,6 +32,7 @@
                     showSelectClass = false;
                     showSetting = false;
                     showExport = false;
+                    getClass(null);
                 "
             >
                 <i class="fas fa-filter"></i>
@@ -43,6 +45,7 @@
                     showSelectClass = false;
                     showFilter = false;
                     showExport = false;
+                    getClass(null);
                 "
             >
                 <i class="fas fa-cog"></i>
@@ -55,6 +58,7 @@
                     showSelectClass = false;
                     showFilter = false;
                     showSetting = false;
+                    getClass(null);
                 "
             >
                 <i class="fas fa-download"></i>

@@ -314,6 +314,17 @@
                     </div>
                 </div>
             </div>
+            <div v-if="mobile" class="custom-control custom-checkbox mb-3 ml-3">
+                <input
+                    id="scroll"
+                    v-model="scrollable"
+                    type="checkbox"
+                    class="custom-control-input"
+                />
+                <label for="scroll" class="custom-control-label">
+                    scrollable
+                </label>
+            </div>
             <button class="btn btn-primary nav-btn">
                 Display Options
             </button>
@@ -430,7 +441,14 @@
                 </button>
             </div>
         </transition>
-        <div class="schedule" :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`">
+        <div
+            class="schedule"
+            :style="
+                `width:${
+                    mobile ? (scrollable ? 200 : 90) + '%' : scheduleWidth + 'vw'
+                }; margin-left:${mobile ? 11 : scheduleLeft}vw;`
+            "
+        >
             <div class="container-fluid mb-2">
                 <div class="row justify-content-center">
                     <div class="col">
@@ -607,7 +625,9 @@ export default Vue.extend({
             noti: new Notification(),
             cache: true,
             navHeight: 500,
-            loading: false
+            loading: false,
+            mobile: window.screen.width < 900,
+            scrollable: false
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -1066,35 +1086,11 @@ export default Vue.extend({
     background-color: rgba(223, 223, 223, 0.5);
 }
 
-@media screen and (orientation: portrait) {
-    .schedule {
-        width: 90% !important;
-        margin-left: 5% !important;
-    }
-
-    .sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 100; /* Behind the navbar */
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-        overflow-y: auto;
-        left: 3vw;
-        width: 60vw;
-    }
-
-    .nav-btn {
-        border-radius: 0 !important;
-        width: 100%;
-    }
-}
-
-@media (max-width: 450px) {
-    .schedule {
-        width: 90% !important;
+@media (max-width: 900px) {
+    /* .schedule {
+        width: 85% !important;
         margin-left: 11vw !important;
-    }
+    } */
 
     .sidebar {
         position: fixed;

@@ -24,7 +24,7 @@ class ScheduleEvaluator {
      */
     static variance(schedule) {
         const minutes = new Array(5).fill(0);
-        const days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+        const days = ScheduleEvaluator.days;
         for (const course of schedule) {
             for (let i = 0; i < days.length; i++) {
                 if (course[1].includes(days[i])) minutes[i] += course[2][1] - course[2][0];
@@ -35,7 +35,7 @@ class ScheduleEvaluator {
 
     /**
      * compute the compactness of a schedule
-     * @param {import("./ScheduleGenerator").RawSchedule} schedule
+     * @param {RawSchedule} schedule
      */
     static compactness(schedule) {
         const groups = ScheduleEvaluator.groupCourses(schedule);
@@ -58,7 +58,7 @@ class ScheduleEvaluator {
          * @type {import("./ScheduleGenerator").RawSchedule[]}
          */
         const groups = [];
-        const days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+        const days = ScheduleEvaluator.days;
         for (let i = 0; i < days.length; i++) groups.push([]);
         for (const course of schedule) {
             for (let i = 0; i < days.length; i++) {
@@ -77,11 +77,21 @@ class ScheduleEvaluator {
         return groups;
     }
 
-    constructor() {
+    static days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+
+    /**
+     *
+     * @param {string} sortBy
+     */
+    constructor(sortBy) {
         /**
          * @type {ComparableSchedule[]}
          */
         this.schedules = [];
+        this.sortBy = sortBy;
+        // console.log(sortBy);
+        // console.log(this.evalFunc);
+        if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
     }
 
     /**
@@ -93,9 +103,10 @@ class ScheduleEvaluator {
          * Use variance to evaluate the class
          */
         const schedule = timeTable.concat();
+        const evalFunc = ScheduleEvaluator[this.sortBy];
         this.schedules.push({
             schedule: schedule,
-            coeff: ScheduleEvaluator.variance(schedule) // + ScheduleEvaluator.compactness(schedule)
+            coeff: evalFunc(schedule)
         });
     }
 
@@ -103,8 +114,23 @@ class ScheduleEvaluator {
      * sort the array of schedules according to their quality coefficients
      */
     sort() {
-        // if want to be really fast, use Floyd–Rivest algorithm to select first 100 elements and sort only these elements
+        // if want to be really fast, use Floyd–Rivest algorithm to select first, say, 100 elements and then sort only these elements
         this.schedules.sort((a, b) => a.coeff - b.coeff);
+    }
+
+    /**
+     * change the sorting method and optionally do sorting
+     * @param {string} sortBy
+     * @param {boolean} doSort
+     */
+    changeSort(sortBy, doSort = true) {
+        const evalFunc = ScheduleEvaluator[sortBy];
+        if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
+        for (const cmpSchedule of this.schedules) {
+            cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
+        }
+        if (doSort) this.sort();
+        console.log(this.schedules[0]);
     }
 
     size() {
@@ -125,12 +151,16 @@ class ScheduleEvaluator {
         return raw_schedule;
     }
     /**
+     * Get a `Schedule` object at idx
      * @param {number} idx
      */
     getSchedule(idx) {
         return new Schedule(this.getRaw(idx), 'Schedule', idx + 1);
     }
-
+    /**
+     * whether this evaluator contains an empty array of schedules
+     * @returns {boolean}
+     */
     empty() {
         return this.schedules.length === 0;
     }

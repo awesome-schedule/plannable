@@ -279,10 +279,41 @@
                                 type="radio"
                                 class="custom-control-input"
                                 value="variance"
-                                @click="changeSorting('variance')"
                             />
                             <label class="custom-control-label" for="variance">
                                 Variance
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input
+                                id="IamFeelingLucky"
+                                v-model="sortBy"
+                                type="radio"
+                                class="custom-control-input"
+                                value="IamFeelingLucky"
+                            />
+                            <label
+                                class="custom-control-label"
+                                for="IamFeelingLucky"
+                                title="Random sort"
+                            >
+                                I'm Feeling Lucky
+                            </label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="reverseSort"
+                                v-model="reverseSort"
+                                type="checkbox"
+                                class="custom-control-input"
+                                value="reverseSort"
+                            />
+                            <label
+                                class="custom-control-label"
+                                for="reverseSort"
+                                title="Sort in reverse order"
+                            >
+                                Reverse Sort
                             </label>
                         </div>
                     </ul>
@@ -543,7 +574,7 @@ export default Vue.extend({
              * indicates whether the currently showing schedule is the generated schedule
              */
             generated: false,
-            scheduleEvaluator: new ScheduleEvaluator('variance'),
+            scheduleEvaluator: new ScheduleEvaluator(),
             maxNumSchedules: Infinity,
 
             // sidebar display status
@@ -597,6 +628,7 @@ export default Vue.extend({
             allowWaitlist: true,
             allowClosed: true,
             sortBy: 'variance',
+            reverseSort: false,
 
             downloadURL: '',
 
@@ -608,6 +640,7 @@ export default Vue.extend({
                 'currentSchedule',
                 'proposedSchedule',
                 'sortBy',
+                'reverseSort',
                 // settings
                 'allowWaitList',
                 'allowClosed',
@@ -659,7 +692,14 @@ export default Vue.extend({
             return this.currentSchedule.totalCredit;
         }
     },
-    watch: {},
+    watch: {
+        sortBy() {
+            this.changeSorting(this.sortBy, this.reverseSort);
+        },
+        reverseSort() {
+            this.changeSorting(this.sortBy, this.reverseSort);
+        }
+    },
     created() {
         // axios.get(`${this.api}/semesters`).then(res => {
         //     this.semesters = res.data;
@@ -928,43 +968,46 @@ export default Vue.extend({
             if (!this.allowClosed) {
                 constraintStatus.push('Closed');
             }
+
+            const timeFilters = this.computeFilter();
+            // null means there's an error processing time filters. Don't continue if that's the case
+            if (timeFilters === null) return;
             if (this.generated) {
                 this.currentSchedule = this.proposedSchedule;
             }
+            this.loading = true;
             const generator = new ScheduleGenerator(this.allRecords);
-            const timeFilters = this.computeFilter();
 
-            // null means there's an error processing time filters. Don't continue if that's the case
-            if (timeFilters === null) return;
-            try {
-                this.scheduleEvaluator = generator.getSchedules(this.currentSchedule, {
+            generator
+                .getSchedules(this.currentSchedule, {
                     timeSlots: timeFilters,
                     status: constraintStatus,
-                    sortBy: this.sortBy
+                    sortBy: this.sortBy,
+                    reverseSort: this.reverseSort
+                })
+                .then(evaluator => {
+                    this.scheduleEvaluator = evaluator;
+                    this.proposedSchedule = this.currentSchedule;
+                    this.generated = true;
+                    this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
+                    this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
+                    this.saveStatus();
+                    this.loading = false;
+                })
+                .catch(err => {
+                    this.generated = false;
+                    this.scheduleEvaluator.clear();
+                    this.noti.error(err);
+                    this.saveStatus();
+                    this.loading = false;
                 });
-
-                if (this.scheduleEvaluator.empty())
-                    throw 'No schedules can be generated: class time conflict';
-                this.scheduleEvaluator.sort();
-                this.proposedSchedule = this.currentSchedule;
-                this.generated = true;
-                this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
-                this.noti.success('Schedules Generated!', 3);
-            } catch (error) {
-                this.generated = false;
-                this.scheduleEvaluator.clear();
-                this.noti.error('No schedules satisfying the given filter can be found.');
-                return;
-            } finally {
-                this.saveStatus();
-            }
         },
         /**
          * @param {string} sortBy
          */
-        changeSorting(sortBy) {
+        changeSorting(sortBy, reverseSort) {
             if (!this.scheduleEvaluator.empty()) {
-                this.scheduleEvaluator.changeSort(sortBy, true);
+                this.scheduleEvaluator.changeSort(sortBy, reverseSort, true);
                 if (!this.generated) {
                     this.proposedSchedule = this.currentSchedule;
                     this.currentSchedule = this.scheduleEvaluator.getSchedule(
@@ -1030,8 +1073,13 @@ export default Vue.extend({
                     this.noti.error('Invalid time input.');
                     return null;
                 }
-                const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
-                const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
+                // note: substract/add one to allow end points
+                const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]) + 1;
+                const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]) - 1;
+                if (startMin >= endMin) {
+                    this.noti.error('Start time must be earlier than the end time');
+                    return null;
+                }
                 timeSlotsRecord.push([startMin, endMin]);
             }
             return timeSlotsRecord;

@@ -426,7 +426,7 @@
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
                 role="alert"
-                :style="`width:${scheduleWidth}vw; margin-left:${scheduleLeft}vw;`"
+                :style="`width:${mobile ? 'auto' : scheduleWidth + 'vw'}; margin-left:${mobile ? '11' : scheduleLeft}vw;`"
             >
                 {{ noti.msg }}
                 <button
@@ -618,8 +618,7 @@ export default Vue.extend({
                 'fullHeight',
                 'partialHeight',
                 'timeSlots',
-                'storageVersion',
-                'semesters'
+                'storageVersion'
             ],
 
             // other
@@ -668,17 +667,57 @@ export default Vue.extend({
         //     this.selectSemester(this.semesters.length - 1);
         // });
         this.loading = true;
-        getSemesterList()
-            .then(res => {
-                this.semesters = res;
-                // get the latest semester
-                this.selectSemester(this.semesters.length - 1);
-                this.loading = false;
-            })
-            .catch(error => {
-                this.noti.error(error);
-                this.loading = false;
-            });
+        let noSidebar = false;
+        if (!(this.showSelectClass || this.showFilter || this.showSetting || this.showExport)) {
+            this.noti.info('Loading...', 3600);
+            noSidebar = true;
+        }
+
+        const storage = localStorage.getItem('semesters');
+        let sms = null;
+        let modified = null;
+        // const modified = storage['modified'];
+        // new Date(modified).getTime() - new Date().getTime() < 3600000
+        // this.semesters = JSON.parse(storage['semesterList']);
+
+        if (storage !== null && storage !== undefined) {
+            sms = JSON.parse(storage);
+            modified = sms['modified'];
+        }
+        if (
+            modified !== null &&
+            modified !== undefined &&
+            new Date(modified).getTime() - new Date().getTime() < 3600000
+        ) {
+            this.semesters = sms['semesterList'];
+            this.loading = false;
+            this.selectSemester(this.semesters.length - 1);
+        } else {
+            getSemesterList()
+                .then(res => {
+                    this.semesters = res;
+                    localStorage.setItem(
+                        'semesters',
+                        JSON.stringify({
+                            modified: new Date().toJSON(),
+                            semesterList: res
+                        })
+                    );
+                    // get the latest semester
+                    this.selectSemester(this.semesters.length - 1);
+                    this.loading = false;
+                    if (noSidebar) {
+                        this.noti.clear();
+                    }
+                })
+                .catch(error => {
+                    this.noti.error(error);
+                    this.loading = false;
+                    if (noSidebar) {
+                        this.noti.clear();
+                    }
+                });
+        }
 
         this.navHeight = document.documentElement.clientHeight;
     },

@@ -24,7 +24,6 @@ class ScheduleEvaluator {
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
             sum += args[i];
-            // sumSq += args[i] ** 2;
         }
         const mean = sum / args.length;
         for (let i = 0; i < args.length; i++) {
@@ -57,7 +56,7 @@ class ScheduleEvaluator {
         let dist = 0;
         for (const group of groups) {
             for (let i = 0; i < group.length - 1; i++) {
-                // start time of next class minus end1 time of previous class
+                // start time of next class minus end time of previous class
                 dist += group[i + 1][2][0] - group[i][2][1];
             }
         }

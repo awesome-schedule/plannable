@@ -36,7 +36,6 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5) {
                             .join(' ')
                     });
                 });
-                records.reverse();
                 console.timeEnd('parse semester list');
                 resolve(records);
             })
@@ -52,7 +51,7 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5) {
  * @return {Promise<RawAllRecords>}
  */
 function getSemesterData(semesterId, cros_proxy = CROS_PROXY) {
-    console.time('request semester data');
+    console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
         axios
             .post(
@@ -65,7 +64,7 @@ function getSemesterData(semesterId, cros_proxy = CROS_PROXY) {
                 })
             )
             .then(res => {
-                console.timeEnd('request semester data');
+                console.timeEnd(`request semester ${semesterId} data`);
                 return parseSemesterData(res.data);
             })
             .then(data => {

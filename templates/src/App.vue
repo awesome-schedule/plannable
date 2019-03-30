@@ -94,12 +94,12 @@
                     style="width: 100%;"
                 >
                     <a
-                        v-for="(semester, index) in semesters.slice().reverse()"
+                        v-for="semester in semesters"
                         :key="semester.id"
                         class="dropdown-item"
                         style="width: 100%;"
                         href="#"
-                        @click="selectSemester(semesters.length - index - 1)"
+                        @click="selectSemester(0)"
                         >{{ semester.name }}
                     </a>
                 </div>
@@ -262,7 +262,7 @@
                     </div>
                 </li>
                 <li class="list-group-item">Sort According to</li>
-                <li class="list-group-item">
+                <li class="list-group-item p-3">
                     <ul class="list-group list-group-flush mx-1">
                         <div class="custom-control custom-radio">
                             <input
@@ -273,8 +273,12 @@
                                 value="compactness"
                                 @click="changeSorting('compactness')"
                             />
-                            <label class="custom-control-label" for="compactness">
-                                Compactness
+                            <label
+                                class="custom-control-label"
+                                for="compactness"
+                                title="Make classes back-to-back"
+                            >
+                                Vertical Compactness
                             </label>
                         </div>
                         <div class="custom-control custom-radio">
@@ -285,7 +289,11 @@
                                 class="custom-control-input"
                                 value="variance"
                             />
-                            <label class="custom-control-label" for="variance">
+                            <label
+                                class="custom-control-label"
+                                for="variance"
+                                title="Balance the class time each day"
+                            >
                                 Variance
                             </label>
                         </div>
@@ -715,33 +723,44 @@ export default Vue.extend({
         //     // get the latest semester
         //     this.selectSemester(this.semesters.length - 1);
         // });
+        this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
         let noSidebar = false;
         if (!(this.showSelectClass || this.showFilter || this.showSetting || this.showExport)) {
             this.noti.info('Loading...', 3600);
             noSidebar = true;
         }
-
         const storage = localStorage.getItem('semesters');
-        let sms = null;
-        let modified = null;
-        // const modified = storage['modified'];
-        // new Date(modified).getTime() - new Date().getTime() < 3600000
-        // this.semesters = JSON.parse(storage['semesterList']);
-
-        if (storage !== null && storage !== undefined) {
-            sms = JSON.parse(storage);
-            modified = sms['modified'];
+        if (!storage) {
+            return this.fetchSemesterList(() => {
+                this.loading = false;
+                if (noSidebar) {
+                    this.noti.clear();
+                }
+            });
         }
-        if (
-            modified !== null &&
-            modified !== undefined &&
-            new Date(modified).getTime() - new Date().getTime() < 3600000
-        ) {
+        const sms = JSON.parse(storage);
+        const modified = sms.modified;
+        const oneDay = 86400 * 1000;
+        if (modified && new Date().getTime() - new Date(modified).getTime() < oneDay) {
             this.semesters = sms['semesterList'];
+            this.selectSemester(0);
             this.loading = false;
-            this.selectSemester(this.semesters.length - 1);
         } else {
+            this.fetchSemesterList(() => {
+                this.loading = false;
+                if (noSidebar) {
+                    this.noti.clear();
+                }
+            });
+        }
+    },
+
+    methods: {
+        /**
+         * @param {()=>void} callback
+         */
+        fetchSemesterList(callback) {
             getSemesterList()
                 .then(res => {
                     this.semesters = res;
@@ -753,25 +772,15 @@ export default Vue.extend({
                         })
                     );
                     // get the latest semester
-                    this.selectSemester(this.semesters.length - 1);
+                    this.selectSemester(0);
                     this.loading = false;
-                    if (noSidebar) {
-                        this.noti.clear();
-                    }
+                    callback();
                 })
                 .catch(error => {
                     this.noti.error(error);
-                    this.loading = false;
-                    if (noSidebar) {
-                        this.noti.clear();
-                    }
+                    callback();
                 });
-        }
-
-        this.navHeight = document.documentElement.clientHeight;
-    },
-
-    methods: {
+        },
         onDocChange() {
             this.saveStatus();
         },
@@ -886,7 +895,7 @@ export default Vue.extend({
                 this.saveAllRecords();
                 this.saveStatus();
             };
-            if (parsed_data === undefined && (data === null || data.length === 0)) {
+            if (parsed_data === undefined && !data) {
                 // set to default values
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
@@ -940,7 +949,6 @@ export default Vue.extend({
          * @param {()=>void} callback
          */
         fetchSemesterData(semesterIdx, callback) {
-            console.info(`Loading semester ${semesterIdx} data from remote...`);
             // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
             //     this.allRecords = new AllRecords(this.currentSemester, res.data.data);
             //     // important: assign all records

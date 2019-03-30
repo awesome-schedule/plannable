@@ -112,7 +112,7 @@ class AllRecords {
                     const profs = course[6][i];
                     for (const prof of profs) {
                         // TODO: better prof name match
-                        if (prof.indexOf(query) !== -1) {
+                        if (prof.toLowerCase().indexOf(query) !== -1) {
                             profMatchIdx.push(i);
                             break;
                         }

@@ -132,6 +132,7 @@ class ScheduleEvaluator {
      * @param {string} sortBy
      */
     changeSort(sortBy, reverseSort = false, doSort = true) {
+        console.time('change sort');
         const evalFunc = ScheduleEvaluator[sortBy];
         if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
         for (const cmpSchedule of this.schedules) {
@@ -139,6 +140,7 @@ class ScheduleEvaluator {
         }
         this.options.reverseSort = reverseSort;
         if (doSort) this.sort();
+        console.timeEnd('change sort');
     }
 
     size() {

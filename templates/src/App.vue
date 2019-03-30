@@ -132,6 +132,11 @@
                 <div class="mt-3">
                     <button
                         class="btn btn-primary nav-btn"
+                        :title="
+                            generated
+                                ? 'Click to edit selected classes'
+                                : 'Click to edit generated schedules'
+                        "
                         @click="
                             if (!scheduleEvaluator.empty()) {
                                 if (generated) {
@@ -174,10 +179,10 @@
                     </div>
                 </div>
             </div>
+            <button class="btn btn-primary nav-btn mt-3">
+                Semester Data
+            </button>
             <ul class="list-group list-group-flush" style="width:99%">
-                <button class="btn btn-primary nav-btn mt-3">
-                    Semester Data
-                </button>
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
                 <li class="list-group-item"></li>
             </ul>
@@ -1095,9 +1100,9 @@ export default Vue.extend({
                 reader.onload = () => {
                     localStorage.setItem(this.currentSemester.id, reader.result);
                     const raw_data = JSON.parse(reader.result);
-                    const semester = raw_data['currentSemester'];
+                    const semester = raw_data.currentSemester;
                     for (let i = 0; i < this.semesters.length; i++) {
-                        if (this.semesters[i].id == semester.id) {
+                        if (this.semesters[i].id === semester.id) {
                             this.selectSemester(i, raw_data);
                             break;
                         }

@@ -1,5 +1,6 @@
 // @ts-check
 import Schedule from '../models/Schedule';
+import ScheduleGenerator from './ScheduleGenerator';
 /**
  * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */
@@ -35,7 +36,7 @@ class ScheduleEvaluator {
 
     /**
      * compute the compactness of a schedule
-     * @param {RawSchedule} schedule
+     * @param {import("./ScheduleGenerator").RawSchedule} schedule
      */
     static compactness(schedule) {
         const groups = ScheduleEvaluator.groupCourses(schedule);
@@ -47,6 +48,10 @@ class ScheduleEvaluator {
             }
         }
         return dist;
+    }
+
+    static IamFeelingLucky() {
+        return Math.random();
     }
 
     /**
@@ -81,17 +86,18 @@ class ScheduleEvaluator {
 
     /**
      *
-     * @param {string} sortBy
+     * @param {import('./ScheduleGenerator').Option} options
      */
-    constructor(sortBy) {
+    constructor(options) {
         /**
          * @type {ComparableSchedule[]}
          */
         this.schedules = [];
-        this.sortBy = sortBy;
+        this.options = ScheduleGenerator.validateOptions(options);
         // console.log(sortBy);
         // console.log(this.evalFunc);
-        if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
+        if (typeof ScheduleEvaluator[this.options.sortBy] !== 'function')
+            throw 'Non-existent sorting option';
     }
 
     /**
@@ -103,7 +109,7 @@ class ScheduleEvaluator {
          * Use variance to evaluate the class
          */
         const schedule = timeTable.concat();
-        const evalFunc = ScheduleEvaluator[this.sortBy];
+        const evalFunc = ScheduleEvaluator[this.options.sortBy];
         this.schedules.push({
             schedule: schedule,
             coeff: evalFunc(schedule)
@@ -111,26 +117,28 @@ class ScheduleEvaluator {
     }
 
     /**
-     * sort the array of schedules according to their quality coefficients
+     * sort the array of schedules according to their quality coefficients computed using the given
      */
     sort() {
         // if want to be really fast, use Floyd–Rivest algorithm to select first, say, 100 elements and then sort only these elements
-        this.schedules.sort((a, b) => a.coeff - b.coeff);
+        let cmpFunc;
+        if (this.options.reverseSort) cmpFunc = (a, b) => b.coeff - a.coeff;
+        else cmpFunc = (a, b) => a.coeff - b.coeff;
+        this.schedules.sort(cmpFunc);
     }
 
     /**
-     * change the sorting method and optionally do sorting
+     * change the sorting method and (optionally) do sorting
      * @param {string} sortBy
-     * @param {boolean} doSort
      */
-    changeSort(sortBy, doSort = true) {
+    changeSort(sortBy, reverseSort = false, doSort = true) {
         const evalFunc = ScheduleEvaluator[sortBy];
         if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
         for (const cmpSchedule of this.schedules) {
             cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
         }
+        this.options.reverseSort = reverseSort;
         if (doSort) this.sort();
-        console.log(this.schedules[0]);
     }
 
     size() {

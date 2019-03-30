@@ -41,7 +41,7 @@ class Schedule {
          * represents all courses in this schedule, stored as `[key, section]` pair
          * note that if **section** is -1, it means that all sections are allowed.
          * Otherwise **section** should be a Set of integers
-         * @type {Object<string, Set<number>|number>}
+         * @type {Object<string, Set<number>|-1>}
          */
         this.All = {};
         /**

@@ -9,14 +9,16 @@ import ScheduleEvaluator from './ScheduleEvaluator';
  * @typedef {RawCourse[]} RawSchedule
  */
 /**
- * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortBy: string}} Constraint
+ * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortBy: string, reverseSort: boolean}} Option
  */
+
 class ScheduleGenerator {
-    static constraintDefaults = {
+    static optionDefaults = {
         timeSlots: [],
         status: [],
         noClassDay: [],
-        sortBy: 'variance'
+        sortBy: 'variance',
+        reverseSort: false
     };
     /**
      *
@@ -27,15 +29,17 @@ class ScheduleGenerator {
     }
 
     /**
-     * check if constraint fields satisfy the required format
-     * @param {Constraint} constraint
+     * check if option fields satisfy the required format
+     * @param {Option} options
      */
-    validateConstraints(constraint) {
-        for (const field in ScheduleGenerator.constraintDefaults) {
-            if (constraint[field] === undefined) {
-                constraint[field] = ScheduleGenerator.constraintDefaults[field];
+    static validateOptions(options) {
+        if (!options) return ScheduleGenerator.optionDefaults;
+        for (const field in ScheduleGenerator.optionDefaults) {
+            if (options[field] === undefined) {
+                options[field] = ScheduleGenerator.optionDefaults[field];
             }
         }
+        return options;
     }
 
     /**
@@ -48,80 +52,75 @@ class ScheduleGenerator {
      * e.g. [ [ ["span20205",["Mo","Tu"],[600,650],0], ["span20205",["Th","Fr"],[720,770],1] ],
      *        [ ["cs21105"  ,["Mo","We"],[400,450],2], ["cs21105"  ,["We","Fr"],[900,975],3] ] ]
      * Pass the **ClassList** into the **createSchedule**
-     * return a **FinalTable** Object
+     *
+     * returns a sorted `ScheduleEvaluator` Object
+     * @see ScheduleEvaluator
      * @param {import('../models/Schedule').default} schedule
-     * @param {Constraint} constraint
-     * @return {ScheduleEvaluator}
+     * @param {Option} options
+     * @return {Promise<ScheduleEvaluator>}
      */
-    getSchedules(schedule, constraint = ScheduleGenerator.constraintDefaults) {
-        this.validateConstraints(constraint);
-        this.constraint = constraint;
+    getSchedules(schedule, options = ScheduleGenerator.optionDefaults) {
+        return new Promise((resolve, reject) => {
+            this.options = ScheduleGenerator.validateOptions(options);
 
-        const courses = schedule.All;
+            const courses = schedule.All;
 
-        /**
-         * @type {RawSchedule[]}
-         */
-        const classList = [];
-        for (const key in courses) {
             /**
-             * @type {RawSchedule}
+             * @type {RawSchedule[]}
              */
-            const classes = [];
-            //get full course records
-            const courseRecFull = this.allRecords.getRecord(key);
-            //get course with specific sections
-            if (courses[key] === -1) {
-                for (let section = 0; section < courseRecFull.section.length; section++) {
+            const classList = [];
+            for (const key in courses) {
+                /**
+                 * @type {RawSchedule}
+                 */
+                const classes = [];
+                //get full course records
+                const courseRecFull = this.allRecords.getRecord(key);
+
+                /**
+                 * get course with specific sections
+                 * @type {number[]}
+                 */
+                const sections =
+                    courses[key] === -1
+                        ? Array.from({ length: courseRecFull.section.length }, (_, i) => i)
+                        : [...courses[key].values()];
+
+                for (const section of sections) {
                     const course = courseRecFull.getCourse(section);
                     //insert filter method
-                    if (this.filterStatus(course, constraint)) {
+                    if (this.filterStatus(course, this.options)) {
                         continue;
                     }
 
                     const day = course.days;
                     const [date, timeBlock] = this.parseTime(day);
-                    if (date === null) {
-                        //do not include any TBA
-                        continue;
-                    }
-                    if (this.filterTimeSlots(date, timeBlock, constraint)) {
+                    //do not include any TBA
+                    if (date === null || this.filterTimeSlots(date, timeBlock)) {
                         continue;
                     }
 
                     classes.push([key, date, timeBlock, section]);
                 }
-            } else {
-                for (const section of courses[key]) {
-                    const course = courseRecFull.getCourse(section);
-                    //insert filter method
-                    if (this.filterStatus(course, constraint)) {
-                        continue;
-                    }
-
-                    const day = course.days;
-                    const [date, timeBlock] = this.parseTime(day);
-                    if (date === null) {
-                        //do not include any TBA
-                        continue;
-                    }
-                    if (this.filterTimeSlots(date, timeBlock, constraint)) {
-                        continue;
-                    }
-
-                    classes.push([key, date, timeBlock, section]);
+                if (classes.length === 0) {
+                    reject(
+                        `No sections of ${courseRecFull.department} ${courseRecFull.number} ${
+                            courseRecFull.type
+                        } satisfy the filter you given`
+                    );
                 }
+                classList.push(classes);
             }
-            if (classes.length === 0) {
-                const error = courseRecFull.department + courseRecFull.number + courseRecFull.type;
-                throw `No ${error}`;
-            }
-            classList.push(classes);
-            // console.log(classList);
-        }
-        classList.sort((a, b) => a.length - b.length);
-        const result = this.createSchedule(classList);
-        return result;
+            classList.sort((a, b) => a.length - b.length);
+            const result = this.createSchedule(classList);
+            if (result.size() > 0) {
+                result.sort();
+                resolve(result);
+            } else
+                reject(
+                    'Given your filter, we cannot generate schedules without overlapping classes'
+                );
+        });
     }
 
     /**
@@ -138,7 +137,7 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new ScheduleEvaluator(this.constraint.sortBy);
+        const finalTable = new ScheduleEvaluator(this.options);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
@@ -252,7 +251,7 @@ class ScheduleGenerator {
     /**
      *
      * @param {string} classTime
-     * @return {[string[], number[]]}
+     * @return {[string[], [number, number]]}
      */
     parseTime(classTime) {
         /*
@@ -275,7 +274,7 @@ class ScheduleGenerator {
             date.push(dates.substring(i, i + 2));
         }
         const time = times.trim().split('-');
-        const timeBlock = [0, 0];
+        const timeBlock = /** @type {[number, number]} */ ([0, 0]);
         let count = 0;
         let tempTime;
         for (const j of time) {
@@ -306,16 +305,16 @@ class ScheduleGenerator {
     /**
      *
      * @param {import('../models/Course').default} course
-     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
+     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} option
      */
-    filterStatus(course, constraint) {
+    filterStatus(course, option) {
         const standard = Object.values(CourseRecord.STATUSES);
-        // console.log(constraint.status.includes(course.status), constraint.status, course.status);
+        // console.log(option.status.includes(course.status), option.status, course.status);
         if (!standard.includes(course.status)) {
             return true;
         }
 
-        if (constraint.status.includes(course.status)) {
+        if (option.status.includes(course.status)) {
             return true;
         }
         return false;
@@ -325,14 +324,12 @@ class ScheduleGenerator {
      *
      * @param {string[]} date
      * @param {[number,number]} timeBlock
-     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} constraint
      */
-    filterTimeSlots(date, timeBlock, constraint) {
-        //ts is the timeslots --> 2D array
-        const ts = constraint.timeSlots;
+    filterTimeSlots(date, timeBlock) {
+        const ts = this.options.timeSlots;
 
         //noClassDay is a list of strings of dates, e.g. ['Mo','Tu']
-        const noClassDay = constraint.noClassDay;
+        const noClassDay = this.options.noClassDay;
 
         //Compare and check if any time/date overlaps. If yes, return true, else false.
         const beginTime = timeBlock[0];
@@ -341,7 +338,11 @@ class ScheduleGenerator {
             const begin = times[0];
             const end = times[1];
 
-            if ((begin <= beginTime && beginTime <= end) || (begin <= endTime && endTime <= end)) {
+            if (
+                (begin <= beginTime && beginTime <= end) ||
+                (begin <= endTime && endTime <= end) ||
+                (begin >= beginTime && end <= endTime)
+            ) {
                 return true;
             }
         }

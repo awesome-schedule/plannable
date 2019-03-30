@@ -457,7 +457,11 @@
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
                 role="alert"
-                :style="`width:${mobile ? 'auto' : scheduleWidth + 'vw'}; margin-left:${mobile ? '11' : scheduleLeft}vw;`"
+                :style="
+                    `width:${mobile ? 'auto' : scheduleWidth + 'vw'}; margin-left:${
+                        mobile ? '11' : scheduleLeft
+                    }vw;`
+                "
             >
                 {{ noti.msg }}
                 <button
@@ -476,8 +480,8 @@
             class="schedule"
             :style="
                 `width:${
-                    mobile ? (scrollable ? 200 : 90) + '%' : scheduleWidth + 'vw'
-                }; margin-left:${mobile ? 11 : scheduleLeft}vw;`
+                    mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw'
+                }; margin-left:${mobile ? 11 : scheduleLeft}vw; margin-right: ${mobile ? '1vw' : 0}`
             "
         >
             <div class="container-fluid mb-2">

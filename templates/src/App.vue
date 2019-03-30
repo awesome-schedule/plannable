@@ -264,14 +264,13 @@
                 <li class="list-group-item">Sort According to</li>
                 <li class="list-group-item p-3">
                     <ul class="list-group list-group-flush mx-1">
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="compactness"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.compactness"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="compactness"
-                                @click="changeSorting('compactness')"
                             />
                             <label
                                 class="custom-control-label"
@@ -281,11 +280,11 @@
                                 Vertical Compactness
                             </label>
                         </div>
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="variance"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.variance"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="variance"
                             />
@@ -297,11 +296,11 @@
                                 Variance
                             </label>
                         </div>
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="lunchTime"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.lunchTime"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="lunchTime"
                             />
@@ -313,11 +312,11 @@
                                 Lunch Time
                             </label>
                         </div>
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="IamFeelingLucky"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.IamFeelingLucky"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="IamFeelingLucky"
                             />
@@ -332,7 +331,7 @@
                         <div class="custom-control custom-checkbox">
                             <input
                                 id="reverseSort"
-                                v-model="reverseSort"
+                                v-model="sortOptions.reverseSort"
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="reverseSort"
@@ -660,9 +659,15 @@ export default Vue.extend({
             timeSlots: [],
             allowWaitlist: true,
             allowClosed: true,
-            sortBy: 'variance',
-            reverseSort: false,
-
+            sortOptions: {
+                sortBy: {
+                    variance: true,
+                    compactness: false,
+                    lunchTime: false,
+                    IamFeelingLucky: false
+                },
+                reverseSort: false
+            },
             downloadURL: '',
 
             // storage related fields
@@ -672,8 +677,7 @@ export default Vue.extend({
                 'currentSemester',
                 'currentSchedule',
                 'proposedSchedule',
-                'sortBy',
-                'reverseSort',
+                'sortOptions',
                 // settings
                 'allowWaitList',
                 'allowClosed',
@@ -728,11 +732,24 @@ export default Vue.extend({
         }
     },
     watch: {
-        sortBy() {
-            this.changeSorting(this.sortBy, this.reverseSort);
-        },
-        reverseSort() {
-            this.changeSorting(this.sortBy, this.reverseSort);
+        sortOptions: {
+            handler() {
+                // if (this.sortOptions.sortBy.IamFeelingLucky) {
+                //     for (const key in this.sortOptions.sortBy) {
+                //         if (key !== 'IamFeelingLucky') this.sortOptions.sortBy[key] = false;
+                //     }
+                // } else {
+                //     this.sortOptions.sortBy.IamFeelingLucky = false;
+                // }
+                for (const key in this.sortOptions.sortBy) {
+                    if (this.sortOptions.sortBy[key]) {
+                        this.changeSorting();
+                        return;
+                    }
+                }
+                this.noti.error('You must have a sorting option ticked!');
+            },
+            deep: true
         }
     },
     created() {
@@ -775,7 +792,6 @@ export default Vue.extend({
             });
         }
     },
-
     methods: {
         /**
          * @param {()=>void} callback
@@ -1021,8 +1037,7 @@ export default Vue.extend({
                 .getSchedules(this.currentSchedule, {
                     timeSlots: timeFilters,
                     status: constraintStatus,
-                    sortBy: this.sortBy,
-                    reverseSort: this.reverseSort
+                    sortOptions: this.sortOptions
                 })
                 .then(evaluator => {
                     this.scheduleEvaluator = evaluator;
@@ -1041,12 +1056,9 @@ export default Vue.extend({
                     this.loading = false;
                 });
         },
-        /**
-         * @param {string} sortBy
-         */
-        changeSorting(sortBy, reverseSort) {
+        changeSorting() {
             if (!this.scheduleEvaluator.empty()) {
-                this.scheduleEvaluator.changeSort(sortBy, reverseSort, true);
+                this.scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {
                     this.proposedSchedule = this.currentSchedule;
                     this.currentSchedule = this.scheduleEvaluator.getSchedule(

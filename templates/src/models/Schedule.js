@@ -190,12 +190,15 @@ class Schedule {
         this.currentCourses = [];
         for (const key in this.All) {
             const sections = this.All[key];
-            this.currentCourses.push(Schedule.allRecords.getRecord(key));
+            const courseRecord = Schedule.allRecords.getRecord(key);
+            this.currentCourses.push(courseRecord);
             // we only render those which has only one section given
+
+            this.totalCredit += isNaN(courseRecord.units) ? 0 : parseFloat(courseRecord.units);
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
-                const course = Schedule.allRecords.getCourse(key, [...sections.values()][0]).copy();
-                this.totalCredit += isNaN(course.units) ? 0 : parseFloat(course.units);
+                const course = courseRecord.getCourse([...sections.values()][0]).copy();
+
                 this.place(course);
             }
         }

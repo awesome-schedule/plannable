@@ -1,10 +1,20 @@
 // @ts-check
 import Schedule from '../models/Schedule';
+// eslint-disable-next-line
 import ScheduleGenerator from './ScheduleGenerator';
 /**
  * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */
 class ScheduleEvaluator {
+    static optionDefaults = {
+        sortBy: {
+            variance: true,
+            compactness: false,
+            lunchTime: false,
+            IamFeelingLucky: false
+        },
+        reverseSort: false
+    };
     /**
      * calculate the population variance
      * @param {number[]} args
@@ -14,9 +24,13 @@ class ScheduleEvaluator {
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
             sum += args[i];
-            sumSq += args[i] ** 2;
+            // sumSq += args[i] ** 2;
         }
-        return Math.sqrt(sumSq ** 2 / (args.length - 1) - (sum / args.length) ** 2);
+        const mean = sum / args.length;
+        for (let i = 0; i < args.length; i++) {
+            sumSq += Math.abs(args[i] - mean);
+        }
+        return sumSq;
     }
 
     /**
@@ -121,18 +135,26 @@ class ScheduleEvaluator {
 
     /**
      *
-     * @param {import('./ScheduleGenerator').Option} options
+     * @param {import('./ScheduleGenerator').SortOptions} options
+     */
+    static validateOptions(options) {
+        if (!options) return ScheduleEvaluator.optionDefaults;
+        for (const key in options.sortBy) {
+            if (typeof ScheduleEvaluator[key] !== 'function') throw 'Non-existent sorting option';
+        }
+        return options;
+    }
+
+    /**
+     *
+     * @param {import('./ScheduleGenerator').SortOptions} options
      */
     constructor(options) {
         /**
          * @type {ComparableSchedule[]}
          */
         this.schedules = [];
-        this.options = ScheduleGenerator.validateOptions(options);
-        // console.log(sortBy);
-        // console.log(this.evalFunc);
-        if (typeof ScheduleEvaluator[this.options.sortBy] !== 'function')
-            throw 'Non-existent sorting option';
+        this.options = ScheduleEvaluator.validateOptions(options);
     }
 
     /**
@@ -144,11 +166,44 @@ class ScheduleEvaluator {
          * Use variance to evaluate the class
          */
         const schedule = timeTable.concat();
-        const evalFunc = ScheduleEvaluator[this.options.sortBy];
         this.schedules.push({
             schedule: schedule,
-            coeff: evalFunc(schedule)
+            coeff: 0
         });
+    }
+
+    computeCoeff() {
+        if (this.options.sortBy.IamFeelingLucky) {
+            for (const cmpSchedule of this.schedules) {
+                cmpSchedule.coeff = Math.random();
+            }
+            return;
+        }
+        console.time('normalizing coefficients');
+        const coeffs = [];
+        for (const key in this.options.sortBy) {
+            if (this.options.sortBy[key]) {
+                const coeff = [];
+                const evalFunc = ScheduleEvaluator[key];
+                let max = 0;
+                for (const cmpSchedule of this.schedules) {
+                    const val = evalFunc(cmpSchedule.schedule);
+                    if (val > max) max = val;
+                    coeff.push(val);
+                }
+                const normalizeRatio = max / 100;
+                coeffs.push(coeff.map(v => v / normalizeRatio));
+            }
+        }
+        // console.log(coeffs);
+        for (let i = 0; i < coeffs[0].length; i++) {
+            let sum = 0;
+            for (let j = 0; j < coeffs.length; j++) {
+                sum += coeffs[j][i] ** 2;
+            }
+            this.schedules[i].coeff = Math.sqrt(sum);
+        }
+        console.timeEnd('normalizing coefficients');
     }
 
     /**
@@ -164,16 +219,12 @@ class ScheduleEvaluator {
 
     /**
      * change the sorting method and (optionally) do sorting
-     * @param {string} sortBy
+     * @param {import('./ScheduleGenerator').SortOptions} options
      */
-    changeSort(sortBy, reverseSort = false, doSort = true) {
+    changeSort(options, doSort = true) {
         console.time('change sort');
-        const evalFunc = ScheduleEvaluator[sortBy];
-        if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
-        for (const cmpSchedule of this.schedules) {
-            cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
-        }
-        this.options.reverseSort = reverseSort;
+        this.options = ScheduleEvaluator.validateOptions(options);
+        this.computeCoeff();
         if (doSort) this.sort();
         console.timeEnd('change sort');
     }

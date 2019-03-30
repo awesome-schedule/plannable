@@ -180,29 +180,25 @@ class ScheduleEvaluator {
             return;
         }
         console.time('normalizing coefficients');
-        const coeffs = [];
+        const coeffs = new Array(this.schedules.length).fill(0);
+        const schedules = this.schedules;
         for (const key in this.options.sortBy) {
             if (this.options.sortBy[key]) {
-                const coeff = [];
+                const coeff = new Array(schedules.length);
                 const evalFunc = ScheduleEvaluator[key];
                 let max = 0;
-                for (const cmpSchedule of this.schedules) {
-                    const val = evalFunc(cmpSchedule.schedule);
+                for (let i = 0; i < schedules.length; i++) {
+                    const val = evalFunc(schedules[i].schedule);
                     if (val > max) max = val;
-                    coeff.push(val);
+                    coeff[i] = val;
                 }
                 const normalizeRatio = max / 100;
-                coeffs.push(coeff.map(v => v / normalizeRatio));
+                for (let i = 0; i < coeffs.length; i++) {
+                    coeffs[i] += (coeff[i] / normalizeRatio) ** 2;
+                }
             }
         }
-        // console.log(coeffs);
-        for (let i = 0; i < coeffs[0].length; i++) {
-            let sum = 0;
-            for (let j = 0; j < coeffs.length; j++) {
-                sum += coeffs[j][i] ** 2;
-            }
-            this.schedules[i].coeff = Math.sqrt(sum);
-        }
+        for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
         console.timeEnd('normalizing coefficients');
     }
 

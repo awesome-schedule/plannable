@@ -198,7 +198,6 @@ class Schedule {
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
                 const course = courseRecord.getCourse([...sections.values()][0]).copy();
-
                 this.place(course);
             }
         }

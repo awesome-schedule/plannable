@@ -106,7 +106,7 @@ class ScheduleGenerator {
                     reject(
                         `No sections of ${courseRecFull.department} ${courseRecFull.number} ${
                             courseRecFull.type
-                        } satisfy the filter you given`
+                        } satisfy the filters you given`
                     );
                 }
                 classList.push(classes);

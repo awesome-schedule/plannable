@@ -9,18 +9,18 @@ class ScheduleEvaluator {
      * calculate the population variance
      * @param {number[]} args
      */
-    static var(args) {
+    static std(args) {
         let sum = 0;
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
             sum += args[i];
             sumSq += args[i] ** 2;
         }
-        return sumSq ** 2 / (args.length - 1) - (sum / args.length) ** 2;
+        return Math.sqrt(sumSq ** 2 / (args.length - 1) - (sum / args.length) ** 2);
     }
 
     /**
-     * compute the variance of the days
+     * compute the standard deviation of class times
      * @param {import("./ScheduleGenerator").RawSchedule} schedule
      */
     static variance(schedule) {
@@ -31,7 +31,7 @@ class ScheduleEvaluator {
                 if (course[1].includes(days[i])) minutes[i] += course[2][1] - course[2][0];
             }
         }
-        return ScheduleEvaluator.var(minutes);
+        return ScheduleEvaluator.std(minutes);
     }
 
     /**
@@ -43,7 +43,7 @@ class ScheduleEvaluator {
         let dist = 0;
         for (const group of groups) {
             for (let i = 0; i < group.length - 1; i++) {
-                // start time of next class minus end time of previous class
+                // start time of next class minus end1 time of previous class
                 dist += group[i + 1][2][0] - group[i][2][1];
             }
         }
@@ -52,6 +52,41 @@ class ScheduleEvaluator {
 
     static IamFeelingLucky() {
         return Math.random();
+    }
+
+    /**
+     *
+     * @param {number} a
+     * @param {number} b
+     * @param {number} c
+     * @param {number} d
+     */
+    static calcOverlap(a, b, c, d) {
+        if (a <= c && d <= b) return d - c;
+        if (a <= c && c <= b) return b - c;
+        else if (a <= d && d <= b) return d - a;
+        else if (a >= c && b <= d) return b - a;
+        else return 0;
+    }
+
+    /**
+     * compute the lunch time of a schedule
+     * @param {import("./ScheduleGenerator").RawSchedule} schedule
+     */
+    static lunchTime(schedule) {
+        // 11:00 to 14:00
+        const lunchStart = 11 * 60,
+            lunchEnd = 14 * 60;
+        let overlap = 0;
+        for (const course of schedule) {
+            overlap += ScheduleEvaluator.calcOverlap(
+                lunchStart,
+                lunchEnd,
+                course[2][0],
+                course[2][1]
+            );
+        }
+        return overlap;
     }
 
     /**
@@ -71,7 +106,7 @@ class ScheduleEvaluator {
             }
         }
         /**
-         *
+         * Sort according to their start time
          * @param {import("./ScheduleGenerator").RawCourse} s1
          * @param {import("./ScheduleGenerator").RawCourse} s2
          */

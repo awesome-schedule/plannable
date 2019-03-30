@@ -299,6 +299,22 @@
                         </div>
                         <div class="custom-control custom-radio">
                             <input
+                                id="lunchTime"
+                                v-model="sortBy"
+                                type="radio"
+                                class="custom-control-input"
+                                value="lunchTime"
+                            />
+                            <label
+                                class="custom-control-label"
+                                for="lunchTime"
+                                title="Make spaces for lunch"
+                            >
+                                Lunch Time
+                            </label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input
                                 id="IamFeelingLucky"
                                 v-model="sortBy"
                                 type="radio"
@@ -677,7 +693,9 @@ export default Vue.extend({
             navHeight: 500,
             loading: false,
             mobile: window.screen.width < 900,
-            scrollable: false
+            scrollable: false,
+            semesterListExpirationTime: 86400 * 1000, // one day
+            semesterDataExpirationTime: 2 * 3600 * 1000 // two hours
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -741,8 +759,10 @@ export default Vue.extend({
         }
         const sms = JSON.parse(storage);
         const modified = sms.modified;
-        const oneDay = 86400 * 1000;
-        if (modified && new Date().getTime() - new Date(modified).getTime() < oneDay) {
+        if (
+            modified &&
+            new Date().getTime() - new Date(modified).getTime() < this.semesterListExpirationTime
+        ) {
             this.semesters = sms['semesterList'];
             this.selectSemester(0);
             this.loading = false;
@@ -911,7 +931,9 @@ export default Vue.extend({
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
             }
-            const temp = AllRecords.fromJSON(JSON.parse(allRecords_raw));
+            const temp = AllRecords.fromJSON(
+                JSON.parse(allRecords_raw, this.semesterDataExpirationTime)
+            );
 
             // things to do after allRecord is loaded
             const callback = () => {

@@ -163,8 +163,8 @@
 <script>
 import Vue from 'vue';
 // eslint-disable-next-line
-import CourseRecord from '../models/CourseRecord';
-import Schedule from '../models/Schedule';
+import CourseRecord from '../models/CourseRecord.js';
+import Schedule from '../models/Schedule.js';
 import Expand from './Expand.vue';
 export default Vue.extend({
     name: 'ClassList',
@@ -172,6 +172,9 @@ export default Vue.extend({
         Expand
     },
     props: {
+        /**
+         * @type {CourseRecord[]}
+         */
         courses: Array,
         schedule: Schedule,
         isEntering: Boolean,
@@ -179,17 +182,27 @@ export default Vue.extend({
     },
     data() {
         return {
+            /**
+             * @type {Object<string, string>}
+             */
             collapsed: {},
             expandOnEntering: false
             // showClassTitleOnEntering: true
         };
     },
     methods: {
+        /**
+         * @param {CourseRecord} crs
+         * @param {number} idx
+         */
         select(crs, idx) {
             this.$emit('update_course', crs.key, idx);
             // note: adding a course to schedule.All cannot be detected by Vue. Must use forceUpdate to rerender component
             this.$forceUpdate();
         },
+        /**
+         * @param {string}
+         */
         collapse(key) {
             if (this.collapsed[key] === undefined) {
                 this.$set(this.collapsed, key, key);
@@ -199,16 +212,28 @@ export default Vue.extend({
                 this.$set(this.collapsed, key, undefined);
             }
         },
+        /**
+         * @param {string} key
+         * @param {number} idx
+         * @returns {boolean}
+         */
         isActive(key, idx) {
             return this.schedule.All[key] instanceof Set && this.schedule.All[key].has(idx);
         },
+        /**
+         * @param {CourseRecord}
+         * @returns {string}
+         */
         expanded(crs) {
-            // return false;
             return (this.collapsed[crs.key] !== undefined) ^
                 (this.isEntering && this.expandOnEntering)
                 ? 'fa-chevron-down'
                 : 'fa-chevron-right';
         },
+        /**
+         * @param {string} key
+         * @param {number} idx
+         */
         preview(key, idx) {
             this.$emit('preview', key, idx);
         },

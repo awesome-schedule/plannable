@@ -721,18 +721,27 @@ export default Vue.extend({
             for (let i = 0; i < indices.length; i++) indices[i] = i;
             return indices;
         },
+        /**
+         * @returns {number}
+         */
         scheduleWidth() {
             return this.sideBar &&
                 (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
                 ? 100 - 19 - 3 - 5
                 : 100 - 3 - 3;
         },
+        /**
+         * @returns {number}
+         */
         scheduleLeft() {
             return this.sideBar &&
                 (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
                 ? 23
                 : 3;
         },
+        /**
+         * @returns {number}
+         */
         totalCredit() {
             return this.currentSchedule.totalCredit;
         }
@@ -773,12 +782,13 @@ export default Vue.extend({
         }
         const storage = localStorage.getItem('semesters');
         if (!storage) {
-            return this.fetchSemesterList(() => {
+            this.fetchSemesterList(() => {
                 this.loading = false;
                 if (noSidebar) {
                     this.noti.clear();
                 }
             });
+            return;
         }
         const sms = JSON.parse(storage);
         const modified = sms.modified;

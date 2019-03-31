@@ -9,16 +9,21 @@ import ScheduleEvaluator from './ScheduleEvaluator';
  * @typedef {RawCourse[]} RawSchedule
  */
 /**
- * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortBy: string, reverseSort: boolean}} Option
+ * @typedef {{sortBy: {variance: boolean, compactness: boolean, lunchTime: boolean, IamFeelingLucky: boolean}, reverseSort: boolean}} SortOptions
+ */
+/**
+ * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortOptions: SortOptions}} Option
  */
 
 class ScheduleGenerator {
+    /**
+     * @type {Option}
+     */
     static optionDefaults = {
         timeSlots: [],
         status: [],
         noClassDay: [],
-        sortBy: 'variance',
-        reverseSort: false
+        sortOptions: ScheduleEvaluator.optionDefaults
     };
     /**
      *
@@ -114,6 +119,7 @@ class ScheduleGenerator {
             classList.sort((a, b) => a.length - b.length);
             const result = this.createSchedule(classList);
             if (result.size() > 0) {
+                result.computeCoeff();
                 result.sort();
                 resolve(result);
             } else
@@ -137,7 +143,7 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new ScheduleEvaluator(this.options);
+        const finalTable = new ScheduleEvaluator(this.options.sortOptions);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {

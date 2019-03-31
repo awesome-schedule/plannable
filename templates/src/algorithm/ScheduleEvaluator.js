@@ -1,26 +1,39 @@
 // @ts-check
 import Schedule from '../models/Schedule';
+// eslint-disable-next-line
 import ScheduleGenerator from './ScheduleGenerator';
 /**
  * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
  */
 class ScheduleEvaluator {
+    static optionDefaults = {
+        sortBy: {
+            variance: true,
+            compactness: false,
+            lunchTime: false,
+            IamFeelingLucky: false
+        },
+        reverseSort: false
+    };
     /**
      * calculate the population variance
      * @param {number[]} args
      */
-    static var(args) {
+    static std(args) {
         let sum = 0;
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
             sum += args[i];
-            sumSq += args[i] ** 2;
         }
-        return sumSq ** 2 / (args.length - 1) - (sum / args.length) ** 2;
+        const mean = sum / args.length;
+        for (let i = 0; i < args.length; i++) {
+            sumSq += Math.abs(args[i] - mean);
+        }
+        return sumSq;
     }
 
     /**
-     * compute the variance of the days
+     * compute the standard deviation of class times
      * @param {import("./ScheduleGenerator").RawSchedule} schedule
      */
     static variance(schedule) {
@@ -31,7 +44,7 @@ class ScheduleEvaluator {
                 if (course[1].includes(days[i])) minutes[i] += course[2][1] - course[2][0];
             }
         }
-        return ScheduleEvaluator.var(minutes);
+        return ScheduleEvaluator.std(minutes);
     }
 
     /**
@@ -56,6 +69,41 @@ class ScheduleEvaluator {
 
     /**
      *
+     * @param {number} a
+     * @param {number} b
+     * @param {number} c
+     * @param {number} d
+     */
+    static calcOverlap(a, b, c, d) {
+        if (a <= c && d <= b) return d - c;
+        if (a <= c && c <= b) return b - c;
+        else if (a <= d && d <= b) return d - a;
+        else if (a >= c && b <= d) return b - a;
+        else return 0;
+    }
+
+    /**
+     * compute the lunch time of a schedule
+     * @param {import("./ScheduleGenerator").RawSchedule} schedule
+     */
+    static lunchTime(schedule) {
+        // 11:00 to 14:00
+        const lunchStart = 11 * 60,
+            lunchEnd = 14 * 60;
+        let overlap = 0;
+        for (const course of schedule) {
+            overlap += ScheduleEvaluator.calcOverlap(
+                lunchStart,
+                lunchEnd,
+                course[2][0],
+                course[2][1]
+            );
+        }
+        return overlap;
+    }
+
+    /**
+     *
      * @param {import("./ScheduleGenerator").RawSchedule} schedule
      */
     static groupCourses(schedule) {
@@ -71,7 +119,7 @@ class ScheduleEvaluator {
             }
         }
         /**
-         *
+         * Sort according to their start time
          * @param {import("./ScheduleGenerator").RawCourse} s1
          * @param {import("./ScheduleGenerator").RawCourse} s2
          */
@@ -86,18 +134,26 @@ class ScheduleEvaluator {
 
     /**
      *
-     * @param {import('./ScheduleGenerator').Option} options
+     * @param {import('./ScheduleGenerator').SortOptions} options
+     */
+    static validateOptions(options) {
+        if (!options) return ScheduleEvaluator.optionDefaults;
+        for (const key in options.sortBy) {
+            if (typeof ScheduleEvaluator[key] !== 'function') throw 'Non-existent sorting option';
+        }
+        return options;
+    }
+
+    /**
+     *
+     * @param {import('./ScheduleGenerator').SortOptions} options
      */
     constructor(options) {
         /**
          * @type {ComparableSchedule[]}
          */
         this.schedules = [];
-        this.options = ScheduleGenerator.validateOptions(options);
-        // console.log(sortBy);
-        // console.log(this.evalFunc);
-        if (typeof ScheduleEvaluator[this.options.sortBy] !== 'function')
-            throw 'Non-existent sorting option';
+        this.options = ScheduleEvaluator.validateOptions(options);
     }
 
     /**
@@ -109,11 +165,40 @@ class ScheduleEvaluator {
          * Use variance to evaluate the class
          */
         const schedule = timeTable.concat();
-        const evalFunc = ScheduleEvaluator[this.options.sortBy];
         this.schedules.push({
             schedule: schedule,
-            coeff: evalFunc(schedule)
+            coeff: 0
         });
+    }
+
+    computeCoeff() {
+        if (this.options.sortBy.IamFeelingLucky) {
+            for (const cmpSchedule of this.schedules) {
+                cmpSchedule.coeff = Math.random();
+            }
+            return;
+        }
+        console.time('normalizing coefficients');
+        const coeffs = new Array(this.schedules.length).fill(0);
+        const schedules = this.schedules;
+        for (const key in this.options.sortBy) {
+            if (this.options.sortBy[key]) {
+                const coeff = new Array(schedules.length);
+                const evalFunc = ScheduleEvaluator[key];
+                let max = 0;
+                for (let i = 0; i < schedules.length; i++) {
+                    const val = evalFunc(schedules[i].schedule);
+                    if (val > max) max = val;
+                    coeff[i] = val;
+                }
+                const normalizeRatio = max / 100;
+                for (let i = 0; i < coeffs.length; i++) {
+                    coeffs[i] += (coeff[i] / normalizeRatio) ** 2;
+                }
+            }
+        }
+        for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
+        console.timeEnd('normalizing coefficients');
     }
 
     /**
@@ -129,16 +214,14 @@ class ScheduleEvaluator {
 
     /**
      * change the sorting method and (optionally) do sorting
-     * @param {string} sortBy
+     * @param {import('./ScheduleGenerator').SortOptions} options
      */
-    changeSort(sortBy, reverseSort = false, doSort = true) {
-        const evalFunc = ScheduleEvaluator[sortBy];
-        if (typeof ScheduleEvaluator[sortBy] !== 'function') throw 'Non-existent sorting option';
-        for (const cmpSchedule of this.schedules) {
-            cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
-        }
-        this.options.reverseSort = reverseSort;
+    changeSort(options, doSort = true) {
+        console.time('change sort');
+        this.options = ScheduleEvaluator.validateOptions(options);
+        this.computeCoeff();
         if (doSort) this.sort();
+        console.timeEnd('change sort');
     }
 
     size() {

@@ -94,12 +94,12 @@
                     style="width: 100%;"
                 >
                     <a
-                        v-for="(semester, index) in semesters.slice().reverse()"
+                        v-for="(semester, idx) in semesters"
                         :key="semester.id"
                         class="dropdown-item"
                         style="width: 100%;"
                         href="#"
-                        @click="selectSemester(semesters.length - index - 1)"
+                        @click="selectSemester(idx)"
                         >{{ semester.name }}
                     </a>
                 </div>
@@ -262,38 +262,61 @@
                     </div>
                 </li>
                 <li class="list-group-item">Sort According to</li>
-                <li class="list-group-item">
+                <li class="list-group-item p-3">
                     <ul class="list-group list-group-flush mx-1">
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="compactness"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.compactness"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="compactness"
-                                @click="changeSorting('compactness')"
                             />
-                            <label class="custom-control-label" for="compactness">
-                                Compactness
+                            <label
+                                class="custom-control-label"
+                                for="compactness"
+                                title="Make classes back-to-back"
+                            >
+                                Vertical Compactness
                             </label>
                         </div>
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="variance"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.variance"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="variance"
                             />
-                            <label class="custom-control-label" for="variance">
+                            <label
+                                class="custom-control-label"
+                                for="variance"
+                                title="Balance the class time each day"
+                            >
                                 Variance
                             </label>
                         </div>
-                        <div class="custom-control custom-radio">
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="lunchTime"
+                                v-model="sortOptions.sortBy.lunchTime"
+                                type="checkbox"
+                                class="custom-control-input"
+                                value="lunchTime"
+                            />
+                            <label
+                                class="custom-control-label"
+                                for="lunchTime"
+                                title="Make spaces for lunch"
+                            >
+                                Lunch Time
+                            </label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
                             <input
                                 id="IamFeelingLucky"
-                                v-model="sortBy"
-                                type="radio"
+                                v-model="sortOptions.sortBy.IamFeelingLucky"
+                                type="checkbox"
                                 class="custom-control-input"
                                 value="IamFeelingLucky"
                             />
@@ -308,7 +331,7 @@
                         <div class="custom-control custom-checkbox">
                             <input
                                 id="reverseSort"
-                                v-model="reverseSort"
+                                v-model="sortOptions.reverseSort"
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="reverseSort"
@@ -429,7 +452,7 @@
                 Import/Export Schedule
             </button>
             <ul class="list-group list-group-flush mx-1">
-                <li class="list-group-item">
+                <li class="list-group-item px-1">
                     <div class="custom-file">
                         <input
                             id="customFile"
@@ -439,7 +462,7 @@
                             style="width:100%"
                             @change="onUploadJson($event)"
                         />
-                        <label class="custom-file-label" for="customFile">Choose file</label>
+                        <label class="custom-file-label" for="customFile">Import From..</label>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -452,6 +475,11 @@
                         >Export
                     </a>
                 </li>
+                <li class="list-group-item">
+                    <button class="btn btn-outline-primary" style="width: 100%" @click="print">
+                        Print
+                    </button>
+                </li>
                 <li class="list-group-item"></li>
             </ul>
         </nav>
@@ -459,6 +487,7 @@
         <transition name="fade">
             <div
                 v-if="noti.msg.length > 0"
+                id="noti"
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
                 role="alert"
@@ -630,17 +659,23 @@ export default Vue.extend({
             showRoom: false,
             showInstructor: true,
             showClasslistTitle: false,
-            fullHeight: 45,
-            partialHeight: 35,
+            fullHeight: 40,
+            partialHeight: 25,
             /**
              * @type {[string, string][]}
              */
             timeSlots: [],
             allowWaitlist: true,
             allowClosed: true,
-            sortBy: 'variance',
-            reverseSort: false,
-
+            sortOptions: {
+                sortBy: {
+                    variance: true,
+                    compactness: false,
+                    lunchTime: false,
+                    IamFeelingLucky: false
+                },
+                reverseSort: false
+            },
             downloadURL: '',
 
             // storage related fields
@@ -650,8 +685,7 @@ export default Vue.extend({
                 'currentSemester',
                 'currentSchedule',
                 'proposedSchedule',
-                'sortBy',
-                'reverseSort',
+                'sortOptions',
                 // settings
                 'allowWaitList',
                 'allowClosed',
@@ -671,7 +705,9 @@ export default Vue.extend({
             navHeight: 500,
             loading: false,
             mobile: window.screen.width < 900,
-            scrollable: false
+            scrollable: false,
+            semesterListExpirationTime: 86400 * 1000, // one day
+            semesterDataExpirationTime: 2 * 3600 * 1000 // two hours
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -687,28 +723,50 @@ export default Vue.extend({
             for (let i = 0; i < indices.length; i++) indices[i] = i;
             return indices;
         },
+        /**
+         * @returns {number}
+         */
         scheduleWidth() {
             return this.sideBar &&
                 (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
                 ? 100 - 19 - 3 - 5
                 : 100 - 3 - 3;
         },
+        /**
+         * @returns {number}
+         */
         scheduleLeft() {
             return this.sideBar &&
                 (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
                 ? 23
                 : 3;
         },
+        /**
+         * @returns {number}
+         */
         totalCredit() {
             return this.currentSchedule.totalCredit;
         }
     },
     watch: {
-        sortBy() {
-            this.changeSorting(this.sortBy, this.reverseSort);
-        },
-        reverseSort() {
-            this.changeSorting(this.sortBy, this.reverseSort);
+        sortOptions: {
+            handler() {
+                // if (this.sortOptions.sortBy.IamFeelingLucky) {
+                //     for (const key in this.sortOptions.sortBy) {
+                //         if (key !== 'IamFeelingLucky') this.sortOptions.sortBy[key] = false;
+                //     }
+                // } else {
+                //     this.sortOptions.sortBy.IamFeelingLucky = false;
+                // }
+                for (const key in this.sortOptions.sortBy) {
+                    if (this.sortOptions.sortBy[key]) {
+                        this.changeSorting();
+                        return;
+                    }
+                }
+                this.noti.error('You must have a sorting option ticked!');
+            },
+            deep: true
         }
     },
     created() {
@@ -717,33 +775,46 @@ export default Vue.extend({
         //     // get the latest semester
         //     this.selectSemester(this.semesters.length - 1);
         // });
+        this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
         let noSidebar = false;
         if (!(this.showSelectClass || this.showFilter || this.showSetting || this.showExport)) {
             this.noti.info('Loading...', 3600);
             noSidebar = true;
         }
-
         const storage = localStorage.getItem('semesters');
-        let sms = null;
-        let modified = null;
-        // const modified = storage['modified'];
-        // new Date(modified).getTime() - new Date().getTime() < 3600000
-        // this.semesters = JSON.parse(storage['semesterList']);
-
-        if (storage !== null && storage !== undefined) {
-            sms = JSON.parse(storage);
-            modified = sms['modified'];
+        if (!storage) {
+            this.fetchSemesterList(() => {
+                this.loading = false;
+                if (noSidebar) {
+                    this.noti.clear();
+                }
+            });
+            return;
         }
+        const sms = JSON.parse(storage);
+        const modified = sms.modified;
         if (
-            modified !== null &&
-            modified !== undefined &&
-            new Date(modified).getTime() - new Date().getTime() < 3600000
+            modified &&
+            new Date().getTime() - new Date(modified).getTime() < this.semesterListExpirationTime
         ) {
             this.semesters = sms['semesterList'];
+            this.selectSemester(0);
             this.loading = false;
-            this.selectSemester(this.semesters.length - 1);
         } else {
+            this.fetchSemesterList(() => {
+                this.loading = false;
+                if (noSidebar) {
+                    this.noti.clear();
+                }
+            });
+        }
+    },
+    methods: {
+        /**
+         * @param {()=>void} callback
+         */
+        fetchSemesterList(callback) {
             getSemesterList()
                 .then(res => {
                     this.semesters = res;
@@ -755,27 +826,20 @@ export default Vue.extend({
                         })
                     );
                     // get the latest semester
-                    this.selectSemester(this.semesters.length - 1);
+                    this.selectSemester(0);
                     this.loading = false;
-                    if (noSidebar) {
-                        this.noti.clear();
-                    }
+                    callback();
                 })
                 .catch(error => {
                     this.noti.error(error);
-                    this.loading = false;
-                    if (noSidebar) {
-                        this.noti.clear();
-                    }
+                    callback();
                 });
-        }
-
-        this.navHeight = document.documentElement.clientHeight;
-    },
-
-    methods: {
+        },
         onDocChange() {
             this.saveStatus();
+        },
+        print() {
+            window.print();
         },
         clear() {
             this.currentSchedule.clean();
@@ -888,7 +952,7 @@ export default Vue.extend({
                 this.saveAllRecords();
                 this.saveStatus();
             };
-            if (parsed_data === undefined && (data === null || data.length === 0)) {
+            if (parsed_data === undefined && !data) {
                 // set to default values
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
@@ -904,7 +968,9 @@ export default Vue.extend({
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
             }
-            const temp = AllRecords.fromJSON(JSON.parse(allRecords_raw));
+            const temp = AllRecords.fromJSON(
+                JSON.parse(allRecords_raw, this.semesterDataExpirationTime)
+            );
 
             // things to do after allRecord is loaded
             const callback = () => {
@@ -942,7 +1008,6 @@ export default Vue.extend({
          * @param {()=>void} callback
          */
         fetchSemesterData(semesterIdx, callback) {
-            console.info(`Loading semester ${semesterIdx} data from remote...`);
             // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
             //     this.allRecords = new AllRecords(this.currentSemester, res.data.data);
             //     // important: assign all records
@@ -993,8 +1058,7 @@ export default Vue.extend({
                 .getSchedules(this.currentSchedule, {
                     timeSlots: timeFilters,
                     status: constraintStatus,
-                    sortBy: this.sortBy,
-                    reverseSort: this.reverseSort
+                    sortOptions: this.sortOptions
                 })
                 .then(evaluator => {
                     this.scheduleEvaluator = evaluator;
@@ -1013,12 +1077,9 @@ export default Vue.extend({
                     this.loading = false;
                 });
         },
-        /**
-         * @param {string} sortBy
-         */
-        changeSorting(sortBy, reverseSort) {
+        changeSorting() {
             if (!this.scheduleEvaluator.empty()) {
-                this.scheduleEvaluator.changeSort(sortBy, reverseSort, true);
+                this.scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {
                     this.proposedSchedule = this.currentSchedule;
                     this.currentSchedule = this.scheduleEvaluator.getSchedule(
@@ -1183,6 +1244,28 @@ export default Vue.extend({
 
 .filter-add:hover {
     background-color: rgba(223, 223, 223, 0.5);
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        page-break-before: avoid;
+        margin: 0.8cm 0.8cm 0.8cm 0.8cm;
+    }
+
+    nav {
+        display: none !important;
+    }
+
+    div .schedule {
+        width: calc(100vw - 1.6cm) !important;
+        height: calc(100vw - 1.6cm) !important;
+        margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
+    }
+
+    div #noti {
+        display: none !important;
+    }
 }
 
 @media (max-width: 900px) {

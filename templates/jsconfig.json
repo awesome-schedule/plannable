@@ -1,9 +1,12 @@
 {
     "compilerOptions": {
-        "checkJs": true
+        "checkJs": true,
+        "noImplicitAny": true,
+        "strict": true
     },
     "typeAcquisition": {
         "enable": true,
         "include": ["jquery"]
-    }
+    },
+    "include": ["src/*"]
 }

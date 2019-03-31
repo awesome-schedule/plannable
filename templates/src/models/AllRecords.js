@@ -14,7 +14,7 @@ class AllRecords {
      * return `null` if data is invalid or data expired
      * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
-    static fromJSON(data) {
+    static fromJSON(data, expTime = 2 * 3600 * 1000) {
         if (
             data &&
             typeof data.modified === 'string' &&
@@ -23,7 +23,7 @@ class AllRecords {
         ) {
             const now = new Date().getTime();
             const dataTime = new Date(data.modified).getTime();
-            if (now - dataTime > 3600 * 1000) return null;
+            if (now - dataTime > expTime) return null;
             else {
                 return new AllRecords(data.semester, data.raw_data);
             }
@@ -34,8 +34,8 @@ class AllRecords {
      *
      * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
-    fromJSON(data) {
-        return AllRecords.fromJSON(data);
+    fromJSON(data, expTime = 2 * 3600 * 1000) {
+        return AllRecords.fromJSON(data, expTime);
     }
     /**
      * @param {Semester} semester
@@ -112,7 +112,7 @@ class AllRecords {
                     const profs = course[6][i];
                     for (const prof of profs) {
                         // TODO: better prof name match
-                        if (prof.indexOf(query) !== -1) {
+                        if (prof.toLowerCase().indexOf(query) !== -1) {
                             profMatchIdx.push(i);
                             break;
                         }

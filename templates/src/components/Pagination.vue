@@ -36,6 +36,9 @@
 import Vue from 'vue';
 export default Vue.extend({
     props: {
+        /**
+         * @type {number}
+         */
         indices: Array
     },
     data() {
@@ -54,6 +57,9 @@ export default Vue.extend({
         };
     },
     methods: {
+        /**
+         * @param {number}
+         */
         switchPage(idx) {
             if (idx >= this.start && idx < this.end) {
                 this.idx = idx;

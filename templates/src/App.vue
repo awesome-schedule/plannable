@@ -452,7 +452,7 @@
                 Import/Export Schedule
             </button>
             <ul class="list-group list-group-flush mx-1">
-                <li class="list-group-item">
+                <li class="list-group-item px-1">
                     <div class="custom-file">
                         <input
                             id="customFile"
@@ -462,7 +462,7 @@
                             style="width:100%"
                             @change="onUploadJson($event)"
                         />
-                        <label class="custom-file-label" for="customFile">Choose file</label>
+                        <label class="custom-file-label" for="customFile">Import From..</label>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -475,6 +475,11 @@
                         >Export
                     </a>
                 </li>
+                <li class="list-group-item">
+                    <button class="btn btn-outline-primary" style="width: 100%" @click="print">
+                        Print
+                    </button>
+                </li>
                 <li class="list-group-item"></li>
             </ul>
         </nav>
@@ -482,6 +487,7 @@
         <transition name="fade">
             <div
                 v-if="noti.msg.length > 0"
+                id="noti"
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
                 role="alert"
@@ -651,8 +657,8 @@ export default Vue.extend({
             showRoom: false,
             showInstructor: true,
             showClasslistTitle: false,
-            fullHeight: 45,
-            partialHeight: 35,
+            fullHeight: 40,
+            partialHeight: 25,
             /**
              * @type {[string, string][]}
              */
@@ -819,6 +825,9 @@ export default Vue.extend({
         },
         onDocChange() {
             this.saveStatus();
+        },
+        print() {
+            window.print();
         },
         clear() {
             this.currentSchedule.clean();
@@ -1223,6 +1232,28 @@ export default Vue.extend({
 
 .filter-add:hover {
     background-color: rgba(223, 223, 223, 0.5);
+}
+
+@media print {
+    @page {
+        size: A4 landscape;
+        page-break-before: avoid;
+        margin: 0.8cm 0.8cm 0.8cm 0.8cm;
+    }
+
+    nav {
+        display: none !important;
+    }
+
+    div .schedule {
+        width: calc(100vw - 1.6cm) !important;
+        height: calc(100vw - 1.6cm) !important;
+        margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
+    }
+
+    div #noti {
+        display: none !important;
+    }
 }
 
 @media (max-width: 900px) {

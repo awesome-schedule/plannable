@@ -8,7 +8,7 @@ class Notification {
     };
     public msg: string;
     public class: string;
-    public job: number | null;
+    public job: NodeJS.Timeout | null;
     constructor() {
         this.msg = '';
         this.class = '';

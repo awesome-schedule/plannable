@@ -72,7 +72,7 @@ class Schedule implements Days {
         return schedule;
     }
 
-    public All: { [x: string]: Set<number> | number };
+    public All: { [x: string]: Set<number> | -1 };
     public Monday: Course[];
     public Tuesday: Course[];
     public Wednesday: Course[];

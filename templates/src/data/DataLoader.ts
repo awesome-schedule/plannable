@@ -1,20 +1,18 @@
-// @ts-check
 import axios from 'axios';
 import cheerio from 'cheerio';
 import parse from 'csv-parse/lib/sync';
 import querystring from 'querystring';
 import CourseRecord from '../models/CourseRecord';
+import { RawRecord, Semester } from '../models/AllRecords';
+
+interface RawAllRecords {
+    [x: string]: RawRecord;
+}
 const CROS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 /**
- * @typedef {Object<string, import('../models/AllRecords').RawRecord>} RawAllRecords
- */
-/**
  * Fetch the list of semesters from Lou's list
- * @param {string} cros_proxy
- * @param {number} count
- * @returns {Promise<import('../models/AllRecords').Semester[]>}
  */
-function getSemesterList(cros_proxy = CROS_PROXY, count = 5) {
+function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]> {
     console.time('get semester list');
     return new Promise((resolve, reject) => {
         axios
@@ -23,10 +21,11 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5) {
                 console.timeEnd('get semester list');
                 console.time('parse semester list');
                 const $ = cheerio.load(response.data);
-                const records = [];
+                const records: Semester[] = [];
                 const options = $('option').slice(0, count);
                 options.each((i, element) => {
                     const key = element.attribs['value'].substr(-4);
+                    console.log(element);
                     records.push({
                         id: key,
                         name: $(element)
@@ -45,12 +44,7 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5) {
     });
 }
 
-/**
- * @param {string} semesterId
- * @param {string} cros_proxy
- * @return {Promise<RawAllRecords>}
- */
-function getSemesterData(semesterId, cros_proxy = CROS_PROXY) {
+function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<RawAllRecords> {
     console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
         axios
@@ -76,23 +70,15 @@ function getSemesterData(semesterId, cros_proxy = CROS_PROXY) {
     });
 }
 
-/**
- * @param {string} csv_string
- */
-function parseSemesterData(csv_string) {
+function parseSemesterData(csv_string: string) {
     console.time('parse semester data');
-    /**
-     * @type {string[][]}
-     */
-    const raw_data = parse(csv_string, {
+
+    const raw_data: string[][] = parse(csv_string, {
         columns: false,
         skip_empty_lines: true
     });
 
-    /**
-     * @type {RawAllRecords}
-     */
-    const DICT = {};
+    const DICT: RawAllRecords = {};
     // console.log(raw_data[0]);
     for (let i = 1; i < raw_data.length; i++) {
         const row = raw_data[i];

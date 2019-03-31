@@ -1,6 +1,6 @@
 import CourseRecord from './CourseRecord';
 
-type RawRecord = import('./AllRecords').RawRecord;
+import { RawRecord } from './AllRecords';
 interface RawCourse {
     [x: string]: any;
 }

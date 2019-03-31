@@ -1,43 +1,37 @@
 // @ts-check
-
+import AllRecords from '../models/AllRecords';
 import CourseRecord from '../models/CourseRecord';
 import ScheduleEvaluator from './ScheduleEvaluator';
-/**
- * @typedef {[string,string[],number[],number]} RawCourse
- */
-/**
- * @typedef {RawCourse[]} RawSchedule
- */
-/**
- * @typedef {{sortBy: {variance: boolean, compactness: boolean, lunchTime: boolean, IamFeelingLucky: boolean}, reverseSort: boolean}} SortOptions
- */
-/**
- * @typedef {{timeSlots: [number, number][], status: string[], noClassDay: string[], sortOptions: SortOptions}} Option
- */
+
+export type RawAlgoCourse = [string, string[], number[], number];
+export type RawAlgoSchedule = RawAlgoCourse[];
+
+export interface SortOptions {
+    sortBy: {
+        variance: boolean;
+        compactness: boolean;
+        lunchTime: boolean;
+        IamFeelingLucky: boolean;
+    };
+    reverseSort: boolean;
+}
+
+export interface Options {
+    timeSlots: Array<[number, number]>;
+    status: string[];
+    noClassDay: string[];
+    sortOptions: SortOptions;
+}
 
 class ScheduleGenerator {
-    /**
-     * @type {Option}
-     */
-    static optionDefaults = {
+    public static optionDefaults: Options = {
         timeSlots: [],
         status: [],
         noClassDay: [],
         sortOptions: ScheduleEvaluator.optionDefaults
     };
-    /**
-     *
-     * @param {import('../models/AllRecords').default} allRecords
-     */
-    constructor(allRecords) {
-        this.allRecords = allRecords;
-    }
 
-    /**
-     * check if option fields satisfy the required format
-     * @param {Option} options
-     */
-    static validateOptions(options) {
+    public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
             if (options[field] === undefined) {
@@ -45,6 +39,13 @@ class ScheduleGenerator {
             }
         }
         return options;
+    }
+
+    public allRecords: AllRecords;
+    public options: Options;
+    constructor(allRecords: AllRecords) {
+        this.allRecords = allRecords;
+        this.options = ScheduleGenerator.optionDefaults;
     }
 
     /**
@@ -60,48 +61,45 @@ class ScheduleGenerator {
      *
      * returns a sorted `ScheduleEvaluator` Object
      * @see ScheduleEvaluator
-     * @param {import('../models/Schedule').default} schedule
-     * @param {Option} options
-     * @return {Promise<ScheduleEvaluator>}
      */
-    getSchedules(schedule, options = ScheduleGenerator.optionDefaults) {
+    public getSchedules(
+        schedule: import('../models/Schedule').default,
+        options: Options = ScheduleGenerator.optionDefaults
+    ): Promise<ScheduleEvaluator> {
         return new Promise((resolve, reject) => {
             this.options = ScheduleGenerator.validateOptions(options);
 
             const courses = schedule.All;
 
-            /**
-             * @type {RawSchedule[]}
-             */
-            const classList = [];
+            const classList: RawAlgoSchedule[] = [];
             for (const key in courses) {
-                /**
-                 * @type {RawSchedule}
-                 */
-                const classes = [];
-                //get full course records
+                const classes: RawAlgoSchedule = [];
+                // get full course records
                 const courseRecFull = this.allRecords.getRecord(key);
-
+                const temp = courses[key];
                 /**
                  * get course with specific sections
-                 * @type {number[]}
                  */
                 const sections =
-                    courses[key] === -1
+                    temp === -1
                         ? Array.from({ length: courseRecFull.section.length }, (_, i) => i)
-                        : [...courses[key].values()];
+                        : [...temp.values()];
 
                 for (const section of sections) {
                     const course = courseRecFull.getCourse(section);
-                    //insert filter method
+                    // insert filter method
                     if (this.filterStatus(course, this.options)) {
                         continue;
                     }
 
                     const day = course.days;
                     const [date, timeBlock] = this.parseTime(day);
-                    //do not include any TBA
-                    if (date === null || this.filterTimeSlots(date, timeBlock)) {
+                    // do not include any TBA
+                    if (
+                        timeBlock === null ||
+                        date === null ||
+                        this.filterTimeSlots(date, timeBlock)
+                    ) {
                         continue;
                     }
 
@@ -129,11 +127,7 @@ class ScheduleGenerator {
         });
     }
 
-    /**
-     *
-     * @param {RawSchedule[]} classList
-     * */
-    createSchedule(classList) {
+    public createSchedule(classList: RawAlgoSchedule[]) {
         /**
          * classList Array --> [keys,[days],[start,end],index] --> 3D array
          * finatable Object --> [keys,[days],[start,end],index] --> 2D array
@@ -170,7 +164,8 @@ class ScheduleGenerator {
             const timeBlock = classList[classNum][choiceNum][2];
 
             if (!this.checkTimeConflict(timeTable, date, timeBlock)) {
-                //if the schedule matches, record the next path memory and go to the next class, reset the choiceNum = 0
+                // if the schedule matches,
+                // record the next path memory and go to the next class, reset the choiceNum = 0
                 timeTable.push(classList[classNum][choiceNum]);
                 pathMemory[classNum] = choiceNum + 1;
                 classNum += 1;
@@ -182,15 +177,13 @@ class ScheduleGenerator {
         return finalTable;
     }
 
-    /**
-     * **incorrect annotation for classlist @OAHC2022**
-     * @param {[string,string[],number[]][]} classList
-     * @param {number} classNum
-     * @param {number} choiceNum
-     * @param {number[]} pathMemory
-     * @param {RawSchedule} timeTable
-     * */
-    AlgorithmRetract(classList, classNum, choiceNum, pathMemory, timeTable) {
+    public AlgorithmRetract(
+        classList: RawAlgoSchedule[],
+        classNum: number,
+        choiceNum: number,
+        pathMemory: number[],
+        timeTable: RawAlgoSchedule
+    ): [number, number, number[], RawAlgoSchedule, boolean] {
         /**
          * when all possibilities in on class have exhausted, retract one class
          * explore the next possibilities in the nearest possible class
@@ -212,21 +205,15 @@ class ScheduleGenerator {
     }
 
     /**
-     *
-     * @param {RawSchedule} timeTable
-     * @param {string[]} date
-     * @param {number[]} timeBlock
-     * */
-    checkTimeConflict(timeTable, date, timeBlock) {
-        /*
-        compare the new class to see if it has conflicts with the existing time table
-        :param timeTable: three entries: 1. the class serial number, 2. the date 3. the time
-        :param date: contains the date when the class takes place
-        :param timeBlock: contains beginTime and endTime of a class
-        :return: Boolean type: true if it has conflict, else false
-        */
+     * compare the new class to see if it has conflicts with the existing time table
+     * :param timeTable: three entries: 1. the class serial number, 2. the date 3. the time
+     * :param date: contains the date when the class takes place
+     * :param timeBlock: contains beginTime and endTime of a class
+     * :return: Boolean type: true if it has conflict, else false
+     */
+    public checkTimeConflict(timeTable: RawAlgoSchedule, date: string[], timeBlock: number[]) {
         if (date === null) {
-            //do not include any TBA
+            // do not include any TBA
             return true;
         }
         if (timeTable === []) {
@@ -255,24 +242,19 @@ class ScheduleGenerator {
     }
 
     /**
-     *
-     * @param {string} classTime
-     * @return {[string[], [number, number]]}
+     * parse the classTime and return which day the class is on and what time it takes place
+     * remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
+     * :param classTime: give the clclassList[classNum][choiceNum][0ass time in form of String
+     * :return: date: List, timeBlock: List
      */
-    parseTime(classTime) {
-        /*
-        parse the classTime and return which day the class is on and what time it takes place
-        remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
-        :param classTime: give the clclassList[classNum][choiceNum][0ass time in form of String
-        :return: date: List, timeBlock: List
-        */
+    public parseTime(classTime: string): [string[] | null, [number, number] | null] {
         if (classTime === 'TBA') {
             /*there is TBA*/
             return [null, null];
         }
         const pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
         const match = classTime.match(pattern);
-
+        if (match === null) return [null, null];
         const dates = match[1];
         const times = match[2];
         const date = [];
@@ -280,7 +262,7 @@ class ScheduleGenerator {
             date.push(dates.substring(i, i + 2));
         }
         const time = times.trim().split('-');
-        const timeBlock = /** @type {[number, number]} */ ([0, 0]);
+        const timeBlock: [number, number] = [0, 0];
         let count = 0;
         let tempTime;
         for (const j of time) {
@@ -308,12 +290,7 @@ class ScheduleGenerator {
         return [date, timeBlock];
     }
 
-    /**
-     *
-     * @param {import('../models/Course').default} course
-     * @param {{timeSlots: [number, number][], status: string[],noClassDay: string[]}} option
-     */
-    filterStatus(course, option) {
+    public filterStatus(course: import('../models/Course').default, option: Options) {
         const standard = Object.values(CourseRecord.STATUSES);
         // console.log(option.status.includes(course.status), option.status, course.status);
         if (!standard.includes(course.status)) {
@@ -326,18 +303,13 @@ class ScheduleGenerator {
         return false;
     }
 
-    /**
-     *
-     * @param {string[]} date
-     * @param {[number,number]} timeBlock
-     */
-    filterTimeSlots(date, timeBlock) {
+    public filterTimeSlots(date: string[], timeBlock: [number, number]) {
         const ts = this.options.timeSlots;
 
-        //noClassDay is a list of strings of dates, e.g. ['Mo','Tu']
+        // noClassDay is a list of strings of dates, e.g. ['Mo','Tu']
         const noClassDay = this.options.noClassDay;
 
-        //Compare and check if any time/date overlaps. If yes, return true, else false.
+        // Compare and check if any time/date overlaps. If yes, return true, else false.
         const beginTime = timeBlock[0];
         const endTime = timeBlock[1];
         for (const times of ts) {

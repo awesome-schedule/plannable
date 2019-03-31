@@ -20,6 +20,7 @@
         "curly": false,
         "forin": false,
         "variable-name": false,
-        "object-literal-key-quotes": false
+        "object-literal-key-quotes": false,
+        "prefer-for-of": false
     }
 }

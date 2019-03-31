@@ -20,7 +20,10 @@ export type RawRecord = [
     string
 ];
 
-export type Semester = { id: string; name: string };
+export interface Semester {
+    id: string;
+    name: string;
+}
 
 class AllRecords {
     /**

@@ -1,12 +1,17 @@
 // @ts-check
 import Schedule from '../models/Schedule';
 // eslint-disable-next-line
-import ScheduleGenerator from './ScheduleGenerator';
-/**
- * @typedef {{schedule: import("./ScheduleGenerator").RawSchedule, coeff: number}} ComparableSchedule
- */
+import { RawAlgoSchedule, RawAlgoCourse, SortOptions } from './ScheduleGenerator';
+
+interface ComparableSchedule {
+    schedule: RawAlgoSchedule;
+    coeff: number;
+}
+
 class ScheduleEvaluator {
-    static optionDefaults = {
+    public static days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+
+    public static optionDefaults: SortOptions = {
         sortBy: {
             variance: true,
             compactness: false,
@@ -17,9 +22,8 @@ class ScheduleEvaluator {
     };
     /**
      * calculate the population variance
-     * @param {number[]} args
      */
-    static std(args) {
+    public static std(args: number[]) {
         let sum = 0;
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
@@ -34,9 +38,8 @@ class ScheduleEvaluator {
 
     /**
      * compute the standard deviation of class times
-     * @param {import("./ScheduleGenerator").RawSchedule} schedule
      */
-    static variance(schedule) {
+    public static variance(schedule: RawAlgoSchedule) {
         const minutes = new Array(5).fill(0);
         const days = ScheduleEvaluator.days;
         for (const course of schedule) {
@@ -49,9 +52,8 @@ class ScheduleEvaluator {
 
     /**
      * compute the compactness of a schedule
-     * @param {import("./ScheduleGenerator").RawSchedule} schedule
      */
-    static compactness(schedule) {
+    public static compactness(schedule: RawAlgoSchedule) {
         const groups = ScheduleEvaluator.groupCourses(schedule);
         let dist = 0;
         for (const group of groups) {
@@ -63,18 +65,11 @@ class ScheduleEvaluator {
         return dist;
     }
 
-    static IamFeelingLucky() {
+    public static IamFeelingLucky() {
         return Math.random();
     }
 
-    /**
-     *
-     * @param {number} a
-     * @param {number} b
-     * @param {number} c
-     * @param {number} d
-     */
-    static calcOverlap(a, b, c, d) {
+    public static calcOverlap(a: number, b: number, c: number, d: number) {
         if (a <= c && d <= b) return d - c;
         if (a <= c && c <= b) return b - c;
         else if (a <= d && d <= b) return d - a;
@@ -82,14 +77,10 @@ class ScheduleEvaluator {
         else return 0;
     }
 
-    /**
-     * compute the lunch time of a schedule
-     * @param {import("./ScheduleGenerator").RawSchedule} schedule
-     */
-    static lunchTime(schedule) {
+    public static lunchTime(schedule: RawAlgoSchedule) {
         // 11:00 to 14:00
-        const lunchStart = 11 * 60,
-            lunchEnd = 14 * 60;
+        const lunchStart = 11 * 60;
+        const lunchEnd = 14 * 60;
         let overlap = 0;
         for (const course of schedule) {
             overlap += ScheduleEvaluator.calcOverlap(
@@ -102,15 +93,8 @@ class ScheduleEvaluator {
         return overlap;
     }
 
-    /**
-     *
-     * @param {import("./ScheduleGenerator").RawSchedule} schedule
-     */
-    static groupCourses(schedule) {
-        /**
-         * @type {import("./ScheduleGenerator").RawSchedule[]}
-         */
-        const groups = [];
+    public static groupCourses(schedule: RawAlgoSchedule) {
+        const groups: RawAlgoSchedule[] = [];
         const days = ScheduleEvaluator.days;
         for (let i = 0; i < days.length; i++) groups.push([]);
         for (const course of schedule) {
@@ -120,58 +104,42 @@ class ScheduleEvaluator {
         }
         /**
          * Sort according to their start time
-         * @param {import("./ScheduleGenerator").RawCourse} s1
-         * @param {import("./ScheduleGenerator").RawCourse} s2
          */
-        const comparator = (s1, s2) => s1[2][0] - s2[2][0];
+        const comparator = (s1: RawAlgoCourse, s2: RawAlgoCourse) => s1[2][0] - s2[2][0];
         for (const group of groups) {
             group.sort(comparator);
         }
         return groups;
     }
 
-    static days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
-
-    /**
-     *
-     * @param {import('./ScheduleGenerator').SortOptions} options
-     */
-    static validateOptions(options) {
+    public static validateOptions(options: SortOptions) {
         if (!options) return ScheduleEvaluator.optionDefaults;
         for (const key in options.sortBy) {
-            if (typeof ScheduleEvaluator[key] !== 'function') throw 'Non-existent sorting option';
+            if (typeof ScheduleEvaluator[key] !== 'function')
+                throw new Error('Non-existent sorting option');
         }
         return options;
     }
 
-    /**
-     *
-     * @param {import('./ScheduleGenerator').SortOptions} options
-     */
-    constructor(options) {
-        /**
-         * @type {ComparableSchedule[]}
-         */
+    public schedules: ComparableSchedule[];
+    public options: SortOptions;
+
+    constructor(options: SortOptions) {
         this.schedules = [];
         this.options = ScheduleEvaluator.validateOptions(options);
     }
 
     /**
      * Add a schedule to the collection of results. Compute its coefficient of quality.
-     * @param {import("./ScheduleGenerator").RawSchedule} timeTable
      */
-    add(timeTable) {
-        /**
-         * Use variance to evaluate the class
-         */
-        const schedule = timeTable.concat();
+    public add(schedule: RawAlgoSchedule) {
         this.schedules.push({
-            schedule: schedule,
+            schedule: schedule.concat(),
             coeff: 0
         });
     }
 
-    computeCoeff() {
+    public computeCoeff() {
         if (this.options.sortBy.IamFeelingLucky) {
             for (const cmpSchedule of this.schedules) {
                 cmpSchedule.coeff = Math.random();
@@ -204,19 +172,19 @@ class ScheduleEvaluator {
     /**
      * sort the array of schedules according to their quality coefficients computed using the given
      */
-    sort() {
-        // if want to be really fast, use Floyd–Rivest algorithm to select first, say, 100 elements and then sort only these elements
-        let cmpFunc;
+    public sort() {
+        let cmpFunc: (a: ComparableSchedule, b: ComparableSchedule) => number;
         if (this.options.reverseSort) cmpFunc = (a, b) => b.coeff - a.coeff;
         else cmpFunc = (a, b) => a.coeff - b.coeff;
+        // if want to be really fast, use Floyd–Rivest algorithm to select first,
+        // say, 100 elements and then sort only these elements
         this.schedules.sort(cmpFunc);
     }
 
     /**
      * change the sorting method and (optionally) do sorting
-     * @param {import('./ScheduleGenerator').SortOptions} options
      */
-    changeSort(options, doSort = true) {
+    public changeSort(options: SortOptions, doSort = true) {
         console.time('change sort');
         this.options = ScheduleEvaluator.validateOptions(options);
         this.computeCoeff();
@@ -224,18 +192,12 @@ class ScheduleEvaluator {
         console.timeEnd('change sort');
     }
 
-    size() {
+    public size() {
         return this.schedules.length;
     }
 
-    /**
-     * @param {number} idx
-     */
-    getRaw(idx) {
-        /**
-         * @type {import('../models/Schedule').RawSchedule}
-         */
-        const raw_schedule = [];
+    public getRaw(idx: number) {
+        const raw_schedule: import('../models/Schedule').RawSchedule = [];
         for (const raw_course of this.schedules[idx].schedule) {
             raw_schedule.push([raw_course[0], raw_course[3], -1]);
         }
@@ -243,20 +205,18 @@ class ScheduleEvaluator {
     }
     /**
      * Get a `Schedule` object at idx
-     * @param {number} idx
      */
-    getSchedule(idx) {
+    public getSchedule(idx: number) {
         return new Schedule(this.getRaw(idx), 'Schedule', idx + 1);
     }
     /**
      * whether this evaluator contains an empty array of schedules
-     * @returns {boolean}
      */
-    empty() {
+    public empty() {
         return this.schedules.length === 0;
     }
 
-    clear() {
+    public clear() {
         this.schedules = [];
     }
 }

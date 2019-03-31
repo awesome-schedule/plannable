@@ -44,9 +44,11 @@ export default Vue.extend({
         course: Course,
         heightInfo: Array,
         fullHeight: Number,
+        partialHeight: Number,
         showTime: Boolean,
         showRoom: Boolean,
-        showInstructor: Boolean
+        showInstructor: Boolean,
+        absoluteEarliest: Number
     },
     data() {
         return {
@@ -57,37 +59,49 @@ export default Vue.extend({
         startPx() {
             let start = 48;
             const t = this.course.start.split(':');
-            const temp = (parseFloat(t[0]) - 8) * 2;
-            for (let i = 0; i < temp; i++) {
-                start += this.heightInfo[i];
+            // const hr = parseInt(t[0]);
+            const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
+
+            const temp = this.timeToNum(this.course.start, true);
+            for (let i = this.absoluteEarliest; i < temp; i++) {
+                start += this.heightInfo[i - this.absoluteEarliest];
             }
-            if (parseInt(t[1]) >= 30) {
-                start += this.heightInfo[temp];
-                if (parseInt(t[1]) > 30) {
-                    start += ((parseFloat(t[1]) - 30) / 30) * this.fullHeight;
-                }
-            } else {
-                start += (parseFloat(t[1]) / 30) * this.fullHeight;
-            }
+            start += (min / 30) * this.fullHeight;
             return start;
         },
 
         endPx() {
             let end = 48;
             const t = this.course.end.split(':');
-            const temp = (parseFloat(t[0]) - 8) * 2;
-            for (let i = 0; i < temp; i++) {
-                end += this.heightInfo[i];
+            const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
+
+            const temp = this.timeToNum(this.course.end, false);
+            for (let i = this.absoluteEarliest; i < temp; i++) {
+                end += this.heightInfo[i - this.absoluteEarliest];
             }
-            if (parseInt(t[1]) >= 30) {
-                end += this.heightInfo[temp];
-                if (parseInt(t[1]) > 30) {
-                    end += ((parseFloat(t[1]) - 30) / 30) * this.fullHeight;
+            end += (min / 30) * this.fullHeight;
+            return end;
+        }
+    },
+    methods: {
+        timeToNum(time, start) {
+            const sep = time.split(':');
+            const min = parseInt(sep[1]);
+            let t = (parseInt(sep[0]) - 8) * 2;
+            if (start) {
+                if (min >= 30) {
+                    t += 2;
+                } else {
+                    t += 1;
                 }
             } else {
-                end += (parseFloat(t[1]) / 30) * this.fullHeight;
+                if (min > 30) {
+                    t += 2;
+                } else if (min > 0) {
+                    t += 1;
+                }
             }
-            return end;
+            return t - 1;
         }
     }
 });

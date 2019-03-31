@@ -507,6 +507,8 @@
                 :show-instructor="showInstructor"
                 :full-height="+fullHeight"
                 :partial-height="+partialHeight"
+                earliest="8:00"
+                latest="19:00"
                 @trigger-modal="showModal"
             ></grid-schedule>
         </div>

@@ -28,7 +28,8 @@
                         'grid-template-rows': heightInfo.reduce(
                             (acc, x) => acc + (x + 'px '),
                             '48px '
-                        )
+                        ),
+                        height: mainHeight
                     }"
                 >
                     <div class="placeholder">{{ mon }}</div>
@@ -52,6 +53,7 @@
                         :show-time="showTime"
                         :show-room="showRoom"
                         :show-instructor="showInstructor"
+                        :absolute-earliest="absoluteEarliest"
                         style="left:0%"
                     ></course-block>
                     <course-block
@@ -63,6 +65,7 @@
                         :show-time="showTime"
                         :show-room="showRoom"
                         :show-instructor="showInstructor"
+                        :absolute-earliest="absoluteEarliest"
                         style="left:20%"
                     ></course-block>
                     <course-block
@@ -74,6 +77,7 @@
                         :show-time="showTime"
                         :show-room="showRoom"
                         :show-instructor="showInstructor"
+                        :absolute-earliest="absoluteEarliest"
                         style="left:40%"
                     ></course-block>
                     <course-block
@@ -85,6 +89,7 @@
                         :show-time="showTime"
                         :show-room="showRoom"
                         :show-instructor="showInstructor"
+                        :absolute-earliest="absoluteEarliest"
                         style="left:60%"
                     ></course-block>
                     <course-block
@@ -96,6 +101,7 @@
                         :show-time="showTime"
                         :show-room="showRoom"
                         :show-instructor="showInstructor"
+                        :absolute-earliest="absoluteEarliest"
                         style="left:80%"
                     ></course-block>
                 </div>
@@ -119,30 +125,12 @@ export default Vue.extend({
         showRoom: Boolean,
         showInstructor: Boolean,
         partialHeight: Number,
-        fullHeight: Number
+        fullHeight: Number,
+        earliest: String,
+        latest: String
     },
     data() {
-        const arr = [];
-        for (let i = 0; i < 115; i++) {
-            arr.push(i + 1);
-        }
-
-        const time = [];
-        for (let i = 8; i < 19; i++) {
-            time.push((i / 10 > 0 ? i : 0 + i) + ': 00');
-            time.push((i / 10 > 0 ? i : 0 + i) + ': 30');
-        }
-
-        const reducedTime = [];
-        for (let i = 8; i < 19; i++) {
-            reducedTime.push(i);
-            reducedTime.push('');
-        }
-
-        time.push('19: 00');
         return {
-            items: arr,
-            hours: window.screen.width > 450 ? time : reducedTime,
             mon: window.screen.width > 450 ? 'Monday' : 'Mon',
             tue: window.screen.width > 450 ? 'Tuesday' : 'Tue',
             wed: window.screen.width > 450 ? 'Wednesday' : 'Wed',
@@ -151,22 +139,104 @@ export default Vue.extend({
         };
     },
     computed: {
-        heightInfo() {
-            const info = new Array(23);
-            info.fill(this.partialHeight);
-
+        /**
+         * return the block in which the earliest class starts, the 8:00 block is zero
+         * return 0 if no class
+         */
+        earliestBlock() {
+            let earliest = 817;
             for (const key of Schedule.days) {
                 for (const course of this.courses[key]) {
-                    const t1 = course.start.split(':');
-                    const t2 = course.end.split(':');
-                    const h1 = (parseInt(t1[0]) - 8) * 2 + (parseInt(t1[1]) >= 30 ? 1 : 0);
-                    const h2 =
-                        t2[1] === '00'
-                            ? (parseInt(t2[0]) - 8) * 2
-                            : (parseInt(t2[0]) - 8) * 2 + (parseInt(t2[1]) > 30 ? 2 : 1);
+                    const temp = this.timeToNum(course.start, true);
+                    if (temp < earliest && course !== undefined && course !== null) {
+                        earliest = temp;
+                    }
+                }
+            }
+            return earliest === 817 ? 0 : earliest;
+        },
+        /**
+         * return the block in which the latest class ends, the 8:00 block is zero
+         */
+        latestBlock() {
+            let latest = 0;
+            for (const key of Schedule.days) {
+                for (const course of this.courses[key]) {
+                    const temp = this.timeToNum(course.end, false);
+                    if (temp > latest && course !== undefined && course !== null) {
+                        latest = temp;
+                    }
+                }
+            }
+            return latest === 817 ? (19 - 8) * 2 : latest;
+        },
+        /**
+         * return the block in which the schedule starts with
+         */
+        absoluteEarliest() {
+            if (this.timeToNum(this.earliest, true) > this.earliestBlock) {
+                return this.earliestBlock;
+            } else {
+                return this.timeToNum(this.earliest, true);
+            }
+        },
+        /**
+         * return the block in which the schedule ends with
+         */
+        absoluteLatest() {
+            if (this.timeToNum(this.latest, false) < this.latestBlock) {
+                return this.latestBlock;
+            } else {
+                return this.timeToNum(this.latest, false);
+            }
+        },
+        /**
+         * computes the number of rows needs
+         */
+        numRow() {
+            let num = 0;
+            for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
+                num += 1;
+            }
+            return num;
+        },
+        hours() {
+            let curTime = '';
+            if (this.absoluteEarliest % 2 == 0) {
+                curTime = this.absoluteEarliest / 2 + 8 + ':00';
+            } else {
+                curTime = (this.absoluteEarliest - 1) / 2 + 8 + ':30';
+            }
 
-                    for (let i = h1; i < h2; i++) {
-                        info[i] = this.fullHeight;
+            const time = [];
+            const reducedTime = [];
+            for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
+                time.push(curTime);
+                curTime = this.increTime(curTime);
+                reducedTime.push(i % 2 !== 0 ? '' : i / 2 + 8);
+            }
+
+            return window.screen.width > 450 ? time : reducedTime;
+        },
+        items() {
+            const arr = [];
+            const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
+            for (let i = 0; i < numBlocks; i++) {
+                arr.push(i + 1);
+            }
+
+            return arr;
+        },
+        heightInfo() {
+            const info = new Array(this.numRow);
+            info.fill(this.partialHeight);
+            const earliest = this.absoluteEarliest;
+            for (const key of Schedule.days) {
+                for (const course of this.courses[key]) {
+                    const startTime = this.timeToNum(course.start, true);
+                    const endTime = this.timeToNum(course.end, false);
+                    for (let i = startTime; i <= endTime; i++) {
+                        info[i - earliest] = this.fullHeight;
                     }
                 }
             }
@@ -177,7 +247,50 @@ export default Vue.extend({
             for (const i of this.heightInfo) {
                 h += i;
             }
+            console.log(this.heightInfo);
+            console.log(h);
             return h;
+        }
+    },
+    methods: {
+        /**
+         * Increase the time in string by 30 minutes and return
+         */
+        increTime(time) {
+            const sep = time.split(':');
+            const hr = parseInt(sep[0]);
+            const min = parseInt(sep[1]);
+            return (
+                hr +
+                ((min + 30) / 60 >= 1 ? 1 : 0) +
+                ':' +
+                ((min + 30) % 60 < 10 ? '0' + ((min + 30) % 60) : (min + 30) % 60)
+            );
+        },
+        /**
+         * timeToNum
+         * convert time in 24 hours to number of time blocks relative to the    8:00 block
+         * @param time time in 24 hours
+         * @param start boolean that indicates this is a start time or end time
+         */
+        timeToNum(time, start) {
+            const sep = time.split(':');
+            const min = parseInt(sep[1]);
+            let t = (parseInt(sep[0]) - 8) * 2;
+            if (start) {
+                if (min >= 30) {
+                    t += 2;
+                } else {
+                    t += 1;
+                }
+            } else {
+                if (min > 30) {
+                    t += 2;
+                } else if (min > 0) {
+                    t += 1;
+                }
+            }
+            return t - 1;
         }
     }
 });

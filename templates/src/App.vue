@@ -94,12 +94,12 @@
                     style="width: 100%;"
                 >
                     <a
-                        v-for="semester in semesters"
+                        v-for="(semester, idx) in semesters"
                         :key="semester.id"
                         class="dropdown-item"
                         style="width: 100%;"
                         href="#"
-                        @click="selectSemester(0)"
+                        @click="selectSemester(idx)"
                         >{{ semester.name }}
                     </a>
                 </div>

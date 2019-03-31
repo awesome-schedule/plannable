@@ -4,13 +4,13 @@ import AllRecords from './AllRecords';
 
 export type RawSchedule = Array<[string, number, number]>;
 
-interface Days {
-    [x: string]: any;
-}
+// interface Days {
+//     [x: string]: Course[];
+// }
 /**
- * A schedule is a list of courses
+ * A schedule is a list of courses with computed properties that aid rendering
  */
-class Schedule implements Days {
+class Schedule {
     public static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     public static fields = ['All', 'title', 'id'];
     public static bgColors = [
@@ -71,70 +71,66 @@ class Schedule implements Days {
         schedule.computeSchedule();
         return schedule;
     }
-
+    /**
+     * represents all courses in this schedule, stored as `[key, set of section]` pair
+     * note that if **section** is -1, it means that all sections are allowed.
+     * Otherwise **section** should be a Set of integers
+     */
     public All: { [x: string]: Set<number> | -1 };
+    /**
+     * computed based on `this.All` by `computeSchedule`
+     */
     public Monday: Course[];
+    /**
+     * computed based on `this.All` by `computeSchedule`
+     */
     public Tuesday: Course[];
+    /**
+     * computed based on `this.All` by `computeSchedule`
+     */
     public Wednesday: Course[];
+    /**
+     * computed based on `this.All` by `computeSchedule`
+     */
     public Thursday: Course[];
+    /**
+     * computed based on `this.All` by `computeSchedule`
+     */
     public Friday: Course[];
-    public previous: [string, number] | null;
     public title: string;
     public id: number;
+    /**
+     * computed property
+     */
     public colors: Set<number>;
-    public currentCourses: CourseRecord[];
+    /**
+     * computed property
+     */
     public totalCredit: number;
+    /**
+     * a computed list that's updated by the `computeSchedule method`
+     */
+    public currentCourses: CourseRecord[];
+    private previous: [string, number] | null;
+
     /**
      * Construct a `Schedule` object from its raw representation
      */
     constructor(raw_schedule: RawSchedule = [], title = 'Schedule', id = 0) {
-        /**
-         * represents all courses in this schedule, stored as `[key, section]` pair
-         * note that if **section** is -1, it means that all sections are allowed.
-         * Otherwise **section** should be a Set of integers
-         */
         this.All = {};
-        /**
-         * computed based on `this.All` by `computeSchedule`
-         */
         this.Monday = [];
-        /**
-         * computed based on `this.All` by `computeSchedule`
-         */
         this.Tuesday = [];
-        /**
-         * computed based on `this.All` by `computeSchedule`
-         */
         this.Wednesday = [];
-        /**
-         * computed based on `this.All` by `computeSchedule`
-         */
         this.Thursday = [];
-        /**
-         * computed based on `this.All` by `computeSchedule`
-         */
         this.Friday = [];
         this.previous = null;
-
         this.title = title;
         this.id = id;
-
-        /**
-         * computed property
-         */
         this.colors = new Set();
-        /**
-         * computed property
-         */
         this.totalCredit = 0;
-        /**
-         * a computed list that's updated by the `computeSchedule method`
-         * @type {}
-         */
         this.currentCourses = [];
 
-        for (const schedule of raw_schedule) {
-            const [key, section] = schedule;
+        for (const [key, section] of raw_schedule) {
             this.add(key, section, false);
         }
         this.computeSchedule();
@@ -223,11 +219,11 @@ class Schedule implements Days {
             const sections = this.All[key];
             const courseRecord = Schedule.allRecords.getRecord(key);
             this.currentCourses.push(courseRecord);
-            // we only render those which has only one section given
-
             this.totalCredit += isNaN(courseRecord.units)
                 ? 0
                 : parseFloat(courseRecord.units.toString());
+
+            // we only render those which has only one section given
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
                 const course = courseRecord.getCourse([...sections.values()][0]).copy();

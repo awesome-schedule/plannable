@@ -354,7 +354,10 @@
                 Schedule Display settings
             </button>
             <div class="list-group list-group-flush mx-1">
-                <div class="input-group my-3" title="height of a course on schedule">
+                <div
+                    class="input-group my-3"
+                    title="Schedule grid later than this time won't be displayed if you don't have any class at that time"
+                >
                     <div class="input-group-prepend">
                         <span class="input-group-text">End of My Day</span>
                     </div>
@@ -692,6 +695,7 @@ export default Vue.extend({
                 'currentSchedule',
                 'proposedSchedule',
                 'sortOptions',
+                'currentScheduleIndex',
                 // settings
                 'allowWaitList',
                 'allowClosed',
@@ -920,6 +924,7 @@ export default Vue.extend({
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
                 this.currentScheduleIndex = idx;
                 this.currentSchedule = this.scheduleEvaluator.getSchedule(idx);
+                this.saveStatus();
             }
         },
         /**
@@ -1074,9 +1079,14 @@ export default Vue.extend({
                     this.scheduleEvaluator = evaluator;
                     this.proposedSchedule = this.currentSchedule;
                     this.generated = true;
-                    this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
-                    this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
+                    // this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
+                    this.switchPage(
+                        this.currentScheduleIndex >= this.scheduleEvaluator.size()
+                            ? 0
+                            : this.currentScheduleIndex
+                    );
                     this.saveStatus();
+                    this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
                     this.loading = false;
                 })
                 .catch(err => {

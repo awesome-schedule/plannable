@@ -25,11 +25,11 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]
                 const options = $('option').slice(0, count);
                 options.each((i, element) => {
                     const key = element.attribs['value'].substr(-4);
-                    console.log(element);
+                    const innerHTML = $(element).html();
+                    if (innerHTML === null) return;
                     records.push({
                         id: key,
-                        name: $(element)
-                            .html()
+                        name: innerHTML
                             .split(' ')
                             .splice(0, 2)
                             .join(' ')
@@ -77,8 +77,8 @@ function parseSemesterData(csv_string: string) {
         columns: false,
         skip_empty_lines: true
     });
-
-    const DICT: RawAllRecords = {};
+    const DICT: { [x: string]: any } = {};
+    // const DICT: RawAllRecords = {};
     // console.log(raw_data[0]);
     for (let i = 1; i < raw_data.length; i++) {
         const row = raw_data[i];
@@ -94,10 +94,10 @@ function parseSemesterData(csv_string: string) {
             }
         } else {
             const parsedRow = [];
-            for (let i = 0, j = 0; i < CourseRecord.LENGTH; i++) {
-                const func = CourseRecord.PARSE_FUNC[i];
-                const item = func ? func(row[i]) : row[i];
-                if (i === CourseRecord.LIST[j]) {
+            for (let x = 0, j = 0; x < CourseRecord.LENGTH; x++) {
+                const func = CourseRecord.PARSE_FUNC[x];
+                const item = func ? func(row[x]) : row[x];
+                if (x === CourseRecord.LIST[j]) {
                     parsedRow.push([item]);
                     j++;
                 } else {

@@ -84,12 +84,12 @@ function parseSemesterData(csv_string: string) {
         const row = raw_data[i];
         const key = (row[1] + row[2] + row[4]).toLowerCase();
         if (DICT[key]) {
-            for (const i of CourseRecord.LIST) {
-                const func = CourseRecord.PARSE_FUNC[i];
+            for (const x of CourseRecord.LIST) {
+                const func = CourseRecord.PARSE_FUNC[x];
                 if (func) {
-                    DICT[key][i].push(func(row[i]));
+                    DICT[key][x].push(func(row[x]));
                 } else {
-                    DICT[key][i].push(row[i]);
+                    DICT[key][x].push(row[x]);
                 }
             }
         } else {

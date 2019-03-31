@@ -945,11 +945,13 @@ export default Vue.extend({
          * This method will assign a correct AllRecords object to `this.allRecords` and `Schedule.allRecords`
          * which will be either requested from remote or parsed from `localStorage`
          *
-         * After that, schedules and settings will be parsed from `localStorage` and assigned to relevant fields of `this`. If no local data is present, then default values will be assigned.
+         * After that, schedules and settings will be parsed from `localStorage`
+         * and assigned to relevant fields of `this`.
+         * If no local data is present, then default values will be assigned.
          * @param {number} semesterId
          * @param {Object<string, any>} parsed_data
          */
-        selectSemester(semesterId, parsed_data = undefined) {
+        selectSemester(semesterId, parsed_data) {
             this.currentSemester = this.semesters[semesterId];
             const data = localStorage.getItem(this.currentSemester.id);
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);

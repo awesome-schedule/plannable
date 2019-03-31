@@ -218,7 +218,7 @@ export default Vue.extend({
         },
         hours() {
             let curTime = '';
-            if (this.absoluteEarliest % 2 == 0) {
+            if (this.absoluteEarliest % 2 === 0) {
                 curTime = this.absoluteEarliest / 2 + 8 + ':00';
             } else {
                 curTime = (this.absoluteEarliest - 1) / 2 + 8 + ':30';

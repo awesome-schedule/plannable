@@ -34,6 +34,7 @@ export default {
                     // Force repaint to make sure the
                     // animation is triggered correctly.
                     // eslint-disable-next-line no-unused-expressions
+                    // tslint:disable-next-line
                     getComputedStyle(element).height;
                     setTimeout(() => {
                         // eslint-disable-next-line no-param-reassign
@@ -47,6 +48,7 @@ export default {
                     // Force repaint to make sure the
                     // animation is triggered correctly.
                     // eslint-disable-next-line no-unused-expressions
+                    // tslint:disable-next-line
                     getComputedStyle(element).height;
                     setTimeout(() => {
                         // eslint-disable-next-line no-param-reassign

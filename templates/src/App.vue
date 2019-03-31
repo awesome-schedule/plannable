@@ -356,6 +356,12 @@
             <div class="list-group list-group-flush mx-1">
                 <div class="input-group my-3" title="height of a course on schedule">
                     <div class="input-group-prepend">
+                        <span class="input-group-text">End of My Day</span>
+                    </div>
+                    <input v-model="latest" type="time" class="form-control" />
+                </div>
+                <div class="input-group mb-3" title="height of a course on schedule">
+                    <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
                     <input v-model="fullHeight" type="number" class="form-control" />
@@ -536,8 +542,8 @@
                 :show-instructor="showInstructor"
                 :full-height="+fullHeight"
                 :partial-height="+partialHeight"
-                earliest="8:00"
-                latest="19:00"
+                :earliest="earliest"
+                :latest="latest"
                 @trigger-modal="showModal"
             ></grid-schedule>
         </div>
@@ -707,7 +713,9 @@ export default Vue.extend({
             mobile: window.screen.width < 900,
             scrollable: false,
             semesterListExpirationTime: 86400 * 1000, // one day
-            semesterDataExpirationTime: 2 * 3600 * 1000 // two hours
+            semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
+            earliest: '08:00:00',
+            latest: '19:00:00'
         };
         defaultData.defaultData = defaultData;
         return defaultData;

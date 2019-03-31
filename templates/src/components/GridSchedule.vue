@@ -174,7 +174,16 @@ export default Vue.extend({
          * return the block in which the schedule starts with
          */
         absoluteEarliest() {
-            if (this.timeToNum(this.earliest, true) > this.earliestBlock) {
+            const early =
+                this.earliest === null || this.earliest === undefined
+                    ? '8:00'
+                    : this.earliest
+                          .split(':')
+                          .slice(0, 2)
+                          .join(':');
+            console.log('early');
+            console.log(this.earliest);
+            if (this.timeToNum(early, true) > this.earliestBlock) {
                 return this.earliestBlock;
             } else {
                 return this.timeToNum(this.earliest, true);
@@ -184,7 +193,14 @@ export default Vue.extend({
          * return the block in which the schedule ends with
          */
         absoluteLatest() {
-            if (this.timeToNum(this.latest, false) < this.latestBlock) {
+            const late =
+                this.latest === null || this.latest === undefined
+                    ? '19:00'
+                    : this.latest
+                          .split(':')
+                          .slice(0, 2)
+                          .join(':');
+            if (this.timeToNum(late, false) < this.latestBlock) {
                 return this.latestBlock;
             } else {
                 return this.timeToNum(this.latest, false);
@@ -247,8 +263,6 @@ export default Vue.extend({
             for (const i of this.heightInfo) {
                 h += i;
             }
-            console.log(this.heightInfo);
-            console.log(h);
             return h;
         }
     },

@@ -1,12 +1,26 @@
-// @ts-check
 import Course from './Course';
 import CourseRecord from './CourseRecord';
-/**
- * @typedef {[number[], string, number, number[], number, number, string[][], string[], string[], string, string[], number[], number[], number[], number[], string]} RawRecord
- */
-/**
- * @typedef {{id: string, name: string}} Semester
- */
+
+export type RawRecord = [
+    number[],
+    string,
+    number,
+    number[],
+    number,
+    number,
+    string[][],
+    string[],
+    string[],
+    string,
+    string[],
+    number[],
+    number[],
+    number[],
+    number[],
+    string
+];
+
+export type Semester = { id: string; name: string };
 
 class AllRecords {
     /**
@@ -14,7 +28,10 @@ class AllRecords {
      * return `null` if data is invalid or data expired
      * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
-    static fromJSON(data, expTime = 2 * 3600 * 1000) {
+    public static fromJSON(
+        data: { modified: string; semester: Semester; raw_data: { [x: string]: RawRecord } },
+        expTime = 2 * 3600 * 1000
+    ) {
         if (
             data &&
             typeof data.modified === 'string' &&
@@ -30,26 +47,22 @@ class AllRecords {
         }
         return null;
     }
-    /**
-     *
-     * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
-     */
-    fromJSON(data, expTime = 2 * 3600 * 1000) {
-        return AllRecords.fromJSON(data, expTime);
-    }
-    /**
-     * @param {Semester} semester
-     * @param {Object<string, RawRecord>} raw_data
-     */
-    constructor(semester, raw_data) {
+    public semester: Semester;
+    public raw_data: { [s: string]: RawRecord };
+
+    constructor(semester: Semester, raw_data: { [s: string]: RawRecord }) {
         this.semester = semester;
         this.raw_data = raw_data;
     }
 
-    /**
-     * @return {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}}
-     */
-    toJSON() {
+    public fromJSON(
+        data: { modified: string; semester: Semester; raw_data: { [x: string]: RawRecord } },
+        expTime = 2 * 3600 * 1000
+    ) {
+        return AllRecords.fromJSON(data, expTime);
+    }
+
+    public toJSON() {
         return {
             semester: this.semester,
             raw_data: this.raw_data,
@@ -62,32 +75,23 @@ class AllRecords {
      * @param {string} key
      * @returns {CourseRecord}
      */
-    getRecord(key) {
+    public getRecord(key: string) {
         return new CourseRecord(this.raw_data[key], key);
     }
 
     /**
      * Get a Course associated with the given key and section index
-     * @param {string} key
-     * @param {number} section
-     * @returns {Course}
      */
-    getCourse(key, section = 0) {
+    public getCourse(key: string, section = 0) {
         return new Course(this.raw_data[key], key, section);
     }
 
-    /**
-     *
-     * @param {string} query
-     * @param {number} max_results
-     * @returns {CourseRecord[]}
-     */
-    search(query, max_results = 10) {
+    public search(query: string, max_results = 10) {
         console.time('query');
         query = query.trim().toLowerCase();
         // query no space
         const query_no_sp = query.split(' ').join('');
-        const matches = [[], [], [], [], []];
+        const matches: CourseRecord[][] = [[], [], [], [], []];
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 
@@ -137,7 +141,7 @@ class AllRecords {
             len += matches[i].length;
             if (len >= max_results) break;
         }
-        let results = [];
+        let results: CourseRecord[] = [];
         for (const [i, upper] of indices.entries())
             results = results.concat(matches[i].slice(0, upper));
         console.timeEnd('query');

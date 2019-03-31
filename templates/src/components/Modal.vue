@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import Course from '../models/Course.js';
+import Course from '../models/Course';
 export default {
     props: {
         course: Course

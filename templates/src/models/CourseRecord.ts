@@ -1,10 +1,15 @@
-//@ts-check
 import Course from './Course';
-class CourseRecord {
+type RawRecord = import('./AllRecords').RawRecord;
+
+interface Index {
+    [x: string]: any;
+}
+
+class CourseRecord implements Index {
     /**
      * lecture type number => meaning
      */
-    static TYPES = Object.freeze({
+    public static TYPES: { [x: number]: string } = Object.freeze({
         '-1': '',
         0: 'Clinical',
         1: 'Discussion',
@@ -21,14 +26,14 @@ class CourseRecord {
     /**
      * status number => meaning
      */
-    static STATUSES = Object.freeze({
+    public static STATUSES: { [x: number]: string } = Object.freeze({
         '-1': 'TBA',
         1: 'Open',
         0: 'Closed',
         2: 'Wait List'
     });
 
-    static FIELDS = Object.freeze({
+    public static FIELDS: { [x: number]: string } = Object.freeze({
         0: 'id',
         1: 'department',
         2: 'number',
@@ -47,7 +52,7 @@ class CourseRecord {
         15: 'description'
     });
 
-    static TYPES_PARSE = Object.freeze({
+    public static TYPES_PARSE: { [x: string]: number } = Object.freeze({
         Clinical: 0,
         Discussion: 1,
         Drill: 2,
@@ -60,7 +65,7 @@ class CourseRecord {
         Workshop: 9
     });
 
-    static STATUSES_PARSE = Object.freeze({
+    public static STATUSES_PARSE: { [x: string]: number } = Object.freeze({
         Open: 1,
         Closed: 0,
         'Wait List': 2
@@ -69,35 +74,26 @@ class CourseRecord {
     /**
      * The list of indices at which the field is a list
      */
-    static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14];
+    public static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14];
 
-    static LENGTH = 16;
+    public static LENGTH = 16;
 
-    static PARSE_FUNC = [
+    public static PARSE_FUNC = [
         Number,
         null,
         Number,
         null,
-        /**
-         * @param {string} x
-         */
-        x => {
+        (x: string) => {
             const temp = CourseRecord.TYPES_PARSE[x];
             return temp ? temp : -1;
         },
         Number,
-        /**
-         * @param {string} x
-         */
-        x => x.split(','),
+        (x: string) => x.split(','),
         null,
         null,
         null,
         null,
-        /**
-         * @param {string} x
-         */
-        x => {
+        (x: string) => {
             const temp = CourseRecord.STATUSES_PARSE[x];
             return temp ? temp : -1;
         },
@@ -106,37 +102,69 @@ class CourseRecord {
         Number,
         null
     ];
+    public key: string;
+    public raw: [
+        number[],
+        string,
+        number,
+        number[],
+        number,
+        number,
+        string[][],
+        string[],
+        string[],
+        string,
+        string[],
+        number[],
+        number[],
+        number[],
+        number[],
+        string
+    ];
+    public id: number[];
+    public department: string;
+    public number: number;
+    public section: number[];
+    public type: any;
+    public units: number;
+    public instructor: string[][];
+    public days: string[];
+    public room: string[];
+    public title: string;
+    public topic: string[];
+    public status: any[];
+    public enrollment: number[];
+    public enrollment_limit: number[];
+    public wait_list: number[];
+    public description: string;
     /**
-     *
-     * @param {import('./AllRecords').RawRecord} raw
-     * @param {string} key
-     * @param {number[]} sids A list of section indices
+     * @param sids A list of section indices
      */
-    constructor(raw, key, sids = null) {
+    constructor(raw: RawRecord, key: string, sids: number[] = []) {
         this.key = key;
         this.raw = raw;
 
-        this.id = this[0] = raw[0];
-        this.department = this[1] = raw[1];
-        this.number = this[2] = raw[2];
-        this.section = this[3] = raw[3];
-        this.type = this[4] = CourseRecord.TYPES[raw[4]];
-        this.units = this[5] = raw[5];
-        this.instructor = this[6] = raw[6];
-        this.days = this[7] = raw[7];
-        this.room = this[8] = raw[8];
-        this.title = this[9] = raw[9];
-        this.topic = this[10] = raw[10];
-        this.status = this[11] = raw[11].map(status => CourseRecord.STATUSES[status]);
-        this.enrollment = this[12] = raw[12];
-        this.enrollment_limit = this[13] = raw[13];
-        this.wait_list = this[14] = raw[14];
-        this.description = this[15] = raw[15];
+        this.id = raw[0];
+        this.department = raw[1];
+        this.number = raw[2];
+        this.section = raw[3];
+        this.type = CourseRecord.TYPES[raw[4]];
+        this.units = raw[5];
+        this.instructor = raw[6];
+        this.days = raw[7];
+        this.room = raw[8];
+        this.title = raw[9];
+        this.topic = raw[10];
+        this.status = raw[11].map(status => CourseRecord.STATUSES[status]);
+        this.enrollment = raw[12];
+        this.enrollment_limit = raw[13];
+        this.wait_list = raw[14];
+        this.description = raw[15];
 
-        if (sids !== null && sids.length > 0) {
+        if (sids.length > 0) {
             for (const i of CourseRecord.LIST) {
                 const field = CourseRecord.FIELDS[i];
-                this[field] = this[i] = [];
+                this[field] = [];
                 for (const idx of sids) {
                     this[field].push(raw[i][idx]);
                 }
@@ -149,7 +177,7 @@ class CourseRecord {
      * @param {number} section
      * @return {Course}
      */
-    getCourse(section) {
+    public getCourse(section: number): Course {
         return new Course(this.raw, this.key, section);
     }
 
@@ -158,7 +186,7 @@ class CourseRecord {
      * @param {number[]} sections
      * @return {CourseRecord}
      */
-    getRecord(sections) {
+    public getRecord(sections: number[]): CourseRecord {
         return new CourseRecord(this.raw, this.key, sections);
     }
 
@@ -166,7 +194,7 @@ class CourseRecord {
      * @param {Object} object
      * @return {boolean}
      */
-    equals(object) {
+    public equals(object: object): boolean {
         if (object instanceof CourseRecord) {
             return this.key === object.key;
         } else {

@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import CourseRecord from '../models/CourseRecord.js';
+import CourseRecord from '../models/CourseRecord';
 export default {
     props: {
         course: CourseRecord

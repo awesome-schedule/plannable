@@ -1,18 +1,19 @@
-// @ts-check
-// eslint-disable-next-line
 import Course from './Course';
-// eslint-disable-next-line
 import CourseRecord from './CourseRecord';
+import AllRecords from './AllRecords';
+
+export type RawSchedule = Array<[string, number, number]>;
+
+interface Days {
+    [x: string]: any;
+}
 /**
  * A schedule is a list of courses
  */
-/**
- * @typedef {[string, number, number][]} RawSchedule
- */
-class Schedule {
-    static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    static fields = ['All', 'title', 'id'];
-    static bgColors = [
+class Schedule implements Days {
+    public static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    public static fields = ['All', 'title', 'id'];
+    public static bgColors = [
         '#f7867e',
         '#ffb74c',
         '#82677E',
@@ -27,52 +28,92 @@ class Schedule {
     ];
     /**
      * this field must be initialized before calling any instance method of the Schedule class
-     * @type {import('./AllRecords').default}
      */
-    static allRecords;
+    public static allRecords: AllRecords;
+    /**
+     * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
+     */
+    public static parseTime(start: string, end: string): [string, string] {
+        let suffix = start.substr(start.length - 2, 2);
+        let start_time: string;
+        let end_time: string;
+        if (suffix === 'PM') {
+            let [hour, minute] = start.substring(0, start.length - 2).split(':');
+            start_time = `${(+hour % 12) + 12}:${minute}`;
+
+            [hour, minute] = end.substring(0, end.length - 2).split(':');
+            end_time = `${(+hour % 12) + 12}:${minute}`;
+        } else {
+            start_time = start.substring(0, start.length - 2);
+            suffix = end.substr(end.length - 2, 2);
+            const temp = end.substring(0, end.length - 2);
+            if (suffix === 'PM') {
+                const [hour, minute] = temp.split(':');
+                end_time = `${(+hour % 12) + 12}:${minute}`;
+            } else {
+                end_time = temp;
+            }
+        }
+        return [start_time, end_time];
+    }
+    /**
+     * instantiate a `Schedule` object from its JSON representation
+     */
+    public static fromJSON(obj: { [x: string]: any }) {
+        const schedule = new Schedule();
+        for (const field of Schedule.fields) {
+            schedule[field] = obj[field];
+        }
+        // convert array to set
+        for (const key in obj.All) {
+            if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
+        }
+        schedule.computeSchedule();
+        return schedule;
+    }
+
+    public All: { [x: string]: Set<number> | number };
+    public Monday: Course[];
+    public Tuesday: Course[];
+    public Wednesday: Course[];
+    public Thursday: Course[];
+    public Friday: Course[];
+    public previous: [string, number] | null;
+    public title: string;
+    public id: number;
+    public colors: Set<number>;
+    public currentCourses: CourseRecord[];
+    public totalCredit: number;
     /**
      * Construct a `Schedule` object from its raw representation
-     * @param {RawSchedule} raw_schedule
-     * @param {string} title
-     * @param {number} id
      */
-    constructor(raw_schedule = [], title = 'Schedule', id = 0) {
+    constructor(raw_schedule: RawSchedule = [], title = 'Schedule', id = 0) {
         /**
          * represents all courses in this schedule, stored as `[key, section]` pair
          * note that if **section** is -1, it means that all sections are allowed.
          * Otherwise **section** should be a Set of integers
-         * @type {Object<string, Set<number>|-1>}
          */
         this.All = {};
         /**
          * computed based on `this.All` by `computeSchedule`
-         * @type {Course[]}
          */
         this.Monday = [];
         /**
          * computed based on `this.All` by `computeSchedule`
-         * @type {Course[]}
          */
         this.Tuesday = [];
         /**
          * computed based on `this.All` by `computeSchedule`
-         * @type {Course[]}
          */
         this.Wednesday = [];
         /**
          * computed based on `this.All` by `computeSchedule`
-         * @type {Course[]}
          */
         this.Thursday = [];
         /**
          * computed based on `this.All` by `computeSchedule`
-         * @type {Course[]}
          */
         this.Friday = [];
-
-        /**
-         * @type {[string, number]}
-         */
         this.previous = null;
 
         this.title = title;
@@ -88,12 +129,12 @@ class Schedule {
         this.totalCredit = 0;
         /**
          * a computed list that's updated by the `computeSchedule method`
-         * @type {CourseRecord[]}
+         * @type {}
          */
         this.currentCourses = [];
 
-        for (let i = 0; i < raw_schedule.length; i++) {
-            const [key, section] = raw_schedule[i];
+        for (const schedule of raw_schedule) {
+            const [key, section] = schedule;
             this.add(key, section, false);
         }
         this.computeSchedule();
@@ -101,10 +142,8 @@ class Schedule {
 
     /**
      * Get the background color of a course
-     * @param {Course} course
-     * @return {string}
      */
-    getColor(course) {
+    public getColor(course: Course) {
         let hash = course.hash();
         let idx = hash % Schedule.bgColors.length;
         // avoid color collision by linear probing
@@ -118,15 +157,13 @@ class Schedule {
 
     /**
      * Add a course to schedule
-     * @param {string} key
-     * @param {number} section
-     * @param {boolean} update whether to re-compute the schedule
-     * @return {boolean}
+     * @param update whether to re-compute the schedule
      */
-    add(key, section, update = true) {
-        if (this.All[key] instanceof Set) {
-            if (this.All[key].has(section)) return false;
-            this.All[key].add(section);
+    public add(key: string, section: number, update = true) {
+        const sections = this.All[key];
+        if (sections instanceof Set) {
+            if (sections.has(section)) return false;
+            sections.add(section);
             if (update) this.computeSchedule();
         } else {
             this.All[key] = new Set([section]);
@@ -139,12 +176,10 @@ class Schedule {
      * Update a course in the schedule
      * - If the course is **already in** the schedule, delete it from the schedule
      * - If the course is **not** in the schedule, add it to the schedule
-     * @param {string} key
-     * @param {number} section
-     * @param {boolean} update whether to recompute schedule
-     * @param {boolean} remove whether to remove the key if the set of section is empty
+     * @param update whether to recompute schedule
+     * @param remove whether to remove the key if the set of section is empty
      */
-    update(key, section, update = true, remove = true) {
+    public update(key: string, section: number, update: boolean = true, remove: boolean = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
@@ -152,11 +187,12 @@ class Schedule {
                 else this.All[key] = new Set();
             } else this.All[key] = -1;
         } else {
-            if (this.All[key] instanceof Set) {
-                if (this.All[key].delete(section)) {
-                    if (this.All[key].size === 0 && remove) delete this.All[key];
+            const sections = this.All[key];
+            if (sections instanceof Set) {
+                if (sections.delete(section)) {
+                    if (sections.size === 0 && remove) delete this.All[key];
                 } else {
-                    this.All[key].add(section);
+                    sections.add(section);
                 }
             } else {
                 this.All[key] = new Set([section]);
@@ -165,17 +201,12 @@ class Schedule {
         if (update) this.computeSchedule();
     }
 
-    removePreview() {
+    public removePreview() {
         this.previous = null;
         this.computeSchedule();
     }
 
-    /**
-     *
-     * @param {string} key
-     * @param {number} section
-     */
-    preview(key, section) {
+    public preview(key: string, section: number) {
         this.previous = [key, section];
         this.computeSchedule();
     }
@@ -184,7 +215,7 @@ class Schedule {
      * Compute the schedule view based on `this.All` and `this.preview`
      * @see {@link computeSchedule}
      */
-    computeSchedule() {
+    public computeSchedule() {
         if (!Schedule.allRecords) return;
         this.cleanSchedule();
         this.currentCourses = [];
@@ -194,7 +225,9 @@ class Schedule {
             this.currentCourses.push(courseRecord);
             // we only render those which has only one section given
 
-            this.totalCredit += isNaN(courseRecord.units) ? 0 : parseFloat(courseRecord.units);
+            this.totalCredit += isNaN(courseRecord.units)
+                ? 0
+                : parseFloat(courseRecord.units.toString());
             if (sections instanceof Set && sections.size === 1) {
                 // we need a copy of course
                 const course = courseRecord.getCourse([...sections.values()][0]).copy();
@@ -211,9 +244,8 @@ class Schedule {
 
     /**
      * places the course into one of the `Monday` to `Friday` array according to its `days` property
-     * @param {Course} course
      */
-    place(course) {
+    public place(course: Course) {
         course.backgroundColor = this.getColor(course);
 
         // parse MoWeFr 11:00PM - 11:50PM style time
@@ -242,14 +274,13 @@ class Schedule {
 
     /**
      * Remove a course (and all its sections) from the schedule
-     * @param {string} key
      */
-    remove(key) {
+    public remove(key: string) {
         delete this.All[key];
         this.computeSchedule();
     }
 
-    cleanSchedule() {
+    public cleanSchedule() {
         for (const key of Schedule.days) {
             this[key] = [];
         }
@@ -259,37 +290,16 @@ class Schedule {
     }
     /**
      * instantiate a `Schedule` object from its JSON representation
-     * @param {Object<string, any>} obj
-     * @return {Schedule}
      */
-    static fromJSON(obj) {
-        const schedule = new Schedule();
-        for (const field of Schedule.fields) {
-            schedule[field] = obj[field];
-        }
-        // convert array to set
-        for (const key in obj.All) {
-            if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
-        }
-        schedule.computeSchedule();
-        return schedule;
-    }
-
-    /**
-     * instantiate a `Schedule` object from its JSON representation
-     * @param {Object<string, any>} obj
-     * @return {Schedule}
-     */
-    fromJSON(obj) {
+    public fromJSON(obj: { [x: string]: any }) {
         return Schedule.fromJSON(obj);
     }
 
     /**
      * Serialize `this` to JSON
-     * @return {Object<string, any>}
      */
-    toJSON() {
-        const obj = {};
+    public toJSON() {
+        const obj: { [x: string]: any } = {};
         for (const field of Schedule.fields) {
             obj[field] = this[field];
         }
@@ -297,52 +307,20 @@ class Schedule {
         obj.All = Object.assign({}, this.All);
         // convert set to array
         for (const key in obj.All) {
-            if (this.All[key] instanceof Set) obj.All[key] = [...this.All[key].values()];
+            const sections = this.All[key];
+            if (sections instanceof Set) obj.All[key] = [...sections.values()];
         }
         return obj;
     }
 
-    /**
-     * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
-     * @param {string} start
-     * @param {string} end
-     * @returns {[string, string]}
-     */
-    static parseTime(start, end) {
-        let suffix = start.substr(start.length - 2, 2);
-        let start_time, end_time;
-        if (suffix == 'PM') {
-            let [hour, minute] = start.substring(0, start.length - 2).split(':');
-            start_time = `${(+hour % 12) + 12}:${minute}`;
-
-            [hour, minute] = end.substring(0, end.length - 2).split(':');
-            end_time = `${(+hour % 12) + 12}:${minute}`;
-        } else {
-            start_time = start.substring(0, start.length - 2);
-            suffix = end.substr(end.length - 2, 2);
-            const temp = end.substring(0, end.length - 2);
-            if (suffix == 'PM') {
-                const [hour, minute] = temp.split(':');
-                end_time = `${(+hour % 12) + 12}:${minute}`;
-            } else {
-                end_time = temp;
-            }
-        }
-        return [start_time, end_time];
-    }
-
-    static empty() {
-        return new Schedule([], 'Schedule', 1);
-    }
-
-    clean() {
+    public clean() {
         this.cleanSchedule();
         this.All = {};
         this.previous = null;
     }
 
-    empty() {
-        Object.keys(this.All).length === 0;
+    public empty() {
+        return Object.keys(this.All).length === 0;
     }
 }
 

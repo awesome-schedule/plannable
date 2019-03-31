@@ -552,16 +552,16 @@ import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 // eslint-disable-next-line
-import CourseRecord from './models/CourseRecord.js';
-import Schedule from './models/Schedule.js';
+import CourseRecord from './models/CourseRecord';
+import Schedule from './models/Schedule';
 // eslint-disable-next-line
-import Course from './models/Course.js';
-import AllRecords from './models/AllRecords.js';
+import Course from './models/Course';
+import AllRecords from './models/AllRecords';
 // import axios from 'axios';
-import ScheduleGenerator from './algorithm/ScheduleGenerator.js';
-import ScheduleEvaluator from './algorithm/ScheduleEvaluator.js';
-import { getSemesterList, getSemesterData } from './data/DataLoader.js';
-import Notification from './models/Notification.js';
+import ScheduleGenerator from './algorithm/ScheduleGenerator';
+import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
+import { getSemesterList, getSemesterData } from './data/DataLoader';
+import Notification from './models/Notification';
 
 /**
  * @typedef {{id: string, name: string}} Semester

@@ -107,7 +107,7 @@
 <script>
 import Vue from 'vue';
 import CourseBlock from './CourseBlock.vue';
-import Schedule from '../models/Schedule.js';
+import Schedule from '../models/Schedule';
 export default Vue.extend({
     name: 'GridSchedule',
     components: {

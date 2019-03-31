@@ -163,8 +163,8 @@
 <script>
 import Vue from 'vue';
 // eslint-disable-next-line
-import CourseRecord from '../models/CourseRecord.js';
-import Schedule from '../models/Schedule.js';
+import CourseRecord from '../models/CourseRecord';
+import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 export default Vue.extend({
     name: 'ClassList',

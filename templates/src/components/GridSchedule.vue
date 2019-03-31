@@ -181,8 +181,6 @@ export default Vue.extend({
                           .split(':')
                           .slice(0, 2)
                           .join(':');
-            console.log('early');
-            console.log(this.earliest);
             if (this.timeToNum(early, true) > this.earliestBlock) {
                 return this.earliestBlock;
             } else {

@@ -13,6 +13,10 @@ This project is a continuation of our hackathon project of the same name. Initia
 
 For the following parts, those with the most contributions are listed first.
 
+## Software Architect
+
+Hanzhi Zhou
+
 ## Front-end
 
 ### Design
@@ -59,7 +63,7 @@ Hanzhi Zhou
 
 ### Models and Data Structure
 
-These are mainly JavaScript files in [models](/templates/src/models)
+These are mainly TypeScript files in [models](/templates/src/models)
 
 | Name          | Description                                             | Contributor |
 | ------------- | ------------------------------------------------------- | ----------- |
@@ -71,19 +75,19 @@ These are mainly JavaScript files in [models](/templates/src/models)
 
 ### Data Fetching
 
-| Name           | Description                                             | Contributor  |
-| -------------- | ------------------------------------------------------- | ------------ |
-| DataLoader     | Script for fetching the list of semesters               | Kaiying Shan |
-| SemesterLoader | Script for fetching course records of a single semester | Hanzhi Zhou  |
+| Name       | Description                               | Contributor               |
+| ---------- | ----------------------------------------- | ------------------------- |
+| DataLoader | Script for fetching the list of semesters | Hanzhi Zhou, Kaiying Shan |
 
 ### Algorithm
 
 These are mainly JavaScript files in [algorithm](/templates/src/algorithm)
 
-| Part             | Description                                       | Contributor |
-| ---------------- | ------------------------------------------------- | ----------- |
-| Main Algorithm   | -                                                 | Zichao Hu   |
-| Type Annotations | JSDoc Annotations to make the script type-checked | Hanzhi Zhou |
+| Part               | Description                                    | Contributor            |
+| ------------------ | ---------------------------------------------- | ---------------------- |
+| Main Algorithm     | -                                              | Zichao Hu              |
+| Schedule Evaluator | Compute quality indicators and perform sorting | Hanzhi Zhou, Zichao Hu |
+| TypeScript Rewrite | Rewrite everything using TypeScript            | Hanzhi Zhou            |
 
 ## Back-End
 

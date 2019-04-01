@@ -533,6 +533,7 @@
                         <Pagination
                             v-if="generated && !scheduleEvaluator.empty()"
                             :indices="scheduleIndices"
+                            :cur-idx="currentScheduleIndex"
                             @switch_page="switchPage"
                         ></Pagination>
                     </div>

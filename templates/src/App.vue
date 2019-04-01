@@ -533,7 +533,7 @@
                         <Pagination
                             v-if="generated && !scheduleEvaluator.empty()"
                             :indices="scheduleIndices"
-                            :cur-idx="currentScheduleIndex"
+                            :cur-idx="tempScheduleIndex"
                             @switch_page="switchPage"
                         ></Pagination>
                     </div>
@@ -720,7 +720,8 @@ export default Vue.extend({
             semesterListExpirationTime: 86400 * 1000, // one day
             semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
             earliest: '08:00:00',
-            latest: '19:00:00'
+            latest: '19:00:00',
+            tempScheduleIndex: null
         };
         defaultData.defaultData = defaultData;
         return defaultData;
@@ -921,9 +922,14 @@ export default Vue.extend({
         /**
          * @param {number} idx
          */
-        switchPage(idx) {
+        switchPage(idx, parsed = false) {
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
                 this.currentScheduleIndex = idx;
+                if (parsed) {
+                    this.tempScheduleIndex = idx;
+                } else {
+                    this.tempScheduleIndex = null;
+                }
                 this.currentSchedule = this.scheduleEvaluator.getSchedule(idx);
                 this.saveStatus();
             }
@@ -1052,7 +1058,7 @@ export default Vue.extend({
             event.target.value = '';
             this.getClass(null);
         },
-        generateSchedules() {
+        generateSchedules(parsed = false) {
             const constraintStatus = [];
             if (!this.allowWaitlist) {
                 constraintStatus.push('Wait List');
@@ -1084,7 +1090,8 @@ export default Vue.extend({
                     this.switchPage(
                         this.currentScheduleIndex >= this.scheduleEvaluator.size()
                             ? 0
-                            : this.currentScheduleIndex
+                            : this.currentScheduleIndex,
+                        parsed
                     );
                     this.saveStatus();
                     this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
@@ -1138,7 +1145,7 @@ export default Vue.extend({
             }
             if (!this.proposedSchedule.empty()) {
                 this.currentSchedule = this.proposedSchedule;
-                this.generateSchedules();
+                this.generateSchedules(true);
             }
         },
         removeTimeSlot(n) {

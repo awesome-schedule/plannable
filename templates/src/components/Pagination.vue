@@ -58,7 +58,6 @@ export default Vue.extend({
         };
     },
     created() {
-        console.log('created! ' + this.curIdx);
         if (
             this.curIdx !== undefined &&
             this.curIdx !== null &&
@@ -69,7 +68,6 @@ export default Vue.extend({
         }
     },
     updated() {
-        console.log('updated ' + this.curIdx);
         if (
             this.curIdx !== undefined &&
             this.curIdx !== null &&

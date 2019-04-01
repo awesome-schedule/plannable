@@ -146,7 +146,8 @@ class CourseRecord {
                 const field = CourseRecord.FIELDS[i];
                 this[field] = [];
                 for (const idx of sids) {
-                    this[field].push(raw[i][idx]);
+                    const s: any = raw[i];
+                    this[field].push(s[idx]);
                 }
             }
         }

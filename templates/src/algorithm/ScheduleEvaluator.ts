@@ -20,6 +20,62 @@ class ScheduleEvaluator {
         },
         reverseSort: false
     };
+    public static sortFunctions: { [x: string]: (schedule: RawAlgoSchedule) => number } = {
+        /**
+         * compute the standard deviation of class times
+         */
+        variance(schedule: RawAlgoSchedule) {
+            const minutes = new Array(5).fill(0);
+            const days = ScheduleEvaluator.days;
+            for (const course of schedule) {
+                for (let i = 0; i < days.length; i++) {
+                    if (course[1].includes(days[i])) minutes[i] += course[2][1] - course[2][0];
+                }
+            }
+            return ScheduleEvaluator.std(minutes);
+        },
+
+        /**
+         * compute the vertical compactness of a schedule,
+         * defined as the total time in between each pair of consecutive classes
+         */
+        compactness(schedule: RawAlgoSchedule) {
+            const groups = ScheduleEvaluator.groupCourses(schedule);
+            let dist = 0;
+            for (const group of groups) {
+                for (let i = 0; i < group.length - 1; i++) {
+                    // start time of next class minus end time of previous class
+                    dist += group[i + 1][2][0] - group[i][2][1];
+                }
+            }
+            return dist;
+        },
+
+        /**
+         * compute overlap of the classes and the lunch time,
+         * defined as the time between 11:00 and 14:00
+         */
+        lunchTime(schedule: RawAlgoSchedule) {
+            // 11:00 to 14:00
+            const lunchStart = 11 * 60;
+            const lunchEnd = 14 * 60;
+            let overlap = 0;
+            for (const course of schedule) {
+                overlap += ScheduleEvaluator.calcOverlap(
+                    lunchStart,
+                    lunchEnd,
+                    course[2][0],
+                    course[2][1]
+                );
+            }
+            return overlap;
+        },
+
+        IamFeelingLucky() {
+            return Math.random();
+        }
+    };
+
     /**
      * calculate the population variance
      */
@@ -36,61 +92,12 @@ class ScheduleEvaluator {
         return sumSq;
     }
 
-    /**
-     * compute the standard deviation of class times
-     */
-    public static variance(schedule: RawAlgoSchedule) {
-        const minutes = new Array(5).fill(0);
-        const days = ScheduleEvaluator.days;
-        for (const course of schedule) {
-            for (let i = 0; i < days.length; i++) {
-                if (course[1].includes(days[i])) minutes[i] += course[2][1] - course[2][0];
-            }
-        }
-        return ScheduleEvaluator.std(minutes);
-    }
-
-    /**
-     * compute the compactness of a schedule
-     */
-    public static compactness(schedule: RawAlgoSchedule) {
-        const groups = ScheduleEvaluator.groupCourses(schedule);
-        let dist = 0;
-        for (const group of groups) {
-            for (let i = 0; i < group.length - 1; i++) {
-                // start time of next class minus end time of previous class
-                dist += group[i + 1][2][0] - group[i][2][1];
-            }
-        }
-        return dist;
-    }
-
-    public static IamFeelingLucky() {
-        return Math.random();
-    }
-
     public static calcOverlap(a: number, b: number, c: number, d: number) {
         if (a <= c && d <= b) return d - c;
         if (a <= c && c <= b) return b - c;
         else if (a <= d && d <= b) return d - a;
         else if (a >= c && b <= d) return b - a;
         else return 0;
-    }
-
-    public static lunchTime(schedule: RawAlgoSchedule) {
-        // 11:00 to 14:00
-        const lunchStart = 11 * 60;
-        const lunchEnd = 14 * 60;
-        let overlap = 0;
-        for (const course of schedule) {
-            overlap += ScheduleEvaluator.calcOverlap(
-                lunchStart,
-                lunchEnd,
-                course[2][0],
-                course[2][1]
-            );
-        }
-        return overlap;
     }
 
     public static groupCourses(schedule: RawAlgoSchedule) {
@@ -115,7 +122,7 @@ class ScheduleEvaluator {
     public static validateOptions(options: SortOptions) {
         if (!options) return ScheduleEvaluator.optionDefaults;
         for (const key in options.sortBy) {
-            if (typeof ScheduleEvaluator[key] !== 'function')
+            if (typeof ScheduleEvaluator.sortFunctions[key] !== 'function')
                 throw new Error('Non-existent sorting option');
         }
         return options;
@@ -152,7 +159,7 @@ class ScheduleEvaluator {
         for (const key in this.options.sortBy) {
             if (this.options.sortBy[key]) {
                 const coeff = new Array(schedules.length);
-                const evalFunc = ScheduleEvaluator[key];
+                const evalFunc = ScheduleEvaluator.sortFunctions[key];
                 let max = 0;
                 for (let i = 0; i < schedules.length; i++) {
                     const val = evalFunc(schedules[i].schedule);

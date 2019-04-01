@@ -39,7 +39,8 @@ export default Vue.extend({
         /**
          * @type {number[]}
          */
-        indices: Array
+        indices: Array,
+        curIdx: Number
     },
     data() {
         let e = 10;
@@ -55,6 +56,16 @@ export default Vue.extend({
             end: e,
             pageNumber: e
         };
+    },
+    created() {
+        if (
+            this.curIdx !== undefined &&
+            this.curIdx !== null &&
+            this.curIdx >= 0 &&
+            this.curIdx < this.indices.length
+        ) {
+            this.switchPage(this.curIdx);
+        }
     },
     methods: {
         /**

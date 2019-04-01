@@ -8,6 +8,7 @@ export type RawAlgoSchedule = RawAlgoCourse[];
 
 export interface SortOptions {
     sortBy: {
+        [x: string]: boolean;
         variance: boolean;
         compactness: boolean;
         lunchTime: boolean;
@@ -17,6 +18,7 @@ export interface SortOptions {
 }
 
 export interface Options {
+    [x: string]: any;
     timeSlots: Array<[number, number]>;
     status: string[];
     noClassDay: string[];

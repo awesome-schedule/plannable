@@ -43,67 +43,21 @@
                         class="placeholder"
                         style="z-index:1"
                     ></div>
-
-                    <course-block
-                        v-for="course in courses.Monday"
-                        :key="course.key + 'Mo'"
-                        :course="course"
-                        :height-info="heightInfo"
-                        :full-height="fullHeight"
-                        :show-time="showTime"
-                        :show-room="showRoom"
-                        :show-instructor="showInstructor"
-                        :absolute-earliest="absoluteEarliest"
-                        style="left:0%"
-                    ></course-block>
-                    <course-block
-                        v-for="course in courses.Tuesday"
-                        :key="course.key + 'Tu'"
-                        :course="course"
-                        :height-info="heightInfo"
-                        :full-height="fullHeight"
-                        :show-time="showTime"
-                        :show-room="showRoom"
-                        :show-instructor="showInstructor"
-                        :absolute-earliest="absoluteEarliest"
-                        style="left:20%"
-                    ></course-block>
-                    <course-block
-                        v-for="course in courses.Wednesday"
-                        :key="course.key + 'We'"
-                        :course="course"
-                        :height-info="heightInfo"
-                        :full-height="fullHeight"
-                        :show-time="showTime"
-                        :show-room="showRoom"
-                        :show-instructor="showInstructor"
-                        :absolute-earliest="absoluteEarliest"
-                        style="left:40%"
-                    ></course-block>
-                    <course-block
-                        v-for="course in courses.Thursday"
-                        :key="course.key + 'Th'"
-                        :course="course"
-                        :height-info="heightInfo"
-                        :full-height="fullHeight"
-                        :show-time="showTime"
-                        :show-room="showRoom"
-                        :show-instructor="showInstructor"
-                        :absolute-earliest="absoluteEarliest"
-                        style="left:60%"
-                    ></course-block>
-                    <course-block
-                        v-for="course in courses.Friday"
-                        :key="course.key + 'Fr'"
-                        :course="course"
-                        :height-info="heightInfo"
-                        :full-height="fullHeight"
-                        :show-time="showTime"
-                        :show-room="showRoom"
-                        :show-instructor="showInstructor"
-                        :absolute-earliest="absoluteEarliest"
-                        style="left:80%"
-                    ></course-block>
+                    <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
+                    <template v-for="(day, idx) in days">
+                        <course-block
+                            v-for="course in schedule.days[day]"
+                            :key="course.key + day"
+                            :course="course"
+                            :height-info="heightInfo"
+                            :full-height="fullHeight"
+                            :show-time="showTime"
+                            :show-room="showRoom"
+                            :show-instructor="showInstructor"
+                            :absolute-earliest="absoluteEarliest"
+                            :style="`left:${idx * 20}%`"
+                        ></course-block>
+                    </template>
                 </div>
             </td>
         </tr>
@@ -120,7 +74,7 @@ export default Vue.extend({
         CourseBlock
     },
     props: {
-        courses: Schedule,
+        schedule: Schedule,
         showTime: Boolean,
         showRoom: Boolean,
         showInstructor: Boolean,
@@ -135,18 +89,21 @@ export default Vue.extend({
             tue: window.screen.width > 450 ? 'Tuesday' : 'Tue',
             wed: window.screen.width > 450 ? 'Wednesday' : 'Wed',
             thu: window.screen.width > 450 ? 'Thursday' : 'Thu',
-            fri: window.screen.width > 450 ? 'Friday' : 'Fri'
+            fri: window.screen.width > 450 ? 'Friday' : 'Fri',
+            // note: we need Schedule.days because it's an array that keeps the keys in order
+            days: Schedule.days
         };
     },
     computed: {
         /**
          * return the block in which the earliest class starts, the 8:00 block is zero
          * return 0 if no class
+         * @returns {number}
          */
         earliestBlock() {
             let earliest = 817;
-            for (const key of Schedule.days) {
-                for (const course of this.courses[key]) {
+            for (const key in this.schedule.days) {
+                for (const course of this.schedule.days[key]) {
                     const temp = this.timeToNum(course.start, true);
                     if (temp < earliest && course !== undefined && course !== null) {
                         earliest = temp;
@@ -157,11 +114,12 @@ export default Vue.extend({
         },
         /**
          * return the block in which the latest class ends, the 8:00 block is zero
+         * @returns {number}
          */
         latestBlock() {
             let latest = 0;
-            for (const key of Schedule.days) {
-                for (const course of this.courses[key]) {
+            for (const key in this.schedule.days) {
+                for (const course of this.schedule.days[key]) {
                     const temp = this.timeToNum(course.end, false);
                     if (temp > latest && course !== undefined && course !== null) {
                         latest = temp;
@@ -172,6 +130,7 @@ export default Vue.extend({
         },
         /**
          * return the block in which the schedule starts with
+         * @returns {number}
          */
         absoluteEarliest() {
             const early =
@@ -189,6 +148,7 @@ export default Vue.extend({
         },
         /**
          * return the block in which the schedule ends with
+         * @returns {number}
          */
         absoluteLatest() {
             const late =
@@ -206,6 +166,7 @@ export default Vue.extend({
         },
         /**
          * computes the number of rows needs
+         * @returns {number}
          */
         numRow() {
             let num = 0;
@@ -214,6 +175,9 @@ export default Vue.extend({
             }
             return num;
         },
+        /**
+         * @returns {string[]}
+         */
         hours() {
             let curTime = '';
             if (this.absoluteEarliest % 2 === 0) {
@@ -227,26 +191,36 @@ export default Vue.extend({
             for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
                 time.push(curTime);
                 curTime = this.increTime(curTime);
-                reducedTime.push(i % 2 !== 0 ? '' : i / 2 + 8);
+                // note: need .toString to make the type of reducedTime consistent
+                reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
             }
 
             return window.screen.width > 450 ? time : reducedTime;
         },
+
+        /**
+         * @returns {number[]}
+         */
         items() {
             const arr = [];
             const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
             for (let i = 0; i < numBlocks; i++) {
                 arr.push(i + 1);
             }
-
             return arr;
         },
+        /**
+         * @returns {number[]}
+         */
         heightInfo() {
+            /**
+             * @type {number[]}
+             */
             const info = new Array(this.numRow);
             info.fill(this.partialHeight);
             const earliest = this.absoluteEarliest;
-            for (const key of Schedule.days) {
-                for (const course of this.courses[key]) {
+            for (const key in this.schedule.days) {
+                for (const course of this.schedule.days[key]) {
                     const startTime = this.timeToNum(course.start, true);
                     const endTime = this.timeToNum(course.end, false);
                     for (let i = startTime; i <= endTime; i++) {
@@ -256,6 +230,9 @@ export default Vue.extend({
             }
             return info;
         },
+        /**
+         * @returns {number}
+         */
         mainHeight() {
             let h = 0;
             for (const i of this.heightInfo) {
@@ -267,6 +244,7 @@ export default Vue.extend({
     methods: {
         /**
          * Increase the time in string by 30 minutes and return
+         * @param {string} time
          */
         increTime(time) {
             const sep = time.split(':');
@@ -282,8 +260,9 @@ export default Vue.extend({
         /**
          * timeToNum
          * convert time in 24 hours to number of time blocks relative to the    8:00 block
-         * @param time time in 24 hours
-         * @param start boolean that indicates this is a start time or end time
+         * @param {string} time time in 24 hours
+         * @param {string} start boolean that indicates this is a start time or end time
+         * @returns {number}
          */
         timeToNum(time, start) {
             const sep = time.split(':');

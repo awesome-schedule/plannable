@@ -3,6 +3,11 @@ import CourseRecord from './CourseRecord';
 import AllRecords from './AllRecords';
 
 export type RawSchedule = Array<[string, number, number]>;
+export interface ScheduleJSON {
+    All: { [x: string]: number[] | -1 };
+    title: string;
+    id: number;
+}
 
 /**
  * A schedule is a list of courses with computed properties that aid rendering
@@ -56,14 +61,15 @@ class Schedule {
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
-    public static fromJSON(obj: { [x: string]: any }) {
+    public static fromJSON(obj: ScheduleJSON) {
         const schedule = new Schedule();
-        for (const field of Schedule.fields) {
-            schedule[field] = obj[field];
-        }
+        schedule.title = obj.title;
+        schedule.id = obj.id;
         // convert array to set
         for (const key in obj.All) {
-            if (obj.All[key] instanceof Array) schedule.All[key] = new Set(obj.All[key]);
+            const sections = obj.All[key];
+            if (sections instanceof Array) schedule.All[key] = new Set(sections);
+            else schedule.All[key] = sections;
         }
         schedule.computeSchedule();
         return schedule;
@@ -79,23 +85,14 @@ class Schedule {
     /**
      * computed based on `this.All` by `computeSchedule`
      */
-    public Monday: Course[];
-    /**
-     * computed based on `this.All` by `computeSchedule`
-     */
-    public Tuesday: Course[];
-    /**
-     * computed based on `this.All` by `computeSchedule`
-     */
-    public Wednesday: Course[];
-    /**
-     * computed based on `this.All` by `computeSchedule`
-     */
-    public Thursday: Course[];
-    /**
-     * computed based on `this.All` by `computeSchedule`
-     */
-    public Friday: Course[];
+    public days: {
+        [x: string]: Course[];
+        Monday: Course[];
+        Tuesday: Course[];
+        Wednesday: Course[];
+        Thursday: Course[];
+        Friday: Course[];
+    };
     /**
      * computed property
      */
@@ -115,11 +112,13 @@ class Schedule {
      */
     constructor(raw_schedule: RawSchedule = [], title = 'Schedule', id = 0) {
         this.All = {};
-        this.Monday = [];
-        this.Tuesday = [];
-        this.Wednesday = [];
-        this.Thursday = [];
-        this.Friday = [];
+        this.days = {
+            Monday: [],
+            Tuesday: [],
+            Wednesday: [],
+            Thursday: [],
+            Friday: []
+        };
         this.previous = null;
         this.title = title;
         this.id = id;
@@ -246,19 +245,19 @@ class Schedule {
         for (let i = 0; i < days.length; i += 2) {
             switch (days.substr(i, 2)) {
                 case 'Mo':
-                    this.Monday.push(course);
+                    this.days.Monday.push(course);
                     break;
                 case 'Tu':
-                    this.Tuesday.push(course);
+                    this.days.Tuesday.push(course);
                     break;
                 case 'We':
-                    this.Wednesday.push(course);
+                    this.days.Wednesday.push(course);
                     break;
                 case 'Th':
-                    this.Thursday.push(course);
+                    this.days.Thursday.push(course);
                     break;
                 case 'Fr':
-                    this.Friday.push(course);
+                    this.days.Friday.push(course);
                     break;
             }
             [course.start, course.end] = Schedule.parseTime(start, end);
@@ -274,8 +273,8 @@ class Schedule {
     }
 
     public cleanSchedule() {
-        for (const key of Schedule.days) {
-            this[key] = [];
+        for (const key in this.days) {
+            this.days[key] = [];
         }
         this.colors.clear();
         this.totalCredit = 0;
@@ -284,7 +283,7 @@ class Schedule {
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
-    public fromJSON(obj: { [x: string]: any }) {
+    public fromJSON(obj: ScheduleJSON) {
         return Schedule.fromJSON(obj);
     }
 
@@ -292,16 +291,16 @@ class Schedule {
      * Serialize `this` to JSON
      */
     public toJSON() {
-        const obj: { [x: string]: any } = {};
-        for (const field of Schedule.fields) {
-            obj[field] = this[field];
-        }
-        // deep copy All
-        obj.All = Object.assign({}, this.All);
+        const obj: ScheduleJSON = {
+            All: {},
+            id: this.id,
+            title: this.title
+        };
         // convert set to array
-        for (const key in obj.All) {
+        for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Set) obj.All[key] = [...sections.values()];
+            else obj.All[key] = sections;
         }
         return obj;
     }

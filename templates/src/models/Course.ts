@@ -1,11 +1,7 @@
 import CourseRecord from './CourseRecord';
 
 import { RawRecord } from './AllRecords';
-interface RawCourse {
-    [x: string]: any;
-}
-
-class Course implements RawCourse {
+class Course {
     /**
      * Calculate a 32 bit FNV-1a hash
      * @see https://gist.github.com/vaiorabbit/5657561
@@ -22,24 +18,7 @@ class Course implements RawCourse {
         }
         return hval >>> 0;
     }
-    public raw: [
-        number[],
-        string,
-        number,
-        number[],
-        number,
-        number,
-        string[][],
-        string[],
-        string[],
-        string,
-        string[],
-        number[],
-        number[],
-        number[],
-        number[],
-        string
-    ];
+    public raw: RawRecord;
     public sid: number;
     public key: string;
     public id: number;

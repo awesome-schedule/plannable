@@ -10,7 +10,7 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "sourceMap": true,
-        "suppressImplicitAnyIndexErrors": true,
+
         "baseUrl": ".",
         "types": ["webpack-env"],
         "paths": {

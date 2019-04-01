@@ -539,7 +539,7 @@
                 </div>
             </div>
             <grid-schedule
-                :courses="currentSchedule"
+                :schedule="currentSchedule"
                 :show-time="showTime"
                 :show-room="showRoom"
                 :show-instructor="showInstructor"

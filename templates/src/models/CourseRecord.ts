@@ -1,11 +1,7 @@
 import Course from './Course';
 import { RawRecord } from './AllRecords';
 
-interface Index {
-    [x: string]: any;
-}
-
-class CourseRecord implements Index {
+class CourseRecord {
     /**
      * lecture type number => meaning
      */
@@ -102,25 +98,9 @@ class CourseRecord implements Index {
         Number,
         null
     ];
+    [x: string]: any;
     public key: string;
-    public raw: [
-        number[],
-        string,
-        number,
-        number[],
-        number,
-        number,
-        string[][],
-        string[],
-        string[],
-        string,
-        string[],
-        number[],
-        number[],
-        number[],
-        number[],
-        string
-    ];
+    public raw: RawRecord;
     public id: number[];
     public department: string;
     public number: number;

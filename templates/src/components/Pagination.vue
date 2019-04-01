@@ -21,11 +21,7 @@
                     <span v-if="idx === index + end - 1" class="sr-only">(current)</span>
                 </a>
             </li>
-            <li
-                :class="
-                    'page-item' + (end >= indices.length - 1 && idx >= end - 1 ? ' disabled' : '')
-                "
-            >
+            <li :class="'page-item' + (end >= indices.length && idx >= end - 1 ? ' disabled' : '')">
                 <a class="page-link" href="#" @click="switchPage(idx + 1)">Next</a>
             </li>
         </ul>
@@ -76,7 +72,7 @@ export default Vue.extend({
                 this.end -= 1;
                 this.idx = idx;
                 this.$emit('switch_page', idx);
-            } else if (idx >= this.end && this.end < this.indices.length - 1) {
+            } else if (idx >= this.end && this.end < this.indices.length) {
                 this.start += 1;
                 this.end += 1;
                 this.idx = idx;

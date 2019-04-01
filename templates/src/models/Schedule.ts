@@ -4,16 +4,13 @@ import AllRecords from './AllRecords';
 
 export type RawSchedule = Array<[string, number, number]>;
 
-// interface Days {
-//     [x: string]: Course[];
-// }
 /**
  * A schedule is a list of courses with computed properties that aid rendering
  */
 class Schedule {
-    public static days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    public static fields = ['All', 'title', 'id'];
-    public static bgColors = [
+    public static readonly days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    public static readonly fields = ['All', 'title', 'id'];
+    public static readonly bgColors = [
         '#f7867e',
         '#ffb74c',
         '#82677E',
@@ -29,7 +26,7 @@ class Schedule {
     /**
      * this field must be initialized before calling any instance method of the Schedule class
      */
-    public static allRecords: AllRecords;
+    public static readonly allRecords: AllRecords;
     /**
      * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
      */
@@ -77,6 +74,8 @@ class Schedule {
      * Otherwise **section** should be a Set of integers
      */
     public All: { [x: string]: Set<number> | -1 };
+    public title: string;
+    public id: number;
     /**
      * computed based on `this.All` by `computeSchedule`
      */
@@ -97,8 +96,6 @@ class Schedule {
      * computed based on `this.All` by `computeSchedule`
      */
     public Friday: Course[];
-    public title: string;
-    public id: number;
     /**
      * computed property
      */

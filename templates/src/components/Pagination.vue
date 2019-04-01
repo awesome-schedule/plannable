@@ -37,7 +37,7 @@ import Vue from 'vue';
 export default Vue.extend({
     props: {
         /**
-         * @type {number}
+         * @type {number[]}
          */
         indices: Array
     },

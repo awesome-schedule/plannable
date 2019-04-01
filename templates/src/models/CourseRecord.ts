@@ -9,7 +9,7 @@ class CourseRecord implements Index {
     /**
      * lecture type number => meaning
      */
-    public static TYPES: { [x: number]: string } = Object.freeze({
+    public static readonly TYPES: { [x: number]: string } = Object.freeze({
         '-1': '',
         0: 'Clinical',
         1: 'Discussion',
@@ -26,14 +26,14 @@ class CourseRecord implements Index {
     /**
      * status number => meaning
      */
-    public static STATUSES: { [x: number]: string } = Object.freeze({
+    public static readonly STATUSES: { [x: number]: string } = Object.freeze({
         '-1': 'TBA',
         1: 'Open',
         0: 'Closed',
         2: 'Wait List'
     });
 
-    public static FIELDS: { [x: number]: string } = Object.freeze({
+    public static readonly FIELDS: { [x: number]: string } = Object.freeze({
         0: 'id',
         1: 'department',
         2: 'number',
@@ -52,7 +52,7 @@ class CourseRecord implements Index {
         15: 'description'
     });
 
-    public static TYPES_PARSE: { [x: string]: number } = Object.freeze({
+    public static readonly TYPES_PARSE: { [x: string]: number } = Object.freeze({
         Clinical: 0,
         Discussion: 1,
         Drill: 2,
@@ -65,7 +65,7 @@ class CourseRecord implements Index {
         Workshop: 9
     });
 
-    public static STATUSES_PARSE: { [x: string]: number } = Object.freeze({
+    public static readonly STATUSES_PARSE: { [x: string]: number } = Object.freeze({
         Open: 1,
         Closed: 0,
         'Wait List': 2
@@ -74,11 +74,11 @@ class CourseRecord implements Index {
     /**
      * The list of indices at which the field is a list
      */
-    public static LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14];
+    public static readonly LIST = [0, 3, 6, 7, 8, 10, 11, 12, 13, 14];
 
-    public static LENGTH = 16;
+    public static readonly LENGTH = 16;
 
-    public static PARSE_FUNC = [
+    public static readonly PARSE_FUNC = [
         Number,
         null,
         Number,

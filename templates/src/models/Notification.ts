@@ -1,5 +1,5 @@
 class Notification {
-    public static TYPES: { [x: string]: string } = {
+    public static readonly TYPES: { [x: string]: string } = {
         info: 'info',
         error: 'danger',
         danger: 'danger',

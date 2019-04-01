@@ -90,7 +90,15 @@ export default Vue.extend({
                 this.curIdx >= 0 &&
                 this.curIdx < this.indices.length
             ) {
-                this.switchPage(this.curIdx);
+                console.log('autoswitched');
+                if (this.curIdx < this.pageNumber) {
+                    this.switchPage(this.curIdx);
+                } else {
+                    this.end = this.curIdx;
+                    this.start =
+                        this.curIdx - this.pageNumber < 0 ? 0 : this.curIdx - this.pageNumber;
+                    this.switchPage(this.curIdx);
+                }
             }
         }
     }

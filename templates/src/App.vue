@@ -575,6 +575,141 @@ import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 
 /**
+ * use a standalone method to get rid of deep copy issues
+ */
+function getDefaultData() {
+    return {
+        api:
+            window.location.host.indexOf('localhost') === -1 &&
+            window.location.host.indexOf('127.0.0.1') === -1
+                ? `${window.location.protocol}//${window.location.host}/api`
+                : 'http://localhost:8000/api',
+        /**
+         * @type {Semester[]}
+         */
+        semesters: null,
+        /**
+         * @type {Semester}
+         */
+        currentSemester: null,
+        /**
+         * @type {AllRecords}
+         */
+        allRecords: null,
+        currentScheduleIndex: 0,
+        /**
+         * @type {Schedule}
+         */
+        currentSchedule: new Schedule(),
+        /**
+         * @type {Schedule}
+         */
+        proposedSchedule: new Schedule(),
+        /**
+         * indicates whether the currently showing schedule is the generated schedule
+         */
+        generated: false,
+        scheduleEvaluator: new ScheduleEvaluator(),
+        maxNumSchedules: Infinity,
+
+        // sidebar display status
+        /***
+         * show left sidebar when true, and hide when false
+         */
+        sideBar: true,
+        /**
+         * when true, show the select-class sidebar if 'sideBar' is also true
+         */
+        showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
+        /**
+         * when true, show the filter sidebar if 'sideBar' is also true
+         */
+        showFilter: false,
+        /**
+         * when true, show the settings sidebar if 'sideBar' is also true
+         */
+        showSetting: false,
+        showExport: false,
+
+        // autocompletion related fields
+        isEntering: false,
+        /**
+         * @type {Course[]}
+         */
+        inputCourses: null,
+
+        // modal object binding
+        /**
+         * @type {Course}
+         */
+        modalCourse: null,
+        /**
+         * A course record to be displayed on Modal
+         * @type {CourseRecord}
+         */
+        classListModalCourse: null,
+
+        // input options
+        showTime: true,
+        showRoom: false,
+        showInstructor: true,
+        showClasslistTitle: false,
+        fullHeight: 40,
+        partialHeight: 25,
+        /**
+         * @type {[string, string][]}
+         */
+        timeSlots: [],
+        allowWaitlist: true,
+        allowClosed: true,
+        sortOptions: {
+            sortBy: {
+                variance: true,
+                compactness: false,
+                lunchTime: false,
+                IamFeelingLucky: false
+            },
+            reverseSort: false
+        },
+        downloadURL: '',
+
+        // storage related fields
+        storageVersion: 2,
+        storageFields: [
+            // schedules
+            // 'currentSemester',
+            'currentSchedule',
+            'proposedSchedule',
+            'sortOptions',
+            'currentScheduleIndex',
+            // settings
+            'allowWaitList',
+            'allowClosed',
+            'showTime',
+            'showRoom',
+            'showInstructor',
+            'showClasslistTitle',
+            'fullHeight',
+            'partialHeight',
+            'timeSlots',
+            'storageVersion'
+        ],
+
+        // other
+        noti: new Notification(),
+        cache: true,
+        navHeight: 500,
+        loading: false,
+        mobile: window.screen.width < 900,
+        scrollable: false,
+        semesterListExpirationTime: 86400 * 1000, // one day
+        semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
+        earliest: '08:00:00',
+        latest: '19:00:00'
+    };
+}
+
+/**
  * @typedef {{id: string, name: string}} Semester
  */
 /**
@@ -592,137 +727,7 @@ export default Vue.extend({
         ClassListModal
     },
     data() {
-        const defaultData = {
-            api:
-                window.location.host.indexOf('localhost') === -1 &&
-                window.location.host.indexOf('127.0.0.1') === -1
-                    ? `${window.location.protocol}//${window.location.host}/api`
-                    : 'http://localhost:8000/api',
-            /**
-             * @type {Semester[]}
-             */
-            semesters: null,
-            /**
-             * @type {Semester}
-             */
-            currentSemester: null,
-            /**
-             * @type {AllRecords}
-             */
-            allRecords: null,
-            currentScheduleIndex: 0,
-            /**
-             * @type {Schedule}
-             */
-            currentSchedule: new Schedule(),
-            /**
-             * @type {Schedule}
-             */
-            proposedSchedule: new Schedule(),
-            /**
-             * indicates whether the currently showing schedule is the generated schedule
-             */
-            generated: false,
-            scheduleEvaluator: new ScheduleEvaluator(),
-            maxNumSchedules: Infinity,
-
-            // sidebar display status
-            /***
-             * show left sidebar when true, and hide when false
-             */
-            sideBar: true,
-            /**
-             * when true, show the select-class sidebar if 'sideBar' is also true
-             */
-            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
-            /**
-             * when true, show the filter sidebar if 'sideBar' is also true
-             */
-            showFilter: false,
-            /**
-             * when true, show the settings sidebar if 'sideBar' is also true
-             */
-            showSetting: false,
-            showExport: false,
-
-            // autocompletion related fields
-            isEntering: false,
-            /**
-             * @type {Course[]}
-             */
-            inputCourses: null,
-
-            // modal object binding
-            /**
-             * @type {Course}
-             */
-            modalCourse: null,
-            /**
-             * A course record to be displayed on Modal
-             * @type {CourseRecord}
-             */
-            classListModalCourse: null,
-
-            // input options
-            showTime: true,
-            showRoom: false,
-            showInstructor: true,
-            showClasslistTitle: false,
-            fullHeight: 40,
-            partialHeight: 25,
-            /**
-             * @type {[string, string][]}
-             */
-            timeSlots: [],
-            allowWaitlist: true,
-            allowClosed: true,
-            sortOptions: {
-                sortBy: {
-                    variance: true,
-                    compactness: false,
-                    lunchTime: false,
-                    IamFeelingLucky: false
-                },
-                reverseSort: false
-            },
-            downloadURL: '',
-
-            // storage related fields
-            storageVersion: 2,
-            storageFields: [
-                // schedules
-                'currentSemester',
-                'currentSchedule',
-                'proposedSchedule',
-                'sortOptions',
-                'currentScheduleIndex',
-                // settings
-                'allowWaitList',
-                'allowClosed',
-                'showTime',
-                'showRoom',
-                'showInstructor',
-                'showClasslistTitle',
-                'fullHeight',
-                'partialHeight',
-                'timeSlots',
-                'storageVersion'
-            ],
-
-            // other
-            noti: new Notification(),
-            cache: true,
-            navHeight: 500,
-            loading: false,
-            mobile: window.screen.width < 900,
-            scrollable: false,
-            semesterListExpirationTime: 86400 * 1000, // one day
-            semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
-            earliest: '08:00:00',
-            latest: '19:00:00'
-        };
-        defaultData.defaultData = defaultData;
-        return defaultData;
+        return getDefaultData();
     },
     computed: {
         /**
@@ -770,6 +775,7 @@ export default Vue.extend({
                 // } else {
                 //     this.sortOptions.sortBy.IamFeelingLucky = false;
                 // }
+                if (this.loading) return;
                 for (const key in this.sortOptions.sortBy) {
                     if (this.sortOptions.sortBy[key]) {
                         this.changeSorting();
@@ -957,15 +963,20 @@ export default Vue.extend({
          * @param {Object<string, any>} parsed_data
          */
         selectSemester(semesterId, parsed_data) {
+            this.loading = true;
             this.currentSemester = this.semesters[semesterId];
             const data = localStorage.getItem(this.currentSemester.id);
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
             const defaultCallback = () => {
+                this.generated = false;
+                this.scheduleEvaluator.clear();
+                const defaultData = getDefaultData();
                 for (const field of this.storageFields) {
-                    this[field] = this.defaultData[field];
+                    this[field] = defaultData[field];
                 }
                 this.saveAllRecords();
                 this.saveStatus();
+                this.loading = false;
             };
             if (parsed_data === undefined && !data) {
                 // set to default values
@@ -973,7 +984,6 @@ export default Vue.extend({
                 return;
             }
             const raw_data = parsed_data === undefined ? JSON.parse(data) : parsed_data;
-            // must assign allRecords prior to any other fields
             const storageVersion = raw_data.storageVersion;
 
             // storage version mismatch implies API update: use dafault data instead
@@ -989,14 +999,17 @@ export default Vue.extend({
 
             // things to do after allRecord is loaded
             const callback = () => {
+                this.generated = false;
+                this.scheduleEvaluator.clear();
                 this.parseLocalData(raw_data);
             };
             // if data is non-existant or data expires
             if (temp === null) {
                 // in this case, we only need to update allRecords. Save a set of fresh data
                 this.fetchSemesterData(semesterId, () => {
-                    callback();
                     this.saveAllRecords();
+                    callback();
+                    this.loading = false;
                 });
             } else {
                 this.allRecords = temp;

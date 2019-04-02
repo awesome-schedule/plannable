@@ -710,6 +710,22 @@ function getDefaultData() {
         tempScheduleIndex: null
     };
 }
+/**
+ * @template T
+ * @param {Promise<T>} promise
+ * @param {number} time
+ * @return {Promise<T>}
+ */
+function timeout(promise, time) {
+    return Promise.race([
+        promise,
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject('Time out fetching data. Please try again later');
+            }, time);
+        })
+    ]);
+}
 
 /**
  * @typedef {{id: string, name: string}} Semester
@@ -787,6 +803,12 @@ export default Vue.extend({
                 this.noti.error('You must have a sorting option ticked!');
             },
             deep: true
+        },
+        loading() {
+            if (this.mobile) {
+                if (this.loading) this.noti.info('Loading...', 3600);
+                else this.noti.clear();
+            }
         }
     },
     created() {
@@ -797,19 +819,9 @@ export default Vue.extend({
         // });
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
-        let noSidebar = false;
-        if (!(this.showSelectClass || this.showFilter || this.showSetting || this.showExport)) {
-            this.noti.info('Loading...', 3600);
-            noSidebar = true;
-        }
         const storage = localStorage.getItem('semesters');
         if (!storage) {
-            this.fetchSemesterList(() => {
-                this.loading = false;
-                if (noSidebar) {
-                    this.noti.clear();
-                }
-            });
+            this.fetchSemesterList();
             return;
         }
         const sms = JSON.parse(storage);
@@ -820,22 +832,19 @@ export default Vue.extend({
         ) {
             this.semesters = sms['semesterList'];
             this.selectSemester(0);
-            this.loading = false;
         } else {
-            this.fetchSemesterList(() => {
-                this.loading = false;
-                if (noSidebar) {
-                    this.noti.clear();
-                }
+            this.fetchSemesterList(undefined, () => {
+                this.semesters = sms['semesterList'];
             });
         }
     },
     methods: {
         /**
-         * @param {()=>void} callback
+         * @param {()=>void} success
+         * @param {()=>void} reject
          */
-        fetchSemesterList(callback) {
-            getSemesterList()
+        fetchSemesterList(success, reject) {
+            timeout(getSemesterList(), 5000)
                 .then(res => {
                     this.semesters = res;
                     localStorage.setItem(
@@ -847,12 +856,22 @@ export default Vue.extend({
                     );
                     // get the latest semester
                     this.selectSemester(0);
-                    this.loading = false;
-                    callback();
+                    if (typeof success === 'function') callback();
                 })
                 .catch(error => {
-                    this.noti.error(error);
-                    callback();
+                    let errStr = `Failed to fetch semester list: `;
+                    if (typeof error === 'string') errStr += error;
+                    else if (err.response) errStr += `request rejected by the server. `;
+                    else if (err.request) errStr += `No response received. `;
+                    if (typeof reject === 'function') {
+                        errStr += 'Old data is used instead';
+                        this.noti.warn(errStr);
+                        this.loading = false;
+                        reject();
+                        return;
+                    }
+                    this.noti.error(errStr);
+                    this.loading = false;
                 });
         },
         onDocChange() {
@@ -1009,14 +1028,29 @@ export default Vue.extend({
                 this.generated = false;
                 this.scheduleEvaluator.clear();
                 this.parseLocalData(raw_data);
+                this.loading = false;
             };
-            // if data is non-existant or data expires
+            // if data expires
             if (temp === null) {
                 // in this case, we only need to update allRecords. Save a set of fresh data
+                this.fetchSemesterData(
+                    semesterId,
+                    () => {
+                        this.saveAllRecords();
+                        callback();
+                    },
+                    () => {
+                        // if failed, just use the old data.
+                        this.allRecords = temp;
+                        Schedule.allRecords = temp;
+                        callback();
+                    }
+                );
+                // if data is not in correct format
+            } else if (temp === undefined) {
                 this.fetchSemesterData(semesterId, () => {
                     this.saveAllRecords();
                     callback();
-                    this.loading = false;
                 });
             } else {
                 this.allRecords = temp;
@@ -1042,7 +1076,7 @@ export default Vue.extend({
          * @param {number} semeseterIdx
          * @param {()=>void} callback
          */
-        fetchSemesterData(semesterIdx, callback) {
+        fetchSemesterData(semesterIdx, callback, reject) {
             // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
             //     this.allRecords = new AllRecords(this.currentSemester, res.data.data);
             //     // important: assign all records
@@ -1052,7 +1086,7 @@ export default Vue.extend({
             //     }
             // });
             this.loading = true;
-            getSemesterData(this.semesters[semesterIdx].id)
+            timeout(getSemesterData(this.semesters[semesterIdx].id), 5000)
                 .then(data => {
                     this.allRecords = new AllRecords(this.currentSemester, data);
                     // important: assign all records
@@ -1063,7 +1097,18 @@ export default Vue.extend({
                     }
                 })
                 .catch(err => {
-                    this.noti.error(err);
+                    let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
+                    if (typeof error === 'string') errStr += error;
+                    else if (err.response) errStr += `request rejected by the server. `;
+                    else if (err.request) errStr += `No response received. `;
+                    if (typeof reject === 'function') {
+                        errStr += 'Old data is used instead';
+                        this.noti.warn(errStr);
+                        reject();
+                        this.loading = false;
+                        return;
+                    }
+                    this.noti.error(errStr);
                     this.loading = false;
                 });
         },

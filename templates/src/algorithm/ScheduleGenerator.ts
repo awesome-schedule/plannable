@@ -3,7 +3,15 @@ import AllRecords from '../models/AllRecords';
 import CourseRecord from '../models/CourseRecord';
 import ScheduleEvaluator from './ScheduleEvaluator';
 
+/**
+ * The data structure used in the algorithm
+ * e.g. `["span20205",["Mo","Tu"],[600,650],0]`
+ */
 export type RawAlgoCourse = [string, string[], number[], number];
+
+/**
+ * A schedule is nothing more than an array of courses
+ */
 export type RawAlgoSchedule = RawAlgoCourse[];
 
 export interface SortOptions {
@@ -52,15 +60,6 @@ class ScheduleGenerator {
 
     /**
      * The entrance of the schedule generator
-     * Read from **schedule.All** and collect data from **allRecords**
-     * Collect data from **section(index)[7]**
-     * Parse the **days** into desired format: **{[ string[], number[] ]}**
-     * e.g. [ ["Mo","Tu"],[600,650] ]
-     * concatenate with the **key** and push into the **classList** to form a 3D array
-     * e.g. [ [ ["span20205",["Mo","Tu"],[600,650],0], ["span20205",["Th","Fr"],[720,770],1] ],
-     *        [ ["cs21105"  ,["Mo","We"],[400,450],2], ["cs21105"  ,["We","Fr"],[900,975],3] ] ]
-     * Pass the **ClassList** into the **createSchedule**
-     *
      * returns a sorted `ScheduleEvaluator` Object
      * @see ScheduleEvaluator
      */
@@ -90,21 +89,18 @@ class ScheduleGenerator {
                 for (const section of sections) {
                     const course = courseRecFull.getCourse(section);
                     // insert filter method
-                    if (this.filterStatus(course, this.options)) {
+                    if (this.filterStatus(course)) {
                         continue;
                     }
 
                     const day = course.days;
-                    const [date, timeBlock] = this.parseTime(day);
+                    const tmp1 = this.parseTime(day);
+                    if (tmp1 === null) continue;
+                    const [date, timeBlock] = tmp1;
                     // do not include any TBA
-                    if (
-                        timeBlock === null ||
-                        date === null ||
-                        this.filterTimeSlots(date, timeBlock)
-                    ) {
+                    if (this.filterTimeSlots(date, timeBlock)) {
                         continue;
                     }
-
                     classes.push([key, date, timeBlock, section]);
                 }
                 if (classes.length === 0) {
@@ -116,6 +112,7 @@ class ScheduleGenerator {
                 }
                 classList.push(classes);
             }
+            // note: this makes the algorithm deterministic
             classList.sort((a, b) => a.length - b.length);
             const result = this.createSchedule(classList);
             if (result.size() > 0) {
@@ -130,11 +127,6 @@ class ScheduleGenerator {
     }
 
     public createSchedule(classList: RawAlgoSchedule[]) {
-        /**
-         * classList Array --> [keys,[days],[start,end],index] --> 3D array
-         * finatable Object --> [keys,[days],[start,end],index] --> 2D array
-         */
-
         let classNum = 0;
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
@@ -246,17 +238,17 @@ class ScheduleGenerator {
     /**
      * parse the classTime and return which day the class is on and what time it takes place
      * remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
-     * :param classTime: give the clclassList[classNum][choiceNum][0ass time in form of String
-     * :return: date: List, timeBlock: List
+     *
+     * returns null when fail to parse
+     * @param {string} classTime
      */
-    public parseTime(classTime: string): [string[] | null, [number, number] | null] {
+    public parseTime(classTime: string): [string[], [number, number]] | null {
         if (classTime === 'TBA') {
-            /*there is TBA*/
-            return [null, null];
+            return null;
         }
         const pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
         const match = classTime.match(pattern);
-        if (match === null) return [null, null];
+        if (match === null) return null;
         const dates = match[1];
         const times = match[2];
         const date = [];
@@ -292,14 +284,14 @@ class ScheduleGenerator {
         return [date, timeBlock];
     }
 
-    public filterStatus(course: import('../models/Course').default, option: Options) {
+    public filterStatus(course: import('../models/Course').default) {
         const standard = Object.values(CourseRecord.STATUSES);
         // console.log(option.status.includes(course.status), option.status, course.status);
         if (!standard.includes(course.status)) {
             return true;
         }
 
-        if (option.status.includes(course.status)) {
+        if (this.options.status.includes(course.status)) {
             return true;
         }
         return false;

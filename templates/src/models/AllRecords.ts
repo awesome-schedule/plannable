@@ -48,7 +48,7 @@ class AllRecords {
                 return new AllRecords(data.semester, data.raw_data);
             }
         }
-        return null;
+        return undefined;
     }
     public semester: Semester;
     public raw_data: { [s: string]: RawRecord };

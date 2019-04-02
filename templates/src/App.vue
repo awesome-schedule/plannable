@@ -706,7 +706,8 @@ function getDefaultData() {
         semesterListExpirationTime: 86400 * 1000, // one day
         semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
         earliest: '08:00:00',
-        latest: '19:00:00'
+        latest: '19:00:00',
+        tempScheduleIndex: null
     };
 }
 
@@ -728,137 +729,6 @@ export default Vue.extend({
         ClassListModal
     },
     data() {
-        const defaultData = {
-            api:
-                window.location.host.indexOf('localhost') === -1 &&
-                window.location.host.indexOf('127.0.0.1') === -1
-                    ? `${window.location.protocol}//${window.location.host}/api`
-                    : 'http://localhost:8000/api',
-            /**
-             * @type {Semester[]}
-             */
-            semesters: null,
-            /**
-             * @type {Semester}
-             */
-            currentSemester: null,
-            /**
-             * @type {AllRecords}
-             */
-            allRecords: null,
-            currentScheduleIndex: 0,
-            /**
-             * @type {Schedule}
-             */
-            currentSchedule: new Schedule(),
-            /**
-             * @type {Schedule}
-             */
-            proposedSchedule: new Schedule(),
-            /**
-             * indicates whether the currently showing schedule is the generated schedule
-             */
-            generated: false,
-            scheduleEvaluator: new ScheduleEvaluator(),
-            maxNumSchedules: Infinity,
-
-            // sidebar display status
-            /***
-             * show left sidebar when true, and hide when false
-             */
-            sideBar: true,
-            /**
-             * when true, show the select-class sidebar if 'sideBar' is also true
-             */
-            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
-            /**
-             * when true, show the filter sidebar if 'sideBar' is also true
-             */
-            showFilter: false,
-            /**
-             * when true, show the settings sidebar if 'sideBar' is also true
-             */
-            showSetting: false,
-            showExport: false,
-
-            // autocompletion related fields
-            isEntering: false,
-            /**
-             * @type {Course[]}
-             */
-            inputCourses: null,
-
-            // modal object binding
-            /**
-             * @type {Course}
-             */
-            modalCourse: null,
-            /**
-             * A course record to be displayed on Modal
-             * @type {CourseRecord}
-             */
-            classListModalCourse: null,
-
-            // input options
-            showTime: true,
-            showRoom: false,
-            showInstructor: true,
-            showClasslistTitle: false,
-            fullHeight: 40,
-            partialHeight: 25,
-            /**
-             * @type {[string, string][]}
-             */
-            timeSlots: [],
-            allowWaitlist: true,
-            allowClosed: true,
-            sortOptions: {
-                sortBy: {
-                    variance: true,
-                    compactness: false,
-                    lunchTime: false,
-                    IamFeelingLucky: false
-                },
-                reverseSort: false
-            },
-            downloadURL: '',
-
-            // storage related fields
-            storageVersion: 2,
-            storageFields: [
-                // schedules
-                'currentSemester',
-                'currentSchedule',
-                'proposedSchedule',
-                'sortOptions',
-                'currentScheduleIndex',
-                // settings
-                'allowWaitList',
-                'allowClosed',
-                'showTime',
-                'showRoom',
-                'showInstructor',
-                'showClasslistTitle',
-                'fullHeight',
-                'partialHeight',
-                'timeSlots',
-                'storageVersion'
-            ],
-
-            // other
-            noti: new Notification(),
-            cache: true,
-            navHeight: 500,
-            loading: false,
-            mobile: window.screen.width < 900,
-            scrollable: false,
-            semesterListExpirationTime: 86400 * 1000, // one day
-            semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
-            earliest: '08:00:00',
-            latest: '19:00:00',
-            tempScheduleIndex: null
-        };
-        defaultData.defaultData = defaultData;
         return getDefaultData();
     },
     computed: {

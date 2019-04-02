@@ -864,9 +864,9 @@ export default Vue.extend({
                     this.selectSemester(0);
                     if (typeof success === 'function') callback();
                 })
-                .catch(error => {
+                .catch(err => {
                     let errStr = `Failed to fetch semester list: `;
-                    if (typeof error === 'string') errStr += error;
+                    if (typeof err === 'string') errStr += err;
                     else if (err.response) errStr += `request rejected by the server. `;
                     else if (err.request) errStr += `No response received. `;
                     if (typeof reject === 'function') {
@@ -1104,7 +1104,7 @@ export default Vue.extend({
                 })
                 .catch(err => {
                     let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
-                    if (typeof error === 'string') errStr += error;
+                    if (typeof err === 'string') errStr += err;
                     else if (err.response) errStr += `request rejected by the server. `;
                     else if (err.request) errStr += `No response received. `;
                     if (typeof reject === 'function') {

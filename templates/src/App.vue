@@ -550,6 +550,12 @@
                 :latest="latest"
                 @trigger-modal="showModal"
             ></grid-schedule>
+            <div style="text-align: center" class="mb-2">
+                If you find any bugs, please file an issue at
+                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                    >our GitHub repository</a
+                >
+            </div>
         </div>
     </div>
 </template>

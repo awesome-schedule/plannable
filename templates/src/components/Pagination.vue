@@ -58,26 +58,10 @@ export default Vue.extend({
         };
     },
     created() {
-        console.log('created! ' + this.curIdx);
-        if (
-            this.curIdx !== undefined &&
-            this.curIdx !== null &&
-            this.curIdx >= 0 &&
-            this.curIdx < this.indices.length
-        ) {
-            this.switchPage(this.curIdx);
-        }
+        this.autoSwitch();
     },
     updated() {
-        console.log('updated ' + this.curIdx);
-        if (
-            this.curIdx !== undefined &&
-            this.curIdx !== null &&
-            this.curIdx >= 0 &&
-            this.curIdx < this.indices.length
-        ) {
-            this.switchPage(this.curIdx);
-        }
+        this.autoSwitch();
     },
     methods: {
         /**
@@ -97,6 +81,16 @@ export default Vue.extend({
                 this.end += 1;
                 this.idx = idx;
                 this.$emit('switch_page', idx);
+            }
+        },
+        autoSwitch() {
+            if (
+                this.curIdx !== undefined &&
+                this.curIdx !== null &&
+                this.curIdx >= 0 &&
+                this.curIdx < this.indices.length
+            ) {
+                this.switchPage(this.curIdx);
             }
         }
     }

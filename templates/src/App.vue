@@ -561,8 +561,6 @@
 </template>
 
 <script>
-// eslint-disable-next-line
-/* global $ */
 import Vue from 'vue';
 import ClassList from './components/ClassList.vue';
 import Pagination from './components/Pagination.vue';

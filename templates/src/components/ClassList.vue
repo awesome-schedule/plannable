@@ -205,12 +205,12 @@ export default Vue.extend({
          * @param {string}
          */
         collapse(key) {
-            if (this.collapsed[key] === undefined) {
-                this.$set(this.collapsed, key, key);
-            } else {
+            if (this.collapsed[key]) {
                 const ele = document.getElementById(`${key}trans`);
                 ele.style.maxHeight = ele.clientHeight + 'px';
                 this.$set(this.collapsed, key, undefined);
+            } else {
+                this.$set(this.collapsed, key, key);
             }
         },
         /**
@@ -219,14 +219,16 @@ export default Vue.extend({
          * @returns {boolean}
          */
         isActive(key, idx) {
-            return this.schedule.All[key] instanceof Set && this.schedule.All[key].has(idx);
+            const sections = this.schedule.All[key];
+            if (sections instanceof Set) return this.schedule.All[key].has(idx);
+            return false;
         },
         /**
          * @param {CourseRecord}
          * @returns {string}
          */
         expanded(crs) {
-            return (this.collapsed[crs.key] !== undefined) ^
+            return (this.collapsed[crs.key] !== undefined) !==
                 (this.isEntering && this.expandOnEntering)
                 ? 'fa-chevron-down'
                 : 'fa-chevron-right';

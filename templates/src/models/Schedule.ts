@@ -86,12 +86,12 @@ class Schedule {
      * computed based on `this.All` by `computeSchedule`
      */
     public days: {
-        [x: string]: Course[];
-        Monday: Course[];
-        Tuesday: Course[];
-        Wednesday: Course[];
-        Thursday: Course[];
-        Friday: Course[];
+        [x: string]: Array<Course | CourseRecord>;
+        Monday: Array<Course | CourseRecord>;
+        Tuesday: Array<Course | CourseRecord>;
+        Wednesday: Array<Course | CourseRecord>;
+        Thursday: Array<Course | CourseRecord>;
+        Friday: Array<Course | CourseRecord>;
     };
     /**
      * computed property
@@ -135,7 +135,7 @@ class Schedule {
     /**
      * Get the background color of a course
      */
-    public getColor(course: Course) {
+    public getColor(course: Course | CourseRecord) {
         let hash = course.hash();
         let idx = hash % Schedule.bgColors.length;
         // avoid color collision by linear probing
@@ -219,11 +219,16 @@ class Schedule {
                 ? 0
                 : parseFloat(courseRecord.units.toString());
 
-            // we only render those which has only one section given
-            if (sections instanceof Set && sections.size === 1) {
+            if (sections === -1) {
+                this.place(courseRecord.copy());
+            } else {
                 // we need a copy of course
-                const course = courseRecord.getCourse([...sections.values()][0]).copy();
-                this.place(course);
+                if (sections.size === 1) {
+                    this.place(courseRecord.getCourse(sections.values().next().value).copy());
+                } else {
+                    // a subset of the sections
+                    this.place(courseRecord.getRecord([...sections.values()]).copy());
+                }
             }
         }
 
@@ -237,11 +242,19 @@ class Schedule {
     /**
      * places the course into one of the `Monday` to `Friday` array according to its `days` property
      */
-    public place(course: Course) {
-        course.backgroundColor = this.getColor(course);
+    public place(course: Course | CourseRecord) {
+        let days: string, start: string, end: string;
 
-        // parse MoWeFr 11:00PM - 11:50PM style time
-        const [days, start, , end] = course.days.split(' ');
+        // we only render a CourseRecord if all of its sections occur at the same time
+        if (course instanceof CourseRecord) {
+            for (let i = 0; i < course.days.length - 1; i++) {
+                if (course.days[i] !== course.days[i + 1]) return;
+            }
+            [days, start, , end] = course.days[0].split(' ');
+        } else {
+            [days, start, , end] = course.days.split(' ');
+        }
+        course.backgroundColor = this.getColor(course);
         for (let i = 0; i < days.length; i += 2) {
             switch (days.substr(i, 2)) {
                 case 'Mo':

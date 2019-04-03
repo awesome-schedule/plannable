@@ -58,7 +58,11 @@ pip install flask flask-cors requests schedule
 
 ## Contributors
 
-Please refer to our [Contribution Log](/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)
+Please refer to our [Contribution Log](docs/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)
+
+## Contributing
+
+Please refer to [our contribution guide](docs/CONTRIBUTING.md).
 
 ## License
 

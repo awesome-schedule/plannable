@@ -75,11 +75,11 @@ class AllRecords {
 
     /**
      * Get a CourseRecord associated with the given key
-     * @param {string} key
-     * @returns {CourseRecord}
      */
-    public getRecord(key: string) {
-        return new CourseRecord(this.raw_data[key], key);
+    public getRecord(key: string, sections?: Set<number> | -1) {
+        if (!sections) return new CourseRecord(this.raw_data[key], key);
+        else if (sections === -1) return new CourseRecord(this.raw_data[key], key);
+        else return new CourseRecord(this.raw_data[key], key, [...sections.values()]);
     }
 
     /**

@@ -101,6 +101,8 @@ class CourseRecord {
     [x: string]: any;
     public key: string;
     public raw: RawRecord;
+    public sids: number[];
+
     public id: number[];
     public department: string;
     public number: number;
@@ -123,6 +125,7 @@ class CourseRecord {
     constructor(raw: RawRecord, key: string, sids: number[] = []) {
         this.key = key;
         this.raw = raw;
+        this.sids = sids;
 
         this.id = raw[0];
         this.department = raw[1];
@@ -171,13 +174,17 @@ class CourseRecord {
         return new CourseRecord(this.raw, this.key, sections);
     }
 
-    /**
-     * @param {Object} object
-     * @return {boolean}
-     */
+    public hash() {
+        return Course.hashCode(this.key + this.sids.toString());
+    }
+
+    public copy() {
+        return new CourseRecord(this.raw, this.key, this.sids);
+    }
+
     public equals(object: object): boolean {
         if (object instanceof CourseRecord) {
-            return this.key === object.key;
+            return this.key === object.key && this.sids.toString() === object.sids.toString();
         } else {
             return false;
         }

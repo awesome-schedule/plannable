@@ -32,11 +32,11 @@
                         height: mainHeight
                     }"
                 >
-                    <div class="placeholder">{{ mon }}</div>
-                    <div class="placeholder">{{ tue }}</div>
-                    <div class="placeholder">{{ wed }}</div>
-                    <div class="placeholder">{{ thu }}</div>
-                    <div class="placeholder">{{ fri }}</div>
+                    <div class="placeholder day">{{ mon }}</div>
+                    <div class="placeholder day">{{ tue }}</div>
+                    <div class="placeholder day">{{ wed }}</div>
+                    <div class="placeholder day">{{ thu }}</div>
+                    <div class="placeholder day">{{ fri }}</div>
                     <div
                         v-for="(item, i) in items"
                         :key="i"
@@ -301,8 +301,6 @@ export default Vue.extend({
 }
 
 .placeholder {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 12px 0 10px;
     font-size: 14px;
     border-left: 0.7px solid #e5e3dc;
     border-top: 0.7px solid #e5e3dc;
@@ -319,5 +317,9 @@ export default Vue.extend({
 
 .item1 {
     grid-column: 1 / 3;
+}
+
+.day {
+    padding-top: 10px;
 }
 </style>

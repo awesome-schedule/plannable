@@ -2,7 +2,7 @@
 
 First of all, thank you for considering to contribute! :tada:
 
-When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change, and read the Get Started section of this contributing guideline to figure out where you want to make a change to this repository.
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change, and read the [Get Started](https://github.com/awesome-schedule/Awesome-SchedulAR/blob/dev/CONTRIBUTING.md#get-started-satisfied) section of this contributing guideline to figure out where you want to make a change to this repository.
 
 Also, please note we have a code of conduct, please follow it in all your interactions with the project.
 

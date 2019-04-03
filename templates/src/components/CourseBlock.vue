@@ -1,8 +1,6 @@
 <template>
     <div
         class="courseBlock"
-        data-toggle="modal"
-        data-target="#modal"
         :style="{
             'margin-top': startPx + 'px',
             position: 'absolute',
@@ -13,35 +11,85 @@
             color: 'white',
             cursor: 'pointer'
         }"
-        @click="$parent.$emit('trigger-modal', course)"
     >
-        <div v-if="!mobile" class="mt-2 ml-2" style="color:white; font-size:13px">
-            {{ course.department }} {{ course.number }}-{{ course.section }} {{ course.type }}
+        <div v-if="!mobile" style="height:100%">
+            <div
+                v-if="isCourse(course)"
+                data-toggle="modal"
+                data-target="#modal"
+                style="height:100%"
+                @click="$parent.$emit('trigger-modal', course)"
+            >
+                <div class="mt-2 ml-2" style="color:white; font-size:13px">
+                    {{ course.department }} {{ course.number }}-{{ course.section }}
+                    {{ course.type }}
+                </div>
+                <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ course.days }}
+                </div>
+                <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ course.instructor.join(', ') }}
+                </div>
+                <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ course.room }}
+                </div>
+            </div>
+            <div
+                v-else
+                data-toggle="modal"
+                data-target="#class-list-modal"
+                style="height:100%"
+                @click="$parent.$parent.showClassListModal(course)"
+            >
+                <div class="mt-2 ml-2" style="color:white; font-size:13px">
+                    {{ course.department }} {{ course.number }}-{{ course.section[0] }} +{{
+                        course.section.length - 1
+                    }}
+                    {{ course.type }}
+                </div>
+                <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ course.days[0] }}
+                </div>
+                <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ course.instructor[0].join(', ') }} and
+                    {{ course.instructor.length - 1 }} more
+                </div>
+                <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ course.room[0] }} and {{ course.room.length - 1 }} more
+                </div>
+            </div>
         </div>
         <div v-if="mobile" class="mt-2 ml-2" style="color:white; font-size:10px">
-            {{ course.department }} <br />
-            {{ course.number }} <br />
-            {{ course.section }}
-        </div>
-        <div v-if="showTime && !mobile" class="ml-2" style="color:#eaeaea; font-size:11px">
-            {{ course.days }}
-        </div>
-        <div v-if="showInstructor && !mobile" class="ml-2" style="color:#eaeaea; font-size:11px">
-            {{ course.instructor.join(', ') }}
-        </div>
-        <div v-if="showRoom && !mobile" class="ml-2" style="color:#eaeaea; font-size:11px">
-            {{ course.room }}
+            <div
+                v-if="isCourse(course)"
+                data-toggle="modal"
+                data-target="#modal"
+                @click="$parent.$emit('trigger-modal', course)"
+            >
+                {{ course.department }} <br />
+                {{ course.number }} <br />
+                {{ course.section }}
+            </div>
+            <div v-else>
+                {{ course.department }} <br />
+                {{ course.number }} <br />
+                {{ course.section[0] }} +{{ course.section.length - 1 }}
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import Course from '../models/Course';
+import CourseRecord from '../models/CourseRecord';
 import Vue from 'vue';
 export default Vue.extend({
     name: 'CourseBlock',
     props: {
-        course: Course,
+        /**
+         * @type {Course | CourseRecord}
+         */
+        course: Object,
         heightInfo: Array,
         fullHeight: Number,
         partialHeight: Number,
@@ -102,6 +150,9 @@ export default Vue.extend({
                 }
             }
             return t - 1;
+        },
+        isCourse(crs) {
+            return crs instanceof Course;
         }
     }
 });

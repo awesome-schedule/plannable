@@ -75,7 +75,7 @@
             <div class="dropdown" style="">
                 <button
                     id="semester"
-                    class="btn btn-primary nav-btn mt-0"
+                    class="btn btn-info nav-btn mt-0"
                     type="button"
                     data-toggle="dropdown"
                 >
@@ -131,7 +131,7 @@
             <div>
                 <div class="mt-3">
                     <button
-                        class="btn btn-primary nav-btn"
+                        class="btn btn-info nav-btn"
                         :title="
                             generated
                                 ? 'Click to edit selected classes'
@@ -179,17 +179,16 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-primary nav-btn mt-3">
-                Semester Data
+            <button class="btn btn-info nav-btn mt-3">
+                Semester Overview
             </button>
             <ul class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
-                <li class="list-group-item"></li>
             </ul>
         </nav>
 
         <nav v-if="sideBar && showFilter" class="d-block bg-light sidebar">
-            <button class="btn btn-primary nav-btn">
+            <button class="btn btn-info nav-btn">
                 Filters
             </button>
             <ul class="list-group list-group-flush mx-1">
@@ -350,7 +349,7 @@
         </nav>
 
         <nav v-if="sideBar && showSetting" class="d-block bg-light sidebar">
-            <button class="btn btn-primary nav-btn">
+            <button class="btn btn-info nav-btn">
                 Schedule Display settings
             </button>
             <div class="list-group list-group-flush mx-1">
@@ -393,7 +392,7 @@
                     scrollable
                 </label>
             </div>
-            <button class="btn btn-primary nav-btn">
+            <button class="btn btn-info nav-btn">
                 Display Options
             </button>
             <ul class="list-group list-group-flush mx-1">
@@ -457,7 +456,7 @@
         </nav>
 
         <nav v-if="sideBar && showExport" class="d-block bg-light sidebar">
-            <button class="btn btn-primary nav-btn">
+            <button class="btn btn-info nav-btn">
                 Import/Export Schedule
             </button>
             <ul class="list-group list-group-flush mx-1">
@@ -916,6 +915,7 @@ export default Vue.extend({
          */
         showClassListModal(course) {
             this.classListModalCourse = course;
+            $('class-list-modal').modal();
         },
         /**
          * @param {string} key

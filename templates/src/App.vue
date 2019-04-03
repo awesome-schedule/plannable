@@ -682,7 +682,10 @@ function getDefaultData() {
         storageVersion: 2,
         storageFields: [
             // schedules
-            // 'currentSemester',
+
+            // note: this field is for uploadJSON
+            'currentSemester',
+
             'currentSchedule',
             'proposedSchedule',
             'sortOptions',

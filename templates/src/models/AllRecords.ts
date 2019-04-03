@@ -5,7 +5,7 @@ export type RawRecord = [
     number[],
     string,
     number,
-    number[],
+    string[],
     number,
     number,
     string[][],

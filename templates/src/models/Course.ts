@@ -21,10 +21,11 @@ class Course {
     public raw: RawRecord;
     public sid: number;
     public key: string;
+
     public id: number;
     public department: string;
     public number: number;
-    public section: number;
+    public section: string;
     public type: any;
     public units: number;
     public instructor: string[];

@@ -3,6 +3,7 @@ __pycache__
 .idea/
 .ipynb_checkpoints
 .~lock*
+~$*
 /models/
 *.ipynb
 node_modules

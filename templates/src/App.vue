@@ -1005,13 +1005,13 @@ export default Vue.extend({
                 this.scheduleEvaluator.clear();
                 const defaultData = getDefaultData();
                 for (const field of this.storageFields) {
-                    this[field] = defaultData[field];
+                    if (field !== 'currentSemester') this[field] = defaultData[field];
                 }
                 this.saveAllRecords();
                 this.saveStatus();
                 this.loading = false;
             };
-            if (parsed_data === undefined && !data) {
+            if (!parsed_data && !data) {
                 // set to default values
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
@@ -1081,7 +1081,8 @@ export default Vue.extend({
          * fetch basic class data for the given semester for fast class search and rendering
          * this method will assign `this.allRecords` and `Schedule.allRecords`
          * @param {number} semeseterIdx
-         * @param {()=>void} callback
+         * @param {()=>void} [callback]
+         * @param {()=>void} [reject]
          */
         fetchSemesterData(semesterIdx, callback, reject) {
             // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
@@ -1105,6 +1106,7 @@ export default Vue.extend({
                 })
                 .catch(err => {
                     let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
+                    console.warn(err);
                     if (typeof err === 'string') errStr += err;
                     else if (err.response) errStr += `request rejected by the server. `;
                     else if (err.request) errStr += `No response received. `;

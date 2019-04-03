@@ -2,12 +2,14 @@
 import AllRecords from '../models/AllRecords';
 import CourseRecord from '../models/CourseRecord';
 import ScheduleEvaluator from './ScheduleEvaluator';
+import Schedule from '../models/Schedule';
+import Course from '../models/Course';
 
 /**
  * The data structure used in the algorithm
  * e.g. `["span20205",["Mo","Tu"],[600,650],0]`
  */
-export type RawAlgoCourse = [string, string[], number[], number];
+export type RawAlgoCourse = [string, string[], number[], number[]];
 
 /**
  * A schedule is nothing more than an array of courses
@@ -64,7 +66,7 @@ class ScheduleGenerator {
      * @see ScheduleEvaluator
      */
     public getSchedules(
-        schedule: import('../models/Schedule').default,
+        schedule: Schedule,
         options: Options = ScheduleGenerator.optionDefaults
     ): Promise<ScheduleEvaluator> {
         return new Promise((resolve, reject) => {
@@ -75,38 +77,35 @@ class ScheduleGenerator {
             const classList: RawAlgoSchedule[] = [];
             for (const key in courses) {
                 const classes: RawAlgoSchedule = [];
-                // get full course records
-                const courseRecFull = this.allRecords.getRecord(key);
-                const temp = courses[key];
                 /**
-                 * get course with specific sections
+                 * get course with specific sections specified by Schedule
                  */
-                const sections =
-                    temp === -1
-                        ? Array.from({ length: courseRecFull.section.length }, (_, i) => i)
-                        : [...temp.values()];
+                const courseRec = this.allRecords.getRecord(key, courses[key]);
 
-                for (const section of sections) {
-                    const course = courseRecFull.getCourse(section);
-                    // insert filter method
-                    if (this.filterStatus(course)) {
-                        continue;
-                    }
-
-                    const day = course.days;
-                    const tmp1 = this.parseTime(day);
+                const combined = courseRec.getCombined();
+                for (const time in combined) {
+                    const sids = combined[time];
+                    const tmp1 = this.parseTime(time);
+                    // do not include any TBA
                     if (tmp1 === null) continue;
                     const [date, timeBlock] = tmp1;
-                    // do not include any TBA
-                    if (this.filterTimeSlots(date, timeBlock)) {
-                        continue;
+                    if (this.filterTimeSlots(date, timeBlock)) continue;
+
+                    const algoCourse: RawAlgoCourse = [key, date, timeBlock, []];
+
+                    for (const sid of sids) {
+                        const course = courseRec.getCourse(sid);
+                        // insert filter method
+                        if (this.filterStatus(course)) continue;
+                        algoCourse[3].push(sid);
                     }
-                    classes.push([key, date, timeBlock, section]);
+                    if (algoCourse[3].length !== 0) classes.push(algoCourse);
                 }
+
                 if (classes.length === 0) {
                     reject(
-                        `No sections of ${courseRecFull.department} ${courseRecFull.number} ${
-                            courseRecFull.type
+                        `No sections of ${courseRec.department} ${courseRec.number} ${
+                            courseRec.type
                         } satisfy the filters you given`
                     );
                 }
@@ -284,7 +283,7 @@ class ScheduleGenerator {
         return [date, timeBlock];
     }
 
-    public filterStatus(course: import('../models/Course').default) {
+    public filterStatus(course: Course) {
         const standard = Object.values(CourseRecord.STATUSES);
         // console.log(option.status.includes(course.status), option.status, course.status);
         if (!standard.includes(course.status)) {

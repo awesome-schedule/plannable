@@ -2,7 +2,7 @@ import Course from './Course';
 import CourseRecord from './CourseRecord';
 import AllRecords from './AllRecords';
 
-export type RawSchedule = Array<[string, number, number]>;
+export type RawSchedule = Array<[string, number[], number]>;
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
     title: string;
@@ -75,7 +75,7 @@ class Schedule {
         return schedule;
     }
     /**
-     * represents all courses in this schedule, stored as `[key, set of section]` pair
+     * represents all courses in this schedule, stored as `[key, set of sections]` pair
      * note that if **section** is -1, it means that all sections are allowed.
      * Otherwise **section** should be a Set of integers
      */
@@ -126,8 +126,8 @@ class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
 
-        for (const [key, section] of raw_schedule) {
-            this.add(key, section, false);
+        for (const [key, sections] of raw_schedule) {
+            this.All[key] = new Set(sections);
         }
         this.computeSchedule();
     }
@@ -247,9 +247,7 @@ class Schedule {
 
         // we only render a CourseRecord if all of its sections occur at the same time
         if (course instanceof CourseRecord) {
-            for (let i = 0; i < course.days.length - 1; i++) {
-                if (course.days[i] !== course.days[i + 1]) return;
-            }
+            if (!course.allSameTime()) return;
             [days, start, , end] = course.days[0].split(' ');
         } else {
             [days, start, , end] = course.days.split(' ');

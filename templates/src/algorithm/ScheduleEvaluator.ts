@@ -1,32 +1,107 @@
-// @ts-check
 import Schedule from '../models/Schedule';
-// eslint-disable-next-line
-import { RawAlgoSchedule, RawAlgoCourse, SortOptions } from './ScheduleGenerator';
+import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
 
 interface ComparableSchedule {
     schedule: RawAlgoSchedule;
     coeff: number;
 }
 
-class ScheduleEvaluator {
-    public static days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+export enum SortMode {
+    fallback,
+    combined
+}
 
-    public static optionDefaults: SortOptions = {
-        sortBy: {
-            variance: true,
-            compactness: false,
-            lunchTime: false,
-            noEarly: false,
-            IamFeelingLucky: false
-        },
-        reverseSort: false
+export interface SortOptions {
+    sortBy: Array<{
+        /**
+         * name of this sorting option
+         */
+        readonly name: string;
+        /**
+         * whether or not this option is enabled
+         */
+        enabled: boolean;
+        /**
+         * whether to sort in reverse
+         */
+        reverse: false;
+        /**
+         * the names of the sorting options that cannot be applied when this option is enabled
+         */
+        readonly exclusive: string[];
+        /**
+         * text displayed next to the checkbox
+         */
+        readonly title: string;
+        /**
+         * text displayed in tooltip
+         */
+        readonly description: string;
+    }>;
+    mode: SortMode;
+}
+
+class ScheduleEvaluator {
+    public static readonly days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+
+    public static readonly optionDefaults: SortOptions = {
+        sortBy: [
+            {
+                name: 'variance',
+                enabled: true,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Variance',
+                description: 'Balance the class time each day'
+            },
+            {
+                name: 'compactness',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Vertical compactness',
+                description: 'Make classes back-to-back'
+            },
+            {
+                name: 'lunchTime',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Lunch Time',
+                description: 'Make space for lunch'
+            },
+            {
+                name: 'noEarly',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'No Early',
+                description: 'Start my day as late as possible'
+            },
+            {
+                name: 'IamFeelingLucky',
+                enabled: false,
+                reverse: false,
+                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly'],
+                title: `I'm Feeling Lucky`,
+                description: 'Sort randomly'
+            }
+        ],
+        mode: SortMode.combined
     };
+
+    public static getDefaultOptions() {
+        const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
+        options.sortBy = options.sortBy.map(x => Object.assign({}, x));
+        return options;
+    }
+
     public static sortFunctions: { [x: string]: (schedule: RawAlgoSchedule) => number } = {
         /**
          * compute the standard deviation of class times
          */
         variance(schedule: RawAlgoSchedule) {
-            const minutes = new Array(5).fill(0);
+            const minutes = new Float32Array(5);
             const days = ScheduleEvaluator.days;
             for (const course of schedule) {
                 for (let i = 0; i < days.length; i++) {
@@ -92,9 +167,10 @@ class ScheduleEvaluator {
     };
 
     /**
-     * calculate the population variance
+     * although it's called std, it is actually calculating the
+     * sum of the absolute values of the difference between each sample and the mean
      */
-    public static std(args: number[]) {
+    public static std(args: Float32Array) {
         let sum = 0;
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
@@ -136,9 +212,9 @@ class ScheduleEvaluator {
 
     public static validateOptions(options: SortOptions) {
         if (!options) return ScheduleEvaluator.optionDefaults;
-        for (const key in options.sortBy) {
-            if (typeof ScheduleEvaluator.sortFunctions[key] !== 'function')
-                throw new Error('Non-existent sorting option');
+        for (const option of options.sortBy) {
+            if (typeof ScheduleEvaluator.sortFunctions[option.name] !== 'function')
+                throw new Error(`Non-existent sorting option ${option.name}`);
         }
         return options;
     }
@@ -162,22 +238,18 @@ class ScheduleEvaluator {
     }
 
     public computeCoeff() {
-        if (this.options.sortBy.IamFeelingLucky) {
-            for (const cmpSchedule of this.schedules) {
-                cmpSchedule.coeff = Math.random();
-            }
-            return;
-        }
         let count = 0;
-        let lastKey: string = '';
-        for (const key in this.options.sortBy) {
-            if (this.options.sortBy[key]) {
+        let lastKey: number = -1;
+        for (let i = 0; i < this.options.sortBy.length; i++) {
+            const option = this.options.sortBy[i];
+            if (option.enabled) {
                 count++;
-                lastKey = key;
+                lastKey = i;
             }
         }
         if (count === 1) {
-            const evalFunc = ScheduleEvaluator.sortFunctions[lastKey];
+            const option = this.options.sortBy[lastKey];
+            const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
             for (const cmpSchedule of this.schedules) {
                 cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
             }
@@ -186,29 +258,31 @@ class ScheduleEvaluator {
         count = 0;
 
         console.time('normalizing coefficients');
-        const coeffs: number[] = new Array(this.schedules.length);
+        const coeffs = new Float32Array(this.schedules.length);
         const schedules = this.schedules;
-        for (const key in this.options.sortBy) {
-            if (this.options.sortBy[key]) {
-                const coeff = new Array(schedules.length);
-                const evalFunc = ScheduleEvaluator.sortFunctions[key];
-                let max = 0;
+        for (const option of this.options.sortBy) {
+            if (option.enabled) {
+                const coeff = new Float32Array(schedules.length);
+                const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
+                let max = 0,
+                    min = Infinity;
                 for (let i = 0; i < schedules.length; i++) {
                     const val = evalFunc(schedules[i].schedule);
                     if (val > max) max = val;
+                    if (val < min) min = val;
                     coeff[i] = val;
                 }
-                const normalizeRatio = max / 64;
-                if (count) {
+                const range = max - min;
+                const normalizeRatio = range / 100;
+                if (option.reverse) {
                     for (let i = 0; i < coeffs.length; i++) {
-                        coeffs[i] += (coeff[i] / normalizeRatio) ** 2;
+                        coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
                     }
                 } else {
                     for (let i = 0; i < coeffs.length; i++) {
-                        coeffs[i] = (coeff[i] / normalizeRatio) ** 2;
+                        coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
                     }
                 }
-                count++;
             }
         }
         for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
@@ -220,9 +294,8 @@ class ScheduleEvaluator {
      */
     public sort() {
         console.time('sorting: ');
-        let cmpFunc: (a: ComparableSchedule, b: ComparableSchedule) => number;
-        if (this.options.reverseSort) cmpFunc = (a, b) => b.coeff - a.coeff;
-        else cmpFunc = (a, b) => a.coeff - b.coeff;
+        const cmpFunc: (a: ComparableSchedule, b: ComparableSchedule) => number = (a, b) =>
+            a.coeff - b.coeff;
         // if want to be really fast, use Floyd–Rivest algorithm to select first,
         // say, 100 elements and then sort only these elements
         this.schedules.sort(cmpFunc);

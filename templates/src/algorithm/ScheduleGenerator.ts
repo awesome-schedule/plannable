@@ -1,6 +1,6 @@
 import AllRecords from '../models/AllRecords';
 import CourseRecord from '../models/CourseRecord';
-import ScheduleEvaluator from './ScheduleEvaluator';
+import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Course from '../models/Course';
 
@@ -15,17 +15,6 @@ export type RawAlgoCourse = [string, string[], number[], number[]];
  */
 export type RawAlgoSchedule = RawAlgoCourse[];
 
-export interface SortOptions {
-    sortBy: {
-        [x: string]: boolean;
-        variance: boolean;
-        compactness: boolean;
-        lunchTime: boolean;
-        IamFeelingLucky: boolean;
-    };
-    reverseSort: boolean;
-}
-
 export interface Options {
     [x: string]: any;
     timeSlots: Array<[number, number]>;
@@ -35,17 +24,18 @@ export interface Options {
 }
 
 class ScheduleGenerator {
-    public static optionDefaults: Options = {
+    public static readonly optionDefaults: Options = {
         timeSlots: [],
         status: [],
         noClassDay: [],
-        sortOptions: ScheduleEvaluator.optionDefaults
+        sortOptions: ScheduleEvaluator.getDefaultOptions()
     };
 
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
-            if (options[field] === undefined) {
+            if (!options[field]) {
+                console.warn(`Non-existent field ${field}. Default value used`);
                 options[field] = ScheduleGenerator.optionDefaults[field];
             }
         }

@@ -48,6 +48,7 @@ class CourseRecord {
         15: 'description'
     });
 
+    // maybe do this using enum?
     public static readonly TYPES_PARSE: { [x: string]: number } = Object.freeze({
         Clinical: 0,
         Discussion: 1,

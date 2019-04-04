@@ -16,6 +16,7 @@ class ScheduleEvaluator {
             variance: true,
             compactness: false,
             lunchTime: false,
+            noEarly: false,
             IamFeelingLucky: false
         },
         reverseSort: false
@@ -59,16 +60,30 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
+            const lunchDuration = lunchEnd - lunchStart;
             let overlap = 0;
             for (const course of schedule) {
-                overlap += ScheduleEvaluator.calcOverlap(
-                    lunchStart,
-                    lunchEnd,
-                    course[2][0],
-                    course[2][1]
-                );
+                const olap =
+                    ScheduleEvaluator.calcOverlap(
+                        lunchStart,
+                        lunchEnd,
+                        course[2][0],
+                        course[2][1]
+                    ) * course[1].length;
+                overlap += Math.exp(olap / lunchDuration / 4);
             }
             return overlap;
+        },
+
+        noEarly(schedule: RawAlgoSchedule) {
+            const groups = ScheduleEvaluator.groupCourses(schedule);
+            let time = 0;
+            const refTime = 22 * 60;
+            for (const group of groups) {
+                const start = group[0][2][0];
+                time += refTime - start;
+            }
+            return time;
         },
 
         IamFeelingLucky() {

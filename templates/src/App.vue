@@ -141,7 +141,7 @@
                             if (!scheduleEvaluator.empty()) {
                                 if (generated) {
                                     currentSchedule = proposedSchedule;
-                                } else switchPage(currentScheduleIndex);
+                                } else switchPage(currentScheduleIndex, true);
                                 generated = !generated;
                             }
                         "
@@ -272,7 +272,7 @@
                                 value="compactness"
                                 @change="
                                     sortOptions.sortBy.IamFeelingLucky = false;
-                                    changeSorting();
+                                    changeSorting($event);
                                 "
                             />
                             <label
@@ -292,7 +292,7 @@
                                 value="variance"
                                 @change="
                                     sortOptions.sortBy.IamFeelingLucky = false;
-                                    changeSorting();
+                                    changeSorting($event);
                                 "
                             />
                             <label
@@ -312,7 +312,7 @@
                                 value="lunchTime"
                                 @change="
                                     sortOptions.sortBy.IamFeelingLucky = false;
-                                    changeSorting();
+                                    changeSorting($event);
                                 "
                             />
                             <label
@@ -321,6 +321,26 @@
                                 title="Make spaces for lunch"
                             >
                                 Lunch Time
+                            </label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input
+                                id="noEarly"
+                                v-model="sortOptions.sortBy.noEarly"
+                                type="checkbox"
+                                class="custom-control-input"
+                                value="noEarly"
+                                @change="
+                                    sortOptions.sortBy.IamFeelingLucky = false;
+                                    changeSorting($event);
+                                "
+                            />
+                            <label
+                                class="custom-control-label"
+                                for="noEarly"
+                                title="Start my day as late as possible"
+                            >
+                                No Early
                             </label>
                         </div>
                         <div class="custom-control custom-checkbox">
@@ -334,7 +354,7 @@
                                     for (const key in sortOptions.sortBy)
                                         if (key !== 'IamFeelingLucky')
                                             sortOptions.sortBy[key] = false;
-                                    changeSorting();
+                                    changeSorting($event);
                                 "
                             />
                             <label
@@ -352,6 +372,7 @@
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="reverseSort"
+                                @change="changeSorting($event)"
                             />
                             <label
                                 class="custom-control-label"
@@ -684,15 +705,7 @@ function getDefaultData() {
         timeSlots: [],
         allowWaitlist: true,
         allowClosed: true,
-        sortOptions: {
-            sortBy: {
-                variance: true,
-                compactness: false,
-                lunchTime: false,
-                IamFeelingLucky: false
-            },
-            reverseSort: false
-        },
+        sortOptions: ScheduleEvaluator.optionDefaults,
         downloadURL: '',
 
         // storage related fields
@@ -950,7 +963,9 @@ export default Vue.extend({
             this.currentSchedule.removePreview();
         },
         /**
+         * if parsed is true, also update the pagination
          * @param {number} idx
+         * @param {boolean} [parsed]
          */
         switchPage(idx, parsed = false) {
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
@@ -1170,7 +1185,13 @@ export default Vue.extend({
                     this.loading = false;
                 });
         },
-        changeSorting() {
+        /**
+         * @param {*} event
+         */
+        changeSorting(event) {
+            if (!Object.values(this.sortOptions.sortBy).some(x => x)) {
+                return this.noti.error('You must have at least one sort option!');
+            }
             if (!this.scheduleEvaluator.empty()) {
                 this.scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {

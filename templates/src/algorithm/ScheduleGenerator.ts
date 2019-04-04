@@ -1,4 +1,3 @@
-// @ts-check
 import AllRecords from '../models/AllRecords';
 import CourseRecord from '../models/CourseRecord';
 import ScheduleEvaluator from './ScheduleEvaluator';

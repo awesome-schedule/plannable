@@ -43,7 +43,6 @@ const STATUSES = {
  * @type {Object<string, any[][]>}
  */
 const DICT = {};
-console.log(raw_data[0]);
 for (let i = 1; i < raw_data.length; i++) {
     const row = raw_data[i];
     row[0] = Number(row[0]);

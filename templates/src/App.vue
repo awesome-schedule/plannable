@@ -270,6 +270,10 @@
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="compactness"
+                                @change="
+                                    sortOptions.sortBy.IamFeelingLucky = false;
+                                    changeSorting();
+                                "
                             />
                             <label
                                 class="custom-control-label"
@@ -286,6 +290,10 @@
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="variance"
+                                @change="
+                                    sortOptions.sortBy.IamFeelingLucky = false;
+                                    changeSorting();
+                                "
                             />
                             <label
                                 class="custom-control-label"
@@ -302,6 +310,10 @@
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="lunchTime"
+                                @change="
+                                    sortOptions.sortBy.IamFeelingLucky = false;
+                                    changeSorting();
+                                "
                             />
                             <label
                                 class="custom-control-label"
@@ -318,6 +330,12 @@
                                 type="checkbox"
                                 class="custom-control-input"
                                 value="IamFeelingLucky"
+                                @change="
+                                    for (const key in sortOptions.sortBy)
+                                        if (key !== 'IamFeelingLucky')
+                                            sortOptions.sortBy[key] = false;
+                                    changeSorting();
+                                "
                             />
                             <label
                                 class="custom-control-label"
@@ -790,26 +808,6 @@ export default Vue.extend({
         }
     },
     watch: {
-        sortOptions: {
-            handler() {
-                // if (this.sortOptions.sortBy.IamFeelingLucky) {
-                //     for (const key in this.sortOptions.sortBy) {
-                //         if (key !== 'IamFeelingLucky') this.sortOptions.sortBy[key] = false;
-                //     }
-                // } else {
-                //     this.sortOptions.sortBy.IamFeelingLucky = false;
-                // }
-                if (this.loading) return;
-                for (const key in this.sortOptions.sortBy) {
-                    if (this.sortOptions.sortBy[key]) {
-                        this.changeSorting();
-                        return;
-                    }
-                }
-                this.noti.error('You must have a sorting option ticked!');
-            },
-            deep: true
-        },
         loading() {
             if (this.mobile) {
                 if (this.loading) this.noti.info('Loading...', 3600);
@@ -1189,7 +1187,6 @@ export default Vue.extend({
             }
         },
         saveStatus() {
-            console.time('saved in');
             const obj = {};
             for (const field of this.storageFields) {
                 // use toJSON method if it exists
@@ -1198,7 +1195,6 @@ export default Vue.extend({
                 else obj[field] = this[field];
             }
             localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
-            console.timeEnd('saved in');
         },
         /**
          * @param {Object<string, any>} raw_data

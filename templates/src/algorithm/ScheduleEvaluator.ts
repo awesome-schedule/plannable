@@ -153,8 +153,25 @@ class ScheduleEvaluator {
             }
             return;
         }
+        let count = 0;
+        let lastKey: string = '';
+        for (const key in this.options.sortBy) {
+            if (this.options.sortBy[key]) {
+                count++;
+                lastKey = key;
+            }
+        }
+        if (count === 1) {
+            const evalFunc = ScheduleEvaluator.sortFunctions[lastKey];
+            for (const cmpSchedule of this.schedules) {
+                cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
+            }
+            return;
+        }
+        count = 0;
+
         console.time('normalizing coefficients');
-        const coeffs = new Array(this.schedules.length).fill(0);
+        const coeffs: number[] = new Array(this.schedules.length);
         const schedules = this.schedules;
         for (const key in this.options.sortBy) {
             if (this.options.sortBy[key]) {
@@ -166,10 +183,17 @@ class ScheduleEvaluator {
                     if (val > max) max = val;
                     coeff[i] = val;
                 }
-                const normalizeRatio = max / 100;
-                for (let i = 0; i < coeffs.length; i++) {
-                    coeffs[i] += (coeff[i] / normalizeRatio) ** 2;
+                const normalizeRatio = max / 64;
+                if (count) {
+                    for (let i = 0; i < coeffs.length; i++) {
+                        coeffs[i] += (coeff[i] / normalizeRatio) ** 2;
+                    }
+                } else {
+                    for (let i = 0; i < coeffs.length; i++) {
+                        coeffs[i] = (coeff[i] / normalizeRatio) ** 2;
+                    }
                 }
+                count++;
             }
         }
         for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
@@ -180,23 +204,23 @@ class ScheduleEvaluator {
      * sort the array of schedules according to their quality coefficients computed using the given
      */
     public sort() {
+        console.time('sorting: ');
         let cmpFunc: (a: ComparableSchedule, b: ComparableSchedule) => number;
         if (this.options.reverseSort) cmpFunc = (a, b) => b.coeff - a.coeff;
         else cmpFunc = (a, b) => a.coeff - b.coeff;
         // if want to be really fast, use Floyd–Rivest algorithm to select first,
         // say, 100 elements and then sort only these elements
         this.schedules.sort(cmpFunc);
+        console.timeEnd('sorting: ');
     }
 
     /**
      * change the sorting method and (optionally) do sorting
      */
     public changeSort(options: SortOptions, doSort = true) {
-        console.time('change sort');
         this.options = ScheduleEvaluator.validateOptions(options);
         this.computeCoeff();
         if (doSort) this.sort();
-        console.timeEnd('change sort');
     }
 
     public size() {

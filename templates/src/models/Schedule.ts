@@ -220,7 +220,12 @@ class Schedule {
                 : parseFloat(courseRecord.units.toString());
 
             if (sections === -1) {
-                this.place(courseRecord.copy());
+                // if there's only one section in this CourseRecord, just treat it as a Course
+                if (courseRecord.section.length === 1) {
+                    this.place(courseRecord.getCourse(0));
+                } else {
+                    this.place(courseRecord.copy());
+                }
             } else {
                 // we need a copy of course
                 if (sections.size === 1) {

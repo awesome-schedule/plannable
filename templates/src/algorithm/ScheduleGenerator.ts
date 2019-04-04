@@ -7,7 +7,7 @@ import Course from '../models/Course';
 
 /**
  * The data structure used in the algorithm
- * e.g. `["span20205",["Mo","Tu"],[600,650],0]`
+ * e.g. `["span20205",["Mo","Tu"],[600,650],[0, 1, 2]]`
  */
 export type RawAlgoCourse = [string, string[], number[], number[]];
 
@@ -130,12 +130,13 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new ScheduleEvaluator(this.options.sortOptions);
+        const evaluator = new ScheduleEvaluator(this.options.sortOptions);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
             if (classNum >= classList.length) {
-                finalTable.add(timeTable);
+                evaluator.add(timeTable);
+                if (evaluator.size() >= 100000) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
                 timeTable.pop();
@@ -167,7 +168,7 @@ class ScheduleGenerator {
                 choiceNum += 1;
             }
         }
-        return finalTable;
+        return evaluator;
     }
 
     public AlgorithmRetract(

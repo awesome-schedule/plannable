@@ -281,11 +281,11 @@
                                 <i
                                     class="fas mr-2"
                                     :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
+                                    title="Click to reverse sorting"
                                     @click="
                                         option.reverse = !option.reverse;
                                         changeSorting(optIdx);
                                     "
-                                    title="Click to reverse sorting"
                                 ></i>
                                 <div
                                     class="custom-control custom-checkbox"
@@ -819,7 +819,7 @@ export default Vue.extend({
          * @param {()=>void} reject
          */
         fetchSemesterList(success, reject) {
-            timeout(getSemesterList(), 5000)
+            timeout(getSemesterList(), 10000)
                 .then(res => {
                     this.semesters = res;
                     localStorage.setItem(
@@ -1066,7 +1066,7 @@ export default Vue.extend({
             //     }
             // });
             this.loading = true;
-            timeout(getSemesterData(this.semesters[semesterIdx].id), 5000)
+            timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
                 .then(data => {
                     this.allRecords = new AllRecords(this.currentSemester, data);
                     // important: assign all records

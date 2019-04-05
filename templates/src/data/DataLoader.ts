@@ -1,6 +1,6 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
-import parse from 'csv-parse/lib/sync';
+import parse from 'csv-parse/lib/es5/sync';
 import querystring from 'querystring';
 import CourseRecord from '../models/CourseRecord';
 import { RawRecord, Semester } from '../models/AllRecords';

@@ -1,6 +1,19 @@
 <template>
     <nav class="mt-2">
         <ul class="pagination justify-content-center" style="margin-bottom: 0;">
+            <li class="input-group" style="width:10vw">
+                <!-- <div class="input-group-prepend">
+                    <span class="input-group-text">Go To</span>
+                </div> -->
+                <input
+                    v-model="goto"
+                    type="number"
+                    placeholder="Go to"
+                    class="form-control"
+                    style="border-radius: 4px 0px 0px 4px !important"
+                    @input="switchPage(goto - 1)"
+                />
+            </li>
             <li :class="'page-item' + (start <= 0 && idx <= start ? ' disabled' : '')">
                 <a
                     class="page-link"
@@ -8,11 +21,11 @@
                     tabindex="-1"
                     aria-disabled="true"
                     @click="switchPage(idx - 1)"
-                    >Previous</a
+                    >Prev</a
                 >
             </li>
             <li
-                v-for="index in pageNumber"
+                v-for="index in length"
                 :key="index"
                 :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
             >
@@ -21,7 +34,7 @@
                     <span v-if="idx === index + end - 1" class="sr-only">(current)</span>
                 </a>
             </li>
-            <li :class="'page-item' + (end >= indices.length && idx >= end - 1 ? ' disabled' : '')">
+            <li :class="'page-item' + (idx >= indices.length - 1 ? ' disabled' : '')">
                 <a class="page-link" href="#" @click="switchPage(idx + 1)">Next</a>
             </li>
         </ul>
@@ -48,10 +61,29 @@ export default Vue.extend({
         }
         return {
             idx: 0,
-            start: 0,
+            // start: 0,
             end: e,
-            pageNumber: e
+            pageNumber: e,
+            goto: null
         };
+    },
+    computed: {
+        length() {
+            if (window.screen.width < 900) {
+                return this.indices.length < 3 ? this.indices.length : 3;
+            } else {
+                return this.indices.length < 10 ? this.indices.length : 10;
+            }
+        },
+        start() {
+            if (idx < this.length / 2) {
+                return 0;
+            } else if (this.indices - idx - 1 < this.length / 2) {
+                return this.indices.length - this.length;
+            } else {
+                return idx - this.length / 2;
+            }
+        }
     },
     created() {
         this.autoSwitch();
@@ -64,37 +96,44 @@ export default Vue.extend({
          * @param {number}
          */
         switchPage(idx) {
+            if (idx < 0 || idx >= this.indices || isNaN(idx)) return;
+            idx = parseInt(idx);
             if (idx >= this.start && idx < this.end) {
                 this.idx = idx;
                 this.$emit('switch_page', idx);
-            } else if (idx < this.start && this.start > 0) {
+            } else if (idx === this.start - 1 && this.start > 0) {
                 this.start -= 1;
                 this.end -= 1;
                 this.idx = idx;
                 this.$emit('switch_page', idx);
-            } else if (idx >= this.end && this.end < this.indices.length) {
+            } else if (idx === this.end && this.end < this.indices.length) {
                 this.start += 1;
                 this.end += 1;
                 this.idx = idx;
                 this.$emit('switch_page', idx);
+            } else if (idx < this.start - 1 && this.start > 0) {
+                this.end -= this.start - this.idx;
+                this.start = idx;
+                this.idx = idx;
+                this.$emit('switch_page', idx);
+            } else if (idx > this.end && this.end < this.indices.length) {
+                this.idx = idx;
+                this.start += idx - this.end + 1;
+                this.end = idx + 1;
+                this.$emit('switch_page', idx);
             }
         },
         autoSwitch() {
-            if (
-                this.curIdx !== undefined &&
-                this.curIdx !== null &&
-                this.curIdx >= 0 &&
-                this.curIdx < this.indices.length
-            ) {
-                console.log('autoswitched');
-                if (this.curIdx < this.pageNumber) {
-                    this.switchPage(this.curIdx);
-                } else {
-                    this.end = this.curIdx;
-                    this.start =
-                        this.curIdx - this.pageNumber < 0 ? 0 : this.curIdx - this.pageNumber;
-                    this.switchPage(this.curIdx);
-                }
+            if (this.curIdx && this.curIdx >= 0 && this.curIdx < this.indices.length) {
+                // if (this.curIdx >= this.start && this.curIdx < this.start + this.length) {
+                //     this.switchPage(this.curIdx);
+                // } else if(this.curIdx < this.length / 2){
+
+                //     this.start = this.curIdx - this.length < 0 ? 0 : this.curIdx - this.pageNumber;
+                //     this.switchPage(this.curIdx);
+                // }
+                this.idx = this.curIdx;
+                this.switchPage(this.idx);
             }
         }
     }

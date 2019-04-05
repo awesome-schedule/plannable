@@ -528,9 +528,8 @@
         >
             <div class="container-fluid mb-2">
                 <div class="row justify-content-center">
-                    <div class="col">
+                    <div v-if="generated && !scheduleEvaluator.empty()" class="col">
                         <Pagination
-                            v-if="generated && !scheduleEvaluator.empty()"
                             :indices="scheduleIndices"
                             :cur-idx="tempScheduleIndex"
                             @switch_page="switchPage"

@@ -538,7 +538,7 @@
                 If you find any bugs, please file an issue at
                 <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
                     >our GitHub repository</a
-                >
+                >. We recommend Google Chrome for best experience.
             </div>
         </div>
     </div>

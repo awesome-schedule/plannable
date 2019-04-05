@@ -1,6 +1,6 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
-import parse from 'csv-parse/lib/es5/sync';
+import { parse } from 'papaparse';
 import querystring from 'querystring';
 import CourseRecord from '../models/CourseRecord';
 import { RawRecord, Semester } from '../models/AllRecords';
@@ -71,12 +71,17 @@ function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<R
 }
 
 function parseSemesterData(csv_string: string) {
-    console.time('parse semester data');
-
+    console.time('parsing csv');
+    // const raw_data: string[][] = parse(csv_string, {
+    //     columns: false,
+    //     skip_empty_lines: true
+    // });
     const raw_data: string[][] = parse(csv_string, {
-        columns: false,
-        skip_empty_lines: true
-    });
+        skipEmptyLines: true,
+        header: false
+    }).data;
+    console.timeEnd('parsing csv');
+    console.time('reorganizing data');
     const DICT: { [x: string]: any } = {};
     // const DICT: RawAllRecords = {};
     // console.log(raw_data[0]);
@@ -107,7 +112,7 @@ function parseSemesterData(csv_string: string) {
             DICT[key] = parsedRow;
         }
     }
-    console.timeEnd('parse semester data');
+    console.timeEnd('reorganizing data');
     return DICT;
 }
 

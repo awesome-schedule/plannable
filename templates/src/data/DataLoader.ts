@@ -47,16 +47,28 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]
 function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<RawAllRecords> {
     console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
+        // axios
+        //     .post(
+        //         `${cros_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
+        //         querystring.stringify({
+        //             Semester: semesterId,
+        //             Group: 'CS',
+        //             Description: 'Yes',
+        //             submit: 'Submit Data Request'
+        //         })
+        //     )
+        //     .then(res => {
+        //         console.timeEnd(`request semester ${semesterId} data`);
+        //         return parseSemesterData(res.data);
+        //     })
+        //     .then(data => {
+        //         resolve(data);
+        //     })
+        //     .catch(err => {
+        //         reject(err);
+        //     });
         axios
-            .post(
-                `${cros_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
-                querystring.stringify({
-                    Semester: semesterId,
-                    Group: 'CS',
-                    Description: 'Yes',
-                    submit: 'Submit Data Request'
-                })
-            )
+            .get(`https://awesome-schedule.github.io/data/CS${semesterId}Data.csv`)
             .then(res => {
                 console.timeEnd(`request semester ${semesterId} data`);
                 return parseSemesterData(res.data);

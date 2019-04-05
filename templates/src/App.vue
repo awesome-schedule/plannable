@@ -1,11 +1,7 @@
 <template>
     <div id="app" style="width:100%" @change="onDocChange">
         <modal id="modal" :course="modalCourse"></modal>
-        <ClassListModal
-            v-if="classListModalCourse !== null"
-            id="class-list-modal"
-            :course="classListModalCourse"
-        ></ClassListModal>
+        <ClassListModal id="class-list-modal" :course="classListModalCourse"></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
@@ -193,7 +189,7 @@
             </button>
             <ul class="list-group list-group-flush mx-1">
                 <li
-                    class="list-group-item px-2"
+                    class="list-group-item px-3"
                     title="Time periods when you don't want to have class"
                 >
                     No Class Time
@@ -263,53 +259,74 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item px-2">Sort According to</li>
-                <li class="list-group-item p-0">
-                    <draggable>
-                        <div
-                            v-for="(option, optIdx) in sortOptions.sortBy"
-                            :key="option.name"
-                            class="list-group list-group-flush"
-                        >
-                            <div class="list-group-item list-group-item-action py-1 pl-2 pr-0">
-                                <div class="row no-gutters" style="width: 100%">
-                                    <div class="col col-md-9 pr-1" :title="option.description">
-                                        {{ option.title }}
-                                    </div>
-                                    <div class="col col-md-3">
-                                        <i
-                                            class="fas mr-2"
-                                            :class="
-                                                option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'
-                                            "
-                                            @click="
-                                                option.reverse = !option.reverse;
-                                                changeSorting(optIdx);
-                                            "
-                                        ></i>
-                                        <div
-                                            class="custom-control custom-checkbox"
-                                            style="display: inline-block"
-                                        >
-                                            <input
-                                                :id="option.name"
-                                                v-model="option.enabled"
-                                                type="checkbox"
-                                                class="custom-control-input"
-                                                :value="option.name"
-                                                @change="changeSorting(optIdx)"
-                                            />
-                                            <label
-                                                class="custom-control-label"
-                                                :for="option.name"
-                                                title="Make classes back-to-back"
-                                            ></label>
-                                        </div>
-                                    </div>
+                <li class="list-group-item px-3">Sort According to</li>
+                <draggable
+                    v-model="sortOptions.sortBy"
+                    @start="drag = true"
+                    @end="
+                        drag = false;
+                        if (sortOptions.mode == 0) changeSorting(undefined);
+                    "
+                >
+                    <div
+                        v-for="(option, optIdx) in sortOptions.sortBy"
+                        :key="option.name"
+                        class="list-group-item sort-option py-1 pl-3 pr-0"
+                    >
+                        <div class="row no-gutters" style="width: 100%">
+                            <div class="col col-sm-9 pr-1" :title="option.description">
+                                {{ option.title }}
+                            </div>
+                            <div class="col col-sm-3">
+                                <i
+                                    class="fas mr-2"
+                                    :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
+                                    @click="
+                                        option.reverse = !option.reverse;
+                                        changeSorting(optIdx);
+                                    "
+                                ></i>
+                                <div
+                                    class="custom-control custom-checkbox"
+                                    style="display: inline-block"
+                                >
+                                    <input
+                                        :id="option.name"
+                                        v-model="option.enabled"
+                                        type="checkbox"
+                                        class="custom-control-input"
+                                        :value="option.name"
+                                        @change="changeSorting(optIdx)"
+                                    />
+                                    <label
+                                        class="custom-control-label"
+                                        :for="option.name"
+                                        title="Make classes back-to-back"
+                                    ></label>
                                 </div>
                             </div>
                         </div>
-                    </draggable>
+                    </div>
+                </draggable>
+                <li class="list-group-item">
+                    <template v-for="mode in sortModes">
+                        <div :key="'sm' + mode.mode" class="custom-control custom-radio">
+                            <input
+                                :id="'sm' + mode.mode"
+                                v-model.number="sortOptions.mode"
+                                type="radio"
+                                :value="mode.mode"
+                                class="custom-control-input"
+                                @change="changeSorting(undefined)"
+                            />
+                            <label
+                                class="custom-control-label"
+                                :for="'sm' + mode.mode"
+                                :title="mode.description"
+                                >{{ mode.title }}
+                            </label>
+                        </div>
+                    </template>
                 </li>
             </ul>
         </nav>
@@ -462,6 +479,7 @@
             <div
                 v-if="noti.msg.length > 0"
                 id="noti"
+                v-top
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
                 role="alert"
@@ -540,10 +558,18 @@ import Course from './models/Course';
 import AllRecords from './models/AllRecords';
 // import axios from 'axios';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
-import ScheduleEvaluator, { SortMode } from './algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
+
+Vue.directive('top', {
+    // When the bound element is inserted into the DOM...
+    inserted: el => {
+        // Focus the element
+        window.scrollTo(0, 0);
+    }
+});
 
 /**
  * use a standalone method to get rid of deep copy issues
@@ -673,7 +699,8 @@ function getDefaultData() {
         latest: '19:00:00',
         tempScheduleIndex: null,
         drag: false,
-        sortOptions: ScheduleEvaluator.getDefaultOptions()
+        sortOptions: ScheduleEvaluator.getDefaultOptions(),
+        sortModes: ScheduleEvaluator.sortModes
     };
 }
 /**
@@ -829,6 +856,7 @@ export default Vue.extend({
         },
         clear() {
             this.currentSchedule.clean();
+            this.proposedSchedule.clean();
             this.generated = false;
             this.scheduleEvaluator.clear();
             this.saveStatus();
@@ -1120,18 +1148,24 @@ export default Vue.extend({
          * @param {number} optIdx
          */
         changeSorting(optIdx) {
-            if (!Object.values(this.sortOptions.sortBy).some(x => x)) {
+            if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
+                // if (optIdx !== undefined) {
+                //     this.sortOptions.sortBy[optIdx].enabled = true;
+                // }
                 return this.noti.error('You must have at least one sort option!');
             }
-            const option = this.sortOptions.sortBy[optIdx];
-            if (option.enabled) {
-                for (const key of option.exclusive) {
-                    for (const opt of this.sortOptions.sortBy) {
-                        if (opt.name === key) opt.enabled = false;
+            if (optIdx !== undefined) {
+                const option = this.sortOptions.sortBy[optIdx];
+                if (option.enabled) {
+                    for (const key of option.exclusive) {
+                        for (const opt of this.sortOptions.sortBy) {
+                            if (opt.name === key) opt.enabled = false;
+                        }
                     }
                 }
             }
             if (!this.scheduleEvaluator.empty()) {
+                this.loading = true;
                 this.scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {
                     this.proposedSchedule = this.currentSchedule;
@@ -1144,6 +1178,7 @@ export default Vue.extend({
                         this.currentScheduleIndex
                     );
                 }
+                this.loading = false;
             }
         },
         saveStatus() {
@@ -1162,10 +1197,23 @@ export default Vue.extend({
         parseLocalData(raw_data) {
             const defaultData = getDefaultData();
             for (const field of this.storageFields) {
-                if (this[field] instanceof Object && typeof this[field].fromJSON === 'function') {
-                    const parsed = this[field].fromJSON(raw_data[field]);
-                    if (parsed) this[field] = parsed;
-                    else this[field] = defaultData[field];
+                if (this[field] instanceof Object) {
+                    if (typeof this[field].fromJSON === 'function') {
+                        const parsed = this[field].fromJSON(raw_data[field]);
+                        if (parsed) this[field] = parsed;
+                        else this[field] = defaultData[field];
+                    } else {
+                        if (
+                            Object.keys(this[field])
+                                .sort()
+                                .toString() ===
+                            Object.keys(raw_data[field])
+                                .sort()
+                                .toString()
+                        )
+                            this[field] = raw_data[field];
+                        else this[field] = defaultData[field];
+                    }
                 } else if (typeof raw_data[field] === typeof this[field])
                     this[field] = raw_data[field];
                 else this[field] = defaultData[field];
@@ -1299,6 +1347,10 @@ export default Vue.extend({
 
 .filter-add:hover {
     background-color: rgba(223, 223, 223, 0.5);
+}
+
+.sort-option {
+    cursor: pointer;
 }
 
 @media print {

@@ -285,6 +285,7 @@
                                         option.reverse = !option.reverse;
                                         changeSorting(optIdx);
                                     "
+                                    title="Click to reverse sorting"
                                 ></i>
                                 <div
                                     class="custom-control custom-checkbox"

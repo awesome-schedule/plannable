@@ -193,7 +193,7 @@ class CourseRecord {
     }
 
     /**
-     * Get an object where the key is the days string and
+     * Get an object in which the key is the days string and
      * value is the subset of sections contained in this CourseRecord occurring at that time
      */
     public getCombined() {

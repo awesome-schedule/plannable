@@ -262,7 +262,13 @@ class ScheduleEvaluator {
         });
     }
 
+    public isRandom() {
+        return this.options.sortBy.some(x => x.name === 'IamFeelingLucky' && x.enabled);
+    }
+
     public computeCoeff() {
+        if (this.isRandom()) return;
+
         const [count, lastIdx] = this.countSortOpt();
         if (this.options.mode === SortMode.fallback) {
             console.time('precomputing coefficients');
@@ -355,7 +361,18 @@ class ScheduleEvaluator {
      */
     public sort() {
         console.time('sorting: ');
+
+        if (this.isRandom()) {
+            this.shuffle(this.schedules as CmpSchedules[]);
+            console.timeEnd('sorting: ');
+            return;
+        }
+
         const options = this.options.sortBy.filter(x => x.enabled);
+
+        /**
+         * The comparator function when there's only one sorting option selected
+         */
         const cmpFunc: (a: CmpSchedules, b: CmpSchedules) => number = options[0].reverse
             ? (a, b) => b.coeff - a.coeff
             : (a, b) => a.coeff - b.coeff;
@@ -420,6 +437,20 @@ class ScheduleEvaluator {
 
     public clear() {
         this.schedules = [];
+    }
+
+    /**
+     * Fisher–Yates shuffle algorithm
+     * @see https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+     */
+    private shuffle<T>(a: T[]): T[] {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        return a;
     }
 }
 export default ScheduleEvaluator;

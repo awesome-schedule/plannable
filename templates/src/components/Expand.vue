@@ -16,6 +16,9 @@ export default {
                     // eslint-disable-next-line no-param-reassign
                     element.style.height = `auto`;
                 },
+                /**
+                 * @param {HTMLElement} element
+                 */
                 enter(element) {
                     const { width } = getComputedStyle(element);
                     /* eslint-disable no-param-reassign */
@@ -26,9 +29,9 @@ export default {
                     /* eslint-enable */
                     const { height } = getComputedStyle(element);
                     /* eslint-disable no-param-reassign */
-                    element.style.width = null;
-                    element.style.position = null;
-                    element.style.visibility = null;
+                    element.style.removeProperty('width');
+                    element.style.removeProperty('position');
+                    element.style.removeProperty('visibility');
                     element.style.height = 0;
                     /* eslint-enable */
                     // Force repaint to make sure the

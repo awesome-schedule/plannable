@@ -34,7 +34,6 @@
             integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
             crossorigin="anonymous"
         />
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-notify@3.1.3/bootstrap-notify.min.js"></script>
         <style>
             .github-corner:hover .octo-arm {
                 animation: octocat-wave 560ms ease-in-out;
@@ -83,6 +82,10 @@
             gtag('js', new Date());
 
             gtag('config', 'UA-137414032-1');
+
+            $(function() {
+                $('[data-toggle="popover"]').popover({ trigger: 'hover', html: true });
+            });
         </script>
     </head>
     <body>
@@ -122,10 +125,4 @@
         <div id="app"></div>
         <!-- built files will be auto injected -->
     </body>
-
-    <script>
-        $(function() {
-            $('[data-toggle="popover"]').popover({ trigger: 'hover', html: true });
-        });
-    </script>
 </html>

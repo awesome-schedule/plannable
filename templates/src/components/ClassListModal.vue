@@ -1,7 +1,7 @@
 <template>
     <div class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
+            <div v-if="course !== null" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         {{ course.department }} {{ course.number }} {{ course.title }}

@@ -1,13 +1,12 @@
-// @ts-check
 import AllRecords from '../models/AllRecords';
 import CourseRecord from '../models/CourseRecord';
-import ScheduleEvaluator from './ScheduleEvaluator';
+import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Course from '../models/Course';
 
 /**
  * The data structure used in the algorithm
- * e.g. `["span20205",["Mo","Tu"],[600,650],0]`
+ * e.g. `["span20205",["Mo","Tu"],[600,650],[0, 1, 2]]`
  */
 export type RawAlgoCourse = [string, string[], number[], number[]];
 
@@ -15,17 +14,6 @@ export type RawAlgoCourse = [string, string[], number[], number[]];
  * A schedule is nothing more than an array of courses
  */
 export type RawAlgoSchedule = RawAlgoCourse[];
-
-export interface SortOptions {
-    sortBy: {
-        [x: string]: boolean;
-        variance: boolean;
-        compactness: boolean;
-        lunchTime: boolean;
-        IamFeelingLucky: boolean;
-    };
-    reverseSort: boolean;
-}
 
 export interface Options {
     [x: string]: any;
@@ -36,17 +24,18 @@ export interface Options {
 }
 
 class ScheduleGenerator {
-    public static optionDefaults: Options = {
+    public static readonly optionDefaults: Options = {
         timeSlots: [],
         status: [],
         noClassDay: [],
-        sortOptions: ScheduleEvaluator.optionDefaults
+        sortOptions: ScheduleEvaluator.getDefaultOptions()
     };
 
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
-            if (options[field] === undefined) {
+            if (!options[field]) {
+                console.warn(`Non-existent field ${field}. Default value used`);
                 options[field] = ScheduleGenerator.optionDefaults[field];
             }
         }
@@ -130,12 +119,13 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = Array.from({ length: classList.length }, () => 0);
         let timeTable = new Array();
-        const finalTable = new ScheduleEvaluator(this.options.sortOptions);
+        const evaluator = new ScheduleEvaluator(this.options.sortOptions);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
             if (classNum >= classList.length) {
-                finalTable.add(timeTable);
+                evaluator.add(timeTable);
+                if (evaluator.size() >= 100000) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
                 timeTable.pop();
@@ -167,7 +157,7 @@ class ScheduleGenerator {
                 choiceNum += 1;
             }
         }
-        return finalTable;
+        return evaluator;
     }
 
     public AlgorithmRetract(

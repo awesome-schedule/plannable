@@ -1,31 +1,126 @@
-// @ts-check
 import Schedule from '../models/Schedule';
-// eslint-disable-next-line
-import { RawAlgoSchedule, RawAlgoCourse, SortOptions } from './ScheduleGenerator';
+import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
 
-interface ComparableSchedule {
+export enum SortMode {
+    fallback = 0,
+    combined = 1
+}
+
+export type SortModes = Array<{
+    mode: SortMode;
+    title: string;
+    description: string;
+}>;
+
+interface CmpSchedules {
     schedule: RawAlgoSchedule;
     coeff: number;
 }
 
-class ScheduleEvaluator {
-    public static days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+interface MultiCriteriaCmpSchedules {
+    schedule: RawAlgoSchedule;
+    coeff: Float32Array;
+}
 
-    public static optionDefaults: SortOptions = {
-        sortBy: {
-            variance: true,
-            compactness: false,
-            lunchTime: false,
-            IamFeelingLucky: false
-        },
-        reverseSort: false
+export interface SortOptions {
+    sortBy: Array<{
+        /**
+         * name of this sorting option
+         */
+        readonly name: string;
+        /**
+         * whether or not this option is enabled
+         */
+        enabled: boolean;
+        /**
+         * whether to sort in reverse
+         */
+        reverse: boolean;
+        /**
+         * the names of the sorting options that cannot be applied when this option is enabled
+         */
+        readonly exclusive: string[];
+        /**
+         * text displayed next to the checkbox
+         */
+        readonly title: string;
+        /**
+         * text displayed in tooltip
+         */
+        readonly description: string;
+    }>;
+    mode: SortMode;
+}
+
+class ScheduleEvaluator {
+    public static readonly days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+
+    public static readonly optionDefaults: SortOptions = {
+        sortBy: [
+            {
+                name: 'variance',
+                enabled: true,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Variance',
+                description: 'Balance the class time each day'
+            },
+            {
+                name: 'compactness',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Vertical compactness',
+                description: 'Make classes back-to-back'
+            },
+            {
+                name: 'lunchTime',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Lunch Time',
+                description: 'Leave spaces for lunch'
+            },
+            {
+                name: 'noEarly',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'No Early',
+                description: 'Start my day as late as possible'
+            },
+            {
+                name: 'IamFeelingLucky',
+                enabled: false,
+                reverse: false,
+                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly'],
+                title: `I'm Feeling Lucky`,
+                description: 'Sort randomly'
+            }
+        ],
+        mode: SortMode.combined
     };
+
+    public static readonly sortModes: SortModes = [
+        {
+            mode: SortMode.combined,
+            title: 'Combined',
+            description: 'Combine all sorting options and given them equal weight'
+        },
+        {
+            mode: SortMode.fallback,
+            title: 'Fallback',
+            description:
+                'Sort using the options on top first. If compare equal, sort using the next option.'
+        }
+    ];
+
     public static sortFunctions: { [x: string]: (schedule: RawAlgoSchedule) => number } = {
         /**
          * compute the standard deviation of class times
          */
         variance(schedule: RawAlgoSchedule) {
-            const minutes = new Array(5).fill(0);
+            const minutes = new Float32Array(5);
             const days = ScheduleEvaluator.days;
             for (const course of schedule) {
                 for (let i = 0; i < days.length; i++) {
@@ -59,16 +154,30 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
+            const lunchDuration = lunchEnd - lunchStart;
             let overlap = 0;
             for (const course of schedule) {
-                overlap += ScheduleEvaluator.calcOverlap(
-                    lunchStart,
-                    lunchEnd,
-                    course[2][0],
-                    course[2][1]
-                );
+                const olap =
+                    ScheduleEvaluator.calcOverlap(
+                        lunchStart,
+                        lunchEnd,
+                        course[2][0],
+                        course[2][1]
+                    ) * course[1].length;
+                overlap += Math.exp(olap / lunchDuration / 4);
             }
             return overlap;
+        },
+
+        noEarly(schedule: RawAlgoSchedule) {
+            const groups = ScheduleEvaluator.groupCourses(schedule);
+            let time = 0;
+            const refTime = 22 * 60;
+            for (const group of groups) {
+                const start = group[0][2][0];
+                time += refTime - start;
+            }
+            return time;
         },
 
         IamFeelingLucky() {
@@ -76,10 +185,17 @@ class ScheduleEvaluator {
         }
     };
 
+    public static getDefaultOptions() {
+        const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
+        options.sortBy = options.sortBy.map(x => Object.assign({}, x));
+        return options;
+    }
+
     /**
-     * calculate the population variance
+     * although it's called std, it is actually calculating the
+     * sum of the absolute values of the difference between each sample and the mean
      */
-    public static std(args: number[]) {
+    public static std(args: Float32Array) {
         let sum = 0;
         let sumSq = 0;
         for (let i = 0; i < args.length; i++) {
@@ -121,14 +237,14 @@ class ScheduleEvaluator {
 
     public static validateOptions(options: SortOptions) {
         if (!options) return ScheduleEvaluator.optionDefaults;
-        for (const key in options.sortBy) {
-            if (typeof ScheduleEvaluator.sortFunctions[key] !== 'function')
-                throw new Error('Non-existent sorting option');
+        for (const option of options.sortBy) {
+            if (typeof ScheduleEvaluator.sortFunctions[option.name] !== 'function')
+                throw new Error(`Non-existent sorting option ${option.name}`);
         }
         return options;
     }
 
-    public schedules: ComparableSchedule[];
+    public schedules: CmpSchedules[] | MultiCriteriaCmpSchedules[];
     public options: SortOptions;
 
     constructor(options: SortOptions) {
@@ -140,35 +256,86 @@ class ScheduleEvaluator {
      * Add a schedule to the collection of results. Compute its coefficient of quality.
      */
     public add(schedule: RawAlgoSchedule) {
-        this.schedules.push({
+        (this.schedules as CmpSchedules[]).push({
             schedule: schedule.concat(),
             coeff: 0
         });
     }
 
+    public isRandom() {
+        return this.options.sortBy.some(x => x.name === 'IamFeelingLucky' && x.enabled);
+    }
+
     public computeCoeff() {
-        if (this.options.sortBy.IamFeelingLucky) {
-            for (const cmpSchedule of this.schedules) {
-                cmpSchedule.coeff = Math.random();
+        if (this.isRandom()) return;
+
+        const [count, lastIdx] = this.countSortOpt();
+        if (this.options.mode === SortMode.fallback) {
+            console.time('precomputing coefficients');
+            // tslint:disable-next-line
+            const schedules = this.schedules as MultiCriteriaCmpSchedules[];
+            if (count === 1) {
+                const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[0].name];
+                for (const cmpSchedule of this.schedules) {
+                    cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
+                }
+            } else {
+                const evalFuncs = this.options.sortBy
+                    .filter(x => x.enabled)
+                    .map(x => ScheduleEvaluator.sortFunctions[x.name]);
+                const len = evalFuncs.length;
+                const ef = evalFuncs[0];
+                for (const schedule of schedules) {
+                    const arr = new Float32Array(len);
+                    arr[0] = ef(schedule.schedule);
+                    schedule.coeff = arr;
+                }
+                for (let i = 1; i < evalFuncs.length; i++) {
+                    const evalFunc = evalFuncs[i];
+                    for (const schedule of schedules) {
+                        schedule.coeff[i] = evalFunc(schedule.schedule);
+                    }
+                }
+            }
+            console.timeEnd('precomputing coefficients');
+            return;
+        }
+
+        const schedules = this.schedules as CmpSchedules[];
+        if (count === 1) {
+            const option = this.options.sortBy[lastIdx];
+            const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
+            for (const cmpSchedule of schedules) {
+                cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
             }
             return;
         }
+
         console.time('normalizing coefficients');
-        const coeffs = new Array(this.schedules.length).fill(0);
-        const schedules = this.schedules;
-        for (const key in this.options.sortBy) {
-            if (this.options.sortBy[key]) {
-                const coeff = new Array(schedules.length);
-                const evalFunc = ScheduleEvaluator.sortFunctions[key];
-                let max = 0;
+        // note: fixed-size typed array is must faster than 'normal' array
+        const coeffs = new Float32Array(schedules.length);
+        for (const option of this.options.sortBy) {
+            if (option.enabled) {
+                const coeff = new Float32Array(schedules.length);
+                const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
+                let max = 0,
+                    min = Infinity;
                 for (let i = 0; i < schedules.length; i++) {
                     const val = evalFunc(schedules[i].schedule);
                     if (val > max) max = val;
+                    if (val < min) min = val;
                     coeff[i] = val;
                 }
-                const normalizeRatio = max / 100;
-                for (let i = 0; i < coeffs.length; i++) {
-                    coeffs[i] += (coeff[i] / normalizeRatio) ** 2;
+                const range = max - min;
+                const normalizeRatio = range / 100;
+                if (option.reverse) {
+                    for (let i = 0; i < coeffs.length; i++) {
+                        coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
+                    }
+                } else {
+                    for (let i = 0; i < coeffs.length; i++) {
+                        coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
+                    }
                 }
             }
         }
@@ -176,27 +343,72 @@ class ScheduleEvaluator {
         console.timeEnd('normalizing coefficients');
     }
 
+    public countSortOpt() {
+        let count = 0;
+        let lastIdx: number = -1;
+        for (let i = 0; i < this.options.sortBy.length; i++) {
+            const option = this.options.sortBy[i];
+            if (option.enabled) {
+                count++;
+                lastIdx = i;
+            }
+        }
+        return [count, lastIdx];
+    }
+
     /**
      * sort the array of schedules according to their quality coefficients computed using the given
      */
     public sort() {
-        let cmpFunc: (a: ComparableSchedule, b: ComparableSchedule) => number;
-        if (this.options.reverseSort) cmpFunc = (a, b) => b.coeff - a.coeff;
-        else cmpFunc = (a, b) => a.coeff - b.coeff;
-        // if want to be really fast, use Floyd–Rivest algorithm to select first,
-        // say, 100 elements and then sort only these elements
-        this.schedules.sort(cmpFunc);
+        console.time('sorting: ');
+
+        if (this.isRandom()) {
+            this.shuffle(this.schedules as CmpSchedules[]);
+            console.timeEnd('sorting: ');
+            return;
+        }
+
+        const options = this.options.sortBy.filter(x => x.enabled);
+
+        /**
+         * The comparator function when there's only one sorting option selected
+         */
+        const cmpFunc: (a: CmpSchedules, b: CmpSchedules) => number = options[0].reverse
+            ? (a, b) => b.coeff - a.coeff
+            : (a, b) => a.coeff - b.coeff;
+        if (this.options.mode === SortMode.combined) {
+            // if want to be really fast, use Floyd–Rivest algorithm to select first,
+            // say, 100 elements and then sort only these elements
+            (this.schedules as CmpSchedules[]).sort(cmpFunc);
+        } else {
+            if (options.length === 1) (this.schedules as CmpSchedules[]).sort(cmpFunc);
+            else {
+                const evalFuncs = options.map(x => ScheduleEvaluator.sortFunctions[x.name]);
+                const len = evalFuncs.length;
+                const schedules = this.schedules as MultiCriteriaCmpSchedules[];
+                const ifReverse = new Int8Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
+                schedules.sort((a, b) => {
+                    const c1 = a.coeff;
+                    const c2 = b.coeff;
+                    let r = 0;
+                    for (let i = 0; i < len; i++) {
+                        r = ifReverse[i] * (c1[i] - c2[i]);
+                        if (r) return r;
+                    }
+                    return r;
+                });
+            }
+        }
+        console.timeEnd('sorting: ');
     }
 
     /**
      * change the sorting method and (optionally) do sorting
      */
     public changeSort(options: SortOptions, doSort = true) {
-        console.time('change sort');
         this.options = ScheduleEvaluator.validateOptions(options);
         this.computeCoeff();
         if (doSort) this.sort();
-        console.timeEnd('change sort');
     }
 
     public size() {
@@ -225,6 +437,20 @@ class ScheduleEvaluator {
 
     public clear() {
         this.schedules = [];
+    }
+
+    /**
+     * Fisher–Yates shuffle algorithm
+     * @see https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
+     */
+    private shuffle<T>(a: T[]): T[] {
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        return a;
     }
 }
 export default ScheduleEvaluator;

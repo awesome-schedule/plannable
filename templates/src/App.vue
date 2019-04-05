@@ -1,11 +1,7 @@
 <template>
     <div id="app" style="width:100%" @change="onDocChange">
         <modal id="modal" :course="modalCourse"></modal>
-        <ClassListModal
-            v-if="classListModalCourse !== null"
-            id="class-list-modal"
-            :course="classListModalCourse"
-        ></ClassListModal>
+        <ClassListModal id="class-list-modal" :course="classListModalCourse"></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
@@ -141,7 +137,7 @@
                             if (!scheduleEvaluator.empty()) {
                                 if (generated) {
                                     currentSchedule = proposedSchedule;
-                                } else switchPage(currentScheduleIndex);
+                                } else switchPage(currentScheduleIndex, true);
                                 generated = !generated;
                             }
                         "
@@ -192,7 +188,10 @@
                 Filters
             </button>
             <ul class="list-group list-group-flush mx-1">
-                <li class="list-group-item" title="Time periods when you don't want to have class">
+                <li
+                    class="list-group-item px-3"
+                    title="Time periods when you don't want to have class"
+                >
                     No Class Time
                 </li>
                 <li v-for="(value, n) in timeSlots" :key="n" class="list-group-item p-1">
@@ -260,90 +259,75 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item">Sort According to</li>
-                <li class="list-group-item p-3">
-                    <ul class="list-group list-group-flush mx-1">
-                        <div class="custom-control custom-checkbox">
+                <li class="list-group-item px-3">Sort According to</li>
+                <draggable
+                    v-model="sortOptions.sortBy"
+                    @start="drag = true"
+                    @end="
+                        drag = false;
+                        if (sortOptions.mode == 0) changeSorting(undefined);
+                    "
+                >
+                    <div
+                        v-for="(option, optIdx) in sortOptions.sortBy"
+                        :key="option.name"
+                        class="list-group-item sort-option py-1 pl-3 pr-0"
+                    >
+                        <div class="row no-gutters" style="width: 100%">
+                            <div class="col col-sm-9 pr-1" :title="option.description">
+                                {{ option.title }}
+                            </div>
+                            <div class="col col-sm-3">
+                                <i
+                                    class="fas mr-2"
+                                    :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
+                                    title="Click to reverse sorting"
+                                    @click="
+                                        option.reverse = !option.reverse;
+                                        changeSorting(optIdx);
+                                    "
+                                ></i>
+                                <div
+                                    class="custom-control custom-checkbox"
+                                    style="display: inline-block"
+                                >
+                                    <input
+                                        :id="option.name"
+                                        v-model="option.enabled"
+                                        type="checkbox"
+                                        class="custom-control-input"
+                                        :value="option.name"
+                                        @change="changeSorting(optIdx)"
+                                    />
+                                    <label
+                                        class="custom-control-label"
+                                        :for="option.name"
+                                        title="Make classes back-to-back"
+                                    ></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </draggable>
+                <li class="list-group-item">
+                    <template v-for="mode in sortModes">
+                        <div :key="'sm' + mode.mode" class="custom-control custom-radio">
                             <input
-                                id="compactness"
-                                v-model="sortOptions.sortBy.compactness"
-                                type="checkbox"
+                                :id="'sm' + mode.mode"
+                                v-model.number="sortOptions.mode"
+                                type="radio"
+                                :value="mode.mode"
                                 class="custom-control-input"
-                                value="compactness"
+                                @change="changeSorting(undefined)"
                             />
                             <label
                                 class="custom-control-label"
-                                for="compactness"
-                                title="Make classes back-to-back"
-                            >
-                                Vertical Compactness
+                                :for="'sm' + mode.mode"
+                                :title="mode.description"
+                                >{{ mode.title }}
                             </label>
                         </div>
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="variance"
-                                v-model="sortOptions.sortBy.variance"
-                                type="checkbox"
-                                class="custom-control-input"
-                                value="variance"
-                            />
-                            <label
-                                class="custom-control-label"
-                                for="variance"
-                                title="Balance the class time each day"
-                            >
-                                Variance
-                            </label>
-                        </div>
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="lunchTime"
-                                v-model="sortOptions.sortBy.lunchTime"
-                                type="checkbox"
-                                class="custom-control-input"
-                                value="lunchTime"
-                            />
-                            <label
-                                class="custom-control-label"
-                                for="lunchTime"
-                                title="Make spaces for lunch"
-                            >
-                                Lunch Time
-                            </label>
-                        </div>
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="IamFeelingLucky"
-                                v-model="sortOptions.sortBy.IamFeelingLucky"
-                                type="checkbox"
-                                class="custom-control-input"
-                                value="IamFeelingLucky"
-                            />
-                            <label
-                                class="custom-control-label"
-                                for="IamFeelingLucky"
-                                title="Random sort"
-                            >
-                                I'm Feeling Lucky
-                            </label>
-                        </div>
-                        <div class="custom-control custom-checkbox">
-                            <input
-                                id="reverseSort"
-                                v-model="sortOptions.reverseSort"
-                                type="checkbox"
-                                class="custom-control-input"
-                                value="reverseSort"
-                            />
-                            <label
-                                class="custom-control-label"
-                                for="reverseSort"
-                                title="Sort in reverse order"
-                            >
-                                Reverse Sort
-                            </label>
-                        </div>
-                    </ul>
+                    </template>
                 </li>
             </ul>
         </nav>
@@ -496,6 +480,7 @@
             <div
                 v-if="noti.msg.length > 0"
                 id="noti"
+                v-top
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
                 role="alert"
@@ -552,7 +537,7 @@
                 If you find any bugs, please file an issue at
                 <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
                     >our GitHub repository</a
-                >
+                >. We recommend Google Chrome for best experience.
             </div>
         </div>
     </div>
@@ -573,9 +558,18 @@ import Course from './models/Course';
 import AllRecords from './models/AllRecords';
 // import axios from 'axios';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
-import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
+import draggable from 'vuedraggable';
+
+Vue.directive('top', {
+    // When the bound element is inserted into the DOM...
+    inserted: el => {
+        // Focus the element
+        window.scrollTo(0, 0);
+    }
+});
 
 /**
  * use a standalone method to get rid of deep copy issues
@@ -665,29 +659,20 @@ function getDefaultData() {
         timeSlots: [],
         allowWaitlist: true,
         allowClosed: true,
-        sortOptions: {
-            sortBy: {
-                variance: true,
-                compactness: false,
-                lunchTime: false,
-                IamFeelingLucky: false
-            },
-            reverseSort: false
-        },
+        // sortOptions: ScheduleEvaluator.optionDefaults,
         downloadURL: '',
 
         // storage related fields
         storageVersion: 2,
         storageFields: [
             // schedules
-
             // note: this field is for uploadJSON
-            'currentSemester',
+            'currentScheduleIndex',
 
+            'currentSemester',
             'currentSchedule',
             'proposedSchedule',
             'sortOptions',
-            'currentScheduleIndex',
             // settings
             'allowWaitList',
             'allowClosed',
@@ -712,7 +697,10 @@ function getDefaultData() {
         semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
         earliest: '08:00:00',
         latest: '19:00:00',
-        tempScheduleIndex: null
+        tempScheduleIndex: null,
+        drag: false,
+        sortOptions: ScheduleEvaluator.getDefaultOptions(),
+        sortModes: ScheduleEvaluator.sortModes
     };
 }
 /**
@@ -747,7 +735,8 @@ export default Vue.extend({
         Pagination,
         GridSchedule,
         Modal,
-        ClassListModal
+        ClassListModal,
+        draggable
     },
     data() {
         return getDefaultData();
@@ -789,26 +778,6 @@ export default Vue.extend({
         }
     },
     watch: {
-        sortOptions: {
-            handler() {
-                // if (this.sortOptions.sortBy.IamFeelingLucky) {
-                //     for (const key in this.sortOptions.sortBy) {
-                //         if (key !== 'IamFeelingLucky') this.sortOptions.sortBy[key] = false;
-                //     }
-                // } else {
-                //     this.sortOptions.sortBy.IamFeelingLucky = false;
-                // }
-                if (this.loading) return;
-                for (const key in this.sortOptions.sortBy) {
-                    if (this.sortOptions.sortBy[key]) {
-                        this.changeSorting();
-                        return;
-                    }
-                }
-                this.noti.error('You must have a sorting option ticked!');
-            },
-            deep: true
-        },
         loading() {
             if (this.mobile) {
                 if (this.loading) this.noti.info('Loading...', 3600);
@@ -849,7 +818,7 @@ export default Vue.extend({
          * @param {()=>void} reject
          */
         fetchSemesterList(success, reject) {
-            timeout(getSemesterList(), 5000)
+            timeout(getSemesterList(), 10000)
                 .then(res => {
                     this.semesters = res;
                     localStorage.setItem(
@@ -887,6 +856,7 @@ export default Vue.extend({
         },
         clear() {
             this.currentSchedule.clean();
+            this.proposedSchedule.clean();
             this.generated = false;
             this.scheduleEvaluator.clear();
             this.saveStatus();
@@ -951,7 +921,9 @@ export default Vue.extend({
             this.currentSchedule.removePreview();
         },
         /**
+         * if parsed is true, also update the pagination
          * @param {number} idx
+         * @param {boolean} [parsed]
          */
         switchPage(idx, parsed = false) {
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
@@ -1093,7 +1065,7 @@ export default Vue.extend({
             //     }
             // });
             this.loading = true;
-            timeout(getSemesterData(this.semesters[semesterIdx].id), 5000)
+            timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
                 .then(data => {
                     this.allRecords = new AllRecords(this.currentSemester, data);
                     // important: assign all records
@@ -1164,6 +1136,7 @@ export default Vue.extend({
                     this.loading = false;
                 })
                 .catch(err => {
+                    console.warn(err);
                     this.generated = false;
                     this.scheduleEvaluator.clear();
                     this.noti.error(err);
@@ -1171,8 +1144,28 @@ export default Vue.extend({
                     this.loading = false;
                 });
         },
-        changeSorting() {
+        /**
+         * @param {number} optIdx
+         */
+        changeSorting(optIdx) {
+            if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
+                // if (optIdx !== undefined) {
+                //     this.sortOptions.sortBy[optIdx].enabled = true;
+                // }
+                return this.noti.error('You must have at least one sort option!');
+            }
+            if (optIdx !== undefined) {
+                const option = this.sortOptions.sortBy[optIdx];
+                if (option.enabled) {
+                    for (const key of option.exclusive) {
+                        for (const opt of this.sortOptions.sortBy) {
+                            if (opt.name === key) opt.enabled = false;
+                        }
+                    }
+                }
+            }
             if (!this.scheduleEvaluator.empty()) {
+                this.loading = true;
                 this.scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {
                     this.proposedSchedule = this.currentSchedule;
@@ -1185,10 +1178,10 @@ export default Vue.extend({
                         this.currentScheduleIndex
                     );
                 }
+                this.loading = false;
             }
         },
         saveStatus() {
-            console.time('saved in');
             const obj = {};
             for (const field of this.storageFields) {
                 // use toJSON method if it exists
@@ -1197,17 +1190,33 @@ export default Vue.extend({
                 else obj[field] = this[field];
             }
             localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
-            console.timeEnd('saved in');
         },
         /**
          * @param {Object<string, any>} raw_data
          */
         parseLocalData(raw_data) {
+            const defaultData = getDefaultData();
             for (const field of this.storageFields) {
-                if (this[field] instanceof Object && typeof this[field].fromJSON === 'function')
-                    this[field] = this[field].fromJSON(raw_data[field]);
-                else if (raw_data[field] !== undefined && raw_data[field] !== null)
+                if (this[field] instanceof Object) {
+                    if (typeof this[field].fromJSON === 'function') {
+                        const parsed = this[field].fromJSON(raw_data[field]);
+                        if (parsed) this[field] = parsed;
+                        else this[field] = defaultData[field];
+                    } else {
+                        if (
+                            Object.keys(this[field])
+                                .sort()
+                                .toString() ===
+                            Object.keys(raw_data[field])
+                                .sort()
+                                .toString()
+                        )
+                            this[field] = raw_data[field];
+                        else this[field] = defaultData[field];
+                    }
+                } else if (typeof raw_data[field] === typeof this[field])
                     this[field] = raw_data[field];
+                else this[field] = defaultData[field];
             }
             if (!this.proposedSchedule.empty()) {
                 this.currentSchedule = this.proposedSchedule;
@@ -1338,6 +1347,10 @@ export default Vue.extend({
 
 .filter-add:hover {
     background-color: rgba(223, 223, 223, 0.5);
+}
+
+.sort-option {
+    cursor: pointer;
 }
 
 @media print {

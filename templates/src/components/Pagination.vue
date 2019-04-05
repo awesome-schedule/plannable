@@ -11,7 +11,10 @@
                     placeholder="Go to"
                     class="form-control"
                     style="border-radius: 4px 0px 0px 4px !important"
-                    @input="switchPage(goto - 1)"
+                    @input="
+                        switchPage(goto - 1);
+                        updateStart();
+                    "
                 />
             </li>
             <li :class="'page-item' + (start <= 0 && idx <= start ? ' disabled' : '')">
@@ -20,7 +23,10 @@
                     href="#"
                     tabindex="-1"
                     aria-disabled="true"
-                    @click="switchPage(idx - 1)"
+                    @click="
+                        switchPage(idx - 1);
+                        updateStart();
+                    "
                     >Prev</a
                 >
             </li>
@@ -29,13 +35,27 @@
                 :key="index"
                 :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
             >
-                <a class="page-link" href="#" @click="switchPage(index + start - 1)">
+                <a
+                    class="page-link"
+                    href="#"
+                    @click="
+                        switchPage(index + start - 1);
+                        updateStart();
+                    "
+                >
                     {{ index + start }}
-                    <span v-if="idx === index + end - 1" class="sr-only">(current)</span>
                 </a>
             </li>
             <li :class="'page-item' + (idx >= indices.length - 1 ? ' disabled' : '')">
-                <a class="page-link" href="#" @click="switchPage(idx + 1)">Next</a>
+                <a
+                    class="page-link"
+                    href="#"
+                    @click="
+                        switchPage(idx + 1);
+                        updateStart();
+                    "
+                    >Next</a
+                >
             </li>
         </ul>
     </nav>
@@ -61,9 +81,7 @@ export default Vue.extend({
         }
         return {
             idx: 0,
-            // start: 0,
-            end: e,
-            pageNumber: e,
+            start: 0,
             goto: null
         };
     },
@@ -74,15 +92,6 @@ export default Vue.extend({
             } else {
                 return this.indices.length < 10 ? this.indices.length : 10;
             }
-        },
-        start() {
-            if (idx < this.length / 2) {
-                return 0;
-            } else if (this.indices - idx - 1 < this.length / 2) {
-                return this.indices.length - this.length;
-            } else {
-                return idx - this.length / 2;
-            }
         }
     },
     created() {
@@ -92,48 +101,28 @@ export default Vue.extend({
         this.autoSwitch();
     },
     methods: {
+        updateStart() {
+            if (this.idx < this.start) {
+                this.start = this.idx;
+            } else if (this.idx >= this.start + this.length) {
+                this.start = this.idx - this.length + 1;
+            }
+        },
         /**
          * @param {number}
          */
         switchPage(idx) {
-            if (idx < 0 || idx >= this.indices || isNaN(idx)) return;
-            idx = parseInt(idx);
-            if (idx >= this.start && idx < this.end) {
-                this.idx = idx;
-                this.$emit('switch_page', idx);
-            } else if (idx === this.start - 1 && this.start > 0) {
-                this.start -= 1;
-                this.end -= 1;
-                this.idx = idx;
-                this.$emit('switch_page', idx);
-            } else if (idx === this.end && this.end < this.indices.length) {
-                this.start += 1;
-                this.end += 1;
-                this.idx = idx;
-                this.$emit('switch_page', idx);
-            } else if (idx < this.start - 1 && this.start > 0) {
-                this.end -= this.start - this.idx;
-                this.start = idx;
-                this.idx = idx;
-                this.$emit('switch_page', idx);
-            } else if (idx > this.end && this.end < this.indices.length) {
-                this.idx = idx;
-                this.start += idx - this.end + 1;
-                this.end = idx + 1;
-                this.$emit('switch_page', idx);
+            if (idx >= 0 && idx < this.indices.length && !isNaN(idx)) {
+                this.idx = parseInt(idx);
+                this.$emit('switch_page', this.idx);
             }
         },
         autoSwitch() {
             if (this.curIdx && this.curIdx >= 0 && this.curIdx < this.indices.length) {
-                // if (this.curIdx >= this.start && this.curIdx < this.start + this.length) {
-                //     this.switchPage(this.curIdx);
-                // } else if(this.curIdx < this.length / 2){
-
-                //     this.start = this.curIdx - this.length < 0 ? 0 : this.curIdx - this.pageNumber;
-                //     this.switchPage(this.curIdx);
-                // }
                 this.idx = this.curIdx;
                 this.switchPage(this.idx);
+                this.updateStart();
+                this.$emit('switch_page', this.idx);
             }
         }
     }

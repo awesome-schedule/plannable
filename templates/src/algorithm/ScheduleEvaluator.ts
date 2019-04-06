@@ -138,15 +138,7 @@ class ScheduleEvaluator {
          * defined as the total time in between each pair of consecutive classes
          */
         compactness(schedule: RawAlgoSchedule) {
-            const groups = ScheduleEvaluator.groupCourses(schedule);
-            let dist = 0;
-            for (const group of groups) {
-                for (let i = 0; i < group.length - 1; i++) {
-                    // start time of next class minus end time of previous class
-                    dist += group[i + 1][2][0] - group[i][2][1];
-                }
-            }
-            return dist;
+            return 1;
         },
 
         /**
@@ -173,14 +165,16 @@ class ScheduleEvaluator {
         },
 
         noEarly(schedule: RawAlgoSchedule) {
-            const groups = ScheduleEvaluator.groupCourses(schedule);
-            let time = 0;
-            const refTime = 22 * 60;
-            for (const group of groups) {
-                const start = group[0][2][0];
-                time += refTime - start;
+            const earliest = new Int32Array(5);
+            const days = ScheduleEvaluator.days;
+            const refTime = 8 * 60;
+            for (const course of schedule) {
+                for (let i = 0; i < 5; i++) {
+                    const timeBlock = course[1][days[i]];
+                    if (timeBlock) earliest[i] = Math.min(earliest[i], Math.min(...timeBlock));
+                }
             }
-            return time;
+            return earliest.reduce((acc, x) => acc + x - refTime, 0);
         },
 
         IamFeelingLucky() {
@@ -217,25 +211,6 @@ class ScheduleEvaluator {
         else if (a <= d && d <= b) return d - a;
         else if (a >= c && b <= d) return b - a;
         else return 0;
-    }
-
-    public static groupCourses(schedule: RawAlgoSchedule) {
-        const groups: RawAlgoSchedule[] = [];
-        const days = ScheduleEvaluator.days;
-        for (let i = 0; i < days.length; i++) groups.push([]);
-        for (const course of schedule) {
-            for (let i = 0; i < days.length; i++) {
-                if (course[1]) groups[i].push(course);
-            }
-        }
-        /**
-         * Sort according to their start time
-         */
-        const comparator = (s1: RawAlgoCourse, s2: RawAlgoCourse) => s1[2][0] - s2[2][0];
-        for (const group of groups) {
-            group.sort(comparator);
-        }
-        return groups;
     }
 
     public static validateOptions(options: SortOptions) {

@@ -112,7 +112,7 @@ class ScheduleGenerator {
                         continue;
                     }
                     algoCourse[1] = tmp_dict;
-                    
+
                     for (const sid of sids) {
                         const section = courseRec.getSection(sid);
                         // insert filter method

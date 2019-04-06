@@ -251,11 +251,11 @@ class Schedule {
      */
     public place(course: Section | Course) {
         // we only render a CourseRecord if all of its sections occur at the same time
-        if (course instanceof Course) {
+        if (course instanceof Section) {
+            this.placeHelper(this.getColor(course), course.meetings, course);
+        } else {
             if (!course.allSameTime()) return;
             this.placeHelper(this.getColor(course), course.sections[0].meetings, course.sections);
-        } else {
-            this.placeHelper(this.getColor(course), course.meetings, course);
         }
     }
 
@@ -263,6 +263,8 @@ class Schedule {
         for (const meeting of meetings) {
             let [days, start, , end] = meeting.days.split(' ');
             [start, end] = Schedule.parseTime(start, end);
+            // console.log(meeting);
+            // console.log(start, end);
             for (let i = 0; i < days.length; i += 2) {
                 const scheduleBlock = new ScheduleBlock(color, start, end, sections);
                 switch (days.substr(i, 2)) {

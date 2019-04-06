@@ -1,7 +1,16 @@
 import Section from './Section';
-import { RawCourse } from './Meta';
+import Meta, { RawCourse } from './Meta';
 
-class Course {
+export interface CourseFields {
+    department: string;
+    number: number;
+    type: string;
+    units: number;
+    title: string;
+    description: string;
+}
+
+class Course implements CourseFields {
     /**
      * Calculate a 32 bit FNV-1a hash
      * @see https://gist.github.com/vaiorabbit/5657561
@@ -21,18 +30,18 @@ class Course {
 
     [x: string]: any;
     public key: string;
-    public readonly raw: RawCourse;
-    /**
-     * array of section ids contained in this object
-     */
-    public readonly sids: number[];
-
     public readonly department: string;
     public readonly number: number;
     public readonly type: string;
     public readonly units: number;
     public readonly title: string;
     public readonly description: string;
+
+    public readonly raw: RawCourse;
+    /**
+     * array of section ids contained in this object
+     */
+    public readonly sids: number[];
     public readonly sections: Section[];
 
     /**
@@ -45,7 +54,7 @@ class Course {
 
         this.department = raw[0];
         this.number = raw[1];
-        this.type = raw[2];
+        this.type = Meta.TYPES[raw[2]];
         this.units = raw[3];
         this.title = raw[4];
         this.description = raw[5];

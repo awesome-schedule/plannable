@@ -118,8 +118,6 @@
                     :is-entering="isEntering"
                     :show-classlist-title="showClasslistTitle"
                     @update_course="updateCourse"
-                    @remove_preview="removePreview"
-                    @preview="preview"
                     @close="closeClassList"
                     @trigger-classlist-modal="showClassListModal"
                 ></ClassList>
@@ -156,10 +154,7 @@
                         :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
                         @update_course="updateCourse"
-                        @remove_course="removeCourse"
-                        @remove_preview="removePreview"
                         @trigger-classlist-modal="showClassListModal"
-                        @preview="preview"
                     ></ClassList>
                     <div class="btn-group mt-3" role="group" style="width:100%">
                         <button
@@ -910,16 +905,6 @@ export default Vue.extend({
             } else {
                 this.saveStatus();
             }
-        },
-        /**
-         * @param {string} key
-         * @param {number} section
-         */
-        preview(key, section) {
-            this.currentSchedule.preview(key, section);
-        },
-        removePreview() {
-            this.currentSchedule.removePreview();
         },
         /**
          * if parsed is true, also update the pagination

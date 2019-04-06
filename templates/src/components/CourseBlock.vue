@@ -6,7 +6,7 @@
             position: 'absolute',
             width: '20%',
             height: endPx - startPx + 'px',
-            'background-color': course.backgroundColor,
+            'background-color': scheduleBlock.backgroundColor,
             'z-index': '2',
             color: 'white',
             cursor: 'pointer'
@@ -14,66 +14,76 @@
     >
         <div v-if="!mobile" style="height:100%">
             <div
-                v-if="isCourse(course)"
+                v-if="isCourse(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
                 style="height:100%"
-                @click="$parent.$emit('trigger-modal', course)"
+                @click="$parent.$emit('trigger-modal', scheduleBlock)"
             >
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
-                    {{ course.department }} {{ course.number }}-{{ course.section }}
-                    {{ course.type }}
-                </div>
-                <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.days }}
+                    {{ scheduleBlock.section.department }} {{ scheduleBlock.section.number }}-{{
+                        scheduleBlock.section.section
+                    }}
+                    {{ scheduleBlock.section.type }}
                 </div>
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.instructor.join(', ') }}
+                    {{ scheduleBlock.section.instructors.join(', ') }}
                 </div>
-                <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.room }}
-                </div>
+                <template v-if="showTime && showRoom">
+                    <div
+                        v-for="(meeting, idx) in scheduleBlock.section.meetings"
+                        :key="`${scheduleBlock.section.key}-mt-` + idx"
+                    >
+                        <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+                            {{ meeting.days }}
+                        </div>
+                        <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
+                            {{ meeting.room }}
+                        </div>
+                    </div>
+                </template>
             </div>
             <div
                 v-else
                 data-toggle="modal"
                 data-target="#class-list-modal"
                 style="height:100%"
-                @click="$parent.$parent.showClassListModal(course)"
+                @click="$parent.$parent.showClassListModal(scheduleBlock)"
             >
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
-                    {{ course.department }} {{ course.number }}-{{ course.section[0] }} +{{
-                        course.section.length - 1
+                    {{ scheduleBlock.department }} {{ scheduleBlock.number }}-{{
+                        scheduleBlock.section[0]
                     }}
-                    {{ course.type }}
+                    +{{ scheduleBlock.section.length - 1 }}
+                    {{ scheduleBlock.type }}
                 </div>
                 <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.days[0] }}
+                    {{ scheduleBlock.days[0] }}
                 </div>
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.instructor[0].join(', ') }} and
-                    {{ course.instructor.length - 1 }} more
+                    {{ scheduleBlock.instructor[0].join(', ') }} and
+                    {{ scheduleBlock.instructor.length - 1 }} more
                 </div>
                 <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.room[0] }} and {{ course.room.length - 1 }} more
+                    {{ scheduleBlock.room[0] }} and {{ scheduleBlock.room.length - 1 }} more
                 </div>
             </div>
         </div>
-        <div v-if="mobile" class="mt-2 ml-2" style="color:white; font-size:10px">
+        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
             <div
-                v-if="isCourse(course)"
+                v-if="isCourse(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
-                @click="$parent.$emit('trigger-modal', course)"
+                @click="$parent.$emit('trigger-modal', scheduleBlock)"
             >
-                {{ course.department }} <br />
-                {{ course.number }} <br />
-                {{ course.section }}
+                {{ scheduleBlock.department }} <br />
+                {{ scheduleBlock.number }} <br />
+                {{ scheduleBlock.section }}
             </div>
             <div v-else>
-                {{ course.department }} <br />
-                {{ course.number }} <br />
-                {{ course.section[0] }} +{{ course.section.length - 1 }}
+                {{ scheduleBlock.department }} <br />
+                {{ scheduleBlock.number }} <br />
+                {{ scheduleBlock.section[0] }} +{{ scheduleBlock.section.length - 1 }}
             </div>
         </div>
     </div>
@@ -85,7 +95,7 @@ import Vue from 'vue';
 export default Vue.extend({
     name: 'CourseBlock',
     props: {
-        course: ScheduleBlock,
+        scheduleBlock: ScheduleBlock,
         /**
          * @type {number[]}
          */
@@ -105,11 +115,11 @@ export default Vue.extend({
     computed: {
         startPx() {
             let start = 48;
-            const t = this.course.start.split(':');
+            const t = this.scheduleBlock.start.split(':');
             // const hr = parseInt(t[0]);
             const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-            const temp = this.timeToNum(this.course.start, true);
+            const temp = this.timeToNum(this.scheduleBlock.start, true);
             for (let i = this.absoluteEarliest; i < temp; i++) {
                 start += this.heightInfo[i - this.absoluteEarliest];
             }
@@ -119,10 +129,10 @@ export default Vue.extend({
 
         endPx() {
             let end = 48;
-            const t = this.course.end.split(':');
+            const t = this.scheduleBlock.end.split(':');
             const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-            const temp = this.timeToNum(this.course.end, false);
+            const temp = this.timeToNum(this.scheduleBlock.end, false);
             for (let i = this.absoluteEarliest; i < temp; i++) {
                 end += this.heightInfo[i - this.absoluteEarliest];
             }
@@ -154,7 +164,7 @@ export default Vue.extend({
          * @param {ScheduleBlock} crs
          */
         isCourse(crs) {
-            return crs.section instanceof Array;
+            return !(crs.section instanceof Array);
         }
     }
 });

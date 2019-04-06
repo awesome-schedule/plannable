@@ -46,9 +46,9 @@
                     <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
                     <template v-for="(day, idx) in days">
                         <course-block
-                            v-for="course in schedule.days[day]"
-                            :key="course.key + day"
-                            :course="course"
+                            v-for="scheduleBlock in schedule.days[day]"
+                            :key="scheduleBlock.key + day"
+                            :schedule-block="scheduleBlock"
                             :height-info="heightInfo"
                             :full-height="fullHeight"
                             :show-time="showTime"

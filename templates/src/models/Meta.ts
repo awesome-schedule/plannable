@@ -2,7 +2,7 @@ export interface RawCatalog {
     [key: string]: RawCourse;
 }
 
-export type RawCourse = [string, number, string, number, string, string, RawSection[]];
+export type RawCourse = [string, number, number, number, string, string, RawSection[]];
 
 export type RawSection = [number, string, string, number, number, number, number, RawMeeting[]];
 

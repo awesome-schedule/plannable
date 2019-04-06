@@ -1,10 +1,17 @@
-import Course from './Course';
+import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 
-class Section {
-    public raw: RawSection;
+class Section implements CourseFields {
+    public department: string;
+    public number: number;
+    public type: string;
+    public units: number;
+    public title: string;
+    public description: string;
+
     public sid: number;
+    public key: string;
 
     public course: Course;
     public id: number;
@@ -19,8 +26,15 @@ class Section {
 
     constructor(course: Course, raw: RawSection, sid: number) {
         this.course = course;
-        this.raw = raw;
         this.sid = sid;
+        this.key = course.key;
+
+        this.department = course.department;
+        this.number = course.number;
+        this.type = course.type;
+        this.units = course.units;
+        this.title = course.title;
+        this.description = course.description;
 
         this.id = raw[0];
         this.section = raw[1];

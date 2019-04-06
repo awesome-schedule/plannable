@@ -1052,8 +1052,8 @@ export default Vue.extend({
                         }
                     );
                 } else {
-                    this.catalog = temp;
-                    Schedule.catalog = temp;
+                    this.catalog = temp.catalog;
+                    Schedule.catalog = temp.catalog;
                     callback();
                 }
             }

@@ -138,7 +138,40 @@ class ScheduleEvaluator {
          * defined as the total time in between each pair of consecutive classes
          */
         compactness(schedule: RawAlgoSchedule) {
-            return 1;
+            const DAYS = ScheduleEvaluator.days;
+            const week: number[][] = [[], [], [], [], []];
+            for (const c of schedule) {
+                const crs = c[1];
+                for (let k = 0; k < 5; k++) {
+                    const temp = week[k];
+                    week[k].push.apply(temp, crs[DAYS[k]]);
+                }
+            }
+
+            let compact: number = 0;
+
+            for (const arr of week) {
+                for (let i = 0; i < arr.length; i += 2) {
+                    for (let j = i - 2; j >= 0; j -= 2) {
+                        if (arr[j] > arr[j + 2]) {
+                            const tempL = arr[j];
+                            const tempR = arr[j + 1];
+                            arr[j] = arr[j + 2];
+                            arr[j + 1] = arr[j + 2 + 1];
+                            arr[j + 2] = tempL;
+                            arr[j + 2 + 1] = tempR;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+
+                for (let i = 2; i < arr.length; i += 2) {
+                    compact += arr[i] - arr[i - 1];
+                }
+            }
+
+            return compact;
         },
 
         /**

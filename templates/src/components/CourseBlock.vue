@@ -47,13 +47,18 @@
             >
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
                     {{ firstSec.department }}
-                    {{ firstSec.number }}-{{ firstSec.section }} +
-                    {{ scheduleBlock.section.length - 1 }}
+                    {{ firstSec.number }}-{{ firstSec.section }} +{{
+                        scheduleBlock.section.length - 1
+                    }}
                     {{ firstSec.type }}
                 </div>
-                <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ scheduleBlock.days[0] }}
-                </div>
+                <template v-if="showTime">
+                    <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
+                        <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+                            {{ meeting.days }}
+                        </div>
+                    </div>
+                </template>
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
                     {{ firstSec.instructors.join(', ') }} and
                     {{
@@ -71,16 +76,21 @@
                 v-if="isCourse(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
-                @click="$parent.$emit('trigger-modal', scheduleBlock)"
+                @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
             >
-                {{ scheduleBlock.department }} <br />
-                {{ scheduleBlock.number }} <br />
-                {{ scheduleBlock.section }}
+                {{ firstSec.department }} <br />
+                {{ firstSec.number }} <br />
+                {{ firstSec.section }}
             </div>
-            <div v-else>
-                {{ scheduleBlock.department }} <br />
-                {{ scheduleBlock.number }} <br />
-                {{ scheduleBlock.section[0] }} +{{ scheduleBlock.section.length - 1 }}
+            <div
+                v-else
+                data-toggle="modal"
+                data-target="#class-list-modal"
+                @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
+            >
+                {{ firstSec.department }} <br />
+                {{ firstSec.number }} <br />
+                {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
             </div>
         </div>
     </div>

@@ -2,11 +2,14 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
-import Course from '../models/Course';
+import CourseRecord from '../models/Course';
 import { Semester } from '../models/Catalog';
-import { RawCatalog } from '@/models/Meta';
+import Meta, { RawCatalog, RawCourse, RawSection, RawMeeting } from '@/models/Meta';
+import Meeting from '@/models/Meeting';
+import { STATUS_CODES } from 'http';
 
 const CROS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+
 /**
  * Fetch the list of semesters from Lou's list
  */
@@ -45,38 +48,41 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]
 function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<RawCatalog> {
     console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
-        // axios
-        //     .post(
-        //         `${cros_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
-        //         querystring.stringify({
-        //             Semester: semesterId,
-        //             Group: 'CS',
-        //             Description: 'Yes',
-        //             submit: 'Submit Data Request'
-        //         })
-        //     )
-        //     .then(res => {
-        //         console.timeEnd(`request semester ${semesterId} data`);
-        //         return parseSemesterData(res.data);
-        //     })
-        //     .then(data => {
-        //         resolve(data);
-        //     })
-        //     .catch(err => {
-        //         reject(err);
-        //     });
         axios
-            .get(`http://localhost:8000/CS${semesterId}Data.json`)
+            .post(
+                `${cros_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
+                querystring.stringify({
+                    Semester: semesterId,
+                    Group: 'CS',
+                    Description: 'Yes',
+                    submit: 'Submit Data Request',
+                    Extended: 'Yes'
+                })
+            )
+            .then(res => {
+                console.timeEnd(`request semester ${semesterId} data`);
+                return parseSemesterData(res.data);
+            })
             .then(data => {
-                resolve(data.data);
+                resolve(data);
             })
             .catch(err => {
                 reject(err);
             });
+        // axios
+        //     .get(`http://localhost:8000/CS${semesterId}Data.json`)
+        //     .then(data => {
+        //         resolve(data.data);
+        //     })
+        //     .catch(err => {
+        //         reject(err);
+        //     });
     });
 }
 
 function parseSemesterData(csv_string: string) {
+    const CLASS_TYPES = Meta.TYPES_PARSE;
+    const STATUSES = Meta.STATUSES_PARSE;
     console.time('parsing csv');
     const raw_data: string[][] = parse(csv_string, {
         skipEmptyLines: true,
@@ -84,10 +90,50 @@ function parseSemesterData(csv_string: string) {
     }).data;
     console.timeEnd('parsing csv');
     console.time('reorganizing data');
-    const DICT: RawCatalog = {};
+    const rawCatalog: RawCatalog = {};
+
+    for (const data of raw_data) {
+        const key = (data[1] + data[2] + CLASS_TYPES[data[4]]).toLowerCase();
+        const tempSection: RawSection = [
+            parseInt(data[0]),
+            data[3],
+            data[23],
+            STATUSES[data[24]],
+            parseInt(data[25]),
+            parseInt(data[26]),
+            parseInt(data[27]),
+            []
+        ];
+        const meetings: RawMeeting[] = [];
+        for (let i = 0; i < 4; i++) {
+            if (data[6 + i * 4] && data[6 + i * 4] !== '') {
+                const tempMeeting: RawMeeting = [
+                    data[6 + i * 4],
+                    data[6 + i * 4 + 1],
+                    data[6 + i * 4 + 2],
+                    data[6 + i * 4 + 3]
+                ];
+                meetings.push(tempMeeting);
+            }
+        }
+        tempSection[7] = meetings;
+        if (rawCatalog[key]) {
+            rawCatalog[key][6].push(tempSection);
+        } else {
+            rawCatalog[key] = [
+                data[1],
+                parseInt(data[2]),
+                CLASS_TYPES[4],
+                data[5],
+                data[22],
+                data[28],
+                [tempSection]
+            ];
+        }
+    }
 
     console.timeEnd('reorganizing data');
-    return DICT;
+    return rawCatalog;
 }
 
 export { getSemesterData, getSemesterList };

@@ -2,7 +2,7 @@ import csv
 import logging
 from flask import Flask, render_template, jsonify, request, send_from_directory
 
-from backend.data_loader import load_all_data, update_local_data, ATTR_MAP, CLASS_TYPES, STATUSES, SEMESTERS, ALL_SEMESTER_RECORDS
+from backend.data_loader import load_all_data, update_local_data, CLASS_TYPES, STATUSES, SEMESTERS, ALL_SEMESTER_RECORDS
 from collections import OrderedDict
 from flask_cors import CORS
 from typing import List, Any, Dict, Tuple

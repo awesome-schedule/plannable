@@ -43,10 +43,10 @@ class ScheduleGenerator {
         return options;
     }
 
-    public allRecords: Catalog;
+    public catalog: Catalog;
     public options: Options;
     constructor(allRecords: Catalog) {
-        this.allRecords = allRecords;
+        this.catalog = allRecords;
         this.options = ScheduleGenerator.optionDefaults;
     }
 
@@ -71,10 +71,10 @@ class ScheduleGenerator {
                 /**
                  * get course with specific sections specified by Schedule
                  */
-                const courseRec = this.allRecords.getRecord(key, courses[key]);
+                const courseRec = this.catalog.getRecord(key, courses[key]);
 
+                // combine any section of occuring at the same time
                 const combined = courseRec.getCombined();
-                console.log(combined);
                 for (const time in combined) {
                     let no_match = false;
                     const sids = combined[time];
@@ -82,6 +82,7 @@ class ScheduleGenerator {
                     const tmp_dict: { [x: string]: number[] } = {};
 
                     for (const t of time.split('|')) {
+                        // skip empty string
                         if (!t) {
                             continue;
                         }
@@ -120,7 +121,6 @@ class ScheduleGenerator {
                         algoCourse[2].push(sid);
                     }
                     if (algoCourse[2].length !== 0) classes.push(algoCourse);
-                    console.log(algoCourse);
                 }
 
                 if (classes.length === 0) {
@@ -149,8 +149,8 @@ class ScheduleGenerator {
     public createSchedule(classList: RawAlgoSchedule[]) {
         let classNum = 0;
         let choiceNum = 0;
-        let pathMemory = Array.from({ length: classList.length }, () => 0);
-        let timeTable = new Array();
+        let pathMemory = new Int32Array(classList.length);
+        let timeTable: RawAlgoSchedule = [];
         const evaluator = new ScheduleEvaluator(this.options.sortOptions);
         let exhausted = false;
         // eslint-disable-next-line
@@ -195,9 +195,9 @@ class ScheduleGenerator {
         classList: RawAlgoSchedule[],
         classNum: number,
         choiceNum: number,
-        pathMemory: number[],
+        pathMemory: Int32Array,
         timeTable: RawAlgoSchedule
-    ): [number, number, number[], RawAlgoSchedule, boolean] {
+    ): [number, number, Int32Array, RawAlgoSchedule, boolean] {
         /**
          * when all possibilities in on class have exhausted, retract one class
          * explore the next possibilities in the nearest possible class
@@ -220,18 +220,16 @@ class ScheduleGenerator {
 
     /**
      * compare the new class to see if it has conflicts with the existing time table
-     * :param timeTable: three entries: 1. the class serial number, 2. the date 3. the time
-     * :param date: contains the date when the class takes place
-     * :param timeBlock: contains beginTime and endTime of a class
      * :return: Boolean type: true if it has conflict, else false
      */
     public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: { [x: string]: number[] }) {
         for (const algoCourse of timeTable) {
-            for (const dayBlock in algoCourse[1]) {
+            const tmp = algoCourse[1];
+            for (const dayBlock in tmp) {
                 if (!timeDict[dayBlock]) {
-                    break;
+                    continue;
                 }
-                const timeTableBlocks = algoCourse[1][dayBlock];
+                const timeTableBlocks = tmp[dayBlock];
                 const timeDictBlocks = timeDict[dayBlock];
                 for (let i = 0; i < timeTableBlocks.length; i += 2) {
                     const begin = timeTableBlocks[i];

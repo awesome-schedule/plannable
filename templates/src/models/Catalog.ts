@@ -10,7 +10,7 @@ export interface Semester {
 class Catalog {
     /**
      * Parse AllRecords from parsed JSON
-     * return `null` if data is invalid or data expired
+     * return `null` if data is invalid
      */
     public static fromJSON(
         data: { modified: string; semester: Semester; raw_data: RawCatalog },
@@ -24,12 +24,19 @@ class Catalog {
         ) {
             const now = new Date().getTime();
             const dataTime = new Date(data.modified).getTime();
-            if (now - dataTime > expTime) return null;
+            if (now - dataTime > expTime)
+                return {
+                    catalog: new Catalog(data.semester, data.raw_data),
+                    expired: true
+                };
             else {
-                return new Catalog(data.semester, data.raw_data);
+                return {
+                    catalog: new Catalog(data.semester, data.raw_data),
+                    expired: false
+                };
             }
         }
-        return undefined;
+        return null;
     }
     public semester: Semester;
     public raw_data: RawCatalog;

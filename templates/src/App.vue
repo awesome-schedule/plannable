@@ -1027,32 +1027,35 @@ export default Vue.extend({
                 this.parseLocalData(raw_data);
                 this.loading = false;
             };
-            // if data expires
+
+            // if data does not exist or is not in correct format
             if (temp === null) {
-                // in this case, we only need to update catalog. Save a set of fresh data
-                this.fetchSemesterData(
-                    semesterId,
-                    () => {
-                        this.saveAllRecords();
-                        callback();
-                    },
-                    () => {
-                        // if failed, just use the old data.
-                        this.catalog = temp;
-                        Schedule.catalog = temp;
-                        callback();
-                    }
-                );
-                // if data is not in correct format
-            } else if (temp === undefined) {
                 this.fetchSemesterData(semesterId, () => {
                     this.saveAllRecords();
                     callback();
                 });
             } else {
-                this.catalog = temp;
-                Schedule.catalog = temp;
-                callback();
+                // if data expired
+                if (temp.expired) {
+                    // in this case, we only need to update catalog. Save a set of fresh data
+                    this.fetchSemesterData(
+                        semesterId,
+                        () => {
+                            this.saveAllRecords();
+                            callback();
+                        },
+                        () => {
+                            // if failed, just use the old data.
+                            this.catalog = temp.catalog;
+                            Schedule.catalog = temp.catalog;
+                            callback();
+                        }
+                    );
+                } else {
+                    this.catalog = temp;
+                    Schedule.catalog = temp;
+                    callback();
+                }
             }
         },
         saveAllRecords() {

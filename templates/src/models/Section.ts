@@ -61,6 +61,10 @@ class Section implements CourseFields {
         return true;
     }
 
+    public combinedTime() {
+        return this.meetings.reduce((acc, v) => acc + v.days + '|', '');
+    }
+
     public hash() {
         return this.course.hash();
     }

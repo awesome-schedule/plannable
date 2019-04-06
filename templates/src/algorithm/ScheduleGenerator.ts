@@ -6,9 +6,9 @@ import Section from '../models/Section';
 
 /**
  * The data structure used in the algorithm
- * e.g. `["span20205",["Mo","Tu"],[600,650],[0, 1, 2]]`
+ * e.g. `["span20205",["Mo":[600,650],"Tu":[600,650]],[0, 1, 2]]`
  */
-export type RawAlgoCourse = [string, string[], number[], number[]];
+export type RawAlgoCourse = [string, { [x: string]: number[] }, number[]];
 
 /**
  * A schedule is nothing more than an array of courses

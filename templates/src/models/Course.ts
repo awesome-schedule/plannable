@@ -50,7 +50,6 @@ class Course implements CourseFields {
     constructor(raw: RawCourse, key: string, sids: number[] = []) {
         this.key = key;
         this.raw = raw;
-        this.sids = sids;
 
         this.department = raw[0];
         this.number = raw[1];
@@ -98,16 +97,17 @@ class Course implements CourseFields {
 
     /**
      * Get an object in which the key is the days string and
-     * value is the subset of sections contained in this CourseRecord occurring at that time
+     * value is the subset of sections contained in this Course occurring at that time
+     *
+     * e.g. {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : array of section indices }
      */
     public getCombined() {
         const combined: { [x: string]: number[] } = {};
-        // for (let i = 0; i < this.days.length; i++) {
-        //     const day = this.days[i];
-        //     if (combined[day]) combined[day].push(this.sids[i]);
-        //     else combined[day] = [this.sids[i]];
-        // }
-        // return combined;
+        for (let i = 0; i < this.sections.length; i++) {
+            const day = this.sections[i].combinedTime();
+            if (combined[day]) combined[day].push(this.sids[i]);
+            else combined[day] = [this.sids[i]];
+        }
         return combined;
     }
 

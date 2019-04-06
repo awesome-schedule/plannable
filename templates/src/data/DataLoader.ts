@@ -123,7 +123,7 @@ function parseSemesterData(csv_string: string) {
             rawCatalog[key] = [
                 data[1],
                 parseInt(data[2]),
-                CLASS_TYPES[4],
+                CLASS_TYPES[data[4]],
                 data[5],
                 data[22],
                 data[28],

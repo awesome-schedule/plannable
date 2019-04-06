@@ -2,7 +2,7 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
-import CourseRecord from '../models/Course';
+import Course from '../models/Course';
 import { Semester } from '../models/Catalog';
 import { RawCatalog } from '@/models/Meta';
 

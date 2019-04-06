@@ -117,7 +117,6 @@ def load_semester_data(semester_index):
         Log.info('Processed {} lines.'.format(line_count))
     print(key_map[list(key_map.keys())[95]])
 
-    # 1 4 9 10 11 12 13
     allRecords = dict()
 
     list_indices = [0, 3, 7, 8, 9, 10, 11, 13]

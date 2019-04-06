@@ -3,8 +3,8 @@ import Course from './Course';
 import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
 import Meeting from './Meeting';
+import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 
-export type RawSchedule = Array<[string, number[], number]>;
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
     title: string;
@@ -112,7 +112,7 @@ class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw_schedule: RawSchedule = [], title = 'Schedule', id = 0) {
+    constructor(raw_schedule: RawAlgoSchedule = [], title = 'Schedule', id = 0) {
         this.All = {};
         this.days = {
             Monday: [],
@@ -128,7 +128,7 @@ class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
 
-        for (const [key, sections] of raw_schedule) {
+        for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
         this.computeSchedule();

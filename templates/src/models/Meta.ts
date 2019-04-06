@@ -1,11 +1,55 @@
+/**
+ * key: department + number + type, e.g. cs11105
+ */
 export interface RawCatalog {
     [key: string]: RawCourse;
 }
 
+/**
+ * 0: department
+ *
+ * 1: number
+ *
+ * 2: type Use Meta.TYPES_PARSE to do parsing
+ *
+ * 3: units
+ *
+ * 4: title
+ *
+ * 5: description
+ *
+ * 6: RawSection[]
+ */
 export type RawCourse = [string, number, number, number, string, string, RawSection[]];
 
+/**
+ * 0: id
+ *
+ * 1: section
+ *
+ * 2: topic
+ *
+ * 3: status Use Meta.STATUSES_PARSE to do parsing
+ *
+ * 4: enrollment
+ *
+ * 5: enrollment limit
+ *
+ * 6: wait_list
+ *
+ * 7: meetings
+ */
 export type RawSection = [number, string, string, number, number, number, number, RawMeeting[]];
 
+/**
+ * 0: instructor
+ *
+ * 1: days
+ *
+ * 2: room
+ *
+ * 3: dates
+ */
 export type RawMeeting = [string, string, string, string];
 
 class Meta {

@@ -124,7 +124,10 @@ class ScheduleEvaluator {
             const days = ScheduleEvaluator.days;
             for (const course of schedule) {
                 for (let i = 0; i < days.length; i++) {
-                    if (course[1].includes(days[i])) minutes[i] += course[2][1] - course[2][0];
+                    const timeBlock = course[1][days[i]];
+                    if (timeBlock) {
+                        minutes[i] += timeBlock[1] - timeBlock[0];
+                    }
                 }
             }
             return ScheduleEvaluator.std(minutes);
@@ -163,7 +166,7 @@ class ScheduleEvaluator {
                         lunchEnd,
                         course[2][0],
                         course[2][1]
-                    ) * course[1].length;
+                    ) * Object.keys(course[1]).length;
                 overlap += Math.exp(olap / lunchDuration / 4);
             }
             return overlap;
@@ -222,7 +225,7 @@ class ScheduleEvaluator {
         for (let i = 0; i < days.length; i++) groups.push([]);
         for (const course of schedule) {
             for (let i = 0; i < days.length; i++) {
-                if (course[1].includes(days[i])) groups[i].push(course);
+                if (course[1]) groups[i].push(course);
             }
         }
         /**
@@ -415,18 +418,11 @@ class ScheduleEvaluator {
         return this.schedules.length;
     }
 
-    public getRaw(idx: number) {
-        const raw_schedule: import('../models/Schedule').RawSchedule = [];
-        for (const raw_course of this.schedules[idx].schedule) {
-            raw_schedule.push([raw_course[0], raw_course[3], -1]);
-        }
-        return raw_schedule;
-    }
     /**
      * Get a `Schedule` object at idx
      */
     public getSchedule(idx: number) {
-        return new Schedule(this.getRaw(idx), 'Schedule', idx + 1);
+        return new Schedule(this.schedules[idx].schedule, 'Schedule', idx + 1);
     }
     /**
      * whether this evaluator contains an empty array of schedules

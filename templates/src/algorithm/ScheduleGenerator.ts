@@ -1,8 +1,9 @@
-import AllRecords from '../models/Catalog';
+import Catalog from '../models/Catalog';
 import Course from '../models/Course';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Section from '../models/Section';
+import { tmpdir } from 'os';
 
 /**
  * The data structure used in the algorithm
@@ -42,9 +43,9 @@ class ScheduleGenerator {
         return options;
     }
 
-    public allRecords: AllRecords;
+    public allRecords: Catalog;
     public options: Options;
-    constructor(allRecords: AllRecords) {
+    constructor(allRecords: Catalog) {
         this.allRecords = allRecords;
         this.options = ScheduleGenerator.optionDefaults;
     }
@@ -73,22 +74,47 @@ class ScheduleGenerator {
 
                 const combined = courseRec.getCombined();
                 for (const time in combined) {
+                    let no_match = false;
                     const sids = combined[time];
-                    const tmp1 = this.parseTime(time);
-                    // do not include any TBA
-                    if (tmp1 === null) continue;
-                    const [date, timeBlock] = tmp1;
-                    if (this.filterTimeSlots(date, timeBlock)) continue;
+                    const algoCourse: RawAlgoCourse = [key, {}, []];
+                    const tmp_dict: { [x: string]: number[] } = {};
 
-                    const algoCourse: RawAlgoCourse = [key, date, timeBlock, []];
+                    for (const t of time.split('|')) {
+                        const tmp1 = this.parseTime(t);
+                        if (tmp1 === null) {
+                            no_match = true;
+                            break;
+                        }
+
+                        const [date, timeBlock] = tmp1;
+
+                        if (this.filterTimeSlots(date, timeBlock)) {
+                            no_match = true;
+                            break;
+                        }
+
+                        for (const d of date) {
+                            // the timeBlock is flattened
+                            const dayBlock = tmp_dict[d];
+                            if (dayBlock) {
+                                dayBlock.push.apply(dayBlock, timeBlock);
+                            } else {
+                                tmp_dict[d] = timeBlock.concat();
+                            }
+                        }
+                    }
+                    if (no_match) {
+                        continue;
+                    }
+                    algoCourse[1] = tmp_dict;
 
                     for (const sid of sids) {
-                        const course = courseRec.getSection(sid);
+                        const section = courseRec.getSection(sid);
                         // insert filter method
-                        if (this.filterStatus(course)) continue;
-                        algoCourse[3].push(sid);
+                        if (this.filterStatus(section)) continue;
+                        algoCourse[2].push(sid);
                     }
-                    if (algoCourse[3].length !== 0) classes.push(algoCourse);
+                    if (algoCourse[2].length !== 0) classes.push(algoCourse);
                 }
 
                 if (classes.length === 0) {
@@ -143,10 +169,9 @@ class ScheduleGenerator {
                 break;
             }
 
-            const date = classList[classNum][choiceNum][1];
-            const timeBlock = classList[classNum][choiceNum][2];
+            const timeDict = classList[classNum][choiceNum][1];
 
-            if (!this.checkTimeConflict(timeTable, date, timeBlock)) {
+            if (!this.checkTimeConflict(timeTable, timeDict)) {
                 // if the schedule matches,
                 // record the next path memory and go to the next class, reset the choiceNum = 0
                 timeTable.push(classList[classNum][choiceNum]);
@@ -194,30 +219,32 @@ class ScheduleGenerator {
      * :param timeBlock: contains beginTime and endTime of a class
      * :return: Boolean type: true if it has conflict, else false
      */
-    public checkTimeConflict(timeTable: RawAlgoSchedule, date: string[], timeBlock: number[]) {
-        if (date === null) {
-            // do not include any TBA
-            return true;
-        }
+    public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: { [x: string]: number[];}) {
         if (timeTable === []) {
             return false;
         }
-        const beginTime = timeBlock[0];
-        const endTime = timeBlock[1];
-        for (const times of timeTable) {
-            const dates = times[1];
-            const begin = times[2][0];
-            const end = times[2][1];
-            for (const d of date) {
-                if (!dates.includes(d)) {
-                    continue;
+
+        for (const algoCourse of timeTable) {
+            for (const dayBlock in algoCourse[1]) {
+                if (!timeDict[dayBlock]) {
+                    break;
                 }
-                if (
-                    (begin <= beginTime && beginTime <= end) ||
-                    (begin <= endTime && endTime <= end) ||
-                    (begin >= beginTime && end <= endTime)
-                ) {
-                    return true;
+                const timeTableBlocks = algoCourse[1][dayBlock];
+                const timeDictBlocks = timeDict[dayBlock];
+                for (let i = 0; i < timeTableBlocks.length; i += 2) {
+                    const begin = timeTableBlocks[i];
+                    const end = timeTableBlocks[i];
+                    for (let j = 0; j < timeDictBlocks.length; j += 2) {
+                        const beginTime = timeDictBlocks[j];
+                        const endTime = timeDictBlocks[j];
+                        if (
+                            (begin <= beginTime && beginTime <= end) ||
+                            (begin <= endTime && endTime <= end) ||
+                            (begin >= beginTime && end <= endTime)
+                        ) {
+                            return true;
+                        }
+                    }
                 }
             }
         }

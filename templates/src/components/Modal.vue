@@ -13,11 +13,7 @@
                 <div class="modal-body">
                     <div style="color:#a0a0a0">{{ course.type }} | {{ course.units }} units</div>
                     <div style="color:#a0a0a0">{{ course.instructors.join(', ') }}</div>
-                    <div
-                        v-for="(meeting, idx) in course.meetings"
-                        :key="`md-${course.key}-mt-` + idx"
-                        style="color:#a0a0a0"
-                    >
+                    <div v-for="(meeting, idx) in course.meetings" :key="idx" style="color:#a0a0a0">
                         {{ meeting.days }} {{ meeting.room }}
                     </div>
                     <br />

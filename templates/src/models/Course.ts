@@ -101,13 +101,14 @@ class Course implements CourseFields {
      * value is the subset of sections contained in this CourseRecord occurring at that time
      */
     public getCombined() {
-        const combined: { [x: string]: number[] } = {};
-        for (let i = 0; i < this.days.length; i++) {
-            const day = this.days[i];
-            if (combined[day]) combined[day].push(this.sids[i]);
-            else combined[day] = [this.sids[i]];
-        }
-        return combined;
+        // const combined: { [x: string]: number[] } = {};
+        // for (let i = 0; i < this.days.length; i++) {
+        //     const day = this.days[i];
+        //     if (combined[day]) combined[day].push(this.sids[i]);
+        //     else combined[day] = [this.sids[i]];
+        // }
+        // return combined;
+        return {};
     }
 
     public hash() {

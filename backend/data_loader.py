@@ -14,18 +14,18 @@ import json
 ALL_SEMESTER_RECORDS = []
 
 SEMESTERS = [
-    # {
-    #     "id": "1188",
-    #     "name": "Fall 2018"
-    # },
-    # {
-    #     "id": "1191",
-    #     "name": "January 2019"
-    # },
-    # {
-    #     "id": "1192",
-    #     "name": "Spring 2019"
-    # },
+    {
+        "id": "1188",
+        "name": "Fall 2018"
+    },
+    {
+        "id": "1191",
+        "name": "January 2019"
+    },
+    {
+        "id": "1192",
+        "name": "Spring 2019"
+    },
     {
         "name": "Summer 2019",
         "id": "1196"

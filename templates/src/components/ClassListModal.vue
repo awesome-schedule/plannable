@@ -13,17 +13,25 @@
                 <div class="modal-body">
                     <h6>{{ course.type }}</h6>
                     <table style="color:#808080; font-size:0.75rem; width:95%">
-                        <tr v-for="(_, i) in course.section" :key="i">
-                            <td class="info">Section:&nbsp;{{ course.section[i] }}</td>
-                            <td v-if="course.topic[i] !== ''" class="info">
-                                {{ course.topic[i] }}
+                        <tr v-for="(section, i) in course.sections" :key="section.key + i">
+                            <td class="info">Section:&nbsp;{{ section.section }}</td>
+                            <td v-if="section.topic !== ''" class="info">
+                                {{ section.topic }}
                             </td>
-                            <td class="info" width="20%">{{ course.instructor[i].join(' ') }}</td>
-                            <td class="info">{{ course.days[i] }}</td>
-                            <td class="info">{{ course.room[i] }}</td>
-                            <td class="info">{{ course.status[i] }}</td>
+                            <td class="info" width="20%">{{ section.instructors.join(' ') }}</td>
                             <td class="info">
-                                {{ course.enrollment[i] + '/' + course.enrollment_limit[i] }}
+                                <template v-for="(meeting, j) in section.meetings"
+                                    >{{ meeting.days }} <br :key="j" />
+                                </template>
+                            </td>
+                            <td class="info">
+                                <template v-for="(meeting, j) in section.meetings"
+                                    >{{ meeting.room }} <br :key="j" />
+                                </template>
+                            </td>
+                            <td class="info">{{ section.status }}</td>
+                            <td class="info">
+                                {{ section.enrollment + '/' + section.enrollment_limit }}
                             </td>
                         </tr>
                     </table>
@@ -47,5 +55,6 @@ export default {
 <style scoped>
 .info {
     padding-right: 10px;
+    vertical-align: top;
 }
 </style>

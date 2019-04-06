@@ -1,7 +1,7 @@
 <template>
-    <nav class="mt-2">
+    <nav>
         <ul class="pagination justify-content-center" style="margin-bottom: 0;">
-            <li class="input-group" style="width:10vw">
+            <li class="input-group" style="width:80px">
                 <!-- <div class="input-group-prepend">
                     <span class="input-group-text">Go To</span>
                 </div> -->
@@ -27,7 +27,7 @@
                         switchPage(idx - 1);
                         updateStart();
                     "
-                    >Prev</a
+                    >&laquo;</a
                 >
             </li>
             <li
@@ -46,7 +46,7 @@
                     {{ index + start }}
                 </a>
             </li>
-            <li :class="'page-item' + (idx >= indices.length - 1 ? ' disabled' : '')">
+            <li :class="'page-item' + (idx >= scheduleLength - 1 ? ' disabled' : '')">
                 <a
                     class="page-link"
                     href="#"
@@ -54,7 +54,7 @@
                         switchPage(idx + 1);
                         updateStart();
                     "
-                    >Next</a
+                    >&raquo;</a
                 >
             </li>
         </ul>
@@ -68,7 +68,7 @@ export default Vue.extend({
         /**
          * @type {number[]}
          */
-        indices: Array,
+        scheduleLength: Number,
         curIdx: Number
     },
     data() {
@@ -76,8 +76,8 @@ export default Vue.extend({
         if (window.screen.width < 900) {
             e = 3;
         }
-        if (this.indices.length < e) {
-            e = this.indices.length;
+        if (this.scheduleLength < e) {
+            e = this.scheduleLength;
         }
         return {
             idx: 0,
@@ -88,9 +88,9 @@ export default Vue.extend({
     computed: {
         length() {
             if (window.screen.width < 900) {
-                return this.indices.length < 3 ? this.indices.length : 3;
+                return this.scheduleLength < 3 ? this.scheduleLength : 3;
             } else {
-                return this.indices.length < 10 ? this.indices.length : 10;
+                return this.scheduleLength < 10 ? this.scheduleLength : 10;
             }
         }
     },
@@ -112,13 +112,20 @@ export default Vue.extend({
          * @param {number}
          */
         switchPage(idx) {
-            if (idx >= 0 && idx < this.indices.length && !isNaN(idx)) {
-                this.idx = parseInt(idx);
+            idx = parseInt(idx);
+            if (idx >= 0 && idx < this.scheduleLength && !isNaN(idx)) {
+                this.idx = idx;
+                this.$emit('switch_page', this.idx);
+            } else if (idx >= this.scheduleLength) {
+                this.idx = this.scheduleLength - 1;
+                this.$emit('switch_page', this.idx);
+            } else if (idx < 0) {
+                this.idx = 0;
                 this.$emit('switch_page', this.idx);
             }
         },
         autoSwitch() {
-            if (this.curIdx && this.curIdx >= 0 && this.curIdx < this.indices.length) {
+            if (this.curIdx && this.curIdx >= 0 && this.curIdx < this.scheduleLength) {
                 this.idx = this.curIdx;
                 this.switchPage(this.idx);
                 this.updateStart();

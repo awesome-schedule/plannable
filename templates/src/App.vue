@@ -339,7 +339,16 @@
             <div class="list-group list-group-flush mx-1">
                 <div
                     class="input-group my-3"
-                    title="Schedule grid later than this time won't be displayed if you don't have any class at that time"
+                    title="Schedule grid earlier than this time won't be displayed if you don't have any class"
+                >
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Start of My Day</span>
+                    </div>
+                    <input v-model="earliest" type="time" class="form-control" />
+                </div>
+                <div
+                    class="input-group mb-3"
+                    title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
                         <span class="input-group-text">End of My Day</span>
@@ -417,7 +426,7 @@
                     </div>
                 </li>
                 <li class="list-group-item">Class List Display</li>
-                <li class="list-group-item">
+                <li class="list-group-item mb-1">
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayClasslistTitle"
@@ -430,12 +439,41 @@
                         </label>
                     </div>
                 </li>
+            </ul>
+            <button class="btn btn-info nav-btn">
+                Time Options
+            </button>
+            <ul class="list-group list-group-flush mx-1">
+                <li>
+                    <div
+                        class="btn-group btn-group-toggle my-3"
+                        role="group"
+                        data-toggle="buttons"
+                        style="width:100%"
+                    >
+                        <button
+                            class="btn btn-secondary"
+                            :class="{ active: standard }"
+                            type="button"
+                            @click="standard = true"
+                        >
+                            Standard
+                        </button>
+                        <button
+                            class="btn btn-secondary"
+                            :class="{ active: !standard }"
+                            type="button"
+                            @click="standard = false"
+                        >
+                            Military
+                        </button>
+                    </div>
+                </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
                         Reset All and Clean
                     </button>
                 </li>
-                <li class="list-group-item"></li>
             </ul>
         </nav>
 
@@ -485,8 +523,8 @@
                 :class="`alert-${noti.class}`"
                 role="alert"
                 :style="
-                    `width:${mobile ? 'auto' : scheduleWidth + 'vw'}; margin-left:${
-                        mobile ? '11' : scheduleLeft
+                    `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
+                        mobile ? '11' : scheduleLeft + 5
                     }vw;`
                 "
             >
@@ -511,11 +549,11 @@
                 }; margin-left:${mobile ? 11 : scheduleLeft}vw; margin-right: ${mobile ? '1vw' : 0}`
             "
         >
-            <div class="container-fluid mb-2">
+            <div class="container-fluid my-3">
                 <div class="row justify-content-center">
                     <div v-if="generated && !scheduleEvaluator.empty()" class="col">
                         <Pagination
-                            :indices="scheduleIndices"
+                            :schedule-length="scheduleLength"
                             :cur-idx="tempScheduleIndex"
                             @switch_page="switchPage"
                         ></Pagination>
@@ -531,6 +569,7 @@
                 :partial-height="+partialHeight"
                 :earliest="earliest"
                 :latest="latest"
+                :time-option-standard="standard"
                 @trigger-modal="showModal"
             ></grid-schedule>
             <div style="text-align: center" class="mb-2">
@@ -683,7 +722,9 @@ function getDefaultData() {
             'fullHeight',
             'partialHeight',
             'timeSlots',
-            'storageVersion'
+            'storageVersion',
+            'earliest',
+            'latest'
         ],
 
         // other
@@ -700,7 +741,8 @@ function getDefaultData() {
         tempScheduleIndex: null,
         drag: false,
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        sortModes: ScheduleEvaluator.sortModes
+        sortModes: ScheduleEvaluator.sortModes,
+        standard: true
     };
 }
 /**
@@ -743,14 +785,10 @@ export default Vue.extend({
     },
     computed: {
         /**
-         * @return {number[]}
+         * @return {number}
          */
-        scheduleIndices() {
-            const indices = new Array(
-                Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)
-            );
-            for (let i = 0; i < indices.length; i++) indices[i] = i;
-            return indices;
+        scheduleLength() {
+            return Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules);
         },
         /**
          * @returns {number}

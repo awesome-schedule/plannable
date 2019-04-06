@@ -81,7 +81,8 @@ export default Vue.extend({
         partialHeight: Number,
         fullHeight: Number,
         earliest: String,
-        latest: String
+        latest: String,
+        timeOptionStandard: Boolean
     },
     data() {
         return {
@@ -187,15 +188,21 @@ export default Vue.extend({
             }
 
             const time = [];
+            const stdTime = [];
             const reducedTime = [];
             for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
                 time.push(curTime);
+                stdTime.push(this.convTime(curTime));
                 curTime = this.increTime(curTime);
                 // note: need .toString to make the type of reducedTime consistent
                 reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
             }
 
-            return window.screen.width > 450 ? time : reducedTime;
+            return window.screen.width > 450
+                ? this.timeOptionStandard
+                    ? stdTime
+                    : time
+                : reducedTime;
         },
 
         /**
@@ -243,11 +250,22 @@ export default Vue.extend({
     },
     methods: {
         /**
+         * 24hr to ampm
+         */
+        convTime(time) {
+            const sep = time.split(':');
+            if (parseInt(sep[0]) <= 12) {
+                return time + ' AM';
+            } else {
+                return parseInt(sep[0]) - 12 + ':' + sep[1] + ' PM';
+            }
+        },
+        /**
          * Increase the time in string by 30 minutes and return
          * @param {string} time
          */
         increTime(time) {
-            const sep = time.split(':');
+            const sep = time.split(' ')[0].split(':');
             const hr = parseInt(sep[0]);
             const min = parseInt(sep[1]);
             return (

@@ -152,14 +152,19 @@ class ScheduleEvaluator {
             const lunchDuration = lunchEnd - lunchStart;
             let overlap = 0;
             for (const course of schedule) {
-                const olap =
-                    ScheduleEvaluator.calcOverlap(
-                        lunchStart,
-                        lunchEnd,
-                        course[2][0],
-                        course[2][1]
-                    ) * Object.keys(course[1]).length;
-                overlap += Math.exp(olap / lunchDuration / 4);
+                const tmp = course[1];
+                for (const day in tmp) {
+                    const blocks = tmp[day];
+                    for (let i = 0; i < blocks.length; i += 2) {
+                        const olap = ScheduleEvaluator.calcOverlap(
+                            lunchStart,
+                            lunchEnd,
+                            blocks[i],
+                            blocks[i + 1]
+                        );
+                        overlap += Math.exp(olap / lunchDuration / 4);
+                    }
+                }
             }
             return overlap;
         },

@@ -122,6 +122,9 @@ export default Vue.extend({
         };
     },
     computed: {
+        /**
+         * @returns {number}
+         */
         startPx() {
             let start = 48;
             const t = this.scheduleBlock.start.split(':');
@@ -136,6 +139,9 @@ export default Vue.extend({
             return start;
         },
 
+        /**
+         * @returns {number}
+         */
         endPx() {
             let end = 48;
             const t = this.scheduleBlock.end.split(':');
@@ -160,6 +166,11 @@ export default Vue.extend({
         }
     },
     methods: {
+        /**
+         * @param {number} time
+         * @param {number} start
+         * @returns {number}
+         */
         timeToNum(time, start) {
             const sep = time.split(':');
             const min = parseInt(sep[1]);

@@ -18,7 +18,7 @@
                 data-toggle="modal"
                 data-target="#modal"
                 style="height:100%"
-                @click="$parent.$emit('trigger-modal', scheduleBlock)"
+                @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
             >
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
                     {{ scheduleBlock.section.department }} {{ scheduleBlock.section.number }}-{{
@@ -29,7 +29,7 @@
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
                     {{ scheduleBlock.section.instructors.join(', ') }}
                 </div>
-                <template v-if="showTime && showRoom">
+                <template v-if="showTime || showRoom">
                     <div
                         v-for="(meeting, idx) in scheduleBlock.section.meetings"
                         :key="`${scheduleBlock.section.key}-mt-` + idx"

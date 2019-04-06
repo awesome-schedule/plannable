@@ -13,8 +13,8 @@ class Meeting {
         this.raw = raw;
         this.instructor = raw[0];
         this.days = raw[1];
-        this.dates = raw[2];
-        this.room = raw[3];
+        this.room = raw[2];
+        this.dates = raw[3];
     }
 
     public sameTimeAs(other: Meeting) {

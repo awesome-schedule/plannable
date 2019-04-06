@@ -115,7 +115,7 @@ def load_semester_data(semester_index):
             if len(key_map[key]) == 0:
                 del key_map[key]
         Log.info('Processed {} lines.'.format(line_count))
-    print(key_map[list(key_map.keys())[95]])
+    # print(key_map[list(key_map.keys())[95]])
 
     allRecords = dict()
 
@@ -132,7 +132,7 @@ def load_semester_data(semester_index):
         record.append(sections)
         allRecords[k] = record
 
-    print(allRecords[list(key_map.keys())[95]])
+    # print(allRecords[list(key_map.keys())[95]])
 
     json.dump(allRecords, open(get_data_path(
         "CS{}Data.json").format(semester_id), 'w'), separators=(',', ':'))

@@ -76,21 +76,18 @@ function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<R
     });
 }
 
-// function parseSemesterData(csv_string: string) {
-//     console.time('parsing csv');
-//     // const raw_data: string[][] = parse(csv_string, {
-//     //     columns: false,
-//     //     skip_empty_lines: true
-//     // });
-//     const raw_data: string[][] = parse(csv_string, {
-//         skipEmptyLines: true,
-//         header: false
-//     }).data;
-//     console.timeEnd('parsing csv');
-//     console.time('reorganizing data');
-//     const DICT: { [x: string]: any } = {};
-//     console.timeEnd('reorganizing data');
-//     return DICT;
-// }
+function parseSemesterData(csv_string: string) {
+    console.time('parsing csv');
+    const raw_data: string[][] = parse(csv_string, {
+        skipEmptyLines: true,
+        header: false
+    }).data;
+    console.timeEnd('parsing csv');
+    console.time('reorganizing data');
+    const DICT: RawCatalog = {};
+
+    console.timeEnd('reorganizing data');
+    return DICT;
+}
 
 export { getSemesterData, getSemesterList };

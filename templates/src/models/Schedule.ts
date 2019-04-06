@@ -261,6 +261,7 @@ class Schedule {
 
     public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
         for (const meeting of meetings) {
+            // tslint:disable-next-line: prefer-const
             let [days, start, , end] = meeting.days.split(' ');
             [start, end] = Schedule.parseTime(start, end);
             for (let i = 0; i < days.length; i += 2) {

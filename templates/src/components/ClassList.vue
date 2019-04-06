@@ -136,8 +136,8 @@
                                     <div class="col-md-auto mr-auto">
                                         <ul class="list-unstyled class-info">
                                             <li>Section {{ sec.section }} {{ sec.topic }}</li>
-                                            <template v-for="(meeting, idx) in sec.meetings">
-                                                <li :key="`cl-${sec.key}-mt-${idx}`">
+                                            <template v-for="(meeting, j) in sec.meetings">
+                                                <li :key="j">
                                                     {{ meeting.days }}
                                                 </li>
                                             </template>

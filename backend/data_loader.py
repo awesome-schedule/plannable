@@ -8,22 +8,24 @@ import traceback
 import io
 from colorama import Back as B, Fore as F
 import requests
+from tqdm import tqdm
+import json
 
 ALL_SEMESTER_RECORDS = []
 
 SEMESTERS = [
-    {
-        "id": "1188",
-        "name": "Fall 2018"
-    },
-    {
-        "id": "1191",
-        "name": "January 2019"
-    },
-    {
-        "id": "1192",
-        "name": "Spring 2019"
-    },
+    # {
+    #     "id": "1188",
+    #     "name": "Fall 2018"
+    # },
+    # {
+    #     "id": "1191",
+    #     "name": "January 2019"
+    # },
+    # {
+    #     "id": "1192",
+    #     "name": "Spring 2019"
+    # },
     {
         "name": "Summer 2019",
         "id": "1196"
@@ -33,12 +35,6 @@ SEMESTERS = [
         "id": "1198"
     },
 ]
-
-ATTR_MAP = {
-    0: 'id', 1: 'department', 2: 'number', 3: 'section', 4: 'type', 5: 'units', 6: 'instructor', 7: 'days', 8: 'room',
-    9: 'title', 10: 'topic', 11: 'status', 12: 'enrollment', 13: 'enrollment_limit', 14: 'wait_list', 15: 'description'
-}
-
 CLASS_TYPES = {'Clinical': 0, 'Discussion': 1, 'Drill': 2, 'Independent Study': 3, 'Laboratory': 4,
                'Lecture': 5, 'Practicum': 6, 'Seminar': 7, 'Studio': 8, 'Workshop': 9}
 
@@ -47,15 +43,6 @@ STATUSES = {
     'Closed': 0,
     'Wait List': 2
 }
-
-
-RAW_DATA_TYPES = {
-    0: int, 1: str, 2: int, 3: str, 4: CLASS_TYPES.__getitem__, 5: str, 6: str, 7: str, 8: str, 9: str, 10: str, 11: STATUSES.__getitem__, 12: int, 13: int, 14: int, 15: str
-}
-
-# ALL_RECORD_TYPES = {
-#     0: list, 1: str, 2: int, 3: list, 4: int, 5: float, 6: list,
-# }
 
 
 class Log:
@@ -94,25 +81,30 @@ def load_semester_data(semester_index):
 
     key_map = defaultdict(list)
 
-    def get_key(row: List[str]):
-        return (row[1] + row[2] + str(CLASS_TYPES[row[4]])).lower()
-
-    def parse(raw_row: List[str]):
-        row = raw_row.copy()
-        for idx, _type in RAW_DATA_TYPES.items():
-            row[idx] = _type(row[idx])
-        return row
-
     Log.info('Parsing Course Data of {}'.format(semester['name']))
+    arr_start = 6
+    arr_end = 22
+    arr_step = 4
     with open(get_data_path("CS{}Data.csv").format(semester_id)) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = -1
-        for raw_row in csv_reader:
+        for raw_row in tqdm(csv_reader):
             line_count += 1
             if line_count == 0:
                 continue
             try:
-                key_map[get_key(raw_row)].append(parse(raw_row))
+                raw_row[0] = int(raw_row[0])
+                raw_row[4] = CLASS_TYPES.get(raw_row[4], -1)
+                raw_row[24] = STATUSES.get(raw_row[24], -1)
+                raw_row[25] = int(raw_row[25])
+                raw_row[26] = int(raw_row[26])
+                raw_row[27] = int(raw_row[27])
+                key = (raw_row[1] + raw_row[2] + str(raw_row[4])).lower()
+                combined_row = raw_row[0:arr_start]
+                combined_row.append([raw_row[x:x+arr_step]
+                                     for x in range(arr_start, arr_end, arr_step) if raw_row[x] and raw_row[x+1]])
+                combined_row.extend(raw_row[arr_end:])
+                key_map[key].append(combined_row)
             except Exception as e:
                 Log.warning('Error Parsing \n {} \n {}'.format(
                     str(raw_row), str(e)))
@@ -121,28 +113,26 @@ def load_semester_data(semester_index):
             if len(key_map[key]) == 0:
                 del key_map[key]
         Log.info('Processed {} lines.'.format(line_count))
+    print(key_map[list(key_map.keys())[95]])
 
+    # 1 4 9 10 11 12 13
     allRecords = dict()
 
+    list_indices = [0, 3, 6, 8, 9, 10, 11, 12]
     for k, v in key_map.items():
-        allRecords[k] = [
-            [a[0] for a in v],
-            v[0][1],
-            v[0][2],
-            [a[3] for a in v],
-            v[0][4],
-            v[0][5],
-            [a[6].split(",") for a in v],
-            [a[7] for a in v],
-            [a[8] for a in v],
-            v[0][9],
-            [a[10] for a in v],
-            [a[11] for a in v],
-            [a[12] for a in v],
-            [a[13] for a in v],
-            [a[14] for a in v],
-            v[0][15]
-        ]
+        record = []
+        sections = [[] for i in range(len(v))]
+        for i in range(14):
+            if i in list_indices:
+                for j, a in enumerate(v):
+                    sections[j].append(a[i])
+            else:
+                record.append(v[0][i])
+        record.append(sections)
+        allRecords[k] = record
+
+    json.dump(allRecords, open(get_data_path(
+        "CS{}Data.json").format(semester_id), 'w'), separators=(',', ':'))
 
     return allRecords
 
@@ -156,7 +146,7 @@ def update_local_data():
         Log.info('Updating data for semester {}'.format(semester['name']))
         semester_id = semester['id']
         params = {'Semester': (None, semester_id), 'Group': (None, 'CS'),
-                  'Description': (None, 'Yes'), 'submit': (None, 'Submit Data Request')}
+                  'Description': (None, 'Yes'), 'submit': (None, 'Submit Data Request'), 'Extended': (None, 'Yes')}
 
         # sending post request. use "files" because Lou's list uses multipart/form-data format
         r = requests.post(url=url, files=params)
@@ -173,5 +163,5 @@ def load_all_data():
 
 
 if __name__ == "__main__":
-    update_local_data()
+    # update_local_data()
     load_all_data()

@@ -36,10 +36,10 @@
 </template>
 
 <script>
-import CourseRecord from '../models/CourseRecord';
+import Course from '../models/Course';
 export default {
     props: {
-        course: CourseRecord
+        course: Course
     }
 };
 </script>

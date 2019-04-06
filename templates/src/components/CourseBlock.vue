@@ -80,16 +80,15 @@
 </template>
 
 <script>
-import Course from '../models/Course';
-import CourseRecord from '../models/CourseRecord';
+import ScheduleBlock from '../models/ScheduleBlock';
 import Vue from 'vue';
 export default Vue.extend({
     name: 'CourseBlock',
     props: {
+        course: ScheduleBlock,
         /**
-         * @type {Course | CourseRecord}
+         * @type {number[]}
          */
-        course: Object,
         heightInfo: Array,
         fullHeight: Number,
         partialHeight: Number,
@@ -151,8 +150,11 @@ export default Vue.extend({
             }
             return t - 1;
         },
+        /**
+         * @param {ScheduleBlock} crs
+         */
         isCourse(crs) {
-            return crs instanceof Course;
+            return crs.section instanceof Array;
         }
     }
 });

@@ -1,8 +1,8 @@
 import AllRecords from '../models/Catalog';
-import CourseRecord from '../models/Course';
+import Course from '../models/Course';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
-import Course from '../models/Section';
+import Section from '../models/Section';
 
 /**
  * The data structure used in the algorithm
@@ -83,7 +83,7 @@ class ScheduleGenerator {
                     const algoCourse: RawAlgoCourse = [key, date, timeBlock, []];
 
                     for (const sid of sids) {
-                        const course = courseRec.getCourse(sid);
+                        const course = courseRec.getSection(sid);
                         // insert filter method
                         if (this.filterStatus(course)) continue;
                         algoCourse[3].push(sid);
@@ -273,14 +273,14 @@ class ScheduleGenerator {
         return [date, timeBlock];
     }
 
-    public filterStatus(course: Course) {
-        const standard = Object.values(CourseRecord.STATUSES);
-        // console.log(option.status.includes(course.status), option.status, course.status);
-        if (!standard.includes(course.status)) {
-            return true;
-        }
+    public filterStatus(section: Section) {
+        // const standard = Object.values(CourseRecord.STATUSES);
+        // // console.log(option.status.includes(course.status), option.status, course.status);
+        // if (!standard.includes(course.status)) {
+        //     return true;
+        // }
 
-        if (this.options.status.includes(course.status)) {
+        if (this.options.status.includes(section.status)) {
             return true;
         }
         return false;

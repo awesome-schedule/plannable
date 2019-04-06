@@ -1223,7 +1223,10 @@ export default Vue.extend({
                     if (typeof this[field].fromJSON === 'function') {
                         const parsed = this[field].fromJSON(raw_data[field]);
                         if (parsed) this[field] = parsed;
-                        else this[field] = defaultData[field];
+                        else {
+                            this.noti.warn(`Fail to parse ${field}`);
+                            this[field] = defaultData[field];
+                        }
                     } else {
                         if (
                             Object.keys(this[field])

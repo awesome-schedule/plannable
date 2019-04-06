@@ -170,7 +170,7 @@ class ScheduleEvaluator {
         },
 
         noEarly(schedule: RawAlgoSchedule) {
-            const earliest = new Int32Array(5);
+            const earliest = new Int32Array(5).fill(24 * 60);
             const days = ScheduleEvaluator.days;
             const refTime = 8 * 60;
             for (const course of schedule) {

@@ -445,12 +445,7 @@
             </button>
             <ul class="list-group list-group-flush mx-1">
                 <li>
-                    <div
-                        class="btn-group btn-group-toggle my-3"
-                        role="group"
-                        data-toggle="buttons"
-                        style="width:100%"
-                    >
+                    <div class="btn-group my-3" role="group" style="width:100%">
                         <button
                             class="btn btn-secondary"
                             :class="{ active: standard }"
@@ -742,7 +737,7 @@ function getDefaultData() {
         drag: false,
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
         sortModes: ScheduleEvaluator.sortModes,
-        standard: true
+        standard: false
     };
 }
 /**

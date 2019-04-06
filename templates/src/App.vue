@@ -154,6 +154,7 @@
                         :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
                         @update_course="updateCourse"
+                        @remove_course="removeCourse"
                         @trigger-classlist-modal="showClassListModal"
                     ></ClassList>
                     <div class="btn-group mt-3" role="group" style="width:100%">

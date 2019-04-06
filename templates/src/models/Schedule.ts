@@ -263,10 +263,8 @@ class Schedule {
         for (const meeting of meetings) {
             let [days, start, , end] = meeting.days.split(' ');
             [start, end] = Schedule.parseTime(start, end);
-            // console.log(meeting);
-            // console.log(start, end);
             for (let i = 0; i < days.length; i += 2) {
-                const scheduleBlock = new ScheduleBlock(color, start, end, sections);
+                const scheduleBlock = new ScheduleBlock(color, start, end, sections, meeting);
                 switch (days.substr(i, 2)) {
                     case 'Mo':
                         this.days.Monday.push(scheduleBlock);

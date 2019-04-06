@@ -101,8 +101,10 @@ def load_semester_data(semester_index):
                 raw_row[27] = int(raw_row[27])
                 key = (raw_row[1] + raw_row[2] + str(raw_row[4])).lower()
                 combined_row = raw_row[0:arr_start]
-                combined_row.append([raw_row[x:x+arr_step]
-                                     for x in range(arr_start, arr_end, arr_step) if raw_row[x] and raw_row[x+1]])
+                meeting_times = [raw_row[x:x+arr_step]
+                                 for x in range(arr_start, arr_end, arr_step) if raw_row[x] and raw_row[x+1]]
+                meeting_times.sort(key=lambda x: x[1])
+                combined_row.append(meeting_times)
                 combined_row.extend(raw_row[arr_end:])
                 key_map[key].append(combined_row)
             except Exception as e:

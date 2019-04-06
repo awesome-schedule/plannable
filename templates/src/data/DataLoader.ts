@@ -2,8 +2,8 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
-import CourseRecord from '../models/CourseRecord';
-import { RawRecord, Semester } from '../models/AllRecords';
+import CourseRecord from '../models/Course';
+import { RawRecord, Semester } from '../models/Catalog';
 
 interface RawAllRecords {
     [x: string]: RawRecord;

@@ -1,8 +1,8 @@
-import AllRecords from '../models/AllRecords';
-import CourseRecord from '../models/CourseRecord';
+import AllRecords from '../models/Catalog';
+import CourseRecord from '../models/Course';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
-import Course from '../models/Course';
+import Course from '../models/Section';
 
 /**
  * The data structure used in the algorithm

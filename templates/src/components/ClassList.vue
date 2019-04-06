@@ -163,7 +163,7 @@
 <script>
 import Vue from 'vue';
 // eslint-disable-next-line
-import CourseRecord from '../models/CourseRecord';
+import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 export default Vue.extend({
@@ -173,7 +173,7 @@ export default Vue.extend({
     },
     props: {
         /**
-         * @type {CourseRecord[]}
+         * @type {Course[]}
          */
         courses: Array,
         schedule: Schedule,

@@ -1,6 +1,8 @@
+import Section from './Section';
 import Course from './Course';
-import CourseRecord from './CourseRecord';
-import AllRecords from './AllRecords';
+import Catalog from './Catalog';
+import ScheduleBlock from './ScheduleBlock';
+import Meeting from './Meeting';
 
 export type RawSchedule = Array<[string, number[], number]>;
 export interface ScheduleJSON {
@@ -31,7 +33,7 @@ class Schedule {
     /**
      * this field must be initialized before calling any instance method of the Schedule class
      */
-    public static readonly allRecords: AllRecords;
+    public static readonly catalog: Catalog;
     /**
      * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
      */
@@ -86,12 +88,12 @@ class Schedule {
      * computed based on `this.All` by `computeSchedule`
      */
     public days: {
-        [x: string]: Array<Course | CourseRecord>;
-        Monday: Array<Course | CourseRecord>;
-        Tuesday: Array<Course | CourseRecord>;
-        Wednesday: Array<Course | CourseRecord>;
-        Thursday: Array<Course | CourseRecord>;
-        Friday: Array<Course | CourseRecord>;
+        [x: string]: ScheduleBlock[];
+        Monday: ScheduleBlock[];
+        Tuesday: ScheduleBlock[];
+        Wednesday: ScheduleBlock[];
+        Thursday: ScheduleBlock[];
+        Friday: ScheduleBlock[];
     };
     /**
      * computed property
@@ -104,7 +106,7 @@ class Schedule {
     /**
      * a computed list that's updated by the `computeSchedule method`
      */
-    public currentCourses: CourseRecord[];
+    public currentCourses: Course[];
     private previous: [string, number] | null;
 
     /**
@@ -135,7 +137,7 @@ class Schedule {
     /**
      * Get the background color of a course
      */
-    public getColor(course: Course | CourseRecord) {
+    public getColor(course: Course | Section) {
         let hash = course.hash();
         let idx = hash % Schedule.bgColors.length;
         // avoid color collision by linear probing
@@ -208,12 +210,12 @@ class Schedule {
      * @see {@link computeSchedule}
      */
     public computeSchedule() {
-        if (!Schedule.allRecords) return;
+        if (!Schedule.catalog) return;
         this.cleanSchedule();
         this.currentCourses = [];
         for (const key in this.All) {
             const sections = this.All[key];
-            const courseRecord = Schedule.allRecords.getRecord(key);
+            const courseRecord = Schedule.catalog.getRecord(key);
             this.currentCourses.push(courseRecord);
             this.totalCredit += isNaN(courseRecord.units)
                 ? 0
@@ -222,61 +224,65 @@ class Schedule {
             if (sections === -1) {
                 // if there's only one section in this CourseRecord, just treat it as a Course
                 if (courseRecord.section.length === 1) {
-                    this.place(courseRecord.getCourse(0));
+                    this.place(courseRecord.getSection(0));
                 } else {
                     this.place(courseRecord.copy());
                 }
             } else {
                 // we need a copy of course
                 if (sections.size === 1) {
-                    this.place(courseRecord.getCourse(sections.values().next().value).copy());
+                    this.place(courseRecord.getSection(sections.values().next().value));
                 } else {
                     // a subset of the sections
-                    this.place(courseRecord.getRecord([...sections.values()]).copy());
+                    this.place(courseRecord.getCourse([...sections.values()]));
                 }
             }
         }
 
         if (this.previous !== null) {
-            const course = Schedule.allRecords.getCourse(...this.previous);
-            course.key += 'preview';
-            this.place(course);
+            const section = Schedule.catalog.getSection(...this.previous);
+            section.course.key += 'preview';
+            this.place(section);
         }
     }
 
     /**
      * places the course into one of the `Monday` to `Friday` array according to its `days` property
      */
-    public place(course: Course | CourseRecord) {
-        let days: string, start: string, end: string;
-
+    public place(course: Section | Course) {
         // we only render a CourseRecord if all of its sections occur at the same time
-        if (course instanceof CourseRecord) {
+        if (course instanceof Course) {
             if (!course.allSameTime()) return;
-            [days, start, , end] = course.days[0].split(' ');
+            this.placeHelper(this.getColor(course), course.sections[0].meetings, course.sections);
         } else {
-            [days, start, , end] = course.days.split(' ');
+            this.placeHelper(this.getColor(course), course.meetings, course);
         }
-        course.backgroundColor = this.getColor(course);
-        for (let i = 0; i < days.length; i += 2) {
-            switch (days.substr(i, 2)) {
-                case 'Mo':
-                    this.days.Monday.push(course);
-                    break;
-                case 'Tu':
-                    this.days.Tuesday.push(course);
-                    break;
-                case 'We':
-                    this.days.Wednesday.push(course);
-                    break;
-                case 'Th':
-                    this.days.Thursday.push(course);
-                    break;
-                case 'Fr':
-                    this.days.Friday.push(course);
-                    break;
+    }
+
+    public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
+        for (const meeting of meetings) {
+            let [days, start, , end] = meeting.days.split(' ');
+            [start, end] = Schedule.parseTime(start, end);
+            for (let i = 0; i < days.length; i += 2) {
+                const scheduleBlock = new ScheduleBlock(color, start, end, sections);
+                switch (days.substr(i, 2)) {
+                    case 'Mo':
+                        this.days.Monday.push(scheduleBlock);
+                        break;
+                    case 'Tu':
+                        this.days.Tuesday.push(scheduleBlock);
+                        break;
+                    case 'We':
+                        this.days.Wednesday.push(scheduleBlock);
+                        break;
+                    case 'Th':
+                        this.days.Thursday.push(scheduleBlock);
+                        break;
+                    case 'Fr':
+                        this.days.Friday.push(scheduleBlock);
+                        break;
+                }
             }
-            [course.start, course.end] = Schedule.parseTime(start, end);
         }
     }
 

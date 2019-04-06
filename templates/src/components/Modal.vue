@@ -12,9 +12,10 @@
                 </div>
                 <div class="modal-body">
                     <div style="color:#a0a0a0">{{ course.type }} | {{ course.units }} units</div>
-                    <div style="color:#a0a0a0">{{ course.days }}</div>
-                    <div style="color:#a0a0a0">{{ course.room }}</div>
-                    <div style="color:#a0a0a0">{{ course.instructor.join(', ') }}</div>
+                    <div style="color:#a0a0a0">{{ course.instructors.join(', ') }}</div>
+                    <div v-for="(meeting, idx) in course.meetings" :key="idx" style="color:#a0a0a0">
+                        {{ meeting.days }} {{ meeting.room }}
+                    </div>
                     <br />
                     <div>{{ course.description }}</div>
                 </div>
@@ -24,10 +25,10 @@
 </template>
 
 <script>
-import Course from '../models/Course';
+import Section from '../models/Section';
 export default {
     props: {
-        course: Course
+        course: Section
     }
 };
 </script>

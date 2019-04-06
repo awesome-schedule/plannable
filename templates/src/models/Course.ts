@@ -1,7 +1,16 @@
-import CourseRecord from './CourseRecord';
+import Section from './Section';
+import Meta, { RawCourse } from './Meta';
 
-import { RawRecord } from './AllRecords';
-class Course {
+export interface CourseFields {
+    department: string;
+    number: number;
+    type: string;
+    units: number;
+    title: string;
+    description: string;
+}
+
+class Course implements CourseFields {
     /**
      * Calculate a 32 bit FNV-1a hash
      * @see https://gist.github.com/vaiorabbit/5657561
@@ -18,75 +27,103 @@ class Course {
         }
         return hval >>> 0;
     }
-    public raw: RawRecord;
-    public sid: number;
+
+    [x: string]: any;
     public key: string;
+    public readonly department: string;
+    public readonly number: number;
+    public readonly type: string;
+    public readonly units: number;
+    public readonly title: string;
+    public readonly description: string;
 
-    public id: number;
-    public department: string;
-    public number: number;
-    public section: string;
-    public type: any;
-    public units: number;
-    public instructor: string[];
-    public days: string;
-    public room: string;
-    public title: string;
-    public topic: string;
-    public status: any;
-    public enrollment: number;
-    public enrollment_limit: number;
-    public wait_list: number;
-    public description: string;
-    public backgroundColor: string;
-    public start: string;
-    public end: string;
-    public default: boolean;
-
-    constructor(raw: RawRecord, key: string, section: number = 0) {
-        this.raw = raw;
-        const sid = section;
-        this.sid = sid;
-        this.key = key;
-        this.id = raw[0][sid];
-        this.department = raw[1];
-        this.number = raw[2];
-        this.section = raw[3][sid];
-        this.type = isNaN(+raw[4]) ? raw[4] : CourseRecord.TYPES[raw[4]];
-        this.units = raw[5];
-        this.instructor = raw[6][sid];
-        this.days = raw[7][sid];
-        this.room = raw[8][sid];
-        this.title = raw[9];
-        this.topic = raw[10][sid];
-        this.status = isNaN(+raw[11][sid]) ? raw[11][sid] : CourseRecord.STATUSES[raw[11][sid]];
-        this.enrollment = raw[12][sid];
-        this.enrollment_limit = raw[13][sid];
-        this.wait_list = raw[14][sid];
-        this.description = raw[15];
-
-        // only used in schedule rendering
-        this.backgroundColor = 'white';
-        this.start = '';
-        this.end = '';
-
-        // whether is the default section
-        this.default = true;
-    }
-
-    public copy(): Course {
-        const cp = new Course(this.raw, this.key, this.sid);
-        cp.backgroundColor = this.backgroundColor;
-        cp.start = this.start;
-        cp.end = this.end;
-        cp.default = this.default;
-        return cp;
-    }
+    public readonly raw: RawCourse;
     /**
-     * compute the hash of this course using its key
+     * array of section ids contained in this object
      */
+    public readonly sids: number[];
+    public readonly sections: Section[];
+
+    /**
+     * @param sids A list of section indices
+     */
+    constructor(raw: RawCourse, key: string, sids: number[] = []) {
+        this.key = key;
+        this.raw = raw;
+        this.sids = sids;
+
+        this.department = raw[0];
+        this.number = raw[1];
+        this.type = Meta.TYPES[raw[2]];
+        this.units = raw[3];
+        this.title = raw[4];
+        this.description = raw[5];
+
+        if (sids.length > 0) {
+            sids.sort();
+            this.sids = sids;
+            this.sections = sids.map(i => new Section(this, raw[6][i], i));
+        } else {
+            this.sids = Array.from({ length: raw[6].length }, (_, i) => i);
+            this.sections = raw[6].map((x, i) => new Section(this, x, i));
+        }
+    }
+
+    /**
+     * Get the course of a given section.
+     * Note that **it is possible** to get a Course whose section index
+     * is not in the subset of sections contained in this instance
+     */
+    public getSection(sid: number): Section {
+        return new Section(this, this.raw[6][sid], sid);
+    }
+
+    /**
+     * Get the CourseRecord at a given range of sections
+     */
+    public getCourse(sids: number[]): Course {
+        return new Course(this.raw, this.key, sids);
+    }
+
+    /**
+     * whether all sections of this CourseRecord occur at the same time
+     */
+    public allSameTime(): boolean {
+        const sections = this.sections;
+        for (let i = 0; i < sections.length - 1; i++) {
+            if (!sections[i].sameTimeAs(sections[i + 1])) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Get an object in which the key is the days string and
+     * value is the subset of sections contained in this CourseRecord occurring at that time
+     */
+    public getCombined() {
+        const combined: { [x: string]: number[] } = {};
+        // for (let i = 0; i < this.days.length; i++) {
+        //     const day = this.days[i];
+        //     if (combined[day]) combined[day].push(this.sids[i]);
+        //     else combined[day] = [this.sids[i]];
+        // }
+        // return combined;
+        return combined;
+    }
+
     public hash() {
-        return Course.hashCode(this.key);
+        return Course.hashCode(this.key + this.sids.toString());
+    }
+
+    public copy() {
+        return new Course(this.raw, this.key, this.sids);
+    }
+
+    public equals(object: object): boolean {
+        if (object instanceof Course) {
+            return this.key === object.key && this.sids.toString() === object.sids.toString();
+        }
+        return false;
     }
 }
 

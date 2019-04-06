@@ -100,8 +100,8 @@
                         class="trans"
                     >
                         <div
-                            v-for="(sec, idx) in crs.section"
-                            :key="sec + idx"
+                            v-for="(sec, idx) in crs.sections"
+                            :key="crs.key + sec.section + idx"
                             class="list-group"
                             :class="{ show: isEntering && expandOnEntering }"
                         >
@@ -135,10 +135,14 @@
                                 <div class="row no-gutters">
                                     <div class="col-md-auto mr-auto">
                                         <ul class="list-unstyled class-info">
-                                            <li>{{ sec }} {{ crs.days[idx] }}</li>
-                                            <li>{{ crs.topic[idx] }}</li>
+                                            <li>Section {{ sec.section }} {{ sec.topic }}</li>
+                                            <template v-for="(meeting, j) in sec.meetings">
+                                                <li :key="j">
+                                                    {{ meeting.days }}
+                                                </li>
+                                            </template>
                                             <li>
-                                                {{ crs.instructor[idx].join(', ') }}
+                                                {{ sec.instructors.join(', ') }}
                                                 <!-- {{ crs.room[idx] }} -->
                                             </li>
                                         </ul>
@@ -163,7 +167,7 @@
 <script>
 import Vue from 'vue';
 // eslint-disable-next-line
-import CourseRecord from '../models/CourseRecord';
+import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 export default Vue.extend({
@@ -173,7 +177,7 @@ export default Vue.extend({
     },
     props: {
         /**
-         * @type {CourseRecord[]}
+         * @type {Course[]}
          */
         courses: Array,
         schedule: Schedule,
@@ -192,7 +196,7 @@ export default Vue.extend({
     },
     methods: {
         /**
-         * @param {CourseRecord} crs
+         * @param {Course} crs
          * @param {number} idx
          */
         select(crs, idx) {
@@ -224,7 +228,7 @@ export default Vue.extend({
             return false;
         },
         /**
-         * @param {CourseRecord}
+         * @param {Course}
          * @returns {string}
          */
         expanded(crs) {
@@ -238,10 +242,10 @@ export default Vue.extend({
          * @param {number} idx
          */
         preview(key, idx) {
-            this.$emit('preview', key, idx);
+            this.schedule.preview(key, idx);
         },
         removePreview() {
-            this.$emit('remove_preview');
+            this.schedule.removePreview();
         }
     }
 });

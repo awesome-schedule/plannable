@@ -6,7 +6,7 @@
             position: 'absolute',
             width: '20%',
             height: endPx - startPx + 'px',
-            'background-color': course.backgroundColor,
+            'background-color': scheduleBlock.backgroundColor,
             'z-index': '2',
             color: 'white',
             cursor: 'pointer'
@@ -14,82 +14,100 @@
     >
         <div v-if="!mobile" style="height:100%">
             <div
-                v-if="isCourse(course)"
+                v-if="isCourse(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
                 style="height:100%"
-                @click="$parent.$emit('trigger-modal', course)"
+                @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
             >
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
-                    {{ course.department }} {{ course.number }}-{{ course.section }}
-                    {{ course.type }}
-                </div>
-                <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.days }}
+                    {{ firstSec.department }} {{ firstSec.number }}-{{ firstSec.section }}
+                    {{ firstSec.type }}
                 </div>
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.instructor.join(', ') }}
+                    {{ firstSec.instructors.join(', ') }}
                 </div>
                 <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.room }}
+                    {{ scheduleBlock.meeting.room }}
                 </div>
+                <template v-if="showTime">
+                    <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
+                        <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+                            {{ meeting.days }}
+                        </div>
+                    </div>
+                </template>
             </div>
             <div
                 v-else
                 data-toggle="modal"
                 data-target="#class-list-modal"
                 style="height:100%"
-                @click="$parent.$parent.showClassListModal(course)"
+                @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
             >
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
-                    {{ course.department }} {{ course.number }}-{{ course.section[0] }} +{{
-                        course.section.length - 1
+                    {{ firstSec.department }}
+                    {{ firstSec.number }}-{{ firstSec.section }} +{{
+                        scheduleBlock.section.length - 1
                     }}
-                    {{ course.type }}
+                    {{ firstSec.type }}
                 </div>
-                <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.days[0] }}
-                </div>
+                <template v-if="showTime">
+                    <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
+                        <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">
+                            {{ meeting.days }}
+                        </div>
+                    </div>
+                </template>
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.instructor[0].join(', ') }} and
-                    {{ course.instructor.length - 1 }} more
+                    {{ firstSec.instructors.join(', ') }} and
+                    {{
+                        scheduleBlock.section.reduce((acc, x) => acc + x.instructors.length, 0) - 1
+                    }}
+                    more
                 </div>
                 <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ course.room[0] }} and {{ course.room.length - 1 }} more
+                    {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
                 </div>
             </div>
         </div>
-        <div v-if="mobile" class="mt-2 ml-2" style="color:white; font-size:10px">
+        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
             <div
-                v-if="isCourse(course)"
+                v-if="isCourse(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
-                @click="$parent.$emit('trigger-modal', course)"
+                @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
             >
-                {{ course.department }} <br />
-                {{ course.number }} <br />
-                {{ course.section }}
+                {{ firstSec.department }} <br />
+                {{ firstSec.number }} <br />
+                {{ firstSec.section }}
             </div>
-            <div v-else>
-                {{ course.department }} <br />
-                {{ course.number }} <br />
-                {{ course.section[0] }} +{{ course.section.length - 1 }}
+            <div
+                v-else
+                data-toggle="modal"
+                data-target="#class-list-modal"
+                @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
+            >
+                {{ firstSec.department }} <br />
+                {{ firstSec.number }} <br />
+                {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import ScheduleBlock from '../models/ScheduleBlock';
+import Section from '../models/Section';
 import Course from '../models/Course';
-import CourseRecord from '../models/CourseRecord';
 import Vue from 'vue';
 export default Vue.extend({
     name: 'CourseBlock',
     props: {
+        scheduleBlock: ScheduleBlock,
         /**
-         * @type {Course | CourseRecord}
+         * @type {number[]}
          */
-        course: Object,
         heightInfo: Array,
         fullHeight: Number,
         partialHeight: Number,
@@ -106,11 +124,11 @@ export default Vue.extend({
     computed: {
         startPx() {
             let start = 48;
-            const t = this.course.start.split(':');
+            const t = this.scheduleBlock.start.split(':');
             // const hr = parseInt(t[0]);
             const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-            const temp = this.timeToNum(this.course.start, true);
+            const temp = this.timeToNum(this.scheduleBlock.start, true);
             for (let i = this.absoluteEarliest; i < temp; i++) {
                 start += this.heightInfo[i - this.absoluteEarliest];
             }
@@ -120,15 +138,25 @@ export default Vue.extend({
 
         endPx() {
             let end = 48;
-            const t = this.course.end.split(':');
+            const t = this.scheduleBlock.end.split(':');
             const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-            const temp = this.timeToNum(this.course.end, false);
+            const temp = this.timeToNum(this.scheduleBlock.end, false);
             for (let i = this.absoluteEarliest; i < temp; i++) {
                 end += this.heightInfo[i - this.absoluteEarliest];
             }
             end += (min / 30) * this.fullHeight;
             return end;
+        },
+
+        /**
+         * @returns {Section}
+         */
+        firstSec() {
+            const section = this.scheduleBlock.section;
+            if (section instanceof Array) {
+                return section[0];
+            } else return section;
         }
     },
     methods: {
@@ -151,8 +179,18 @@ export default Vue.extend({
             }
             return t - 1;
         },
+        /**
+         * @param {ScheduleBlock} crs
+         */
         isCourse(crs) {
-            return crs instanceof Course;
+            return !(crs.section instanceof Array);
+        },
+        /**
+         * @param {Section[]} sections
+         */
+        sectionsToCourse(sections) {
+            const course = sections[0].course;
+            return new Course(course.raw, course.key, sections.map(x => x.sid));
         }
     }
 });

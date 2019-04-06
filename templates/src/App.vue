@@ -118,8 +118,6 @@
                     :is-entering="isEntering"
                     :show-classlist-title="showClasslistTitle"
                     @update_course="updateCourse"
-                    @remove_preview="removePreview"
-                    @preview="preview"
                     @close="closeClassList"
                     @trigger-classlist-modal="showClassListModal"
                 ></ClassList>
@@ -157,9 +155,7 @@
                         :show-classlist-title="showClasslistTitle"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
-                        @remove_preview="removePreview"
                         @trigger-classlist-modal="showClassListModal"
-                        @preview="preview"
                     ></ClassList>
                     <div class="btn-group mt-3" role="group" style="width:100%">
                         <button
@@ -585,11 +581,11 @@ import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 // eslint-disable-next-line
-import CourseRecord from './models/CourseRecord';
+import Section from './models/Section';
 import Schedule from './models/Schedule';
 // eslint-disable-next-line
 import Course from './models/Course';
-import AllRecords from './models/AllRecords';
+import Catalog from './models/Catalog';
 // import axios from 'axios';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
@@ -624,9 +620,9 @@ function getDefaultData() {
          */
         currentSemester: null,
         /**
-         * @type {AllRecords}
+         * @type {Catalog}
          */
-        allRecords: null,
+        catalog: null,
         currentScheduleIndex: 0,
         /**
          * @type {Schedule}
@@ -944,16 +940,6 @@ export default Vue.extend({
             }
         },
         /**
-         * @param {string} key
-         * @param {number} section
-         */
-        preview(key, section) {
-            this.currentSchedule.preview(key, section);
-        },
-        removePreview() {
-            this.currentSchedule.removePreview();
-        },
-        /**
          * if parsed is true, also update the pagination
          * @param {number} idx
          * @param {boolean} [parsed]
@@ -984,13 +970,13 @@ export default Vue.extend({
                 this.generated = !this.generated;
                 this.currentSchedule = this.proposedSchedule;
             }
-            this.inputCourses = this.allRecords.search(query);
+            this.inputCourses = this.catalog.search(query);
             this.isEntering = true;
         },
         /**
          * Select a semester and fetch all its associated data.
          *
-         * This method will assign a correct AllRecords object to `this.allRecords` and `Schedule.allRecords`
+         * This method will assign a correct Catalog object to `this.catalog` and `Schedule.catalog`
          * which will be either requested from remote or parsed from `localStorage`
          *
          * After that, schedules and settings will be parsed from `localStorage`
@@ -1030,7 +1016,7 @@ export default Vue.extend({
                 this.fetchSemesterData(semesterId, defaultCallback);
                 return;
             }
-            const temp = AllRecords.fromJSON(
+            const temp = Catalog.fromJSON(
                 JSON.parse(allRecords_raw, this.semesterDataExpirationTime)
             );
 
@@ -1043,7 +1029,7 @@ export default Vue.extend({
             };
             // if data expires
             if (temp === null) {
-                // in this case, we only need to update allRecords. Save a set of fresh data
+                // in this case, we only need to update catalog. Save a set of fresh data
                 this.fetchSemesterData(
                     semesterId,
                     () => {
@@ -1052,8 +1038,8 @@ export default Vue.extend({
                     },
                     () => {
                         // if failed, just use the old data.
-                        this.allRecords = temp;
-                        Schedule.allRecords = temp;
+                        this.catalog = temp;
+                        Schedule.catalog = temp;
                         callback();
                     }
                 );
@@ -1064,8 +1050,8 @@ export default Vue.extend({
                     callback();
                 });
             } else {
-                this.allRecords = temp;
-                Schedule.allRecords = temp;
+                this.catalog = temp;
+                Schedule.catalog = temp;
                 callback();
             }
         },
@@ -1078,21 +1064,21 @@ export default Vue.extend({
             }
             localStorage.setItem(
                 `${this.currentSemester.id}data`,
-                JSON.stringify(this.allRecords.toJSON())
+                JSON.stringify(this.catalog.toJSON())
             );
         },
         /**
          * fetch basic class data for the given semester for fast class search and rendering
-         * this method will assign `this.allRecords` and `Schedule.allRecords`
+         * this method will assign `this.catalog` and `Schedule.catalog`
          * @param {number} semeseterIdx
          * @param {()=>void} [callback]
          * @param {()=>void} [reject]
          */
         fetchSemesterData(semesterIdx, callback, reject) {
             // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
-            //     this.allRecords = new AllRecords(this.currentSemester, res.data.data);
+            //     this.catalog = new Catalog(this.currentSemester, res.data.data);
             //     // important: assign all records
-            //     Schedule.allRecords = this.allRecords;
+            //     Schedule.catalog = this.catalog;
             //     if (typeof callback === 'function') {
             //         callback();
             //     }
@@ -1100,9 +1086,9 @@ export default Vue.extend({
             this.loading = true;
             timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
                 .then(data => {
-                    this.allRecords = new AllRecords(this.currentSemester, data);
+                    this.catalog = new Catalog(this.currentSemester, data);
                     // important: assign all records
-                    Schedule.allRecords = this.allRecords;
+                    Schedule.catalog = this.catalog;
                     if (typeof callback === 'function') {
                         callback();
                         this.loading = false;
@@ -1145,7 +1131,7 @@ export default Vue.extend({
                 this.currentSchedule = this.proposedSchedule;
             }
             this.loading = true;
-            const generator = new ScheduleGenerator(this.allRecords);
+            const generator = new ScheduleGenerator(this.catalog);
 
             generator
                 .getSchedules(this.currentSchedule, {

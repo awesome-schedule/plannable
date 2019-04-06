@@ -2,12 +2,10 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
-import CourseRecord from '../models/CourseRecord';
-import { RawRecord, Semester } from '../models/AllRecords';
+import CourseRecord from '../models/Course';
+import { Semester } from '../models/Catalog';
+import { RawCatalog } from '@/models/Meta';
 
-interface RawAllRecords {
-    [x: string]: RawRecord;
-}
 const CROS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 /**
  * Fetch the list of semesters from Lou's list
@@ -44,7 +42,7 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]
     });
 }
 
-function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<RawAllRecords> {
+function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<RawCatalog> {
     console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
         // axios
@@ -68,13 +66,9 @@ function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<R
         //         reject(err);
         //     });
         axios
-            .get(`https://awesome-schedule.github.io/data/CS${semesterId}Data.csv`)
-            .then(res => {
-                console.timeEnd(`request semester ${semesterId} data`);
-                return parseSemesterData(res.data);
-            })
+            .get(`http://localhost:8000/CS${semesterId}Data.json`)
             .then(data => {
-                resolve(data);
+                resolve(data.data);
             })
             .catch(err => {
                 reject(err);
@@ -82,50 +76,21 @@ function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<R
     });
 }
 
-function parseSemesterData(csv_string: string) {
-    console.time('parsing csv');
-    // const raw_data: string[][] = parse(csv_string, {
-    //     columns: false,
-    //     skip_empty_lines: true
-    // });
-    const raw_data: string[][] = parse(csv_string, {
-        skipEmptyLines: true,
-        header: false
-    }).data;
-    console.timeEnd('parsing csv');
-    console.time('reorganizing data');
-    const DICT: { [x: string]: any } = {};
-    // const DICT: RawAllRecords = {};
-    // console.log(raw_data[0]);
-    for (let i = 1; i < raw_data.length; i++) {
-        const row = raw_data[i];
-        const key = (row[1] + row[2] + row[4]).toLowerCase();
-        if (DICT[key]) {
-            for (const x of CourseRecord.LIST) {
-                const func = CourseRecord.PARSE_FUNC[x];
-                if (func) {
-                    DICT[key][x].push(func(row[x]));
-                } else {
-                    DICT[key][x].push(row[x]);
-                }
-            }
-        } else {
-            const parsedRow = [];
-            for (let x = 0, j = 0; x < CourseRecord.LENGTH; x++) {
-                const func = CourseRecord.PARSE_FUNC[x];
-                const item = func ? func(row[x]) : row[x];
-                if (x === CourseRecord.LIST[j]) {
-                    parsedRow.push([item]);
-                    j++;
-                } else {
-                    parsedRow.push(item);
-                }
-            }
-            DICT[key] = parsedRow;
-        }
-    }
-    console.timeEnd('reorganizing data');
-    return DICT;
-}
+// function parseSemesterData(csv_string: string) {
+//     console.time('parsing csv');
+//     // const raw_data: string[][] = parse(csv_string, {
+//     //     columns: false,
+//     //     skip_empty_lines: true
+//     // });
+//     const raw_data: string[][] = parse(csv_string, {
+//         skipEmptyLines: true,
+//         header: false
+//     }).data;
+//     console.timeEnd('parsing csv');
+//     console.time('reorganizing data');
+//     const DICT: { [x: string]: any } = {};
+//     console.timeEnd('reorganizing data');
+//     return DICT;
+// }
 
 export { getSemesterData, getSemesterList };

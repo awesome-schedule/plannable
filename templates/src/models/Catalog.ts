@@ -1,38 +1,19 @@
+import Section from './Section';
 import Course from './Course';
-import CourseRecord from './CourseRecord';
-
-export type RawRecord = [
-    number[],
-    string,
-    number,
-    string[],
-    number,
-    number,
-    string[][],
-    string[],
-    string[],
-    string,
-    string[],
-    number[],
-    number[],
-    number[],
-    number[],
-    string
-];
+import { RawCatalog } from './Meta';
 
 export interface Semester {
     id: string;
     name: string;
 }
 
-class AllRecords {
+class Catalog {
     /**
      * Parse AllRecords from parsed JSON
      * return `null` if data is invalid or data expired
-     * @param {{modified: string, semester: Semester, raw_data: Object<string, RawRecord>}} data
      */
     public static fromJSON(
-        data: { modified: string; semester: Semester; raw_data: { [x: string]: RawRecord } },
+        data: { modified: string; semester: Semester; raw_data: RawCatalog },
         expTime = 2 * 3600 * 1000
     ) {
         if (
@@ -45,24 +26,24 @@ class AllRecords {
             const dataTime = new Date(data.modified).getTime();
             if (now - dataTime > expTime) return null;
             else {
-                return new AllRecords(data.semester, data.raw_data);
+                return new Catalog(data.semester, data.raw_data);
             }
         }
         return undefined;
     }
     public semester: Semester;
-    public raw_data: { [s: string]: RawRecord };
+    public raw_data: RawCatalog;
 
-    constructor(semester: Semester, raw_data: { [s: string]: RawRecord }) {
+    constructor(semester: Semester, raw_data: RawCatalog) {
         this.semester = semester;
         this.raw_data = raw_data;
     }
 
     public fromJSON(
-        data: { modified: string; semester: Semester; raw_data: { [x: string]: RawRecord } },
+        data: { modified: string; semester: Semester; raw_data: RawCatalog },
         expTime = 2 * 3600 * 1000
     ) {
-        return AllRecords.fromJSON(data, expTime);
+        return Catalog.fromJSON(data, expTime);
     }
 
     public toJSON() {
@@ -77,16 +58,16 @@ class AllRecords {
      * Get a CourseRecord associated with the given key
      */
     public getRecord(key: string, sections?: Set<number> | -1) {
-        if (!sections) return new CourseRecord(this.raw_data[key], key);
-        else if (sections === -1) return new CourseRecord(this.raw_data[key], key);
-        else return new CourseRecord(this.raw_data[key], key, [...sections.values()]);
+        if (!sections) return new Course(this.raw_data[key], key);
+        else if (sections === -1) return new Course(this.raw_data[key], key);
+        else return new Course(this.raw_data[key], key, [...sections.values()]);
     }
 
     /**
      * Get a Course associated with the given key and section index
      */
-    public getCourse(key: string, section = 0) {
-        return new Course(this.raw_data[key], key, section);
+    public getSection(key: string, section = 0) {
+        return new Course(this.raw_data[key], key).getSection(section);
     }
 
     public search(query: string, max_results = 10) {
@@ -94,44 +75,45 @@ class AllRecords {
         query = query.trim().toLowerCase();
         // query no space
         const query_no_sp = query.split(' ').join('');
-        const matches: CourseRecord[][] = [[], [], [], [], []];
+        const matches: Course[][] = [[], [], [], [], []];
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 
             // match with the course number
             if (key.indexOf(query_no_sp) !== -1) {
-                matches[0].push(new CourseRecord(course, key));
+                matches[0].push(new Course(course, key));
 
                 // match with the title
-            } else if (course[9].toLowerCase().indexOf(query) !== -1) {
-                matches[1].push(new CourseRecord(course, key));
+            } else if (course[4].toLowerCase().indexOf(query) !== -1) {
+                matches[1].push(new Course(course, key));
             } else {
                 // check any topic/professor match. Select the sections which only match the topic/professor
                 const topicMatchIdx = [];
                 const profMatchIdx = [];
 
-                for (let i = 0; i < course[3].length; i++) {
-                    const topic = course[10][i];
+                for (let i = 0; i < course[6].length; i++) {
+                    const section = course[6][i];
+                    const topic = section[2];
                     if (topic.toLowerCase().indexOf(query) !== -1) {
                         topicMatchIdx.push(i);
                         continue;
                     }
-                    const profs = course[6][i];
-                    for (const prof of profs) {
+                    const meetings = section[7];
+                    for (const meeting of meetings) {
                         // TODO: better prof name match
-                        if (prof.toLowerCase().indexOf(query) !== -1) {
+                        if (meeting[0].toLowerCase().indexOf(query) !== -1) {
                             profMatchIdx.push(i);
                             break;
                         }
                     }
                 }
                 if (topicMatchIdx.length > 0) {
-                    matches[2].push(new CourseRecord(course, key, topicMatchIdx));
+                    matches[2].push(new Course(course, key, topicMatchIdx));
                 } else if (profMatchIdx.length > 0) {
-                    matches[4].push(new CourseRecord(course, key, profMatchIdx));
+                    matches[4].push(new Course(course, key, profMatchIdx));
                     // lastly, check description match
-                } else if (course[15].toLowerCase().indexOf(query) !== -1) {
-                    matches[3].push(new CourseRecord(course, key));
+                } else if (course[5].toLowerCase().indexOf(query) !== -1) {
+                    matches[3].push(new Course(course, key));
                 }
             }
             if (matches[0].length >= max_results) break;
@@ -144,7 +126,7 @@ class AllRecords {
             len += matches[i].length;
             if (len >= max_results) break;
         }
-        let results: CourseRecord[] = [];
+        let results: Course[] = [];
         for (const [i, upper] of indices.entries())
             results = results.concat(matches[i].slice(0, upper));
         console.timeEnd('query');
@@ -152,4 +134,4 @@ class AllRecords {
     }
 }
 
-export default AllRecords;
+export default Catalog;

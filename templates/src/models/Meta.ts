@@ -20,7 +20,7 @@ export interface RawCatalog {
  *
  * 6: RawSection[]
  */
-export type RawCourse = [string, number, number, number, string, string, RawSection[]];
+export type RawCourse = [string, number, number, string, string, string, RawSection[]];
 
 /**
  * 0: id

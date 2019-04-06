@@ -5,7 +5,7 @@ export interface CourseFields {
     department: string;
     number: number;
     type: string;
-    units: number;
+    units: string;
     title: string;
     description: string;
 }
@@ -33,7 +33,7 @@ class Course implements CourseFields {
     public readonly department: string;
     public readonly number: number;
     public readonly type: string;
-    public readonly units: number;
+    public readonly units: string;
     public readonly title: string;
     public readonly description: string;
 

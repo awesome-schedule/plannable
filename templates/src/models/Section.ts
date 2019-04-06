@@ -6,7 +6,7 @@ class Section implements CourseFields {
     public department: string;
     public number: number;
     public type: string;
-    public units: number;
+    public units: string;
     public title: string;
     public description: string;
 

@@ -217,9 +217,8 @@ class Schedule {
             const sections = this.All[key];
             const courseRecord = Schedule.catalog.getRecord(key);
             this.currentCourses.push(courseRecord);
-            this.totalCredit += isNaN(courseRecord.units)
-                ? 0
-                : parseFloat(courseRecord.units.toString());
+            const credit = parseFloat(courseRecord.units);
+            this.totalCredit += isNaN(credit) ? 0 : credit;
 
             if (sections === -1) {
                 // if there's only one section in this CourseRecord, just treat it as a Course

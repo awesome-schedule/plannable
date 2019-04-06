@@ -65,6 +65,7 @@ class ScheduleGenerator {
             const courses = schedule.All;
 
             const classList: RawAlgoSchedule[] = [];
+
             for (const key in courses) {
                 const classes: RawAlgoSchedule = [];
                 /**
@@ -73,6 +74,7 @@ class ScheduleGenerator {
                 const courseRec = this.allRecords.getRecord(key, courses[key]);
 
                 const combined = courseRec.getCombined();
+                console.log(combined);
                 for (const time in combined) {
                     let no_match = false;
                     const sids = combined[time];
@@ -80,6 +82,9 @@ class ScheduleGenerator {
                     const tmp_dict: { [x: string]: number[] } = {};
 
                     for (const t of time.split('|')) {
+                        if (!t) {
+                            continue;
+                        }
                         const tmp1 = this.parseTime(t);
                         if (tmp1 === null) {
                             no_match = true;
@@ -107,7 +112,7 @@ class ScheduleGenerator {
                         continue;
                     }
                     algoCourse[1] = tmp_dict;
-
+                    
                     for (const sid of sids) {
                         const section = courseRec.getSection(sid);
                         // insert filter method
@@ -115,6 +120,7 @@ class ScheduleGenerator {
                         algoCourse[2].push(sid);
                     }
                     if (algoCourse[2].length !== 0) classes.push(algoCourse);
+                    console.log(algoCourse);
                 }
 
                 if (classes.length === 0) {
@@ -219,11 +225,7 @@ class ScheduleGenerator {
      * :param timeBlock: contains beginTime and endTime of a class
      * :return: Boolean type: true if it has conflict, else false
      */
-    public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: { [x: string]: number[];}) {
-        if (timeTable === []) {
-            return false;
-        }
-
+    public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: { [x: string]: number[] }) {
         for (const algoCourse of timeTable) {
             for (const dayBlock in algoCourse[1]) {
                 if (!timeDict[dayBlock]) {
@@ -233,10 +235,10 @@ class ScheduleGenerator {
                 const timeDictBlocks = timeDict[dayBlock];
                 for (let i = 0; i < timeTableBlocks.length; i += 2) {
                     const begin = timeTableBlocks[i];
-                    const end = timeTableBlocks[i];
+                    const end = timeTableBlocks[i + 1];
                     for (let j = 0; j < timeDictBlocks.length; j += 2) {
                         const beginTime = timeDictBlocks[j];
-                        const endTime = timeDictBlocks[j];
+                        const endTime = timeDictBlocks[j + 1];
                         if (
                             (begin <= beginTime && beginTime <= end) ||
                             (begin <= endTime && endTime <= end) ||

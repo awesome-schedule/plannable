@@ -222,7 +222,7 @@ class Schedule {
 
             if (sections === -1) {
                 // if there's only one section in this CourseRecord, just treat it as a Course
-                if (courseRecord.section.length === 1) {
+                if (courseRecord.sections.length === 1) {
                     this.place(courseRecord.getSection(0));
                 } else {
                     this.place(courseRecord.copy());

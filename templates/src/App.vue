@@ -721,7 +721,6 @@ function getDefaultData() {
         timeSlots: [],
         allowWaitlist: true,
         allowClosed: true,
-        // sortOptions: ScheduleEvaluator.optionDefaults,
         downloadURL: '',
 
         // storage related fields

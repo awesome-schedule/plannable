@@ -3,6 +3,7 @@ import Course from './Course';
 import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
 import Meeting from './Meeting';
+import Event from './Event';
 import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import Meta from './Meta';
 
@@ -135,6 +136,8 @@ class Schedule {
      */
     public currentIds: { [x: string]: string };
 
+    public events: Event[];
+
     private previous: [string, number] | null;
     /**
      * a property used internally to keep track of used colors to avoid color collision
@@ -160,6 +163,7 @@ class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
+        this.events = [];
 
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
@@ -170,7 +174,7 @@ class Schedule {
     /**
      * Get the background color of a course
      */
-    public getColor(course: Course | Section) {
+    public getColor(course: Course | Section | Event) {
         let hash = course.hash();
         let idx = hash % Schedule.bgColors.length;
         // avoid color collision by linear probing
@@ -238,6 +242,24 @@ class Schedule {
         this.computeSchedule();
     }
 
+    public addEvent(days: string, room?: string, description? : string){
+        for(const e of this.events){
+            if(e.days === days){
+                throw "Concentrate, please.";
+            }
+        }
+        this.events.push(new Event(days, description, room));
+    }
+
+    public deleteEvent(days: string){
+        for(let i = 0; i < this.events.length; i++){
+            if (this.events[i].days === days) {
+                this.events.splice(i, 1);
+                break;
+            }
+        }
+    }
+
     /**
      * Compute the schedule view based on `this.All` and `this.preview`
      * @see {@link computeSchedule}
@@ -295,43 +317,76 @@ class Schedule {
      *
      * @remarks a Course instance if all of its sections occur at the same time
      */
-    public place(course: Section | Course) {
+    public place(course: Section | Course | Event) {
         if (course instanceof Section) {
-            this.placeHelper(this.getColor(course), course.meetings, course);
+            for (const meeting of course.meetings) {
+                this.placeHelper(this.getColor(course), meeting.days, course);
+            }
+        } else if (course instanceof Event) {
+            this.placeHelper('???', course.days, course);
         } else {
             if (!course.allSameTime()) return;
-            this.placeHelper(this.getColor(course), course.sections[0].meetings, course.sections);
-        }
-    }
-
-    public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
-        for (const meeting of meetings) {
-            // eslint-disable-next-line
-            // tslint:disable-next-line: prefer-const
-            let [days, start, , end] = meeting.days.split(' ');
-            [start, end] = Schedule.parseTime(start, end);
-            for (let i = 0; i < days.length; i += 2) {
-                const scheduleBlock = new ScheduleBlock(color, start, end, sections);
-                switch (days.substr(i, 2)) {
-                    case 'Mo':
-                        this.days.Monday.push(scheduleBlock);
-                        break;
-                    case 'Tu':
-                        this.days.Tuesday.push(scheduleBlock);
-                        break;
-                    case 'We':
-                        this.days.Wednesday.push(scheduleBlock);
-                        break;
-                    case 'Th':
-                        this.days.Thursday.push(scheduleBlock);
-                        break;
-                    case 'Fr':
-                        this.days.Friday.push(scheduleBlock);
-                        break;
-                }
+            for (const meeting of course.sections[0].meetings) {
+                this.placeHelper(this.getColor(course), meeting.days, course.sections);
             }
         }
     }
+
+    public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
+        // eslint-disable-next-line
+        // tslint:disable-next-line: prefer-const
+        let [days, start, , end] = dayTimes.split(' ');
+        [start, end] = Schedule.parseTime(start, end);
+        for (let i = 0; i < days.length; i += 2) {
+            const scheduleBlock = new ScheduleBlock(color, start, end, events);
+            switch (days.substr(i, 2)) {
+                case 'Mo':
+                    this.days.Monday.push(scheduleBlock);
+                    break;
+                case 'Tu':
+                    this.days.Tuesday.push(scheduleBlock);
+                    break;
+                case 'We':
+                    this.days.Wednesday.push(scheduleBlock);
+                    break;
+                case 'Th':
+                    this.days.Thursday.push(scheduleBlock);
+                    break;
+                case 'Fr':
+                    this.days.Friday.push(scheduleBlock);
+                    break;
+            }
+        }
+    }
+
+    // public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
+    //     for (const meeting of meetings) {
+    //         // eslint-disable-next-line
+    //         // tslint:disable-next-line: prefer-const
+    //         let [days, start, , end] = meeting.days.split(' ');
+    //         [start, end] = Schedule.parseTime(start, end);
+    //         for (let i = 0; i < days.length; i += 2) {
+    //             const scheduleBlock = new ScheduleBlock(color, start, end, sections);
+    //             switch (days.substr(i, 2)) {
+    //                 case 'Mo':
+    //                     this.days.Monday.push(scheduleBlock);
+    //                     break;
+    //                 case 'Tu':
+    //                     this.days.Tuesday.push(scheduleBlock);
+    //                     break;
+    //                 case 'We':
+    //                     this.days.Wednesday.push(scheduleBlock);
+    //                     break;
+    //                 case 'Th':
+    //                     this.days.Thursday.push(scheduleBlock);
+    //                     break;
+    //                 case 'Fr':
+    //                     this.days.Friday.push(scheduleBlock);
+    //                     break;
+    //             }
+    //         }
+    //     }
+    // }
 
     /**
      * Remove a course (and all its sections) from the schedule

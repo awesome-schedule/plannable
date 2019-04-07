@@ -71,7 +71,7 @@ class ScheduleGenerator {
                 /**
                  * get course with specific sections specified by Schedule
                  */
-                const courseRec = this.catalog.getRecord(key, courses[key]);
+                const courseRec = this.catalog.getCourse(key, courses[key]);
 
                 // combine any section of occuring at the same time
                 const combined = courseRec.getCombined();

@@ -131,7 +131,12 @@ class Schedule {
      * a computed list that's updated by the `computeSchedule` method
      */
     public currentCourses: Course[];
-    public currentIds: { [x: string]: number };
+    /**
+     * a computed dictionary that's updated by the `computeSchedule` method
+     *
+     * it has format {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "See Modal"}
+     */
+    public currentIds: { [x: string]: string };
 
     private previous: [string, number] | null;
 
@@ -242,32 +247,33 @@ class Schedule {
         this.currentCourses = [];
         for (const key in this.All) {
             const sections = this.All[key];
-            const course = Schedule.catalog.getRecord(key);
+            const course = Schedule.catalog.getCourse(key);
             this.currentCourses.push(course);
 
             const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
 
+            const currentIdKey = `${course.department} ${course.number} ${course.type}`;
             if (sections === -1) {
-                // if there's only one section in this CourseRecord, just treat it as a Course
+                // if there's only one section in this Course, just treat it as a Section
                 if (course.sections.length === 1) {
-                    this.place(course.getSection(0));
+                    const section = course.getSection(0);
+                    this.currentIds[currentIdKey] = section.id.toString();
+                    this.place(section);
                 } else {
+                    this.currentIds[currentIdKey] = 'See modal';
                     this.place(course.copy());
                 }
             } else {
                 // we need a copy of course
                 if (sections.size === 1) {
                     const sectionIdx = sections.values().next().value;
-
-                    // only for generated schedule (guaranteed single section)
-                    this.currentIds[
-                        `${course.department} ${course.number} ${course.type}`
-                    ] = course.getSection(sectionIdx).id;
+                    this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
                 } else {
                     // a subset of the sections
                     this.place(course.getCourse([...sections.values()]));
+                    this.currentIds[currentIdKey] = 'See modal';
                 }
             }
         }
@@ -280,13 +286,13 @@ class Schedule {
     }
 
     /**
-     * places the course into one of the `Monday` to `Friday` array according to its `days` property
+     * places a `Section`/`Course` into one of the `Monday` to `Friday` array according to its `days` property
      */
     public place(course: Section | Course) {
-        // we only render a CourseRecord if all of its sections occur at the same time
         if (course instanceof Section) {
             this.placeHelper(this.getColor(course), course.meetings, course);
         } else {
+            // we only render a Course instance if all of its sections occur at the same time
             if (!course.allSameTime()) return;
             this.placeHelper(this.getColor(course), course.sections[0].meetings, course.sections);
         }

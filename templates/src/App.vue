@@ -685,18 +685,18 @@ function getDefaultData() {
 
         // modal object binding
         /**
-         * @type {Course}
+         * @type {Section}
          */
         modalCourse: null,
         /**
-         * A course record to be displayed on Modal
-         * @type {CourseRecord}
+         * A course to be displayed on Modal
+         * @type {Course}
          */
         classListModalCourse: null,
 
-        // input options
-        showTime: true,
-        showRoom: false,
+        // display options
+        showTime: false,
+        showRoom: true,
         showInstructor: true,
         showClasslistTitle: false,
         fullHeight: 40,
@@ -920,14 +920,14 @@ export default Vue.extend({
         },
 
         /**
-         * @param {Course} course
+         * @param {Section} course
          */
         showModal(course) {
             this.modalCourse = course;
         },
 
         /**
-         * @param {CourseRecord} course
+         * @param {Course} course
          */
         showClassListModal(course) {
             this.classListModalCourse = course;

@@ -62,9 +62,12 @@ class Catalog {
     }
 
     /**
-     * Get a CourseRecord associated with the given key
+     * Get a Course associated with the given key
+     *
+     * you may specify a set of section indices so that you can
+     * only obtain a subset of the original course sections
      */
-    public getRecord(key: string, sections?: Set<number> | -1) {
+    public getCourse(key: string, sections?: Set<number> | -1) {
         if (!sections) return new Course(this.raw_data[key], key);
         else if (sections === -1) return new Course(this.raw_data[key], key);
         else return new Course(this.raw_data[key], key, [...sections.values()]);

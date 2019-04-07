@@ -77,8 +77,7 @@ class Schedule {
         if (isNaN(parseInt(match[3]))) {
             const newKeys = keys.map(x => {
                 const m = x.match(regex) as RegExpMatchArray;
-                let y = m[3];
-                y = y
+                const y = m[3]
                     .split(' ')
                     .map(z => z.charAt(0).toUpperCase() + z.substr(1))
                     .join(' ');
@@ -102,7 +101,7 @@ class Schedule {
         return schedule;
     }
     /**
-     * represents all courses in this schedule, stored as `[key, set of sections]` pair
+     * represents all courses in this schedule, stored as `(key, set of sections)` pair
      * note that if **section** is -1, it means that all sections are allowed.
      * Otherwise **section** should be a Set of integers
      */
@@ -123,10 +122,6 @@ class Schedule {
     /**
      * computed property
      */
-    public colors: Set<number>;
-    /**
-     * computed property
-     */
     public totalCredit: number;
     /**
      * a computed list that's updated by the `computeSchedule` method
@@ -134,12 +129,17 @@ class Schedule {
     public currentCourses: Course[];
     /**
      * a computed dictionary that's updated by the `computeSchedule` method
+     * @remarks If a Course has multiple sections selected, a `+x` will be appended
      *
-     * it has format {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "See Modal"}
+     * it has format `{"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}`
      */
     public currentIds: { [x: string]: string };
 
     private previous: [string, number] | null;
+    /**
+     * a property used internally to keep track of used colors to avoid color collision
+     */
+    private colors: Set<number>;
 
     /**
      * Construct a `Schedule` object from its raw representation
@@ -184,7 +184,7 @@ class Schedule {
 
     /**
      * Add a course to schedule
-     * @param update whether to re-compute the schedule
+     * @param update whether to recompute the schedule
      */
     public add(key: string, section: number, update = true) {
         const sections = this.All[key];
@@ -203,8 +203,8 @@ class Schedule {
      * Update a course in the schedule
      * - If the course is **already in** the schedule, delete it from the schedule
      * - If the course is **not** in the schedule, add it to the schedule
-     * @param update whether to recompute schedule
-     * @param remove whether to remove the key if the set of section is empty
+     * @param update whether to recompute schedule after update
+     * @param remove whether to remove the key if the set of sections is empty
      */
     public update(key: string, section: number, update: boolean = true, remove: boolean = true) {
         if (section === -1) {
@@ -292,12 +292,13 @@ class Schedule {
 
     /**
      * places a `Section`/`Course` into one of the `Monday` to `Friday` array according to its `days` property
+     *
+     * @remarks a Course instance if all of its sections occur at the same time
      */
     public place(course: Section | Course) {
         if (course instanceof Section) {
             this.placeHelper(this.getColor(course), course.meetings, course);
         } else {
-            // we only render a Course instance if all of its sections occur at the same time
             if (!course.allSameTime()) return;
             this.placeHelper(this.getColor(course), course.sections[0].meetings, course.sections);
         }
@@ -305,11 +306,12 @@ class Schedule {
 
     public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
         for (const meeting of meetings) {
+            // eslint-disable-next-line
             // tslint:disable-next-line: prefer-const
             let [days, start, , end] = meeting.days.split(' ');
             [start, end] = Schedule.parseTime(start, end);
             for (let i = 0; i < days.length; i += 2) {
-                const scheduleBlock = new ScheduleBlock(color, start, end, sections, meeting);
+                const scheduleBlock = new ScheduleBlock(color, start, end, sections);
                 switch (days.substr(i, 2)) {
                     case 'Mo':
                         this.days.Monday.push(scheduleBlock);

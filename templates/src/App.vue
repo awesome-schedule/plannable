@@ -615,11 +615,10 @@ import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 // eslint-disable-next-line
 import Section from './models/Section';
-import Schedule from './models/Schedule';
 // eslint-disable-next-line
 import Course from './models/Course';
+import Schedule from './models/Schedule';
 import Catalog from './models/Catalog';
-// import axios from 'axios';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
@@ -871,6 +870,7 @@ export default Vue.extend({
         } else {
             this.fetchSemesterList(undefined, () => {
                 this.semesters = sms['semesterList'];
+                this.selectSemester(0);
             });
         }
     },

@@ -6,20 +6,12 @@ class ScheduleBlock {
     public start: string;
     public end: string;
     public section: Section | Section[];
-    public meeting: Meeting;
 
-    constructor(
-        backgroundColor: string,
-        start: string,
-        end: string,
-        section: Section | Section[],
-        meeting: Meeting
-    ) {
+    constructor(backgroundColor: string, start: string, end: string, section: Section | Section[]) {
         this.backgroundColor = backgroundColor;
         this.start = start;
         this.end = end;
         this.section = section;
-        this.meeting = meeting;
     }
 }
 

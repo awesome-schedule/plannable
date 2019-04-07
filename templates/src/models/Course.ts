@@ -1,6 +1,9 @@
 import Section from './Section';
 import Meta, { RawCourse } from './Meta';
 
+/**
+ * Represents all public information of a Course
+ */
 export interface CourseFields {
     department: string;
     number: number;
@@ -29,6 +32,9 @@ class Course implements CourseFields {
     }
 
     [x: string]: any;
+    /**
+     * key of this in Catalog, equal to (department + number + `Meta.TYPES_PARSE`\[type\])
+     */
     public key: string;
     public readonly department: string;
     public readonly number: number;
@@ -39,7 +45,8 @@ class Course implements CourseFields {
 
     public readonly raw: RawCourse;
     /**
-     * array of section ids contained in this object
+     * Array of section ids contained in this object.
+     * Can be all sections of a subset of the sections
      */
     public readonly sids: number[];
     public readonly sections: Section[];
@@ -85,7 +92,7 @@ class Course implements CourseFields {
     }
 
     /**
-     * whether all sections of this CourseRecord occur at the same time
+     * whether all sections of this Course occur at the same time
      */
     public allSameTime(): boolean {
         const sections = this.sections;
@@ -99,7 +106,7 @@ class Course implements CourseFields {
      * Get an object in which the key is the days string and
      * value is the subset of sections contained in this Course occurring at that time
      *
-     * e.g. {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : array of section indices }
+     * e.g. `{"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : array of section indices }`
      */
     public getCombined() {
         const combined: { [x: string]: number[] } = {};

@@ -2,6 +2,10 @@ import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 
+/**
+ * A section contains all the fields that a Course has,
+ * and it holds additional information specific to that section.
+ */
 class Section implements CourseFields {
     public department: string;
     public number: number;
@@ -61,10 +65,17 @@ class Section implements CourseFields {
         return true;
     }
 
+    /**
+     * @returns all meeting times of this section concatenated together, separated by |
+     */
     public combinedTime() {
         return this.meetings.reduce((acc, v) => acc + v.days + '|', '');
     }
 
+    /**
+     * @remarks The hash of all sections of a Course by design are equal to each other.
+     * @returns the hash of the Course that this section belongs to.
+     */
     public hash() {
         return this.course.hash();
     }

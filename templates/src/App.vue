@@ -67,7 +67,11 @@
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 
-        <nav v-if="sideBar && showSelectClass" class="d-block bg-light sidebar">
+        <nav
+            v-if="sideBar && showSelectClass"
+            class="d-block bg-light sidebar"
+            style="scrollbar-width:none !important"
+        >
             <div class="dropdown" style="">
                 <button
                     id="semester"

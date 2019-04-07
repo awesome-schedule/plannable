@@ -1,4 +1,4 @@
-import AllRecords from '../../src/models/AllRecords';
+import Catalog from '../../src/models/Catalog';
 import data from './data.js';
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import Schedule from '../../src/models/Schedule';

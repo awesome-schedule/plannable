@@ -51,11 +51,6 @@ def get_classes():
         return "Missing Request Parameters"
 
 
-@app.route('/about')
-def default_handler():
-    return render_template('dist/contact.html')
-
-
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory(os.path.join(os.path.dirname(__file__), 'templates', 'dist', 'js'), path)

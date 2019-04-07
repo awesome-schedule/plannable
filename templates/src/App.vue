@@ -325,6 +325,16 @@
                         </div>
                     </template>
                 </li>
+                <li class="list-group-item">
+                    <button
+                        type="button"
+                        class="btn btn-outline-info"
+                        style="width:100%"
+                        @click="generateSchedules"
+                    >
+                        Apply
+                    </button>
+                </li>
             </ul>
         </nav>
 

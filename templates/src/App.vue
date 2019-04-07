@@ -178,12 +178,12 @@
                 </div>
             </div>
             <button v-if="generated" class="btn btn-info nav-btn mt-3">
-                Semester Overview
+                Schedule Overview
             </button>
             <ul v-if="generated" class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
-                <li class="list-group-item">
-                    <table>
+                <li class="list-group-item pr-0">
+                    <table style="width:100%;font-size:14px">
                         <tr v-for="(value, idx) in currentSchedule.currentIds" :key="idx">
                             <td>{{ idx }}&nbsp;&nbsp;&nbsp;</td>
                             <td>{{ value }}</td>
@@ -1456,12 +1456,6 @@ export default Vue.extend({
         width: 75vw !important;
     }
 
-    .sidebar::-webkit-scrollbar {
-        width: 5px;
-        height: 8px;
-        background-color: #aba; /* or add it to the track */
-    }
-
     .nav-btn {
         border-radius: 0 !important;
         width: 100%;
@@ -1484,9 +1478,14 @@ export default Vue.extend({
         margin-left: 20%;
         color: #5e5e5e;
     }
+}
 
-    body::-webkit-scrollbar {
-        width: 1px;
-    }
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #aaa;
 }
 </style>

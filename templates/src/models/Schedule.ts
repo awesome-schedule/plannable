@@ -295,10 +295,12 @@ class Schedule {
                     this.place(course.getSection(sectionIdx));
                 } else {
                     // a subset of the sections
-                    const sectionIdx = sections.values().next().value;
-                    this.place(course.getCourse([...sections.values()]));
-                    this.currentIds[currentIdKey] =
-                        course.getSection(sectionIdx).id.toString() + '+' + (sections.size - 1);
+                    if (sections.size > 0) {
+                        const sectionIdx = sections.values().next().value;
+                        this.place(course.getCourse([...sections.values()]));
+                        this.currentIds[currentIdKey] =
+                            course.getSection(sectionIdx).id.toString() + '+' + (sections.size - 1);
+                    }
                 }
             }
         }

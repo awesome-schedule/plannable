@@ -145,7 +145,7 @@ class ScheduleEvaluator {
                 const crs = c[1];
                 for (let k = 0; k < 5; k++) {
                     const temp = week[k];
-                    week[k].push.apply(temp, crs[DAYS[k]]);
+                    week[k].push.apply(temp, crs[DAYS[k]] as number[]);
                 }
             }
 

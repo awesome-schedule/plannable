@@ -70,7 +70,7 @@
         <nav
             v-if="sideBar && showSelectClass"
             class="d-block bg-light sidebar"
-            style="scrollbar-width:none !important"
+            style="scrollbar-width:thin !important"
         >
             <div class="dropdown" style="">
                 <button
@@ -191,7 +191,11 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showFilter" class="d-block bg-light sidebar">
+        <nav
+            v-if="sideBar && showFilter"
+            class="d-block bg-light sidebar"
+            style="scrollbar-width:thin !important"
+        >
             <button class="btn btn-info nav-btn">
                 Filters
             </button>
@@ -350,7 +354,11 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showSetting" class="d-block bg-light sidebar">
+        <nav
+            v-if="sideBar && showSetting"
+            class="d-block bg-light sidebar"
+            style="scrollbar-width:thin !important"
+        >
             <button class="btn btn-info nav-btn">
                 Schedule Display settings
             </button>
@@ -1440,6 +1448,12 @@ export default Vue.extend({
         width: 75vw !important;
     }
 
+    .sidebar::-webkit-scrollbar {
+        width: 5px;
+        height: 8px;
+        background-color: #aba; /* or add it to the track */
+    }
+
     .nav-btn {
         border-radius: 0 !important;
         width: 100%;
@@ -1461,6 +1475,10 @@ export default Vue.extend({
         font-size: 6vw;
         margin-left: 20%;
         color: #5e5e5e;
+    }
+
+    body::-webkit-scrollbar {
+        width: 1px;
     }
 }
 </style>

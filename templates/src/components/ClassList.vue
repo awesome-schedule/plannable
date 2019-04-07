@@ -106,7 +106,7 @@
                             :class="{ show: isEntering && expandOnEntering }"
                         >
                             <a
-                                v-if="idx === 0"
+                                v-if="!generated && idx === 0"
                                 style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
                                 class="list-group-item list-group-item-action class-section"
                                 :class="{ active: schedule.All[crs.key] === -1 }"
@@ -182,7 +182,8 @@ export default Vue.extend({
         courses: Array,
         schedule: Schedule,
         isEntering: Boolean,
-        showClasslistTitle: Boolean
+        showClasslistTitle: Boolean,
+        generated: Boolean
     },
     data() {
         return {

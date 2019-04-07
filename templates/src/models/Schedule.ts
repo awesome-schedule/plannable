@@ -284,6 +284,8 @@ class Schedule {
             section.course.key += 'preview';
             this.place(section);
         }
+
+        this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
     }
 
     /**

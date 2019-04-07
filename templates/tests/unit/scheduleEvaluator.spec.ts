@@ -11,9 +11,17 @@ describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
         const func = ScheduleEvaluator.sortFunctions['compactness'];
         const schedules: import('../../src/algorithm/ScheduleGenerator').RawAlgoSchedule = [
-            ['asd', { Mo: [100, 200] }, [1]],
-            ['asd', { Tu: [50, 100] }, [1]]
+            ['', { Mo: [100, 200] }, [1]],
+            ['', { Mo: [50, 80] }, [1]],
+            ['', { Mo: [350, 450] }, [1]],
+            ['', { Mo: [10, 15] }, [1]],
+            ['', { Tu: [500, 600] }, [1]],
+            ['', { Tu: [100, 200] }, [1]]
         ];
-        console.log(func(schedules));
+        expect(func(schedules)).toBe(35 + 20 + 150 + 300);
+    });
+
+    it('lunch Test', () => {
+        expect(1).toBe(1);
     });
 });

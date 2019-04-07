@@ -1,6 +1,3 @@
-// @ts-check
-import AllRecords from '../../src/models/Catalog';
-import { getSemesterData } from '../../src/data/DataLoader';
 import 'jest';
 describe('Request Test', () => {
     it('Data Validation', done => {

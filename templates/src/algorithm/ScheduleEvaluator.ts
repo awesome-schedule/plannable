@@ -183,36 +183,41 @@ class ScheduleEvaluator {
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
             const lunchDuration = lunchEnd - lunchStart;
-            let overlap = 0;
-            for (const course of schedule) {
-                const tmp = course[1];
-                for (const day in tmp) {
-                    const blocks = tmp[day];
-                    for (let i = 0; i < blocks.length; i += 2) {
-                        const olap = ScheduleEvaluator.calcOverlap(
-                            lunchStart,
-                            lunchEnd,
-                            blocks[i],
-                            blocks[i + 1]
-                        );
-                        overlap += Math.exp(olap / lunchDuration / 4);
+            const week = ScheduleEvaluator.days;
+            const lunchOverlap = new Float32Array(5);
+            for (let i = 0; i < 5; i++) {
+                for (const course of schedule) {
+                    const blocks = course[1][week[i]];
+                    if (blocks) {
+                        for (let j = 0; j < blocks.length; j += 2) {
+                            lunchOverlap[i] += ScheduleEvaluator.calcOverlap(
+                                lunchStart,
+                                lunchEnd,
+                                blocks[j],
+                                blocks[j + 1]
+                            );
+                        }
                     }
                 }
+            }
+            let overlap = 0;
+            for (let i = 0; i < lunchOverlap.length; i++) {
+                overlap += Math.exp(lunchOverlap[i] / lunchDuration / 4);
             }
             return overlap;
         },
 
         noEarly(schedule: RawAlgoSchedule) {
-            const earliest = new Int32Array(5);
+            const earliest = new Int32Array(5).fill(24 * 60);
             const days = ScheduleEvaluator.days;
-            const refTime = 8 * 60;
+            const refTime = 22 * 60;
             for (const course of schedule) {
                 for (let i = 0; i < 5; i++) {
                     const timeBlock = course[1][days[i]];
                     if (timeBlock) earliest[i] = Math.min(earliest[i], Math.min(...timeBlock));
                 }
             }
-            return earliest.reduce((acc, x) => acc + x - refTime, 0);
+            return earliest.reduce((acc, x) => acc + refTime - x, 0);
         },
 
         IamFeelingLucky() {

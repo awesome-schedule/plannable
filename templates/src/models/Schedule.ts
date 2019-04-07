@@ -4,6 +4,7 @@ import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
 import Meeting from './Meeting';
 import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
+import Meta from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -67,12 +68,35 @@ class Schedule {
         const schedule = new Schedule();
         schedule.title = obj.title;
         schedule.id = obj.id;
-        // convert array to set
-        for (const key in obj.All) {
-            const sections = obj.All[key];
-            if (sections instanceof Array) schedule.All[key] = new Set(sections);
-            else schedule.All[key] = sections;
+        let keys = Object.keys(obj.All).map(x => x.toLowerCase());
+        const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
+        const match = keys[0].match(regex);
+        if (!match || !match[3]) return null;
+
+        if (isNaN(parseInt(match[3]))) {
+            const newKeys = keys.map(x => {
+                const m = x.match(regex) as RegExpMatchArray;
+                let y = m[3];
+                y = y
+                    .split(' ')
+                    .map(z => z.charAt(0).toUpperCase() + z.substr(1))
+                    .join(' ');
+                return m[1] + m[2] + Meta.TYPES_PARSE[y];
+            });
+            for (let i = 0; i < keys.length; i++) {
+                const sections = obj.All[keys[i]];
+                if (sections instanceof Array) schedule.All[newKeys[i]] = new Set(sections);
+                else schedule.All[newKeys[i]] = sections;
+            }
+        } else {
+            // convert array to set
+            for (const key of keys) {
+                const sections = obj.All[key];
+                if (sections instanceof Array) schedule.All[key] = new Set(sections);
+                else schedule.All[key] = sections;
+            }
         }
+
         schedule.computeSchedule();
         return schedule;
     }
@@ -104,9 +128,11 @@ class Schedule {
      */
     public totalCredit: number;
     /**
-     * a computed list that's updated by the `computeSchedule method`
+     * a computed list that's updated by the `computeSchedule` method
      */
     public currentCourses: Course[];
+    public currentIds: { [x: string]: number };
+
     private previous: [string, number] | null;
 
     /**
@@ -127,6 +153,7 @@ class Schedule {
         this.colors = new Set();
         this.totalCredit = 0;
         this.currentCourses = [];
+        this.currentIds = {};
 
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
@@ -215,25 +242,32 @@ class Schedule {
         this.currentCourses = [];
         for (const key in this.All) {
             const sections = this.All[key];
-            const courseRecord = Schedule.catalog.getRecord(key);
-            this.currentCourses.push(courseRecord);
-            const credit = parseFloat(courseRecord.units);
+            const course = Schedule.catalog.getRecord(key);
+            this.currentCourses.push(course);
+
+            const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
 
             if (sections === -1) {
                 // if there's only one section in this CourseRecord, just treat it as a Course
-                if (courseRecord.sections.length === 1) {
-                    this.place(courseRecord.getSection(0));
+                if (course.sections.length === 1) {
+                    this.place(course.getSection(0));
                 } else {
-                    this.place(courseRecord.copy());
+                    this.place(course.copy());
                 }
             } else {
                 // we need a copy of course
                 if (sections.size === 1) {
-                    this.place(courseRecord.getSection(sections.values().next().value));
+                    const sectionIdx = sections.values().next().value;
+
+                    // only for generated schedule (guaranteed single section)
+                    this.currentIds[
+                        `${course.department} ${course.number} ${course.type}`
+                    ] = course.getSection(sectionIdx).id;
+                    this.place(course.getSection(sectionIdx));
                 } else {
                     // a subset of the sections
-                    this.place(courseRecord.getCourse([...sections.values()]));
+                    this.place(course.getCourse([...sections.values()]));
                 }
             }
         }

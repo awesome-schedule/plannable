@@ -5,6 +5,7 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         {{ course.department }} {{ course.number }} {{ course.title }}
+                        {{ course.id }}
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>

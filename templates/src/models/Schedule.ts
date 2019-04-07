@@ -68,7 +68,7 @@ class Schedule {
         const schedule = new Schedule();
         schedule.title = obj.title;
         schedule.id = obj.id;
-        let keys = Object.keys(obj.All).map(x => x.toLowerCase());
+        const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
         const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
         const match = keys[0].match(regex);

@@ -1141,6 +1141,9 @@ export default Vue.extend({
             this.getClass(null);
         },
         generateSchedules(parsed = false) {
+            if (this.currentSchedule.empty())
+                return this.noti.warn(`There are no classes in your schedule!`);
+
             const constraintStatus = [];
             if (!this.allowWaitlist) {
                 constraintStatus.push('Wait List');
@@ -1270,6 +1273,9 @@ export default Vue.extend({
                 this.generateSchedules(true);
             }
         },
+        /**
+         * @param {number} n
+         */
         removeTimeSlot(n) {
             this.timeSlots.splice(n, 1);
         },

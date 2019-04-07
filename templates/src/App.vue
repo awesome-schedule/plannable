@@ -1487,6 +1487,6 @@ export default Vue.extend({
 
 .sidebar::-webkit-scrollbar-thumb {
     width: 5px;
-    background-color: #aaa;
+    background-color: #ccc;
 }
 </style>

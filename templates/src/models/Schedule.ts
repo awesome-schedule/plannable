@@ -128,9 +128,11 @@ class Schedule {
      */
     public totalCredit: number;
     /**
-     * a computed list that's updated by the `computeSchedule method`
+     * a computed list that's updated by the `computeSchedule` method
      */
     public currentCourses: Course[];
+    public currentIds: { [x: string]: number };
+
     private previous: [string, number] | null;
 
     /**
@@ -151,6 +153,7 @@ class Schedule {
         this.colors = new Set();
         this.totalCredit = 0;
         this.currentCourses = [];
+        this.currentIds = {};
 
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
@@ -239,25 +242,32 @@ class Schedule {
         this.currentCourses = [];
         for (const key in this.All) {
             const sections = this.All[key];
-            const courseRecord = Schedule.catalog.getRecord(key);
-            this.currentCourses.push(courseRecord);
-            const credit = parseFloat(courseRecord.units);
+            const course = Schedule.catalog.getRecord(key);
+            this.currentCourses.push(course);
+
+            const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
 
             if (sections === -1) {
                 // if there's only one section in this CourseRecord, just treat it as a Course
-                if (courseRecord.sections.length === 1) {
-                    this.place(courseRecord.getSection(0));
+                if (course.sections.length === 1) {
+                    this.place(course.getSection(0));
                 } else {
-                    this.place(courseRecord.copy());
+                    this.place(course.copy());
                 }
             } else {
                 // we need a copy of course
                 if (sections.size === 1) {
-                    this.place(courseRecord.getSection(sections.values().next().value));
+                    const sectionIdx = sections.values().next().value;
+
+                    // only for generated schedule (guaranteed single section)
+                    this.currentIds[
+                        `${course.department} ${course.number} ${course.type}`
+                    ] = course.getSection(sectionIdx).id;
+                    this.place(course.getSection(sectionIdx));
                 } else {
                     // a subset of the sections
-                    this.place(courseRecord.getCourse([...sections.values()]));
+                    this.place(course.getCourse([...sections.values()]));
                 }
             }
         }

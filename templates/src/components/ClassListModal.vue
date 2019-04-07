@@ -15,6 +15,7 @@
                     <table style="color:#808080; font-size:0.75rem; width:95%">
                         <tr v-for="(section, i) in course.sections" :key="section.key + i">
                             <td class="info">Section:&nbsp;{{ section.section }}</td>
+                            <td class="info">ID:&nbsp;{{ section.id }}</td>
                             <td v-if="section.topic !== ''" class="info">
                                 {{ section.topic }}
                             </td>

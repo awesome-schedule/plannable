@@ -171,11 +171,19 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-info nav-btn mt-3">
+            <button v-if="generated" class="btn btn-info nav-btn mt-3">
                 Semester Overview
             </button>
-            <ul class="list-group list-group-flush" style="width:99%">
+            <ul v-if="generated" class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
+                <li class="list-group-item">
+                    <table>
+                        <tr v-for="(value, idx) in currentSchedule.currentIds" :key="idx">
+                            <td>{{ idx }}&nbsp;&nbsp;&nbsp;</td>
+                            <td>{{ value }}</td>
+                        </tr>
+                    </table>
+                </li>
             </ul>
         </nav>
 

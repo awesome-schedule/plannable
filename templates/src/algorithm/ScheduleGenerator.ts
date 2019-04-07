@@ -1,9 +1,7 @@
 import Catalog from '../models/Catalog';
-import Course from '../models/Course';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Section from '../models/Section';
-import { tmpdir } from 'os';
 
 /**
  * The data structure used in the algorithm

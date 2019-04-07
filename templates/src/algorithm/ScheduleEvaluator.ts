@@ -111,7 +111,8 @@ class ScheduleEvaluator {
             mode: SortMode.fallback,
             title: 'Fallback',
             description:
-                'Sort using the options on top first. If compare equal, sort using the next option.'
+                'Sort using the options on top first. If compare equal, sort using the next option.' +
+                ' You can drag the sorting options to change their order.'
         }
     ];
 

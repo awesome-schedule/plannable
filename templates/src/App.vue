@@ -276,6 +276,7 @@
                 <li class="list-group-item px-3">Sort According to</li>
                 <draggable
                     v-model="sortOptions.sortBy"
+                    handle=".drag-handle"
                     @start="drag = true"
                     @end="
                         drag = false;
@@ -288,7 +289,7 @@
                         class="list-group-item sort-option py-1 pl-3 pr-0"
                     >
                         <div class="row no-gutters" style="width: 100%">
-                            <div class="col col-sm-9 pr-1" :title="option.description">
+                            <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
                                 {{ option.title }}
                             </div>
                             <div class="col col-sm-3">

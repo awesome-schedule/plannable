@@ -56,6 +56,7 @@
                             :show-instructor="showInstructor"
                             :absolute-earliest="absoluteEarliest"
                             :style="`left:${idx * 20}%`"
+                            :day="day"
                         ></course-block>
                     </template>
                 </div>
@@ -255,10 +256,13 @@ export default Vue.extend({
          */
         convTime(time) {
             const sep = time.split(':');
-            if (parseInt(sep[0]) <= 12) {
-                return time + ' AM';
+            const hr = parseInt(sep[0]);
+            if (hr === 12) {
+                return time + 'PM';
+            } else if (hr < 12) {
+                return time + 'AM';
             } else {
-                return parseInt(sep[0]) - 12 + ':' + sep[1] + ' PM';
+                return hr - 12 + ':' + sep[1] + 'PM';
             }
         },
         /**

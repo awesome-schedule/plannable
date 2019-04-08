@@ -1,6 +1,7 @@
 import Schedule from '../models/Schedule';
 import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
 import Meta from '@/models/Meta';
+import Event from '../models/Event';
 
 export enum SortMode {
     fallback = 0,
@@ -267,10 +268,12 @@ class ScheduleEvaluator {
 
     public schedules: CmpSchedules[] | MultiCriteriaCmpSchedules[];
     public options: SortOptions;
+    public events: Event[];
 
-    constructor(options: SortOptions) {
+    constructor(options: SortOptions, events: Event[]) {
         this.schedules = [];
         this.options = ScheduleEvaluator.validateOptions(options);
+        this.events = events;
     }
 
     /**
@@ -440,7 +443,7 @@ class ScheduleEvaluator {
      * Get a `Schedule` object at idx
      */
     public getSchedule(idx: number) {
-        return new Schedule(this.schedules[idx].schedule, 'Schedule', idx + 1);
+        return new Schedule(this.schedules[idx].schedule, 'Schedule', idx + 1, this.events);
     }
     /**
      * whether this evaluator contains an empty array of schedules

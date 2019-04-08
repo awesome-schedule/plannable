@@ -2,6 +2,7 @@ import Catalog from '../models/Catalog';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Section from '../models/Section';
+import Event from '../models/Event';
 
 export interface TimeDict {
     [x: string]: number[] | undefined;
@@ -25,7 +26,7 @@ export type RawAlgoSchedule = RawAlgoCourse[];
 
 export interface Options {
     [x: string]: any;
-    timeSlots: Array<[number, number]>;
+    events: Event[];
     status: string[];
     noClassDay: string[];
     sortOptions: SortOptions;
@@ -33,11 +34,60 @@ export interface Options {
 
 class ScheduleGenerator {
     public static readonly optionDefaults: Options = {
-        timeSlots: [],
+        events: [],
         status: [],
         noClassDay: [],
         sortOptions: ScheduleEvaluator.getDefaultOptions()
     };
+
+    /**
+     * parse the classTime and return which day the class is on and what time it takes place
+     * remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
+     *
+     * returns null when fail to parse
+     * @param {string} classTime
+     */
+    public static parseTime(classTime: string): [string[], [number, number]] | null {
+        if (classTime === 'TBA') {
+            return null;
+        }
+        const pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
+        const match = classTime.match(pattern);
+        if (match === null) return null;
+        const dates = match[1];
+        const times = match[2];
+        const date = [];
+        for (let i = 0; i < dates.length; i += 2) {
+            date.push(dates.substring(i, i + 2));
+        }
+        const time = times.trim().split('-');
+        const timeBlock: [number, number] = [0, 0];
+        let count = 0;
+        let tempTime;
+        for (const j of time) {
+            if (j.includes('12') && j.includes('PM')) {
+                tempTime = j
+                    .replace('PM', '')
+                    .trim()
+                    .split(':');
+                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
+            } else if (j.includes('AM')) {
+                tempTime = j
+                    .replace('AM', '')
+                    .trim()
+                    .split(':');
+                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
+            } else if (j.includes('PM')) {
+                tempTime = j
+                    .replace('PM', '')
+                    .trim()
+                    .split(':');
+                timeBlock[count] += (Number(tempTime[0]) + 12) * 60 + Number(tempTime[1]);
+            }
+            count++;
+        }
+        return [date, timeBlock];
+    }
 
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
@@ -101,6 +151,12 @@ class ScheduleGenerator {
 
             const classList: RawAlgoSchedule[] = [];
 
+            const timeSlots: TimeDict[] = [];
+
+            for (const event of this.options.events) {
+                timeSlots.push(event.toTimeDict());
+            }
+
             for (const key in courses) {
                 const classes: RawAlgoSchedule = [];
                 /**
@@ -121,19 +177,13 @@ class ScheduleGenerator {
                         if (!t) {
                             continue;
                         }
-                        const tmp1 = this.parseTime(t);
+                        const tmp1 = ScheduleGenerator.parseTime(t);
                         if (tmp1 === null) {
                             no_match = true;
                             break;
                         }
 
                         const [date, timeBlock] = tmp1;
-
-                        if (this.filterTimeSlots(date, timeBlock)) {
-                            no_match = true;
-                            break;
-                        }
-
                         for (const d of date) {
                             // the timeBlock is flattened
                             const dayBlock = tmp_dict[d];
@@ -144,6 +194,14 @@ class ScheduleGenerator {
                             }
                         }
                     }
+
+                    for (const td of timeSlots) {
+                        if (ScheduleGenerator.checkTimeConflict(td, tmp_dict)) {
+                            no_match = true;
+                            break;
+                        }
+                    }
+
                     if (no_match) {
                         continue;
                     }
@@ -186,7 +244,11 @@ class ScheduleGenerator {
         let choiceNum = 0;
         let pathMemory = new Int32Array(classList.length);
         let timeTable: RawAlgoSchedule = [];
-        const evaluator = new ScheduleEvaluator(this.options.sortOptions);
+
+        const evaluator = new ScheduleEvaluator(
+            this.options.sortOptions,
+            this.options.events.filter(x => x.display)
+        );
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
@@ -264,55 +326,6 @@ class ScheduleGenerator {
         return false;
     }
 
-    /**
-     * parse the classTime and return which day the class is on and what time it takes place
-     * remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
-     *
-     * returns null when fail to parse
-     * @param {string} classTime
-     */
-    public parseTime(classTime: string): [string[], [number, number]] | null {
-        if (classTime === 'TBA') {
-            return null;
-        }
-        const pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
-        const match = classTime.match(pattern);
-        if (match === null) return null;
-        const dates = match[1];
-        const times = match[2];
-        const date = [];
-        for (let i = 0; i < dates.length; i += 2) {
-            date.push(dates.substring(i, i + 2));
-        }
-        const time = times.trim().split('-');
-        const timeBlock: [number, number] = [0, 0];
-        let count = 0;
-        let tempTime;
-        for (const j of time) {
-            if (j.includes('12') && j.includes('PM')) {
-                tempTime = j
-                    .replace('PM', '')
-                    .trim()
-                    .split(':');
-                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
-            } else if (j.includes('AM')) {
-                tempTime = j
-                    .replace('AM', '')
-                    .trim()
-                    .split(':');
-                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
-            } else if (j.includes('PM')) {
-                tempTime = j
-                    .replace('PM', '')
-                    .trim()
-                    .split(':');
-                timeBlock[count] += (Number(tempTime[0]) + 12) * 60 + Number(tempTime[1]);
-            }
-            count++;
-        }
-        return [date, timeBlock];
-    }
-
     public filterStatus(section: Section) {
         // const standard = Object.values(CourseRecord.STATUSES);
         // // console.log(option.status.includes(course.status), option.status, course.status);
@@ -322,36 +335,6 @@ class ScheduleGenerator {
 
         if (this.options.status.includes(section.status)) {
             return true;
-        }
-        return false;
-    }
-
-    public filterTimeSlots(date: string[], timeBlock: [number, number]) {
-        const ts = this.options.timeSlots;
-
-        // noClassDay is a list of strings of dates, e.g. ['Mo','Tu']
-        const noClassDay = this.options.noClassDay;
-
-        // Compare and check if any time/date overlaps. If yes, return true, else false.
-        const beginTime = timeBlock[0];
-        const endTime = timeBlock[1];
-        for (const times of ts) {
-            const begin = times[0];
-            const end = times[1];
-
-            if (
-                (begin <= beginTime && beginTime <= end) ||
-                (begin <= endTime && endTime <= end) ||
-                (begin >= beginTime && end <= endTime)
-            ) {
-                return true;
-            }
-        }
-
-        for (const d of noClassDay) {
-            if (date.includes(d)) {
-                return true;
-            }
         }
         return false;
     }

@@ -1,15 +1,18 @@
 import Course from './Course';
-import { TimeDict } from '@/algorithm/ScheduleGenerator';
+
+import ScheduleGenerator, { TimeDict } from '@/algorithm/ScheduleGenerator';
 
 class Event {
     public days: string;
     public display: boolean;
+    public title?: string;
     public room?: string;
     public description?: string;
 
-    constructor(days: string, display: boolean, description?: string, room?: string) {
+    constructor(days: string, display: boolean, title?: string, description?: string, room?: string) {
         this.days = days;
         this.display = display;
+        this.title = title;
         this.description = description;
         this.room = room;
     }
@@ -19,20 +22,12 @@ class Event {
     }
 
     public toTimeDict(): TimeDict {
-        const [days, start, , end] = this.days.split(' ');
-        const weekdays = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
         const dict: TimeDict = {};
 
-        const [startL, startR] = start.split(':');
-        const [endL, endR] = end.split(':');
+        const [date, timeBlock] = ScheduleGenerator.parseTime(this.days) as [string[], number[]];
 
-        const startMin = parseInt(startL) * 60 + parseInt(startR);
-        const endMin = parseInt(endL) * 60 + parseInt(endR);
-
-        for (const wd of weekdays) {
-            if (days.indexOf(wd) !== -1) {
-                dict[wd] = [startMin, endMin];
-            }
+        for (const day of date) {
+            dict[day] = timeBlock;
         }
 
         return dict;

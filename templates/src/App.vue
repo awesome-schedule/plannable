@@ -1,6 +1,6 @@
 <template>
     <div id="app" style="width:100%" @change="onDocChange">
-        <modal id="modal" :course="modalCourse"></modal>
+        <modal id="modal" :semester="currentSemester" :course="modalCourse"></modal>
         <ClassListModal id="class-list-modal" :course="classListModalCourse"></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
@@ -619,6 +619,7 @@ import Section from './models/Section';
 import Course from './models/Course';
 import Schedule from './models/Schedule';
 import Catalog from './models/Catalog';
+import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
@@ -1173,7 +1174,7 @@ export default Vue.extend({
 
             generator
                 .getSchedules(this.currentSchedule, {
-                    timeSlots: timeFilters,
+                    events: timeFilters,
                     status: constraintStatus,
                     sortOptions: this.sortOptions
                 })
@@ -1312,15 +1313,22 @@ export default Vue.extend({
                     return null;
                 }
                 // note: substract/add one to allow end points
-                const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]) + 1;
-                const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]) - 1;
-                if (startMin >= endMin) {
-                    this.noti.error('Start time must be earlier than the end time');
-                    return null;
-                }
-                timeSlotsRecord.push([startMin, endMin]);
+                const days =
+                    'MoTuWeThFr ' + this.convTime(time[0]) + ' - ' + this.convTime(time[1]);
+                timeSlotsRecord.push(new Event(days, false));
             }
             return timeSlotsRecord;
+        },
+        convTime(time) {
+            const sep = time.split(':');
+            const hr = parseInt(sep[0]);
+            if (hr === 12) {
+                return time + 'PM';
+            } else if (hr < 12) {
+                return time + 'AM';
+            } else {
+                return hr - 12 + ':' + sep[1] + 'PM';
+            }
         },
         onUploadJson(event) {
             const input = event.target;

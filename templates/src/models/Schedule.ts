@@ -146,7 +146,7 @@ class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw_schedule: RawAlgoSchedule = [], title = 'Schedule', id = 0) {
+    constructor(raw_schedule: RawAlgoSchedule = [], title = 'Schedule', id = 0, events: Event[] = []) {
         this.All = {};
         this.days = {
             Mo: [],
@@ -162,7 +162,7 @@ class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
-        this.events = [];
+        this.events = events;
 
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
@@ -241,10 +241,13 @@ class Schedule {
         this.computeSchedule();
     }
 
-    public addEvent(days: string, display: boolean, room?: string, description?: string) {
-        const newEvent = new Event(days, display, description, room);
+    public addEvent(days: string, display: boolean, title?: string, room?: string, description?: string) {
+        const newEvent = new Event(days, display, title, description, room);
         for (const e of this.events) {
-            if (e.days === days || ScheduleGenerator.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())){
+            if (
+                e.days === days ||
+                ScheduleGenerator.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())
+            ) {
                 throw new Error('Just one thing at a time, please.');
             }
         }
@@ -315,7 +318,7 @@ class Schedule {
 
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
-        for(const event of this.events){
+        for (const event of this.events) {
             this.place(event);
         }
     }
@@ -327,11 +330,14 @@ class Schedule {
      */
     public place(course: Section | Course | Event) {
         if (course instanceof Section) {
+            const color = this.getColor(course);
             for (const meeting of course.meetings) {
-                this.placeHelper(this.getColor(course), meeting.days, course);
+                this.placeHelper(color, meeting.days, course);
             }
         } else if (course instanceof Event) {
-            this.placeHelper('???', course.days, course);
+            if (course.display) {
+                this.placeHelper(this.getColor(course), course.days, course);
+            }
         } else {
             if (!course.allSameTime()) return;
             for (const meeting of course.sections[0].meetings) {
@@ -366,35 +372,6 @@ class Schedule {
             }
         }
     }
-
-    // public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
-    //     for (const meeting of meetings) {
-    //         // eslint-disable-next-line
-    //         // tslint:disable-next-line: prefer-const
-    //         let [days, start, , end] = meeting.days.split(' ');
-    //         [start, end] = Schedule.parseTime(start, end);
-    //         for (let i = 0; i < days.length; i += 2) {
-    //             const scheduleBlock = new ScheduleBlock(color, start, end, sections);
-    //             switch (days.substr(i, 2)) {
-    //                 case 'Mo':
-    //                     this.days.Monday.push(scheduleBlock);
-    //                     break;
-    //                 case 'Tu':
-    //                     this.days.Tuesday.push(scheduleBlock);
-    //                     break;
-    //                 case 'We':
-    //                     this.days.Wednesday.push(scheduleBlock);
-    //                     break;
-    //                 case 'Th':
-    //                     this.days.Thursday.push(scheduleBlock);
-    //                     break;
-    //                 case 'Fr':
-    //                     this.days.Friday.push(scheduleBlock);
-    //                     break;
-    //             }
-    //         }
-    //     }
-    // }
 
     /**
      * Remove a course (and all its sections) from the schedule

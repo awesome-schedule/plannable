@@ -183,7 +183,7 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
-            const lunchDuration = lunchEnd - lunchStart;
+            const lunchMaxOverlap = 60;
             const week = Meta.days;
             const lunchOverlap = new Int32Array(5);
             for (let i = 0; i < 5; i++) {
@@ -204,7 +204,7 @@ class ScheduleEvaluator {
             let overlap = 0;
             for (let i = 0; i < lunchOverlap.length; i++) {
                 const o = lunchOverlap[i];
-                if (o) overlap += Math.exp(o / lunchDuration / 4);
+                if (o > lunchMaxOverlap) overlap += o;
             }
             return overlap;
         },
@@ -216,7 +216,12 @@ class ScheduleEvaluator {
             for (const course of schedule) {
                 for (let i = 0; i < 5; i++) {
                     const timeBlock = course[1][days[i]];
-                    if (timeBlock) earliest[i] = Math.min(earliest[i], Math.min(...timeBlock));
+                    if (timeBlock) {
+                        for (let j = 0; j < timeBlock.length; j += 2) {
+                            const t = timeBlock[j];
+                            if (t < earliest[i]) earliest[i] = t;
+                        }
+                    }
                 }
             }
             return earliest.reduce((acc, x) => acc + refTime - x, 0);

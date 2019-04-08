@@ -92,8 +92,8 @@ function parseSemesterData(csv_string: string) {
     console.time('reorganizing data');
     const rawCatalog: RawCatalog = {};
 
-    for (let i =1; i < raw_data.length; i++) {
-        const data = raw_data[i];
+    for (let j = 1; j < raw_data.length; j++) {
+        const data = raw_data[j];
         const key = (data[1] + data[2] + CLASS_TYPES[data[4]]).toLowerCase();
         const tempSection: RawSection = [
             parseInt(data[0]),

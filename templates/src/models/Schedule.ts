@@ -146,7 +146,12 @@ class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw_schedule: RawAlgoSchedule = [], title = 'Schedule', id = 0, events: Event[] = []) {
+    constructor(
+        raw_schedule: RawAlgoSchedule = [],
+        title = 'Schedule',
+        id = 0,
+        events: Event[] = []
+    ) {
         this.All = {};
         this.days = {
             Mo: [],
@@ -241,7 +246,13 @@ class Schedule {
         this.computeSchedule();
     }
 
-    public addEvent(days: string, display: boolean, title?: string, room?: string, description?: string) {
+    public addEvent(
+        days: string,
+        display: boolean,
+        title?: string,
+        room?: string,
+        description?: string
+    ) {
         const newEvent = new Event(days, display, title, description, room);
         for (const e of this.events) {
             if (
@@ -340,8 +351,9 @@ class Schedule {
             }
         } else {
             if (!course.allSameTime()) return;
+            const color = this.getColor(course);
             for (const meeting of course.sections[0].meetings) {
-                this.placeHelper(this.getColor(course), meeting.days, course.sections);
+                this.placeHelper(color, meeting.days, course.sections);
             }
         }
     }

@@ -4,7 +4,7 @@ import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
 import Meeting from './Meeting';
 import Event from './Event';
-import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
+import ScheduleGenerator, { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import Meta from './Meta';
 
 export interface ScheduleJSON {
@@ -242,22 +242,25 @@ class Schedule {
         this.computeSchedule();
     }
 
-    public addEvent(days: string, room?: string, description? : string){
-        for(const e of this.events){
-            if(e.days === days){
-                throw "Concentrate, please.";
+    public addEvent(days: string, display: boolean, room?: string, description?: string) {
+        const newEvent = new Event(days, display, description, room);
+        for (const e of this.events) {
+            if (e.days === days || ScheduleGenerator.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())){
+                throw new Error('Just one thing at a time, please.');
             }
         }
-        this.events.push(new Event(days, description, room));
+        this.events.push(newEvent);
+        this.computeSchedule();
     }
 
-    public deleteEvent(days: string){
-        for(let i = 0; i < this.events.length; i++){
+    public deleteEvent(days: string) {
+        for (let i = 0; i < this.events.length; i++) {
             if (this.events[i].days === days) {
                 this.events.splice(i, 1);
                 break;
             }
         }
+        this.computeSchedule();
     }
 
     /**
@@ -312,6 +315,10 @@ class Schedule {
         }
 
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
+
+        for(const event of this.events){
+            this.place(event);
+        }
     }
 
     /**

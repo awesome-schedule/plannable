@@ -1,5 +1,4 @@
 import Section from './Section';
-import Meeting from './Meeting';
 import Event from './Event';
 
 class ScheduleBlock {

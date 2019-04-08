@@ -68,6 +68,7 @@
 import Vue from 'vue';
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
+import Meta from '../models/Meta';
 export default Vue.extend({
     name: 'GridSchedule',
     components: {
@@ -92,7 +93,7 @@ export default Vue.extend({
             thu: window.screen.width > 450 ? 'Thursday' : 'Thu',
             fri: window.screen.width > 450 ? 'Friday' : 'Fri',
             // note: we need Schedule.days because it's an array that keeps the keys in order
-            days: Schedule.days
+            days: Meta.days
         };
     },
     computed: {

@@ -2,6 +2,7 @@ import Catalog from '../../src/models/Catalog';
 import data from './data';
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import Schedule from '../../src/models/Schedule';
+import 'jest';
 
 const allRecords = new Catalog({ id: '1198', name: 'Fall 2019' }, data);
 

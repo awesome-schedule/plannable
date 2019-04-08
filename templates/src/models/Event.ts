@@ -1,6 +1,6 @@
 import Course from './Course';
-
-import ScheduleGenerator, { TimeDict } from '@/algorithm/ScheduleGenerator';
+import * as Utils from './Utils';
+import { TimeDict } from '../algorithm/ScheduleGenerator';
 
 class Event {
     public days: string;
@@ -9,7 +9,13 @@ class Event {
     public room?: string;
     public description?: string;
 
-    constructor(days: string, display: boolean, title?: string, description?: string, room?: string) {
+    constructor(
+        days: string,
+        display: boolean,
+        title?: string,
+        description?: string,
+        room?: string
+    ) {
         this.days = days;
         this.display = display;
         this.title = title;
@@ -24,8 +30,7 @@ class Event {
     public toTimeDict(): TimeDict {
         const dict: TimeDict = {};
 
-        const [date, timeBlock] = ScheduleGenerator.parseTime(this.days) as [string[], number[]];
-
+        const [date, timeBlock] = Utils.parseTimeAll(this.days) as [string[], number[]];
         for (const day of date) {
             dict[day] = timeBlock;
         }

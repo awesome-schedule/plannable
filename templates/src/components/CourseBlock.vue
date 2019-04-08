@@ -104,6 +104,7 @@ import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';
 import Event from '../models/Event';
+import { to12hr } from '../models/Utils';
 import Vue from 'vue';
 export default Vue.extend({
     name: 'CourseBlock',
@@ -173,8 +174,8 @@ export default Vue.extend({
         room() {
             for (const meeting of this.firstSec.meetings) {
                 if (meeting.days.indexOf(this.day) !== -1) {
-                    const convedStart = this.convTime(this.scheduleBlock.start);
-                    const convedEnd = this.convTime(this.scheduleBlock.end);
+                    const convedStart = to12hr(this.scheduleBlock.start);
+                    const convedEnd = to12hr(this.scheduleBlock.end);
                     const [days, start, , end] = meeting.days.split(' ');
                     if (convedStart === start && convedEnd === end) {
                         return meeting.room;
@@ -227,17 +228,6 @@ export default Vue.extend({
         sectionsToCourse(sections) {
             const course = sections[0].course;
             return new Course(course.raw, course.key, sections.map(x => x.sid));
-        },
-        convTime(time) {
-            const sep = time.split(':');
-            const hr = parseInt(sep[0]);
-            if (hr === 12) {
-                return time + 'PM';
-            } else if (hr < 12) {
-                return time + 'AM';
-            } else {
-                return hr - 12 + ':' + sep[1] + 'PM';
-            }
         }
     }
 });

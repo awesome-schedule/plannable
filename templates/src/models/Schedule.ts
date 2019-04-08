@@ -2,10 +2,10 @@ import Section from './Section';
 import Course from './Course';
 import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
-import Meeting from './Meeting';
 import Event from './Event';
-import ScheduleGenerator, { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
+import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import Meta from './Meta';
+import * as Utils from './Utils';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -35,32 +35,6 @@ class Schedule {
      * this field must be initialized before calling any instance method of the Schedule class
      */
     public static readonly catalog: Catalog;
-    /**
-     * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
-     */
-    public static parseTime(start: string, end: string): [string, string] {
-        let suffix = start.substr(start.length - 2, 2);
-        let start_time: string;
-        let end_time: string;
-        if (suffix === 'PM') {
-            let [hour, minute] = start.substring(0, start.length - 2).split(':');
-            start_time = `${(+hour % 12) + 12}:${minute}`;
-
-            [hour, minute] = end.substring(0, end.length - 2).split(':');
-            end_time = `${(+hour % 12) + 12}:${minute}`;
-        } else {
-            start_time = start.substring(0, start.length - 2);
-            suffix = end.substr(end.length - 2, 2);
-            const temp = end.substring(0, end.length - 2);
-            if (suffix === 'PM') {
-                const [hour, minute] = temp.split(':');
-                end_time = `${(+hour % 12) + 12}:${minute}`;
-            } else {
-                end_time = temp;
-            }
-        }
-        return [start_time, end_time];
-    }
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
@@ -255,10 +229,7 @@ class Schedule {
     ) {
         const newEvent = new Event(days, display, title, description, room);
         for (const e of this.events) {
-            if (
-                e.days === days ||
-                ScheduleGenerator.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())
-            ) {
+            if (e.days === days || Utils.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())) {
                 throw new Error('Just one thing at a time, please.');
             }
         }
@@ -362,7 +333,7 @@ class Schedule {
         // eslint-disable-next-line
         // tslint:disable-next-line: prefer-const
         let [days, start, , end] = dayTimes.split(' ');
-        [start, end] = Schedule.parseTime(start, end);
+        [start, end] = Utils.parseTimeAsString(start, end);
         for (let i = 0; i < days.length; i += 2) {
             const scheduleBlock = new ScheduleBlock(color, start, end, events);
             switch (days.substr(i, 2)) {

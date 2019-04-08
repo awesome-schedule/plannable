@@ -70,6 +70,7 @@ import Vue from 'vue';
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
+import { to12hr } from '../models/Utils';
 export default Vue.extend({
     name: 'GridSchedule',
     components: {
@@ -194,7 +195,7 @@ export default Vue.extend({
             const reducedTime = [];
             for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
                 time.push(curTime);
-                stdTime.push(this.convTime(curTime));
+                stdTime.push(to12hr(curTime));
                 curTime = this.increTime(curTime);
                 // note: need .toString to make the type of reducedTime consistent
                 reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
@@ -251,20 +252,6 @@ export default Vue.extend({
         }
     },
     methods: {
-        /**
-         * 24hr to ampm
-         */
-        convTime(time) {
-            const sep = time.split(':');
-            const hr = parseInt(sep[0]);
-            if (hr === 12) {
-                return time + 'PM';
-            } else if (hr < 12) {
-                return time + 'AM';
-            } else {
-                return hr - 12 + ':' + sep[1] + 'PM';
-            }
-        },
         /**
          * Increase the time in string by 30 minutes and return
          * @param {string} time

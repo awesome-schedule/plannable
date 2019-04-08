@@ -3,6 +3,7 @@ import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Section from '../models/Section';
 import Event from '../models/Event';
+import * as Utils from '../models/Utils';
 
 export interface TimeDict {
     [x: string]: number[] | undefined;
@@ -40,55 +41,6 @@ class ScheduleGenerator {
         sortOptions: ScheduleEvaluator.getDefaultOptions()
     };
 
-    /**
-     * parse the classTime and return which day the class is on and what time it takes place
-     * remark: all time are calculated in minute form, starting at 0 and end at 24 * 60
-     *
-     * returns null when fail to parse
-     * @param {string} classTime
-     */
-    public static parseTime(classTime: string): [string[], [number, number]] | null {
-        if (classTime === 'TBA') {
-            return null;
-        }
-        const pattern = /([A-Za-z]*)\s([0-9]+.*)/i;
-        const match = classTime.match(pattern);
-        if (match === null) return null;
-        const dates = match[1];
-        const times = match[2];
-        const date = [];
-        for (let i = 0; i < dates.length; i += 2) {
-            date.push(dates.substring(i, i + 2));
-        }
-        const time = times.trim().split('-');
-        const timeBlock: [number, number] = [0, 0];
-        let count = 0;
-        let tempTime;
-        for (const j of time) {
-            if (j.includes('12') && j.includes('PM')) {
-                tempTime = j
-                    .replace('PM', '')
-                    .trim()
-                    .split(':');
-                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
-            } else if (j.includes('AM')) {
-                tempTime = j
-                    .replace('AM', '')
-                    .trim()
-                    .split(':');
-                timeBlock[count] += Number(tempTime[0]) * 60 + Number(tempTime[1]);
-            } else if (j.includes('PM')) {
-                tempTime = j
-                    .replace('PM', '')
-                    .trim()
-                    .split(':');
-                timeBlock[count] += (Number(tempTime[0]) + 12) * 60 + Number(tempTime[1]);
-            }
-            count++;
-        }
-        return [date, timeBlock];
-    }
-
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
@@ -98,34 +50,6 @@ class ScheduleGenerator {
             }
         }
         return options;
-    }
-
-    public static checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
-        for (const dayBlock in timeDict1) {
-            const timeBlocks2 = timeDict2[dayBlock];
-            if (!timeBlocks2) {
-                continue;
-            }
-            // if the key exists, it cannot be undefined.
-            const timeBlocks1 = timeDict1[dayBlock] as number[];
-
-            for (let i = 0; i < timeBlocks1.length; i += 2) {
-                const begin = timeBlocks1[i];
-                const end = timeBlocks1[i + 1];
-                for (let j = 0; j < timeBlocks2.length; j += 2) {
-                    const beginTime = timeBlocks2[j];
-                    const endTime = timeBlocks2[j + 1];
-                    if (
-                        (begin <= beginTime && beginTime <= end) ||
-                        (begin <= endTime && endTime <= end) ||
-                        (begin >= beginTime && end <= endTime)
-                    ) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     public catalog: Catalog;
@@ -177,7 +101,7 @@ class ScheduleGenerator {
                         if (!t) {
                             continue;
                         }
-                        const tmp1 = ScheduleGenerator.parseTime(t);
+                        const tmp1 = Utils.parseTimeAll(t);
                         if (tmp1 === null) {
                             no_match = true;
                             break;
@@ -196,7 +120,7 @@ class ScheduleGenerator {
                     }
 
                     for (const td of timeSlots) {
-                        if (ScheduleGenerator.checkTimeConflict(td, tmp_dict)) {
+                        if (Utils.checkTimeConflict(td, tmp_dict)) {
                             no_match = true;
                             break;
                         }
@@ -321,7 +245,7 @@ class ScheduleGenerator {
      */
     public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: TimeDict) {
         for (const algoCourse of timeTable) {
-            if (ScheduleGenerator.checkTimeConflict(algoCourse[1], timeDict)) return true;
+            if (Utils.checkTimeConflict(algoCourse[1], timeDict)) return true;
         }
         return false;
     }

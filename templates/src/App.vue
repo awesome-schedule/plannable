@@ -625,6 +625,7 @@ import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
+import { to12hr } from './models/Utils';
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
@@ -1313,22 +1314,10 @@ export default Vue.extend({
                     return null;
                 }
                 // note: substract/add one to allow end points
-                const days =
-                    'MoTuWeThFr ' + this.convTime(time[0]) + ' - ' + this.convTime(time[1]);
+                const days = 'MoTuWeThFr ' + to12hr(time[0]) + ' - ' + to12hr(time[1]);
                 timeSlotsRecord.push(new Event(days, false));
             }
             return timeSlotsRecord;
-        },
-        convTime(time) {
-            const sep = time.split(':');
-            const hr = parseInt(sep[0]);
-            if (hr === 12) {
-                return time + 'PM';
-            } else if (hr < 12) {
-                return time + 'AM';
-            } else {
-                return hr - 12 + ':' + sep[1] + 'PM';
-            }
         },
         onUploadJson(event) {
             const input = event.target;

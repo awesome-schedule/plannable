@@ -1,5 +1,6 @@
 import Schedule from '../models/Schedule';
 import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
+import Meta from '@/models/Meta';
 
 export enum SortMode {
     fallback = 0,
@@ -53,8 +54,6 @@ export interface SortOptions {
 }
 
 class ScheduleEvaluator {
-    public static readonly days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
-
     public static readonly optionDefaults: SortOptions = {
         sortBy: [
             {
@@ -122,7 +121,7 @@ class ScheduleEvaluator {
          */
         variance(schedule: RawAlgoSchedule) {
             const minutes = new Float32Array(5);
-            const days = ScheduleEvaluator.days;
+            const days = Meta.days;
             for (const course of schedule) {
                 for (let i = 0; i < days.length; i++) {
                     const timeBlock = course[1][days[i]];
@@ -139,7 +138,7 @@ class ScheduleEvaluator {
          * defined as the total time in between each pair of consecutive classes
          */
         compactness(schedule: RawAlgoSchedule) {
-            const DAYS = ScheduleEvaluator.days;
+            const DAYS = Meta.days;
             const week: number[][] = [[], [], [], [], []];
             for (const c of schedule) {
                 const crs = c[1];
@@ -184,7 +183,7 @@ class ScheduleEvaluator {
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
             const lunchDuration = lunchEnd - lunchStart;
-            const week = ScheduleEvaluator.days;
+            const week = Meta.days;
             const lunchOverlap = new Float32Array(5);
             for (let i = 0; i < 5; i++) {
                 for (const course of schedule) {
@@ -210,7 +209,7 @@ class ScheduleEvaluator {
 
         noEarly(schedule: RawAlgoSchedule) {
             const earliest = new Int32Array(5).fill(24 * 60);
-            const days = ScheduleEvaluator.days;
+            const days = Meta.days;
             const refTime = 22 * 60;
             for (const course of schedule) {
                 for (let i = 0; i < 5; i++) {

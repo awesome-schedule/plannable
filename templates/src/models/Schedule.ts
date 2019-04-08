@@ -16,7 +16,6 @@ export interface ScheduleJSON {
  * A schedule is a list of courses with computed properties that aid rendering
  */
 class Schedule {
-    public static readonly days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     public static readonly fields = ['All', 'title', 'id'];
     public static readonly bgColors = [
         '#f7867e',
@@ -113,11 +112,11 @@ class Schedule {
      */
     public days: {
         [x: string]: ScheduleBlock[];
-        Monday: ScheduleBlock[];
-        Tuesday: ScheduleBlock[];
-        Wednesday: ScheduleBlock[];
-        Thursday: ScheduleBlock[];
-        Friday: ScheduleBlock[];
+        Mo: ScheduleBlock[];
+        Tu: ScheduleBlock[];
+        We: ScheduleBlock[];
+        Th: ScheduleBlock[];
+        Fr: ScheduleBlock[];
     };
     /**
      * computed property
@@ -147,11 +146,11 @@ class Schedule {
     constructor(raw_schedule: RawAlgoSchedule = [], title = 'Schedule', id = 0) {
         this.All = {};
         this.days = {
-            Monday: [],
-            Tuesday: [],
-            Wednesday: [],
-            Thursday: [],
-            Friday: []
+            Mo: [],
+            Tu: [],
+            We: [],
+            Th: [],
+            Fr: []
         };
         this.previous = null;
         this.title = title;
@@ -293,7 +292,7 @@ class Schedule {
     }
 
     /**
-     * places a `Section`/`Course` into one of the `Monday` to `Friday` array according to its `days` property
+     * places a `Section`/`Course` into one of the `Mo` to `Fr` array according to its `days` property
      *
      * @remarks a Course instance if all of its sections occur at the same time
      */
@@ -316,19 +315,19 @@ class Schedule {
                 const scheduleBlock = new ScheduleBlock(color, start, end, sections);
                 switch (days.substr(i, 2)) {
                     case 'Mo':
-                        this.days.Monday.push(scheduleBlock);
+                        this.days.Mo.push(scheduleBlock);
                         break;
                     case 'Tu':
-                        this.days.Tuesday.push(scheduleBlock);
+                        this.days.Tu.push(scheduleBlock);
                         break;
                     case 'We':
-                        this.days.Wednesday.push(scheduleBlock);
+                        this.days.We.push(scheduleBlock);
                         break;
                     case 'Th':
-                        this.days.Thursday.push(scheduleBlock);
+                        this.days.Th.push(scheduleBlock);
                         break;
                     case 'Fr':
-                        this.days.Friday.push(scheduleBlock);
+                        this.days.Fr.push(scheduleBlock);
                         break;
                 }
             }

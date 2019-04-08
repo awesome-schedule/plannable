@@ -27,9 +27,9 @@
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
                     {{ firstSec.instructors.join(', ') }}
                 </div>
-                <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
+                <!-- <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
                     {{ scheduleBlock.meeting.room }}
-                </div>
+                </div> -->
                 <template v-if="showTime">
                     <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
                         <div v-if="showTime" class="ml-2" style="color:#eaeaea; font-size:11px">

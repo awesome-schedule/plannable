@@ -67,100 +67,101 @@ class ScheduleGenerator {
     public getSchedules(
         schedule: Schedule,
         options: Options = ScheduleGenerator.optionDefaults
-    ): Promise<ScheduleEvaluator> {
-        return new Promise((resolve, reject) => {
-            this.options = ScheduleGenerator.validateOptions(options);
+    ): ScheduleEvaluator {
+        console.time('algorithm bootstrapping');
+        this.options = ScheduleGenerator.validateOptions(options);
 
-            const courses = schedule.All;
+        const courses = schedule.All;
 
-            const classList: RawAlgoSchedule[] = [];
+        const classList: RawAlgoSchedule[] = [];
 
-            const timeSlots: TimeDict[] = [];
+        const timeSlots: TimeDict[] = [];
 
-            for (const event of this.options.events) {
-                timeSlots.push(event.toTimeDict());
+        for (const event of this.options.events) {
+            timeSlots.push(event.toTimeDict());
+        }
+
+        for (const key in courses) {
+            const classes: RawAlgoSchedule = [];
+            /**
+             * get course with specific sections specified by Schedule
+             */
+            const courseRec = this.catalog.getCourse(key, courses[key]);
+
+            // combine any section of occurring at the same time
+            const combined = courseRec.getCombined();
+            for (const time in combined) {
+                let no_match = false;
+                const sids = combined[time];
+                const algoCourse: RawAlgoCourse = [key, {}, []];
+                const tmp_dict: TimeDict = {};
+
+                for (const t of time.split('|')) {
+                    // skip empty string
+                    if (!t) continue;
+                    const tmp1 = Utils.parseTimeAll(t);
+                    if (tmp1 === null) {
+                        no_match = true;
+                        break;
+                    }
+
+                    const [date, timeBlock] = tmp1;
+                    for (const d of date) {
+                        // the timeBlock is flattened
+                        const dayBlock = tmp_dict[d];
+                        if (dayBlock) {
+                            dayBlock.push.apply(dayBlock, timeBlock);
+                        } else {
+                            tmp_dict[d] = timeBlock.concat();
+                        }
+                    }
+                }
+                if (no_match) continue;
+
+                for (const td of timeSlots) {
+                    if (Utils.checkTimeConflict(td, tmp_dict)) {
+                        no_match = true;
+                        break;
+                    }
+                }
+                if (no_match) continue;
+
+                algoCourse[1] = tmp_dict;
+
+                for (const sid of sids) {
+                    const section = courseRec.getSection(sid);
+                    // insert filter method
+                    if (this.filterStatus(section)) continue;
+                    algoCourse[2].push(sid);
+                }
+                if (algoCourse[2].length !== 0) classes.push(algoCourse);
             }
 
-            for (const key in courses) {
-                const classes: RawAlgoSchedule = [];
-                /**
-                 * get course with specific sections specified by Schedule
-                 */
-                const courseRec = this.catalog.getCourse(key, courses[key]);
-
-                // combine any section of occuring at the same time
-                const combined = courseRec.getCombined();
-                for (const time in combined) {
-                    let no_match = false;
-                    const sids = combined[time];
-                    const algoCourse: RawAlgoCourse = [key, {}, []];
-                    const tmp_dict: TimeDict = {};
-
-                    for (const t of time.split('|')) {
-                        // skip empty string
-                        if (!t) {
-                            continue;
-                        }
-                        const tmp1 = Utils.parseTimeAll(t);
-                        if (tmp1 === null) {
-                            no_match = true;
-                            break;
-                        }
-
-                        const [date, timeBlock] = tmp1;
-                        for (const d of date) {
-                            // the timeBlock is flattened
-                            const dayBlock = tmp_dict[d];
-                            if (dayBlock) {
-                                dayBlock.push.apply(dayBlock, timeBlock);
-                            } else {
-                                tmp_dict[d] = timeBlock.concat();
-                            }
-                        }
-                    }
-
-                    for (const td of timeSlots) {
-                        if (Utils.checkTimeConflict(td, tmp_dict)) {
-                            no_match = true;
-                            break;
-                        }
-                    }
-
-                    if (no_match) {
-                        continue;
-                    }
-                    algoCourse[1] = tmp_dict;
-
-                    for (const sid of sids) {
-                        const section = courseRec.getSection(sid);
-                        // insert filter method
-                        if (this.filterStatus(section)) continue;
-                        algoCourse[2].push(sid);
-                    }
-                    if (algoCourse[2].length !== 0) classes.push(algoCourse);
-                }
-
-                if (classes.length === 0) {
-                    reject(
-                        `No sections of ${courseRec.department} ${courseRec.number} ${
-                            courseRec.type
-                        } satisfy the filters you given`
-                    );
-                }
-                classList.push(classes);
-            }
-            // note: this makes the algorithm deterministic
-            classList.sort((a, b) => a.length - b.length);
-            const result = this.createSchedule(classList);
-            if (result.size() > 0) {
-                result.computeCoeff();
-                result.sort();
-                resolve(result);
-            } else
-                reject(
-                    'Given your filter, we cannot generate schedules without overlapping classes'
+            if (classes.length === 0) {
+                throw new Error(
+                    `No sections of ${courseRec.department} ${courseRec.number} ${
+                        courseRec.type
+                    } satisfy the filters you given`
                 );
-        });
+            }
+            classList.push(classes);
+        }
+        // note: this makes the algorithm deterministic
+        classList.sort((a, b) => a.length - b.length);
+        console.timeEnd('algorithm bootstrapping');
+
+        console.time('running algorithm:');
+        const result = this.createSchedule(classList);
+        console.timeEnd('running algorithm:');
+
+        if (result.size() > 0) {
+            result.computeCoeff();
+            result.sort();
+            return result;
+        } else
+            throw new Error(
+                'Given your filter, we cannot generate schedules without overlapping classes'
+            );
     }
 
     public createSchedule(classList: RawAlgoSchedule[]) {

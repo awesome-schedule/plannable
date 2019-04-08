@@ -317,7 +317,7 @@
                                     <label
                                         class="custom-control-label"
                                         :for="option.name"
-                                        title="Make classes back-to-back"
+                                        title="Enable this sorting option"
                                     ></label>
                                 </div>
                             </div>
@@ -367,11 +367,11 @@
             </button>
             <div class="list-group list-group-flush mx-1">
                 <div
-                    class="input-group my-3"
+                    class="input-group mt-3"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Start of My Day</span>
+                        <span class="input-group-text">Schedule Start</span>
                     </div>
                     <input v-model="earliest" type="time" class="form-control" />
                 </div>
@@ -380,11 +380,11 @@
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
-                        <span class="input-group-text">End of My Day</span>
+                        <span class="input-group-text">Schedule End&nbsp;</span>
                     </div>
                     <input v-model="latest" type="time" class="form-control" />
                 </div>
-                <div class="input-group mb-3" title="height of a course on schedule">
+                <div class="input-group" title="height of a course on schedule">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
@@ -395,7 +395,7 @@
                 </div>
                 <div class="input-group mb-3" title="height of an empty row">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Grid Height</span>
+                        <span class="input-group-text">Grid Height&nbsp;</span>
                     </div>
                     <input v-model="partialHeight" type="number" class="form-control" />
                     <div class="input-group-append">
@@ -454,8 +454,7 @@
                         </label>
                     </div>
                 </li>
-                <li class="list-group-item">Class List Display</li>
-                <li class="list-group-item mb-1">
+                <li class="list-group-item mb-0" style="border-bottom: 0">
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayClasslistTitle"
@@ -494,6 +493,13 @@
                     </div>
                 </li>
                 <li class="list-group-item">
+                    <button
+                        class="btn btn-outline-info mb-1"
+                        style="width: 100%"
+                        @click="selectSemester(currentSemester.id, undefined, true)"
+                    >
+                        Update Semester Data
+                    </button>
                     <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
                         Reset All and Clean
                     </button>
@@ -626,6 +632,7 @@ import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr } from './models/Utils';
+import { type } from 'os';
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
@@ -929,10 +936,12 @@ export default Vue.extend({
             this.currentSchedule.cleanSchedule();
         },
         clearCache() {
-            this.currentSchedule.clean();
-            this.generated = false;
-            this.scheduleEvaluator.clear();
-            localStorage.clear();
+            if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
+                this.currentSchedule.clean();
+                this.generated = false;
+                this.scheduleEvaluator.clear();
+                localStorage.clear();
+            }
         },
 
         /**
@@ -1016,12 +1025,24 @@ export default Vue.extend({
          * After that, schedules and settings will be parsed from `localStorage`
          * and assigned to relevant fields of `this`.
          * If no local data is present, then default values will be assigned.
-         * @param {number} semesterId
+         * @param {number|string} semesterId index or id of this semester
          * @param {Object<string, any>} parsed_data
+         * @param {boolean} [force=false] whether to force-update semester data
          */
-        selectSemester(semesterId, parsed_data) {
-            this.loading = true;
+        selectSemester(semesterId, parsed_data, force = false) {
+            if (typeof semesterId === 'string') {
+                for (let i = 0; i < this.semesters.length; i++) {
+                    const semester = this.semesters[i];
+                    if (semester.id === semesterId) {
+                        semesterId = i;
+                        break;
+                    }
+                }
+                // not found: return
+                if (typeof semesterId === 'string') return;
+            }
             this.currentSemester = this.semesters[semesterId];
+            this.loading = true;
             const data = localStorage.getItem(this.currentSemester.id);
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
             const defaultCallback = () => {
@@ -1070,12 +1091,14 @@ export default Vue.extend({
                 });
             } else {
                 // if data expired
-                if (temp.expired) {
+                if (temp.expired || force) {
+                    if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`, 5);
                     // in this case, we only need to update catalog. Save a set of fresh data
                     this.fetchSemesterData(
                         semesterId,
                         () => {
                             this.saveAllRecords();
+                            if (force) this.noti.success('Success!', 3);
                             callback();
                         },
                         () => {
@@ -1139,8 +1162,8 @@ export default Vue.extend({
                     else if (err.request) errStr += `No response received. `;
                     if (typeof reject === 'function') {
                         errStr += 'Old data is used instead';
-                        this.noti.warn(errStr);
                         reject();
+                        this.noti.warn(errStr);
                         this.loading = false;
                         return;
                     }
@@ -1173,35 +1196,32 @@ export default Vue.extend({
             this.loading = true;
             const generator = new ScheduleGenerator(this.catalog);
 
-            generator
-                .getSchedules(this.currentSchedule, {
+            try {
+                const evaluator = generator.getSchedules(this.currentSchedule, {
                     events: timeFilters,
                     status: constraintStatus,
                     sortOptions: this.sortOptions
-                })
-                .then(evaluator => {
-                    this.scheduleEvaluator = evaluator;
-                    this.proposedSchedule = this.currentSchedule;
-                    this.generated = true;
-                    // this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
-                    this.switchPage(
-                        this.currentScheduleIndex >= this.scheduleEvaluator.size()
-                            ? 0
-                            : this.currentScheduleIndex,
-                        parsed
-                    );
-                    this.saveStatus();
-                    this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
-                    this.loading = false;
-                })
-                .catch(err => {
-                    console.warn(err);
-                    this.generated = false;
-                    this.scheduleEvaluator.clear();
-                    this.noti.error(err);
-                    this.saveStatus();
-                    this.loading = false;
                 });
+                this.scheduleEvaluator = evaluator;
+                this.proposedSchedule = this.currentSchedule;
+                this.generated = true;
+                this.switchPage(
+                    this.currentScheduleIndex >= this.scheduleEvaluator.size()
+                        ? 0
+                        : this.currentScheduleIndex,
+                    parsed
+                );
+                this.saveStatus();
+                this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
+                this.loading = false;
+            } catch (err) {
+                console.warn(err);
+                this.generated = false;
+                this.scheduleEvaluator.clear();
+                this.noti.error(err.message);
+                this.saveStatus();
+                this.loading = false;
+            }
         },
         /**
          * @param {number} optIdx

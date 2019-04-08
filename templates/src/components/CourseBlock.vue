@@ -76,7 +76,7 @@
         </div>
         <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
             <div
-                v-if="isCourse(scheduleBlock)"
+                v-if="isSection(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
                 @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
@@ -86,7 +86,7 @@
                 {{ firstSec.section }}
             </div>
             <div
-                v-else
+                v-if="isSectionArray(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#class-list-modal"
                 @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
@@ -94,6 +94,9 @@
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
+            </div>
+            <div v-if="isEvent(scheduleBlock)">
+                {{ scheduleBlock.section.days }}
             </div>
         </div>
     </div>

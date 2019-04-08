@@ -367,7 +367,7 @@
             </button>
             <div class="list-group list-group-flush mx-1">
                 <div
-                    class="input-group mt-3"
+                    class="input-group my-2"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
@@ -376,7 +376,7 @@
                     <input v-model="earliest" type="time" class="form-control" />
                 </div>
                 <div
-                    class="input-group mb-3"
+                    class="input-group mb-2"
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
@@ -384,7 +384,7 @@
                     </div>
                     <input v-model="latest" type="time" class="form-control" />
                 </div>
-                <div class="input-group" title="height of a course on schedule">
+                <div class="input-group mb-2" title="height of a course on schedule">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
@@ -393,7 +393,7 @@
                         <span class="input-group-text">px</span>
                     </div>
                 </div>
-                <div class="input-group mb-3" title="height of an empty row">
+                <div class="input-group mb-2" title="height of an empty row">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Grid Height&nbsp;</span>
                     </div>
@@ -500,6 +500,8 @@
                     >
                         Update Semester Data
                     </button>
+                </li>
+                <li class="list-group-item">
                     <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
                         Reset All and Clean
                     </button>

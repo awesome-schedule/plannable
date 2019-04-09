@@ -1,6 +1,6 @@
 import Schedule from '../models/Schedule';
 import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
-import Meta from '@/models/Meta';
+import Meta from '../models/Meta';
 import Event from '../models/Event';
 
 export enum SortMode {
@@ -24,34 +24,55 @@ interface MultiCriteriaCmpSchedules {
     coeff: Float32Array;
 }
 
-export interface SortOptions {
+/**
+ * A `SortOption` represents a single sort option
+ */
+export interface SortOption {
+    /**
+     * name of this sorting option
+     */
+    readonly name: string;
+    /**
+     * whether or not this option is enabled
+     */
+    enabled: boolean;
+    /**
+     * whether to sort in reverse
+     */
+    reverse: boolean;
+    /**
+     * the names of the sorting options that cannot be applied when this option is enabled
+     */
+    readonly exclusive: string[];
+    /**
+     * text displayed next to the checkbox
+     */
+    readonly title: string;
+    /**
+     * text displayed in tooltip
+     */
+    readonly description: string;
+}
+
+/**
+ * SortOptionJSON is the JSON representation of SortOptions
+ *
+ * It only keeps the name and non-readonly fields of the SortOptions
+ */
+export interface SortOptionJSON {
     sortBy: Array<{
-        /**
-         * name of this sorting option
-         */
-        readonly name: string;
-        /**
-         * whether or not this option is enabled
-         */
+        name: string;
         enabled: boolean;
-        /**
-         * whether to sort in reverse
-         */
         reverse: boolean;
-        /**
-         * the names of the sorting options that cannot be applied when this option is enabled
-         */
-        readonly exclusive: string[];
-        /**
-         * text displayed next to the checkbox
-         */
-        readonly title: string;
-        /**
-         * text displayed in tooltip
-         */
-        readonly description: string;
     }>;
     mode: SortMode;
+}
+
+export interface SortOptions {
+    sortBy: SortOption[];
+    mode: SortMode;
+    toJSON: () => SortOptionJSON;
+    fromJSON: (x: SortOptionJSON) => void;
 }
 
 class ScheduleEvaluator {
@@ -98,7 +119,32 @@ class ScheduleEvaluator {
                 description: 'Sort randomly'
             }
         ],
-        mode: SortMode.combined
+        mode: SortMode.combined,
+        toJSON() {
+            return {
+                sortBy: this.sortBy.map(x => ({
+                    name: x.name,
+                    enabled: x.enabled,
+                    reverse: x.reverse
+                })),
+                mode: this.mode
+            };
+        },
+        fromJSON(raw: SortOptionJSON) {
+            if (raw && raw.mode && raw.sortBy) {
+                this.mode = raw.mode;
+                for (const raw_sort of raw.sortBy) {
+                    for (const sort of this.sortBy) {
+                        if (sort.name === raw_sort.name) {
+                            sort.enabled = raw_sort.enabled;
+                            sort.reverse = raw_sort.reverse;
+                            break;
+                        }
+                    }
+                }
+            }
+            return this;
+        }
     };
 
     public static readonly sortModes: SortModes = [

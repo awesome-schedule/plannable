@@ -5,6 +5,30 @@ import Section from '../models/Section';
 import Event from '../models/Event';
 import * as Utils from '../models/Utils';
 
+/**
+ * A `TimeBlock` defines the start and end time of a 'Block'
+ * that a Meeting will take place. These two numbers are the minutes starting from 0:00
+ *
+ * e.g. `[600, 660]` represents time from 10:00 to 11:00
+ */
+export type TimeBlock = [number, number];
+
+/**
+ * `TimeDict` is a data structure used to store the time blocks in a week
+ * that a certain `Section` or `Event` will take place
+ *
+ * The keys of a `TimeDict` are abbreviated day strings like `Mo` or `Tu`
+ *
+ * The values are **flattened** arrays of `TimeBlock`s, e.g. `[100, 200, 300, 400]`
+ *
+ * @remarks The values are not simply `TimeBlock`s
+ * because it is possible for a single section to have multiple meetings in a day
+ *
+ * e.g. `{Mo: [600, 660, 900, 960], Fr: [1200, 1260]}` represents that this `Section` or `Event`
+ * will take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ *
+ * @see TimeBlock
+ */
 export interface TimeDict {
     [x: string]: number[] | undefined;
     Mo?: number[];
@@ -15,13 +39,20 @@ export interface TimeDict {
 }
 
 /**
- * The data structure used in the algorithm
- * e.g. `["span20205",["Mo":[600,650],"Tu":[600,650]],[0, 1, 2]]`
+ * The data structure used in the algorithm to represent a Course that
+ * possibly has multiple sections combined (occurring at the same time)
+ *
+ * 0: key of this course
+ * 1: TimeDict
+ * 2: an array of section indices
+ * example: `["span20205",["Mo":[600,650],"Tu":[600,650]],[0, 1, 2]]`
+ *
+ * @see TimeDict
  */
 export type RawAlgoCourse = [string, TimeDict, number[]];
 
 /**
- * A schedule is nothing more than an array of courses
+ * A schedule is an array of `RawAlgoCourse`
  */
 export type RawAlgoSchedule = RawAlgoCourse[];
 

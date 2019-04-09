@@ -1,4 +1,4 @@
-import ScheduleEvaluator from '../../src/algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, { SortOptionJSON } from '../../src/algorithm/ScheduleEvaluator';
 import 'jest';
 
 describe('Schedule Evaluator Test', () => {
@@ -23,5 +23,27 @@ describe('Schedule Evaluator Test', () => {
 
     it('lunch Test', () => {
         expect(1).toBe(1);
+    });
+
+    it('Sort Option JSON Parse', () => {
+        const rawSortOptions: SortOptionJSON = {
+            sortBy: [
+                {
+                    name: 'variance',
+                    enabled: false,
+                    reverse: true
+                }
+            ],
+            mode: 1
+        };
+        const sortOption = ScheduleEvaluator.getDefaultOptions();
+        sortOption.fromJSON(rawSortOptions);
+        expect(sortOption.sortBy[0].enabled).toBe(false);
+        expect(sortOption.sortBy[0].reverse).toBe(true);
+        expect(sortOption.mode).toBe(1);
+
+        for (let i = 1; i < sortOption.sortBy.length; i++) {
+            expect(sortOption.sortBy[i]).toEqual(ScheduleEvaluator.optionDefaults.sortBy[i]);
+        }
     });
 });

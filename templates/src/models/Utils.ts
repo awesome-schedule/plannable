@@ -1,4 +1,4 @@
-import { TimeDict } from '@/algorithm/ScheduleGenerator';
+import { TimeDict, TimeBlock } from '@/algorithm/ScheduleGenerator';
 
 /**
  *
@@ -6,7 +6,7 @@ import { TimeDict } from '@/algorithm/ScheduleGenerator';
  * returns null when fail to parse
  * @param time
  */
-export function parseTimeAll(time: string): [string[], [number, number]] | null {
+export function parseTimeAll(time: string): [string[], TimeBlock] | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
         const dayList = [];
@@ -18,7 +18,7 @@ export function parseTimeAll(time: string): [string[], [number, number]] | null 
     return null;
 }
 
-export function parseTimeAsInt(start: string, end: string): [number, number] {
+export function parseTimeAsInt(start: string, end: string): TimeBlock {
     let suffix = start.substr(start.length - 2, 2);
     let start_time: number;
     let end_time: number;

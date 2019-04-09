@@ -273,7 +273,12 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item px-3">Sort According to</li>
+                <li
+                    class="list-group-item px-3"
+                    title="Note that you can drag sort options to change their priority in fallback mode"
+                >
+                    Sort According to
+                </li>
                 <draggable
                     v-model="sortOptions.sortBy"
                     handle=".drag-handle"
@@ -286,15 +291,15 @@
                     <div
                         v-for="(option, optIdx) in sortOptions.sortBy"
                         :key="option.name"
-                        class="list-group-item sort-option py-1 pl-3 pr-0"
+                        class="list-group-item py-1 pl-3 pr-0"
                     >
                         <div class="row no-gutters" style="width: 100%">
                             <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
-                                {{ option.title }}
+                                <span class="sort-option"> {{ option.title }}</span>
                             </div>
                             <div class="col col-sm-3">
                                 <i
-                                    class="fas mr-2"
+                                    class="fas mr-2 sort-option"
                                     :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
                                     title="Click to reverse sorting"
                                     @click="
@@ -303,7 +308,7 @@
                                     "
                                 ></i>
                                 <div
-                                    class="custom-control custom-checkbox"
+                                    class="custom-control custom-checkbox sort-option"
                                     style="display: inline-block"
                                 >
                                     <input

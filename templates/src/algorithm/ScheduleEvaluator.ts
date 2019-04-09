@@ -296,20 +296,21 @@ class ScheduleEvaluator {
         for (const c of schedule) {
             for (let k = 0; k < 5; k++) {
                 // temp is the Chunk array at day k
-                const temp : Chunk[] = week[k];
+                const temp: Chunk[] = week[k];
 
                 // dayBlock is the flattened Chunk[1] array
                 const dayBlock = c[1][DAYS[k]] as number[];
                 for (let i = 0; i < dayBlock.length; i += 2) {
-
                     const chunk: Chunk = [c[0], [dayBlock[i], dayBlock[i + 1]], c[2]];
                     temp.push(chunk);
-                    
-                    for(let j = temp.length - 2; j >= 0; j--){
-                        if(temp[j][1][0] > chunk[1][0]){
+
+                    for (let j = temp.length - 2; j >= 0; j--) {
+                        if (temp[j][1][0] > chunk[1][0]) {
                             let t = temp[j];
                             temp[j] = temp[j + 1];
                             temp[j + 1] = t;
+                        } else {
+                            break;
                         }
                     }
                 }

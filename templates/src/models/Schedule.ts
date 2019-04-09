@@ -103,6 +103,7 @@ class Schedule {
     public currentCourses: Course[];
     /**
      * a computed dictionary that's updated by the `computeSchedule` method
+     *
      * @remarks If a Course has multiple sections selected, a `+x` will be appended
      *
      * it has format `{"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}`

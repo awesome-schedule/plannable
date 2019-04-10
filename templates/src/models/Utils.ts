@@ -1,7 +1,6 @@
 import { TimeDict, TimeBlock } from '@/algorithm/ScheduleGenerator';
 
 /**
- *
  * Parse `MoWeFr 10:00AM - 11:00AM` to `[['Mo', 'We', 'Fr'], [10*60, 11*60]]`
  * returns null when fail to parse
  * @param time
@@ -17,7 +16,12 @@ export function parseTimeAll(time: string): [string[], TimeBlock] | null {
     }
     return null;
 }
-
+/**
+ * Parse time in `['10:00AM', '11:00AM']` format to `[600, 660]` (number of minutes from 0:00),
+ * assuming that the start time is always smaller (earlier) than end time
+ * @param start start time such as `10:00AM`
+ * @param end  end time such as `11:00AM`
+ */
 export function parseTimeAsInt(start: string, end: string): TimeBlock {
     let suffix = start.substr(start.length - 2, 2);
     let start_time: number;
@@ -67,6 +71,11 @@ export function parseTimeAsString(start: string, end: string): [string, string] 
     return [start_time, end_time];
 }
 
+/**
+ * return true of two `TimeDict` objects have overlapping time blocks, false otherwise
+ * @param timeDict1
+ * @param timeDict2
+ */
 export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
     for (const dayBlock in timeDict1) {
         const timeBlocks2 = timeDict2[dayBlock];
@@ -97,6 +106,7 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
 
 /**
  * convert 24 hour format time to 12 hour format
+ * e.g. from `17:00` to `5:00PM`
  * @author Kaiying Shan
  * @param time the time in 24 hour format, e.g. 17:00
  */
@@ -110,4 +120,21 @@ export function to12hr(time: string) {
     } else {
         return hr - 12 + ':' + sep[1] + 'PM';
     }
+}
+
+/**
+ * Calculate a 32 bit FNV-1a hash
+ * @see https://gist.github.com/vaiorabbit/5657561
+ * @see http://isthe.com/chongo/tech/comp/fnv/
+ * @param str the input string to hash
+ * @returns a 32-bit unsigned integer
+ */
+export function hashCode(str: string): number {
+    let hval = 0x811c9dc5;
+
+    for (let i = 0, l = str.length; i < l; i++) {
+        hval ^= str.charCodeAt(i);
+        hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+    }
+    return hval >>> 0;
 }

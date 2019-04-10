@@ -1,8 +1,9 @@
-import Course from './Course';
 import * as Utils from './Utils';
 import { TimeDict } from '../algorithm/ScheduleGenerator';
+import Hashable from './Hashable';
 
-class Event {
+class Event implements Hashable {
+    public key: string;
     public days: string;
     public display: boolean;
     public title?: string;
@@ -16,7 +17,7 @@ class Event {
         description?: string,
         room?: string
     ) {
-        this.days = days;
+        this.key = this.days = days;
         this.display = display;
         this.title = title;
         this.description = description;
@@ -24,7 +25,7 @@ class Event {
     }
 
     public hash() {
-        return Course.hashCode(this.days);
+        return Utils.hashCode(this.days);
     }
 
     public toTimeDict(): TimeDict {

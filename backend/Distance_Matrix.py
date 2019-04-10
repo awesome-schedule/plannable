@@ -26,11 +26,11 @@ def load_data():
             if count == 0:
                 continue
             match = x.search(i[8])
-            if match[0] == "TBA":
+            if match.group(0) == "TBA":
                 continue
-            s.add(match[0])
+            s.add(match.group(0))
+    with open(get_data_path('BuildingList.csv'),'w') as f:
         for i in s:
-            print(i)
-        print(len(s))
+            print(i, file = f)
 
 load_data()

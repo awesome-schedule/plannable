@@ -14,7 +14,7 @@
     >
         <div v-if="!mobile" style="height:100%">
             <div
-                v-if="isCourse(scheduleBlock)"
+                v-if="isSection(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
                 style="height:100%"
@@ -27,8 +27,8 @@
                 <div v-if="showInstructor" class="ml-2" style="color:#eaeaea; font-size:11px">
                     {{ firstSec.instructors.join(', ') }}
                 </div>
-                <div v-if="showRoom" class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ scheduleBlock.meeting.room }}
+                <div v-if="showRoom && room" class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ room }}
                 </div>
                 <template v-if="showTime">
                     <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
@@ -39,7 +39,7 @@
                 </template>
             </div>
             <div
-                v-else
+                v-if="isSectionArray(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#class-list-modal"
                 style="height:100%"
@@ -70,10 +70,13 @@
                     {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
                 </div>
             </div>
+            <div v-if="isEvent(scheduleBlock)">
+                {{ scheduleBlock.section.days }}
+            </div>
         </div>
         <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
             <div
-                v-if="isCourse(scheduleBlock)"
+                v-if="isSection(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
                 @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
@@ -83,7 +86,7 @@
                 {{ firstSec.section }}
             </div>
             <div
-                v-else
+                v-if="isSectionArray(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#class-list-modal"
                 @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
@@ -91,6 +94,9 @@
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
+            </div>
+            <div v-if="isEvent(scheduleBlock)">
+                {{ scheduleBlock.section.days }}
             </div>
         </div>
     </div>
@@ -100,6 +106,8 @@
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';
+import Event from '../models/Event';
+import { to12hr } from '../models/Utils';
 import Vue from 'vue';
 export default Vue.extend({
     name: 'CourseBlock',
@@ -114,7 +122,8 @@ export default Vue.extend({
         showTime: Boolean,
         showRoom: Boolean,
         showInstructor: Boolean,
-        absoluteEarliest: Number
+        absoluteEarliest: Number,
+        day: String
     },
     data() {
         return {
@@ -163,6 +172,20 @@ export default Vue.extend({
             if (section instanceof Array) {
                 return section[0];
             } else return section;
+        },
+
+        room() {
+            for (const meeting of this.firstSec.meetings) {
+                if (meeting.days.indexOf(this.day) !== -1) {
+                    const convedStart = to12hr(this.scheduleBlock.start);
+                    const convedEnd = to12hr(this.scheduleBlock.end);
+                    const [days, start, , end] = meeting.days.split(' ');
+                    if (convedStart === start && convedEnd === end) {
+                        return meeting.room;
+                    }
+                }
+            }
+            return null;
         }
     },
     methods: {
@@ -184,7 +207,7 @@ export default Vue.extend({
             } else {
                 if (min > 30) {
                     t += 2;
-                } else if (min > 0) {
+                } else {
                     t += 1;
                 }
             }
@@ -193,8 +216,14 @@ export default Vue.extend({
         /**
          * @param {ScheduleBlock} crs
          */
-        isCourse(crs) {
-            return !(crs.section instanceof Array);
+        isSection(crs) {
+            return crs.section instanceof Section;
+        },
+        isEvent(crs) {
+            return crs.section instanceof Event;
+        },
+        isSectionArray(crs) {
+            return crs.section instanceof Array;
         },
         /**
          * @param {Section[]} sections

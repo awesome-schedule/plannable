@@ -53,6 +53,7 @@ export type RawSection = [number, string, string, number, number, number, number
 export type RawMeeting = [string, string, string, string];
 
 class Meta {
+    public static readonly days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
     /**
      * lecture type number => meaning
      */

@@ -93,72 +93,71 @@
                         </div>
                     </div> -->
                 </div>
-                <Expand>
+                <div
+                    v-if="expanded(crs) === 'fa-chevron-down'"
+                    :id="`${crs.key}trans`"
+                    class="trans"
+                >
                     <div
-                        v-if="expanded(crs) === 'fa-chevron-down'"
-                        :id="`${crs.key}trans`"
-                        class="trans"
+                        v-for="(sec, idx) in crs.sections"
+                        :key="crs.key + sec.section + idx"
+                        class="list-group"
+                        :class="{ show: isEntering && expandOnEntering }"
                     >
-                        <div
-                            v-for="(sec, idx) in crs.sections"
-                            :key="crs.key + sec.section + idx"
-                            class="list-group"
-                            :class="{ show: isEntering && expandOnEntering }"
-                        >
-                            <a
-                                v-if="idx === 0"
-                                style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
-                                class="list-group-item list-group-item-action class-section"
-                                :class="{ active: schedule.All[crs.key] === -1 }"
-                                :title="
-                                    schedule.All[crs.key] === -1
-                                        ? 'click to unselect'
-                                        : 'click to select'
-                                "
-                                @click="select(crs, -1)"
-                                >Any Section
-                                <div v-if="schedule.All[crs.key] === -1" style="float:right;">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                            </a>
+                        <a
+                            v-if="!generated && idx === 0"
+                            style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
+                            class="list-group-item list-group-item-action class-section"
+                            :class="{ active: schedule.All[crs.key] === -1 }"
+                            :title="
+                                schedule.All[crs.key] === -1
+                                    ? 'click to unselect'
+                                    : 'click to select'
+                            "
+                            @click="select(crs, -1)"
+                            >Any Section
+                            <div v-if="schedule.All[crs.key] === -1" style="float:right;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </a>
 
-                            <div
-                                class="list-group-item list-group-item-action class-section container-fluid"
-                                :class="{ active: isActive(crs.key, idx) }"
-                                :title="
-                                    isActive(crs.key, idx) ? 'click to unselect' : 'click to select'
-                                "
-                                @click="select(crs, idx)"
-                                @mouseover="preview(crs.key, idx)"
-                                @mouseleave="removePreview()"
-                            >
-                                <div class="row no-gutters">
-                                    <div class="col-md-auto mr-auto">
-                                        <ul class="list-unstyled class-info">
-                                            <li>Section {{ sec.section }} {{ sec.topic }}</li>
-                                            <template v-for="(meeting, j) in sec.meetings">
-                                                <li :key="j">
-                                                    {{ meeting.days }}
-                                                </li>
-                                            </template>
-                                            <li>
-                                                {{ sec.instructors.join(', ') }}
-                                                <!-- {{ crs.room[idx] }} -->
+                        <div
+                            class="list-group-item list-group-item-action class-section container-fluid"
+                            :class="{ active: isActive(crs.key, idx) }"
+                            :title="
+                                isActive(crs.key, idx) ? 'click to unselect' : 'click to select'
+                            "
+                            @click="select(crs, idx)"
+                            @mouseover="preview(crs.key, idx)"
+                            @mouseleave="removePreview()"
+                        >
+                            <div class="row no-gutters">
+                                <div class="col-md-auto mr-auto">
+                                    <ul class="list-unstyled class-info">
+                                        <li>Section {{ sec.section }} {{ sec.topic }}</li>
+                                        <template v-for="(meeting, j) in sec.meetings">
+                                            <li :key="j">
+                                                {{ meeting.days }}
                                             </li>
-                                        </ul>
-                                    </div>
-                                    <div class="col col-sm-1 align-self-center mr-1">
-                                        <i
-                                            v-if="isActive(crs.key, idx)"
-                                            style="font-size: 0.85rem"
-                                            class="fas fa-check"
-                                        ></i>
-                                    </div>
+                                        </template>
+                                        <li>
+                                            {{ sec.instructors.join(', ') }}
+                                            <!-- {{ crs.room[idx] }} -->
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col col-sm-1 align-self-center mr-1">
+                                    <i
+                                        v-if="isActive(crs.key, idx)"
+                                        style="font-size: 0.85rem"
+                                        class="fas fa-check"
+                                    ></i>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </Expand>
+                </div>
+                <!-- <Expand> </Expand> -->
             </div>
         </div>
     </div>
@@ -169,12 +168,12 @@ import Vue from 'vue';
 // eslint-disable-next-line
 import Course from '../models/Course';
 import Schedule from '../models/Schedule';
-import Expand from './Expand.vue';
+// import Expand from './Expand.vue';
 export default Vue.extend({
     name: 'ClassList',
-    components: {
-        Expand
-    },
+    // components: {
+    //     Expand
+    // },
     props: {
         /**
          * @type {Course[]}
@@ -182,7 +181,8 @@ export default Vue.extend({
         courses: Array,
         schedule: Schedule,
         isEntering: Boolean,
-        showClasslistTitle: Boolean
+        showClasslistTitle: Boolean,
+        generated: Boolean
     },
     data() {
         return {

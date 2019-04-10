@@ -1,6 +1,6 @@
 <template>
     <div id="app" style="width:100%" @change="onDocChange">
-        <modal id="modal" :course="modalCourse"></modal>
+        <modal id="modal" :semester="currentSemester" :course="modalCourse"></modal>
         <ClassListModal id="class-list-modal" :course="classListModalCourse"></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
@@ -70,7 +70,7 @@
         <nav
             v-if="sideBar && showSelectClass"
             class="d-block bg-light sidebar"
-            style="scrollbar-width:none !important"
+            style="scrollbar-width:thin !important"
         >
             <div class="dropdown" style="">
                 <button
@@ -121,6 +121,7 @@
                     :schedule="currentSchedule"
                     :is-entering="isEntering"
                     :show-classlist-title="showClasslistTitle"
+                    :generated="generated"
                     @update_course="updateCourse"
                     @close="closeClassList"
                     @trigger-classlist-modal="showClassListModal"
@@ -157,6 +158,7 @@
                         :schedule="currentSchedule"
                         :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
+                        :generated="generated"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
                         @trigger-classlist-modal="showClassListModal"
@@ -176,12 +178,12 @@
                 </div>
             </div>
             <button v-if="generated" class="btn btn-info nav-btn mt-3">
-                Semester Overview
+                Schedule Overview
             </button>
             <ul v-if="generated" class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
-                <li class="list-group-item">
-                    <table>
+                <li class="list-group-item pr-0">
+                    <table style="width:100%;font-size:14px">
                         <tr v-for="(value, idx) in currentSchedule.currentIds" :key="idx">
                             <td>{{ idx }}&nbsp;&nbsp;&nbsp;</td>
                             <td>{{ value }}</td>
@@ -191,7 +193,11 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showFilter" class="d-block bg-light sidebar">
+        <nav
+            v-if="sideBar && showFilter"
+            class="d-block bg-light sidebar"
+            style="scrollbar-width:thin !important"
+        >
             <button class="btn btn-info nav-btn">
                 Filters
             </button>
@@ -267,9 +273,15 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item px-3">Sort According to</li>
+                <li
+                    class="list-group-item px-3"
+                    title="Note that you can drag sort options to change their priority in fallback mode"
+                >
+                    Sort According to
+                </li>
                 <draggable
                     v-model="sortOptions.sortBy"
+                    handle=".drag-handle"
                     @start="drag = true"
                     @end="
                         drag = false;
@@ -279,15 +291,15 @@
                     <div
                         v-for="(option, optIdx) in sortOptions.sortBy"
                         :key="option.name"
-                        class="list-group-item sort-option py-1 pl-3 pr-0"
+                        class="list-group-item py-1 pl-3 pr-0"
                     >
                         <div class="row no-gutters" style="width: 100%">
-                            <div class="col col-sm-9 pr-1" :title="option.description">
-                                {{ option.title }}
+                            <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
+                                <span class="sort-option"> {{ option.title }}</span>
                             </div>
                             <div class="col col-sm-3">
                                 <i
-                                    class="fas mr-2"
+                                    class="fas mr-2 sort-option"
                                     :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
                                     title="Click to reverse sorting"
                                     @click="
@@ -296,7 +308,7 @@
                                     "
                                 ></i>
                                 <div
-                                    class="custom-control custom-checkbox"
+                                    class="custom-control custom-checkbox sort-option"
                                     style="display: inline-block"
                                 >
                                     <input
@@ -310,7 +322,7 @@
                                     <label
                                         class="custom-control-label"
                                         :for="option.name"
-                                        title="Make classes back-to-back"
+                                        title="Enable this sorting option"
                                     ></label>
                                 </div>
                             </div>
@@ -350,30 +362,34 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showSetting" class="d-block bg-light sidebar">
+        <nav
+            v-if="sideBar && showSetting"
+            class="d-block bg-light sidebar"
+            style="scrollbar-width:thin !important"
+        >
             <button class="btn btn-info nav-btn">
                 Schedule Display settings
             </button>
             <div class="list-group list-group-flush mx-1">
                 <div
-                    class="input-group my-3"
+                    class="input-group my-2"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Start of My Day</span>
+                        <span class="input-group-text">Schedule Start</span>
                     </div>
                     <input v-model="earliest" type="time" class="form-control" />
                 </div>
                 <div
-                    class="input-group mb-3"
+                    class="input-group mb-2"
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
                     <div class="input-group-prepend">
-                        <span class="input-group-text">End of My Day</span>
+                        <span class="input-group-text">Schedule End&nbsp;</span>
                     </div>
                     <input v-model="latest" type="time" class="form-control" />
                 </div>
-                <div class="input-group mb-3" title="height of a course on schedule">
+                <div class="input-group mb-2" title="height of a course on schedule">
                     <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
@@ -382,9 +398,9 @@
                         <span class="input-group-text">px</span>
                     </div>
                 </div>
-                <div class="input-group mb-3" title="height of an empty row">
+                <div class="input-group mb-2" title="height of an empty row">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Grid Height</span>
+                        <span class="input-group-text">Grid Height&nbsp;</span>
                     </div>
                     <input v-model="partialHeight" type="number" class="form-control" />
                     <div class="input-group-append">
@@ -443,8 +459,7 @@
                         </label>
                     </div>
                 </li>
-                <li class="list-group-item">Class List Display</li>
-                <li class="list-group-item mb-1">
+                <li class="list-group-item mb-0" style="border-bottom: 0">
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayClasslistTitle"
@@ -481,6 +496,15 @@
                             Military
                         </button>
                     </div>
+                </li>
+                <li class="list-group-item">
+                    <button
+                        class="btn btn-outline-info mb-1"
+                        style="width: 100%"
+                        @click="selectSemester(currentSemester.id, undefined, true)"
+                    >
+                        Update Semester Data
+                    </button>
                 </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
@@ -604,16 +628,18 @@ import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 // eslint-disable-next-line
 import Section from './models/Section';
-import Schedule from './models/Schedule';
 // eslint-disable-next-line
 import Course from './models/Course';
+import Schedule from './models/Schedule';
 import Catalog from './models/Catalog';
-// import axios from 'axios';
+import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
+import { to12hr } from './models/Utils';
+import { type } from 'os';
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
@@ -711,7 +737,6 @@ function getDefaultData() {
         timeSlots: [],
         allowWaitlist: true,
         allowClosed: true,
-        // sortOptions: ScheduleEvaluator.optionDefaults,
         downloadURL: '',
 
         // storage related fields
@@ -860,6 +885,7 @@ export default Vue.extend({
         } else {
             this.fetchSemesterList(undefined, () => {
                 this.semesters = sms['semesterList'];
+                this.selectSemester(0);
             });
         }
     },
@@ -917,10 +943,12 @@ export default Vue.extend({
             this.currentSchedule.cleanSchedule();
         },
         clearCache() {
-            this.currentSchedule.clean();
-            this.generated = false;
-            this.scheduleEvaluator.clear();
-            localStorage.clear();
+            if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
+                this.currentSchedule.clean();
+                this.generated = false;
+                this.scheduleEvaluator.clear();
+                localStorage.clear();
+            }
         },
 
         /**
@@ -1004,12 +1032,24 @@ export default Vue.extend({
          * After that, schedules and settings will be parsed from `localStorage`
          * and assigned to relevant fields of `this`.
          * If no local data is present, then default values will be assigned.
-         * @param {number} semesterId
+         * @param {number|string} semesterId index or id of this semester
          * @param {Object<string, any>} parsed_data
+         * @param {boolean} [force=false] whether to force-update semester data
          */
-        selectSemester(semesterId, parsed_data) {
-            this.loading = true;
+        selectSemester(semesterId, parsed_data, force = false) {
+            if (typeof semesterId === 'string') {
+                for (let i = 0; i < this.semesters.length; i++) {
+                    const semester = this.semesters[i];
+                    if (semester.id === semesterId) {
+                        semesterId = i;
+                        break;
+                    }
+                }
+                // not found: return
+                if (typeof semesterId === 'string') return;
+            }
             this.currentSemester = this.semesters[semesterId];
+            this.loading = true;
             const data = localStorage.getItem(this.currentSemester.id);
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
             const defaultCallback = () => {
@@ -1058,12 +1098,14 @@ export default Vue.extend({
                 });
             } else {
                 // if data expired
-                if (temp.expired) {
+                if (temp.expired || force) {
+                    if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`, 5);
                     // in this case, we only need to update catalog. Save a set of fresh data
                     this.fetchSemesterData(
                         semesterId,
                         () => {
                             this.saveAllRecords();
+                            if (force) this.noti.success('Success!', 3);
                             callback();
                         },
                         () => {
@@ -1127,8 +1169,8 @@ export default Vue.extend({
                     else if (err.request) errStr += `No response received. `;
                     if (typeof reject === 'function') {
                         errStr += 'Old data is used instead';
-                        this.noti.warn(errStr);
                         reject();
+                        this.noti.warn(errStr);
                         this.loading = false;
                         return;
                     }
@@ -1141,6 +1183,9 @@ export default Vue.extend({
             this.getClass(null);
         },
         generateSchedules(parsed = false) {
+            if (this.currentSchedule.empty())
+                return this.noti.warn(`There are no classes in your schedule!`);
+
             const constraintStatus = [];
             if (!this.allowWaitlist) {
                 constraintStatus.push('Wait List');
@@ -1158,35 +1203,32 @@ export default Vue.extend({
             this.loading = true;
             const generator = new ScheduleGenerator(this.catalog);
 
-            generator
-                .getSchedules(this.currentSchedule, {
-                    timeSlots: timeFilters,
+            try {
+                const evaluator = generator.getSchedules(this.currentSchedule, {
+                    events: timeFilters,
                     status: constraintStatus,
                     sortOptions: this.sortOptions
-                })
-                .then(evaluator => {
-                    this.scheduleEvaluator = evaluator;
-                    this.proposedSchedule = this.currentSchedule;
-                    this.generated = true;
-                    // this.currentSchedule = this.scheduleEvaluator.getSchedule(0);
-                    this.switchPage(
-                        this.currentScheduleIndex >= this.scheduleEvaluator.size()
-                            ? 0
-                            : this.currentScheduleIndex,
-                        parsed
-                    );
-                    this.saveStatus();
-                    this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
-                    this.loading = false;
-                })
-                .catch(err => {
-                    console.warn(err);
-                    this.generated = false;
-                    this.scheduleEvaluator.clear();
-                    this.noti.error(err);
-                    this.saveStatus();
-                    this.loading = false;
                 });
+                this.scheduleEvaluator = evaluator;
+                this.proposedSchedule = this.currentSchedule;
+                this.generated = true;
+                this.switchPage(
+                    this.currentScheduleIndex >= this.scheduleEvaluator.size()
+                        ? 0
+                        : this.currentScheduleIndex,
+                    parsed
+                );
+                this.saveStatus();
+                this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
+                this.loading = false;
+            } catch (err) {
+                console.warn(err);
+                this.generated = false;
+                this.scheduleEvaluator.clear();
+                this.noti.error(err.message);
+                this.saveStatus();
+                this.loading = false;
+            }
         },
         /**
          * @param {number} optIdx
@@ -1270,6 +1312,9 @@ export default Vue.extend({
                 this.generateSchedules(true);
             }
         },
+        /**
+         * @param {number} n
+         */
         removeTimeSlot(n) {
             this.timeSlots.splice(n, 1);
         },
@@ -1296,13 +1341,8 @@ export default Vue.extend({
                     return null;
                 }
                 // note: substract/add one to allow end points
-                const startMin = parseInt(startTime[0]) * 60 + parseInt(startTime[1]) + 1;
-                const endMin = parseInt(endTime[0]) * 60 + parseInt(endTime[1]) - 1;
-                if (startMin >= endMin) {
-                    this.noti.error('Start time must be earlier than the end time');
-                    return null;
-                }
-                timeSlotsRecord.push([startMin, endMin]);
+                const days = 'MoTuWeThFr ' + to12hr(time[0]) + ' - ' + to12hr(time[1]);
+                timeSlotsRecord.push(new Event(days, false));
             }
             return timeSlotsRecord;
         },
@@ -1462,5 +1502,14 @@ export default Vue.extend({
         margin-left: 20%;
         color: #5e5e5e;
     }
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #ccc;
 }
 </style>

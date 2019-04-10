@@ -2,9 +2,10 @@ import Section from './Section';
 import Course from './Course';
 import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
-import Meeting from './Meeting';
+import Event from './Event';
 import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import Meta from './Meta';
+import * as Utils from './Utils';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -16,7 +17,6 @@ export interface ScheduleJSON {
  * A schedule is a list of courses with computed properties that aid rendering
  */
 class Schedule {
-    public static readonly days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     public static readonly fields = ['All', 'title', 'id'];
     public static readonly bgColors = [
         '#f7867e',
@@ -36,32 +36,6 @@ class Schedule {
      */
     public static readonly catalog: Catalog;
     /**
-     * Convert [11:00AM, 1:00PM] style to [11:00, 13:00] style time
-     */
-    public static parseTime(start: string, end: string): [string, string] {
-        let suffix = start.substr(start.length - 2, 2);
-        let start_time: string;
-        let end_time: string;
-        if (suffix === 'PM') {
-            let [hour, minute] = start.substring(0, start.length - 2).split(':');
-            start_time = `${(+hour % 12) + 12}:${minute}`;
-
-            [hour, minute] = end.substring(0, end.length - 2).split(':');
-            end_time = `${(+hour % 12) + 12}:${minute}`;
-        } else {
-            start_time = start.substring(0, start.length - 2);
-            suffix = end.substr(end.length - 2, 2);
-            const temp = end.substring(0, end.length - 2);
-            if (suffix === 'PM') {
-                const [hour, minute] = temp.split(':');
-                end_time = `${(+hour % 12) + 12}:${minute}`;
-            } else {
-                end_time = temp;
-            }
-        }
-        return [start_time, end_time];
-    }
-    /**
      * instantiate a `Schedule` object from its JSON representation
      */
     public static fromJSON(obj: ScheduleJSON) {
@@ -77,8 +51,7 @@ class Schedule {
         if (isNaN(parseInt(match[3]))) {
             const newKeys = keys.map(x => {
                 const m = x.match(regex) as RegExpMatchArray;
-                let y = m[3];
-                y = y
+                const y = m[3]
                     .split(' ')
                     .map(z => z.charAt(0).toUpperCase() + z.substr(1))
                     .join(' ');
@@ -102,7 +75,7 @@ class Schedule {
         return schedule;
     }
     /**
-     * represents all courses in this schedule, stored as `[key, set of sections]` pair
+     * represents all courses in this schedule, stored as `(key, set of sections)` pair
      * note that if **section** is -1, it means that all sections are allowed.
      * Otherwise **section** should be a Set of integers
      */
@@ -114,16 +87,12 @@ class Schedule {
      */
     public days: {
         [x: string]: ScheduleBlock[];
-        Monday: ScheduleBlock[];
-        Tuesday: ScheduleBlock[];
-        Wednesday: ScheduleBlock[];
-        Thursday: ScheduleBlock[];
-        Friday: ScheduleBlock[];
+        Mo: ScheduleBlock[];
+        Tu: ScheduleBlock[];
+        We: ScheduleBlock[];
+        Th: ScheduleBlock[];
+        Fr: ScheduleBlock[];
     };
-    /**
-     * computed property
-     */
-    public colors: Set<number>;
     /**
      * computed property
      */
@@ -135,23 +104,36 @@ class Schedule {
     /**
      * a computed dictionary that's updated by the `computeSchedule` method
      *
-     * it has format {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "See Modal"}
+     * @remarks If a Course has multiple sections selected, a `+x` will be appended
+     *
+     * it has format `{"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}`
      */
     public currentIds: { [x: string]: string };
 
+    public events: Event[];
+
     private previous: [string, number] | null;
+    /**
+     * a property used internally to keep track of used colors to avoid color collision
+     */
+    private colors: Set<number>;
 
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw_schedule: RawAlgoSchedule = [], title = 'Schedule', id = 0) {
+    constructor(
+        raw_schedule: RawAlgoSchedule = [],
+        title = 'Schedule',
+        id = 0,
+        events: Event[] = []
+    ) {
         this.All = {};
         this.days = {
-            Monday: [],
-            Tuesday: [],
-            Wednesday: [],
-            Thursday: [],
-            Friday: []
+            Mo: [],
+            Tu: [],
+            We: [],
+            Th: [],
+            Fr: []
         };
         this.previous = null;
         this.title = title;
@@ -160,6 +142,7 @@ class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
+        this.events = events;
 
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
@@ -170,7 +153,7 @@ class Schedule {
     /**
      * Get the background color of a course
      */
-    public getColor(course: Course | Section) {
+    public getColor(course: Course | Section | Event) {
         let hash = course.hash();
         let idx = hash % Schedule.bgColors.length;
         // avoid color collision by linear probing
@@ -184,7 +167,7 @@ class Schedule {
 
     /**
      * Add a course to schedule
-     * @param update whether to re-compute the schedule
+     * @param update whether to recompute the schedule
      */
     public add(key: string, section: number, update = true) {
         const sections = this.All[key];
@@ -203,8 +186,8 @@ class Schedule {
      * Update a course in the schedule
      * - If the course is **already in** the schedule, delete it from the schedule
      * - If the course is **not** in the schedule, add it to the schedule
-     * @param update whether to recompute schedule
-     * @param remove whether to remove the key if the set of section is empty
+     * @param update whether to recompute schedule after update
+     * @param remove whether to remove the key if the set of sections is empty
      */
     public update(key: string, section: number, update: boolean = true, remove: boolean = true) {
         if (section === -1) {
@@ -235,6 +218,33 @@ class Schedule {
 
     public preview(key: string, section: number) {
         this.previous = [key, section];
+        this.computeSchedule();
+    }
+
+    public addEvent(
+        days: string,
+        display: boolean,
+        title?: string,
+        room?: string,
+        description?: string
+    ) {
+        const newEvent = new Event(days, display, title, description, room);
+        for (const e of this.events) {
+            if (e.days === days || Utils.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())) {
+                throw new Error('Just one thing at a time, please.');
+            }
+        }
+        this.events.push(newEvent);
+        this.computeSchedule();
+    }
+
+    public deleteEvent(days: string) {
+        for (let i = 0; i < this.events.length; i++) {
+            if (this.events[i].days === days) {
+                this.events.splice(i, 1);
+                break;
+            }
+        }
         this.computeSchedule();
     }
 
@@ -273,8 +283,12 @@ class Schedule {
                     this.place(course.getSection(sectionIdx));
                 } else {
                     // a subset of the sections
-                    this.place(course.getCourse([...sections.values()]));
-                    this.currentIds[currentIdKey] = 'See modal';
+                    if (sections.size > 0) {
+                        const sectionIdx = sections.values().next().value;
+                        this.place(course.getCourse([...sections.values()]));
+                        this.currentIds[currentIdKey] =
+                            course.getSection(sectionIdx).id.toString() + '+' + (sections.size - 1);
+                    }
                 }
             }
         }
@@ -284,45 +298,61 @@ class Schedule {
             section.course.key += 'preview';
             this.place(section);
         }
-    }
 
-    /**
-     * places a `Section`/`Course` into one of the `Monday` to `Friday` array according to its `days` property
-     */
-    public place(course: Section | Course) {
-        if (course instanceof Section) {
-            this.placeHelper(this.getColor(course), course.meetings, course);
-        } else {
-            // we only render a Course instance if all of its sections occur at the same time
-            if (!course.allSameTime()) return;
-            this.placeHelper(this.getColor(course), course.sections[0].meetings, course.sections);
+        this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
+
+        for (const event of this.events) {
+            this.place(event);
         }
     }
 
-    public placeHelper(color: string, meetings: Meeting[], sections: Section | Section[]) {
-        for (const meeting of meetings) {
-            // tslint:disable-next-line: prefer-const
-            let [days, start, , end] = meeting.days.split(' ');
-            [start, end] = Schedule.parseTime(start, end);
-            for (let i = 0; i < days.length; i += 2) {
-                const scheduleBlock = new ScheduleBlock(color, start, end, sections, meeting);
-                switch (days.substr(i, 2)) {
-                    case 'Mo':
-                        this.days.Monday.push(scheduleBlock);
-                        break;
-                    case 'Tu':
-                        this.days.Tuesday.push(scheduleBlock);
-                        break;
-                    case 'We':
-                        this.days.Wednesday.push(scheduleBlock);
-                        break;
-                    case 'Th':
-                        this.days.Thursday.push(scheduleBlock);
-                        break;
-                    case 'Fr':
-                        this.days.Friday.push(scheduleBlock);
-                        break;
-                }
+    /**
+     * places a `Section`/`Course` into one of the `Mo` to `Fr` array according to its `days` property
+     *
+     * @remarks a Course instance if all of its sections occur at the same time
+     */
+    public place(course: Section | Course | Event) {
+        if (course instanceof Section) {
+            const color = this.getColor(course);
+            for (const meeting of course.meetings) {
+                this.placeHelper(color, meeting.days, course);
+            }
+        } else if (course instanceof Event) {
+            if (course.display) {
+                this.placeHelper(this.getColor(course), course.days, course);
+            }
+        } else {
+            if (!course.allSameTime()) return;
+            const color = this.getColor(course);
+            for (const meeting of course.sections[0].meetings) {
+                this.placeHelper(color, meeting.days, course.sections);
+            }
+        }
+    }
+
+    public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
+        // eslint-disable-next-line
+        // tslint:disable-next-line: prefer-const
+        let [days, start, , end] = dayTimes.split(' ');
+        [start, end] = Utils.parseTimeAsString(start, end);
+        for (let i = 0; i < days.length; i += 2) {
+            const scheduleBlock = new ScheduleBlock(color, start, end, events);
+            switch (days.substr(i, 2)) {
+                case 'Mo':
+                    this.days.Mo.push(scheduleBlock);
+                    break;
+                case 'Tu':
+                    this.days.Tu.push(scheduleBlock);
+                    break;
+                case 'We':
+                    this.days.We.push(scheduleBlock);
+                    break;
+                case 'Th':
+                    this.days.Th.push(scheduleBlock);
+                    break;
+                case 'Fr':
+                    this.days.Fr.push(scheduleBlock);
+                    break;
             }
         }
     }

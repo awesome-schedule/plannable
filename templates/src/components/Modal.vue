@@ -19,6 +19,14 @@
                     </div>
                     <br />
                     <div>{{ course.description }}</div>
+                    <div v-if="semester !== null" class="mt-2">
+                        <button
+                            class="btn btn-outline-info"
+                            @click="SectionTip(semester.id, course.id)"
+                        >
+                            Click for more details (Lou's List)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -29,7 +37,20 @@
 import Section from '../models/Section';
 export default {
     props: {
-        course: Section
+        course: Section,
+        semester: Object
+    },
+    methods: {
+        SectionTip(Semester, ClassNumber) {
+            window.open(
+                'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
+                    Semester +
+                    '&ClassNumber=' +
+                    ClassNumber,
+                '_blank',
+                'width=650,height=700,scrollbars=yes'
+            );
+        }
     }
 };
 </script>

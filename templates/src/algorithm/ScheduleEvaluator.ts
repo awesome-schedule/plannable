@@ -1,5 +1,7 @@
 import Schedule from '../models/Schedule';
 import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
+import Meta from '../models/Meta';
+import Event from '../models/Event';
 
 export enum SortMode {
     fallback = 0,
@@ -22,39 +24,58 @@ interface MultiCriteriaCmpSchedules {
     coeff: Float32Array;
 }
 
-export interface SortOptions {
+/**
+ * A `SortOption` represents a single sort option
+ */
+export interface SortOption {
+    /**
+     * name of this sorting option
+     */
+    readonly name: string;
+    /**
+     * whether or not this option is enabled
+     */
+    enabled: boolean;
+    /**
+     * whether to sort in reverse
+     */
+    reverse: boolean;
+    /**
+     * the names of the sorting options that cannot be applied when this option is enabled
+     */
+    readonly exclusive: string[];
+    /**
+     * text displayed next to the checkbox
+     */
+    readonly title: string;
+    /**
+     * text displayed in tooltip
+     */
+    readonly description: string;
+}
+
+/**
+ * SortOptionJSON is the JSON representation of SortOptions
+ *
+ * It only keeps the name and non-readonly fields of the SortOptions
+ */
+export interface SortOptionJSON {
     sortBy: Array<{
-        /**
-         * name of this sorting option
-         */
-        readonly name: string;
-        /**
-         * whether or not this option is enabled
-         */
+        name: string;
         enabled: boolean;
-        /**
-         * whether to sort in reverse
-         */
         reverse: boolean;
-        /**
-         * the names of the sorting options that cannot be applied when this option is enabled
-         */
-        readonly exclusive: string[];
-        /**
-         * text displayed next to the checkbox
-         */
-        readonly title: string;
-        /**
-         * text displayed in tooltip
-         */
-        readonly description: string;
     }>;
     mode: SortMode;
 }
 
-class ScheduleEvaluator {
-    public static readonly days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+export interface SortOptions {
+    sortBy: SortOption[];
+    mode: SortMode;
+    toJSON: () => SortOptionJSON;
+    fromJSON: (x: SortOptionJSON) => void;
+}
 
+class ScheduleEvaluator {
     public static readonly optionDefaults: SortOptions = {
         sortBy: [
             {
@@ -98,7 +119,32 @@ class ScheduleEvaluator {
                 description: 'Sort randomly'
             }
         ],
-        mode: SortMode.combined
+        mode: SortMode.combined,
+        toJSON() {
+            return {
+                sortBy: this.sortBy.map(x => ({
+                    name: x.name,
+                    enabled: x.enabled,
+                    reverse: x.reverse
+                })),
+                mode: this.mode
+            };
+        },
+        fromJSON(raw: SortOptionJSON) {
+            if (raw && raw.mode && raw.sortBy) {
+                this.mode = raw.mode;
+                for (const raw_sort of raw.sortBy) {
+                    for (const sort of this.sortBy) {
+                        if (sort.name === raw_sort.name) {
+                            sort.enabled = raw_sort.enabled;
+                            sort.reverse = raw_sort.reverse;
+                            break;
+                        }
+                    }
+                }
+            }
+            return this;
+        }
     };
 
     public static readonly sortModes: SortModes = [
@@ -111,7 +157,8 @@ class ScheduleEvaluator {
             mode: SortMode.fallback,
             title: 'Fallback',
             description:
-                'Sort using the options on top first. If compare equal, sort using the next option.'
+                'Sort using the options on top first. If compare equal, sort using the next option.' +
+                ' You can drag the sorting options to change their order.'
         }
     ];
 
@@ -121,7 +168,7 @@ class ScheduleEvaluator {
          */
         variance(schedule: RawAlgoSchedule) {
             const minutes = new Float32Array(5);
-            const days = ScheduleEvaluator.days;
+            const days = Meta.days;
             for (const course of schedule) {
                 for (let i = 0; i < days.length; i++) {
                     const timeBlock = course[1][days[i]];
@@ -138,13 +185,13 @@ class ScheduleEvaluator {
          * defined as the total time in between each pair of consecutive classes
          */
         compactness(schedule: RawAlgoSchedule) {
-            const DAYS = ScheduleEvaluator.days;
+            const DAYS = Meta.days;
             const week: number[][] = [[], [], [], [], []];
             for (const c of schedule) {
                 const crs = c[1];
                 for (let k = 0; k < 5; k++) {
                     const temp = week[k];
-                    week[k].push.apply(temp, crs[DAYS[k]]);
+                    week[k].push.apply(temp, crs[DAYS[k]] as number[]);
                 }
             }
 
@@ -182,9 +229,9 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
-            const lunchDuration = lunchEnd - lunchStart;
-            const week = ScheduleEvaluator.days;
-            const lunchOverlap = new Float32Array(5);
+            const lunchMaxOverlap = 60;
+            const week = Meta.days;
+            const lunchOverlap = new Int32Array(5);
             for (let i = 0; i < 5; i++) {
                 for (const course of schedule) {
                     const blocks = course[1][week[i]];
@@ -202,19 +249,25 @@ class ScheduleEvaluator {
             }
             let overlap = 0;
             for (let i = 0; i < lunchOverlap.length; i++) {
-                overlap += Math.exp(lunchOverlap[i] / lunchDuration / 4);
+                const o = lunchOverlap[i];
+                if (o > lunchMaxOverlap) overlap += o;
             }
             return overlap;
         },
 
         noEarly(schedule: RawAlgoSchedule) {
             const earliest = new Int32Array(5).fill(24 * 60);
-            const days = ScheduleEvaluator.days;
+            const days = Meta.days;
             const refTime = 22 * 60;
             for (const course of schedule) {
                 for (let i = 0; i < 5; i++) {
                     const timeBlock = course[1][days[i]];
-                    if (timeBlock) earliest[i] = Math.min(earliest[i], Math.min(...timeBlock));
+                    if (timeBlock) {
+                        for (let j = 0; j < timeBlock.length; j += 2) {
+                            const t = timeBlock[j];
+                            if (t < earliest[i]) earliest[i] = t;
+                        }
+                    }
                 }
             }
             return earliest.reduce((acc, x) => acc + refTime - x, 0);
@@ -267,10 +320,12 @@ class ScheduleEvaluator {
 
     public schedules: CmpSchedules[] | MultiCriteriaCmpSchedules[];
     public options: SortOptions;
+    public events: Event[];
 
-    constructor(options: SortOptions) {
+    constructor(options: SortOptions, events: Event[]) {
         this.schedules = [];
         this.options = ScheduleEvaluator.validateOptions(options);
+        this.events = events;
     }
 
     /**
@@ -440,7 +495,7 @@ class ScheduleEvaluator {
      * Get a `Schedule` object at idx
      */
     public getSchedule(idx: number) {
-        return new Schedule(this.schedules[idx].schedule, 'Schedule', idx + 1);
+        return new Schedule(this.schedules[idx].schedule, 'Schedule', idx + 1, this.events);
     }
     /**
      * whether this evaluator contains an empty array of schedules

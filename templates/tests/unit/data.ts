@@ -3,7 +3,7 @@
  */
 
 import { RawCatalog } from '../../src/models/Meta';
-
+import 'node';
 import path from 'path';
 import fs from 'fs';
 

@@ -18,7 +18,7 @@ describe('Schedule Test', () => {
         const sum = frequencies.reduce((acc, x) => acc + x, 0);
         const prob = frequencies.map(x => (x * 100) / sum);
         console.log(prob);
-        // we expect the hashes to be uniformly distributed
+        // we expect the hashes to be quite uniformly distributed
         expect(prob.some(x => x > 11)).toBe(false);
     });
 });

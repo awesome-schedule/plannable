@@ -9,6 +9,7 @@
                 title="Select Classes"
                 @click="
                     showSelectClass = !showSelectClass;
+                    showEvent = false;
                     showFilter = false;
                     showSetting = false;
                     showExport = false;
@@ -18,11 +19,26 @@
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
+                class="tab-icon mt-0 mb-4"
+                title="Select Classes"
+                @click="
+                    showEvent = !showEvent;
+                    showSelectClass = false;
+                    showFilter = false;
+                    showSetting = false;
+                    showExport = false;
+                    getClass(null);
+                "
+            >
+                <i class="fab fa-elementor"></i>
+            </div>
+            <div
                 class="tab-icon mb-4"
                 title="Filters"
                 @click="
                     showFilter = !showFilter;
                     showSelectClass = false;
+                    showEvent = false;
                     showSetting = false;
                     showExport = false;
                     getClass(null);
@@ -36,6 +52,7 @@
                 @click="
                     showSetting = !showSetting;
                     showSelectClass = false;
+                    showEvent = false;
                     showFilter = false;
                     showExport = false;
                     getClass(null);
@@ -49,6 +66,7 @@
                 @click="
                     showExport = !showExport;
                     showSelectClass = false;
+                    showEvent = false;
                     showFilter = false;
                     showSetting = false;
                     getClass(null);
@@ -191,6 +209,57 @@
                     </table>
                 </li>
             </ul>
+        </nav>
+
+        <nav
+            v-if="sideBar && showEvent"
+            class="d-block bg-light sidebar"
+            style="scrollbar-width:thin !important"
+        >
+            <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
+                Add an Event
+            </button>
+            <div class="input-group my-3" style="width:98%;margin-left:1%">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Title</span>
+                </div>
+                <input class="form-control" type="text" />
+            </div>
+            <div class="btn-group" role="group" style="width:98%;margin-left:1%">
+                <button
+                    v-for="(day, idx) in days"
+                    :key="idx"
+                    :class="'btn btn-secondary' + (eventWeek[idx] ? ' active' : '')"
+                    type="button"
+                    @click="updateDay(idx)"
+                >
+                    {{ day }}
+                </button>
+            </div>
+            <br />
+            <div class="input-group mt-3" style="width:98%;margin-left:1%">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">From</span>
+                </div>
+                <input class="form-control" type="time" style="-webkit-appearance:button" />
+                <div class="input-group-prepend">
+                    <span class="input-group-text">to</span>
+                </div>
+                <input class="form-control" type="time" style="-webkit-appearance:button" />
+            </div>
+
+            <div class="input-group flex-nowrap mt-3" style="width:98%;margin-left:1%">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Place (Optional)</span>
+                </div>
+                <input type="text" class="form-control" />
+            </div>
+
+            <textarea
+                class="mt-3"
+                placeholder="Description"
+                style="width:98%;height:100px;margin-left:1%;border-radius: 3px 3px 3px 3px"
+            ></textarea>
         </nav>
 
         <nav
@@ -639,7 +708,7 @@ import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr } from './models/Utils';
-import { type } from 'os';
+import Meta from './models/Meta';
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
@@ -696,6 +765,8 @@ function getDefaultData() {
          * when true, show the select-class sidebar if 'sideBar' is also true
          */
         showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
+
+        showEvent: false,
         /**
          * when true, show the filter sidebar if 'sideBar' is also true
          */
@@ -780,7 +851,13 @@ function getDefaultData() {
         drag: false,
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
         sortModes: ScheduleEvaluator.sortModes,
-        standard: false
+        standard: false,
+        eventWeek: [false, false, false, false, false],
+        eventTime: '',
+        eventTitle: '',
+        eventRoom: '',
+        eventDescription: '',
+        days: Meta.days
     };
 }
 /**
@@ -833,7 +910,11 @@ export default Vue.extend({
          */
         scheduleWidth() {
             return this.sideBar &&
-                (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
+                (this.showSelectClass ||
+                    this.showEvent ||
+                    this.showFilter ||
+                    this.showSetting ||
+                    this.showExport)
                 ? 100 - 19 - 3 - 5
                 : 100 - 3 - 3;
         },
@@ -842,7 +923,11 @@ export default Vue.extend({
          */
         scheduleLeft() {
             return this.sideBar &&
-                (this.showSelectClass || this.showFilter || this.showSetting || this.showExport)
+                (this.showSelectClass ||
+                    this.showEvent ||
+                    this.showFilter ||
+                    this.showSetting ||
+                    this.showExport)
                 ? 23
                 : 3;
         },
@@ -890,6 +975,10 @@ export default Vue.extend({
         }
     },
     methods: {
+        updateDay(idx) {
+            this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
+            // this.eventWeek[idx] = !this.eventWeek[idx];
+        },
         /**
          * @param {()=>void} success
          * @param {()=>void} reject

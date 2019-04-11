@@ -2,22 +2,19 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
-import CourseRecord from '../models/Course';
 import { Semester } from '../models/Catalog';
-import Meta, { RawCatalog, RawCourse, RawSection, RawMeeting } from '@/models/Meta';
-import Meeting from '@/models/Meeting';
-import { STATUS_CODES } from 'http';
+import Meta, { RawCatalog, RawSection, RawMeeting } from '@/models/Meta';
 
-const CROS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
 
 /**
  * Fetch the list of semesters from Lou's list
  */
-function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]> {
+function getSemesterList(cors_proxy = CORS_PROXY, count = 5): Promise<Semester[]> {
     console.time('get semester list');
     return new Promise((resolve, reject) => {
         axios
-            .get(`${cros_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/`)
+            .get(`${cors_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/`)
             .then(response => {
                 console.timeEnd('get semester list');
                 console.time('parse semester list');
@@ -45,12 +42,12 @@ function getSemesterList(cros_proxy = CROS_PROXY, count = 5): Promise<Semester[]
     });
 }
 
-function getSemesterData(semesterId: string, cros_proxy = CROS_PROXY): Promise<RawCatalog> {
+function getSemesterData(semesterId: string, cors_proxy = CORS_PROXY): Promise<RawCatalog> {
     console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
         axios
             .post(
-                `${cros_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
+                `${cors_proxy}https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
                 querystring.stringify({
                     Semester: semesterId,
                     Group: 'CS',

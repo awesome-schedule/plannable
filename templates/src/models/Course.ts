@@ -1,5 +1,7 @@
 import Section from './Section';
 import Meta, { RawCourse } from './Meta';
+import Hashable from './Hashable';
+import { hashCode } from './Utils';
 
 /**
  * Represents all public information of a Course
@@ -13,24 +15,7 @@ export interface CourseFields {
     description: string;
 }
 
-class Course implements CourseFields {
-    /**
-     * Calculate a 32 bit FNV-1a hash
-     * @see https://gist.github.com/vaiorabbit/5657561
-     * @see http://isthe.com/chongo/tech/comp/fnv/
-     * @param {string} str the input value
-     * @returns {number}
-     */
-    public static hashCode(str: string): number {
-        let hval = 0x811c9dc5;
-
-        for (let i = 0, l = str.length; i < l; i++) {
-            hval ^= str.charCodeAt(i);
-            hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-        }
-        return hval >>> 0;
-    }
-
+class Course implements CourseFields, Hashable {
     [x: string]: any;
     /**
      * key of this in Catalog, equal to (department + number + `Meta.TYPES_PARSE`\[type\])
@@ -119,7 +104,7 @@ class Course implements CourseFields {
     }
 
     public hash() {
-        return Course.hashCode(this.key + this.sids.toString());
+        return hashCode(this.key + this.sids.toString());
     }
 
     public copy() {

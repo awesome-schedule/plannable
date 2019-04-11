@@ -199,12 +199,12 @@
                 Schedule Overview
             </button>
             <ul v-if="generated" class="list-group list-group-flush" style="width:99%">
-                <li class="list-group-item">Total Credits: {{ totalCredit }}</li>
+                <li class="list-group-item">Total Credits: {{ currentSchedule.totalCredit }}</li>
                 <li class="list-group-item pr-0">
                     <table style="width:100%;font-size:14px">
-                        <tr v-for="(value, idx) in currentSchedule.currentIds" :key="idx">
-                            <td>{{ idx }}&nbsp;&nbsp;&nbsp;</td>
-                            <td>{{ value }}</td>
+                        <tr v-for="item in currentIds" :key="item[0]">
+                            <td>{{ item[0] }}</td>
+                            <td>{{ item[1] }}</td>
                         </tr>
                     </table>
                 </li>
@@ -932,10 +932,12 @@ export default Vue.extend({
                 : 3;
         },
         /**
-         * @returns {number}
+         * @returns {[string, string][]}
          */
-        totalCredit() {
-            return this.currentSchedule.totalCredit;
+        currentIds() {
+            return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
+                a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
+            );
         }
     },
     watch: {

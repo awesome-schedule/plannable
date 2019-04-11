@@ -6,6 +6,7 @@ import Event from './Event';
 import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from './Utils';
+import Hashable from './Hashable';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -116,7 +117,7 @@ class Schedule {
     /**
      * a property used internally to keep track of used colors to avoid color collision
      */
-    private colors: Set<number>;
+    private colors: string[][];
 
     /**
      * Construct a `Schedule` object from its raw representation
@@ -138,7 +139,7 @@ class Schedule {
         this.previous = null;
         this.title = title;
         this.id = id;
-        this.colors = new Set();
+        this.colors = Array.from({ length: Schedule.bgColors.length }, () => []);
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
@@ -151,18 +152,37 @@ class Schedule {
     }
 
     /**
-     * Get the background color of a course
+     * Get the background color of a hashable object
+     *
+     * Usually the object is either a `Course`, a `Section`, or an `Event`
+     *
+     * @remarks color collision is avoided by linear probing
+     *
+     * @remarks it is rarely the case that the number of classes exceed the total length of the bg color array
      */
-    public getColor(course: Course | Section | Event) {
-        let hash = course.hash();
-        let idx = hash % Schedule.bgColors.length;
-        // avoid color collision by linear probing
-        while (this.colors.has(idx)) {
-            hash += 1;
-            idx = hash % Schedule.bgColors.length;
+    public getColor(obj: Hashable) {
+        const hash = obj.hash();
+        const tableSize = Schedule.bgColors.length;
+        let idx = hash % tableSize;
+        let count = 0;
+        let minLen = Infinity;
+        let minLenIdx = 0;
+        while (this.colors[idx].length && count < tableSize) {
+            count++;
+            idx = (hash + count) % tableSize;
+            const bucketSize = this.colors[idx].length;
+            if (bucketSize < minLen) {
+                minLen = bucketSize;
+                minLenIdx = idx;
+            }
         }
-        this.colors.add(idx);
-        return Schedule.bgColors[idx];
+        if (count >= tableSize) {
+            this.colors[minLenIdx].push(obj.key);
+            return Schedule.bgColors[minLenIdx];
+        } else {
+            this.colors[idx].push(obj.key);
+            return Schedule.bgColors[idx];
+        }
     }
 
     /**
@@ -369,7 +389,7 @@ class Schedule {
         for (const key in this.days) {
             this.days[key] = [];
         }
-        this.colors.clear();
+        this.colors = this.colors.map(() => []);
         this.totalCredit = 0;
         this.currentCourses = [];
     }

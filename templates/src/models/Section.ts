@@ -1,12 +1,13 @@
 import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
+import Hashable from './Hashable';
 
 /**
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
  */
-class Section implements CourseFields {
+class Section implements CourseFields, Hashable {
     public department: string;
     public number: number;
     public type: string;

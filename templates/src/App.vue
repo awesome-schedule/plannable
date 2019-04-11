@@ -223,7 +223,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Title</span>
                 </div>
-                <input class="form-control" type="text" />
+                <input v-model="eventTitle" class="form-control" type="text" />
             </div>
             <div class="btn-group" role="group" style="width:98%;margin-left:1%">
                 <button
@@ -241,25 +241,43 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">From</span>
                 </div>
-                <input class="form-control" type="time" style="-webkit-appearance:button" />
+                <input
+                    v-model="eventTimeFrom"
+                    class="form-control"
+                    type="time"
+                    style="-webkit-appearance:button"
+                />
                 <div class="input-group-prepend">
                     <span class="input-group-text">to</span>
                 </div>
-                <input class="form-control" type="time" style="-webkit-appearance:button" />
+                <input
+                    v-model="eventTimeTo"
+                    class="form-control"
+                    type="time"
+                    style="-webkit-appearance:button"
+                />
             </div>
 
             <div class="input-group flex-nowrap mt-3" style="width:98%;margin-left:1%">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Place (Optional)</span>
                 </div>
-                <input type="text" class="form-control" />
+                <input v-model="eventRoom" type="text" class="form-control" />
             </div>
 
             <textarea
+                v-model="eventDescription"
                 class="mt-3"
                 placeholder="Description"
                 style="width:98%;height:100px;margin-left:1%;border-radius: 3px 3px 3px 3px"
             ></textarea>
+            <button
+                class="btn btn-outline-secondary"
+                style="width:98%; margin-left:1%"
+                @click="addEvent()"
+            >
+                Add
+            </button>
         </nav>
 
         <nav
@@ -853,7 +871,8 @@ function getDefaultData() {
         sortModes: ScheduleEvaluator.sortModes,
         standard: false,
         eventWeek: [false, false, false, false, false],
-        eventTime: '',
+        eventTimeFrom: '',
+        eventTimeTo: '',
         eventTitle: '',
         eventRoom: '',
         eventDescription: '',
@@ -1466,6 +1485,30 @@ export default Vue.extend({
             console.log(this.currentSemester.id);
             // console.log(this.currentSchedule);
             window.URL.revokeObjectURL(url);
+        },
+        addEvent() {
+            // parse time
+            let days = '';
+            for (let i = 0; i < 5; i++) {
+                if (this.eventWeek[i]) {
+                    days += Meta.days[i];
+                }
+            }
+            days += ' ';
+            days += to12hr(this.eventTimeFrom);
+            days += ' - ';
+            days += to12hr(this.eventTimeTo);
+
+            this.currentSchedule.addEvent(
+                days,
+                true,
+                this.eventTitle,
+                this.eventRoom,
+                this.eventDescription
+            );
+        },
+        deleteEvent(days) {
+            this.currentSchedule.deleteEvent(days);
         }
     }
 });

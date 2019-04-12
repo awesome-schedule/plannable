@@ -75,6 +75,9 @@ class Schedule {
         schedule.computeSchedule();
         return schedule;
     }
+
+    private static savedColors: { [x: string]: string } = {};
+
     /**
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
      * note that if **section** is -1, it means that all sections are allowed.
@@ -117,7 +120,7 @@ class Schedule {
     /**
      * a property used internally to keep track of used colors to avoid color collision
      */
-    private colors: string[][];
+    private colorSlots: Array<Set<string>>;
 
     /**
      * Construct a `Schedule` object from its raw representation
@@ -139,7 +142,7 @@ class Schedule {
         this.previous = null;
         this.title = title;
         this.id = id;
-        this.colors = Array.from({ length: Schedule.bgColors.length }, () => []);
+        this.colorSlots = Array.from({ length: Schedule.bgColors.length }, () => new Set<string>());
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
@@ -153,37 +156,28 @@ class Schedule {
 
     /**
      * Get the background color of a hashable object
-     *
      * Usually the object is either a `Course`, a `Section`, or an `Event`
      *
-     * @remarks color collision is avoided by linear probing
-     *
-     * @remarks it is rarely the case that the number of classes exceed the total length of the bg color array
+     * @remarks color collision is handled by separate chaining
      */
-    public getColor(obj: Hashable) {
-        const hash = obj.hash();
-        const tableSize = Schedule.bgColors.length;
-        let idx = hash % tableSize;
-        let count = 0;
-        let minLen = Infinity;
-        let minLenIdx = 0;
-        while (this.colors[idx].length && count < tableSize) {
-            count++;
-            idx = (hash + count) % tableSize;
-            const bucketSize = this.colors[idx].length;
-            if (bucketSize < minLen) {
-                minLen = bucketSize;
-                minLenIdx = idx;
-            }
+    public getColor(obj: Hashable): string {
+        const userColor = Schedule.savedColors[obj.key];
+        if (userColor) {
+            return userColor;
         }
-        if (count >= tableSize) {
-            this.colors[minLenIdx].push(obj.key);
-            return Schedule.bgColors[minLenIdx];
-        } else {
-            this.colors[idx].push(obj.key);
-            return Schedule.bgColors[idx];
-        }
+        const idx = obj.hash() % Schedule.bgColors.length;
+        this.colorSlots[idx].add(obj.key);
+        return Schedule.bgColors[idx];
     }
+
+    public setColor(obj: Hashable, color: string) {
+        Schedule.savedColors[obj.key] = color;
+        this.computeSchedule();
+    }
+
+    // public nextColor(obj: Hashable, color: string) {
+
+    // }
 
     /**
      * Add a course to schedule
@@ -389,7 +383,7 @@ class Schedule {
         for (const key in this.days) {
             this.days[key] = [];
         }
-        this.colors = this.colors.map(() => []);
+        this.colorSlots.forEach(x => x.clear());
         this.totalCredit = 0;
         this.currentCourses = [];
     }

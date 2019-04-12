@@ -12,7 +12,7 @@
                                     style="font-size:1.2rem"
                                     @click="collapse(crs.key)"
                                 >
-                                    <i class="fas" :class="expanded(crs)"></i>
+                                    <i class="fas" :class="expanded(crs.key)"></i>
                                 </button>
                             </td>
                             <td>
@@ -95,13 +95,13 @@
                 </div>
                 <Expand>
                     <div
-                        v-if="expanded(crs) === 'fa-chevron-down'"
+                        v-if="expanded(crs.key) === 'fa-chevron-down'"
                         :id="`${crs.key}trans`"
                         class="trans"
                     >
                         <div
                             v-for="(sec, idx) in crs.sections"
-                            :key="crs.key + sec.section + idx"
+                            :key="idx"
                             class="list-group"
                             :class="{ show: isEntering && expandOnEntering }"
                         >
@@ -115,7 +115,7 @@
                                         ? 'click to unselect'
                                         : 'click to select'
                                 "
-                                @click="select(crs, -1)"
+                                @click="select(crs.key, -1)"
                                 >Any Section
                                 <div v-if="schedule.All[crs.key] === -1" style="float:right;">
                                     <i class="fas fa-check"></i>
@@ -124,12 +124,14 @@
 
                             <div
                                 class="list-group-item list-group-item-action class-section container-fluid"
-                                :class="{ active: isActive(crs.key, idx) }"
+                                :class="{ active: isActive(crs.key, crs.sids[idx]) }"
                                 :title="
-                                    isActive(crs.key, idx) ? 'click to unselect' : 'click to select'
+                                    isActive(crs.key, crs.sids[idx])
+                                        ? 'click to unselect'
+                                        : 'click to select'
                                 "
-                                @click="select(crs, idx)"
-                                @mouseover="preview(crs.key, idx)"
+                                @click="select(crs.key, crs.sids[idx])"
+                                @mouseover="preview(crs.key, crs.sids[idx])"
                                 @mouseleave="removePreview()"
                             >
                                 <div class="row no-gutters">
@@ -143,13 +145,12 @@
                                             </template>
                                             <li>
                                                 {{ sec.instructors.join(', ') }}
-                                                <!-- {{ crs.room[idx] }} -->
                                             </li>
                                         </ul>
                                     </div>
                                     <div class="col col-sm-1 align-self-center mr-1">
                                         <i
-                                            v-if="isActive(crs.key, idx)"
+                                            v-if="isActive(crs.key, crs.sids[idx])"
                                             style="font-size: 0.85rem"
                                             class="fas fa-check"
                                         ></i>
@@ -165,8 +166,6 @@
 
 <script>
 import Vue from 'vue';
-// eslint-disable-next-line
-import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 export default Vue.extend({
@@ -176,7 +175,7 @@ export default Vue.extend({
     },
     props: {
         /**
-         * @type {Course[]}
+         * @type {import('../models/Course').default[]}
          */
         courses: Array,
         schedule: Schedule,
@@ -196,11 +195,11 @@ export default Vue.extend({
     },
     methods: {
         /**
-         * @param {Course} crs
+         * @param {string} key
          * @param {number} idx
          */
-        select(crs, idx) {
-            this.$emit('update_course', crs.key, idx);
+        select(key, idx) {
+            this.$emit('update_course', key, idx);
             // note: adding a course to schedule.All cannot be detected by Vue.
             // Must use forceUpdate to rerender component
             this.$forceUpdate();
@@ -228,11 +227,11 @@ export default Vue.extend({
             return false;
         },
         /**
-         * @param {Course}
+         * @param {string} key
          * @returns {string}
          */
-        expanded(crs) {
-            return (this.collapsed[crs.key] !== undefined) !==
+        expanded(key) {
+            return (this.collapsed[key] !== undefined) !==
                 (this.isEntering && this.expandOnEntering)
                 ? 'fa-chevron-down'
                 : 'fa-chevron-right';

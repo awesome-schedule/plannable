@@ -7,70 +7,34 @@
             <div
                 class="tab-icon mt-0 mb-4"
                 title="Select Classes"
-                @click="
-                    showSelectClass = !showSelectClass;
-                    showEvent = false;
-                    showFilter = false;
-                    showSetting = false;
-                    showExport = false;
-                    getClass(null);
-                "
+                @click="switchSideBar('showSelectClass')"
             >
                 <i class="far fa-calendar-alt"></i>
             </div>
-            <div
-                class="tab-icon mt-0 mb-4"
-                title="Select Classes"
-                @click="
-                    showEvent = !showEvent;
-                    showSelectClass = false;
-                    showFilter = false;
-                    showSetting = false;
-                    showExport = false;
-                    getClass(null);
-                "
-            >
+            <div class="tab-icon mt-0 mb-4" title="Edit Events" @click="switchSideBar('showEvent')">
                 <i class="fab fa-elementor"></i>
             </div>
-            <div
-                class="tab-icon mb-4"
-                title="Filters"
-                @click="
-                    showFilter = !showFilter;
-                    showSelectClass = false;
-                    showEvent = false;
-                    showSetting = false;
-                    showExport = false;
-                    getClass(null);
-                "
-            >
+            <div class="tab-icon mb-4" title="Filters" @click="switchSideBar('showFilter')">
                 <i class="fas fa-filter"></i>
             </div>
             <div
                 class="tab-icon mb-4"
                 title="Display Settings"
-                @click="
-                    showSetting = !showSetting;
-                    showSelectClass = false;
-                    showEvent = false;
-                    showFilter = false;
-                    showExport = false;
-                    getClass(null);
-                "
+                @click="switchSideBar('showSetting')"
             >
                 <i class="fas fa-cog"></i>
             </div>
             <div
                 class="tab-icon mb-4"
+                title="Customize Colors"
+                @click="switchSideBar('showSelectColor')"
+            >
+                <i class="fas fa-palette"></i>
+            </div>
+            <div
+                class="tab-icon mb-4"
                 title="Import/Export Schedule"
-                @click="
-                    showExport = !showExport;
-                    showSelectClass = false;
-                    showEvent = false;
-                    showFilter = false;
-                    showSetting = false;
-                    getClass(null);
-                "
+                @click="switchSideBar('showExport')"
             >
                 <i class="fas fa-download"></i>
             </div>
@@ -86,7 +50,7 @@
         <!-- Tab Icons End (Leftmost bar) -->
 
         <nav
-            v-if="sideBar && showSelectClass"
+            v-if="sideBar.showSelectClass"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
@@ -212,7 +176,7 @@
         </nav>
 
         <nav
-            v-if="sideBar && showEvent"
+            v-if="sideBar.showEvent"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
             :edit-event="editEvent(event)"
@@ -282,7 +246,7 @@
         </nav>
 
         <nav
-            v-if="sideBar && showFilter"
+            v-if="sideBar.showFilter"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
@@ -451,7 +415,7 @@
         </nav>
 
         <nav
-            v-if="sideBar && showSetting"
+            v-if="sideBar.showSetting"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
@@ -602,7 +566,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar && showExport" class="d-block bg-light sidebar">
+        <nav v-if="sideBar.showExport" class="d-block bg-light sidebar">
             <button class="btn btn-info nav-btn">
                 Import/Export Schedule
             </button>
@@ -637,6 +601,12 @@
                 </li>
                 <li class="list-group-item"></li>
             </ul>
+        </nav>
+
+        <nav v-if="sideBar.showSelectColor" class="d-block bg-light sidebar">
+            <button class="btn btn-info nav-btn">
+                Palette
+            </button>
         </nav>
 
         <transition name="fade">
@@ -775,26 +745,20 @@ function getDefaultData() {
         scheduleEvaluator: new ScheduleEvaluator(),
         maxNumSchedules: Infinity,
 
-        // sidebar display status
-        /***
-         * show left sidebar when true, and hide when false
-         */
-        sideBar: true,
         /**
-         * when true, show the select-class sidebar if 'sideBar' is also true
+         * sidebar display status
+         * show the specific sidebar when true, and hide when all false
+         *
+         * @type {Object<string, boolean>}
          */
-        showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
-
-        showEvent: false,
-        /**
-         * when true, show the filter sidebar if 'sideBar' is also true
-         */
-        showFilter: false,
-        /**
-         * when true, show the settings sidebar if 'sideBar' is also true
-         */
-        showSetting: false,
-        showExport: false,
+        sideBar: {
+            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
+            showEvent: false,
+            showFilter: false,
+            showSetting: false,
+            showExport: false,
+            showSelectColor: false
+        },
 
         // autocompletion related fields
         isEntering: false,
@@ -821,13 +785,28 @@ function getDefaultData() {
         showClasslistTitle: false,
         fullHeight: 40,
         partialHeight: 25,
+        earliest: '08:00:00',
+        latest: '19:00:00',
+        standard: false,
+
+        // filter settings
         /**
          * @type {[string, string][]}
          */
         timeSlots: [],
         allowWaitlist: true,
         allowClosed: true,
-        downloadURL: '',
+        sortOptions: ScheduleEvaluator.getDefaultOptions(),
+        sortModes: ScheduleEvaluator.sortModes,
+
+        // event related fields
+        eventWeek: [false, false, false, false, false],
+        eventTimeFrom: '',
+        eventTimeTo: '',
+        eventTitle: '',
+        eventRoom: '',
+        eventDescription: '',
+        isEditingEvent: false,
 
         // storage related fields
         storageVersion: 2,
@@ -840,6 +819,7 @@ function getDefaultData() {
             'currentSchedule',
             'proposedSchedule',
             'sortOptions',
+
             // settings
             'allowWaitList',
             'allowClosed',
@@ -857,28 +837,16 @@ function getDefaultData() {
 
         // other
         noti: new Notification(),
-        cache: true,
         navHeight: 500,
         loading: false,
         mobile: window.screen.width < 900,
         scrollable: false,
         semesterListExpirationTime: 86400 * 1000, // one day
         semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
-        earliest: '08:00:00',
-        latest: '19:00:00',
         tempScheduleIndex: null,
         drag: false,
-        sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        sortModes: ScheduleEvaluator.sortModes,
-        standard: false,
-        eventWeek: [false, false, false, false, false],
-        eventTimeFrom: '',
-        eventTimeTo: '',
-        eventTitle: '',
-        eventRoom: '',
-        eventDescription: '',
-        days: Meta.days,
-        isEditingEvent: false
+        downloadURL: '',
+        days: Meta.days
     };
 }
 /**
@@ -920,6 +888,12 @@ export default Vue.extend({
         return getDefaultData();
     },
     computed: {
+        sideBarActive() {
+            for (const key in this.sideBar) {
+                if (this.sideBar[key]) return true;
+            }
+            return false;
+        },
         /**
          * @return {number}
          */
@@ -930,29 +904,16 @@ export default Vue.extend({
          * @returns {number}
          */
         scheduleWidth() {
-            return this.sideBar &&
-                (this.showSelectClass ||
-                    this.showEvent ||
-                    this.showFilter ||
-                    this.showSetting ||
-                    this.showExport)
-                ? 100 - 19 - 3 - 5
-                : 100 - 3 - 3;
+            return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
         },
         /**
          * @returns {number}
          */
         scheduleLeft() {
-            return this.sideBar &&
-                (this.showSelectClass ||
-                    this.showEvent ||
-                    this.showFilter ||
-                    this.showSetting ||
-                    this.showExport)
-                ? 23
-                : 3;
+            return this.sideBarActive ? 23 : 3;
         },
         /**
+         * get the list of current ids, sorted in alpabetical order of the keys
          * @returns {[string, string][]}
          */
         currentIds() {
@@ -998,9 +959,21 @@ export default Vue.extend({
         }
     },
     methods: {
+        /**
+         * @param {number} idx
+         */
         updateDay(idx) {
             this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
-            // this.eventWeek[idx] = !this.eventWeek[idx];
+        },
+        /**
+         * @param {string} key
+         */
+        switchSideBar(key) {
+            this.getClass(null);
+            for (const other in this.sideBar) {
+                if (other !== key) this.sideBar[other] = false;
+            }
+            this.sideBar[key] = !this.sideBar[key];
         },
         /**
          * @param {()=>void} success

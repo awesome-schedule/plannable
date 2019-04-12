@@ -2,6 +2,8 @@
  * This file prepares data for unit testing
  */
 
+import { RawCatalog } from '../../src/models/Meta';
+import 'node';
 import path from 'path';
 import fs from 'fs';
 
@@ -12,7 +14,6 @@ const data_path = path.join(
     'CS1198Data.json'
 );
 
-const data = JSON.parse(fs.readFileSync(data_path).toString());
-// console.log(RECORDS_DICT);
+const data: RawCatalog = JSON.parse(fs.readFileSync(data_path).toString());
 
 export default data;

@@ -70,7 +70,7 @@
                     {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
                 </div>
             </div>
-            <div v-if="isEvent(scheduleBlock)">
+            <div v-if="isEvent(scheduleBlock)" @click="$parent.$emit('edit-event', scheduleBlock)">
                 <div class="ml-2 mt-2">
                     {{ scheduleBlock.section.title }}
                 </div>

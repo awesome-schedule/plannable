@@ -215,6 +215,7 @@
             v-if="sideBar && showEvent"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
+            :edit-event="editEvent(event)"
         >
             <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
                 Add an Event
@@ -876,7 +877,8 @@ function getDefaultData() {
         eventTitle: '',
         eventRoom: '',
         eventDescription: '',
-        days: Meta.days
+        days: Meta.days,
+        isEditingEvent: false
     };
 }
 /**
@@ -1486,8 +1488,7 @@ export default Vue.extend({
             // console.log(this.currentSchedule);
             window.URL.revokeObjectURL(url);
         },
-        addEvent() {
-            // parse time
+        getEventDays() {
             let days = '';
             for (let i = 0; i < 5; i++) {
                 if (this.eventWeek[i]) {
@@ -1498,6 +1499,11 @@ export default Vue.extend({
             days += to12hr(this.eventTimeFrom);
             days += ' - ';
             days += to12hr(this.eventTimeTo);
+            return days;
+        },
+        addEvent() {
+            // parse time
+            const days = this.getEventDays();
 
             this.currentSchedule.addEvent(
                 days,
@@ -1506,9 +1512,38 @@ export default Vue.extend({
                 this.eventRoom,
                 this.eventDescription
             );
+            this.isEditingEvent = false;
         },
-        deleteEvent(days) {
-            this.currentSchedule.deleteEvent(days);
+        editEvent(event) {
+            this.isEditingEvent = true;
+            this.eventTitle = event.title;
+            this.eventRoom = event.room;
+            this.eventDescription = event.description;
+            const [week, start, , end] = event.days.split(' ');
+            for (let i = 0; i < Meta.days.length; i++) {
+                if (week.indexOf(Meta.days[i]) !== -1) {
+                    this.$set(this.eventWeek, i, true);
+                }
+            }
+            const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
+            const start24 =
+                (start.substring(start.length - 2, start.length) === 'AM'
+                    ? starthr
+                    : '' + ((parseInt(starthr) + 12) % 24)) +
+                ':' +
+                startmin;
+            this.eventTimeFrom = start24;
+            const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
+            const end24 =
+                (end.substring(end.length - 2, end.length) === 'AM'
+                    ? endhr
+                    : '' + ((parseInt(endhr) + 12) % 24)) +
+                ':' +
+                endmin;
+            this.eventTimeTo = end24;
+        },
+        deleteEvent() {
+            this.currentSchedule.deleteEvent(this.getEventDays());
         }
     }
 });

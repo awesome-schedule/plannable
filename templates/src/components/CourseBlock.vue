@@ -71,7 +71,16 @@
                 </div>
             </div>
             <div v-if="isEvent(scheduleBlock)">
-                {{ scheduleBlock.section.days }}
+                <div class="ml-2 mt-2">
+                    {{ scheduleBlock.section.title }}
+                </div>
+                <div class="ml-2">
+                    {{ scheduleBlock.days }}&nbsp;
+                    {{ scheduleBlock.room }}
+                </div>
+                <div class="ml-2">
+                    {{ scheduleBlock.description }}
+                </div>
             </div>
         </div>
         <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">

@@ -181,7 +181,8 @@
             style="scrollbar-width:thin !important"
         >
             <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
-                Add an Event
+                <div v-if="!isEditingEvent">Add Event Mode</div>
+                <div v-if="isEditingEvent">Edit Event Mode</div>
             </button>
             <div class="input-group my-3" style="width:98%;margin-left:1%">
                 <div class="input-group-prepend">
@@ -236,12 +237,24 @@
                 style="width:98%;height:100px;margin-left:1%;border-radius: 3px 3px 3px 3px"
             ></textarea>
             <button
+                v-if="!isEditingEvent"
                 class="btn btn-outline-secondary"
                 style="width:98%; margin-left:1%"
                 @click="addEvent()"
             >
                 Add
             </button>
+            <div v-if="isEditingEvent" class="btn-group" role="group" style="width:100%">
+                <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
+                    Edit
+                </button>
+                <button type="button" class="btn btn-outline-info" @click="cancelEvent()">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-outline-danger" @click="deleteEvent()">
+                    Delete
+                </button>
+            </div>
         </nav>
 
         <nav
@@ -835,6 +848,7 @@ function getDefaultData() {
         eventTitle: '',
         eventRoom: '',
         eventDescription: '',
+        isEditingEvent: false,
 
         // storage related fields
         storageVersion: 2,
@@ -876,7 +890,8 @@ function getDefaultData() {
         downloadURL: '',
         days: Meta.days,
 
-        status__: Math.random()
+        status__: Math.random(),
+        toBeModifiedDays: ''
     };
 }
 /**
@@ -1513,8 +1528,7 @@ export default Vue.extend({
             // console.log(this.currentSchedule);
             window.URL.revokeObjectURL(url);
         },
-        addEvent() {
-            // parse time
+        getEventDays() {
             let days = '';
             for (let i = 0; i < 5; i++) {
                 if (this.eventWeek[i]) {
@@ -1525,17 +1539,92 @@ export default Vue.extend({
             days += to12hr(this.eventTimeFrom);
             days += ' - ';
             days += to12hr(this.eventTimeTo);
-
-            this.currentSchedule.addEvent(
-                days,
-                true,
-                this.eventTitle,
-                this.eventRoom,
-                this.eventDescription
-            );
+            return days;
         },
-        deleteEvent(days) {
-            this.currentSchedule.deleteEvent(days);
+        addEvent() {
+            try {
+                const days = this.getEventDays();
+
+                if (days.indexOf('NaN') !== -1) {
+                    this.noti.error('Please enter a valid time!');
+                    return;
+                }
+
+                let invalid = true;
+
+                for (const d of Meta.days) {
+                    if (days.indexOf(d) !== -1) {
+                        invalid = false;
+                        continue;
+                    }
+                }
+
+                if (invalid) {
+                    this.noti.error('Please enter a valid time!');
+                    return;
+                }
+
+                this.currentSchedule.addEvent(
+                    days,
+                    true,
+                    this.eventTitle,
+                    this.eventRoom,
+                    this.eventDescription.split('\n').join('<br />')
+                );
+                this.cancelEvent();
+            } catch (err) {
+                this.noti.error(err.message);
+                // console.error(err);
+            }
+        },
+        editEvent(event) {
+            this.isEditingEvent = true;
+            this.eventTitle = event.title;
+            this.eventRoom = event.room;
+            this.eventDescription = event.description;
+            const [week, start, , end] = event.days.split(' ');
+            for (let i = 0; i < Meta.days.length; i++) {
+                if (week.indexOf(Meta.days[i]) !== -1) {
+                    this.$set(this.eventWeek, i, true);
+                } else {
+                    this.$set(this.eventWeek, i, false);
+                }
+            }
+            const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
+            const start24 =
+                (start.substring(start.length - 2, start.length) === 'AM'
+                    ? starthr
+                    : '' + ((parseInt(starthr) + 12) % 24)) +
+                ':' +
+                startmin;
+            this.eventTimeFrom = start24;
+            const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
+            const end24 =
+                (end.substring(end.length - 2, end.length) === 'AM'
+                    ? endhr
+                    : '' + ((parseInt(endhr) + 12) % 24)) +
+                ':' +
+                endmin;
+            this.eventTimeTo = end24;
+            this.toBeModifiedDays = event.days;
+        },
+        endEditEvent() {
+            this.currentSchedule.deleteEvent(this.toBeModifiedDays);
+            this.addEvent();
+        },
+        deleteEvent() {
+            this.currentSchedule.deleteEvent(this.toBeModifiedDays);
+            this.isEditingEvent = false;
+            this.cancelEvent();
+        },
+        cancelEvent() {
+            this.eventTitle = '';
+            this.eventRoom = '';
+            this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
+            this.eventTimeFrom = '';
+            this.eventTimeTo = '';
+            this.eventDescription = '';
+            this.isEditingEvent = false;
         }
     }
 });

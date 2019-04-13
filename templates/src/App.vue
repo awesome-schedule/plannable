@@ -1039,6 +1039,10 @@ export default Vue.extend({
             for (const other in this.sideBar) {
                 if (other !== key) this.sideBar[other] = false;
             }
+
+            this.currentSchedule = this.proposedSchedule;
+            this.generated = false;
+
             this.sideBar[key] = !this.sideBar[key];
         },
         /**
@@ -1592,16 +1596,21 @@ export default Vue.extend({
             const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
             const start24 =
                 (start.substring(start.length - 2, start.length) === 'AM'
-                    ? starthr
-                    : '' + ((parseInt(starthr) + 12) % 24)) +
+                    ? parseInt(starthr) === 12
+                        ? '00'
+                        : starthr
+                    : '' + (parseInt(starthr) === 12 ? 12 : parseInt(starthr) + 12)) +
                 ':' +
                 startmin;
+            console.log(start24);
             this.eventTimeFrom = start24;
             const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
             const end24 =
                 (end.substring(end.length - 2, end.length) === 'AM'
-                    ? endhr
-                    : '' + ((parseInt(endhr) + 12) % 24)) +
+                    ? parseInt(endhr) === 12
+                        ? '00'
+                        : endhr
+                    : '' + (parseInt(endhr) === 12 ? 12 : parseInt(endhr) + 12)) +
                 ':' +
                 endmin;
             this.eventTimeTo = end24;
@@ -1624,6 +1633,7 @@ export default Vue.extend({
             this.eventTimeTo = '';
             this.eventDescription = '';
             this.isEditingEvent = false;
+            this.generateSchedules();
         }
     }
 });

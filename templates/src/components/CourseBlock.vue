@@ -75,7 +75,10 @@
                 style="height:100%"
                 @click="
                     $parent.$parent.editEvent(scheduleBlock.section);
-                    $parent.$parent.switchSideBar('showEvent');
+                    $parent.$parent.currentSchedule = $parent.$parent.proposedSchedule;
+                    $parent.$parent.generated = false;
+                    if ($parent.$parent.sideBar['showEvent'] === false)
+                        $parent.$parent.switchSideBar('showEvent');
                 "
             >
                 <div class="ml-2 mt-2">

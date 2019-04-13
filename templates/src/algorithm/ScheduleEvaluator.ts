@@ -14,13 +14,18 @@ export type SortModes = Array<{
     description: string;
 }>;
 
+type Chunk = [string, [number, number], number[]];
+type GroupedSchedule = [Chunk[], Chunk[], Chunk[], Chunk[], Chunk[]];
+
 interface CmpSchedules {
     schedule: RawAlgoSchedule;
+    groupedSchedule: GroupedSchedule;
     coeff: number;
 }
 
 interface MultiCriteriaCmpSchedules {
     schedule: RawAlgoSchedule;
+    groupedSchedule: GroupedSchedule;
     coeff: Float32Array;
 }
 
@@ -332,7 +337,34 @@ class ScheduleEvaluator {
      * Add a schedule to the collection of results. Compute its coefficient of quality.
      */
     public add(schedule: RawAlgoSchedule) {
+        const DAYS = Meta.days;
+        const week: GroupedSchedule = [[], [], [], [], []];
+        for (const c of schedule) {
+            for (let k = 0; k < 5; k++) {
+                // temp is the Chunk array at day k
+                const temp: Chunk[] = week[k];
+
+                // dayBlock is the flattened Chunk[1] array
+                const dayBlock = c[1][DAYS[k]] as number[];
+                for (let i = 0; i < dayBlock.length; i += 2) {
+                    const chunk: Chunk = [c[0], [dayBlock[i], dayBlock[i + 1]], c[2]];
+                    temp.push(chunk);
+
+                    for (let j = temp.length - 2; j >= 0; j--) {
+                        if (temp[j][1][0] > chunk[1][0]) {
+                            let t = temp[j];
+                            temp[j] = temp[j + 1];
+                            temp[j + 1] = t;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         (this.schedules as CmpSchedules[]).push({
+            groupedSchedule: week,
             schedule: schedule.concat(),
             coeff: 0
         });

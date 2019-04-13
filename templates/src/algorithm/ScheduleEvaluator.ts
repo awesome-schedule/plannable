@@ -1,5 +1,5 @@
 import Schedule from '../models/Schedule';
-import { RawAlgoSchedule, RawAlgoCourse } from './ScheduleGenerator';
+import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 
@@ -14,14 +14,15 @@ export type SortModes = Array<{
     description: string;
 }>;
 
-interface CmpSchedules {
-    schedule: RawAlgoSchedule;
-    coeff: number;
-}
+type OrderedBlocks = [number[], number[], number[], number[], number[]];
+type OrderedRooms = [string[], string[], string[], string[], string[]];
 
-interface MultiCriteriaCmpSchedules {
+interface CmpSchedule {
     schedule: RawAlgoSchedule;
-    coeff: Float32Array;
+    blocks: OrderedBlocks;
+    rooms: OrderedRooms;
+    coeffs: Float32Array;
+    coeff: number;
 }
 
 /**
@@ -162,14 +163,15 @@ class ScheduleEvaluator {
         }
     ];
 
-    public static sortFunctions: { [x: string]: (schedule: RawAlgoSchedule) => number } = {
+    public static sortFunctions: { [x: string]: (schedule: CmpSchedule) => number } = {
         /**
          * compute the standard deviation of class times
          */
-        variance(schedule: RawAlgoSchedule) {
+        variance(schedule: CmpSchedule) {
             const minutes = new Float32Array(5);
             const days = Meta.days;
-            for (const course of schedule) {
+            const s = schedule.schedule;
+            for (const course of s) {
                 for (let i = 0; i < days.length; i++) {
                     const timeBlock = course[1][days[i]];
                     if (timeBlock) {
@@ -184,40 +186,14 @@ class ScheduleEvaluator {
          * compute the vertical compactness of a schedule,
          * defined as the total time in between each pair of consecutive classes
          */
-        compactness(schedule: RawAlgoSchedule) {
-            const DAYS = Meta.days;
-            const week: number[][] = [[], [], [], [], []];
-            for (const c of schedule) {
-                const crs = c[1];
-                for (let k = 0; k < 5; k++) {
-                    const temp = week[k];
-                    week[k].push.apply(temp, crs[DAYS[k]] as number[]);
+        compactness(schedule: CmpSchedule) {
+            const blocks = schedule.blocks;
+            let compact = 0;
+            for (const dayBlock of blocks) {
+                for (let i = 0; i < dayBlock.length - 3; i += 4) {
+                    compact += dayBlock[i + 2] - dayBlock[i + 1];
                 }
             }
-
-            let compact: number = 0;
-
-            for (const arr of week) {
-                for (let i = 0; i < arr.length; i += 2) {
-                    for (let j = i - 2; j >= 0; j -= 2) {
-                        if (arr[j] > arr[j + 2]) {
-                            const tempL = arr[j];
-                            const tempR = arr[j + 1];
-                            arr[j] = arr[j + 2];
-                            arr[j + 1] = arr[j + 2 + 1];
-                            arr[j + 2] = tempL;
-                            arr[j + 2 + 1] = tempR;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-
-                for (let i = 2; i < arr.length; i += 2) {
-                    compact += arr[i] - arr[i - 1];
-                }
-            }
-
             return compact;
         },
 
@@ -225,52 +201,38 @@ class ScheduleEvaluator {
          * compute overlap of the classes and the lunch time,
          * defined as the time between 11:00 and 14:00
          */
-        lunchTime(schedule: RawAlgoSchedule) {
+        lunchTime(schedule: CmpSchedule) {
             // 11:00 to 14:00
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
-            const lunchMaxOverlap = 60;
-            const week = Meta.days;
+            const lunchMinOverlap = 60;
             const lunchOverlap = new Int32Array(5);
+            const blocks = schedule.blocks;
             for (let i = 0; i < 5; i++) {
-                for (const course of schedule) {
-                    const blocks = course[1][week[i]];
-                    if (blocks) {
-                        for (let j = 0; j < blocks.length; j += 2) {
-                            lunchOverlap[i] += ScheduleEvaluator.calcOverlap(
-                                lunchStart,
-                                lunchEnd,
-                                blocks[j],
-                                blocks[j + 1]
-                            );
-                        }
-                    }
+                const day = blocks[i];
+                for (let j = 0; j < day.length; j += 2) {
+                    lunchOverlap[i] += ScheduleEvaluator.calcOverlap(
+                        lunchStart,
+                        lunchEnd,
+                        day[j],
+                        day[j + 1]
+                    );
                 }
             }
             let overlap = 0;
             for (let i = 0; i < lunchOverlap.length; i++) {
                 const o = lunchOverlap[i];
-                if (o > lunchMaxOverlap) overlap += o;
+                if (o > lunchMinOverlap) overlap += o;
             }
             return overlap;
         },
 
-        noEarly(schedule: RawAlgoSchedule) {
-            const earliest = new Int32Array(5).fill(24 * 60);
-            const days = Meta.days;
+        noEarly(schedule: CmpSchedule) {
+            const blocks = schedule.blocks;
             const refTime = 22 * 60;
-            for (const course of schedule) {
-                for (let i = 0; i < 5; i++) {
-                    const timeBlock = course[1][days[i]];
-                    if (timeBlock) {
-                        for (let j = 0; j < timeBlock.length; j += 2) {
-                            const t = timeBlock[j];
-                            if (t < earliest[i]) earliest[i] = t;
-                        }
-                    }
-                }
-            }
-            return earliest.reduce((acc, x) => acc + refTime - x, 0);
+            let total = 0;
+            for (const day of blocks) total += refTime - day[0];
+            return total;
         },
 
         IamFeelingLucky() {
@@ -318,7 +280,7 @@ class ScheduleEvaluator {
         return options;
     }
 
-    public schedules: CmpSchedules[] | MultiCriteriaCmpSchedules[];
+    public schedules: CmpSchedule[];
     public options: SortOptions;
     public events: Event[];
 
@@ -332,9 +294,36 @@ class ScheduleEvaluator {
      * Add a schedule to the collection of results. Compute its coefficient of quality.
      */
     public add(schedule: RawAlgoSchedule) {
-        (this.schedules as CmpSchedules[]).push({
+        const days = Meta.days;
+
+        // sort time blocks of courses according to its schedule
+        const blocks: OrderedBlocks = [[], [], [], [], []];
+        const rooms: OrderedRooms = [[], [], [], [], []];
+        for (const course of schedule) {
+            for (let k = 0; k < 5; k++) {
+                // time blocks and rooms at day k
+                const timeBlock = course[1][days[k]] as number[];
+                if (!timeBlock) continue;
+
+                // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
+                const block: number[] = blocks[k];
+                const room: string[] = rooms[k];
+
+                const courseRoom = new Array(timeBlock.length / 2).fill('dummy');
+
+                for (let i = 0; i < timeBlock.length; i += 2) {
+                    // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
+                    const ele = timeBlock[i];
+                }
+            }
+        }
+
+        this.schedules.push({
             schedule: schedule.concat(),
-            coeff: 0
+            blocks,
+            rooms,
+            coeff: 0,
+            coeffs: new Float32Array(1)
         });
     }
 
@@ -349,11 +338,11 @@ class ScheduleEvaluator {
         if (this.options.mode === SortMode.fallback) {
             console.time('precomputing coefficients');
             // tslint:disable-next-line
-            const schedules = this.schedules as MultiCriteriaCmpSchedules[];
+            const schedules = this.schedules;
             if (count === 1) {
                 const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[0].name];
                 for (const cmpSchedule of this.schedules) {
-                    cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
+                    cmpSchedule.coeff = evalFunc(cmpSchedule);
                 }
             } else {
                 const evalFuncs = this.options.sortBy
@@ -363,13 +352,13 @@ class ScheduleEvaluator {
                 const ef = evalFuncs[0];
                 for (const schedule of schedules) {
                     const arr = new Float32Array(len);
-                    arr[0] = ef(schedule.schedule);
-                    schedule.coeff = arr;
+                    arr[0] = ef(schedule);
+                    schedule.coeffs = arr;
                 }
                 for (let i = 1; i < evalFuncs.length; i++) {
                     const evalFunc = evalFuncs[i];
                     for (const schedule of schedules) {
-                        schedule.coeff[i] = evalFunc(schedule.schedule);
+                        schedule.coeffs[i] = evalFunc(schedule);
                     }
                 }
             }
@@ -377,12 +366,12 @@ class ScheduleEvaluator {
             return;
         }
 
-        const schedules = this.schedules as CmpSchedules[];
+        const schedules = this.schedules;
         if (count === 1) {
             const option = this.options.sortBy[lastIdx];
             const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
             for (const cmpSchedule of schedules) {
-                cmpSchedule.coeff = evalFunc(cmpSchedule.schedule);
+                cmpSchedule.coeff = evalFunc(cmpSchedule);
             }
             return;
         }
@@ -397,7 +386,7 @@ class ScheduleEvaluator {
                 let max = 0,
                     min = Infinity;
                 for (let i = 0; i < schedules.length; i++) {
-                    const val = evalFunc(schedules[i].schedule);
+                    const val = evalFunc(schedules[i]);
                     if (val > max) max = val;
                     if (val < min) min = val;
                     coeff[i] = val;
@@ -439,7 +428,7 @@ class ScheduleEvaluator {
         console.time('sorting: ');
 
         if (this.isRandom()) {
-            this.shuffle(this.schedules as CmpSchedules[]);
+            this.shuffle(this.schedules as CmpSchedule[]);
             console.timeEnd('sorting: ');
             return;
         }
@@ -449,23 +438,22 @@ class ScheduleEvaluator {
         /**
          * The comparator function when there's only one sorting option selected
          */
-        const cmpFunc: (a: CmpSchedules, b: CmpSchedules) => number = options[0].reverse
+        const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number = options[0].reverse
             ? (a, b) => b.coeff - a.coeff
             : (a, b) => a.coeff - b.coeff;
         if (this.options.mode === SortMode.combined) {
             // if want to be really fast, use Floyd–Rivest algorithm to select first,
             // say, 100 elements and then sort only these elements
-            (this.schedules as CmpSchedules[]).sort(cmpFunc);
+            (this.schedules as CmpSchedule[]).sort(cmpFunc);
         } else {
-            if (options.length === 1) (this.schedules as CmpSchedules[]).sort(cmpFunc);
+            if (options.length === 1) (this.schedules as CmpSchedule[]).sort(cmpFunc);
             else {
-                const evalFuncs = options.map(x => ScheduleEvaluator.sortFunctions[x.name]);
-                const len = evalFuncs.length;
-                const schedules = this.schedules as MultiCriteriaCmpSchedules[];
+                const len = options.length;
+                const schedules = this.schedules;
                 const ifReverse = new Int8Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
                 schedules.sort((a, b) => {
-                    const c1 = a.coeff;
-                    const c2 = b.coeff;
+                    const c1 = a.coeffs;
+                    const c2 = b.coeffs;
                     let r = 0;
                     for (let i = 0; i < len; i++) {
                         r = ifReverse[i] * (c1[i] - c2[i]);

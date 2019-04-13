@@ -1,9 +1,9 @@
+/// <reference path="../../node_modules/@types/node/index.d.ts"/>
 /**
  * This file prepares data for unit testing
  */
 
 import { RawCatalog } from '../../src/models/Meta';
-import 'node';
 import path from 'path';
 import fs from 'fs';
 

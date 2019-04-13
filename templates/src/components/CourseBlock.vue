@@ -70,17 +70,19 @@
                     {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
                 </div>
             </div>
-            <div v-if="isEvent(scheduleBlock)" @click="$parent.$emit('edit-event', scheduleBlock)">
+            <div
+                v-if="isEvent(scheduleBlock)"
+                style="height:100%"
+                @click="$parent.$parent.editEvent(scheduleBlock.section)"
+            >
                 <div class="ml-2 mt-2">
                     {{ scheduleBlock.section.title }}
                 </div>
-                <div class="ml-2">
-                    {{ scheduleBlock.days }}&nbsp;
-                    {{ scheduleBlock.room }}
+                <div class="ml-2" style="color:#eaeaea; font-size:11px">
+                    {{ scheduleBlock.section.days }}<br>
+                    {{ scheduleBlock.section.room }}
                 </div>
-                <div class="ml-2">
-                    {{ scheduleBlock.description }}
-                </div>
+                <div class="ml-2" v-html="scheduleBlock.section.description" style="color:#eaeaea; font-size:11px"></div>
             </div>
         </div>
         <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">

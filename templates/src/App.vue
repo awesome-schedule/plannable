@@ -179,10 +179,10 @@
             v-if="sideBar.showEvent"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
-            :edit-event="editEvent(event)"
         >
             <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
-                Add an Event
+                <div v-if="!isEditingEvent">Add Event Mode</div>
+                <div v-if="isEditingEvent">Edit Event Mode</div>
             </button>
             <div class="input-group my-3" style="width:98%;margin-left:1%">
                 <div class="input-group-prepend">
@@ -237,12 +237,24 @@
                 style="width:98%;height:100px;margin-left:1%;border-radius: 3px 3px 3px 3px"
             ></textarea>
             <button
+                v-if="!isEditingEvent"
                 class="btn btn-outline-secondary"
                 style="width:98%; margin-left:1%"
                 @click="addEvent()"
             >
                 Add
             </button>
+            <div v-if="isEditingEvent" class="btn-group" role="group" style="width:100%">
+                <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
+                    Edit
+                </button>
+                <button type="button" class="btn btn-outline-info" @click="cancelEvent()">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-outline-danger" @click="deleteEvent()">
+                    Delete
+                </button>
+            </div>
         </nav>
 
         <nav
@@ -846,7 +858,8 @@ function getDefaultData() {
         tempScheduleIndex: null,
         drag: false,
         downloadURL: '',
-        days: Meta.days
+        days: Meta.days,
+        toBeModifiedDays: ''
     };
 }
 /**
@@ -1475,17 +1488,40 @@ export default Vue.extend({
             return days;
         },
         addEvent() {
-            // parse time
-            const days = this.getEventDays();
+            try{
+                const days = this.getEventDays();
 
-            this.currentSchedule.addEvent(
-                days,
-                true,
-                this.eventTitle,
-                this.eventRoom,
-                this.eventDescription
-            );
-            this.isEditingEvent = false;
+                if(days.indexOf('NaN') !== -1){
+                    this.noti.error('Please enter a valid time!');
+                    return;
+                }
+
+                let invalid = true;
+
+                for(const d of Meta.days){
+                    if(days.indexOf(d) !== -1){
+                        invalid = false;
+                        continue;
+                    }
+                }
+
+                if(invalid){
+                    this.noti.error('Please enter a valid time!');
+                    return;
+                }
+
+                this.currentSchedule.addEvent(
+                    days,
+                    true,
+                    this.eventTitle,
+                    this.eventRoom,
+                    this.eventDescription.split('\n').join("<br />")
+                );
+                this.cancelEvent();
+            }catch(err){
+                this.noti.error(err.message);
+                // console.error(err);
+            }
         },
         editEvent(event) {
             this.isEditingEvent = true;
@@ -1496,6 +1532,8 @@ export default Vue.extend({
             for (let i = 0; i < Meta.days.length; i++) {
                 if (week.indexOf(Meta.days[i]) !== -1) {
                     this.$set(this.eventWeek, i, true);
+                } else {
+                    this.$set(this.eventWeek, i, false);
                 }
             }
             const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
@@ -1514,9 +1552,25 @@ export default Vue.extend({
                 ':' +
                 endmin;
             this.eventTimeTo = end24;
+            this.toBeModifiedDays = event.days;
+        },
+        endEditEvent() {
+            this.currentSchedule.deleteEvent(this.toBeModifiedDays);
+            this.addEvent();
         },
         deleteEvent() {
-            this.currentSchedule.deleteEvent(this.getEventDays());
+            this.currentSchedule.deleteEvent(this.toBeModifiedDays);
+            this.isEditingEvent = false;
+            this.cancelEvent();
+        },
+        cancelEvent() {
+            this.eventTitle = '';
+            this.eventRoom = '';
+            this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
+            this.eventTimeFrom = '';
+            this.eventTimeTo = '';
+            this.eventDescription = '';
+            this.isEditingEvent = false;
         }
     }
 });

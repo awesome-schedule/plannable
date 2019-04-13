@@ -43,8 +43,11 @@ export interface TimeDict {
  * possibly has multiple sections combined (occurring at the same time)
  *
  * 0: key of this course
+ *
  * 1: TimeDict
+ *
  * 2: an array of section indices
+ *
  * example: `["span20205",["Mo":[600,650],"Tu":[600,650]],[0, 1, 2]]`
  *
  * @see TimeDict
@@ -141,7 +144,7 @@ class ScheduleGenerator {
                         // the timeBlock is flattened
                         const dayBlock = tmp_dict[d];
                         if (dayBlock) {
-                            dayBlock.push.apply(dayBlock, timeBlock);
+                            dayBlock.push(...timeBlock);
                         } else {
                             tmp_dict[d] = timeBlock.concat();
                         }

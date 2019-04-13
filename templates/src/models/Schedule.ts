@@ -46,7 +46,8 @@ class Schedule {
         const schedule = new Schedule();
         schedule.title = obj.title;
         schedule.id = obj.id;
-        schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
+        if (obj.events)
+            schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
         const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;

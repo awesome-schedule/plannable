@@ -3,12 +3,12 @@ import 'jest';
 import { RawAlgoSchedule } from '../../src/algorithm/ScheduleGenerator';
 
 const schedules: RawAlgoSchedule = [
-    ['', { Mo: [100, 200] }, [1]],
-    ['', { Mo: [50, 80] }, [1]],
-    ['', { Mo: [350, 450] }, [1]],
-    ['', { Mo: [10, 15] }, [1]],
-    ['', { Tu: [500, 600, 300, 350] }, [1]],
-    ['', { Tu: [250, 300, 100, 200] }, [1]]
+    ['1', { Mo: [100, 200] }, [1]],
+    ['2', { Mo: [50, 80] }, [1]],
+    ['3', { Mo: [350, 450] }, [1]],
+    ['4', { Mo: [10, 15] }, [1]],
+    ['5', { Tu: [500, 600, 300, 350] }, [1]],
+    ['6', { Tu: [250, 300, 100, 200] }, [1]]
 ];
 
 describe('Schedule Evaluator Test', () => {
@@ -29,6 +29,7 @@ describe('Schedule Evaluator Test', () => {
         const s = evaluator.schedules[0];
         expect(s.blocks[0]).toEqual([10, 15, 50, 80, 100, 200, 350, 450]);
         expect(s.blocks[1]).toEqual([100, 200, 250, 300, 300, 350, 500, 600]);
+        // expect(s.rooms[0]).toEqual(['4', '2', '1', '3']);
     });
 
     it('lunch Test', () => {

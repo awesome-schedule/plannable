@@ -10,7 +10,7 @@ export interface RawCatalog {
  *
  * 1: number
  *
- * 2: type Use Meta.TYPES_PARSE to do parsing
+ * 2: type: 0 to 9. Use Meta.TYPES_PARSE to convert to string like `Lecture`
  *
  * 3: units
  *

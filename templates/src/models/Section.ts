@@ -50,20 +50,16 @@ class Section implements CourseFields, Hashable {
         this.wait_list = raw[6];
         this.meetings = raw[7].map(x => new Meeting(this, x));
         const temp = new Set<string>();
-        for (const meeting of this.meetings) {
-            const insts = meeting.instructor.split(',');
-            for (const inst of insts) temp.add(inst);
-        }
+        this.meetings.forEach(x => {
+            x.instructor.split(' ').forEach(y => temp.add(y));
+        });
         this.instructors = [...temp.values()];
     }
 
     public sameTimeAs(other: Section) {
         const len = this.meetings.length;
         if (len !== other.meetings.length) return false;
-        for (let i = 0; i < len; i++) {
-            if (!this.meetings[i].sameTimeAs(other.meetings[i])) return false;
-        }
-        return true;
+        return this.meetings.every((x, i) => x.sameTimeAs(other.meetings[i]));
     }
 
     /**
@@ -74,7 +70,7 @@ class Section implements CourseFields, Hashable {
     }
 
     /**
-     * @remarks The hash of all sections of a Course by design are equal to each other.
+     * @remarks The hashes of all sections of a Course by design are equal to each other.
      * @returns the hash of the Course that this section belongs to.
      */
     public hash() {

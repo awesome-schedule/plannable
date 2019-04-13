@@ -85,6 +85,7 @@ def get_coordinate(api_key, bldg):
 
 
 def create_distance_matrix(api_key,jfile):
+
     with open(get_data_path(jfile),"r") as f:
         data = json.load(f)
         keys = list(data.keys())
@@ -121,39 +122,10 @@ def create_distance_matrix(api_key,jfile):
         # get_distance_matrix(api_key, origin, destination)
 
 
-def get_distance_matrix(api_key, origin, destination):
-    """
-    Use googlemaps api to find the information between two places
-    :param api_key: the api key for google api
-    :param origin: the origin
-    :param destination: the destination
-    :return: a json file containing the information between two places
-    """
-    # site we want to get data from
-    site = 'https://maps.googleapis.com/maps/api/'
-
-    service = 'distancematrix/json?'
-
-    locations = 'origins={}&destinations={}&departure_time=now&'.format(
-        origin, destination)
-
-    key = 'key={}'.format(api_key)
-
-    url = site + service + locations + key
-    print(url)
-    input()
-    data = request_data(url)
-    print(data)
-    return data
-
-
-def request_data(url):
-    data = urllib.request.urlopen(url)
-    data = data.decode('utf-8')
-    return json.load(data.read())
-
 
 if __name__ == "__main__":
+    api_key = 'AIzaSyDIy_75CVKiA_jFTcNL6x9OhMR7shLmrCg'
+
     jfile = 'BuildingList.json'
     create_distance_matrix(api_key,jfile)
     

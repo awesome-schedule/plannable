@@ -39,7 +39,7 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
-                v-if="isEntering && showSelectClass"
+                v-if="isEntering && sideBar.showSelectClass"
                 title="collapse searching results"
                 class="tab-icon mb-4"
                 @click="closeClassList"
@@ -363,7 +363,7 @@
                             </div>
                             <div class="col col-sm-3">
                                 <i
-                                    class="fas mr-2 sort-option"
+                                    class="fas mr-2 click-icon"
                                     :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
                                     title="Click to reverse sorting"
                                     @click="
@@ -619,6 +619,35 @@
             <button class="btn btn-info nav-btn">
                 Palette
             </button>
+            <ul class="list-group list-group-flush mx-1">
+                <li
+                    v-for="pair in courseColors()"
+                    :key="pair[0]"
+                    class="list-group-item py-1 px-2"
+                    :up="status__"
+                >
+                    <div class="row no-gutters justify-content-between" style="width: 100%">
+                        <div class="col-md-auto" style="font-size: 13px">
+                            <label :for="`color-${pair[1]}`">
+                                {{ catalog.convertKey(pair[0]) }}
+                            </label>
+                        </div>
+                        <div class="col-md-auto">
+                            <i
+                                class="fas fa-sync-alt click-icon mr-1"
+                                @click="setColor(pair[0], randomColor())"
+                            ></i>
+                            <input
+                                :id="`color-${pair[0]}`"
+                                type="color"
+                                :value="pair[1]"
+                                style="width: 40px; height: 95%"
+                                @change="setColor(pair[0], $event.target.value)"
+                            />
+                        </div>
+                    </div>
+                </li>
+            </ul>
         </nav>
 
         <transition name="fade">
@@ -859,6 +888,8 @@ function getDefaultData() {
         drag: false,
         downloadURL: '',
         days: Meta.days,
+
+        status__: Math.random(),
         toBeModifiedDays: ''
     };
 }
@@ -944,11 +975,6 @@ export default Vue.extend({
         }
     },
     created() {
-        // axios.get(`${this.api}/semesters`).then(res => {
-        //     this.semesters = res.data;
-        //     // get the latest semester
-        //     this.selectSemester(this.semesters.length - 1);
-        // });
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
         const storage = localStorage.getItem('semesters');
@@ -972,6 +998,33 @@ export default Vue.extend({
         }
     },
     methods: {
+        randomColor() {
+            return randomColor({
+                luminosity: 'dark'
+            });
+        },
+        /**
+         * @param {string} key
+         * @param {string} color
+         */
+        setColor(key, color) {
+            this.currentSchedule.setColor(key, color);
+            this.status__ = Math.random();
+        },
+        /**
+         * colors must always be recomputed becahse `Schedule.savedColors` is not a reactive property
+         */
+        courseColors() {
+            return Object.entries(Schedule.savedColors)
+                .concat(
+                    this.currentSchedule.colorSlots.reduce(
+                        (arr, bucket, i) =>
+                            arr.concat([...bucket.values()].map(x => [x, Schedule.bgColors[i]])),
+                        []
+                    )
+                )
+                .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
+        },
         /**
          * @param {number} idx
          */
@@ -1593,6 +1646,17 @@ export default Vue.extend({
     color: #3e3e3e;
 }
 .tab-icon:active {
+    color: #bbbbbb;
+}
+
+.click-icon {
+    cursor: pointer;
+}
+
+.click-icon:hover {
+    color: #3e3e3e;
+}
+.click-icon:active {
     color: #bbbbbb;
 }
 

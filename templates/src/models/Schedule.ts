@@ -32,6 +32,8 @@ class Schedule {
         '#CC9393',
         '#993D5F'
     ];
+
+    public static savedColors: { [x: string]: string } = {};
     /**
      * this field must be initialized before calling any instance method of the Schedule class
      */
@@ -76,8 +78,6 @@ class Schedule {
         return schedule;
     }
 
-    private static savedColors: { [x: string]: string } = {};
-
     /**
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
      * note that if **section** is -1, it means that all sections are allowed.
@@ -116,11 +116,12 @@ class Schedule {
 
     public events: Event[];
 
-    private previous: [string, number] | null;
     /**
-     * a property used internally to keep track of used colors to avoid color collision
+     * keep track of used colors to avoid color collision
      */
-    private colorSlots: Array<Set<string>>;
+    public colorSlots: Array<Set<string>>;
+
+    private previous: [string, number] | null;
 
     /**
      * Construct a `Schedule` object from its raw representation
@@ -170,14 +171,25 @@ class Schedule {
         return Schedule.bgColors[idx];
     }
 
-    public setColor(obj: Hashable, color: string) {
-        Schedule.savedColors[obj.key] = color;
+    public setColor(obj: Hashable | string, color: string) {
+        let key: string;
+        let idx: number;
+        if (typeof obj === 'string') {
+            key = obj;
+            idx = Utils.hashCode(key) % Schedule.bgColors.length;
+        } else {
+            key = obj.key;
+            idx = obj.hash() % Schedule.bgColors.length;
+        }
+        const hashColor = Schedule.bgColors[idx];
+        if (color === hashColor) {
+            if (Schedule.savedColors[key]) delete Schedule.savedColors[key];
+        } else {
+            Schedule.savedColors[key] = color;
+            this.colorSlots[idx].delete(key);
+        }
         this.computeSchedule();
     }
-
-    // public nextColor(obj: Hashable, color: string) {
-
-    // }
 
     /**
      * Add a course to schedule
@@ -287,7 +299,7 @@ class Schedule {
                     this.place(section);
                 } else {
                     this.currentIds[currentIdKey] = 'See modal';
-                    this.place(course.copy());
+                    this.place(course);
                 }
             } else {
                 // we need a copy of course
@@ -298,10 +310,12 @@ class Schedule {
                 } else {
                     // a subset of the sections
                     if (sections.size > 0) {
-                        const sectionIdx = sections.values().next().value;
-                        this.place(course.getCourse([...sections.values()]));
+                        const sectionIndices = [...sections.values()];
+                        this.place(course.getCourse(sectionIndices));
                         this.currentIds[currentIdKey] =
-                            course.getSection(sectionIdx).id.toString() + '+' + (sections.size - 1);
+                            course.getSection(sectionIndices[0]).id.toString() +
+                            '+' +
+                            (sections.size - 1);
                     }
                 }
             }

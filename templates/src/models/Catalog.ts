@@ -1,6 +1,5 @@
-import Section from './Section';
 import Course from './Course';
-import { RawCatalog } from './Meta';
+import Meta, { RawCatalog, RawCourse } from './Meta';
 
 export interface Semester {
     id: string;
@@ -78,6 +77,14 @@ class Catalog {
      */
     public getSection(key: string, section = 0) {
         return new Course(this.raw_data[key], key).getSection(section);
+    }
+
+    /**
+     * convert `cs11105` style key to `CS 1110 Lecture`
+     */
+    public convertKey(key: string) {
+        const raw: RawCourse = this.raw_data[key];
+        return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
     }
 
     public search(query: string, max_results = 10) {

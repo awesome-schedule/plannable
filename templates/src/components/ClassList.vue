@@ -52,46 +52,6 @@
                             </td>
                         </tr>
                     </table>
-
-                    <!-- <div class="container-fluid" style="padding: 0">
-                        <div
-                            class="row justify-content-md-center no-gutters"
-                            style="flex-wrap: nowrap"
-                        >
-                            <div
-                                class="col col-xs-1 expand-icon pr-1"
-                                data-toggle="collapse"
-                                :data-target="`#${crs.key}`"
-                                @click="collapse(crs.key)"
-                            >
-                                <i class="fas" :class="expanded(crs)"></i>
-                            </div>
-                            <div class="col-xs-10">
-                                <h6 class="mb-1">
-                                    {{ crs.department }} {{ crs.number }} {{ crs.type }}
-                                    <i
-                                        data-toggle="modal"
-                                        data-target="#class-list-modal"
-                                        class="fas fa-info-circle"
-                                        title="View class description"
-                                        @click="$emit('trigger-classlist-modal', crs)"
-                                    ></i>
-                                </h6>
-                                <p style="font-size: 0.85rem; margin: 0">{{ crs.title }}</p>
-                            </div>
-                            <div class="col col-xs-1 pl-1">
-                                <button
-                                    v-if="!isEntering"
-                                    type="button"
-                                    class="close"
-                                    aria-label="Close"
-                                    @click="$emit('remove_course', crs.key)"
-                                >
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
                 <Expand>
                     <div
@@ -121,7 +81,6 @@
                                     <i class="fas fa-check"></i>
                                 </div>
                             </a>
-
                             <div
                                 class="list-group-item list-group-item-action class-section container-fluid"
                                 :class="{ active: isActive(crs.key, crs.sids[idx]) }"

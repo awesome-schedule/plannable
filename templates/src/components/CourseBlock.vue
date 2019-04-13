@@ -79,10 +79,14 @@
                     {{ scheduleBlock.section.title }}
                 </div>
                 <div class="ml-2" style="color:#eaeaea; font-size:11px">
-                    {{ scheduleBlock.section.days }}<br>
+                    {{ scheduleBlock.section.days }}<br />
                     {{ scheduleBlock.section.room }}
                 </div>
-                <div class="ml-2" v-html="scheduleBlock.section.description" style="color:#eaeaea; font-size:11px"></div>
+                <div
+                    class="ml-2"
+                    v-html="scheduleBlock.section.description"
+                    style="color:#eaeaea; font-size:11px"
+                ></div>
             </div>
         </div>
         <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">

@@ -1488,24 +1488,24 @@ export default Vue.extend({
             return days;
         },
         addEvent() {
-            try{
+            try {
                 const days = this.getEventDays();
 
-                if(days.indexOf('NaN') !== -1){
+                if (days.indexOf('NaN') !== -1) {
                     this.noti.error('Please enter a valid time!');
                     return;
                 }
 
                 let invalid = true;
 
-                for(const d of Meta.days){
-                    if(days.indexOf(d) !== -1){
+                for (const d of Meta.days) {
+                    if (days.indexOf(d) !== -1) {
                         invalid = false;
                         continue;
                     }
                 }
 
-                if(invalid){
+                if (invalid) {
                     this.noti.error('Please enter a valid time!');
                     return;
                 }
@@ -1515,10 +1515,10 @@ export default Vue.extend({
                     true,
                     this.eventTitle,
                     this.eventRoom,
-                    this.eventDescription.split('\n').join("<br />")
+                    this.eventDescription.split('\n').join('<br />')
                 );
                 this.cancelEvent();
-            }catch(err){
+            } catch (err) {
                 this.noti.error(err.message);
                 // console.error(err);
             }

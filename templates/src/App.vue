@@ -739,7 +739,6 @@ import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr } from './models/Utils';
 import Meta from './models/Meta';
-import 'randomcolor';
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...

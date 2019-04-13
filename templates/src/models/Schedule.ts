@@ -12,6 +12,7 @@ export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
     title: string;
     id: number;
+    events: Event[];
 }
 
 /**
@@ -45,6 +46,7 @@ class Schedule {
         const schedule = new Schedule();
         schedule.title = obj.title;
         schedule.id = obj.id;
+        schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
         const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
@@ -73,7 +75,7 @@ class Schedule {
                 else schedule.All[key] = sections;
             }
         }
-
+        console.log(schedule);
         schedule.computeSchedule();
         return schedule;
     }
@@ -415,7 +417,8 @@ class Schedule {
         const obj: ScheduleJSON = {
             All: {},
             id: this.id,
-            title: this.title
+            title: this.title,
+            events: this.events
         };
         // convert set to array
         for (const key in this.All) {

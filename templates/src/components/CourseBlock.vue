@@ -73,7 +73,10 @@
             <div
                 v-if="isEvent(scheduleBlock)"
                 style="height:100%"
-                @click="$parent.$parent.editEvent(scheduleBlock.section)"
+                @click="
+                    $parent.$parent.editEvent(scheduleBlock.section);
+                    $parent.$parent.switchSideBar('showEvent');
+                "
             >
                 <div class="ml-2 mt-2">
                     {{ scheduleBlock.section.title }}
@@ -84,8 +87,8 @@
                 </div>
                 <div
                     class="ml-2"
-                    v-html="scheduleBlock.section.description"
                     style="color:#eaeaea; font-size:11px"
+                    v-html="scheduleBlock.section.description"
                 ></div>
             </div>
         </div>

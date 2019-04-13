@@ -181,8 +181,8 @@
             style="scrollbar-width:thin !important"
         >
             <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
-                <div v-if="!isEditingEvent">Add Event Mode</div>
-                <div v-if="isEditingEvent">Edit Event Mode</div>
+                <div v-if="!isEditingEvent">Add Event</div>
+                <div v-if="isEditingEvent">Edit Event</div>
             </button>
             <div class="input-group my-3" style="width:98%;margin-left:1%">
                 <div class="input-group-prepend">
@@ -1356,7 +1356,7 @@ export default Vue.extend({
 
             try {
                 const evaluator = generator.getSchedules(this.currentSchedule, {
-                    events: timeFilters,
+                    events: this.currentSchedule.events.concat(timeFilters),
                     status: constraintStatus,
                     sortOptions: this.sortOptions
                 });

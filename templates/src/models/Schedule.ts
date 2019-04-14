@@ -13,6 +13,7 @@ export interface ScheduleJSON {
     title: string;
     id: number;
     events: Event[];
+    savedColors: { [x: string]: string };
 }
 
 /**
@@ -48,6 +49,7 @@ class Schedule {
         schedule.id = obj.id;
         if (obj.events)
             schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
+        if (obj.savedColors) Schedule.savedColors = obj.savedColors;
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
         const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
@@ -76,7 +78,6 @@ class Schedule {
                 else schedule.All[key] = sections;
             }
         }
-        console.log(schedule);
         schedule.computeSchedule();
         return schedule;
     }
@@ -419,7 +420,8 @@ class Schedule {
             All: {},
             id: this.id,
             title: this.title,
-            events: this.events
+            events: this.events,
+            savedColors: Schedule.savedColors
         };
         // convert set to array
         for (const key in this.All) {

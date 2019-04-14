@@ -118,14 +118,7 @@
                                 ? 'Click to edit selected classes'
                                 : 'Click to edit generated schedules'
                         "
-                        @click="
-                            if (!scheduleEvaluator.empty()) {
-                                if (generated) {
-                                    currentSchedule = proposedSchedule;
-                                } else switchPage(currentScheduleIndex, true);
-                                generated = !generated;
-                            }
-                        "
+                        @click="switchSchedule(!generated)"
                     >
                         {{
                             generated
@@ -619,7 +612,7 @@
             <button class="btn btn-info nav-btn">
                 Palette
             </button>
-            <ul class="list-group list-group-flush mx-1">
+            <ul v-if="generated" class="list-group list-group-flush mx-1">
                 <li
                     v-for="pair in courseColors()"
                     :key="pair[0]"
@@ -646,6 +639,11 @@
                             />
                         </div>
                     </div>
+                </li>
+            </ul>
+            <ul v-else class="list-group list-group-flush mx-1">
+                <li class="list-group-item">
+                    You need to generate a schedule in order to change its color
                 </li>
             </ul>
         </nav>
@@ -1010,6 +1008,7 @@ export default Vue.extend({
         setColor(key, color) {
             this.currentSchedule.setColor(key, color);
             this.status__ = Math.random();
+            this.saveStatus();
         },
         /**
          * colors must always be recomputed becahse `Schedule.savedColors` is not a reactive property
@@ -1026,6 +1025,21 @@ export default Vue.extend({
                 .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
         },
         /**
+         * @param {boolean} generated
+         */
+        switchSchedule(generated) {
+            if (generated && !this.proposedSchedule.empty()) {
+                if (!this.generated) {
+                    this.generated = true;
+                    this.proposedSchedule = this.currentSchedule;
+                    this.switchPage(this.currentScheduleIndex, true);
+                }
+            } else {
+                this.generated = false;
+                this.currentSchedule = this.proposedSchedule;
+            }
+        },
+        /**
          * @param {number} idx
          */
         updateDay(idx) {
@@ -1039,11 +1053,12 @@ export default Vue.extend({
             for (const other in this.sideBar) {
                 if (other !== key) this.sideBar[other] = false;
             }
-
-            this.currentSchedule = this.proposedSchedule;
-            this.generated = false;
-
             this.sideBar[key] = !this.sideBar[key];
+            if (this.sideBar.showEvent) {
+                this.switchSchedule(false);
+            } else if (this.sideBar.showSelectColor) {
+                this.switchSchedule(true);
+            }
         },
         /**
          * @param {()=>void} success
@@ -1147,7 +1162,7 @@ export default Vue.extend({
         /**
          * if parsed is true, also update the pagination
          * @param {number} idx
-         * @param {boolean} [parsed]
+         * @param {boolean} [parsed] whether to update the pagination status
          */
         switchPage(idx, parsed = false) {
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
@@ -1165,15 +1180,14 @@ export default Vue.extend({
          * @param {string} query
          */
         getClass(query) {
-            if (query === null || query.length === 0) {
+            if (!query) {
                 this.isEntering = false;
                 this.inputCourses = null;
                 return;
             }
             // if current schedule is displayed, switch to proposed schedule
             if (this.generated) {
-                this.generated = !this.generated;
-                this.currentSchedule = this.proposedSchedule;
+                this.switchSchedule(false);
             }
             this.inputCourses = this.catalog.search(query);
             this.isEntering = true;
@@ -1365,14 +1379,7 @@ export default Vue.extend({
                     sortOptions: this.sortOptions
                 });
                 this.scheduleEvaluator = evaluator;
-                this.proposedSchedule = this.currentSchedule;
-                this.generated = true;
-                this.switchPage(
-                    this.currentScheduleIndex >= this.scheduleEvaluator.size()
-                        ? 0
-                        : this.currentScheduleIndex,
-                    parsed
-                );
+                this.switchSchedule(true);
                 this.saveStatus();
                 this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
                 this.loading = false;
@@ -1409,11 +1416,7 @@ export default Vue.extend({
                 this.loading = true;
                 this.scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {
-                    this.proposedSchedule = this.currentSchedule;
-                    this.currentSchedule = this.scheduleEvaluator.getSchedule(
-                        this.currentScheduleIndex
-                    );
-                    this.generated = true;
+                    this.switchSchedule(true);
                 } else {
                     this.currentSchedule = this.scheduleEvaluator.getSchedule(
                         this.currentScheduleIndex

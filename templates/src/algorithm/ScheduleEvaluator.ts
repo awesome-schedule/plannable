@@ -169,15 +169,14 @@ class ScheduleEvaluator {
          */
         variance(schedule: CmpSchedule) {
             const minutes = new Float32Array(5);
-            const days = Meta.days;
-            const s = schedule.schedule;
-            for (const course of s) {
-                for (let i = 0; i < days.length; i++) {
-                    const timeBlock = course[1][days[i]];
-                    if (timeBlock) {
-                        minutes[i] += timeBlock[1] - timeBlock[0];
-                    }
+            const blocks = schedule.blocks;
+            for (let i = 0; i < blocks.length; i++) {
+                const day = blocks[i];
+                let classTime = 0;
+                for (let j = 0; j < day.length; j += 2) {
+                    classTime += day[j + 1] - day[j];
                 }
+                minutes[i] = classTime;
             }
             return ScheduleEvaluator.std(minutes);
         },

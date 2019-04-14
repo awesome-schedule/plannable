@@ -165,20 +165,22 @@ class ScheduleEvaluator {
 
     public static sortFunctions: { [x: string]: (schedule: CmpSchedule) => number } = {
         /**
-         * compute the standard deviation of class times
+         * compute the variance of class times
          */
         variance(schedule: CmpSchedule) {
-            const minutes = new Float32Array(5);
             const blocks = schedule.blocks;
+            let sum = 0;
+            let sumSq = 0;
             for (let i = 0; i < blocks.length; i++) {
                 const day = blocks[i];
                 let classTime = 0;
                 for (let j = 0; j < day.length; j += 2) {
                     classTime += day[j + 1] - day[j];
                 }
-                minutes[i] = classTime;
+                sum += classTime;
+                sumSq += classTime ** 2;
             }
-            return ScheduleEvaluator.std(minutes);
+            return sumSq / 5 - (sum / 5) ** 2;
         },
 
         /**
@@ -243,23 +245,6 @@ class ScheduleEvaluator {
         const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
         options.sortBy = options.sortBy.map(x => Object.assign({}, x));
         return options;
-    }
-
-    /**
-     * although it's called std, it is actually calculating the
-     * sum of the absolute values of the difference between each sample and the mean
-     */
-    public static std(args: Float32Array) {
-        let sum = 0;
-        let sumSq = 0;
-        for (let i = 0; i < args.length; i++) {
-            sum += args[i];
-        }
-        const mean = sum / args.length;
-        for (let i = 0; i < args.length; i++) {
-            sumSq += Math.abs(args[i] - mean);
-        }
-        return sumSq;
     }
 
     public static calcOverlap(a: number, b: number, c: number, d: number) {
@@ -398,11 +383,13 @@ class ScheduleEvaluator {
         const coeffs = new Float32Array(schedules.length);
         for (const option of this.options.sortBy) {
             if (option.enabled) {
-                const coeff = new Float32Array(schedules.length);
+                console.time(`${option.name}`);
+                const len = schedules.length;
+                const coeff = new Float32Array(len);
                 const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
                 let max = 0,
                     min = Infinity;
-                for (let i = 0; i < schedules.length; i++) {
+                for (let i = 0; i < len; i++) {
                     const val = evalFunc(schedules[i]);
                     if (val > max) max = val;
                     if (val < min) min = val;
@@ -411,14 +398,15 @@ class ScheduleEvaluator {
                 const range = max - min;
                 const normalizeRatio = range / 100;
                 if (option.reverse) {
-                    for (let i = 0; i < coeffs.length; i++) {
+                    for (let i = 0; i < len; i++) {
                         coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
                     }
                 } else {
-                    for (let i = 0; i < coeffs.length; i++) {
+                    for (let i = 0; i < len; i++) {
                         coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
                     }
                 }
+                console.timeEnd(`${option.name}`);
             }
         }
         for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];

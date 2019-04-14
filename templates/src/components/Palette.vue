@@ -38,11 +38,12 @@
 <script>
 import Vue from 'vue';
 import Schedule from '../models/Schedule';
+import randomColor from 'randomcolor';
 
 export default Vue.extend({
     name: 'Palette',
     props: {
-        schedule: Schedule
+        schedule: Schedule.prototype
     },
     methods: {
         randomColor() {

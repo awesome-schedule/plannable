@@ -16,3 +16,4 @@ temp.txt
 templates/src/proto
 backend/temp
 docs/tsdoc
+docs/vuedoc

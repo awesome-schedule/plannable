@@ -3,16 +3,16 @@ import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 
-export enum SortMode {
+export enum Mode {
     fallback = 0,
     combined = 1
 }
 
-export type SortModes = Array<{
-    mode: SortMode;
+export interface SortMode {
+    mode: Mode;
     title: string;
     description: string;
-}>;
+}
 
 type OrderedBlocks = [number[], number[], number[], number[], number[]];
 type OrderedRooms = [string[], string[], string[], string[], string[]];
@@ -66,12 +66,12 @@ export interface SortOptionJSON {
         enabled: boolean;
         reverse: boolean;
     }>;
-    mode: SortMode;
+    mode: Mode;
 }
 
 export interface SortOptions {
     sortBy: SortOption[];
-    mode: SortMode;
+    mode: Mode;
     toJSON: () => SortOptionJSON;
     fromJSON: (x: SortOptionJSON) => void;
 }
@@ -120,7 +120,7 @@ class ScheduleEvaluator {
                 description: 'Sort randomly'
             }
         ],
-        mode: SortMode.combined,
+        mode: Mode.combined,
         toJSON() {
             return {
                 sortBy: this.sortBy.map(x => ({
@@ -148,14 +148,14 @@ class ScheduleEvaluator {
         }
     };
 
-    public static readonly sortModes: SortModes = [
+    public static readonly sortModes: SortMode[] = [
         {
-            mode: SortMode.combined,
+            mode: Mode.combined,
             title: 'Combined',
             description: 'Combine all sorting options and given them equal weight'
         },
         {
-            mode: SortMode.fallback,
+            mode: Mode.fallback,
             title: 'Fallback',
             description:
                 'Sort using the options on top first. If compare equal, sort using the next option.' +
@@ -363,7 +363,7 @@ class ScheduleEvaluator {
         if (this.isRandom()) return;
 
         const [count, lastIdx] = this.countSortOpt();
-        if (this.options.mode === SortMode.fallback) {
+        if (this.options.mode === Mode.fallback) {
             console.time('precomputing coefficients');
             // tslint:disable-next-line
             const schedules = this.schedules;
@@ -472,7 +472,7 @@ class ScheduleEvaluator {
         const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number = options[0].reverse
             ? (a, b) => b.coeff - a.coeff
             : (a, b) => a.coeff - b.coeff;
-        if (this.options.mode === SortMode.combined) {
+        if (this.options.mode === Mode.combined) {
             // if want to be really fast, use Floyd–Rivest algorithm to select first,
             // say, 100 elements and then sort only these elements
             (this.schedules as CmpSchedule[]).sort(cmpFunc);

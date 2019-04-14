@@ -695,7 +695,7 @@ import Schedule from './models/Schedule';
 import Catalog from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
-import ScheduleEvaluator, { SortModes } from './algorithm/ScheduleEvaluator';
+import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
@@ -874,11 +874,6 @@ function timeout(promise, time) {
 /**
  * @typedef {{id: string, name: string}} Semester
  */
-/**
- * Raw Schedule
- * @typedef {[string, number, number][]} RawSchedule
- */
-
 export default Vue.extend({
     name: 'App',
     components: {
@@ -1096,14 +1091,14 @@ export default Vue.extend({
             }
         },
         /**
-         * if parsed is true, also update the pagination
+         * Switch to `idx` page. If update is true, also update the pagination status.
          * @param {number} idx
-         * @param {boolean} [parsed] whether to update the pagination status
+         * @param {boolean} update  whether to update the pagination status
          */
-        switchPage(idx, parsed = false) {
+        switchPage(idx, update = false) {
             if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
                 this.currentScheduleIndex = idx;
-                if (parsed) {
+                if (update) {
                     this.tempScheduleIndex = idx;
                 } else {
                     this.tempScheduleIndex = null;
@@ -1115,6 +1110,7 @@ export default Vue.extend({
         /**
          * get classes that match the input query.
          * Exit "entering" mode on falsy parameter (set `isEntering` to false)
+         *
          * @see Catalog.search
          * @param {string} query
          */
@@ -1245,9 +1241,12 @@ export default Vue.extend({
         /**
          * fetch basic class data for the given semester for fast class search and rendering
          * this method will assign `this.catalog` and `Schedule.catalog`
+         *
+         * This method will set the flag `loading` to true on start, to false on return.
+         * When on error, a proper error message will be displayed to the user.
          * @param {number} semeseterIdx
-         * @param {()=>void} [callback]
-         * @param {()=>void} [reject]
+         * @param {()=>void} [callback] func to execute on success
+         * @param {()=>void} [reject] func to execute on failure
          */
         fetchSemesterData(semesterIdx, callback, reject) {
             this.loading = true;
@@ -1329,9 +1328,6 @@ export default Vue.extend({
          */
         changeSorting(optIdx) {
             if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-                // if (optIdx !== undefined) {
-                //     this.sortOptions.sortBy[optIdx].enabled = true;
-                // }
                 return this.noti.error('You must have at least one sort option!');
             }
             if (optIdx !== undefined) {

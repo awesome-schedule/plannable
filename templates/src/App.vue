@@ -169,13 +169,13 @@
         </nav>
 
         <nav
-            v-if="sideBar.showEvent"
+            v-else-if="sideBar.showEvent"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
             <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
-                <div v-if="!isEditingEvent">Add Event</div>
                 <div v-if="isEditingEvent">Edit Event</div>
+                <div v-else>Add Event</div>
             </button>
             <div class="input-group my-3" style="width:98%;margin-left:1%">
                 <div class="input-group-prepend">
@@ -251,7 +251,7 @@
         </nav>
 
         <nav
-            v-if="sideBar.showFilter"
+            v-else-if="sideBar.showFilter"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
@@ -420,7 +420,7 @@
         </nav>
 
         <nav
-            v-if="sideBar.showSetting"
+            v-else-if="sideBar.showSetting"
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
@@ -571,7 +571,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar.showExport" class="d-block bg-light sidebar">
+        <nav v-else-if="sideBar.showExport" class="d-block bg-light sidebar">
             <button class="btn btn-info nav-btn">
                 Import/Export Schedule
             </button>
@@ -608,45 +608,7 @@
             </ul>
         </nav>
 
-        <nav v-if="sideBar.showSelectColor" class="d-block bg-light sidebar">
-            <button class="btn btn-info nav-btn">
-                Palette
-            </button>
-            <ul v-if="generated" class="list-group list-group-flush mx-1">
-                <li
-                    v-for="pair in courseColors()"
-                    :key="pair[0]"
-                    class="list-group-item py-1 px-2"
-                    :up="status__"
-                >
-                    <div class="row no-gutters justify-content-between" style="width: 100%">
-                        <div class="col-md-auto" style="font-size: 13px">
-                            <label :for="`color-${pair[1]}`">
-                                {{ catalog.convertKey(pair[0]) }}
-                            </label>
-                        </div>
-                        <div class="col-md-auto">
-                            <i
-                                class="fas fa-sync-alt click-icon mr-1"
-                                @click="setColor(pair[0], randomColor())"
-                            ></i>
-                            <input
-                                :id="`color-${pair[0]}`"
-                                type="color"
-                                :value="pair[1]"
-                                style="width: 40px; height: 95%"
-                                @change="setColor(pair[0], $event.target.value)"
-                            />
-                        </div>
-                    </div>
-                </li>
-            </ul>
-            <ul v-else class="list-group list-group-flush mx-1">
-                <li class="list-group-item">
-                    You need to generate a schedule in order to change its color
-                </li>
-            </ul>
-        </nav>
+        <palette v-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
 
         <transition name="fade">
             <div
@@ -723,6 +685,8 @@ import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
+import Palette from './components/Palette.vue';
+
 // eslint-disable-next-line
 import Section from './models/Section';
 // eslint-disable-next-line
@@ -887,7 +851,6 @@ function getDefaultData() {
         downloadURL: '',
         days: Meta.days,
 
-        status__: Math.random(),
         toBeModifiedDays: ''
     };
 }
@@ -924,7 +887,8 @@ export default Vue.extend({
         GridSchedule,
         Modal,
         ClassListModal,
-        draggable
+        draggable,
+        Palette
     },
     data() {
         return getDefaultData();
@@ -996,34 +960,6 @@ export default Vue.extend({
         }
     },
     methods: {
-        randomColor() {
-            return randomColor({
-                luminosity: 'dark'
-            });
-        },
-        /**
-         * @param {string} key
-         * @param {string} color
-         */
-        setColor(key, color) {
-            this.currentSchedule.setColor(key, color);
-            this.status__ = Math.random();
-            this.saveStatus();
-        },
-        /**
-         * colors must always be recomputed becahse `Schedule.savedColors` is not a reactive property
-         */
-        courseColors() {
-            return Object.entries(Schedule.savedColors)
-                .concat(
-                    this.currentSchedule.colorSlots.reduce(
-                        (arr, bucket, i) =>
-                            arr.concat([...bucket.values()].map(x => [x, Schedule.bgColors[i]])),
-                        []
-                    )
-                )
-                .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
-        },
         /**
          * @param {boolean} generated
          */
@@ -1177,6 +1113,9 @@ export default Vue.extend({
             }
         },
         /**
+         * get classes that match the input query.
+         * Exit "entering" mode on falsy parameter (set `isEntering` to false)
+         * @see Catalog.search
          * @param {string} query
          */
         getClass(query) {
@@ -1311,14 +1250,6 @@ export default Vue.extend({
          * @param {()=>void} [reject]
          */
         fetchSemesterData(semesterIdx, callback, reject) {
-            // axios.get(`${this.api}/classes?semester=${semesterIdx}`).then(res => {
-            //     this.catalog = new Catalog(this.currentSemester, res.data.data);
-            //     // important: assign all records
-            //     Schedule.catalog = this.catalog;
-            //     if (typeof callback === 'function') {
-            //         callback();
-            //     }
-            // });
             this.loading = true;
             timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
                 .then(data => {
@@ -1352,6 +1283,9 @@ export default Vue.extend({
             this.getClass(null);
         },
         generateSchedules(parsed = false) {
+            if (this.generated) this.currentSchedule = this.proposedSchedule;
+            this.generated = false;
+
             if (this.currentSchedule.empty())
                 return this.noti.warn(`There are no classes in your schedule!`);
 
@@ -1364,11 +1298,9 @@ export default Vue.extend({
             }
 
             const timeFilters = this.computeFilter();
+
             // null means there's an error processing time filters. Don't continue if that's the case
             if (timeFilters === null) return;
-            if (this.generated) {
-                this.currentSchedule = this.proposedSchedule;
-            }
             this.loading = true;
             const generator = new ScheduleGenerator(this.catalog);
 
@@ -1642,7 +1574,7 @@ export default Vue.extend({
 });
 </script>
 
-<style scoped>
+<style>
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.4s;

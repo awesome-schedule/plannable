@@ -1,6 +1,11 @@
 import { RawMeeting } from './Meta';
 import Section from './Section';
 
+/**
+ * A meeting represents a specific meeting time \w information about the instructor and location
+ *
+ * It has a reference back to the section that it belongs to
+ */
 class Meeting {
     public section: Section;
     public instructor: string;

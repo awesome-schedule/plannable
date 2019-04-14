@@ -15,3 +15,4 @@ deploy_key
 temp.txt
 templates/src/proto
 backend/temp
+docs/tsdoc

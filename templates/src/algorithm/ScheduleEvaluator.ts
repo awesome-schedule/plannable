@@ -163,9 +163,15 @@ class ScheduleEvaluator {
         }
     ];
 
+    /**
+     * defines a number of sorting functions. Note that by default, schedules are sorted in
+     * **ascending** order according to the coefficient computed by one or a combination of sorting functions.
+     */
     public static sortFunctions: { [x: string]: (schedule: CmpSchedule) => number } = {
         /**
-         * compute the variance of class times
+         * compute the variance of class times during the week
+         *
+         * returns a higher value when the class times are unbalanced
          */
         variance(schedule: CmpSchedule) {
             const blocks = schedule.blocks;
@@ -186,6 +192,8 @@ class ScheduleEvaluator {
         /**
          * compute the vertical compactness of a schedule,
          * defined as the total time in between each pair of consecutive classes
+         *
+         * The greater the time gap between classes, the greater the return value will be
          */
         compactness(schedule: CmpSchedule) {
             const blocks = schedule.blocks;
@@ -201,6 +209,8 @@ class ScheduleEvaluator {
         /**
          * compute overlap of the classes and the lunch time,
          * defined as the time between 11:00 and 14:00
+         *
+         * The greater the overlap, the greater the return value will be
          */
         lunchTime(schedule: CmpSchedule) {
             // 11:00 to 14:00
@@ -228,6 +238,11 @@ class ScheduleEvaluator {
             return overlap;
         },
 
+        /**
+         * calculate the time between the start time of the earliest class and 22:00
+         *
+         * For a schedule that has earlier classes, this method will return a higher number
+         */
         noEarly(schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             const refTime = 22 * 60;
@@ -275,7 +290,11 @@ class ScheduleEvaluator {
     }
 
     /**
-     * Add a schedule to the collection of results. Compute its coefficient of quality.
+     * Add a schedule to the collection of results.
+     * Group the time blocks and sort them in order.
+     *
+     * @remarks insertion sort is used as there are not many elements in each day array.
+     * This method has pretty high overhead
      */
     public add(schedule: RawAlgoSchedule) {
         const days = Meta.days;
@@ -329,10 +348,17 @@ class ScheduleEvaluator {
         });
     }
 
+    /**
+     * whether the random sort option is enabled
+     */
     public isRandom() {
         return this.options.sortBy.some(x => x.name === 'IamFeelingLucky' && x.enabled);
     }
 
+    /**
+     * pre-compute the coefficient for each schedule using each enabled sorting function
+     * so that they don't need to be computed on the fly when sorting
+     */
     public computeCoeff() {
         if (this.isRandom()) return;
 

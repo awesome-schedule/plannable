@@ -265,12 +265,26 @@
                 >
                     No Class Time
                 </li>
-                <li v-for="(value, n) in timeSlots" :key="n" class="list-group-item p-1">
+                <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
                     <table style="width:100%">
                         <tr>
                             <td>
+                                <div class="btn-group mb-2" role="group" style="width:70%;">
+                                    <button
+                                        v-for="(day, j) in days"
+                                        :key="j"
+                                        :class="
+                                            'btn btn-outline-secondary' +
+                                                (value[j] ? ' active' : '')
+                                        "
+                                        type="button"
+                                        @click="updateFilterDay(i, j)"
+                                    >
+                                        {{ day }}
+                                    </button>
+                                </div>
                                 <input
-                                    v-model="value[0]"
+                                    v-model="value[5]"
                                     type="time"
                                     min="8:00"
                                     max="22:00"
@@ -278,7 +292,7 @@
                                 />
                                 -
                                 <input
-                                    v-model="value[1]"
+                                    v-model="value[6]"
                                     type="time"
                                     min="8:00"
                                     max="22:00"
@@ -294,7 +308,7 @@
                                     style="font-size:2rem"
                                     tabindex="-1"
                                 >
-                                    <span aria-hidden="true" @click="removeTimeSlot(n)"
+                                    <span aria-hidden="true" @click="removeTimeSlot(i)"
                                         >&times;
                                     </span>
                                 </button>
@@ -970,6 +984,9 @@ export default Vue.extend({
                 this.currentSchedule = this.proposedSchedule;
             }
         },
+        updateFilterDay(i, j) {
+            this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
+        },
         /**
          * @param {number} idx
          */
@@ -1369,7 +1386,10 @@ export default Vue.extend({
         parseLocalData(raw_data) {
             const defaultData = getDefaultData();
             for (const field of this.storageFields) {
-                if (this[field] instanceof Object) {
+                if (this[field] instanceof Array) {
+                    if (raw_data[field] instanceof Array) this[field] = raw_data[field];
+                    else this[field] = defaultData[field];
+                } else if (this[field] instanceof Object) {
                     if (typeof this[field].fromJSON === 'function') {
                         const parsed = this[field].fromJSON(raw_data[field]);
                         if (parsed) this[field] = parsed;
@@ -1391,7 +1411,9 @@ export default Vue.extend({
                     }
                 } else if (typeof raw_data[field] === typeof this[field])
                     this[field] = raw_data[field];
-                else this[field] = defaultData[field];
+                else {
+                    this[field] = defaultData[field];
+                }
             }
             if (!this.proposedSchedule.empty()) {
                 this.currentSchedule = this.proposedSchedule;
@@ -1405,7 +1427,7 @@ export default Vue.extend({
             this.timeSlots.splice(n, 1);
         },
         addTimeSlot() {
-            this.timeSlots.push(['', '']);
+            this.timeSlots.push([false, false, false, false, false, '', '']);
         },
         /**
          * Preprocess the time filters so that they are of the correct format
@@ -1415,8 +1437,21 @@ export default Vue.extend({
         computeFilter() {
             const timeSlotsRecord = [];
             for (const time of this.timeSlots) {
-                const startTime = time[0].split(':');
-                const endTime = time[1].split(':');
+                let days = '';
+                let valid = false;
+                for (let j = 0; j < 5; j++) {
+                    if (time[j]) {
+                        days += Meta.days[j];
+                        valid = true;
+                    }
+                }
+
+                if (!valid) {
+                    continue;
+                }
+
+                const startTime = time[5].split(':');
+                const endTime = time[6].split(':');
                 if (
                     isNaN(startTime[0]) ||
                     isNaN(startTime[1]) ||
@@ -1427,9 +1462,12 @@ export default Vue.extend({
                     return null;
                 }
                 // note: substract/add one to allow end points
-                const days = 'MoTuWeThFr ' + to12hr(time[0]) + ' - ' + to12hr(time[1]);
+                days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
+                console.log(days);
+                // const days = 'MoTuWeThFr ' + to12hr(time[0]) + ' - ' + to12hr(time[1]);
                 timeSlotsRecord.push(new Event(days, false));
             }
+
             return timeSlotsRecord;
         },
         onUploadJson(event) {
@@ -1497,7 +1535,6 @@ export default Vue.extend({
                     this.noti.error('Please enter a valid time!');
                     return;
                 }
-
                 this.currentSchedule.addEvent(
                     days,
                     true,
@@ -1515,7 +1552,7 @@ export default Vue.extend({
             this.isEditingEvent = true;
             this.eventTitle = event.title;
             this.eventRoom = event.room;
-            this.eventDescription = event.description;
+            this.eventDescription = event.description.split('<br />').join('\n');
             const [week, start, , end] = event.days.split(' ');
             for (let i = 0; i < Meta.days.length; i++) {
                 if (week.indexOf(Meta.days[i]) !== -1) {

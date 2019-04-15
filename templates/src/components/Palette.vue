@@ -8,7 +8,7 @@
                 <div class="row no-gutters justify-content-between" style="width: 100%">
                     <div class="col-md-auto" style="font-size: 13px">
                         <label :for="`color-${pair[1]}`">
-                            {{ $parent.catalog.convertKey(pair[0]) }}
+                            {{ convertKey(pair[0]) }}
                         </label>
                     </div>
                     <div class="col-md-auto">
@@ -39,6 +39,7 @@
 import Vue from 'vue';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
+import { convertKey } from '../models/Utils';
 
 export default Vue.extend({
     name: 'Palette',
@@ -73,6 +74,9 @@ export default Vue.extend({
                     )
                 )
                 .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
+        },
+        convertKey(key) {
+            return convertKey(this.$parent.catalog, this.$parent.currentSchedule, key);
         }
     }
 });

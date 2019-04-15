@@ -79,14 +79,6 @@ class Catalog {
         return new Course(this.raw_data[key], key).getSection(section);
     }
 
-    /**
-     * convert `cs11105` style key to `CS 1110 Lecture`
-     */
-    public convertKey(key: string) {
-        const raw: RawCourse = this.raw_data[key];
-        return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
-    }
-
     public search(query: string, max_results = 10) {
         console.time('query');
         query = query.trim().toLowerCase();

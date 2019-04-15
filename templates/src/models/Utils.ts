@@ -1,4 +1,7 @@
 import { TimeDict, TimeBlock } from '@/algorithm/ScheduleGenerator';
+import Catalog from './Catalog';
+import Schedule from './Schedule';
+import Meta, { RawCourse } from './Meta';
 
 /**
  * Parse `MoWeFr 10:00AM - 11:00AM` to `[['Mo', 'We', 'Fr'], [10*60, 11*60]]`
@@ -137,4 +140,20 @@ export function hashCode(str: string): number {
         hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
     }
     return hval >>> 0;
+}
+
+/**
+ * convert `cs11105` style key to `CS 1110 Lecture`
+ */
+export function convertKey(cat: Catalog, schedule: Schedule, key: string) {
+    const raw: RawCourse = cat.raw_data[key];
+    if (raw) return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
+    else {
+        for (const event of schedule.events) {
+            if (event.key === key) {
+                return event.title === '' ? key : event.title;
+            }
+        }
+    }
+    return key;
 }

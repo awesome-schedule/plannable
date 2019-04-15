@@ -166,5 +166,5 @@ def load_all_data():
 
 
 if __name__ == "__main__":
-    # update_local_data()
+    update_local_data()
     load_all_data()

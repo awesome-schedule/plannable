@@ -108,7 +108,7 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
 }
 
 /**
- * convert 24 hour format time to 12 hour format
+ * convert 24 hour format time to 12 hour format.
  * e.g. from `17:00` to `5:00PM`
  * @author Kaiying Shan
  * @param time the time in 24 hour format, e.g. 17:00

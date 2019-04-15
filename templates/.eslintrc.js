@@ -13,7 +13,8 @@ module.exports = {
         'prefer-const': 'error',
         'vue/require-default-prop': 'off',
         'no-var': 'error',
-        'vue/no-use-v-if-with-v-for': 'off'
+        'vue/no-use-v-if-with-v-for': 'off',
+        'vue/no-v-html': 'off'
     },
     parserOptions: {
         parser: '@typescript-eslint/parser'

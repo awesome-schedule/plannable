@@ -66,6 +66,7 @@ export default Vue.extend({
          */
         courseColors() {
             return Object.entries(Schedule.savedColors)
+                .filter(entry => this.schedule.has(entry[0]))
                 .concat(
                     this.schedule.colorSlots.reduce(
                         (arr, bucket, i) =>

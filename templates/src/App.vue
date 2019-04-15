@@ -808,7 +808,12 @@ function getDefaultData() {
 
         // filter settings
         /**
-         * @type {[string, string][]}
+         * index 0 - 4: whether Mo - Tu are selected
+         *
+         * 6: start time, of 24 hour format
+         *
+         * 7: end time, of 24 hour format
+         * @type {[boolean, boolean, boolean, boolean, boolean, string, string][]}
          */
         timeSlots: [],
         allowWaitlist: true,
@@ -1432,23 +1437,17 @@ export default Vue.extend({
         /**
          * Preprocess the time filters so that they are of the correct format
          * returns null on parsing error
-         * @returns {[number, number][]}
+         * @returns {Event[]}
          */
         computeFilter() {
             const timeSlotsRecord = [];
             for (const time of this.timeSlots) {
                 let days = '';
-                let valid = false;
                 for (let j = 0; j < 5; j++) {
-                    if (time[j]) {
-                        days += Meta.days[j];
-                        valid = true;
-                    }
+                    if (time[j]) days += Meta.days[j];
                 }
 
-                if (!valid) {
-                    continue;
-                }
+                if (!days) continue;
 
                 const startTime = time[5].split(':');
                 const endTime = time[6].split(':');

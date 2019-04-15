@@ -432,6 +432,15 @@ class Schedule {
         return obj;
     }
 
+    /**
+     * Check whether the given key exists in the Schedule.
+     *
+     * This method will go through the `events` array and `All` property to check for existence of the key
+     */
+    public has(key: string) {
+        return key in this.All || this.events.some(x => x.days === key);
+    }
+
     public clean() {
         this.cleanSchedule();
         this.All = {};

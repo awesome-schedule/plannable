@@ -2,6 +2,11 @@ import * as Utils from './Utils';
 import { TimeDict } from '../algorithm/ScheduleGenerator';
 import Hashable from './Hashable';
 
+/**
+ * An Event is a structure different than `Course` or `Section` that can be placed on a Schedule
+ *
+ * It is uniquely identified by its `days` property
+ */
 class Event implements Hashable {
     public key: string;
     public days: string;

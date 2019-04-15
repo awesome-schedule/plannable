@@ -130,10 +130,10 @@ import Course from '../models/Course';
 import Event from '../models/Event';
 import { to12hr } from '../models/Utils';
 import Vue from 'vue';
-export default Vue.extend({
+export default Vue.component('CourseBlock', {
     name: 'CourseBlock',
     props: {
-        scheduleBlock: ScheduleBlock,
+        scheduleBlock: ScheduleBlock.prototype,
         /**
          * @type {number[]}
          */

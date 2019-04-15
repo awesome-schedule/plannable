@@ -41,8 +41,7 @@ import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
 import { convertKey } from '../models/Utils';
 
-export default Vue.extend({
-    name: 'Palette',
+export default Vue.component('Palette', {
     props: {
         schedule: Schedule.prototype
     },
@@ -76,6 +75,9 @@ export default Vue.extend({
                 )
                 .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
         },
+        /**
+         * @param {string}
+         */
         convertKey(key) {
             return convertKey(this.$parent.catalog, this.$parent.currentSchedule, key);
         }

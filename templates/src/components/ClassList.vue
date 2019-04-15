@@ -127,8 +127,7 @@
 import Vue from 'vue';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-export default Vue.extend({
-    name: 'ClassList',
+export default Vue.component('ClassList', {
     components: {
         Expand
     },
@@ -168,8 +167,6 @@ export default Vue.extend({
          */
         collapse(key) {
             if (this.collapsed[key]) {
-                const ele = document.getElementById(`${key}trans`);
-                ele.style.maxHeight = ele.clientHeight + 'px';
                 this.$set(this.collapsed, key, undefined);
             } else {
                 this.$set(this.collapsed, key, key);
@@ -182,7 +179,7 @@ export default Vue.extend({
          */
         isActive(key, idx) {
             const sections = this.schedule.All[key];
-            if (sections instanceof Set) return this.schedule.All[key].has(idx);
+            if (sections instanceof Set) return sections.has(idx);
             return false;
         },
         /**

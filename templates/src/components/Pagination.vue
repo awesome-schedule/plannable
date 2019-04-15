@@ -63,11 +63,8 @@
 
 <script>
 import Vue from 'vue';
-export default Vue.extend({
+export default Vue.component('Pagination', {
     props: {
-        /**
-         * @type {number[]}
-         */
         scheduleLength: Number,
         curIdx: Number
     },

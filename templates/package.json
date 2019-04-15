@@ -12,7 +12,6 @@
         "tsdoc": "typedoc --out ../docs/tsdoc ./src"
     },
     "dependencies": {
-        "@types/randomcolor": "^0.5.1",
         "axios": "^0.18",
         "cheerio": "^1.0.0-rc.2",
         "papaparse": "^4.6.3",
@@ -21,6 +20,7 @@
         "vuedraggable": "^2.20.0"
     },
     "devDependencies": {
+        "@types/randomcolor": "^0.5.1",
         "@types/cheerio": "^0.22.11",
         "@types/jest": "^24.0.11",
         "@types/jquery": "^3.3.29",
@@ -34,6 +34,7 @@
         "@vue/eslint-config-prettier": "^4.0.1",
         "@vue/eslint-config-typescript": "^4.0.0",
         "@vue/test-utils": "1.0.0-beta.29",
+        "html-webpack-externals-plugin": "^3.8.0",
         "babel-core": "^6.26.3",
         "babel-eslint": "^10.0.1",
         "babel-jest": "^23.6.0",

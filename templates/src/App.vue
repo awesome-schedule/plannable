@@ -1008,7 +1008,10 @@ export default Vue.extend({
                 if (!this.generated) {
                     this.generated = true;
                     this.proposedSchedule = this.currentSchedule;
-                    this.switchPage(this.currentScheduleIndex, true);
+                    this.switchPage(
+                        this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex,
+                        true
+                    );
                 }
             } else {
                 this.generated = false;

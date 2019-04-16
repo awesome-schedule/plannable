@@ -127,17 +127,18 @@ class Catalog {
             }
             if (matches[0].length >= max_results) break;
         }
-
-        let len = 0;
-        const indices = [];
-        for (let i = 0; i < matches.length; i++) {
-            indices.push(Math.min(matches[i].length, max_results - len));
-            len += matches[i].length;
-            if (len >= max_results) break;
+        const results: Course[] = [];
+        for (let i = 0, count = 0; i < 5; i++) {
+            const match = matches[i];
+            for (let j = 0; j < match.length; j++) {
+                results.push(match[j]);
+                count++;
+                if (count >= max_results) {
+                    console.timeEnd('query');
+                    return results;
+                }
+            }
         }
-        let results: Course[] = [];
-        for (const [i, upper] of indices.entries())
-            results = results.concat(matches[i].slice(0, upper));
         console.timeEnd('query');
         return results;
     }

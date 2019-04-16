@@ -13,7 +13,6 @@
     },
     "dependencies": {
         "axios": "^0.18",
-        "cheerio": "^1.0.0-rc.2",
         "papaparse": "^4.6.3",
         "randomcolor": "^0.5.4",
         "vue": "^2.6.10",

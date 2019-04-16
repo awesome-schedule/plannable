@@ -1,5 +1,4 @@
 import axios from 'axios';
-import cheerio from 'cheerio';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
 import { Semester } from '../models/Catalog';
@@ -18,21 +17,25 @@ function getSemesterList(cors_proxy = CORS_PROXY, count = 5): Promise<Semester[]
             .then(response => {
                 console.timeEnd('get semester list');
                 console.time('parse semester list');
-                const $ = cheerio.load(response.data);
+                const element = document.createElement('html');
+                element.innerHTML = response.data;
+                const options = element.getElementsByTagName('option');
                 const records: Semester[] = [];
-                const options = $('option').slice(0, count);
-                options.each((i, element) => {
-                    const key = element.attribs['value'].substr(-4);
-                    const innerHTML = $(element).html();
-                    if (innerHTML === null) return;
-                    records.push({
-                        id: key,
-                        name: innerHTML
-                            .split(' ')
-                            .splice(0, 2)
-                            .join(' ')
-                    });
-                });
+                for (let i = 0; i < Math.min(count, options.length); i++) {
+                    const option = options[i];
+                    const key = option.getAttribute('value');
+                    if (key) {
+                        const semesterId = key.substr(-4);
+                        const html = option.innerHTML;
+                        records.push({
+                            id: semesterId,
+                            name: html
+                                .split(' ')
+                                .splice(0, 2)
+                                .join(' ')
+                        });
+                    }
+                }
                 console.timeEnd('parse semester list');
                 resolve(records);
             })

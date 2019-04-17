@@ -154,6 +154,37 @@
                     </button>
                 </div>
                 <div class="mx-1">
+                    <div class="mx-4">
+                        <div
+                            class="row no-gutters align-items-center justify-content-between"
+                            style="font-size: 24px"
+                        >
+                            <div class="col-md-auto">
+                                <i
+                                    class="fas fa-long-arrow-alt-left click-icon"
+                                    @click="switchProposed(proposedScheduleIndex - 1)"
+                                ></i>
+                            </div>
+                            <div class="col-md-auto" style="font-size: 20px;">
+                                {{ proposedScheduleIndex }}
+                            </div>
+                            <div class="col-md-auto">
+                                <i
+                                    class="fas fa-long-arrow-alt-right click-icon"
+                                    @click="switchProposed(proposedScheduleIndex + 1)"
+                                ></i>
+                            </div>
+                            <div class="col-md-auto">
+                                <i class="far fa-calendar-plus click-icon" @click="newProposed"></i>
+                            </div>
+                            <div class="col-md-auto">
+                                <i
+                                    class="far fa-calendar-times click-icon"
+                                    @click="deleteProposed"
+                                ></i>
+                            </div>
+                        </div>
+                    </div>
                     <ClassList
                         :courses="currentSchedule.currentCourses"
                         :schedule="currentSchedule"
@@ -700,9 +731,11 @@ function getDefaultData() {
          */
         currentSchedule: new Schedule(),
         /**
-         * @type {Schedule}
+         * @type {Schedule[]}
          */
-        proposedSchedule: new Schedule(),
+        proposedSchedules: [new Schedule()],
+        proposedScheduleIndex: 0,
+        cpIndex: -1,
         /**
          * indicates whether the currently showing schedule is the generated schedule
          */
@@ -776,8 +809,10 @@ function getDefaultData() {
 
             'currentSemester',
             'currentSchedule',
-            'proposedSchedule',
+            'proposedSchedules',
             'sortOptions',
+            'cpIndex',
+            'proposedScheduleIndex',
 
             // settings
             'allowWaitList',
@@ -877,6 +912,17 @@ export default Vue.extend({
             return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
                 a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
             );
+        },
+        proposedSchedule: {
+            /**
+             * @param {Schedule} schedule
+             */
+            set(schedule) {
+                return (this.proposedSchedules[this.proposedScheduleIndex] = schedule);
+            },
+            get() {
+                return this.proposedSchedules[this.proposedScheduleIndex];
+            }
         }
     },
     watch: {
@@ -911,6 +957,28 @@ export default Vue.extend({
         }
     },
     methods: {
+        switchProposed(index) {
+            if (index < this.proposedSchedules.length && index >= 0) {
+                this.proposedScheduleIndex = index;
+                this.switchSchedule(false);
+            }
+        },
+        newProposed() {
+            this.proposedSchedules.push(new Schedule());
+            this.switchProposed(this.proposedSchedules.length - 1);
+        },
+        deleteProposed() {
+            if (this.proposedSchedules.length === 1) {
+                return this.noti.error('This is the only schedule left!');
+            }
+            if (this.proposedScheduleIndex >= this.proposedSchedules.length - 1) {
+                this.switchProposed(this.proposedScheduleIndex - 1);
+                this.proposedSchedules.splice(this.proposedScheduleIndex, 1);
+            } else {
+                this.proposedSchedules.splice(this.proposedScheduleIndex, 1);
+            }
+            this.saveStatus();
+        },
         /**
          * @param {Event} event
          */
@@ -922,7 +990,11 @@ export default Vue.extend({
          * @param {boolean} generated
          */
         switchSchedule(generated) {
-            if (generated && (!this.proposedSchedule.empty() || !this.currentSchedule.empty())) {
+            if (
+                generated &&
+                !this.scheduleEvaluator.empty() &&
+                this.cpIndex === this.proposedScheduleIndex
+            ) {
                 if (!this.generated) {
                     this.generated = true;
                     this.proposedSchedule = this.currentSchedule;
@@ -997,6 +1069,7 @@ export default Vue.extend({
             this.proposedSchedule.clean();
             this.generated = false;
             this.scheduleEvaluator.clear();
+            this.cpIndex = -1;
             this.saveStatus();
         },
         cleanSchedules() {
@@ -1009,6 +1082,7 @@ export default Vue.extend({
                 this.generated = false;
                 this.scheduleEvaluator.clear();
                 localStorage.clear();
+                this.cpIndex = -1;
             }
         },
 
@@ -1271,9 +1345,10 @@ export default Vue.extend({
                     sortOptions: this.sortOptions
                 });
                 this.scheduleEvaluator = evaluator;
-                this.switchSchedule(true);
                 this.saveStatus();
                 this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
+                this.cpIndex = this.proposedScheduleIndex;
+                this.switchSchedule(true);
                 this.loading = false;
             } catch (err) {
                 console.warn(err);
@@ -1281,6 +1356,7 @@ export default Vue.extend({
                 this.scheduleEvaluator.clear();
                 this.noti.error(err.message);
                 this.saveStatus();
+                this.cpIndex = -1;
                 this.loading = false;
             }
         },
@@ -1317,11 +1393,9 @@ export default Vue.extend({
         saveStatus() {
             const obj = {};
             for (const field of this.storageFields) {
-                // use toJSON method if it exists
-                if (this[field] instanceof Object && typeof this[field].toJSON === 'function')
-                    obj[field] = this[field].toJSON();
-                else obj[field] = this[field];
+                obj[field] = this[field];
             }
+            // note: toJSON() will automatically be called if such method exists on an object
             localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
         },
         /**
@@ -1330,9 +1404,35 @@ export default Vue.extend({
         parseLocalData(raw_data) {
             const defaultData = getDefaultData();
             for (const field of this.storageFields) {
-                if (this[field] instanceof Array) {
-                    if (raw_data[field] instanceof Array) this[field] = raw_data[field];
-                    else this[field] = defaultData[field];
+                if (field === 'proposedSchedules') {
+                    // if true, we're dealing legacy code
+                    if (raw_data.proposedSchedule) {
+                        this.proposedScheduleIndex = 0;
+                        this.proposedSchedule = Schedule.fromJSON(raw_data.proposedSchedule);
+                    } else {
+                        /**
+                         * @type {import("./models/Schedule").ScheduleJSON[]}
+                         */
+                        const schedules = raw_data.proposedSchedules;
+                        if (schedules.length) {
+                            const propSchedules = [];
+                            for (const schedule of schedules) {
+                                propSchedules.push(Schedule.fromJSON(schedule));
+                            }
+                            this.proposedSchedules = propSchedules;
+                            this.proposedScheduleIndex =
+                                raw_data.proposedScheduleIndex === undefined
+                                    ? 0
+                                    : raw_data.proposedScheduleIndex;
+                        } else {
+                            this.proposedSchedules = defaultData[field];
+                        }
+                    }
+                } else if (this[field] instanceof Array) {
+                    const raw_arr = raw_data[field];
+                    if (raw_arr instanceof Array) {
+                        this[field] = raw_arr;
+                    } else this[field] = defaultData[field];
                 } else if (this[field] instanceof Object) {
                     if (typeof this[field].fromJSON === 'function') {
                         const parsed = this[field].fromJSON(raw_data[field]);

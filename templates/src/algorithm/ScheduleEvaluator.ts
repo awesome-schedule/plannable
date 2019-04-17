@@ -245,9 +245,15 @@ class ScheduleEvaluator {
          */
         noEarly(schedule: CmpSchedule) {
             const blocks = schedule.blocks;
-            const refTime = 22 * 60;
+            const refTime = 12 * 60;
             let total = 0;
-            for (const day of blocks) if (day.length) total += refTime - day[0];
+            for (const day of blocks) {
+                const time = day[0];
+                if (time && time < refTime) {
+                    total += (refTime - time) ** 2;
+                }
+            }
+
             return total;
         },
 
@@ -310,31 +316,21 @@ class ScheduleEvaluator {
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
                 const block: number[] = blocks[k];
-                const room: string[] = rooms[k];
 
-                const courseRoom = new Array(timeBlock.length / 2).fill(course[0]);
+                // const room: string[] = rooms[k];
+                // const courseRoom = new Array(timeBlock.length / 2).fill(course[0]);
 
+                // hi = half of i
                 for (let i = 0, hi = 0; i < timeBlock.length; i += 2, hi += 1) {
                     // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
                     const ele = timeBlock[i];
-                    const ele1 = timeBlock[i + 1];
-                    const thisRoom = courseRoom[hi];
                     let j = 0,
                         hj = 0;
-                    let inserted = false;
                     for (; j < block.length; j += 2, hj += 1) {
-                        if (ele < block[j]) {
-                            block.splice(j, 0, ele, ele1);
-                            room.splice(hj, 0, thisRoom);
-                            inserted = true;
-                            break;
-                        }
+                        if (ele < block[j]) break;
                     }
-                    // not inserted: either the array is empty or the element to be inserted is the greatest
-                    if (!inserted) {
-                        block.push(ele, ele1);
-                        room.push(thisRoom);
-                    }
+                    block.splice(j, 0, ele, timeBlock[i + 1]);
+                    // room.splice(hj, 0, courseRoom[hi]);
                 }
             }
         }

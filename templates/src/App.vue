@@ -194,87 +194,12 @@
             </ul>
         </nav>
 
-        <nav
+        <event-view
             v-else-if="sideBar.showEvent"
-            class="d-block bg-light sidebar"
-            style="scrollbar-width:thin !important"
+            :schedule="generated ? proposedSchedule : currentSchedule"
+            :event="eventToEdit"
         >
-            <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
-                <div v-if="isEditingEvent">Edit Event</div>
-                <div v-else>Add Event</div>
-            </button>
-            <div class="input-group my-3" style="width:98%;margin-left:1%">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Title</span>
-                </div>
-                <input v-model="eventTitle" class="form-control" type="text" />
-            </div>
-            <div class="btn-group" role="group" style="width:98%;margin-left:1%">
-                <button
-                    v-for="(day, idx) in days"
-                    :key="idx"
-                    :class="'btn btn-secondary' + (eventWeek[idx] ? ' active' : '')"
-                    type="button"
-                    @click="updateDay(idx)"
-                >
-                    {{ day }}
-                </button>
-            </div>
-            <br />
-            <div class="input-group mt-3" style="width:98%;margin-left:1%">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">From</span>
-                </div>
-                <input
-                    v-model="eventTimeFrom"
-                    class="form-control"
-                    type="time"
-                    style="-webkit-appearance:button"
-                />
-                <div class="input-group-prepend">
-                    <span class="input-group-text">to</span>
-                </div>
-                <input
-                    v-model="eventTimeTo"
-                    class="form-control"
-                    type="time"
-                    style="-webkit-appearance:button"
-                />
-            </div>
-
-            <div class="input-group flex-nowrap mt-3" style="width:98%;margin-left:1%">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Place (Optional)</span>
-                </div>
-                <input v-model="eventRoom" type="text" class="form-control" />
-            </div>
-
-            <textarea
-                v-model="eventDescription"
-                class="mt-3"
-                placeholder="Description"
-                style="width:98%;height:100px;margin-left:1%;border-radius: 3px 3px 3px 3px"
-            ></textarea>
-            <button
-                v-if="!isEditingEvent"
-                class="btn btn-outline-secondary"
-                style="width:98%; margin-left:1%"
-                @click="addEvent()"
-            >
-                Add
-            </button>
-            <div v-if="isEditingEvent" class="btn-group" role="group" style="width:100%">
-                <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
-                    Edit
-                </button>
-                <button type="button" class="btn btn-outline-info" @click="cancelEvent()">
-                    Cancel
-                </button>
-                <button type="button" class="btn btn-outline-danger" @click="deleteEvent()">
-                    Delete
-                </button>
-            </div>
-        </nav>
+        </event-view>
 
         <nav
             v-else-if="sideBar.showFilter"
@@ -490,7 +415,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Class Height</span>
                     </div>
-                    <input v-model="fullHeight" type="number" class="form-control" />
+                    <input v-model.number="fullHeight" type="number" class="form-control" />
                     <div class="input-group-append">
                         <span class="input-group-text">px</span>
                     </div>
@@ -499,7 +424,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Grid Height&nbsp;</span>
                     </div>
-                    <input v-model="partialHeight" type="number" class="form-control" />
+                    <input v-model.number="partialHeight" type="number" class="form-control" />
                     <div class="input-group-append">
                         <span class="input-group-text">px</span>
                     </div>
@@ -648,7 +573,7 @@
             </ul>
         </nav>
 
-        <palette v-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
+        <palette v-else-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
 
         <transition name="fade">
             <div
@@ -707,6 +632,7 @@
                 :latest="latest"
                 :time-option-standard="standard"
                 @trigger-modal="showModal"
+                @editEvent="editEvent"
             ></grid-schedule>
             <div style="text-align: center" class="mb-2">
                 If you find any bugs, please file an issue at
@@ -726,6 +652,7 @@ import GridSchedule from './components/GridSchedule.vue';
 import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 import Palette from './components/Palette.vue';
+import EventView from './components/EventView.vue';
 
 // eslint-disable-next-line
 import Section from './models/Section';
@@ -739,7 +666,7 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
-import { to12hr } from './models/Utils';
+import { to12hr, parseTimeAsInt } from './models/Utils';
 import Meta from './models/Meta';
 
 Vue.directive('top', {
@@ -847,15 +774,6 @@ function getDefaultData() {
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
         sortModes: ScheduleEvaluator.sortModes,
 
-        // event related fields
-        eventWeek: [false, false, false, false, false],
-        eventTimeFrom: '',
-        eventTimeTo: '',
-        eventTitle: '',
-        eventRoom: '',
-        eventDescription: '',
-        isEditingEvent: false,
-
         // storage related fields
         storageVersion: 2,
         storageFields: [
@@ -895,8 +813,7 @@ function getDefaultData() {
         drag: false,
         downloadURL: '',
         days: Meta.days,
-
-        toBeModifiedDays: ''
+        eventToEdit: null
     };
 }
 /**
@@ -928,7 +845,8 @@ export default Vue.extend({
         Modal,
         ClassListModal,
         draggable,
-        Palette
+        Palette,
+        EventView
     },
     data() {
         return getDefaultData();
@@ -1001,6 +919,13 @@ export default Vue.extend({
     },
     methods: {
         /**
+         * @param {Event} event
+         */
+        editEvent(event) {
+            if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
+            this.eventToEdit = event;
+        },
+        /**
          * @param {boolean} generated
          */
         switchSchedule(generated) {
@@ -1022,12 +947,6 @@ export default Vue.extend({
             this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
         },
         /**
-         * @param {number} idx
-         */
-        updateDay(idx) {
-            this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
-        },
-        /**
          * @param {string} key
          */
         switchSideBar(key) {
@@ -1036,11 +955,8 @@ export default Vue.extend({
                 if (other !== key) this.sideBar[other] = false;
             }
             this.sideBar[key] = !this.sideBar[key];
-            if (this.sideBar.showEvent) {
-                this.switchSchedule(false);
-            } else if (this.sideBar.showSelectColor) {
-                this.switchSchedule(true);
-            }
+
+            if (this.sideBar.showSelectColor) this.switchSchedule(true);
         },
         /**
          * @param {()=>void} success
@@ -1466,6 +1382,7 @@ export default Vue.extend({
         /**
          * Preprocess the time filters so that they are of the correct format
          * returns null on parsing error
+         *
          * @returns {Event[]}
          */
         computeFilter() {
@@ -1489,13 +1406,9 @@ export default Vue.extend({
                     this.noti.error('Invalid time input.');
                     return null;
                 }
-                // note: substract/add one to allow end points
                 days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
-                console.log(days);
-                // const days = 'MoTuWeThFr ' + to12hr(time[0]) + ' - ' + to12hr(time[1]);
                 timeSlotsRecord.push(new Event(days, false));
             }
-
             return timeSlotsRecord;
         },
         onUploadJson(event) {
@@ -1524,116 +1437,17 @@ export default Vue.extend({
             let url = window.URL.createObjectURL(blob);
             this.downloadURL = url;
             url = url.substring(5);
-            console.log(this.currentSemester.id);
-            // console.log(this.currentSchedule);
             window.URL.revokeObjectURL(url);
-        },
-        getEventDays() {
-            let days = '';
-            for (let i = 0; i < 5; i++) {
-                if (this.eventWeek[i]) {
-                    days += Meta.days[i];
-                }
-            }
-            days += ' ';
-            days += to12hr(this.eventTimeFrom);
-            days += ' - ';
-            days += to12hr(this.eventTimeTo);
-            return days;
-        },
-        addEvent() {
-            try {
-                const days = this.getEventDays();
-
-                if (days.indexOf('NaN') !== -1) {
-                    this.noti.error('Please enter a valid time!');
-                    return;
-                }
-
-                let invalid = true;
-
-                for (const d of Meta.days) {
-                    if (days.indexOf(d) !== -1) {
-                        invalid = false;
-                        continue;
-                    }
-                }
-
-                if (invalid) {
-                    this.noti.error('Please enter a valid time!');
-                    return;
-                }
-                this.currentSchedule.addEvent(
-                    days,
-                    true,
-                    this.eventTitle,
-                    this.eventRoom,
-                    this.eventDescription.split('\n').join('<br />')
-                );
-                this.cancelEvent();
-            } catch (err) {
-                this.noti.error(err.message);
-                // console.error(err);
-            }
-        },
-        editEvent(event) {
-            this.isEditingEvent = true;
-            this.eventTitle = event.title;
-            this.eventRoom = event.room;
-            this.eventDescription = event.description.split('<br />').join('\n');
-            const [week, start, , end] = event.days.split(' ');
-            for (let i = 0; i < Meta.days.length; i++) {
-                if (week.indexOf(Meta.days[i]) !== -1) {
-                    this.$set(this.eventWeek, i, true);
-                } else {
-                    this.$set(this.eventWeek, i, false);
-                }
-            }
-            const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
-            const start24 =
-                (start.substring(start.length - 2, start.length) === 'AM'
-                    ? parseInt(starthr) === 12
-                        ? '00'
-                        : starthr
-                    : '' + (parseInt(starthr) === 12 ? 12 : parseInt(starthr) + 12)) +
-                ':' +
-                startmin;
-            console.log(start24);
-            this.eventTimeFrom = start24;
-            const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
-            const end24 =
-                (end.substring(end.length - 2, end.length) === 'AM'
-                    ? parseInt(endhr) === 12
-                        ? '00'
-                        : endhr
-                    : '' + (parseInt(endhr) === 12 ? 12 : parseInt(endhr) + 12)) +
-                ':' +
-                endmin;
-            this.eventTimeTo = end24;
-            this.toBeModifiedDays = event.days;
-        },
-        endEditEvent() {
-            this.currentSchedule.deleteEvent(this.toBeModifiedDays);
-            this.addEvent();
-        },
-        deleteEvent() {
-            this.currentSchedule.deleteEvent(this.toBeModifiedDays);
-            this.isEditingEvent = false;
-            this.cancelEvent();
-        },
-        cancelEvent() {
-            this.eventTitle = '';
-            this.eventRoom = '';
-            this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
-            this.eventTimeFrom = '';
-            this.eventTimeTo = '';
-            this.eventDescription = '';
-            this.isEditingEvent = false;
-            this.generateSchedules();
         }
     }
 });
 </script>
+
+<style scoped>
+.list-group-item {
+    background-color: #f8f8f8;
+}
+</style>
 
 <style>
 .fade-enter-active,
@@ -1692,10 +1506,6 @@ export default Vue.extend({
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
-}
-
-.list-group-item {
-    background-color: #f8f8f8;
 }
 
 .filter-add:hover {

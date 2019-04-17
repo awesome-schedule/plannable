@@ -84,3 +84,9 @@ export default Vue.component('Palette', {
     }
 });
 </script>
+
+<style scoped>
+.list-group-item {
+    background-color: #f8f8f8;
+}
+</style>

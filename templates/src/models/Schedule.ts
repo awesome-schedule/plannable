@@ -363,29 +363,11 @@ class Schedule {
     }
 
     public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
-        // eslint-disable-next-line
-        // tslint:disable-next-line: prefer-const
-        let [days, start, , end] = dayTimes.split(' ');
-        [start, end] = Utils.parseTimeAsString(start, end);
+        const [days, start, , end] = dayTimes.split(' ');
+        const [startMin, endMin] = Utils.parseTimeAsString(start, end);
         for (let i = 0; i < days.length; i += 2) {
-            const scheduleBlock = new ScheduleBlock(color, start, end, events);
-            switch (days.substr(i, 2)) {
-                case 'Mo':
-                    this.days.Mo.push(scheduleBlock);
-                    break;
-                case 'Tu':
-                    this.days.Tu.push(scheduleBlock);
-                    break;
-                case 'We':
-                    this.days.We.push(scheduleBlock);
-                    break;
-                case 'Th':
-                    this.days.Th.push(scheduleBlock);
-                    break;
-                case 'Fr':
-                    this.days.Fr.push(scheduleBlock);
-                    break;
-            }
+            const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
+            this.days[days.substr(i, 2)].push(scheduleBlock);
         }
     }
 

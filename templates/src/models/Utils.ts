@@ -4,9 +4,11 @@ import Schedule from './Schedule';
 import Meta, { RawCourse } from './Meta';
 
 /**
- * Parse `MoWeFr 10:00AM - 11:00AM` to `[['Mo', 'We', 'Fr'], [10*60, 11*60]]`
- * returns null when fail to parse
+ * @example
+ * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
+ *
  * @param time
+ * @returns null when fail to parse
  */
 export function parseTimeAll(time: string): [string[], TimeBlock] | null {
     const [days, start, , end] = time.split(' ');
@@ -20,8 +22,12 @@ export function parseTimeAll(time: string): [string[], TimeBlock] | null {
     return null;
 }
 /**
- * Parse time in `['10:00AM', '11:00AM']` format to `[600, 660]` (number of minutes from 0:00),
- * assuming that the start time is always smaller (earlier) than end time
+ * Parse time in 12h format to number of minutes from 0:00,
+ * assuming that the start time is **always smaller (earlier)** than end time
+ *
+ * @example
+ * parseTimeAsInt('10:00AM', '11:00AM') => [600, 660]
+ *
  * @param start start time such as `10:00AM`
  * @param end  end time such as `11:00AM`
  */
@@ -50,6 +56,16 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
     return [start_time, end_time];
 }
 
+/**
+ * Parse time in 24h format to 12h format,
+ * assuming that the start time is **always smaller (earlier)** than end time
+ *
+ * @example
+ * parseTimeAsString('10:00PM', '11:00PM') => ['22:00', '23:00']
+ *
+ * @param start start time such as `10:00AM`
+ * @param end  end time such as `11:00AM`
+ */
 export function parseTimeAsString(start: string, end: string): [string, string] {
     let suffix = start.substr(start.length - 2, 2);
     let start_time: string;
@@ -109,9 +125,12 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
 
 /**
  * convert 24 hour format time to 12 hour format.
- * e.g. from `17:00` to `5:00PM`
+ *
+ * @example
+ * to12hr('17:00') => '5:00PM'
+ *
  * @author Kaiying Shan
- * @param time the time in 24 hour format, e.g. 17:00
+ * @param time the time in 24 hour format
  */
 export function to12hr(time: string) {
     const sep = time.split(':');

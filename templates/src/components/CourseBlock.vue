@@ -73,13 +73,7 @@
             <div
                 v-if="isEvent(scheduleBlock)"
                 style="height:100%"
-                @click="
-                    $parent.$parent.editEvent(scheduleBlock.section);
-                    $parent.$parent.currentSchedule = $parent.$parent.proposedSchedule;
-                    $parent.$parent.generated = false;
-                    if ($parent.$parent.sideBar['showEvent'] === false)
-                        $parent.$parent.switchSideBar('showEvent');
-                "
+                @click="$parent.$emit('editEvent', scheduleBlock.section)"
             >
                 <div class="ml-2 mt-2">
                     {{ scheduleBlock.section.title }}
@@ -116,7 +110,10 @@
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
             </div>
-            <div v-if="isEvent(scheduleBlock)">
+            <div
+                v-if="isEvent(scheduleBlock)"
+                @click="$parent.$emit('editEvent', scheduleBlock.section)"
+            >
                 {{ scheduleBlock.section.days }}
             </div>
         </div>

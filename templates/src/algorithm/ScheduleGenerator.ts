@@ -9,23 +9,22 @@ import * as Utils from '../models/Utils';
  * A `TimeBlock` defines the start and end time of a 'Block'
  * that a Meeting will take place. These two numbers are the minutes starting from 0:00
  *
- * e.g. `[600, 660]` represents time from 10:00 to 11:00
+ * @example [600, 660] // represents time from 10:00 to 11:00
  */
 export type TimeBlock = [number, number];
 
 /**
  * `TimeDict` is a data structure used to store the time blocks in a week
- * that a certain `Section` or `Event` will take place
- *
- * The keys of a `TimeDict` are abbreviated day strings like `Mo` or `Tu`
- *
- * The values are **flattened** arrays of `TimeBlock`s, e.g. `[100, 200, 300, 400]`
+ * that a certain `Section` or `Event` will take place.
+ * The keys of a `TimeDict` are abbreviated day strings like `Mo` or `Tu`.
+ * The values are **flattened** arrays of `TimeBlock`s, e.g. `[100, 200, 300, 400]`.
  *
  * @remarks The values are not simply `TimeBlock`s
  * because it is possible for a single section to have multiple meetings in a day
  *
- * e.g. `{Mo: [600, 660, 900, 960], Fr: [1200, 1260]}` represents that this `Section` or `Event`
- * will take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ * @example
+ * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]} // represents that this `Section` or `Event` will
+ * //take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
  *
  * @see TimeBlock
  */
@@ -48,7 +47,8 @@ export interface TimeDict {
  *
  * 2: an array of section indices
  *
- * example: `["span20205",["Mo":[600,650],"Tu":[600,650]],[0, 1, 2]]`
+ * @example
+ * ["span20205",{"Mo":[600,650],"Tu":[600,650]},[0, 1, 2]]
  *
  * @see TimeDict
  */
@@ -276,7 +276,8 @@ class ScheduleGenerator {
 
     /**
      * compare the new class to see if it has conflicts with the existing time table
-     * :return: Boolean type: true if it has conflict, else false
+     *
+     * @returns true if it has conflict, false otherwise
      */
     public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: TimeDict) {
         for (const algoCourse of timeTable) {
@@ -286,16 +287,7 @@ class ScheduleGenerator {
     }
 
     public filterStatus(section: Section) {
-        // const standard = Object.values(CourseRecord.STATUSES);
-        // // console.log(option.status.includes(course.status), option.status, course.status);
-        // if (!standard.includes(course.status)) {
-        //     return true;
-        // }
-
-        if (this.options.status.includes(section.status)) {
-            return true;
-        }
-        return false;
+        return this.options.status.includes(section.status);
     }
 }
 

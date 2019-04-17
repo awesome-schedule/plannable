@@ -247,7 +247,7 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             const refTime = 22 * 60;
             let total = 0;
-            for (const day of blocks) total += refTime - day[0];
+            for (const day of blocks) if (day.length) total += refTime - day[0];
             return total;
         },
 

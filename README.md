@@ -1,6 +1,6 @@
 # Awesome-SchedulAR
 
-> Note: the credit of name goes to [OAHC2022](https://github.com/OAHC2022)
+> Note: the credit of the name goes to [OAHC2022](https://github.com/OAHC2022)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)](https://travis-ci.org/awesome-schedule/)

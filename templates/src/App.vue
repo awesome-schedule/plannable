@@ -922,7 +922,7 @@ export default Vue.extend({
          * @param {boolean} generated
          */
         switchSchedule(generated) {
-            if (generated && !this.proposedSchedule.empty()) {
+            if (generated && (!this.proposedSchedule.empty() || !this.currentSchedule.empty())) {
                 if (!this.generated) {
                     this.generated = true;
                     this.proposedSchedule = this.currentSchedule;

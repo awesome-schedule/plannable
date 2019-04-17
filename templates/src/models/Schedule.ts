@@ -285,7 +285,7 @@ class Schedule {
     public computeSchedule() {
         if (!Schedule.catalog) return;
         this.cleanSchedule();
-        this.currentCourses = [];
+
         for (const key in this.All) {
             const sections = this.All[key];
             const course = Schedule.catalog.getCourse(key);
@@ -334,7 +334,7 @@ class Schedule {
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
         for (const event of this.events) {
-            this.place(event);
+            if (event.display) this.place(event);
         }
     }
 

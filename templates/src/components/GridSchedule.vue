@@ -137,17 +137,12 @@ export default Vue.component('GridSchedule', {
          * @returns {number}
          */
         absoluteEarliest() {
-            const early =
-                this.earliest === null || this.earliest === undefined
-                    ? '8:00'
-                    : this.earliest
-                          .split(':')
-                          .slice(0, 2)
-                          .join(':');
+            const early = this.validate(this.earliest, '8:00');
+
             if (this.timeToNum(early, true) > this.earliestBlock) {
                 return this.earliestBlock;
             } else {
-                return this.timeToNum(this.earliest, true);
+                return this.timeToNum(early, true);
             }
         },
         /**
@@ -155,17 +150,11 @@ export default Vue.component('GridSchedule', {
          * @returns {number}
          */
         absoluteLatest() {
-            const late =
-                this.latest === null || this.latest === undefined
-                    ? '19:00'
-                    : this.latest
-                          .split(':')
-                          .slice(0, 2)
-                          .join(':');
+            const late = this.validate(this.latest, '19:00');
             if (this.timeToNum(late, false) < this.latestBlock) {
                 return this.latestBlock;
             } else {
-                return this.timeToNum(this.latest, false);
+                return this.timeToNum(late, false);
             }
         },
         /**
@@ -252,6 +241,17 @@ export default Vue.component('GridSchedule', {
         }
     },
     methods: {
+        /**
+         * @param {string} time
+         * @param {string} fallback
+         */
+        validate(time, fallback) {
+            if (time && time.length >= 3 && time.indexOf(':') > 0) {
+                return time;
+            } else {
+                return fallback;
+            }
+        },
         /**
          * Increase the time in string by 30 minutes and return
          * @param {string} time

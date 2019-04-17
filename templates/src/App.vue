@@ -682,11 +682,6 @@ Vue.directive('top', {
  */
 function getDefaultData() {
     return {
-        api:
-            window.location.host.indexOf('localhost') === -1 &&
-            window.location.host.indexOf('127.0.0.1') === -1
-                ? `${window.location.protocol}//${window.location.host}/api`
-                : 'http://localhost:8000/api',
         /**
          * @type {Semester[]}
          */
@@ -718,8 +713,6 @@ function getDefaultData() {
         /**
          * sidebar display status
          * show the specific sidebar when true, and hide when all false
-         *
-         * @type {Object<string, boolean>}
          */
         sideBar: {
             showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
@@ -1272,7 +1265,8 @@ export default Vue.extend({
 
             try {
                 const evaluator = generator.getSchedules(this.currentSchedule, {
-                    events: this.currentSchedule.events.concat(timeFilters),
+                    events: this.currentSchedule.events,
+                    timeSlots: timeFilters,
                     status: constraintStatus,
                     sortOptions: this.sortOptions
                 });

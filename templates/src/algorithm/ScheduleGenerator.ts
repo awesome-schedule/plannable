@@ -62,6 +62,7 @@ export type RawAlgoSchedule = RawAlgoCourse[];
 export interface Options {
     [x: string]: any;
     events: Event[];
+    timeSlots: Event[];
     status: string[];
     noClassDay: string[];
     sortOptions: SortOptions;
@@ -72,6 +73,7 @@ class ScheduleGenerator {
         events: [],
         status: [],
         noClassDay: [],
+        timeSlots: [],
         sortOptions: ScheduleEvaluator.getDefaultOptions()
     };
 
@@ -111,9 +113,8 @@ class ScheduleGenerator {
 
         const timeSlots: TimeDict[] = [];
 
-        for (const event of this.options.events) {
-            timeSlots.push(event.toTimeDict());
-        }
+        for (const event of this.options.events) timeSlots.push(event.toTimeDict());
+        for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
 
         for (const key in courses) {
             const classes: RawAlgoSchedule = [];
@@ -201,13 +202,10 @@ class ScheduleGenerator {
     public createSchedule(classList: RawAlgoSchedule[]) {
         let classNum = 0;
         let choiceNum = 0;
-        let pathMemory = new Int32Array(classList.length);
-        let timeTable: RawAlgoSchedule = [];
+        const pathMemory = new Int32Array(classList.length);
+        const timeTable: RawAlgoSchedule = [];
 
-        const evaluator = new ScheduleEvaluator(
-            this.options.sortOptions,
-            this.options.events.filter(x => x.display)
-        );
+        const evaluator = new ScheduleEvaluator(this.options.sortOptions, this.options.events);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
@@ -219,7 +217,7 @@ class ScheduleGenerator {
                 timeTable.pop();
             }
 
-            [classNum, choiceNum, pathMemory, timeTable, exhausted] = this.AlgorithmRetract(
+            [classNum, choiceNum, exhausted] = this.AlgorithmRetract(
                 classList,
                 classNum,
                 choiceNum,
@@ -253,7 +251,7 @@ class ScheduleGenerator {
         choiceNum: number,
         pathMemory: Int32Array,
         timeTable: RawAlgoSchedule
-    ): [number, number, Int32Array, RawAlgoSchedule, boolean] {
+    ): [number, number, boolean] {
         /**
          * when all possibilities in on class have exhausted, retract one class
          * explore the next possibilities in the nearest possible class
@@ -263,7 +261,7 @@ class ScheduleGenerator {
         while (choiceNum >= classList[classNum].length) {
             classNum -= 1;
             if (classNum < 0) {
-                return [classNum, choiceNum, pathMemory, timeTable, true];
+                return [classNum, choiceNum, true];
             }
             timeTable.pop();
             choiceNum = pathMemory[classNum];
@@ -271,7 +269,7 @@ class ScheduleGenerator {
                 pathMemory[i] = 0;
             }
         }
-        return [classNum, choiceNum, pathMemory, timeTable, false];
+        return [classNum, choiceNum, false];
     }
 
     /**

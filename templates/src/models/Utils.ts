@@ -105,8 +105,8 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
         const timeBlocks1 = timeDict1[dayBlock] as number[];
 
         for (let i = 0; i < timeBlocks1.length; i += 2) {
-            const begin = timeBlocks1[i];
-            const end = timeBlocks1[i + 1];
+            const begin = timeBlocks1[i] + 1;
+            const end = timeBlocks1[i + 1] - 1;
             for (let j = 0; j < timeBlocks2.length; j += 2) {
                 const beginTime = timeBlocks2[j];
                 const endTime = timeBlocks2[j + 1];

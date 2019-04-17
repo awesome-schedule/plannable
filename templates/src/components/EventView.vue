@@ -165,7 +165,8 @@ export default Vue.component('EventView', {
                     this.eventRoom,
                     this.eventDescription.split('\n').join('<br />')
                 );
-                this.cancelEvent();
+                // note: we don't need to regenerate schedules if the days property is not changed
+                this.cancelEvent(this.toBeModifiedDays !== days);
             } catch (err) {
                 this.$parent.noti.error(err.message);
             }
@@ -195,7 +196,6 @@ export default Vue.component('EventView', {
                     : '' + (parseInt(starthr) === 12 ? 12 : parseInt(starthr) + 12)) +
                 ':' +
                 startmin;
-            console.log(start24);
             this.eventTimeFrom = start24;
             const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
             const end24 =
@@ -216,9 +216,16 @@ export default Vue.component('EventView', {
         deleteEvent() {
             this.schedule.deleteEvent(this.toBeModifiedDays);
             this.isEditingEvent = false;
-            this.cancelEvent();
+            this.cancelEvent(true);
         },
-        cancelEvent() {
+        /**
+         * this method is called after deleteEvent, endEditEvent and addEvent
+         *
+         * clear all properties and force recomputation of current schedule
+         *
+         * @param {boolean} regenerate re-run algorithm if true
+         */
+        cancelEvent(regenerate = false) {
             this.eventTitle = '';
             this.eventRoom = '';
             this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
@@ -226,7 +233,9 @@ export default Vue.component('EventView', {
             this.eventTimeTo = '';
             this.eventDescription = '';
             this.isEditingEvent = false;
-            this.$parent.generateSchedules();
+            this.$parent.eventToEdit = null;
+            if (regenerate) this.$parent.generateSchedules();
+            else this.$parent.currentSchedule.computeSchedule();
         }
     }
 });

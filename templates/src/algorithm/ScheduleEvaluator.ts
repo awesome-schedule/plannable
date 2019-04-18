@@ -364,7 +364,7 @@ class ScheduleEvaluator {
             // tslint:disable-next-line
             const schedules = this.schedules;
             if (count === 1) {
-                const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[0].name];
+                const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[lastIdx].name];
                 for (const cmpSchedule of this.schedules) {
                     cmpSchedule.coeff = evalFunc(cmpSchedule);
                 }

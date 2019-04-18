@@ -199,7 +199,7 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let compact = 0;
             for (const dayBlock of blocks) {
-                for (let i = 0; i < dayBlock.length - 3; i += 4) {
+                for (let i = 0; i < dayBlock.length - 3; i += 2) {
                     compact += dayBlock[i + 2] - dayBlock[i + 1];
                 }
             }

@@ -5,8 +5,8 @@ SOURCE_BRANCH="master"
 TARGET_BRANCH="master"
 
 function doCompile {
-  npm run build
-  cp -r dist/* ../out/
+    npm run build
+    cp -rf dist/* out/
 }
 
 # Pull requests and commits to other branches shouldn't try to deploy, just build to verify

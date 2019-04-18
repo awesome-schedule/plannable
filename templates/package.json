@@ -15,6 +15,7 @@
         "axios": "^0.18",
         "papaparse": "^4.6.3",
         "randomcolor": "^0.5.4",
+        "string-similarity": "^3.0.0",
         "vue": "^2.6.10",
         "vuedraggable": "^2.20.0"
     },

@@ -416,6 +416,26 @@ class Schedule {
     }
 
     /**
+     * get a copy of this schedule
+     */
+    public copy() {
+        const AllCopy: { [x: string]: Set<number> | -1 } = {};
+        for (const key in this.All) {
+            const sections = this.All[key];
+            if (sections instanceof Set) {
+                AllCopy[key] = new Set(sections);
+            } else {
+                AllCopy[key] = sections;
+            }
+        }
+        // note: is it desirable to deep-copy all the events?
+        const cpy = new Schedule([], this.title, this.id, this.events.map(e => e.copy()));
+        cpy.All = AllCopy;
+        cpy.computeSchedule();
+        return cpy;
+    }
+
+    /**
      * Check whether the given key exists in the Schedule.
      *
      * This method will go through the `events` array and `All` property to check for existence of the key

@@ -169,24 +169,39 @@
                             <div class="col-md-auto">
                                 <i
                                     class="fas fa-long-arrow-alt-left click-icon"
+                                    title="previous schedule"
                                     @click="switchProposed(proposedScheduleIndex - 1)"
                                 ></i>
                             </div>
                             <div class="col-md-auto" style="font-size: 20px;">
-                                {{ proposedScheduleIndex }}
+                                {{ proposedScheduleIndex + 1 }}
                             </div>
                             <div class="col-md-auto">
                                 <i
                                     class="fas fa-long-arrow-alt-right click-icon"
+                                    title="next schedule"
                                     @click="switchProposed(proposedScheduleIndex + 1)"
                                 ></i>
                             </div>
                             <div class="col-md-auto">
-                                <i class="far fa-calendar-plus click-icon" @click="newProposed"></i>
+                                <i
+                                    class="far fa-calendar-plus click-icon"
+                                    title="new schedule"
+                                    @click="newProposed"
+                                ></i>
+                            </div>
+                            <div class="col-md-auto">
+                                <i
+                                    class="far fa-copy click-icon"
+                                    title="copy the current schedule to a new schedule"
+                                    @click="copyCurrent"
+                                >
+                                </i>
                             </div>
                             <div class="col-md-auto">
                                 <i
                                     class="far fa-calendar-times click-icon"
+                                    title="delete current schedule"
                                     @click="deleteProposed"
                                 ></i>
                             </div>
@@ -745,6 +760,9 @@ function getDefaultData() {
          */
         proposedSchedules: [new Schedule()],
         proposedScheduleIndex: 0,
+        /**
+         * The index of the proposed schedule corresponding to the generated schedule
+         */
         cpIndex: -1,
         /**
          * indicates whether the currently showing schedule is the generated schedule
@@ -977,25 +995,41 @@ export default Vue.extend({
         });
     },
     methods: {
+        /**
+         * @param {number} index
+         */
         switchProposed(index) {
             if (index < this.proposedSchedules.length && index >= 0) {
                 this.proposedScheduleIndex = index;
                 this.switchSchedule(false);
             }
+            this.saveStatus();
         },
         newProposed() {
             this.proposedSchedules.push(new Schedule());
             this.switchProposed(this.proposedSchedules.length - 1);
         },
+        copyCurrent() {
+            const len = this.proposedSchedules.length;
+            this.proposedSchedules.push(this.proposedSchedules[len - 1].copy());
+            this.switchProposed(len);
+        },
         deleteProposed() {
+            if (!confirm('Are you sure?')) return;
             if (this.proposedSchedules.length === 1) {
                 return this.noti.error('This is the only schedule left!');
             }
-            if (this.proposedScheduleIndex >= this.proposedSchedules.length - 1) {
-                this.switchProposed(this.proposedScheduleIndex - 1);
-                this.proposedSchedules.splice(this.proposedScheduleIndex, 1);
-            } else {
-                this.proposedSchedules.splice(this.proposedScheduleIndex, 1);
+            const idx = this.proposedScheduleIndex;
+
+            // if the schedule to be deleted corresponds to generated schedules,
+            // this deletion invalidates the generated schedules immediately.
+            if (idx === this.cpIndex) {
+                this.scheduleEvaluator.clear();
+                this.cpIndex = -1;
+            }
+            this.proposedSchedules.splice(idx, 1);
+            if (idx >= this.proposedSchedules.length) {
+                this.switchProposed(idx - 1);
             }
             this.saveStatus();
         },
@@ -1028,6 +1062,10 @@ export default Vue.extend({
                 this.currentSchedule = this.proposedSchedule;
             }
         },
+        /**
+         * @param {number} i
+         * @param {number} j
+         */
         updateFilterDay(i, j) {
             this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
         },
@@ -1495,6 +1533,7 @@ export default Vue.extend({
         },
         /**
          * Preprocess the time filters so that they are of the correct format
+         *
          * returns null on parsing error
          *
          * @returns {Event[]}

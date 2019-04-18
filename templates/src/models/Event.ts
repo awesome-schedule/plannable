@@ -33,6 +33,10 @@ class Event implements Hashable {
         return Utils.hashCode(this.days);
     }
 
+    public copy() {
+        return new Event(this.days, this.display, this.title, this.description, this.room);
+    }
+
     public toTimeDict(): TimeDict {
         const dict: TimeDict = {};
 

@@ -199,7 +199,7 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let compact = 0;
             for (const dayBlock of blocks) {
-                for (let i = 0; i < dayBlock.length - 3; i += 4) {
+                for (let i = 0; i < dayBlock.length - 3; i += 2) {
                     compact += dayBlock[i + 2] - dayBlock[i + 1];
                 }
             }
@@ -364,7 +364,7 @@ class ScheduleEvaluator {
             // tslint:disable-next-line
             const schedules = this.schedules;
             if (count === 1) {
-                const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[0].name];
+                const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[lastIdx].name];
                 for (const cmpSchedule of this.schedules) {
                     cmpSchedule.coeff = evalFunc(cmpSchedule);
                 }

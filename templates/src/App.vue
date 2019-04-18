@@ -27,7 +27,7 @@
             </svg>
         </a>
         <modal id="modal" :semester="currentSemester" :course="modalCourse"></modal>
-        <ClassListModal id="class-list-modal" :course="classListModalCourse"></ClassListModal>
+        <ClassListModal :course="classListModalCourse"></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
@@ -65,8 +65,15 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
-                v-if="isEntering && sideBar.showSelectClass"
                 title="collapse searching results"
+                class="tab-icon mb-4"
+                @click="switchSideBar('showInfo')"
+            >
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div
+                v-if="isEntering && sideBar.showSelectClass"
+                title="Tutorials, miscellaneous information and acknowledgments"
                 class="tab-icon mb-4"
                 @click="closeClassList"
             >
@@ -606,6 +613,8 @@
 
         <palette v-else-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
 
+        <information v-else-if="sideBar.showInfo"></information>
+
         <transition name="fade">
             <div
                 v-if="noti.msg.length > 0"
@@ -684,6 +693,7 @@ import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
+import Information from './components/Information.vue';
 
 // eslint-disable-next-line
 import Section from './models/Section';
@@ -753,7 +763,8 @@ function getDefaultData() {
             showFilter: false,
             showSetting: false,
             showExport: false,
-            showSelectColor: false
+            showSelectColor: false,
+            showInfo: false
         },
 
         // autocompletion related fields
@@ -874,7 +885,8 @@ export default Vue.extend({
         ClassListModal,
         draggable,
         Palette,
-        EventView
+        EventView,
+        Information
     },
     data() {
         return getDefaultData();
@@ -955,6 +967,14 @@ export default Vue.extend({
                 this.selectSemester(0);
             });
         }
+    },
+    mounted() {
+        $('#class-list-modal').on('shown.bs.modal', e => {
+            const table = document.getElementById('class-list-modal-table');
+            table.style.maxWidth =
+                document.getElementById('class-list-modal').clientWidth - 20 + 'px';
+            console.log(table.style.maxWidth);
+        });
     },
     methods: {
         switchProposed(index) {

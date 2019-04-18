@@ -12,14 +12,14 @@
                 </div>
                 <div class="modal-body">
                     <h6>{{ course.type }}</h6>
-                    <table style="color:#808080; font-size:0.75rem; width:95%">
+                    <table style="color:#808080; font-size:0.75rem; width: 100%; overflow-x: auto">
                         <tr v-for="(section, i) in course.sections" :key="section.key + i">
                             <td class="info">Section:&nbsp;{{ section.section }}</td>
                             <td class="info">ID:&nbsp;{{ section.id }}</td>
-                            <td v-if="section.topic !== ''" class="info">
+                            <td class="info">
                                 {{ section.topic }}
                             </td>
-                            <td class="info" width="20%">{{ section.instructors.join(' ') }}</td>
+                            <td class="info">{{ section.instructors.join(' ') }}</td>
                             <td class="info">
                                 <template v-for="(meeting, j) in section.meetings"
                                     >{{ meeting.days }} <br :key="j" />
@@ -38,6 +38,10 @@
                     </table>
 
                     <p class="mt-2">{{ course.description }}</p>
+
+                    <button class="btn btn-outline-info" @click="openVAGrade(course)">
+                        Grade Distribution
+                    </button>
                 </div>
             </div>
         </div>
@@ -55,7 +59,7 @@ export default {
 
 <style scoped>
 .info {
-    padding-right: 10px;
+    white-space: nowrap;
     vertical-align: top;
 }
 </style>

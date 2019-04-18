@@ -73,7 +73,7 @@
             </div>
             <div
                 v-if="isEntering && sideBar.showSelectClass"
-                title="collapse searching results"
+                title="Tutorials, miscellaneous information and acknowledgments"
                 class="tab-icon mb-4"
                 @click="closeClassList"
             >

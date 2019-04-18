@@ -65,6 +65,13 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
+                title="collapse searching results"
+                class="tab-icon mb-4"
+                @click="switchSideBar('showInfo')"
+            >
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div
                 v-if="isEntering && sideBar.showSelectClass"
                 title="collapse searching results"
                 class="tab-icon mb-4"
@@ -575,6 +582,8 @@
 
         <palette v-else-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
 
+        <information v-else-if="sideBar.showInfo"></information>
+
         <transition name="fade">
             <div
                 v-if="noti.msg.length > 0"
@@ -653,6 +662,7 @@ import Modal from './components/Modal.vue';
 import ClassListModal from './components/ClassListModal.vue';
 import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
+import Information from './components/Information.vue';
 
 // eslint-disable-next-line
 import Section from './models/Section';
@@ -720,7 +730,8 @@ function getDefaultData() {
             showFilter: false,
             showSetting: false,
             showExport: false,
-            showSelectColor: false
+            showSelectColor: false,
+            showInfo: false
         },
 
         // autocompletion related fields
@@ -839,7 +850,8 @@ export default Vue.extend({
         ClassListModal,
         draggable,
         Palette,
-        EventView
+        EventView,
+        Information
     },
     data() {
         return getDefaultData();

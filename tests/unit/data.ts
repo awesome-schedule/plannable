@@ -8,7 +8,7 @@ import path from 'path';
 import fs from 'fs';
 
 const data_path = path.join(
-    path.dirname(path.dirname(path.dirname(__dirname))),
+    path.dirname(path.dirname(__dirname)),
     'backend',
     'data',
     'CS1198Data.json'

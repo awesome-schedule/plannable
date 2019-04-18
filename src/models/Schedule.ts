@@ -303,7 +303,7 @@ class Schedule {
                     this.currentIds[currentIdKey] = section.id.toString();
                     this.place(section);
                 } else {
-                    this.currentIds[currentIdKey] = 'See modal';
+                    this.currentIds[currentIdKey] = ' - ';
                     this.place(course);
                 }
             } else {

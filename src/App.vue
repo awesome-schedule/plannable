@@ -231,10 +231,10 @@
                     </div>
                 </div>
             </div>
-            <button v-if="generated" class="btn btn-info nav-btn mt-3">
+            <button class="btn btn-info nav-btn mt-3">
                 Schedule Overview
             </button>
-            <ul v-if="generated" class="list-group list-group-flush" style="width:99%">
+            <ul class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Total Credits: {{ currentSchedule.totalCredit }}</li>
                 <li class="list-group-item pr-0">
                     <table style="width:100%;font-size:14px">

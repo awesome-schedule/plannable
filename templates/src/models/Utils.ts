@@ -199,6 +199,7 @@ export function openLousList(semesterId: number, courseId: number) {
 export function openVAGrade(course: Course) {
     window.open(
         `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
-        '_blank'
+        '_blank',
+        'width=650,height=700,scrollbars=yes'
     );
 }

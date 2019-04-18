@@ -51,7 +51,7 @@ class Section implements CourseFields, Hashable {
         this.meetings = raw[7].map(x => new Meeting(this, x));
         const temp = new Set<string>();
         this.meetings.forEach(x => {
-            x.instructor.split(' ').forEach(y => temp.add(y));
+            x.instructor.split(',').forEach(y => temp.add(y));
         });
         this.instructors = [...temp.values()];
     }

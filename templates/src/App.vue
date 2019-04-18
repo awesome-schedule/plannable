@@ -27,7 +27,7 @@
             </svg>
         </a>
         <modal id="modal" :semester="currentSemester" :course="modalCourse"></modal>
-        <ClassListModal id="class-list-modal" :course="classListModalCourse"></ClassListModal>
+        <ClassListModal :course="classListModalCourse"></ClassListModal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
@@ -921,6 +921,14 @@ export default Vue.extend({
                 this.selectSemester(0);
             });
         }
+    },
+    mounted() {
+        $('#class-list-modal').on('shown.bs.modal', e => {
+            const table = document.getElementById('class-list-modal-table');
+            table.style.maxWidth =
+                document.getElementById('class-list-modal').clientWidth - 20 + 'px';
+            console.log(table.style.maxWidth);
+        });
     },
     methods: {
         /**

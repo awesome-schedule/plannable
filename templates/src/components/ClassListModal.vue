@@ -1,5 +1,5 @@
 <template>
-    <div class="modal fade" tabindex="-1" role="dialog">
+    <div id="class-list-modal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div v-if="course !== null" class="modal-content">
                 <div class="modal-header">
@@ -12,30 +12,32 @@
                 </div>
                 <div class="modal-body">
                     <h6>{{ course.type }}</h6>
-                    <table style="color:#808080; font-size:0.75rem; width: 100%; overflow-x: auto">
-                        <tr v-for="(section, i) in course.sections" :key="section.key + i">
-                            <td class="info">Section:&nbsp;{{ section.section }}</td>
-                            <td class="info">ID:&nbsp;{{ section.id }}</td>
-                            <td class="info">
-                                {{ section.topic }}
-                            </td>
-                            <td class="info">{{ section.instructors.join(' ') }}</td>
-                            <td class="info">
-                                <template v-for="(meeting, j) in section.meetings"
-                                    >{{ meeting.days }} <br :key="j" />
-                                </template>
-                            </td>
-                            <td class="info">
-                                <template v-for="(meeting, j) in section.meetings"
-                                    >{{ meeting.room }} <br :key="j" />
-                                </template>
-                            </td>
-                            <td class="info">{{ section.status }}</td>
-                            <td class="info">
-                                {{ section.enrollment + '/' + section.enrollment_limit }}
-                            </td>
-                        </tr>
-                    </table>
+                    <div id="class-list-modal-table" style="width: 100%; overflow-x: auto;">
+                        <table style="color:#808080; font-size:0.75rem;">
+                            <tr v-for="(section, i) in course.sections" :key="section.key + i">
+                                <td class="info">Section:&nbsp;{{ section.section }}</td>
+                                <td class="info">ID:&nbsp;{{ section.id }}</td>
+                                <td class="info">
+                                    {{ section.topic }}
+                                </td>
+                                <td class="info">{{ section.instructors.join(' ') }}</td>
+                                <td class="info">
+                                    <template v-for="(meeting, j) in section.meetings"
+                                        >{{ meeting.days }} <br :key="j" />
+                                    </template>
+                                </td>
+                                <td class="info">
+                                    <template v-for="(meeting, j) in section.meetings"
+                                        >{{ meeting.room }} <br :key="j" />
+                                    </template>
+                                </td>
+                                <td class="info">{{ section.status }}</td>
+                                <td class="info">
+                                    {{ section.enrollment + '/' + section.enrollment_limit }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
                     <p class="mt-2">{{ course.description }}</p>
 
@@ -61,5 +63,6 @@ export default {
 .info {
     white-space: nowrap;
     vertical-align: top;
+    padding-right: 12px;
 }
 </style>

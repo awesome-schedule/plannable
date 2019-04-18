@@ -2,6 +2,7 @@ import { TimeDict, TimeBlock } from '@/algorithm/ScheduleGenerator';
 import Catalog from './Catalog';
 import Schedule from './Schedule';
 import Meta, { RawCourse } from './Meta';
+import Course from './Course';
 
 /**
  * @example
@@ -175,4 +176,30 @@ export function convertKey(cat: Catalog, schedule: Schedule, key: string) {
         }
     }
     return key;
+}
+
+/**
+ * open a course detail on Lou's list
+ *
+ * @remarks I believe this method is copied somewhere from Lou's list
+ */
+export function openLousList(semesterId: number, courseId: number) {
+    window.open(
+        'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
+            semesterId +
+            '&ClassNumber=' +
+            courseId,
+        '_blank',
+        'width=650,height=700,scrollbars=yes'
+    );
+}
+/**
+ * view grade distribution of this course on vagrades
+ */
+export function openVAGrade(course: Course) {
+    window.open(
+        `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
+        '_blank',
+        'width=650,height=700,scrollbars=yes'
+    );
 }

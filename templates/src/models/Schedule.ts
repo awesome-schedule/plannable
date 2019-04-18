@@ -102,7 +102,7 @@ class Schedule {
         Fr: ScheduleBlock[];
     };
     /**
-     * computed property
+     * total credits stored in this schedule, computed based on `this.All`
      */
     public totalCredit: number;
     /**
@@ -114,7 +114,8 @@ class Schedule {
      *
      * @remarks If a Course has multiple sections selected, a `+x` will be appended
      *
-     * it has format `{"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}`
+     * @example
+     * {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}
      */
     public currentIds: { [x: string]: string };
 

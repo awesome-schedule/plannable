@@ -2,6 +2,7 @@ import Schedule from '../models/Schedule';
 import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
+import quickselect from 'quickselect';
 
 export enum Mode {
     fallback = 0,
@@ -352,6 +353,13 @@ class ScheduleEvaluator {
         return this.options.sortBy.some(x => x.name === 'IamFeelingLucky' && x.enabled);
     }
 
+    /**
+     * compute the coefficient array for a specific sorting option.
+     * if it exists, don't do anything
+     *
+     * @param funcName the name of the sorting option
+     * @param assign whether assign to the coeff field of each `CmpSchedule`
+     */
     public computeCoeffFor(funcName: string, assign = true) {
         const schedules = this._schedules;
         const cache = this.sortCoeffCache[funcName];
@@ -411,6 +419,8 @@ class ScheduleEvaluator {
                 const options = this.options.sortBy.filter(x => x.enabled);
                 const len = schedules.length;
                 const coeffs = new Float32Array(len);
+
+                // finding the minimum and maximum are quite fast for 1e6 elements, so not cached.
                 for (const option of options) {
                     this.computeCoeffFor(option.name, false);
 
@@ -427,6 +437,8 @@ class ScheduleEvaluator {
 
                     const range = max - min;
                     const normalizeRatio = range / 100;
+
+                    // use Euclidean distance to combine multiple sorting coefficients
                     if (option.reverse) {
                         for (let i = 0; i < len; i++) {
                             coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
@@ -459,8 +471,13 @@ class ScheduleEvaluator {
 
     /**
      * sort the array of schedules according to their quality coefficients computed using the given
+     *
+     * @param quick quick mode: use Floyd–Rivest algorithm to select first
+     * 100 elements and then sort only these elements
+     *
+     * @see {@link https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm}
      */
-    public sort() {
+    public sort(quick = false) {
         console.time('sorting: ');
 
         const schedules = this._schedules.concat();
@@ -479,28 +496,38 @@ class ScheduleEvaluator {
         const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number = options[0].reverse
             ? (a, b) => b.coeff - a.coeff
             : (a, b) => a.coeff - b.coeff;
-        if (this.options.mode === Mode.combined) {
-            // if want to be really fast, use Floyd–Rivest algorithm to select first,
-            // say, 100 elements and then sort only these elements
-            schedules.sort(cmpFunc);
+        if (this.options.mode === Mode.combined || options.length === 1) {
+            if (quick) {
+                this.partialSort(schedules, cmpFunc, 100);
+            } else {
+                schedules.sort(cmpFunc);
+            }
         } else {
-            if (options.length === 1) schedules.sort(cmpFunc);
-            else {
-                const len = options.length;
-                const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-                const coeffs = options.map(x => this.sortCoeffCache[x.name]);
-                schedules.sort((a, b) => {
-                    let r = 0;
-                    for (let i = 0; i < len; i++) {
-                        const coeff = coeffs[i];
-                        r = ifReverse[i] * (coeff[a.index] - coeff[b.index]);
-                        if (r) return r;
-                    }
-                    return r;
-                });
+            const len = options.length;
+            const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
+            const coeffs = options.map(x => this.sortCoeffCache[x.name]);
+            const func = (a: CmpSchedule, b: CmpSchedule) => {
+                let r = 0;
+                for (let i = 0; i < len; i++) {
+                    const coeff = coeffs[i];
+                    r = ifReverse[i] * (coeff[a.index] - coeff[b.index]);
+                    if (r) return r;
+                }
+                return r;
+            };
+            if (quick) {
+                this.partialSort(schedules, func, 100);
+            } else {
+                schedules.sort(func);
             }
         }
         console.timeEnd('sorting: ');
+    }
+
+    public partialSort<T>(arr: T[], compare: (x: T, y: T) => number, index: number) {
+        quickselect(arr, index, 0, arr.length - 1, compare);
+        const slc = arr.slice(0, index).sort(compare);
+        for (let i = 0; i < index; i++) arr[i] = slc[i];
     }
 
     /**

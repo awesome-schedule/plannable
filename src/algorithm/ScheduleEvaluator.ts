@@ -22,6 +22,7 @@ interface CmpSchedule {
     blocks: OrderedBlocks;
     rooms: OrderedRooms;
     coeff: number;
+    index: number;
 }
 
 /**
@@ -284,14 +285,13 @@ class ScheduleEvaluator {
         return options;
     }
 
-    public schedules: CmpSchedule[];
     public options: SortOptions;
     public events: Event[];
-    // private previousSortCount: number;
+    private _schedules: CmpSchedule[] = [];
+    private schedules: CmpSchedule[] = [];
     private sortCoeffCache: { [x: string]: Float32Array } = {};
 
     constructor(options: SortOptions, events: Event[]) {
-        this.schedules = [];
         this.options = ScheduleEvaluator.validateOptions(options);
         this.events = events;
     }
@@ -336,11 +336,12 @@ class ScheduleEvaluator {
             }
         }
 
-        this.schedules.push({
+        this._schedules.push({
             schedule: schedule.concat(),
             blocks,
             rooms,
-            coeff: 0
+            coeff: 0,
+            index: this._schedules.length
         });
     }
 
@@ -352,10 +353,10 @@ class ScheduleEvaluator {
     }
 
     public computeCoeffFor(funcName: string, assign = true) {
-        const schedules = this.schedules;
+        const schedules = this._schedules;
         const cache = this.sortCoeffCache[funcName];
-        if (cache && assign) {
-            for (let i = 0; i < schedules.length; i++) schedules[i].coeff = cache[i];
+        if (cache) {
+            if (assign) for (let i = 0; i < schedules.length; i++) schedules[i].coeff = cache[i];
         } else {
             console.time(funcName);
 
@@ -387,19 +388,18 @@ class ScheduleEvaluator {
         if (this.isRandom()) return;
 
         const [count, lastIdx] = this.countSortOpt();
-        const schedules = this.schedules;
+        const schedules = this._schedules;
 
         if (this.options.mode === Mode.fallback) {
             console.time('precomputing coefficients');
-            // tslint:disable-next-line
-
-            // we don't need to instantiate an array of coefficients if there's only one sorting option enabled
             if (count === 1) {
                 this.computeCoeffFor(this.options.sortBy[lastIdx].name);
             } else {
-                const funcNames = this.options.sortBy.filter(x => x.enabled).map(x => x.name);
-
-                for (const name of funcNames) this.computeCoeffFor(name, false);
+                this.options.sortBy
+                    .filter(x => x.enabled)
+                    .forEach(x => {
+                        this.computeCoeffFor(x.name, false);
+                    });
             }
             console.timeEnd('precomputing coefficients');
         } else {
@@ -407,14 +407,13 @@ class ScheduleEvaluator {
                 this.computeCoeffFor(this.options.sortBy[lastIdx].name, true);
             } else {
                 console.time('normalizing coefficients');
-                // note: fixed-size typed array is must faster than 'normal' array
 
                 const options = this.options.sortBy.filter(x => x.enabled);
-                // const coeffArrays = [];
                 const len = schedules.length;
                 const coeffs = new Float32Array(len);
                 for (const option of options) {
                     this.computeCoeffFor(option.name, false);
+
                     const coeff = this.sortCoeffCache[option.name];
 
                     let max = 0,
@@ -464,8 +463,10 @@ class ScheduleEvaluator {
     public sort() {
         console.time('sorting: ');
 
+        const schedules = this._schedules.concat();
+        this.schedules = schedules;
         if (this.isRandom()) {
-            this.shuffle(this.schedules as CmpSchedule[]);
+            this.shuffle(this.schedules);
             console.timeEnd('sorting: ');
             return;
         }
@@ -481,19 +482,18 @@ class ScheduleEvaluator {
         if (this.options.mode === Mode.combined) {
             // if want to be really fast, use Floyd–Rivest algorithm to select first,
             // say, 100 elements and then sort only these elements
-            (this.schedules as CmpSchedule[]).sort(cmpFunc);
+            schedules.sort(cmpFunc);
         } else {
-            if (options.length === 1) (this.schedules as CmpSchedule[]).sort(cmpFunc);
+            if (options.length === 1) schedules.sort(cmpFunc);
             else {
                 const len = options.length;
-                const schedules = this.schedules;
                 const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
+                const coeffs = options.map(x => this.sortCoeffCache[x.name]);
                 schedules.sort((a, b) => {
-                    const c1 = a.coeffs;
-                    const c2 = b.coeffs;
                     let r = 0;
                     for (let i = 0; i < len; i++) {
-                        r = ifReverse[i] * (c1[i] - c2[i]);
+                        const coeff = coeffs[i];
+                        r = ifReverse[i] * (coeff[a.index] - coeff[b.index]);
                         if (r) return r;
                     }
                     return r;
@@ -513,7 +513,7 @@ class ScheduleEvaluator {
     }
 
     public size() {
-        return this.schedules.length;
+        return this._schedules.length;
     }
 
     /**
@@ -526,11 +526,11 @@ class ScheduleEvaluator {
      * whether this evaluator contains an empty array of schedules
      */
     public empty() {
-        return this.schedules.length === 0;
+        return this._schedules.length === 0;
     }
 
     public clear() {
-        this.schedules = [];
+        this._schedules = this.schedules = [];
     }
 
     /**

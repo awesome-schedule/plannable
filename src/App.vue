@@ -1098,7 +1098,7 @@ export default Vue.extend({
                     );
                     // get the latest semester
                     this.selectSemester(0);
-                    if (typeof success === 'function') callback();
+                    if (typeof success === 'function') success();
                 })
                 .catch(err => {
                     let errStr = `Failed to fetch semester list: `;

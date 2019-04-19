@@ -432,6 +432,118 @@ class Schedule {
         return obj;
     }
 
+    public toICal() {
+        let ical = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:UVa-Awesome-Schedule\n';
+
+        let startWeekDay: number = 0;
+        let startDate: Date = new Date(2019, 8, 27, 0, 0, 0),
+            endDate: Date = new Date(2019, 12, 6, 0, 0, 0);
+
+        for (const day of Meta.days) {
+            for (const sb of this.days[day]) {
+                if (sb.section instanceof Section) {
+                    for (const m of sb.section.meetings) {
+                        if(m.dates === 'TBD' || m.dates === 'TBA') continue;
+                        const [sd, , ed] = m.dates.split(' ');
+                        const [sl, sm, sr] = sd.split('/');
+                        // startDate = [sr, sl, sm].join('-') + 'T04:00:00';
+                        startDate = new Date(parseInt(sr), parseInt(sl), parseInt(sm), 0, 0, 0);
+                        const [el, em, er] = ed.split('/');
+                        // endDate = [er, el, em].join('-') + 'T04:00:00';
+                        endDate = new Date(parseInt(er), parseInt(el), parseInt(em), 0, 0, 0);
+                        startWeekDay = startDate.getDay();
+                        // console.log(sl + ' ' + sm + ' ' + sr);
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (let d = 0; d < 5; d++) {
+            for (const sb of this.days[Meta.days[d]]) {
+                if (sb.section instanceof Section || sb.section instanceof Array) {
+                    let section = sb.section;
+                    if(sb.section instanceof Array){
+                        section = (section as Section[])[0];
+                    }
+                    for (const m of (section as Section).meetings) {
+                        if(m.days === 'TBD' || m.days === 'TBA') continue;
+                        const dayoffset: number = (d + 7 - startWeekDay) % 7 + 1;
+
+                        const [, start, , end] = m.days.split(' ');
+                        const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
+
+                        let startTime =
+                        new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000);
+                        let endTime =
+                            new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000);
+
+                        // console.log(startDate);
+                        // console.log(startTime);
+                        // console.log(endTime);
+                        while (endDate.getTime() - endTime.getTime() >= 0) {
+                            // console.log(startTime);
+                            ical += this.oneICalEvent(startTime, endTime);
+                            startTime = new Date(startTime.getTime() + 7 * 24 * 60 * 60 * 1000);
+                            endTime = new Date(endTime.getTime() + 7 * 24 * 60 * 60 * 1000);
+                        }
+                    }
+                } else if (sb.section instanceof Event) {
+                    const dayoffset: number = (d + 7 - startWeekDay) % 7;
+
+                    const [, start, , end] = sb.section.days.split(' ');
+                    const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
+
+                    let startTime =
+                    new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000);
+                    let endTime =
+                        new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000);
+
+                    while (endDate.getTime() - endTime.getTime() >= 0) {
+                        ical += this.oneICalEvent(startTime, endTime);
+                        startTime = new Date(startTime.getTime() + 7 * 24 * 60 * 60 * 1000);
+                        endTime = new Date(endTime.getTime() + 7 * 24 * 60 * 60 * 1000);
+                    }
+                }
+            }
+        }
+        ical += 'END:VCALENDAR';
+        return ical;
+    }
+
+    public oneICalEvent(startTime : Date, endTime : Date, summary: String = ''){
+        console.log(startTime);
+        let ical = '';
+        ical += 'BEGIN:VEVENT\n';
+        ical += 'UID:\n';
+        ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
+        ical += 'DTSTART:'  + this.dateToICalString(startTime) + '\n';
+        ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
+        ical += 'SUMMARY:' + summary + '\n';
+        ical += 'END:VEVENT\n';
+        return ical;
+    }
+
+    public dateToICalString(date: Date) {
+        console.log(date);
+        console.log('\n');
+        return (
+
+            date.getUTCFullYear().toString() +
+            (date.getUTCMonth() < 10 ? '0' +  date.getUTCMonth().toString() : date.getUTCMonth().toString()) +
+            (date.getUTCDay() < 10 ? '0' + date.getUTCDay().toString() : date.getUTCDay().toString()) +
+            'T' +
+            (date.getUTCDay() < 10 ? '0' + date.getUTCDay().toString() : date.getUTCHours().toString()) +
+            (date.getUTCMinutes() < 10 ? '0' + date.getUTCMinutes().toString() : date.getUTCMinutes().toString()) +
+            '00Z'
+        );
+    }
+
+    public dateStringToArr(date: String) {
+        let [month, day, year] = date.split('/');
+        return [year, month, day];
+    }
+
     /**
      * Check whether the given key exists in the Schedule.
      *

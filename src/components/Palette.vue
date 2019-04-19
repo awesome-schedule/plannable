@@ -79,7 +79,7 @@ export default Vue.component('Palette', {
          * @param {string}
          */
         convertKey(key) {
-            return convertKey(this.$parent.catalog, this.$parent.currentSchedule, key);
+            return convertKey(window.catalog, this.$parent.currentSchedule, key);
         }
     }
 });

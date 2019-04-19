@@ -1,0 +1,81 @@
+import Course, { CourseFields } from './Course';
+import Meta, { RawSection } from './Meta';
+import Meeting from './Meeting';
+import Hashable from './Hashable';
+
+/**
+ * A section contains all the fields that a Course has,
+ * and it holds additional information specific to that section.
+ */
+class Section implements CourseFields, Hashable {
+    public department: string;
+    public number: number;
+    public type: string;
+    public units: string;
+    public title: string;
+    public description: string;
+
+    public sid: number;
+    public key: string;
+
+    public course: Course;
+    public id: number;
+    public section: string;
+    public topic: string;
+    public status: string;
+    public enrollment: number;
+    public enrollment_limit: number;
+    public wait_list: number;
+    public instructors: string[];
+    public meetings: Meeting[];
+
+    constructor(course: Course, raw: RawSection, sid: number) {
+        this.course = course;
+        this.sid = sid;
+        this.key = course.key;
+
+        this.department = course.department;
+        this.number = course.number;
+        this.type = course.type;
+        this.units = course.units;
+        this.title = course.title;
+        this.description = course.description;
+
+        this.id = raw[0];
+        this.section = raw[1];
+        this.topic = raw[2];
+        this.status = Meta.STATUSES[raw[3]];
+        this.enrollment = raw[4];
+        this.enrollment_limit = raw[5];
+        this.wait_list = raw[6];
+        this.meetings = raw[7].map(x => new Meeting(this, x));
+        const temp = new Set<string>();
+        this.meetings.forEach(x => {
+            x.instructor.split(',').forEach(y => temp.add(y));
+        });
+        this.instructors = [...temp.values()];
+    }
+
+    public sameTimeAs(other: Section) {
+        const len = this.meetings.length;
+        if (len !== other.meetings.length) return false;
+        return this.meetings.every((x, i) => x.sameTimeAs(other.meetings[i]));
+    }
+
+    /**
+     * @returns all meeting times of this section concatenated together, separated by |
+     */
+    public combinedTime() {
+        return this.meetings.reduce((acc, v) => acc + v.days + '|', '');
+    }
+
+    /**
+     * @remarks The hashes of all sections of a Course by design are equal to each other.
+     * @returns the hash of the Course that this section belongs to.
+     */
+    public hash() {
+        return this.course.hash();
+    }
+}
+
+export default Section;

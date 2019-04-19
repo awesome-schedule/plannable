@@ -455,6 +455,11 @@ class Schedule {
                         const [, start, , end] = m.days.split(' ');
                         const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
+                        let startAtDay = new Date(
+                            startDate.getTime() +
+                                dayoffset * 24 * 60 * 60 * 1000
+                        );
+
                         let startTime = new Date(
                             startDate.getTime() +
                                 dayoffset * 24 * 60 * 60 * 1000 +
@@ -469,31 +474,81 @@ class Schedule {
                         // console.log(startDate);
                         // console.log(startTime);
                         // console.log(endTime);
-                        while (endDate.getTime() - endTime.getTime() >= 0) {
-                            // console.log(startTime);
-                            ical += this.oneICalEvent(startTime, endTime);
-                            startTime = new Date(startTime.getTime() + 7 * 24 * 60 * 60 * 1000);
-                            endTime = new Date(endTime.getTime() + 7 * 24 * 60 * 60 * 1000);
-                        }
+                        ical += 'BEGIN:VEVENT\n';
+                        ical += 'UID:\n';
+                        ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
+                        ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
+                        // ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
+                        ical +=
+                            'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
+                            Meta.days[d].toUpperCase() +
+                            ';BYHOUR=' +
+                            startTime.getUTCHours() +
+                            ';BYMINUTE=' +
+                            startTime.getUTCMinutes() +
+                            ';UNTIL=' +
+                            this.dateToICalString(endDate) +
+                            '\n';
+                        ical +=
+                            'DURATION=P' +
+                            Math.floor((endMin - startMin) / 60) +
+                            'H' +
+                            ((endMin - startMin) % 60) +
+                            'M' +
+                            '\n';
+                        ical += 'SUMMARY:' + '\n';
+                        ical += 'DESCRIPTION:' + '\n';
+                        ical += 'LOCATION:' + '\n';
+                        ical += 'END:VEVENT\n';
                     }
                 } else if (sb.section instanceof Event) {
-                    const dayoffset: number = (d + 7 - startWeekDay) % 7 + 1;
+                    const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
 
                     const [, start, , end] = sb.section.days.split(' ');
                     const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
+                    // let startTime = new Date(
+                    //     startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
+                    // );
+
                     let startTime = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
                     );
+
+                    let startAtDay = new Date(
+                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000
+                    );
+
                     let endTime = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000
                     );
 
-                    while (endDate.getTime() - endTime.getTime() >= 0) {
-                        ical += this.oneICalEvent(startTime, endTime);
-                        startTime = new Date(startTime.getTime() + 7 * 24 * 60 * 60 * 1000);
-                        endTime = new Date(endTime.getTime() + 7 * 24 * 60 * 60 * 1000);
-                    }
+                    ical += 'BEGIN:VEVENT\n';
+                    ical += 'UID:\n';
+                    ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
+                    ical += 'DTSTART:' + this.dateToICalString(startAtDay) + '\n';
+                    // ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
+                    ical +=
+                        'RRULES:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
+                        Meta.days[d].toUpperCase() +
+                        'BYHOUR=' +
+                        startTime.getUTCHours() +
+                        ';BYMINUTE=' +
+                        startTime.getUTCMinutes() +
+                        ';UNTIL=' +
+                        this.dateToICalString(endDate) +
+                        '\n';
+                    ical +=
+                        'DURATION=P' +
+                        (endMin - startMin) / 60 +
+                        'H' +
+                        ((endMin - startMin) % 60) +
+                        'M' +
+                        '\n';
+                    ical += 'SUMMARY:' + '\n';
+                    ical += 'DESCRIPTION:' + '\n';
+                    ical += 'LOCATION:' + '\n';
+                    ical += 'END:VEVENT\n';
                 }
             }
         }
@@ -501,7 +556,13 @@ class Schedule {
         return ical;
     }
 
-    public oneICalEvent(startTime: Date, endTime: Date, summary: String = '') {
+    public oneICalEvent(
+        startTime: Date,
+        endTime: Date,
+        summary: String = '',
+        description: String = '',
+        location: String = ''
+    ) {
         console.log(startTime);
         let ical = '';
         ical += 'BEGIN:VEVENT\n';
@@ -510,6 +571,8 @@ class Schedule {
         ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
         ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
         ical += 'SUMMARY:' + summary + '\n';
+        ical += 'DESCRIPTION:' + description + '\n';
+        ical += 'LOCATION' + location + '\n';
         ical += 'END:VEVENT\n';
         return ical;
     }

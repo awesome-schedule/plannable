@@ -1131,6 +1131,7 @@ export default Vue.extend({
             this.saveStatus();
         },
         cleanSchedules() {
+            this.switchSchedule(false);
             this.scheduleEvaluator.clear();
             this.currentSchedule.cleanSchedule();
         },

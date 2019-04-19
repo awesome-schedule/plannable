@@ -2,6 +2,7 @@ import Schedule from '../models/Schedule';
 import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
+import quickselect from 'quickselect';
 
 export enum Mode {
     fallback = 0,
@@ -21,8 +22,8 @@ interface CmpSchedule {
     schedule: RawAlgoSchedule;
     blocks: OrderedBlocks;
     rooms: OrderedRooms;
-    coeffs: Float32Array;
     coeff: number;
+    index: number;
 }
 
 /**
@@ -285,12 +286,13 @@ class ScheduleEvaluator {
         return options;
     }
 
-    public schedules: CmpSchedule[];
     public options: SortOptions;
     public events: Event[];
+    private _schedules: CmpSchedule[] = [];
+    private schedules: CmpSchedule[] = [];
+    private sortCoeffCache: { [x: string]: Float32Array } = {};
 
     constructor(options: SortOptions, events: Event[]) {
-        this.schedules = [];
         this.options = ScheduleEvaluator.validateOptions(options);
         this.events = events;
     }
@@ -335,12 +337,12 @@ class ScheduleEvaluator {
             }
         }
 
-        this.schedules.push({
+        this._schedules.push({
             schedule: schedule.concat(),
             blocks,
             rooms,
             coeff: 0,
-            coeffs: new Float32Array(1)
+            index: this._schedules.length
         });
     }
 
@@ -352,6 +354,41 @@ class ScheduleEvaluator {
     }
 
     /**
+     * compute the coefficient array for a specific sorting option.
+     * if it exists, don't do anything
+     *
+     * @param funcName the name of the sorting option
+     * @param assign whether assign to the coeff field of each `CmpSchedule`
+     */
+    public computeCoeffFor(funcName: string, assign = true) {
+        const schedules = this._schedules;
+        const cache = this.sortCoeffCache[funcName];
+        if (cache) {
+            if (assign) for (let i = 0; i < schedules.length; i++) schedules[i].coeff = cache[i];
+        } else {
+            console.time(funcName);
+
+            const evalFunc = ScheduleEvaluator.sortFunctions[funcName];
+            const newCache = new Float32Array(schedules.length);
+            if (assign) {
+                for (let i = 0; i < schedules.length; i++) {
+                    const cmpSchedule = schedules[i];
+                    const val = evalFunc(cmpSchedule);
+                    newCache[i] = schedules[i].coeff = val;
+                }
+            } else {
+                for (let i = 0; i < schedules.length; i++) {
+                    newCache[i] = evalFunc(schedules[i]);
+                }
+            }
+
+            this.sortCoeffCache[funcName] = newCache;
+
+            console.timeEnd(funcName);
+        }
+    }
+
+    /**
      * pre-compute the coefficient for each schedule using each enabled sorting function
      * so that they don't need to be computed on the fly when sorting
      */
@@ -359,80 +396,64 @@ class ScheduleEvaluator {
         if (this.isRandom()) return;
 
         const [count, lastIdx] = this.countSortOpt();
+        const schedules = this._schedules;
+
         if (this.options.mode === Mode.fallback) {
             console.time('precomputing coefficients');
-            // tslint:disable-next-line
-            const schedules = this.schedules;
             if (count === 1) {
-                const evalFunc = ScheduleEvaluator.sortFunctions[this.options.sortBy[lastIdx].name];
-                for (const cmpSchedule of this.schedules) {
-                    cmpSchedule.coeff = evalFunc(cmpSchedule);
-                }
+                this.computeCoeffFor(this.options.sortBy[lastIdx].name);
             } else {
-                const evalFuncs = this.options.sortBy
+                this.options.sortBy
                     .filter(x => x.enabled)
-                    .map(x => ScheduleEvaluator.sortFunctions[x.name]);
-                const len = evalFuncs.length;
-                const ef = evalFuncs[0];
-                for (const schedule of schedules) {
-                    const arr = new Float32Array(len);
-                    arr[0] = ef(schedule);
-                    schedule.coeffs = arr;
-                }
-                for (let i = 1; i < evalFuncs.length; i++) {
-                    const evalFunc = evalFuncs[i];
-                    for (const schedule of schedules) {
-                        schedule.coeffs[i] = evalFunc(schedule);
-                    }
-                }
+                    .forEach(x => {
+                        this.computeCoeffFor(x.name, false);
+                    });
             }
             console.timeEnd('precomputing coefficients');
-            return;
-        }
+        } else {
+            if (count === 1) {
+                this.computeCoeffFor(this.options.sortBy[lastIdx].name, true);
+            } else {
+                console.time('normalizing coefficients');
 
-        const schedules = this.schedules;
-        if (count === 1) {
-            const option = this.options.sortBy[lastIdx];
-            const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
-            for (const cmpSchedule of schedules) {
-                cmpSchedule.coeff = evalFunc(cmpSchedule);
-            }
-            return;
-        }
-
-        console.time('normalizing coefficients');
-        // note: fixed-size typed array is must faster than 'normal' array
-        const coeffs = new Float32Array(schedules.length);
-        for (const option of this.options.sortBy) {
-            if (option.enabled) {
-                console.time(`${option.name}`);
+                const options = this.options.sortBy.filter(x => x.enabled);
                 const len = schedules.length;
-                const coeff = new Float32Array(len);
-                const evalFunc = ScheduleEvaluator.sortFunctions[option.name];
-                let max = 0,
-                    min = Infinity;
-                for (let i = 0; i < len; i++) {
-                    const val = evalFunc(schedules[i]);
-                    if (val > max) max = val;
-                    if (val < min) min = val;
-                    coeff[i] = val;
-                }
-                const range = max - min;
-                const normalizeRatio = range / 100;
-                if (option.reverse) {
+                const coeffs = new Float32Array(len);
+
+                // finding the minimum and maximum are quite fast for 1e6 elements, so not cached.
+                for (const option of options) {
+                    this.computeCoeffFor(option.name, false);
+
+                    const coeff = this.sortCoeffCache[option.name];
+
+                    let max = 0,
+                        min = Infinity;
                     for (let i = 0; i < len; i++) {
-                        coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
+                        const val = coeff[i];
+                        if (val > max) max = val;
+                        if (val < min) min = val;
+                        coeff[i] = val;
                     }
-                } else {
-                    for (let i = 0; i < len; i++) {
-                        coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
+
+                    const range = max - min;
+                    const normalizeRatio = range / 100;
+
+                    // use Euclidean distance to combine multiple sorting coefficients
+                    if (option.reverse) {
+                        for (let i = 0; i < len; i++) {
+                            coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
+                        }
+                    } else {
+                        for (let i = 0; i < len; i++) {
+                            coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
+                        }
                     }
                 }
-                console.timeEnd(`${option.name}`);
+
+                for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
+                console.timeEnd('normalizing coefficients');
             }
         }
-        for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
-        console.timeEnd('normalizing coefficients');
     }
 
     public countSortOpt() {
@@ -450,12 +471,19 @@ class ScheduleEvaluator {
 
     /**
      * sort the array of schedules according to their quality coefficients computed using the given
+     *
+     * @param quick quick mode: use Floyd–Rivest algorithm to select first
+     * 100 elements and then sort only these elements
+     *
+     * @see {@link https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm}
      */
-    public sort() {
+    public sort(quick = false) {
         console.time('sorting: ');
 
+        const schedules = this._schedules.concat();
+        this.schedules = schedules;
         if (this.isRandom()) {
-            this.shuffle(this.schedules as CmpSchedule[]);
+            this.shuffle(this.schedules);
             console.timeEnd('sorting: ');
             return;
         }
@@ -468,29 +496,38 @@ class ScheduleEvaluator {
         const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number = options[0].reverse
             ? (a, b) => b.coeff - a.coeff
             : (a, b) => a.coeff - b.coeff;
-        if (this.options.mode === Mode.combined) {
-            // if want to be really fast, use Floyd–Rivest algorithm to select first,
-            // say, 100 elements and then sort only these elements
-            (this.schedules as CmpSchedule[]).sort(cmpFunc);
+        if (this.options.mode === Mode.combined || options.length === 1) {
+            if (quick) {
+                this.partialSort(schedules, cmpFunc, 100);
+            } else {
+                schedules.sort(cmpFunc);
+            }
         } else {
-            if (options.length === 1) (this.schedules as CmpSchedule[]).sort(cmpFunc);
-            else {
-                const len = options.length;
-                const schedules = this.schedules;
-                const ifReverse = new Int8Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-                schedules.sort((a, b) => {
-                    const c1 = a.coeffs;
-                    const c2 = b.coeffs;
-                    let r = 0;
-                    for (let i = 0; i < len; i++) {
-                        r = ifReverse[i] * (c1[i] - c2[i]);
-                        if (r) return r;
-                    }
-                    return r;
-                });
+            const len = options.length;
+            const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
+            const coeffs = options.map(x => this.sortCoeffCache[x.name]);
+            const func = (a: CmpSchedule, b: CmpSchedule) => {
+                let r = 0;
+                for (let i = 0; i < len; i++) {
+                    const coeff = coeffs[i];
+                    r = ifReverse[i] * (coeff[a.index] - coeff[b.index]);
+                    if (r) return r;
+                }
+                return r;
+            };
+            if (quick) {
+                this.partialSort(schedules, func, 100);
+            } else {
+                schedules.sort(func);
             }
         }
         console.timeEnd('sorting: ');
+    }
+
+    public partialSort<T>(arr: T[], compare: (x: T, y: T) => number, index: number) {
+        quickselect(arr, index, 0, arr.length - 1, compare);
+        const slc = arr.slice(0, index).sort(compare);
+        for (let i = 0; i < index; i++) arr[i] = slc[i];
     }
 
     /**
@@ -503,7 +540,7 @@ class ScheduleEvaluator {
     }
 
     public size() {
-        return this.schedules.length;
+        return this._schedules.length;
     }
 
     /**
@@ -516,11 +553,11 @@ class ScheduleEvaluator {
      * whether this evaluator contains an empty array of schedules
      */
     public empty() {
-        return this.schedules.length === 0;
+        return this._schedules.length === 0;
     }
 
     public clear() {
-        this.schedules = [];
+        this._schedules = this.schedules = [];
     }
 
     /**

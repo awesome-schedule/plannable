@@ -285,6 +285,7 @@ class Schedule {
      */
     public computeSchedule() {
         if (!Schedule.catalog) return;
+        console.time('render schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
@@ -337,6 +338,8 @@ class Schedule {
         for (const event of this.events) {
             if (event.display) this.place(event);
         }
+
+        console.timeEnd('render schedule');
     }
 
     /**

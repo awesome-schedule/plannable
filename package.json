@@ -14,6 +14,7 @@
     "dependencies": {
         "axios": "^0.18",
         "papaparse": "^4.6.3",
+        "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
         "vue": "^2.6.10",
         "vuedraggable": "^2.20.0"

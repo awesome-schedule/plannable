@@ -667,7 +667,7 @@
         >
             <div class="container-fluid my-3">
                 <div class="row justify-content-center">
-                    <div v-if="generated && !scheduleEvaluator.empty()" class="col">
+                    <div v-if="generated && !generatedEmpty()" class="col">
                         <Pagination
                             :schedule-length="scheduleLength"
                             :cur-idx="tempScheduleIndex"
@@ -746,10 +746,6 @@ function getDefaultData() {
          * @type {Semester}
          */
         currentSemester: null,
-        /**
-         * @type {Catalog}
-         */
-        catalog: null,
         currentScheduleIndex: 0,
         /**
          * @type {Schedule}
@@ -768,7 +764,6 @@ function getDefaultData() {
          * indicates whether the currently showing schedule is the generated schedule
          */
         generated: false,
-        scheduleEvaluator: new ScheduleEvaluator(),
         maxNumSchedules: Infinity,
 
         /**
@@ -890,6 +885,11 @@ function timeout(promise, time) {
     ]);
 }
 
+// these two properties must be non-reactive,
+// otherwise the reative observer will slow down execution significantly
+window.scheduleEvaluator = new ScheduleEvaluator();
+window.catalog = null;
+
 /**
  * @typedef {{id: string, name: string}} Semester
  */
@@ -920,7 +920,7 @@ export default Vue.extend({
          * @return {number}
          */
         scheduleLength() {
-            return Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules);
+            return Math.min(scheduleEvaluator.size(), this.maxNumSchedules);
         },
         /**
          * @returns {number}
@@ -986,15 +986,10 @@ export default Vue.extend({
             });
         }
     },
-    mounted() {
-        $('#class-list-modal').on('shown.bs.modal', e => {
-            const table = document.getElementById('class-list-modal-table');
-            table.style.maxWidth =
-                document.getElementById('class-list-modal').clientWidth - 20 + 'px';
-            console.log(table.style.maxWidth);
-        });
-    },
     methods: {
+        generatedEmpty() {
+            return scheduleEvaluator.empty();
+        },
         /**
          * @param {number} index
          */
@@ -1024,7 +1019,7 @@ export default Vue.extend({
             // if the schedule to be deleted corresponds to generated schedules,
             // this deletion invalidates the generated schedules immediately.
             if (idx === this.cpIndex) {
-                this.scheduleEvaluator.clear();
+                scheduleEvaluator.clear();
                 this.cpIndex = -1;
             }
             this.proposedSchedules.splice(idx, 1);
@@ -1046,7 +1041,7 @@ export default Vue.extend({
         switchSchedule(generated) {
             if (
                 generated &&
-                !this.scheduleEvaluator.empty() &&
+                !scheduleEvaluator.empty() &&
                 this.cpIndex === this.proposedScheduleIndex
             ) {
                 if (!this.generated) {
@@ -1126,20 +1121,20 @@ export default Vue.extend({
             this.currentSchedule.clean();
             this.proposedSchedule.clean();
             this.generated = false;
-            this.scheduleEvaluator.clear();
+            scheduleEvaluator.clear();
             this.cpIndex = -1;
             this.saveStatus();
         },
         cleanSchedules() {
             this.switchSchedule(false);
-            this.scheduleEvaluator.clear();
+            scheduleEvaluator.clear();
             this.currentSchedule.cleanSchedule();
         },
         clearCache() {
             if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
                 this.currentSchedule.clean();
                 this.generated = false;
-                this.scheduleEvaluator.clear();
+                scheduleEvaluator.clear();
                 localStorage.clear();
                 this.cpIndex = -1;
             }
@@ -1189,14 +1184,14 @@ export default Vue.extend({
          * @param {boolean} update  whether to update the pagination status
          */
         switchPage(idx, update = false) {
-            if (0 <= idx && idx < Math.min(this.scheduleEvaluator.size(), this.maxNumSchedules)) {
+            if (0 <= idx && idx < Math.min(scheduleEvaluator.size(), this.maxNumSchedules)) {
                 this.currentScheduleIndex = idx;
                 if (update) {
                     this.tempScheduleIndex = idx;
                 } else {
                     this.tempScheduleIndex = null;
                 }
-                this.currentSchedule = this.scheduleEvaluator.getSchedule(idx);
+                this.currentSchedule = scheduleEvaluator.getSchedule(idx);
                 this.saveStatus();
             }
         },
@@ -1217,13 +1212,13 @@ export default Vue.extend({
             if (this.generated) {
                 this.switchSchedule(false);
             }
-            this.inputCourses = this.catalog.search(query);
+            this.inputCourses = catalog.search(query);
             this.isEntering = true;
         },
         /**
          * Select a semester and fetch all its associated data.
          *
-         * This method will assign a correct Catalog object to `this.catalog` and `Schedule.catalog`
+         * This method will assign a correct Catalog object to `catalog` and `Schedule.catalog`
          * which will be either requested from remote or parsed from `localStorage`
          *
          * After that, schedules and settings will be parsed from `localStorage`
@@ -1251,7 +1246,7 @@ export default Vue.extend({
             const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
             const defaultCallback = () => {
                 this.generated = false;
-                this.scheduleEvaluator.clear();
+                scheduleEvaluator.clear();
                 const defaultData = getDefaultData();
                 for (const field of this.storageFields) {
                     if (field !== 'currentSemester') this[field] = defaultData[field];
@@ -1282,7 +1277,7 @@ export default Vue.extend({
             // things to do after allRecord is loaded
             const callback = () => {
                 this.generated = false;
-                this.scheduleEvaluator.clear();
+                scheduleEvaluator.clear();
                 this.parseLocalData(raw_data);
                 this.loading = false;
             };
@@ -1307,13 +1302,13 @@ export default Vue.extend({
                         },
                         () => {
                             // if failed, just use the old data.
-                            this.catalog = temp.catalog;
+                            catalog = temp.catalog;
                             Schedule.catalog = temp.catalog;
                             callback();
                         }
                     );
                 } else {
-                    this.catalog = temp.catalog;
+                    catalog = temp.catalog;
                     Schedule.catalog = temp.catalog;
                     callback();
                 }
@@ -1328,12 +1323,12 @@ export default Vue.extend({
             }
             localStorage.setItem(
                 `${this.currentSemester.id}data`,
-                JSON.stringify(this.catalog.toJSON())
+                JSON.stringify(catalog.toJSON())
             );
         },
         /**
          * fetch basic class data for the given semester for fast class search and rendering
-         * this method will assign `this.catalog` and `Schedule.catalog`
+         * this method will assign `catalog` and `Schedule.catalog`
          *
          * This method will set the flag `loading` to true on start, to false on return.
          * When on error, a proper error message will be displayed to the user.
@@ -1345,9 +1340,9 @@ export default Vue.extend({
             this.loading = true;
             timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
                 .then(data => {
-                    this.catalog = new Catalog(this.currentSemester, data);
+                    catalog = new Catalog(this.currentSemester, data);
                     // important: assign all records
-                    Schedule.catalog = this.catalog;
+                    Schedule.catalog = catalog;
                     if (typeof callback === 'function') {
                         callback();
                         this.loading = false;
@@ -1394,7 +1389,7 @@ export default Vue.extend({
             // null means there's an error processing time filters. Don't continue if that's the case
             if (timeFilters === null) return;
             this.loading = true;
-            const generator = new ScheduleGenerator(this.catalog);
+            const generator = new ScheduleGenerator(catalog);
 
             try {
                 const evaluator = generator.getSchedules(this.currentSchedule, {
@@ -1403,16 +1398,17 @@ export default Vue.extend({
                     status: constraintStatus,
                     sortOptions: this.sortOptions
                 });
-                this.scheduleEvaluator = evaluator;
+                scheduleEvaluator.clear();
+                scheduleEvaluator = evaluator;
                 this.saveStatus();
-                this.noti.success(`${this.scheduleEvaluator.size()} Schedules Generated!`, 3);
+                this.noti.success(`${scheduleEvaluator.size()} Schedules Generated!`, 3);
                 this.cpIndex = this.proposedScheduleIndex;
                 this.switchSchedule(true);
                 this.loading = false;
             } catch (err) {
                 console.warn(err);
                 this.generated = false;
-                this.scheduleEvaluator.clear();
+                scheduleEvaluator.clear();
                 this.noti.error(err.message);
                 this.saveStatus();
                 this.cpIndex = -1;
@@ -1436,15 +1432,13 @@ export default Vue.extend({
                     }
                 }
             }
-            if (!this.scheduleEvaluator.empty()) {
+            if (!scheduleEvaluator.empty()) {
                 this.loading = true;
-                this.scheduleEvaluator.changeSort(this.sortOptions, true);
+                scheduleEvaluator.changeSort(this.sortOptions, true);
                 if (!this.generated) {
                     this.switchSchedule(true);
                 } else {
-                    this.currentSchedule = this.scheduleEvaluator.getSchedule(
-                        this.currentScheduleIndex
-                    );
+                    this.currentSchedule = scheduleEvaluator.getSchedule(this.currentScheduleIndex);
                 }
                 this.loading = false;
             }

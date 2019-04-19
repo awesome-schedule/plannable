@@ -23,6 +23,7 @@
         "object-literal-key-quotes": false,
         "prefer-for-of": false,
         "one-variable-per-declaration": false,
-        "member-access": false
+        "member-access": false,
+        "whitespace": false
     }
 }

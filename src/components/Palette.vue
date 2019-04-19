@@ -35,54 +35,51 @@
     </nav>
 </template>
 
-<script>
-import Vue from 'vue';
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
 import { convertKey } from '../models/Utils';
 
-export default Vue.component('Palette', {
-    props: {
-        schedule: Schedule.prototype
-    },
-    methods: {
-        randomColor() {
-            return randomColor({
-                luminosity: 'dark'
-            });
-        },
-        /**
-         * @param {string} key
-         * @param {string} color
-         */
-        setColor(key, color) {
-            this.schedule.setColor(key, color);
-            this.$parent.saveStatus();
-            this.$forceUpdate();
-        },
-        /**
-         * colors must always be recomputed becahse `Schedule.savedColors` is not a reactive property
-         */
-        courseColors() {
-            return Object.entries(Schedule.savedColors)
-                .filter(entry => this.schedule.has(entry[0]))
-                .concat(
-                    this.schedule.colorSlots.reduce(
-                        (arr, bucket, i) =>
-                            arr.concat([...bucket.values()].map(x => [x, Schedule.bgColors[i]])),
-                        []
-                    )
-                )
-                .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
-        },
-        /**
-         * @param {string}
-         */
-        convertKey(key) {
-            return convertKey(window.catalog, this.$parent.currentSchedule, key);
-        }
+@Component
+export default class Palette extends Vue {
+    @Prop(Schedule) readonly schedule!: Schedule;
+
+    parent = this.$parent as any;
+
+    randomColor() {
+        return randomColor({
+            luminosity: 'dark'
+        });
     }
-});
+    setColor(key: string, color: string) {
+        this.schedule.setColor(key, color);
+        this.parent.saveStatus();
+        this.$forceUpdate();
+    }
+    /**
+     * colors must always be recomputed becahse `Schedule.savedColors` is not a reactive property
+     */
+    courseColors() {
+        return Object.entries(Schedule.savedColors)
+            .filter(entry => this.schedule.has(entry[0]))
+            .concat(
+                this.schedule.colorSlots.reduce(
+                    (arr: Array<[string, string]>, bucket, i) =>
+                        arr.concat(
+                            [...bucket.values()].map(
+                                x => [x, Schedule.bgColors[i]] as [string, string]
+                            )
+                        ),
+                    []
+                )
+            )
+            .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
+    }
+    convertKey(key: string) {
+        return convertKey(window.catalog, this.parent.currentSchedule, key);
+    }
+}
 </script>
 
 <style scoped>

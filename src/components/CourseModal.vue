@@ -1,5 +1,5 @@
 <template>
-    <div id="class-list-modal" class="modal fade" tabindex="-1" role="dialog">
+    <div id="course-modal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div v-if="course !== null" class="modal-content">
                 <div class="modal-header">
@@ -12,7 +12,7 @@
                 </div>
                 <div class="modal-body">
                     <h6>{{ course.type }}</h6>
-                    <div id="class-list-modal-table" style="width: 100%; overflow-x: auto;">
+                    <div style="width: 100%; overflow-x: auto;">
                         <table style="color:#808080; font-size:0.75rem;">
                             <tr v-for="(section, i) in course.sections" :key="section.key + i">
                                 <td class="info">Section:&nbsp;{{ section.section }}</td>

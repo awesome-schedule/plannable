@@ -26,8 +26,12 @@
                 ></path>
             </svg>
         </a>
-        <modal id="modal" :semester="currentSemester" :course="modalCourse"></modal>
-        <ClassListModal :course="classListModalCourse"></ClassListModal>
+        <section-modal
+            id="modal"
+            :semester="currentSemester"
+            :section="modalSection"
+        ></section-modal>
+        <course-modal :course="modalCourse"></course-modal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
@@ -704,8 +708,8 @@ import Vue from 'vue';
 import ClassList from './components/ClassList.vue';
 import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
-import Modal from './components/Modal.vue';
-import ClassListModal from './components/ClassListModal.vue';
+import SectionModal from './components/SectionModal.vue';
+import CourseModal from './components/CourseModal.vue';
 import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
@@ -722,16 +726,8 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
-import { to12hr, parseTimeAsInt } from './models/Utils';
+import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
 import Meta from './models/Meta';
-
-Vue.directive('top', {
-    // When the bound element is inserted into the DOM...
-    inserted: el => {
-        // Focus the element
-        window.scrollTo(0, 0);
-    }
-});
 
 /**
  * use a standalone method to get rid of deep copy issues
@@ -791,12 +787,11 @@ function getDefaultData() {
         /**
          * @type {Section}
          */
-        modalCourse: null,
+        modalSection: null,
         /**
-         * A course to be displayed on Modal
          * @type {Course}
          */
-        classListModalCourse: null,
+        modalCourse: null,
 
         // display options
         showTime: false,
@@ -868,22 +863,6 @@ function getDefaultData() {
         eventToEdit: null
     };
 }
-/**
- * @template T
- * @param {Promise<T>} promise
- * @param {number} time
- * @return {Promise<T>}
- */
-function timeout(promise, time) {
-    return Promise.race([
-        promise,
-        new Promise((resolve, reject) => {
-            setTimeout(() => {
-                reject('Time out fetching data. Please try again later');
-            }, time);
-        })
-    ]);
-}
 
 // these two properties must be non-reactive,
 // otherwise the reative observer will slow down execution significantly
@@ -899,8 +878,8 @@ export default Vue.extend({
         ClassList,
         Pagination,
         GridSchedule,
-        Modal,
-        ClassListModal,
+        SectionModal,
+        CourseModal,
         draggable,
         Palette,
         EventView,
@@ -1096,6 +1075,7 @@ export default Vue.extend({
                     if (typeof success === 'function') success();
                 })
                 .catch(err => {
+                    console.warn(err);
                     let errStr = `Failed to fetch semester list: `;
                     if (typeof err === 'string') errStr += err;
                     else if (err.response) errStr += `request rejected by the server. `;
@@ -1141,18 +1121,18 @@ export default Vue.extend({
         },
 
         /**
-         * @param {Section} course
+         * @param {Section} section
          */
-        showModal(course) {
-            this.modalCourse = course;
+        showModal(section) {
+            this.modalSection = section;
         },
 
         /**
          * @param {Course} course
          */
         showClassListModal(course) {
-            this.classListModalCourse = course;
-            $('class-list-modal').modal();
+            this.modalCourse = course;
+            $('#course-modal').modal();
         },
         /**
          * @param {string} key
@@ -1218,7 +1198,7 @@ export default Vue.extend({
         /**
          * Select a semester and fetch all its associated data.
          *
-         * This method will assign a correct Catalog object to `catalog` and `Schedule.catalog`
+         * This method will assign a correct Catalog object to `catalog`
          * which will be either requested from remote or parsed from `localStorage`
          *
          * After that, schedules and settings will be parsed from `localStorage`
@@ -1303,13 +1283,11 @@ export default Vue.extend({
                         () => {
                             // if failed, just use the old data.
                             catalog = temp.catalog;
-                            Schedule.catalog = temp.catalog;
                             callback();
                         }
                     );
                 } else {
                     catalog = temp.catalog;
-                    Schedule.catalog = temp.catalog;
                     callback();
                 }
             }
@@ -1328,29 +1306,27 @@ export default Vue.extend({
         },
         /**
          * fetch basic class data for the given semester for fast class search and rendering
-         * this method will assign `catalog` and `Schedule.catalog`
+         * this method will assign to the global `catalog` object
          *
          * This method will set the flag `loading` to true on start, to false on return.
          * When on error, a proper error message will be displayed to the user.
          * @param {number} semeseterIdx
-         * @param {()=>void} [callback] func to execute on success
+         * @param {()=>void} [success] func to execute on success
          * @param {()=>void} [reject] func to execute on failure
          */
-        fetchSemesterData(semesterIdx, callback, reject) {
+        fetchSemesterData(semesterIdx, success, reject) {
             this.loading = true;
             timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
                 .then(data => {
                     catalog = new Catalog(this.currentSemester, data);
-                    // important: assign all records
-                    Schedule.catalog = catalog;
-                    if (typeof callback === 'function') {
-                        callback();
+                    if (typeof success === 'function') {
+                        success();
                         this.loading = false;
                     }
                 })
                 .catch(err => {
-                    let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
                     console.warn(err);
+                    let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
                     if (typeof err === 'string') errStr += err;
                     else if (err.response) errStr += `request rejected by the server. `;
                     else if (err.request) errStr += `No response received. `;
@@ -1576,6 +1552,7 @@ export default Vue.extend({
                 };
                 reader.readAsText(input.files[0]);
             } catch (error) {
+                console.warn(error);
                 this.noti.error(error);
             }
         },

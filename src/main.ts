@@ -15,6 +15,14 @@ declare global {
     }
 }
 
+Vue.directive('top', {
+    // When the bound element is inserted into the DOM...
+    inserted: el => {
+        // scroll to top
+        window.scrollTo(0, 0);
+    }
+});
+
 window.axios = axios;
 window.querystring = querystring;
 

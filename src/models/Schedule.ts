@@ -480,7 +480,7 @@ class Schedule {
                         }
                     }
                 } else if (sb.section instanceof Event) {
-                    const dayoffset: number = (d + 7 - startWeekDay) % 7 + 1;
+                    const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
 
                     const [, start, , end] = sb.section.days.split(' ');
                     const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
@@ -504,7 +504,7 @@ class Schedule {
         return ical;
     }
 
-    public oneICalEvent(startTime: Date, endTime: Date, summary: String = '') {
+    public oneICalEvent(startTime: Date, endTime: Date, summary: string = '') {
         console.log(startTime);
         let ical = '';
         ical += 'BEGIN:VEVENT\n';
@@ -538,8 +538,8 @@ class Schedule {
         );
     }
 
-    public dateStringToArr(date: String) {
-        let [month, day, year] = date.split('/');
+    public dateStringToArr(date: string) {
+        const [month, day, year] = date.split('/');
         return [year, month, day];
     }
 

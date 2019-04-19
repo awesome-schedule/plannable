@@ -123,87 +123,58 @@
     </div>
 </template>
 
-<script>
-import Vue from 'vue';
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-export default Vue.component('ClassList', {
+import Course from '../models/Course';
+
+@Component({
     components: {
         Expand
-    },
-    props: {
-        /**
-         * @type {import('../models/Course').default[]}
-         */
-        courses: Array,
-        schedule: Schedule,
-        isEntering: Boolean,
-        showClasslistTitle: Boolean,
-        generated: Boolean
-    },
-    data() {
-        return {
-            /**
-             * @type {Object<string, string>}
-             */
-            collapsed: {},
-            expandOnEntering: false
-            // showClassTitleOnEntering: true
-        };
-    },
-    methods: {
-        /**
-         * @param {string} key
-         * @param {number} idx
-         */
-        select(key, idx) {
-            this.$emit('update_course', key, idx);
-            // note: adding a course to schedule.All cannot be detected by Vue.
-            // Must use forceUpdate to rerender component
-            this.$forceUpdate();
-        },
-        /**
-         * @param {string}
-         */
-        collapse(key) {
-            if (this.collapsed[key]) {
-                this.$set(this.collapsed, key, undefined);
-            } else {
-                this.$set(this.collapsed, key, key);
-            }
-        },
-        /**
-         * @param {string} key
-         * @param {number} idx
-         * @returns {boolean}
-         */
-        isActive(key, idx) {
-            const sections = this.schedule.All[key];
-            if (sections instanceof Set) return sections.has(idx);
-            return false;
-        },
-        /**
-         * @param {string} key
-         * @returns {string}
-         */
-        expanded(key) {
-            return (this.collapsed[key] !== undefined) !==
-                (this.isEntering && this.expandOnEntering)
-                ? 'fa-chevron-down'
-                : 'fa-chevron-right';
-        },
-        /**
-         * @param {string} key
-         * @param {number} idx
-         */
-        preview(key, idx) {
-            this.schedule.preview(key, idx);
-        },
-        removePreview() {
-            this.schedule.removePreview();
+    }
+})
+export default class ClassList extends Vue {
+    @Prop(Array) readonly courses!: Course[];
+    @Prop(Schedule) readonly schedule!: Schedule;
+    @Prop(Boolean) readonly isEntering!: boolean;
+    @Prop(Boolean) readonly generated!: boolean;
+    @Prop(Boolean) readonly showClasslistTitle!: boolean;
+
+    collapsed: { [x: string]: string } = {};
+    expandOnEntering = false;
+
+    select(key: string, idx: number) {
+        this.$emit('update_course', key, idx);
+        // note: adding a course to schedule.All cannot be detected by Vue.
+        // Must use forceUpdate to rerender component
+        this.$forceUpdate();
+    }
+
+    collapse(key: string) {
+        if (this.collapsed[key]) {
+            this.$set(this.collapsed, key, undefined);
+        } else {
+            this.$set(this.collapsed, key, key);
         }
     }
-});
+    isActive(key: string, idx: number) {
+        const sections = this.schedule.All[key];
+        if (sections instanceof Set) return sections.has(idx);
+        return false;
+    }
+    expanded(key: string) {
+        return (this.collapsed[key] !== undefined) !== (this.isEntering && this.expandOnEntering)
+            ? 'fa-chevron-down'
+            : 'fa-chevron-right';
+    }
+    preview(key: string, idx: number) {
+        this.schedule.preview(key, idx);
+    }
+    removePreview() {
+        this.schedule.removePreview();
+    }
+}
 </script>
 
 <style scoped>

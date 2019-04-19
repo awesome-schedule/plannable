@@ -116,138 +116,112 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';
 import Event from '../models/Event';
 import { to12hr } from '../models/Utils';
-import Vue from 'vue';
-export default Vue.component('CourseBlock', {
-    name: 'CourseBlock',
-    props: {
-        scheduleBlock: ScheduleBlock.prototype,
-        /**
-         * @type {number[]}
-         */
-        heightInfo: Array,
-        fullHeight: Number,
-        partialHeight: Number,
-        showTime: Boolean,
-        showRoom: Boolean,
-        showInstructor: Boolean,
-        absoluteEarliest: Number,
-        day: String
-    },
-    data() {
-        return {
-            mobile: window.screen.width < 900
-        };
-    },
-    computed: {
-        /**
-         * @returns {number}
-         */
-        startPx() {
-            let start = 48;
-            const t = this.scheduleBlock.start.split(':');
-            // const hr = parseInt(t[0]);
-            const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
+import { Vue, Component, Prop } from 'vue-property-decorator';
 
-            const temp = this.timeToNum(this.scheduleBlock.start, true);
-            for (let i = this.absoluteEarliest; i < temp; i++) {
-                start += this.heightInfo[i - this.absoluteEarliest];
-            }
-            start += (min / 30) * this.fullHeight;
-            return start;
-        },
+@Component
+export default class CourseBlock extends Vue {
+    @Prop(Object) readonly scheduleBlock!: ScheduleBlock;
+    @Prop(Array) readonly heightInfo!: number[];
+    @Prop(Number) readonly fullHeight!: number;
+    @Prop(Number) readonly partialHeight!: number;
+    @Prop(Boolean) readonly showTime!: boolean;
+    @Prop(Boolean) readonly showRoom!: boolean;
+    @Prop(Boolean) readonly showInstructor!: boolean;
+    @Prop(Number) readonly absoluteEarliest!: number;
+    @Prop(String) readonly day!: string;
 
-        /**
-         * @returns {number}
-         */
-        endPx() {
-            let end = 48;
-            const t = this.scheduleBlock.end.split(':');
-            const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
+    name = 'CourseBlock';
+    mobile = window.screen.width < 900;
 
-            const temp = this.timeToNum(this.scheduleBlock.end, false);
-            for (let i = this.absoluteEarliest; i < temp; i++) {
-                end += this.heightInfo[i - this.absoluteEarliest];
-            }
-            end += (min / 30) * this.fullHeight;
-            return end;
-        },
+    get startPx() {
+        let start = 48;
+        const t = this.scheduleBlock.start.split(':');
+        // const hr = parseInt(t[0]);
+        const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-        /**
-         * @returns {Section}
-         */
-        firstSec() {
-            const section = this.scheduleBlock.section;
-            if (section instanceof Array) {
-                return section[0];
-            } else return section;
-        },
-
-        room() {
-            for (const meeting of this.firstSec.meetings) {
-                if (meeting.days.indexOf(this.day) !== -1) {
-                    const convedStart = to12hr(this.scheduleBlock.start);
-                    const convedEnd = to12hr(this.scheduleBlock.end);
-                    const [days, start, , end] = meeting.days.split(' ');
-                    if (convedStart === start && convedEnd === end) {
-                        return meeting.room;
-                    }
-                }
-            }
-            return null;
+        const temp = this.timeToNum(this.scheduleBlock.start, true);
+        for (let i = this.absoluteEarliest; i < temp; i++) {
+            start += this.heightInfo[i - this.absoluteEarliest];
         }
-    },
-    methods: {
-        /**
-         * @param {number} time
-         * @param {number} start
-         * @returns {number}
-         */
-        timeToNum(time, start) {
-            const sep = time.split(':');
-            const min = parseInt(sep[1]);
-            let t = (parseInt(sep[0]) - 8) * 2;
-            if (start) {
-                if (min >= 30) {
-                    t += 2;
-                } else {
-                    t += 1;
-                }
-            } else {
-                if (min > 30) {
-                    t += 2;
-                } else {
-                    t += 1;
-                }
-            }
-            return t - 1;
-        },
-        /**
-         * @param {ScheduleBlock} crs
-         */
-        isSection(crs) {
-            return crs.section instanceof Section;
-        },
-        isEvent(crs) {
-            return crs.section instanceof Event;
-        },
-        isSectionArray(crs) {
-            return crs.section instanceof Array;
-        },
-        /**
-         * @param {Section[]} sections
-         */
-        sectionsToCourse(sections) {
-            const course = sections[0].course;
-            return new Course(course.raw, course.key, sections.map(x => x.sid));
-        }
+        start += (min / 30) * this.fullHeight;
+        return start;
     }
-});
+
+    get endPx() {
+        let end = 48;
+        const t = this.scheduleBlock.end.split(':');
+        const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
+
+        const temp = this.timeToNum(this.scheduleBlock.end, false);
+        for (let i = this.absoluteEarliest; i < temp; i++) {
+            end += this.heightInfo[i - this.absoluteEarliest];
+        }
+        end += (min / 30) * this.fullHeight;
+        return end;
+    }
+
+    get firstSec() {
+        const section = this.scheduleBlock.section;
+        if (section instanceof Array) {
+            return section[0];
+        } else return section;
+    }
+
+    get room() {
+        if (!(this.firstSec instanceof Section)) return null;
+
+        for (const meeting of this.firstSec.meetings) {
+            if (meeting.days.indexOf(this.day) !== -1) {
+                const convedStart = to12hr(this.scheduleBlock.start);
+                const convedEnd = to12hr(this.scheduleBlock.end);
+                const [days, start, , end] = meeting.days.split(' ');
+                if (convedStart === start && convedEnd === end) {
+                    return meeting.room;
+                }
+            }
+        }
+        return null;
+    }
+
+    timeToNum(time: string, start: boolean) {
+        const sep = time.split(':');
+        const min = parseInt(sep[1]);
+        let t = (parseInt(sep[0]) - 8) * 2;
+        if (start) {
+            if (min >= 30) {
+                t += 2;
+            } else {
+                t += 1;
+            }
+        } else {
+            if (min > 30) {
+                t += 2;
+            } else {
+                t += 1;
+            }
+        }
+        return t - 1;
+    }
+    isSection(crs: ScheduleBlock) {
+        return crs.section instanceof Section;
+    }
+    isEvent(crs: ScheduleBlock) {
+        return crs.section instanceof Event;
+    }
+    isSectionArray(crs: ScheduleBlock) {
+        return crs.section instanceof Array;
+    }
+    sectionsToCourse(sections: Section[]) {
+        const course = sections[0].course;
+        return new Course(course.raw, course.key, sections.map(x => x.sid));
+    }
+}
 </script>
 
 <style scoped>

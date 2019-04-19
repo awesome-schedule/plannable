@@ -79,7 +79,7 @@ class Catalog {
         return new Course(this.raw_data[key], key).getSection(section);
     }
 
-    public search(query: string, max_results = 10) {
+    public search(query: string, max_results = 6) {
         console.time('query');
         query = query.trim().toLowerCase();
         // query no space

@@ -419,21 +419,21 @@ class Schedule {
         let ical = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:UVa-Awesome-Schedule\n';
 
         let startWeekDay: number = 0;
-        let startDate: Date = new Date(2019, 8, 27, 0, 0, 0),
-            endDate: Date = new Date(2019, 12, 6, 0, 0, 0);
+        let startDate: Date = new Date(2019, 7, 27, 0, 0, 0),
+            endDate: Date = new Date(2019, 11, 6, 0, 0, 0);
 
         for (const day of Meta.days) {
             for (const sb of this.days[day]) {
                 if (sb.section instanceof Section) {
                     for (const m of sb.section.meetings) {
-                        if(m.dates === 'TBD' || m.dates === 'TBA') continue;
+                        if (m.dates === 'TBD' || m.dates === 'TBA') continue;
                         const [sd, , ed] = m.dates.split(' ');
                         const [sl, sm, sr] = sd.split('/');
                         // startDate = [sr, sl, sm].join('-') + 'T04:00:00';
-                        startDate = new Date(parseInt(sr), parseInt(sl), parseInt(sm), 0, 0, 0);
+                        startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
                         const [el, em, er] = ed.split('/');
                         // endDate = [er, el, em].join('-') + 'T04:00:00';
-                        endDate = new Date(parseInt(er), parseInt(el), parseInt(em), 0, 0, 0);
+                        endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
                         startWeekDay = startDate.getDay();
                         // console.log(sl + ' ' + sm + ' ' + sr);
                         break;
@@ -446,20 +446,25 @@ class Schedule {
             for (const sb of this.days[Meta.days[d]]) {
                 if (sb.section instanceof Section || sb.section instanceof Array) {
                     let section = sb.section;
-                    if(sb.section instanceof Array){
+                    if (sb.section instanceof Array) {
                         section = (section as Section[])[0];
                     }
                     for (const m of (section as Section).meetings) {
-                        if(m.days === 'TBD' || m.days === 'TBA') continue;
-                        const dayoffset: number = (d + 7 - startWeekDay) % 7 + 1;
-
+                        if (m.days === 'TBD' || m.days === 'TBA') continue;
+                        const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
                         const [, start, , end] = m.days.split(' ');
                         const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
-                        let startTime =
-                        new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000);
-                        let endTime =
-                            new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000);
+                        let startTime = new Date(
+                            startDate.getTime() +
+                                dayoffset * 24 * 60 * 60 * 1000 +
+                                startMin * 60 * 1000
+                        );
+                        let endTime = new Date(
+                            startDate.getTime() +
+                                dayoffset * 24 * 60 * 60 * 1000 +
+                                endMin * 60 * 1000
+                        );
 
                         // console.log(startDate);
                         // console.log(startTime);
@@ -472,15 +477,17 @@ class Schedule {
                         }
                     }
                 } else if (sb.section instanceof Event) {
-                    const dayoffset: number = (d + 7 - startWeekDay) % 7;
+                    const dayoffset: number = (d + 7 - startWeekDay) % 7 + 1;
 
                     const [, start, , end] = sb.section.days.split(' ');
                     const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
-                    let startTime =
-                    new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000);
-                    let endTime =
-                        new Date(startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000);
+                    let startTime = new Date(
+                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
+                    );
+                    let endTime = new Date(
+                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000
+                    );
 
                     while (endDate.getTime() - endTime.getTime() >= 0) {
                         ical += this.oneICalEvent(startTime, endTime);
@@ -494,13 +501,13 @@ class Schedule {
         return ical;
     }
 
-    public oneICalEvent(startTime : Date, endTime : Date, summary: String = ''){
+    public oneICalEvent(startTime: Date, endTime: Date, summary: String = '') {
         console.log(startTime);
         let ical = '';
         ical += 'BEGIN:VEVENT\n';
         ical += 'UID:\n';
         ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
-        ical += 'DTSTART:'  + this.dateToICalString(startTime) + '\n';
+        ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
         ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
         ical += 'SUMMARY:' + summary + '\n';
         ical += 'END:VEVENT\n';
@@ -508,16 +515,22 @@ class Schedule {
     }
 
     public dateToICalString(date: Date) {
-        console.log(date);
-        console.log('\n');
+        console.log(date.getUTCDay());
         return (
-
             date.getUTCFullYear().toString() +
-            (date.getUTCMonth() < 10 ? '0' +  date.getUTCMonth().toString() : date.getUTCMonth().toString()) +
-            (date.getUTCDay() < 10 ? '0' + date.getUTCDay().toString() : date.getUTCDay().toString()) +
+            (date.getUTCMonth() < 9
+                ? '0' + (date.getUTCMonth() + 1)
+                : (date.getUTCMonth() + 1).toString()) +
+            (date.getUTCDate() < 10
+                ? '0' + date.getUTCDate().toString()
+                : date.getUTCDate().toString()) +
             'T' +
-            (date.getUTCDay() < 10 ? '0' + date.getUTCDay().toString() : date.getUTCHours().toString()) +
-            (date.getUTCMinutes() < 10 ? '0' + date.getUTCMinutes().toString() : date.getUTCMinutes().toString()) +
+            (date.getUTCHours() < 10
+                ? '0' + date.getUTCHours().toString()
+                : date.getUTCHours().toString()) +
+            (date.getUTCMinutes() < 10
+                ? '0' + date.getUTCMinutes().toString()
+                : date.getUTCMinutes().toString()) +
             '00Z'
         );
     }

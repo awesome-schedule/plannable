@@ -35,34 +35,41 @@
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
-                class="tab-icon mt-0 mb-4"
+                :class="(sideBar.showSelectClass ? 'tab-icon-active ' : 'tab-icon ') + 'mt-0 mb-4'"
                 title="Select Classes"
                 @click="switchSideBar('showSelectClass')"
             >
                 <i class="far fa-calendar-alt"></i>
             </div>
-            <div class="tab-icon mt-0 mb-4" title="Edit Events" @click="switchSideBar('showEvent')">
+            <div
+                :class="(sideBar.showEvent ? 'tab-icon-active ' : 'tab-icon ') + 'mt-0 mb-4'"
+                title="Edit Events"
+                @click="switchSideBar('showEvent')"
+            >
                 <i class="fab fa-elementor"></i>
             </div>
-            <div class="tab-icon mb-4" title="Filters" @click="switchSideBar('showFilter')">
+            <div
+                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'" 
+                title="Filters" 
+                @click="switchSideBar('showFilter')">
                 <i class="fas fa-filter"></i>
             </div>
             <div
-                class="tab-icon mb-4"
+                :class="(sideBar.showSetting ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
                 title="Display Settings"
                 @click="switchSideBar('showSetting')"
             >
                 <i class="fas fa-cog"></i>
             </div>
             <div
-                class="tab-icon mb-4"
+                :class="(sideBar.showSelectColor ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
                 title="Customize Colors"
                 @click="switchSideBar('showSelectColor')"
             >
                 <i class="fas fa-palette"></i>
             </div>
             <div
-                class="tab-icon mb-4"
+                :class="(sideBar.showExport ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
                 title="Import/Export Schedule"
                 @click="switchSideBar('showExport')"
             >
@@ -1539,13 +1546,19 @@ export default class App extends Vue {
 .tab-icon {
     font-size: 1.8vw;
     margin-left: 20%;
-    color: #5e5e5e;
+    color: #888888;
 }
 .tab-icon:hover {
-    color: #3e3e3e;
+    color: #666666;
 }
 .tab-icon:active {
     color: #bbbbbb;
+}
+
+.tab-icon-active {
+    font-size: 1.8vw;
+    margin-left: 20%;
+    color: #1f1f1f
 }
 
 .click-icon {

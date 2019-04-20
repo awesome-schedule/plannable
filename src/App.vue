@@ -622,6 +622,17 @@
                     </a>
                 </li>
                 <li class="list-group-item">
+                    <a
+                        class="btn btn-outline-dark"
+                        :href="icalURL"
+                        style="width:100%"
+                        download="schedule.ical"
+                        @click="saveToIcal"
+                    >
+                        Export to ICalendar
+                    </a>
+                </li>
+                <li class="list-group-item">
                     <button class="btn btn-outline-primary" style="width: 100%" @click="print">
                         Print
                     </button>
@@ -826,6 +837,7 @@ export default class App extends Vue {
     downloadURL = '';
     days = Meta.days;
     eventToEdit: Event | null = null;
+    icalURL = '';
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -1482,6 +1494,10 @@ export default class App extends Vue {
             window.URL.revokeObjectURL(url);
         }
     }
+    saveToIcal() {
+        this.icalURL = this.currentSchedule.toICal();
+        window.URL.revokeObjectURL(this.icalURL);
+    }
 }
 </script>
 
@@ -1596,7 +1612,15 @@ export default class App extends Vue {
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
 
+    .sidebar {
+        display: none !important;
+    }
+
     nav {
+        display: none !important;
+    }
+
+    .tab-bar {
         display: none !important;
     }
 
@@ -1615,7 +1639,7 @@ export default class App extends Vue {
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 450px) {
     /* .schedule {
         width: 85% !important;
         margin-left: 11vw !important;

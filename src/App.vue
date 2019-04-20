@@ -126,6 +126,7 @@
 
             <div v-if="isEntering" ref="classList" class="card card-body p-1">
                 <ClassList
+                    ref="enteringClassList"
                     :courses="inputCourses"
                     :schedule="currentSchedule"
                     :is-entering="isEntering"
@@ -203,9 +204,9 @@
                         </div>
                     </div>
                     <ClassList
+                        ref="selectedClassList"
                         :courses="currentSchedule.currentCourses"
                         :schedule="currentSchedule"
-                        :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
                         :generated="generated"
                         @update_course="updateCourse"
@@ -735,7 +736,7 @@ import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
 
 // these two properties must be non-reactive,
-// otherwise the reative observer will slow down execution significantly
+// otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator();
 // window.window.catalog = null;
 
@@ -1055,13 +1056,18 @@ export default class App extends Vue {
     /**
      * @see Schedule.update
      */
-    updateCourse(key: string, section: number) {
-        this.currentSchedule.update(key, section, true, this.isEntering);
+    updateCourse(key: string, section: number, remove: boolean = false) {
+        this.currentSchedule.update(key, section, true, remove);
         if (this.generated) {
             this.noti.warn(`You're editing the generated schedule!`, 3);
         } else {
             this.saveStatus();
         }
+        // note: adding a course to schedule.All cannot be detected by Vue.
+        // Must use forceUpdate to rerender component
+        (this.$refs.selectedClassList as Vue).$forceUpdate();
+        if (this.$refs.enteringClassList instanceof Vue)
+            (this.$refs.enteringClassList as Vue).$forceUpdate();
     }
     /**
      * Switch to `idx` page. If update is true, also update the pagination status.

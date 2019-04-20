@@ -214,6 +214,7 @@ class Schedule {
      * Update a course in the schedule
      * - If the course is **already in** the schedule, delete it from the schedule
      * - If the course is **not** in the schedule, add it to the schedule
+     *
      * @param update whether to recompute schedule after update
      * @param remove whether to remove the key if the set of sections is empty
      */

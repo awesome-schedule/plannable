@@ -456,20 +456,10 @@ class Schedule {
                         const [, start, , end] = m.days.split(' ');
                         const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
-                        let startAtDay = new Date(
-                            startDate.getTime() +
-                                dayoffset * 24 * 60 * 60 * 1000
-                        );
-
                         let startTime = new Date(
                             startDate.getTime() +
                                 dayoffset * 24 * 60 * 60 * 1000 +
                                 startMin * 60 * 1000
-                        );
-                        let endTime = new Date(
-                            startDate.getTime() +
-                                dayoffset * 24 * 60 * 60 * 1000 +
-                                endMin * 60 * 1000
                         );
 
                         // console.log(startDate);
@@ -484,9 +474,9 @@ class Schedule {
                             'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                             Meta.days[d].toUpperCase() +
                             ';BYHOUR=' +
-                            startTime.getUTCHours() +
+                            startTime.getHours() +
                             ';BYMINUTE=' +
-                            startTime.getUTCMinutes() +
+                            startTime.getMinutes() +
                             ';UNTIL=' +
                             this.dateToICalString(endDate) +
                             '\n';
@@ -497,9 +487,9 @@ class Schedule {
                             ((endMin - startMin) % 60) +
                             'M' +
                             '\n';
-                        ical += 'SUMMARY:' + '\n';
-                        ical += 'DESCRIPTION:' + '\n';
-                        ical += 'LOCATION:' + '\n';
+                        ical += 'SUMMARY:' + m.section.department + ' ' + m.section.number + '\n';
+                        ical += 'DESCRIPTION:' + m.section.title + '\n';
+                        ical += 'LOCATION:' + m.room + '\n';
                         ical += 'END:VEVENT\n';
                     }
                 } else if (sb.section instanceof Event) {
@@ -520,10 +510,6 @@ class Schedule {
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000
                     );
 
-                    let endTime = new Date(
-                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + endMin * 60 * 1000
-                    );
-
                     ical += 'BEGIN:VEVENT\n';
                     ical += 'UID:\n';
                     ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
@@ -533,9 +519,9 @@ class Schedule {
                         'RRULES:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                         Meta.days[d].toUpperCase() +
                         'BYHOUR=' +
-                        startTime.getUTCHours() +
+                        startTime.getHours() +
                         ';BYMINUTE=' +
-                        startTime.getUTCMinutes() +
+                        startTime.getMinutes() +
                         ';UNTIL=' +
                         this.dateToICalString(endDate) +
                         '\n';
@@ -554,48 +540,26 @@ class Schedule {
             }
         }
         ical += 'END:VCALENDAR';
-        return ical;
-    }
 
-    public oneICalEvent(
-        startTime: Date,
-        endTime: Date,
-        summary: string = '',
-        description: string = '',
-        location: string = ''
-    ) {
-        console.log(startTime);
-        let ical = '';
-        ical += 'BEGIN:VEVENT\n';
-        ical += 'UID:\n';
-        ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
-        ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
-        ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
-        ical += 'SUMMARY:' + summary + '\n';
-        ical += 'DESCRIPTION:' + description + '\n';
-        ical += 'LOCATION' + location + '\n';
-        ical += 'END:VEVENT\n';
-        return ical;
+        const blob = new Blob([ical], { type: 'text' });
+        let url = window.URL.createObjectURL(blob);
+
+        // url = url.substring(5);
+
+        return url;
     }
 
     public dateToICalString(date: Date) {
-        console.log(date.getUTCDay());
         return (
-            date.getUTCFullYear().toString() +
-            (date.getUTCMonth() < 9
-                ? '0' + (date.getUTCMonth() + 1)
-                : (date.getUTCMonth() + 1).toString()) +
-            (date.getUTCDate() < 10
-                ? '0' + date.getUTCDate().toString()
-                : date.getUTCDate().toString()) +
+            date.getFullYear().toString() +
+            (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString()) +
+            (date.getDate() < 10 ? '0' + date.getDate().toString() : date.getDate().toString()) +
             'T' +
-            (date.getUTCHours() < 10
-                ? '0' + date.getUTCHours().toString()
-                : date.getUTCHours().toString()) +
-            (date.getUTCMinutes() < 10
-                ? '0' + date.getUTCMinutes().toString()
-                : date.getUTCMinutes().toString()) +
-            '00Z'
+            (date.getHours() < 10 ? '0' + date.getHours().toString() : date.getHours().toString()) +
+            (date.getMinutes() < 10
+                ? '0' + date.getMinutes().toString()
+                : date.getMinutes().toString()) +
+            '00'
         );
     }
 

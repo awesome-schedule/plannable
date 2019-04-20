@@ -5,7 +5,7 @@
             <div v-else>Add Event</div>
         </div>
         <div class="input-group my-3 px-1">
-            <div class="input-group-prepend" style="width:25%">
+            <div class="input-group-prepend" style="width:30%">
                 <span class="input-group-text w-100">Title</span>
             </div>
             <input v-model="eventTitle" class="form-control" type="text" />
@@ -36,7 +36,7 @@
         </div> -->
 
         <div class="input-group mt-3 px-1">
-            <div class="input-group-prepend" style="width:25%">
+            <div class="input-group-prepend" style="width:30%">
                 <span class="input-group-text w-100">From</span>
             </div>
             <input
@@ -47,7 +47,7 @@
             />
         </div>
         <div class="input-group mt-1 px-1">
-            <div class="input-group-prepend" style="width:25%">
+            <div class="input-group-prepend" style="width:30%">
                 <span class="input-group-text w-100">to</span>
             </div>
             <input
@@ -58,7 +58,7 @@
             />
         </div>
         <div class="input-group flex-nowrap mt-1 px-1">
-            <div class="input-group-prepend" style="width:25%">
+            <div class="input-group-prepend" style="width:30%">
                 <span class="input-group-text w-100">Location</span>
             </div>
             <input v-model="eventRoom" type="text" class="form-control" />

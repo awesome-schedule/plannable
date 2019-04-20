@@ -40,7 +40,7 @@
                                     {{ crs.title }}
                                 </p>
                             </td>
-                            <td v-if="!isEntering" class="pl-2">
+                            <td v-if="!isEntering" class="pl-2 pr-1">
                                 <button
                                     type="button"
                                     class="close"
@@ -77,12 +77,16 @@
                                 "
                                 @click="select(crs.key, -1)"
                                 >Any Section
-                                <div v-if="schedule.All[crs.key] === -1" style="float:right;">
-                                    <i class="fas fa-check"></i>
+                                <div style="float:right;" class="mr-1">
+                                    <i
+                                        v-if="schedule.All[crs.key] === -1"
+                                        class="far fa-check-square"
+                                    ></i>
+                                    <i v-else class="far fa-square"></i>
                                 </div>
                             </a>
                             <div
-                                class="list-group-item list-group-item-action class-section container-fluid"
+                                class="list-group-item list-group-item-action container-fluid class-section"
                                 :class="{ active: isActive(crs.key, crs.sids[idx]) }"
                                 :title="
                                     isActive(crs.key, crs.sids[idx])
@@ -95,7 +99,10 @@
                             >
                                 <div class="row no-gutters">
                                     <div class="col-md-auto mr-auto">
-                                        <ul class="list-unstyled class-info">
+                                        <ul
+                                            class="list-unstyled class-info"
+                                            style="font-size: 0.75rem;"
+                                        >
                                             <li>Section {{ sec.section }} {{ sec.topic }}</li>
                                             <template v-for="(meeting, j) in sec.meetings">
                                                 <li :key="j">
@@ -110,14 +117,15 @@
                                     <div class="col col-sm-1 align-self-center mr-1">
                                         <i
                                             v-if="isActive(crs.key, crs.sids[idx])"
-                                            style="font-size: 0.85rem"
-                                            class="fas fa-check"
+                                            class="far fa-check-square"
                                         ></i>
+                                        <i v-else class="far fa-square"></i>
                                     </div>
                                 </div>
                             </div>
-                        </div></div
-                ></Expand>
+                        </div>
+                    </div>
+                </Expand>
             </div>
         </div>
     </div>
@@ -197,7 +205,6 @@ export default class ClassList extends Vue {
 
 .class-section {
     padding: 0.1rem 0 0.1rem 1rem;
-    font-size: 0.75rem;
     margin: 0;
     cursor: pointer;
 }

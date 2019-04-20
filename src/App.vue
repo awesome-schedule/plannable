@@ -85,26 +85,15 @@
         >
             <div class="dropdown">
                 <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
-                    <span
-                        v-if="loading"
-                        class="spinner-border spinner-border-sm"
-                        role="status"
-                        aria-hidden="true"
-                    ></span>
+                    <span v-if="loading" class="spinner-border spinner-border-sm"></span>
                     {{ currentSemester ? currentSemester.name : 'Select Semester' }}
                     <i class="fas fa-caret-down ml-4" style="font-size: 20px;"></i>
                 </button>
-                <div
-                    v-if="semesters.length"
-                    class="dropdown-menu"
-                    aria-labelledby="dropdownMenuButton"
-                    style="width: 100%;"
-                >
+                <div v-if="semesters.length" class="dropdown-menu w-100">
                     <a
                         v-for="(semester, idx) in semesters"
                         :key="semester.id"
-                        class="dropdown-item"
-                        style="width: 100%;"
+                        class="dropdown-item w-100"
                         href="#"
                         @click="selectSemester(idx)"
                         >{{ semester.name }}
@@ -321,8 +310,6 @@
                                 <button
                                     type="button"
                                     class="close"
-                                    aria-label="Close"
-                                    role="button"
                                     style="font-size:2rem"
                                     tabindex="-1"
                                 >
@@ -374,7 +361,7 @@
                         :key="option.name"
                         class="list-group-item py-1 pl-3 pr-0"
                     >
-                        <div class="row no-gutters" style="width: 100%">
+                        <div class="row no-gutters w-100">
                             <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
                                 <span class="sort-option"> {{ option.title }}</span>
                             </div>
@@ -596,15 +583,14 @@
                 </li>
                 <li class="list-group-item">
                     <button
-                        class="btn btn-outline-info mb-1"
-                        style="width: 100%"
+                        class="btn btn-outline-info mb-1 w-100"
                         @click="selectSemester(currentSemester.id, undefined, true)"
                     >
                         Update Semester Data
                     </button>
                 </li>
                 <li class="list-group-item">
-                    <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
+                    <button class="btn btn-outline-danger w-100" @click="clearCache">
                         Reset All and Clean
                     </button>
                 </li>
@@ -651,7 +637,7 @@
                     </a>
                 </li>
                 <li class="list-group-item">
-                    <button class="btn btn-outline-primary" style="width: 100%" @click="print">
+                    <button class="btn btn-outline-primary w-100" @click="print">
                         Print
                     </button>
                 </li>
@@ -670,7 +656,6 @@
                 v-top
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
-                role="alert"
                 :style="
                     `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
                         mobile ? '11' : scheduleLeft + 5
@@ -678,14 +663,7 @@
                 "
             >
                 {{ noti.msg }}
-                <button
-                    type="button"
-                    class="close"
-                    aria-label="Close"
-                    style="align:center"
-                    role="button"
-                    @click="noti.clear()"
-                >
+                <button type="button" class="close" style="align:center" @click="noti.clear()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>

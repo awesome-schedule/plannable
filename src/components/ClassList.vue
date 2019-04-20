@@ -1,9 +1,9 @@
 <template>
-    <div id="class-list" style="width: 100%">
+    <div id="class-list w-100">
         <div class="card-body p-0">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
                 <div class="list-group-item class-title py-1 px-0">
-                    <table style="width: 100%">
+                    <table class="w-100">
                         <tr>
                             <td class="expand-icon pr-2">
                                 <button

@@ -91,23 +91,19 @@
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
-            <div class="dropdown" style="">
-                <button
-                    id="semester"
-                    class="btn btn-info nav-btn mt-0"
-                    type="button"
-                    data-toggle="dropdown"
-                >
+            <div class="dropdown">
+                <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
                     <span
                         v-if="loading"
                         class="spinner-border spinner-border-sm"
                         role="status"
                         aria-hidden="true"
                     ></span>
-                    {{ currentSemester === null ? 'Select Semester' : currentSemester.name }}
+                    {{ currentSemester ? currentSemester.name : 'Select Semester' }}
+                    <i class="fas fa-caret-down ml-4" style="font-size: 20px;"></i>
                 </button>
                 <div
-                    v-if="semesters !== null"
+                    v-if="semesters.length"
                     class="dropdown-menu"
                     aria-labelledby="dropdownMenuButton"
                     style="width: 100%;"
@@ -132,6 +128,9 @@
                     @input="getClass($event.target.value)"
                     @keyup.esc="closeClassList($event)"
                 />
+                <div class="input-group-append">
+                    <span class="input-group-text p-1"><i class="fas fa-search"></i></span>
+                </div>
             </div>
 
             <div v-if="isEntering" ref="classList" class="card card-body p-1">
@@ -159,9 +158,10 @@
                     >
                         {{
                             generated
-                                ? `Generated Schedule: ${currentScheduleIndex + 1}`
-                                : 'Selected Classes'
+                                ? `View Schedule: ${currentScheduleIndex + 1}`
+                                : 'Edit Classes'
                         }}
+                        <i class="fas fa-exchange-alt ml-4" style="font-size: 18px;"></i>
                     </button>
                 </div>
                 <div class="mx-1">
@@ -449,44 +449,60 @@
             <button class="btn btn-info nav-btn">
                 Schedule Display settings
             </button>
-            <div class="list-group list-group-flush mx-1">
+            <form class="mx-2">
                 <div
-                    class="input-group my-2"
+                    class="form-group row no-gutters mt-1 mb-1"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Schedule Start</span>
+                    <label for="schedule-start" class="col-sm-5 col-form-label"
+                        >Schedule Start</label
+                    >
+                    <div class="col-sm-7">
+                        <input
+                            id="schedule-start"
+                            v-model="earliest"
+                            type="time"
+                            class="form-control"
+                        />
                     </div>
-                    <input v-model="earliest" type="time" class="form-control" />
                 </div>
                 <div
-                    class="input-group mb-2"
+                    class="form-group row no-gutters mb-1"
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Schedule End&nbsp;</span>
-                    </div>
-                    <input v-model="latest" type="time" class="form-control" />
-                </div>
-                <div class="input-group mb-2" title="height of a course on schedule">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Class Height</span>
-                    </div>
-                    <input v-model.number="fullHeight" type="number" class="form-control" />
-                    <div class="input-group-append">
-                        <span class="input-group-text">px</span>
+                    <label for="schedule-end" class="col-sm-5 col-form-label">Schedule End</label>
+                    <div class="col-sm-7">
+                        <input
+                            id="schedule-end"
+                            v-model="latest"
+                            type="time"
+                            class="form-control"
+                        />
                     </div>
                 </div>
-                <div class="input-group mb-2" title="height of an empty row">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Grid Height&nbsp;</span>
-                    </div>
-                    <input v-model.number="partialHeight" type="number" class="form-control" />
-                    <div class="input-group-append">
-                        <span class="input-group-text">px</span>
+                <div class="form-group row no-gutters mb-1" title="height of a class on schedule">
+                    <label for="class-height" class="col-sm-5 col-form-label">Class Height</label>
+                    <div class="col-sm-7">
+                        <input
+                            id="class-height"
+                            v-model.number="fullHeight"
+                            type="number"
+                            class="form-control"
+                        />
                     </div>
                 </div>
-            </div>
+                <div class="form-group row no-gutters mb-2" title="height of a class on schedule">
+                    <label for="class-height" class="col-sm-5 col-form-label">Grid Height</label>
+                    <div class="col-sm-7">
+                        <input
+                            id="class-height"
+                            v-model.number="partialHeight"
+                            type="number"
+                            class="form-control"
+                        />
+                    </div>
+                </div>
+            </form>
             <div v-if="mobile" class="custom-control custom-checkbox mb-3 ml-3">
                 <input
                     id="scroll"
@@ -794,7 +810,6 @@ export default class App extends Vue {
 
     // autocompletion related fields
     isEntering = false;
-
     inputCourses: Course[] | null = null;
 
     // modal object binding
@@ -1117,11 +1132,7 @@ export default class App extends Vue {
      * @param parsed_data
      * @param force whether to force-update semester data
      */
-    selectSemester(
-        semesterId: number | string,
-        parsed_data: { [x: string]: any } | undefined = undefined,
-        force = false
-    ) {
+    selectSemester(semesterId: number | string, parsed_data?: { [x: string]: any }, force = false) {
         if (typeof semesterId === 'string') {
             for (let i = 0; i < this.semesters.length; i++) {
                 const semester = this.semesters[i];
@@ -1234,8 +1245,8 @@ export default class App extends Vue {
      * This method will set the flag `loading` to true on start, to false on return.
      * When on error, a proper error message will be displayed to the user.
      *
-     * @param {()=>void} [success] func to execute on success
-     * @param {()=>void} [reject] func to execute on failure
+     * @param success func to execute on success
+     * @param reject func to execute on failure
      */
     fetchSemesterData(semesterIdx: number, success?: () => void, reject?: () => void) {
         this.loading = true;
@@ -1461,21 +1472,30 @@ export default class App extends Vue {
         if (!input.files) return;
 
         const reader = new FileReader();
-        try {
-            reader.onload = () => {
-                if (reader.result) {
-                    const result = reader.result.toString();
-                    localStorage.setItem((this.currentSemester as Semester).id, result);
-                    const raw_data = JSON.parse(result);
-                    const semester = raw_data.currentSemester;
-                    for (let i = 0; i < this.semesters.length; i++) {
-                        if (this.semesters[i].id === semester.id) {
-                            this.selectSemester(i, raw_data);
-                            break;
-                        }
+
+        reader.onload = () => {
+            if (reader.result) {
+                let raw_data, result;
+                try {
+                    result = reader.result.toString();
+                    raw_data = JSON.parse(result);
+                } catch (error) {
+                    console.error(error);
+                    this.noti.error(error.message);
+                    return;
+                }
+                localStorage.setItem((this.currentSemester as Semester).id, result);
+                const semester = raw_data.currentSemester;
+                for (let i = 0; i < this.semesters.length; i++) {
+                    if (this.semesters[i].id === semester.id) {
+                        this.selectSemester(i, raw_data);
+                        break;
                     }
                 }
-            };
+            }
+        };
+
+        try {
             reader.readAsText(input.files[0]);
         } catch (error) {
             console.warn(error);

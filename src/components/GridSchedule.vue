@@ -101,7 +101,6 @@ export default class GridSchedule extends Vue {
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
      * return 0 if no class
-     * @returns {number}
      */
     get earliestBlock() {
         let earliest = 817;
@@ -117,7 +116,6 @@ export default class GridSchedule extends Vue {
     }
     /**
      * return the block in which the latest class ends, the 8:00 block is zero
-     * @returns {number}
      */
     get latestBlock() {
         let latest = 0;
@@ -133,7 +131,6 @@ export default class GridSchedule extends Vue {
     }
     /**
      * return the block in which the schedule starts with
-     * @returns {number}
      */
     get absoluteEarliest() {
         const early = this.validate(this.earliest, '8:00');
@@ -146,7 +143,6 @@ export default class GridSchedule extends Vue {
     }
     /**
      * return the block in which the schedule ends with
-     * @returns {number}
      */
     get absoluteLatest() {
         const late = this.validate(this.latest, '19:00');
@@ -157,8 +153,7 @@ export default class GridSchedule extends Vue {
         }
     }
     /**
-     * computes the number of rows needs
-     * @returns {number}
+     * computes the number of rows we need
      */
     get numRow() {
         let num = 0;
@@ -167,9 +162,6 @@ export default class GridSchedule extends Vue {
         }
         return num;
     }
-    /**
-     * @returns {string[]}
-     */
     get hours() {
         let curTime = '';
         if (this.absoluteEarliest % 2 === 0) {
@@ -191,26 +183,16 @@ export default class GridSchedule extends Vue {
 
         return window.screen.width > 450 ? (this.timeOptionStandard ? stdTime : time) : reducedTime;
     }
-
-    /**
-     * @returns {number[]}
-     */
     get items() {
-        const arr = [];
+        const arr: number[] = [];
         const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
         for (let i = 0; i < numBlocks; i++) {
             arr.push(i + 1);
         }
         return arr;
     }
-    /**
-     * @returns {number[]}
-     */
     get heightInfo() {
-        /**
-         * @type {number[]}
-         */
-        const info = new Array(this.numRow);
+        const info: number[] = new Array(this.numRow);
         info.fill(this.partialHeight);
         const earliest = this.absoluteEarliest;
         for (const key in this.schedule.days) {
@@ -224,9 +206,6 @@ export default class GridSchedule extends Vue {
         }
         return info;
     }
-    /**
-     * @returns {number}
-     */
     get mainHeight() {
         let h = 0;
         for (const i of this.heightInfo) {
@@ -234,7 +213,9 @@ export default class GridSchedule extends Vue {
         }
         return h;
     }
-
+    /**
+     * check whether a given time is valid. If invalid, returns the fallback
+     */
     validate(time: string, fallback: string) {
         if (time && time.length >= 3 && time.indexOf(':') > 0) {
             return time;

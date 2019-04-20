@@ -16,6 +16,7 @@
         "papaparse": "^4.6.3",
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
+        "string-similarity": "^3.0.0",
         "vue": "^2.6.10",
         "vuedraggable": "^2.20.0"
     },

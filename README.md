@@ -30,7 +30,7 @@ git clone https://github.com/awesome-schedule/Awesome-SchedulAR
 Install front end dependencies and launch the development server
 
 ```bash
-cd Awesome-SchedulAR/templates
+cd Awesome-SchedulAR
 npm install
 npm run serve
 ```

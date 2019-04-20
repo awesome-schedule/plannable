@@ -1,9 +1,9 @@
 <template>
-    <div id="class-list" style="width: 100%">
+    <div id="class-list w-100">
         <div class="card-body p-0">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
                 <div class="list-group-item class-title py-1 px-0">
-                    <table style="width: 100%">
+                    <table class="w-100">
                         <tr>
                             <td class="expand-icon pr-2">
                                 <button
@@ -145,7 +145,7 @@ import Course from '../models/Course';
 export default class ClassList extends Vue {
     @Prop(Array) readonly courses!: Course[];
     @Prop(Schedule) readonly schedule!: Schedule;
-    @Prop(Boolean) readonly isEntering!: boolean;
+    @Prop({ default: false, type: Boolean }) readonly isEntering!: boolean;
     @Prop(Boolean) readonly generated!: boolean;
     @Prop(Boolean) readonly showClasslistTitle!: boolean;
 
@@ -153,10 +153,7 @@ export default class ClassList extends Vue {
     expandOnEntering = false;
 
     select(key: string, idx: number) {
-        this.$emit('update_course', key, idx);
-        // note: adding a course to schedule.All cannot be detected by Vue.
-        // Must use forceUpdate to rerender component
-        this.$forceUpdate();
+        this.$emit('update_course', key, idx, this.isEntering);
     }
 
     collapse(key: string) {

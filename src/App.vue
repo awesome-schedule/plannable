@@ -92,26 +92,15 @@
         >
             <div class="dropdown">
                 <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
-                    <span
-                        v-if="loading"
-                        class="spinner-border spinner-border-sm"
-                        role="status"
-                        aria-hidden="true"
-                    ></span>
+                    <span v-if="loading" class="spinner-border spinner-border-sm"></span>
                     {{ currentSemester ? currentSemester.name : 'Select Semester' }}
                     <i class="fas fa-caret-down ml-4" style="font-size: 20px;"></i>
                 </button>
-                <div
-                    v-if="semesters.length"
-                    class="dropdown-menu"
-                    aria-labelledby="dropdownMenuButton"
-                    style="width: 100%;"
-                >
+                <div v-if="semesters.length" class="dropdown-menu w-100">
                     <a
                         v-for="(semester, idx) in semesters"
                         :key="semester.id"
-                        class="dropdown-item"
-                        style="width: 100%;"
+                        class="dropdown-item w-100"
                         href="#"
                         @click="selectSemester(idx)"
                         >{{ semester.name }}
@@ -144,6 +133,7 @@
 
             <div v-if="isEntering" ref="classList" class="card card-body p-1">
                 <ClassList
+                    ref="enteringClassList"
                     :courses="inputCourses"
                     :schedule="currentSchedule"
                     :is-entering="isEntering"
@@ -221,9 +211,9 @@
                         </div>
                     </div>
                     <ClassList
+                        ref="selectedClassList"
                         :courses="currentSchedule.currentCourses"
                         :schedule="currentSchedule"
-                        :is-entering="isEntering"
                         :show-classlist-title="showClasslistTitle"
                         :generated="generated"
                         @update_course="updateCourse"
@@ -328,8 +318,6 @@
                                 <button
                                     type="button"
                                     class="close"
-                                    aria-label="Close"
-                                    role="button"
                                     style="font-size:2rem"
                                     tabindex="-1"
                                 >
@@ -381,7 +369,7 @@
                         :key="option.name"
                         class="list-group-item py-1 pl-3 pr-0"
                     >
-                        <div class="row no-gutters" style="width: 100%">
+                        <div class="row no-gutters w-100">
                             <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
                                 <span class="sort-option"> {{ option.title }}</span>
                             </div>
@@ -603,15 +591,14 @@
                 </li>
                 <li class="list-group-item">
                     <button
-                        class="btn btn-outline-info mb-1"
-                        style="width: 100%"
+                        class="btn btn-outline-info mb-1 w-100"
                         @click="selectSemester(currentSemester.id, undefined, true)"
                     >
                         Update Semester Data
                     </button>
                 </li>
                 <li class="list-group-item">
-                    <button class="btn btn-outline-danger" style="width: 100%" @click="clearCache">
+                    <button class="btn btn-outline-danger w-100" @click="clearCache">
                         Reset All and Clean
                     </button>
                 </li>
@@ -658,7 +645,7 @@
                     </a>
                 </li>
                 <li class="list-group-item">
-                    <button class="btn btn-outline-primary" style="width: 100%" @click="print">
+                    <button class="btn btn-outline-primary w-100" @click="print">
                         Print
                     </button>
                 </li>
@@ -677,7 +664,6 @@
                 v-top
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.class}`"
-                role="alert"
                 :style="
                     `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
                         mobile ? '11' : scheduleLeft + 5
@@ -685,14 +671,7 @@
                 "
             >
                 {{ noti.msg }}
-                <button
-                    type="button"
-                    class="close"
-                    aria-label="Close"
-                    style="align:center"
-                    role="button"
-                    @click="noti.clear()"
-                >
+                <button type="button" class="close" style="align:center" @click="noti.clear()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -764,7 +743,7 @@ import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
 
 // these two properties must be non-reactive,
-// otherwise the reative observer will slow down execution significantly
+// otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator();
 // window.window.catalog = null;
 
@@ -945,11 +924,12 @@ export default class App extends Vue {
         this.switchProposed(len);
     }
     deleteProposed() {
-        if (!confirm('Are you sure?')) return;
+        const idx = this.proposedScheduleIndex;
+
+        if (!confirm(`Are you sure to delete schedule ${idx}?`)) return;
         if (this.proposedSchedules.length === 1) {
             return this.noti.error('This is the only schedule left!');
         }
-        const idx = this.proposedScheduleIndex;
 
         // if the schedule to be deleted corresponds to generated schedules,
         // this deletion invalidates the generated schedules immediately.
@@ -1084,13 +1064,18 @@ export default class App extends Vue {
     /**
      * @see Schedule.update
      */
-    updateCourse(key: string, section: number) {
-        this.currentSchedule.update(key, section, true, this.isEntering);
+    updateCourse(key: string, section: number, remove: boolean = false) {
+        this.currentSchedule.update(key, section, true, remove);
         if (this.generated) {
             this.noti.warn(`You're editing the generated schedule!`, 3);
         } else {
             this.saveStatus();
         }
+        // note: adding a course to schedule.All cannot be detected by Vue.
+        // Must use forceUpdate to rerender component
+        (this.$refs.selectedClassList as Vue).$forceUpdate();
+        if (this.$refs.enteringClassList instanceof Vue)
+            (this.$refs.enteringClassList as Vue).$forceUpdate();
     }
     /**
      * Switch to `idx` page. If update is true, also update the pagination status.

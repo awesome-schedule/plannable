@@ -1578,7 +1578,6 @@ export default Vue.extend({
         },
         saveToIcal() {
             this.icalURL = this.currentSchedule.toICal();
-            window.URL.revokeObjectURL(this.icalURL);
         }
     }
 });

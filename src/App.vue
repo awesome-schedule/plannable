@@ -226,9 +226,9 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-info nav-btn mt-3">
+            <div class="btn bg-info nav-btn mt-3" style="width:100%;color:white">
                 Schedule Overview
-            </button>
+            </div>
             <ul class="list-group list-group-flush" style="width:99%">
                 <li class="list-group-item">Total Credits: {{ currentSchedule.totalCredit }}</li>
                 <li class="list-group-item pr-0">
@@ -254,9 +254,9 @@
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
-            <button class="btn btn-info nav-btn">
+            <div class="btn bg-info nav-btn" style="color:white">
                 Filters
-            </button>
+            </div>
             <ul class="list-group list-group-flush mx-1">
                 <li
                     class="list-group-item px-3"
@@ -435,9 +435,9 @@
             class="d-block bg-light sidebar"
             style="scrollbar-width:thin !important"
         >
-            <button class="btn btn-info nav-btn">
+            <div class="btn bg-info nav-btn" style="color:white">
                 Schedule Display settings
-            </button>
+            </div>
             <form class="mx-2">
                 <div
                     class="form-group row no-gutters mt-2 mb-1"
@@ -503,9 +503,9 @@
                     scrollable
                 </label>
             </div>
-            <button class="btn btn-info nav-btn">
+            <div class="btn bg-info nav-btn" style="color:white">
                 Display Options
-            </button>
+            </div>
             <ul class="list-group list-group-flush mx-1">
                 <li class="list-group-item">Course Display</li>
                 <li class="list-group-item">
@@ -557,9 +557,9 @@
                     </div>
                 </li>
             </ul>
-            <button class="btn btn-info nav-btn">
+            <div class="btn bg-info nav-btn" style="color:white">
                 Time Options
-            </button>
+            </div>
             <ul class="list-group list-group-flush mx-1">
                 <li>
                     <div class="btn-group my-3" role="group" style="width:100%">
@@ -569,7 +569,7 @@
                             type="button"
                             @click="standard = true"
                         >
-                            Standard
+                            12 Hour
                         </button>
                         <button
                             class="btn btn-secondary"
@@ -577,7 +577,7 @@
                             type="button"
                             @click="standard = false"
                         >
-                            Military
+                            24 Hour
                         </button>
                     </div>
                 </li>
@@ -598,9 +598,9 @@
         </nav>
 
         <nav v-else-if="sideBar.showExport" class="d-block bg-light sidebar">
-            <button class="btn btn-info nav-btn">
+            <div class="btn bg-info nav-btn" style="color:white">
                 Import/Export Schedule
-            </button>
+            </div>
             <ul class="list-group list-group-flush mx-1">
                 <li class="list-group-item px-1">
                     <div class="custom-file">

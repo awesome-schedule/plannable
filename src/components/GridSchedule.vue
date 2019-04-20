@@ -65,236 +65,216 @@
     </table>
 </template>
 
-<script>
-import Vue from 'vue';
+<script lang="ts">
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import { to12hr } from '../models/Utils';
-export default Vue.extend({
-    name: 'GridSchedule',
+import { Vue, Component, Prop } from 'vue-property-decorator';
+
+@Component({
     components: {
         CourseBlock
-    },
-    props: {
-        schedule: Schedule,
-        showTime: Boolean,
-        showRoom: Boolean,
-        showInstructor: Boolean,
-        partialHeight: Number,
-        fullHeight: Number,
-        earliest: String,
-        latest: String,
-        timeOptionStandard: Boolean
-    },
-    data() {
-        return {
-            mon: window.screen.width > 450 ? 'Monday' : 'Mon',
-            tue: window.screen.width > 450 ? 'Tuesday' : 'Tue',
-            wed: window.screen.width > 450 ? 'Wednesday' : 'Wed',
-            thu: window.screen.width > 450 ? 'Thursday' : 'Thu',
-            fri: window.screen.width > 450 ? 'Friday' : 'Fri',
-            // note: we need Schedule.days because it's an array that keeps the keys in order
-            days: Meta.days
-        };
-    },
-    computed: {
-        /**
-         * return the block in which the earliest class starts, the 8:00 block is zero
-         * return 0 if no class
-         * @returns {number}
-         */
-        earliestBlock() {
-            let earliest = 817;
-            for (const key in this.schedule.days) {
-                for (const course of this.schedule.days[key]) {
-                    const temp = this.timeToNum(course.start, true);
-                    if (temp < earliest && course !== undefined && course !== null) {
-                        earliest = temp;
-                    }
+    }
+})
+export default class GridSchedule extends Vue {
+    @Prop(Object) readonly schedule!: Schedule;
+    @Prop(Boolean) readonly showTime!: boolean;
+    @Prop(Boolean) readonly showRoom!: boolean;
+    @Prop(Boolean) readonly showInstructor!: boolean;
+    @Prop(Number) readonly partialHeight!: number;
+    @Prop(Number) readonly fullHeight!: number;
+    @Prop(Number) readonly earliest!: string;
+    @Prop(Number) readonly latest!: string;
+    @Prop(Boolean) readonly timeOptionStandard!: boolean;
+
+    name = 'GridSchedule';
+
+    mon = window.screen.width > 450 ? 'Monday' : 'Mon';
+    tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
+    wed = window.screen.width > 450 ? 'Wednesday' : 'Wed';
+    thu = window.screen.width > 450 ? 'Thursday' : 'Thu';
+    fri = window.screen.width > 450 ? 'Friday' : 'Fri';
+    // note: we need Schedule.days because it's an array that keeps the keys in order
+    days = Meta.days;
+
+    /**
+     * return the block in which the earliest class starts, the 8:00 block is zero
+     * return 0 if no class
+     * @returns {number}
+     */
+    get earliestBlock() {
+        let earliest = 817;
+        for (const key in this.schedule.days) {
+            for (const course of this.schedule.days[key]) {
+                const temp = this.timeToNum(course.start, true);
+                if (temp < earliest && course !== undefined && course !== null) {
+                    earliest = temp;
                 }
             }
-            return earliest === 817 ? 0 : earliest;
-        },
-        /**
-         * return the block in which the latest class ends, the 8:00 block is zero
-         * @returns {number}
-         */
-        latestBlock() {
-            let latest = 0;
-            for (const key in this.schedule.days) {
-                for (const course of this.schedule.days[key]) {
-                    const temp = this.timeToNum(course.end, false);
-                    if (temp > latest && course !== undefined && course !== null) {
-                        latest = temp;
-                    }
-                }
-            }
-            return latest === 817 ? (19 - 8) * 2 : latest;
-        },
-        /**
-         * return the block in which the schedule starts with
-         * @returns {number}
-         */
-        absoluteEarliest() {
-            const early = this.validate(this.earliest, '8:00');
-
-            if (this.timeToNum(early, true) > this.earliestBlock) {
-                return this.earliestBlock;
-            } else {
-                return this.timeToNum(early, true);
-            }
-        },
-        /**
-         * return the block in which the schedule ends with
-         * @returns {number}
-         */
-        absoluteLatest() {
-            const late = this.validate(this.latest, '19:00');
-            if (this.timeToNum(late, false) < this.latestBlock) {
-                return this.latestBlock;
-            } else {
-                return this.timeToNum(late, false);
-            }
-        },
-        /**
-         * computes the number of rows needs
-         * @returns {number}
-         */
-        numRow() {
-            let num = 0;
-            for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
-                num += 1;
-            }
-            return num;
-        },
-        /**
-         * @returns {string[]}
-         */
-        hours() {
-            let curTime = '';
-            if (this.absoluteEarliest % 2 === 0) {
-                curTime = this.absoluteEarliest / 2 + 8 + ':00';
-            } else {
-                curTime = (this.absoluteEarliest - 1) / 2 + 8 + ':30';
-            }
-
-            const time = [];
-            const stdTime = [];
-            const reducedTime = [];
-            for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
-                time.push(curTime);
-                stdTime.push(to12hr(curTime));
-                curTime = this.increTime(curTime);
-                // note: need .toString to make the type of reducedTime consistent
-                reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
-            }
-
-            return window.screen.width > 450
-                ? this.timeOptionStandard
-                    ? stdTime
-                    : time
-                : reducedTime;
-        },
-
-        /**
-         * @returns {number[]}
-         */
-        items() {
-            const arr = [];
-            const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
-            for (let i = 0; i < numBlocks; i++) {
-                arr.push(i + 1);
-            }
-            return arr;
-        },
-        /**
-         * @returns {number[]}
-         */
-        heightInfo() {
-            /**
-             * @type {number[]}
-             */
-            const info = new Array(this.numRow);
-            info.fill(this.partialHeight);
-            const earliest = this.absoluteEarliest;
-            for (const key in this.schedule.days) {
-                for (const course of this.schedule.days[key]) {
-                    const startTime = this.timeToNum(course.start, true);
-                    const endTime = this.timeToNum(course.end, false);
-                    for (let i = startTime; i <= endTime; i++) {
-                        info[i - earliest] = this.fullHeight;
-                    }
-                }
-            }
-            return info;
-        },
-        /**
-         * @returns {number}
-         */
-        mainHeight() {
-            let h = 0;
-            for (const i of this.heightInfo) {
-                h += i;
-            }
-            return h;
         }
-    },
-    methods: {
-        /**
-         * @param {string} time
-         * @param {string} fallback
-         */
-        validate(time, fallback) {
-            if (time && time.length >= 3 && time.indexOf(':') > 0) {
-                return time;
-            } else {
-                return fallback;
-            }
-        },
-        /**
-         * Increase the time in string by 30 minutes and return
-         * @param {string} time
-         */
-        increTime(time) {
-            const sep = time.split(' ')[0].split(':');
-            const hr = parseInt(sep[0]);
-            const min = parseInt(sep[1]);
-            return (
-                hr +
-                ((min + 30) / 60 >= 1 ? 1 : 0) +
-                ':' +
-                ((min + 30) % 60 < 10 ? '0' + ((min + 30) % 60) : (min + 30) % 60)
-            );
-        },
-        /**
-         * timeToNum
-         * convert time in 24 hours to number of time blocks relative to the    8:00 block
-         * @param {string} time time in 24 hours
-         * @param {string} start boolean that indicates this is a start time or end time
-         * @returns {number}
-         */
-        timeToNum(time, start) {
-            const sep = time.split(':');
-            const min = parseInt(sep[1]);
-            let t = (parseInt(sep[0]) - 8) * 2;
-            if (start) {
-                if (min >= 30) {
-                    t += 2;
-                } else {
-                    t += 1;
-                }
-            } else {
-                if (min > 30) {
-                    t += 2;
-                } else if (min > 0) {
-                    t += 1;
+        return earliest === 817 ? 0 : earliest;
+    }
+    /**
+     * return the block in which the latest class ends, the 8:00 block is zero
+     * @returns {number}
+     */
+    get latestBlock() {
+        let latest = 0;
+        for (const key in this.schedule.days) {
+            for (const course of this.schedule.days[key]) {
+                const temp = this.timeToNum(course.end, false);
+                if (temp > latest && course !== undefined && course !== null) {
+                    latest = temp;
                 }
             }
-            return t - 1;
+        }
+        return latest === 817 ? (19 - 8) * 2 : latest;
+    }
+    /**
+     * return the block in which the schedule starts with
+     * @returns {number}
+     */
+    get absoluteEarliest() {
+        const early = this.validate(this.earliest, '8:00');
+
+        if (this.timeToNum(early, true) > this.earliestBlock) {
+            return this.earliestBlock;
+        } else {
+            return this.timeToNum(early, true);
         }
     }
-});
+    /**
+     * return the block in which the schedule ends with
+     * @returns {number}
+     */
+    get absoluteLatest() {
+        const late = this.validate(this.latest, '19:00');
+        if (this.timeToNum(late, false) < this.latestBlock) {
+            return this.latestBlock;
+        } else {
+            return this.timeToNum(late, false);
+        }
+    }
+    /**
+     * computes the number of rows needs
+     * @returns {number}
+     */
+    get numRow() {
+        let num = 0;
+        for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
+            num += 1;
+        }
+        return num;
+    }
+    /**
+     * @returns {string[]}
+     */
+    get hours() {
+        let curTime = '';
+        if (this.absoluteEarliest % 2 === 0) {
+            curTime = this.absoluteEarliest / 2 + 8 + ':00';
+        } else {
+            curTime = (this.absoluteEarliest - 1) / 2 + 8 + ':30';
+        }
+
+        const time = [];
+        const stdTime = [];
+        const reducedTime = [];
+        for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
+            time.push(curTime);
+            stdTime.push(to12hr(curTime));
+            curTime = this.increTime(curTime);
+            // note: need .toString to make the type of reducedTime consistent
+            reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
+        }
+
+        return window.screen.width > 450 ? (this.timeOptionStandard ? stdTime : time) : reducedTime;
+    }
+
+    /**
+     * @returns {number[]}
+     */
+    get items() {
+        const arr = [];
+        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
+        for (let i = 0; i < numBlocks; i++) {
+            arr.push(i + 1);
+        }
+        return arr;
+    }
+    /**
+     * @returns {number[]}
+     */
+    get heightInfo() {
+        /**
+         * @type {number[]}
+         */
+        const info = new Array(this.numRow);
+        info.fill(this.partialHeight);
+        const earliest = this.absoluteEarliest;
+        for (const key in this.schedule.days) {
+            for (const course of this.schedule.days[key]) {
+                const startTime = this.timeToNum(course.start, true);
+                const endTime = this.timeToNum(course.end, false);
+                for (let i = startTime; i <= endTime; i++) {
+                    info[i - earliest] = this.fullHeight;
+                }
+            }
+        }
+        return info;
+    }
+    /**
+     * @returns {number}
+     */
+    get mainHeight() {
+        let h = 0;
+        for (const i of this.heightInfo) {
+            h += i;
+        }
+        return h;
+    }
+
+    validate(time: string, fallback: string) {
+        if (time && time.length >= 3 && time.indexOf(':') > 0) {
+            return time;
+        } else {
+            return fallback;
+        }
+    }
+
+    increTime(time: string) {
+        const sep = time.split(' ')[0].split(':');
+        const hr = parseInt(sep[0]);
+        const min = parseInt(sep[1]);
+        return (
+            hr +
+            ((min + 30) / 60 >= 1 ? 1 : 0) +
+            ':' +
+            ((min + 30) % 60 < 10 ? '0' + ((min + 30) % 60) : (min + 30) % 60)
+        );
+    }
+
+    timeToNum(time: string, start: boolean) {
+        const sep = time.split(':');
+        const min = parseInt(sep[1]);
+        let t = (parseInt(sep[0]) - 8) * 2;
+        if (start) {
+            if (min >= 30) {
+                t += 2;
+            } else {
+                t += 1;
+            }
+        } else {
+            if (min > 30) {
+                t += 2;
+            } else if (min > 0) {
+                t += 1;
+            }
+        }
+        return t - 1;
+    }
+}
 </script>
 
 <style>

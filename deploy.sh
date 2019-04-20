@@ -5,15 +5,12 @@ SOURCE_BRANCH="master"
 TARGET_BRANCH="master"
 
 function doCompile {
-  cd templates
-  npm run build
-  cp -r dist/* ../out/
-  cd ..
+    npm run build
+    cp -rf dist/* out/
 }
 
 # Pull requests and commits to other branches shouldn't try to deploy, just build to verify
 if [ "$TRAVIS_PULL_REQUEST" != "false" -o "$TRAVIS_BRANCH" != "$SOURCE_BRANCH" ]; then
-    cd templates
     npm run build
     echo "Not from master. Skipping deploy."
     exit 0

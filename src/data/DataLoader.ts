@@ -9,7 +9,7 @@ const CORS_PROXY = '';
 /**
  * Fetch the list of semesters from Lou's list
  */
-function getSemesterList(cors_proxy = CORS_PROXY, count = 5): Promise<Semester[]> {
+export function getSemesterList(cors_proxy = CORS_PROXY, count = 5): Promise<Semester[]> {
     console.time('get semester list');
     return new Promise((resolve, reject) => {
         axios
@@ -45,7 +45,7 @@ function getSemesterList(cors_proxy = CORS_PROXY, count = 5): Promise<Semester[]
     });
 }
 
-function getSemesterData(semesterId: string, cors_proxy = CORS_PROXY): Promise<RawCatalog> {
+export function getSemesterData(semesterId: string, cors_proxy = CORS_PROXY): Promise<RawCatalog> {
     console.time(`request semester ${semesterId} data`);
     return new Promise((resolve, reject) => {
         axios
@@ -72,7 +72,7 @@ function getSemesterData(semesterId: string, cors_proxy = CORS_PROXY): Promise<R
     });
 }
 
-function parseSemesterData(csv_string: string) {
+export function parseSemesterData(csv_string: string) {
     const CLASS_TYPES = Meta.TYPES_PARSE;
     const STATUSES = Meta.STATUSES_PARSE;
     console.time('parsing csv');
@@ -82,7 +82,8 @@ function parseSemesterData(csv_string: string) {
     }).data;
     console.timeEnd('parsing csv');
     console.time('reorganizing data');
-    const rawCatalog: RawCatalog = {};
+
+    const rawCatalog: RawCatalog = Object.create(null);
 
     for (let j = 1; j < raw_data.length; j++) {
         const data = raw_data[j];
@@ -128,5 +129,3 @@ function parseSemesterData(csv_string: string) {
     console.timeEnd('reorganizing data');
     return rawCatalog;
 }
-
-export { getSemesterData, getSemesterList };

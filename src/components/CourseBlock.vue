@@ -142,7 +142,6 @@ export default class CourseBlock extends Vue {
     get startPx() {
         let start = 48;
         const t = this.scheduleBlock.start.split(':');
-        // const hr = parseInt(t[0]);
         const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
         const temp = this.timeToNum(this.scheduleBlock.start, true);

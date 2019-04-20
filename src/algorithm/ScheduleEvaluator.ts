@@ -26,6 +26,15 @@ interface CmpSchedule {
     index: number;
 }
 
+export interface SortFunctions {
+    [x: string]: (a: CmpSchedule) => number;
+    variance: (a: CmpSchedule) => number;
+    compactness: (a: CmpSchedule) => number;
+    noEarly: (a: CmpSchedule) => number;
+    lunchTime: (a: CmpSchedule) => number;
+    IamFeelingLucky: (a: CmpSchedule) => number;
+}
+
 /**
  * A `SortOption` represents a single sort option
  */
@@ -168,7 +177,7 @@ class ScheduleEvaluator {
      * defines a number of sorting functions. Note that by default, schedules are sorted in
      * **ascending** order according to the coefficient computed by one or a combination of sorting functions.
      */
-    public static sortFunctions: { [x: string]: (schedule: CmpSchedule) => number } = {
+    public static sortFunctions: SortFunctions = {
         /**
          * compute the variance of class times during the week
          *
@@ -288,9 +297,22 @@ class ScheduleEvaluator {
 
     public options: SortOptions;
     public events: Event[];
-    private _schedules: CmpSchedule[] = [];
-    private schedules: CmpSchedule[] = [];
-    private sortCoeffCache: { [x: string]: Float32Array } = {};
+
+    /**
+     * _schedules keeps the schedules in insertion order,
+     * so that we can cache the sorting coefficient of each schedule
+     */
+    public _schedules: CmpSchedule[] = [];
+
+    /**
+     * this is the sorted array of schedules, created after the first invocation of `sort`
+     */
+    public schedules: CmpSchedule[] = [];
+
+    /**
+     * the cache of coefficient array for each evaluating function
+     */
+    private sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
 
     constructor(options: SortOptions, events: Event[]) {
         this.options = ScheduleEvaluator.validateOptions(options);
@@ -328,9 +350,8 @@ class ScheduleEvaluator {
                     const ele = timeBlock[i];
                     let j = 0,
                         hj = 0;
-                    for (; j < block.length; j += 2, hj += 1) {
-                        if (ele < block[j]) break;
-                    }
+                    for (; j < block.length; j += 2, hj += 1) if (ele < block[j]) break;
+
                     block.splice(j, 0, ele, timeBlock[i + 1]);
                     // room.splice(hj, 0, courseRoom[hi]);
                 }
@@ -359,12 +380,14 @@ class ScheduleEvaluator {
      *
      * @param funcName the name of the sorting option
      * @param assign whether assign to the coeff field of each `CmpSchedule`
+     * @returns the computed/cached array of coefficients
      */
     public computeCoeffFor(funcName: string, assign = true) {
         const schedules = this._schedules;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {
             if (assign) for (let i = 0; i < schedules.length; i++) schedules[i].coeff = cache[i];
+            return cache;
         } else {
             console.time(funcName);
 
@@ -383,8 +406,9 @@ class ScheduleEvaluator {
             }
 
             this.sortCoeffCache[funcName] = newCache;
-
             console.timeEnd(funcName);
+
+            return newCache;
         }
     }
 
@@ -422,9 +446,7 @@ class ScheduleEvaluator {
 
                 // finding the minimum and maximum are quite fast for 1e6 elements, so not cached.
                 for (const option of options) {
-                    this.computeCoeffFor(option.name, false);
-
-                    const coeff = this.sortCoeffCache[option.name];
+                    const coeff = this.computeCoeffFor(option.name, false);
 
                     let max = 0,
                         min = Infinity;
@@ -482,6 +504,7 @@ class ScheduleEvaluator {
 
         const schedules = this._schedules.concat();
         this.schedules = schedules;
+
         if (this.isRandom()) {
             this.shuffle(this.schedules);
             console.timeEnd('sorting: ');
@@ -505,7 +528,7 @@ class ScheduleEvaluator {
         } else {
             const len = options.length;
             const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-            const coeffs = options.map(x => this.sortCoeffCache[x.name]);
+            const coeffs = options.map(x => this.sortCoeffCache[x.name] as Float32Array);
             const func = (a: CmpSchedule, b: CmpSchedule) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {

@@ -21,7 +21,7 @@ describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
         const evaluator = new ScheduleEvaluator(ScheduleEvaluator.getDefaultOptions(), []);
         evaluator.add(schedules);
-        const s = evaluator.schedules[0];
+        const s = evaluator._schedules[0];
         const func = ScheduleEvaluator.sortFunctions['compactness'];
         expect(func(s)).toBe(35 + 20 + 150 + 50 + 0 + 150);
     });
@@ -29,7 +29,7 @@ describe('Schedule Evaluator Test', () => {
     it('Insertion Test', () => {
         const evaluator = new ScheduleEvaluator(ScheduleEvaluator.getDefaultOptions(), []);
         evaluator.add(schedules);
-        const s = evaluator.schedules[0];
+        const s = evaluator._schedules[0];
         expect(s.blocks[0]).toEqual([10, 15, 50, 80, 100, 200, 350, 450]);
         expect(s.blocks[1]).toEqual([100, 200, 250, 300, 300, 350, 500, 600]);
     });

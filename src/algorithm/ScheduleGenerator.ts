@@ -211,7 +211,7 @@ class ScheduleGenerator {
         while (true) {
             if (classNum >= classList.length) {
                 evaluator.add(timeTable);
-                if (evaluator.size() >= 100000) break;
+                // if (evaluator.size() >= 100000) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
                 timeTable.pop();

@@ -35,4 +35,5 @@ temp.txt
 backend/temp
 docs/tsdoc
 docs/vuedoc
+tests/unit/data
 

@@ -71,7 +71,7 @@ import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import { to12hr } from '../models/Utils';
-export default Vue.component('GridSchedule', {
+export default Vue.extend({
     name: 'GridSchedule',
     components: {
         CourseBlock

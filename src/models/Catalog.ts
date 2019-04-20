@@ -1,5 +1,5 @@
 import Course from './Course';
-import Meta, { RawCatalog, RawCourse } from './Meta';
+import { RawCatalog } from './Meta';
 
 export interface Semester {
     id: string;
@@ -79,12 +79,13 @@ class Catalog {
         return new Course(this.raw_data[key], key).getSection(section);
     }
 
-    public search(query: string, max_results = 10) {
+    public search(query: string, max_results = 6) {
         console.time('query');
         query = query.trim().toLowerCase();
         // query no space
         const query_no_sp = query.split(' ').join('');
         const matches: Course[][] = [[], [], [], [], []];
+
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 

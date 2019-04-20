@@ -1,9 +1,8 @@
 import Section from './Section';
 import Course from './Course';
-import Catalog from './Catalog';
 import ScheduleBlock from './ScheduleBlock';
 import Event from './Event';
-import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
+import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from './Utils';
 import Hashable from './Hashable';
@@ -18,6 +17,8 @@ export interface ScheduleJSON {
 
 /**
  * A schedule is a list of courses with computed properties that aid rendering
+ *
+ * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
 class Schedule {
     public static readonly fields = ['All', 'title', 'id'];
@@ -36,10 +37,6 @@ class Schedule {
     ];
 
     public static savedColors: { [x: string]: string } = {};
-    /**
-     * this field must be initialized before calling any instance method of the Schedule class
-     */
-    public static readonly catalog: Catalog;
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
@@ -284,12 +281,14 @@ class Schedule {
      * @see {@link computeSchedule}
      */
     public computeSchedule() {
-        if (!Schedule.catalog) return;
+        const catalog = window.catalog;
+        if (!catalog) return;
+        console.time('render schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
             const sections = this.All[key];
-            const course = Schedule.catalog.getCourse(key);
+            const course = catalog.getCourse(key);
             this.currentCourses.push(course);
 
             const credit = parseFloat(course.units);
@@ -327,7 +326,7 @@ class Schedule {
         }
 
         if (this.previous !== null) {
-            const section = Schedule.catalog.getSection(...this.previous);
+            const section = catalog.getSection(...this.previous);
             section.course.key += 'preview';
             this.place(section);
         }
@@ -337,6 +336,8 @@ class Schedule {
         for (const event of this.events) {
             if (event.display) this.place(event);
         }
+
+        console.timeEnd('render schedule');
     }
 
     /**
@@ -559,9 +560,9 @@ class Schedule {
     public oneICalEvent(
         startTime: Date,
         endTime: Date,
-        summary: String = '',
-        description: String = '',
-        location: String = ''
+        summary: string = '',
+        description: string = '',
+        location: string = ''
     ) {
         console.log(startTime);
         let ical = '';
@@ -598,8 +599,8 @@ class Schedule {
         );
     }
 
-    public dateStringToArr(date: String) {
-        let [month, day, year] = date.split('/');
+    public dateStringToArr(date: string) {
+        const [month, day, year] = date.split('/');
         return [year, month, day];
     }
 

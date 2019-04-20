@@ -79,32 +79,29 @@
     </nav>
 </template>
 
-<script>
-import Vue from 'vue';
+<script lang="ts">
+import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr } from '../models/Utils';
 
-export default Vue.component('EventView', {
-    props: {
-        schedule: Schedule.prototype,
-        event: Event.prototype
-    },
-    data() {
-        return {
-            // event related fields
-            eventWeek: [false, false, false, false, false],
-            eventTimeFrom: '',
-            eventTimeTo: '',
-            eventTitle: '',
-            eventRoom: '',
-            eventDescription: '',
-            isEditingEvent: false,
-            days: Meta.days,
-            toBeModifiedDays: ''
-        };
-    },
+@Component
+export default class EventView extends Vue {
+    @Prop(Schedule) readonly schedule!: Schedule;
+    @Prop(Event) readonly event!: Event;
+
+    // event related fields
+    eventWeek = [false, false, false, false, false];
+    eventTimeFrom = '';
+    eventTimeTo = '';
+    eventTitle? = '';
+    eventRoom? = '';
+    eventDescription? = '';
+    isEditingEvent = false;
+    days = Meta.days;
+    toBeModifiedDays = '';
+
     mounted() {
         this.$watch(
             'event',
@@ -115,128 +112,124 @@ export default Vue.component('EventView', {
                 immediate: true
             }
         );
-    },
-    methods: {
-        /**
-         * @param {number} idx
-         */
-        updateDay(idx) {
-            this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
-        },
-        getEventDays() {
-            let days = '';
-            for (let i = 0; i < 5; i++) {
-                if (this.eventWeek[i]) {
-                    days += Meta.days[i];
+    }
+    updateDay(idx: number) {
+        this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
+    }
+    getEventDays() {
+        let days = '';
+        for (let i = 0; i < 5; i++) {
+            if (this.eventWeek[i]) {
+                days += Meta.days[i];
+            }
+        }
+        days += ' ';
+        days += to12hr(this.eventTimeFrom);
+        days += ' - ';
+        days += to12hr(this.eventTimeTo);
+        return days;
+    }
+    addEvent() {
+        const $parent = this.$parent as any;
+        try {
+            const days = this.getEventDays();
+
+            if (days.indexOf('NaN') !== -1) {
+                $parent.noti.error('Please enter a valid time!');
+                return;
+            }
+
+            let invalid = true;
+
+            for (const d of Meta.days) {
+                if (days.indexOf(d) !== -1) {
+                    invalid = false;
+                    continue;
                 }
             }
-            days += ' ';
-            days += to12hr(this.eventTimeFrom);
-            days += ' - ';
-            days += to12hr(this.eventTimeTo);
-            return days;
-        },
-        addEvent() {
-            try {
-                const days = this.getEventDays();
 
-                if (days.indexOf('NaN') !== -1) {
-                    this.$parent.noti.error('Please enter a valid time!');
-                    return;
-                }
-
-                let invalid = true;
-
-                for (const d of Meta.days) {
-                    if (days.indexOf(d) !== -1) {
-                        invalid = false;
-                        continue;
-                    }
-                }
-
-                if (invalid) {
-                    this.$parent.noti.error('Please enter a valid time!');
-                    return;
-                }
-                this.schedule.addEvent(
-                    days,
-                    true,
-                    this.eventTitle,
-                    this.eventRoom,
-                    this.eventDescription.split('\n').join('<br />')
-                );
-                // note: we don't need to regenerate schedules if the days property is not changed
-                this.cancelEvent(this.toBeModifiedDays !== days);
-            } catch (err) {
-                this.$parent.noti.error(err.message);
+            if (invalid) {
+                $parent.noti.error('Please enter a valid time!');
+                return;
             }
-        },
-        /**
-         * @param {Event} event
-         */
-        editEvent(event) {
-            this.isEditingEvent = true;
-            this.eventTitle = event.title;
-            this.eventRoom = event.room;
-            this.eventDescription = event.description.split('<br />').join('\n');
-            const [week, start, , end] = event.days.split(' ');
-            for (let i = 0; i < Meta.days.length; i++) {
-                if (week.indexOf(Meta.days[i]) !== -1) {
-                    this.$set(this.eventWeek, i, true);
-                } else {
-                    this.$set(this.eventWeek, i, false);
-                }
-            }
-            const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
-            const start24 =
-                (start.substring(start.length - 2, start.length) === 'AM'
-                    ? parseInt(starthr) === 12
-                        ? '00'
-                        : starthr
-                    : '' + (parseInt(starthr) === 12 ? 12 : parseInt(starthr) + 12)) +
-                ':' +
-                startmin;
-            this.eventTimeFrom = start24;
-            const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
-            const end24 =
-                (end.substring(end.length - 2, end.length) === 'AM'
-                    ? parseInt(endhr) === 12
-                        ? '00'
-                        : endhr
-                    : '' + (parseInt(endhr) === 12 ? 12 : parseInt(endhr) + 12)) +
-                ':' +
-                endmin;
-            this.eventTimeTo = end24;
-            this.toBeModifiedDays = event.days;
-        },
-        endEditEvent() {
-            this.schedule.deleteEvent(this.toBeModifiedDays);
-            this.addEvent();
-        },
-        deleteEvent() {
-            this.schedule.deleteEvent(this.toBeModifiedDays);
-            this.isEditingEvent = false;
-            this.cancelEvent(true);
-        },
-        /**
-         * this method is called after deleteEvent, endEditEvent and addEvent
-         *
-         * clear all properties and force recomputation of current schedule
-         *
-         * @param {boolean} regenerate re-run algorithm if true
-         */
-        cancelEvent(regenerate = false) {
-            this.eventTitle = '';
-            this.eventRoom = '';
-            this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
-            this.eventTimeFrom = '';
-            this.eventTimeTo = '';
-            this.eventDescription = '';
-            this.isEditingEvent = false;
-            this.$parent.eventToEdit = null;
-            if (regenerate) this.$parent.generateSchedules();
-            else this.$parent.currentSchedule.computeSchedule();
+            this.schedule.addEvent(
+                days,
+                true,
+                this.eventTitle,
+                this.eventRoom,
+                this.eventDescription ? this.eventDescription.split('\n').join('<br />') : ''
+            );
+            // note: we don't need to regenerate schedules if the days property is not changed
+            this.cancelEvent(this.toBeModifiedDays !== days);
+        } catch (err) {
+            $parent.noti.error(err.message);
         }
     }
-});
+    editEvent(event: Event) {
+        this.isEditingEvent = true;
+        this.eventTitle = event.title;
+        this.eventRoom = event.room;
+        this.eventDescription = event.description
+            ? event.description.split('<br />').join('\n')
+            : '';
+        const [week, start, , end] = event.days.split(' ');
+        for (let i = 0; i < Meta.days.length; i++) {
+            if (week.indexOf(Meta.days[i]) !== -1) {
+                this.$set(this.eventWeek, i, true);
+            } else {
+                this.$set(this.eventWeek, i, false);
+            }
+        }
+        const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
+        const start24 =
+            (start.substring(start.length - 2, start.length) === 'AM'
+                ? parseInt(starthr) === 12
+                    ? '00'
+                    : starthr
+                : '' + (parseInt(starthr) === 12 ? 12 : parseInt(starthr) + 12)) +
+            ':' +
+            startmin;
+        this.eventTimeFrom = start24;
+        const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
+        const end24 =
+            (end.substring(end.length - 2, end.length) === 'AM'
+                ? parseInt(endhr) === 12
+                    ? '00'
+                    : endhr
+                : '' + (parseInt(endhr) === 12 ? 12 : parseInt(endhr) + 12)) +
+            ':' +
+            endmin;
+        this.eventTimeTo = end24;
+        this.toBeModifiedDays = event.days;
+    }
+    endEditEvent() {
+        this.schedule.deleteEvent(this.toBeModifiedDays);
+        this.addEvent();
+    }
+    deleteEvent() {
+        this.schedule.deleteEvent(this.toBeModifiedDays);
+        this.isEditingEvent = false;
+        this.cancelEvent(true);
+    }
+    /**
+     * this method is called after deleteEvent, endEditEvent and addEvent
+     *
+     * clear all properties and force recomputation of current schedule
+     *
+     * @param regenerate re-run algorithm if true
+     */
+    cancelEvent(regenerate = false) {
+        const $parent = this.$parent as any;
+        this.eventTitle = '';
+        this.eventRoom = '';
+        this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
+        this.eventTimeFrom = '';
+        this.eventTimeTo = '';
+        this.eventDescription = '';
+        this.isEditingEvent = false;
+        $parent.eventToEdit = null;
+        if (regenerate) $parent.generateSchedules();
+        else $parent.currentSchedule.computeSchedule();
+    }
+}
 </script>

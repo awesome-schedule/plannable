@@ -203,3 +203,18 @@ export function openVAGrade(course: Course) {
         'width=650,height=700,scrollbars=yes'
     );
 }
+
+export function timeout<T>(
+    promise: Promise<T>,
+    time: number,
+    msg = 'Time out fetching data. Please try again later'
+) {
+    return Promise.race([
+        promise,
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject(msg);
+            }, time);
+        })
+    ]);
+}

@@ -1,19 +1,30 @@
-/// <reference path="../../node_modules/@types/node/index.d.ts"/>
 /**
  * This file prepares data for unit testing
  */
 
 import { RawCatalog } from '../../src/models/Meta';
+import { getSemesterData } from '../../src/data/DataLoader';
 import path from 'path';
 import fs from 'fs';
 
-const data_path = path.join(
-    path.dirname(path.dirname(__dirname)),
-    'backend',
-    'data',
-    'CS1198Data.json'
-);
+const datadir = path.join(__dirname, 'data');
 
-const data: RawCatalog = JSON.parse(fs.readFileSync(data_path).toString());
+if (!fs.existsSync(datadir)) {
+    fs.mkdirSync(datadir);
+}
 
-export default data;
+const semester = '1198';
+const filename = `CS${semester}Data.json`;
+const filepath = path.join(datadir, filename);
+
+async function getData() {
+    let data: RawCatalog;
+    if (fs.existsSync(filepath)) {
+        data = JSON.parse(fs.readFileSync(filepath).toString());
+    } else {
+        data = await getSemesterData(semester);
+    }
+    return data;
+}
+
+export default getData();

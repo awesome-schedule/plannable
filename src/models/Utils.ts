@@ -208,7 +208,7 @@ export function timeout<T>(
     promise: Promise<T>,
     time: number,
     msg = 'Time out fetching data. Please try again later'
-) {
+): Promise<T> {
     return Promise.race([
         promise,
         new Promise((resolve, reject) => {

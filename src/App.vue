@@ -714,8 +714,8 @@
     </div>
 </template>
 
-<script>
-import Vue from 'vue';
+<script lang="ts">
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import ClassList from './components/ClassList.vue';
 import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
@@ -725,12 +725,10 @@ import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 
-// eslint-disable-next-line
 import Section from './models/Section';
-// eslint-disable-next-line
 import Course from './models/Course';
-import Schedule from './models/Schedule';
-import Catalog from './models/Catalog';
+import Schedule, { ScheduleJSON } from './models/Schedule';
+import Catalog, { Semester } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -738,154 +736,14 @@ import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
-import Meta from './models/Meta';
-
-/**
- * use a standalone method to get rid of deep copy issues
- */
-function getDefaultData() {
-    return {
-        /**
-         * @type {Semester[]}
-         */
-        semesters: null,
-        /**
-         * @type {Semester}
-         */
-        currentSemester: null,
-        currentScheduleIndex: 0,
-        /**
-         * @type {Schedule}
-         */
-        currentSchedule: new Schedule(),
-        /**
-         * @type {Schedule[]}
-         */
-        proposedSchedules: [new Schedule()],
-        proposedScheduleIndex: 0,
-        /**
-         * The index of the proposed schedule corresponding to the generated schedule
-         */
-        cpIndex: -1,
-        /**
-         * indicates whether the currently showing schedule is the generated schedule
-         */
-        generated: false,
-        maxNumSchedules: Infinity,
-
-        /**
-         * sidebar display status
-         * show the specific sidebar when true, and hide when all false
-         */
-        sideBar: {
-            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
-            showEvent: false,
-            showFilter: false,
-            showSetting: false,
-            showExport: false,
-            showSelectColor: false,
-            showInfo: false
-        },
-
-        // autocompletion related fields
-        isEntering: false,
-        /**
-         * @type {Course[]}
-         */
-        inputCourses: null,
-
-        // modal object binding
-        /**
-         * @type {Section}
-         */
-        modalSection: null,
-        /**
-         * @type {Course}
-         */
-        modalCourse: null,
-
-        // display options
-        showTime: false,
-        showRoom: true,
-        showInstructor: true,
-        showClasslistTitle: false,
-        fullHeight: 40,
-        partialHeight: 25,
-        earliest: '08:00:00',
-        latest: '19:00:00',
-        standard: false,
-
-        // filter settings
-        /**
-         * index 0 - 4: whether Mo - Tu are selected
-         *
-         * 6: start time, of 24 hour format
-         *
-         * 7: end time, of 24 hour format
-         * @type {[boolean, boolean, boolean, boolean, boolean, string, string][]}
-         */
-        timeSlots: [],
-        allowWaitlist: true,
-        allowClosed: true,
-        sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        sortModes: ScheduleEvaluator.sortModes,
-
-        // storage related fields
-        storageVersion: 2,
-        storageFields: [
-            // schedules
-            // note: this field is for uploadJSON
-            'currentScheduleIndex',
-
-            'currentSemester',
-            'currentSchedule',
-            'proposedSchedules',
-            'sortOptions',
-            'cpIndex',
-            'proposedScheduleIndex',
-
-            // settings
-            'allowWaitList',
-            'allowClosed',
-            'showTime',
-            'showRoom',
-            'showInstructor',
-            'showClasslistTitle',
-            'fullHeight',
-            'partialHeight',
-            'timeSlots',
-            'storageVersion',
-            'earliest',
-            'latest'
-        ],
-
-        // other
-        noti: new Notification(),
-        navHeight: 500,
-        loading: false,
-        mobile: window.screen.width < 450,
-        scrollable: false,
-        semesterListExpirationTime: 86400 * 1000, // one day
-        semesterDataExpirationTime: 2 * 3600 * 1000, // two hours
-        tempScheduleIndex: null,
-        drag: false,
-        downloadURL: '',
-        icalURL: '',
-        days: Meta.days,
-        eventToEdit: null
-    };
-}
+import Meta, { getDefaultData } from './models/Meta';
 
 // these two properties must be non-reactive,
 // otherwise the reative observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator();
-window.catalog = null;
+// window.window.catalog = null;
 
-/**
- * @typedef {{id: string, name: string}} Semester
- */
-export default Vue.extend({
-    name: 'App',
+@Component({
     components: {
         ClassList,
         Pagination,
@@ -896,64 +754,129 @@ export default Vue.extend({
         Palette,
         EventView,
         Information
-    },
-    data() {
-        return getDefaultData();
-    },
-    computed: {
-        sideBarActive() {
-            for (const key in this.sideBar) {
-                if (this.sideBar[key]) return true;
-            }
-            return false;
-        },
-        /**
-         * @return {number}
-         */
-        scheduleLength() {
-            return Math.min(scheduleEvaluator.size(), this.maxNumSchedules);
-        },
-        /**
-         * @returns {number}
-         */
-        scheduleWidth() {
-            return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
-        },
-        /**
-         * @returns {number}
-         */
-        scheduleLeft() {
-            return this.sideBarActive ? 23 : 3;
-        },
-        /**
-         * get the list of current ids, sorted in alpabetical order of the keys
-         * @returns {[string, string][]}
-         */
-        currentIds() {
-            return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
-                a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
-            );
-        },
-        proposedSchedule: {
-            /**
-             * @param {Schedule} schedule
-             */
-            set(schedule) {
-                return (this.proposedSchedules[this.proposedScheduleIndex] = schedule);
-            },
-            get() {
-                return this.proposedSchedules[this.proposedScheduleIndex];
-            }
+    }
+})
+export default class App extends Vue {
+    [x: string]: any;
+
+    name = 'App';
+
+    semesters: Semester[] = [];
+    currentSemester: Semester | null = null;
+    currentScheduleIndex = 0;
+    currentSchedule = new Schedule();
+
+    proposedSchedules = [new Schedule()];
+    proposedScheduleIndex = 0;
+    /**
+     * The index of the proposed schedule corresponding to the generated schedule
+     */
+    cpIndex = -1;
+    /**
+     * indicates whether the currently showing schedule is the generated schedule
+     */
+    generated = false;
+    maxNumSchedules = Infinity;
+
+    /**
+     * sidebar display status
+     * show the specific sidebar when true, and hide when all false
+     */
+    sideBar: { [x: string]: boolean } = {
+        showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
+        showEvent: false,
+        showFilter: false,
+        showSetting: false,
+        showExport: false,
+        showSelectColor: false,
+        showInfo: false
+    };
+
+    // autocompletion related fields
+    isEntering = false;
+
+    inputCourses: Course[] | null = null;
+
+    // modal object binding
+    modalSection: Section | null = null;
+    modalCourse: Course | null = null;
+
+    // display options
+    showTime = false;
+    showRoom = true;
+    showInstructor = true;
+    showClasslistTitle = false;
+    fullHeight = 40;
+    partialHeight = 25;
+    earliest = '08:00:00';
+    latest = '19:00:00';
+    standard = false;
+
+    // filter settings
+    /**
+     * index 0 - 4: whether Mo - Tu are selected
+     *
+     * 6: start time, of 24 hour format
+     *
+     * 7: end time, of 24 hour format
+     */
+    timeSlots: Array<[boolean, boolean, boolean, boolean, boolean, string, string]> = [];
+    allowWaitlist = true;
+    allowClosed = true;
+    sortOptions = ScheduleEvaluator.getDefaultOptions();
+    sortModes = ScheduleEvaluator.sortModes;
+
+    // other
+    noti = new Notification();
+    navHeight = 500;
+    loading = false;
+    mobile = window.screen.width < 900;
+    scrollable = false;
+    tempScheduleIndex: number | null = null;
+    drag = false;
+    downloadURL = '';
+    days = Meta.days;
+    eventToEdit: Event | null = null;
+    icalURL = '';
+
+    get sideBarActive() {
+        for (const key in this.sideBar) {
+            if (this.sideBar[key]) return true;
         }
-    },
-    watch: {
-        loading() {
-            if (this.mobile) {
-                if (this.loading) this.noti.info('Loading...', 3600);
-                else this.noti.clear();
-            }
+        return false;
+    }
+    get scheduleLength() {
+        return Math.min(window.scheduleEvaluator.size(), this.maxNumSchedules);
+    }
+    get scheduleWidth() {
+        return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
+    }
+    get scheduleLeft() {
+        return this.sideBarActive ? 23 : 3;
+    }
+    /**
+     * get the list of current ids, sorted in alpabetical order of the keys
+     */
+    get currentIds(): Array<[string, string]> {
+        return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
+            a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
+        );
+    }
+    set proposedSchedule(schedule: Schedule) {
+        this.proposedSchedules[this.proposedScheduleIndex] = schedule;
+    }
+    get proposedSchedule() {
+        return this.proposedSchedules[this.proposedScheduleIndex];
+    }
+
+    @Watch('loading')
+    loadingWatch() {
+        if (this.mobile) {
+            if (this.loading) this.noti.info('Loading...', 3600);
+            else this.noti.clear();
         }
-    },
+    }
+
     created() {
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
@@ -966,7 +889,7 @@ export default Vue.extend({
         const modified = sms.modified;
         if (
             modified &&
-            new Date().getTime() - new Date(modified).getTime() < this.semesterListExpirationTime
+            new Date().getTime() - new Date(modified).getTime() < Meta.semesterListExpirationTime
         ) {
             this.semesters = sms['semesterList'];
             this.selectSemester(0);
@@ -976,584 +899,574 @@ export default Vue.extend({
                 this.selectSemester(0);
             });
         }
-    },
-    methods: {
-        generatedEmpty() {
-            return scheduleEvaluator.empty();
-        },
-        /**
-         * @param {number} index
-         */
-        switchProposed(index) {
-            if (index < this.proposedSchedules.length && index >= 0) {
-                this.proposedScheduleIndex = index;
-                this.switchSchedule(false);
-            }
-            this.saveStatus();
-        },
-        newProposed() {
-            this.proposedSchedules.push(new Schedule());
-            this.switchProposed(this.proposedSchedules.length - 1);
-        },
-        copyCurrent() {
-            const len = this.proposedSchedules.length;
-            this.proposedSchedules.push(this.proposedSchedules[len - 1].copy());
-            this.switchProposed(len);
-        },
-        deleteProposed() {
-            if (!confirm('Are you sure?')) return;
-            if (this.proposedSchedules.length === 1) {
-                return this.noti.error('This is the only schedule left!');
-            }
-            const idx = this.proposedScheduleIndex;
+    }
 
-            // if the schedule to be deleted corresponds to generated schedules,
-            // this deletion invalidates the generated schedules immediately.
-            if (idx === this.cpIndex) {
-                scheduleEvaluator.clear();
-                this.cpIndex = -1;
-            }
-            this.proposedSchedules.splice(idx, 1);
-            if (idx >= this.proposedSchedules.length) {
-                this.switchProposed(idx - 1);
-            }
-            this.saveStatus();
-        },
-        /**
-         * @param {Event} event
-         */
-        editEvent(event) {
-            if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
-            this.eventToEdit = event;
-        },
-        /**
-         * @param {boolean} generated
-         */
-        switchSchedule(generated) {
-            if (
-                generated &&
-                !scheduleEvaluator.empty() &&
-                this.cpIndex === this.proposedScheduleIndex
-            ) {
-                if (!this.generated) {
-                    this.generated = true;
-                    this.proposedSchedule = this.currentSchedule;
-                    this.switchPage(
-                        this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex,
-                        true
-                    );
-                }
-            } else {
-                this.generated = false;
-                this.currentSchedule = this.proposedSchedule;
-            }
-        },
-        /**
-         * @param {number} i
-         * @param {number} j
-         */
-        updateFilterDay(i, j) {
-            this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
-        },
-        /**
-         * @param {string} key
-         */
-        switchSideBar(key) {
-            this.getClass(null);
-            for (const other in this.sideBar) {
-                if (other !== key) this.sideBar[other] = false;
-            }
-            this.sideBar[key] = !this.sideBar[key];
-
-            if (this.sideBar.showSelectColor) this.switchSchedule(true);
-        },
-        /**
-         * @param {()=>void} success
-         * @param {()=>void} reject
-         */
-        fetchSemesterList(success, reject) {
-            timeout(getSemesterList(), 10000)
-                .then(res => {
-                    this.semesters = res;
-                    localStorage.setItem(
-                        'semesters',
-                        JSON.stringify({
-                            modified: new Date().toJSON(),
-                            semesterList: res
-                        })
-                    );
-                    // get the latest semester
-                    this.selectSemester(0);
-                    if (typeof success === 'function') success();
-                })
-                .catch(err => {
-                    console.warn(err);
-                    let errStr = `Failed to fetch semester list: `;
-                    if (typeof err === 'string') errStr += err;
-                    else if (err.response) errStr += `request rejected by the server. `;
-                    else if (err.request) errStr += `No response received. `;
-                    if (typeof reject === 'function') {
-                        errStr += 'Old data is used instead';
-                        this.noti.warn(errStr);
-                        this.loading = false;
-                        reject();
-                        return;
-                    }
-                    this.noti.error(errStr);
-                    this.loading = false;
-                });
-        },
-        onDocChange() {
-            this.saveStatus();
-        },
-        print() {
-            window.print();
-        },
-        clear() {
-            this.currentSchedule.clean();
-            this.proposedSchedule.clean();
-            this.generated = false;
-            scheduleEvaluator.clear();
-            this.cpIndex = -1;
-            this.saveStatus();
-        },
-        cleanSchedules() {
+    generatedEmpty() {
+        return window.scheduleEvaluator.empty();
+    }
+    switchProposed(index: number) {
+        if (index < this.proposedSchedules.length && index >= 0) {
+            this.proposedScheduleIndex = index;
             this.switchSchedule(false);
-            scheduleEvaluator.clear();
-            this.currentSchedule.cleanSchedule();
-        },
-        clearCache() {
-            if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
-                this.currentSchedule.clean();
-                this.generated = false;
-                scheduleEvaluator.clear();
-                localStorage.clear();
-                this.cpIndex = -1;
-            }
-        },
+        }
+        this.saveStatus();
+    }
+    newProposed() {
+        this.proposedSchedules.push(new Schedule());
+        this.switchProposed(this.proposedSchedules.length - 1);
+    }
+    copyCurrent() {
+        const len = this.proposedSchedules.length;
+        this.proposedSchedules.push(this.proposedSchedules[len - 1].copy());
+        this.switchProposed(len);
+    }
+    deleteProposed() {
+        if (!confirm('Are you sure?')) return;
+        if (this.proposedSchedules.length === 1) {
+            return this.noti.error('This is the only schedule left!');
+        }
+        const idx = this.proposedScheduleIndex;
 
-        /**
-         * @param {Section} section
-         */
-        showModal(section) {
-            this.modalSection = section;
-        },
+        // if the schedule to be deleted corresponds to generated schedules,
+        // this deletion invalidates the generated schedules immediately.
+        if (idx === this.cpIndex) {
+            window.scheduleEvaluator.clear();
+            this.cpIndex = -1;
+        }
+        this.proposedSchedules.splice(idx, 1);
+        if (idx >= this.proposedSchedules.length) {
+            this.switchProposed(idx - 1);
+        }
+        this.saveStatus();
+    }
 
-        /**
-         * @param {Course} course
-         */
-        showClassListModal(course) {
-            this.modalCourse = course;
-            $('#course-modal').modal();
-        },
-        /**
-         * @param {string} key
-         */
-        removeCourse(key) {
-            this.currentSchedule.remove(key);
-            if (this.generated) {
-                this.noti.warn(`You're editing the generated schedule!`, 3);
-            } else {
-                this.saveStatus();
-            }
-        },
-        /**
-         * @see Schedule.update
-         * @param {string} key
-         * @param {number} section
-         */
-        updateCourse(key, section) {
-            this.currentSchedule.update(key, section, true, this.isEntering);
-            if (this.generated) {
-                this.noti.warn(`You're editing the generated schedule!`, 3);
-            } else {
-                this.saveStatus();
-            }
-        },
-        /**
-         * Switch to `idx` page. If update is true, also update the pagination status.
-         * @param {number} idx
-         * @param {boolean} update  whether to update the pagination status
-         */
-        switchPage(idx, update = false) {
-            if (0 <= idx && idx < Math.min(scheduleEvaluator.size(), this.maxNumSchedules)) {
-                this.currentScheduleIndex = idx;
-                if (update) {
-                    this.tempScheduleIndex = idx;
-                } else {
-                    this.tempScheduleIndex = null;
-                }
-                this.currentSchedule = scheduleEvaluator.getSchedule(idx);
-                this.saveStatus();
-            }
-        },
-        /**
-         * get classes that match the input query.
-         * Exit "entering" mode on falsy parameter (set `isEntering` to false)
-         *
-         * @see Catalog.search
-         * @param {string} query
-         */
-        getClass(query) {
-            if (!query) {
-                this.isEntering = false;
-                this.inputCourses = null;
-                return;
-            }
-            // if current schedule is displayed, switch to proposed schedule
-            if (this.generated) {
-                this.switchSchedule(false);
-            }
-            this.inputCourses = catalog.search(query);
-            this.isEntering = true;
-        },
-        /**
-         * Select a semester and fetch all its associated data.
-         *
-         * This method will assign a correct Catalog object to `catalog`
-         * which will be either requested from remote or parsed from `localStorage`
-         *
-         * After that, schedules and settings will be parsed from `localStorage`
-         * and assigned to relevant fields of `this`.
-         * If no local data is present, then default values will be assigned.
-         * @param {number|string} semesterId index or id of this semester
-         * @param {Object<string, any>} parsed_data
-         * @param {boolean} [force=false] whether to force-update semester data
-         */
-        selectSemester(semesterId, parsed_data, force = false) {
-            if (typeof semesterId === 'string') {
-                for (let i = 0; i < this.semesters.length; i++) {
-                    const semester = this.semesters[i];
-                    if (semester.id === semesterId) {
-                        semesterId = i;
-                        break;
-                    }
-                }
-                // not found: return
-                if (typeof semesterId === 'string') return;
-            }
-            this.currentSemester = this.semesters[semesterId];
-            this.loading = true;
-            const data = localStorage.getItem(this.currentSemester.id);
-            const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
-            const defaultCallback = () => {
-                this.generated = false;
-                scheduleEvaluator.clear();
-                const defaultData = getDefaultData();
-                for (const field of this.storageFields) {
-                    if (field !== 'currentSemester') this[field] = defaultData[field];
-                }
-                this.saveAllRecords();
-                this.saveStatus();
-                this.loading = false;
-            };
-            if (!parsed_data && !data) {
-                // set to default values
-                this.fetchSemesterData(semesterId, defaultCallback);
-                return;
-            }
-            const raw_data = parsed_data === undefined ? JSON.parse(data) : parsed_data;
-            const storageVersion = raw_data.storageVersion;
+    editEvent(event: Event) {
+        if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
+        this.eventToEdit = event;
+    }
 
-            // storage version mismatch implies API update: use dafault data instead
-            if (storageVersion !== this.storageVersion) {
-                // clear local storage
-                localStorage.clear();
-                this.fetchSemesterData(semesterId, defaultCallback);
-                return;
+    switchSchedule(generated: boolean) {
+        if (
+            generated &&
+            !window.scheduleEvaluator.empty() &&
+            this.cpIndex === this.proposedScheduleIndex
+        ) {
+            if (!this.generated) {
+                this.generated = true;
+                this.proposedSchedule = this.currentSchedule;
+                this.switchPage(
+                    this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex,
+                    true
+                );
             }
-            const temp = Catalog.fromJSON(
-                JSON.parse(allRecords_raw, this.semesterDataExpirationTime)
-            );
-
-            // things to do after allRecord is loaded
-            const callback = () => {
-                this.generated = false;
-                scheduleEvaluator.clear();
-                this.parseLocalData(raw_data);
-                this.loading = false;
-            };
-
-            // if data does not exist or is not in correct format
-            if (temp === null) {
-                this.fetchSemesterData(semesterId, () => {
-                    this.saveAllRecords();
-                    callback();
-                });
-            } else {
-                // if data expired
-                if (temp.expired || force) {
-                    if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`, 5);
-                    // in this case, we only need to update catalog. Save a set of fresh data
-                    this.fetchSemesterData(
-                        semesterId,
-                        () => {
-                            this.saveAllRecords();
-                            if (force) this.noti.success('Success!', 3);
-                            callback();
-                        },
-                        () => {
-                            // if failed, just use the old data.
-                            catalog = temp.catalog;
-                            callback();
-                        }
-                    );
-                } else {
-                    catalog = temp.catalog;
-                    callback();
-                }
-            }
-        },
-        saveAllRecords() {
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.endsWith('data')) {
-                    localStorage.removeItem(key);
-                }
-            }
-            localStorage.setItem(
-                `${this.currentSemester.id}data`,
-                JSON.stringify(catalog.toJSON())
-            );
-        },
-        /**
-         * fetch basic class data for the given semester for fast class search and rendering
-         * this method will assign to the global `catalog` object
-         *
-         * This method will set the flag `loading` to true on start, to false on return.
-         * When on error, a proper error message will be displayed to the user.
-         * @param {number} semeseterIdx
-         * @param {()=>void} [success] func to execute on success
-         * @param {()=>void} [reject] func to execute on failure
-         */
-        fetchSemesterData(semesterIdx, success, reject) {
-            this.loading = true;
-            timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
-                .then(data => {
-                    catalog = new Catalog(this.currentSemester, data);
-                    if (typeof success === 'function') {
-                        success();
-                        this.loading = false;
-                    }
-                })
-                .catch(err => {
-                    console.warn(err);
-                    let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
-                    if (typeof err === 'string') errStr += err;
-                    else if (err.response) errStr += `request rejected by the server. `;
-                    else if (err.request) errStr += `No response received. `;
-                    if (typeof reject === 'function') {
-                        errStr += 'Old data is used instead';
-                        reject();
-                        this.noti.warn(errStr);
-                        this.loading = false;
-                        return;
-                    }
-                    this.noti.error(errStr);
-                    this.loading = false;
-                });
-        },
-        closeClassList(event) {
-            event.target.value = '';
-            this.getClass(null);
-        },
-        generateSchedules(parsed = false) {
-            if (this.generated) this.currentSchedule = this.proposedSchedule;
+        } else {
             this.generated = false;
+            this.currentSchedule = this.proposedSchedule;
+        }
+    }
 
-            if (this.currentSchedule.empty())
-                return this.noti.warn(`There are no classes in your schedule!`);
+    updateFilterDay(i: number, j: number) {
+        this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
+    }
 
-            const constraintStatus = [];
-            if (!this.allowWaitlist) {
-                constraintStatus.push('Wait List');
-            }
-            if (!this.allowClosed) {
-                constraintStatus.push('Closed');
-            }
+    switchSideBar(key: string) {
+        this.getClass('');
+        for (const other in this.sideBar) {
+            if (other !== key) this.sideBar[other] = false;
+        }
+        this.sideBar[key] = !this.sideBar[key];
 
-            const timeFilters = this.computeFilter();
+        if (this.sideBar.showSelectColor) this.switchSchedule(true);
+    }
 
-            // null means there's an error processing time filters. Don't continue if that's the case
-            if (timeFilters === null) return;
-            this.loading = true;
-            const generator = new ScheduleGenerator(catalog);
-
-            try {
-                const evaluator = generator.getSchedules(this.currentSchedule, {
-                    events: this.currentSchedule.events,
-                    timeSlots: timeFilters,
-                    status: constraintStatus,
-                    sortOptions: this.sortOptions
-                });
-                scheduleEvaluator.clear();
-                scheduleEvaluator = evaluator;
-                this.saveStatus();
-                this.noti.success(`${scheduleEvaluator.size()} Schedules Generated!`, 3);
-                this.cpIndex = this.proposedScheduleIndex;
-                this.switchSchedule(true);
-                this.loading = false;
-            } catch (err) {
+    fetchSemesterList(success?: () => void, reject?: () => void) {
+        timeout(getSemesterList(), 10000)
+            .then(res => {
+                this.semesters = res;
+                localStorage.setItem(
+                    'semesters',
+                    JSON.stringify({
+                        modified: new Date().toJSON(),
+                        semesterList: res
+                    })
+                );
+                // get the latest semester
+                this.selectSemester(0);
+                if (typeof success === 'function') success();
+            })
+            .catch(err => {
                 console.warn(err);
-                this.generated = false;
-                scheduleEvaluator.clear();
-                this.noti.error(err.message);
-                this.saveStatus();
-                this.cpIndex = -1;
+                let errStr = `Failed to fetch semester list: `;
+                if (typeof err === 'string') errStr += err;
+                else if (err.response) errStr += `request rejected by the server. `;
+                else if (err.request) errStr += `No response received. `;
+                if (typeof reject === 'function') {
+                    errStr += 'Old data is used instead';
+                    this.noti.warn(errStr);
+                    this.loading = false;
+                    reject();
+                    return;
+                }
+                this.noti.error(errStr);
                 this.loading = false;
+            });
+    }
+    onDocChange() {
+        this.saveStatus();
+    }
+    print() {
+        window.print();
+    }
+    clear() {
+        this.currentSchedule.clean();
+        this.proposedSchedule.clean();
+        this.generated = false;
+        window.scheduleEvaluator.clear();
+        this.cpIndex = -1;
+        this.saveStatus();
+    }
+    cleanSchedules() {
+        this.switchSchedule(false);
+        window.scheduleEvaluator.clear();
+        this.currentSchedule.cleanSchedule();
+    }
+    clearCache() {
+        if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
+            this.currentSchedule.clean();
+            this.generated = false;
+            window.scheduleEvaluator.clear();
+            localStorage.clear();
+            this.cpIndex = -1;
+        }
+    }
+
+    showModal(section: Section) {
+        this.modalSection = section;
+    }
+
+    showClassListModal(course: Course) {
+        this.modalCourse = course;
+        (window as any).$('#course-modal').modal();
+    }
+
+    removeCourse(key: string) {
+        this.currentSchedule.remove(key);
+        if (this.generated) {
+            this.noti.warn(`You're editing the generated schedule!`, 3);
+        } else {
+            this.saveStatus();
+        }
+    }
+    /**
+     * @see Schedule.update
+     */
+    updateCourse(key: string, section: number) {
+        this.currentSchedule.update(key, section, true, this.isEntering);
+        if (this.generated) {
+            this.noti.warn(`You're editing the generated schedule!`, 3);
+        } else {
+            this.saveStatus();
+        }
+    }
+    /**
+     * Switch to `idx` page. If update is true, also update the pagination status.
+     * @param idx
+     * @param update  whether to update the pagination status
+     */
+    switchPage(idx: number, update = false) {
+        if (0 <= idx && idx < Math.min(window.scheduleEvaluator.size(), this.maxNumSchedules)) {
+            this.currentScheduleIndex = idx;
+            if (update) {
+                this.tempScheduleIndex = idx;
+            } else {
+                this.tempScheduleIndex = null;
             }
-        },
-        /**
-         * @param {number} optIdx
-         */
-        changeSorting(optIdx) {
-            if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-                return this.noti.error('You must have at least one sort option!');
-            }
-            if (optIdx !== undefined) {
-                const option = this.sortOptions.sortBy[optIdx];
-                if (option.enabled) {
-                    for (const key of option.exclusive) {
-                        for (const opt of this.sortOptions.sortBy) {
-                            if (opt.name === key) opt.enabled = false;
-                        }
-                    }
+            this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
+            this.saveStatus();
+        }
+    }
+    /**
+     * get classes that match the input query.
+     * Exit "entering" mode on falsy parameter (set `isEntering` to false)
+     *
+     * @see Catalog.search
+     */
+    getClass(query: string) {
+        if (!query) {
+            this.isEntering = false;
+            this.inputCourses = null;
+            return;
+        }
+        // if current schedule is displayed, switch to proposed schedule
+        if (this.generated) {
+            this.switchSchedule(false);
+        }
+        this.inputCourses = window.catalog.search(query);
+        this.isEntering = true;
+    }
+    /**
+     * Select a semester and fetch all its associated data.
+     *
+     * This method will assign a correct Catalog object to `window.catalog`
+     * which will be either requested from remote or parsed from `localStorage`
+     *
+     * After that, schedules and settings will be parsed from `localStorage`
+     * and assigned to relevant fields of `this`.
+     * If no local data is present, then default values will be assigned.
+     * @param semesterId index or id of this semester
+     * @param parsed_data
+     * @param force whether to force-update semester data
+     */
+    selectSemester(
+        semesterId: number | string,
+        parsed_data: { [x: string]: any } | undefined = undefined,
+        force = false
+    ) {
+        if (typeof semesterId === 'string') {
+            for (let i = 0; i < this.semesters.length; i++) {
+                const semester = this.semesters[i];
+                if (semester.id === semesterId) {
+                    semesterId = i;
+                    break;
                 }
             }
-            if (!scheduleEvaluator.empty()) {
-                this.loading = true;
-                scheduleEvaluator.changeSort(this.sortOptions, true);
-                if (!this.generated) {
-                    this.switchSchedule(true);
-                } else {
-                    this.currentSchedule = scheduleEvaluator.getSchedule(this.currentScheduleIndex);
-                }
-                this.loading = false;
-            }
-        },
-        saveStatus() {
-            const obj = {};
-            for (const field of this.storageFields) {
-                obj[field] = this[field];
-            }
-            // note: toJSON() will automatically be called if such method exists on an object
-            localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
-        },
+            // not found: return
+            if (typeof semesterId === 'string') return;
+        }
+
+        this.currentSemester = this.semesters[semesterId];
+        this.loading = true;
+        const data = localStorage.getItem(this.currentSemester.id);
+        const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
+
         /**
-         * @param {Object<string, any>} raw_data
+         * The callback that gets executes when no local data is present
          */
-        parseLocalData(raw_data) {
+        const defaultCallback = () => {
+            this.generated = false;
+            window.scheduleEvaluator.clear();
             const defaultData = getDefaultData();
-            for (const field of this.storageFields) {
-                if (field === 'proposedSchedules') {
-                    // if true, we're dealing legacy code
-                    if (raw_data.proposedSchedule) {
-                        this.proposedScheduleIndex = 0;
-                        this.proposedSchedule = Schedule.fromJSON(raw_data.proposedSchedule);
-                    } else {
-                        /**
-                         * @type {import("./models/Schedule").ScheduleJSON[]}
-                         */
-                        const schedules = raw_data.proposedSchedules;
-                        if (schedules.length) {
-                            const propSchedules = [];
-                            for (const schedule of schedules) {
-                                propSchedules.push(Schedule.fromJSON(schedule));
-                            }
-                            this.proposedSchedules = propSchedules;
-                            this.proposedScheduleIndex =
-                                raw_data.proposedScheduleIndex === undefined
-                                    ? 0
-                                    : raw_data.proposedScheduleIndex;
-                        } else {
-                            this.proposedSchedules = defaultData[field];
-                        }
-                    }
-                } else if (this[field] instanceof Array) {
-                    const raw_arr = raw_data[field];
-                    if (raw_arr instanceof Array) {
-                        this[field] = raw_arr;
-                    } else this[field] = defaultData[field];
-                } else if (this[field] instanceof Object) {
-                    if (typeof this[field].fromJSON === 'function') {
-                        const parsed = this[field].fromJSON(raw_data[field]);
-                        if (parsed) this[field] = parsed;
-                        else {
-                            this.noti.warn(`Fail to parse ${field}`);
-                            this[field] = defaultData[field];
-                        }
-                    } else {
-                        if (
-                            Object.keys(this[field])
-                                .sort()
-                                .toString() ===
-                            Object.keys(raw_data[field])
-                                .sort()
-                                .toString()
-                        )
-                            this[field] = raw_data[field];
-                        else this[field] = defaultData[field];
-                    }
-                } else if (typeof raw_data[field] === typeof this[field])
-                    this[field] = raw_data[field];
-                else {
-                    this[field] = defaultData[field];
-                }
+            for (const field of Meta.storageFields) {
+                if (field !== 'currentSemester') this[field] = defaultData[field];
             }
-            if (!this.proposedSchedule.empty()) {
-                this.currentSchedule = this.proposedSchedule;
-                this.generateSchedules(true);
-            }
-        },
-        /**
-         * @param {number} n
-         */
-        removeTimeSlot(n) {
-            this.timeSlots.splice(n, 1);
-        },
-        addTimeSlot() {
-            this.timeSlots.push([false, false, false, false, false, '', '']);
-        },
-        /**
-         * Preprocess the time filters so that they are of the correct format
-         *
-         * returns null on parsing error
-         *
-         * @returns {Event[]}
-         */
-        computeFilter() {
-            const timeSlotsRecord = [];
-            for (const time of this.timeSlots) {
-                let days = '';
-                for (let j = 0; j < 5; j++) {
-                    if (time[j]) days += Meta.days[j];
-                }
+            this.saveAllRecords();
+            this.saveStatus();
+            this.loading = false;
+        };
+        let raw_data: { [x: string]: any };
+        if (parsed_data) {
+            raw_data = parsed_data;
+        } else if (data) {
+            raw_data = JSON.parse(data);
+        } else {
+            this.fetchSemesterData(semesterId, defaultCallback);
+            return;
+        }
 
-                if (!days) continue;
+        // storage version mismatch implies API update: use dafault data instead
+        if (Meta.storageVersion !== raw_data.storageVersion) {
+            // clear local storage
+            localStorage.clear();
+            this.fetchSemesterData(semesterId, defaultCallback);
+            return;
+        }
+        const temp = Catalog.fromJSON(JSON.parse(allRecords_raw as string));
 
-                const startTime = time[5].split(':');
-                const endTime = time[6].split(':');
-                if (
-                    isNaN(startTime[0]) ||
-                    isNaN(startTime[1]) ||
-                    isNaN(endTime[0]) ||
-                    isNaN(endTime[1])
-                ) {
-                    this.noti.error('Invalid time input.');
-                    return null;
-                }
-                days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
-                timeSlotsRecord.push(new Event(days, false));
+        /**
+         * The callback that gets executes after the global `Catalog` object is assigned
+         */
+        const callback = () => {
+            this.generated = false;
+            window.scheduleEvaluator.clear();
+            this.parseLocalData(raw_data);
+            this.loading = false;
+        };
+
+        // if data does not exist or is not in correct format
+        if (temp === null) {
+            this.fetchSemesterData(semesterId, () => {
+                this.saveAllRecords();
+                callback();
+            });
+        } else {
+            // if data expired
+            if (temp.expired || force) {
+                if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`, 5);
+                // in this case, we only need to update window.catalog. Save a set of fresh data
+                this.fetchSemesterData(
+                    semesterId,
+                    () => {
+                        this.saveAllRecords();
+                        if (force) this.noti.success('Success!', 3);
+                        callback();
+                    },
+                    () => {
+                        // if failed, just use the old data.
+                        window.catalog = temp.catalog;
+                        callback();
+                    }
+                );
+            } else {
+                window.catalog = temp.catalog;
+                callback();
             }
-            return timeSlotsRecord;
-        },
-        onUploadJson(event) {
-            const input = event.target;
-            const reader = new FileReader();
-            try {
-                reader.onload = () => {
-                    localStorage.setItem(this.currentSemester.id, reader.result);
-                    const raw_data = JSON.parse(reader.result);
+        }
+    }
+
+    saveAllRecords() {
+        if (!this.currentSemester) return;
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.endsWith('data')) {
+                localStorage.removeItem(key);
+            }
+        }
+        localStorage.setItem(
+            `${this.currentSemester.id}data`,
+            JSON.stringify(window.catalog.toJSON())
+        );
+    }
+    /**
+     * fetch basic class data for the given semester for fast class search and rendering
+     * this method will assign to the global `window.catalog` object
+     *
+     * This method will set the flag `loading` to true on start, to false on return.
+     * When on error, a proper error message will be displayed to the user.
+     *
+     * @param {()=>void} [success] func to execute on success
+     * @param {()=>void} [reject] func to execute on failure
+     */
+    fetchSemesterData(semesterIdx: number, success?: () => void, reject?: () => void) {
+        this.loading = true;
+        timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
+            .then(data => {
+                window.catalog = new Catalog(this.currentSemester as Semester, data);
+                if (typeof success === 'function') {
+                    success();
+                    this.loading = false;
+                }
+            })
+            .catch(err => {
+                console.warn(err);
+                let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
+                if (typeof err === 'string') errStr += err;
+                else if (err.response) errStr += `request rejected by the server. `;
+                else if (err.request) errStr += `No response received. `;
+                if (typeof reject === 'function') {
+                    errStr += 'Old data is used instead';
+                    reject();
+                    this.noti.warn(errStr);
+                    this.loading = false;
+                    return;
+                }
+                this.noti.error(errStr);
+                this.loading = false;
+            });
+    }
+    closeClassList(event: { target: HTMLInputElement }) {
+        event.target.value = '';
+        this.getClass('');
+    }
+    generateSchedules(parsed = false) {
+        if (this.generated) this.currentSchedule = this.proposedSchedule;
+        this.generated = false;
+
+        if (this.currentSchedule.empty())
+            return this.noti.warn(`There are no classes in your schedule!`);
+
+        const constraintStatus = [];
+        if (!this.allowWaitlist) {
+            constraintStatus.push('Wait List');
+        }
+        if (!this.allowClosed) {
+            constraintStatus.push('Closed');
+        }
+
+        const timeFilters = this.computeFilter();
+
+        // null means there's an error processing time filters. Don't continue if that's the case
+        if (timeFilters === null) return;
+        this.loading = true;
+        const generator = new ScheduleGenerator(window.catalog);
+
+        try {
+            const evaluator = generator.getSchedules(this.currentSchedule, {
+                events: this.currentSchedule.events,
+                timeSlots: timeFilters,
+                status: constraintStatus,
+                sortOptions: this.sortOptions
+            });
+            window.scheduleEvaluator.clear();
+            window.scheduleEvaluator = evaluator;
+            this.saveStatus();
+            this.noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
+            this.cpIndex = this.proposedScheduleIndex;
+            this.switchSchedule(true);
+            this.loading = false;
+        } catch (err) {
+            console.warn(err);
+            this.generated = false;
+            window.scheduleEvaluator.clear();
+            this.noti.error(err.message);
+            this.saveStatus();
+            this.cpIndex = -1;
+            this.loading = false;
+        }
+    }
+
+    changeSorting(optIdx: number) {
+        if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
+            return this.noti.error('You must have at least one sort option!');
+        }
+        if (optIdx !== undefined) {
+            const option = this.sortOptions.sortBy[optIdx];
+            if (option.enabled) {
+                for (const key of option.exclusive) {
+                    for (const opt of this.sortOptions.sortBy) {
+                        if (opt.name === key) opt.enabled = false;
+                    }
+                }
+            }
+        }
+        if (!window.scheduleEvaluator.empty()) {
+            this.loading = true;
+            window.scheduleEvaluator.changeSort(this.sortOptions, true);
+            if (!this.generated) {
+                this.switchSchedule(true);
+            } else {
+                this.currentSchedule = window.scheduleEvaluator.getSchedule(
+                    this.currentScheduleIndex
+                );
+            }
+            this.loading = false;
+        }
+    }
+
+    saveStatus() {
+        if (!this.currentSemester) return;
+
+        const obj: { [x: string]: any } = Object.create(null);
+        for (const field of Meta.storageFields) {
+            obj[field] = this[field];
+        }
+        obj.storageVersion = Meta.storageVersion;
+        // note: toJSON() will automatically be called if such method exists on an object
+        localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
+    }
+
+    parseLocalData(raw_data: { [x: string]: any }) {
+        const defaultData = getDefaultData();
+        for (const field of Meta.storageFields) {
+            if (field === 'proposedSchedules') {
+                // if true, we're dealing legacy code
+                if (raw_data.proposedSchedule) {
+                    this.proposedScheduleIndex = 0;
+                    const s = Schedule.fromJSON(raw_data.proposedShedule);
+                    if (s) this.proposedSchedule = s;
+                } else {
+                    const schedules: ScheduleJSON[] | undefined = raw_data.proposedSchedules;
+                    if (schedules && schedules.length) {
+                        const propSchedules = [];
+                        for (const schedule of schedules) {
+                            const temp = Schedule.fromJSON(schedule);
+                            if (temp) propSchedules.push(temp);
+                        }
+
+                        if (propSchedules.length) this.proposedSchedules = propSchedules;
+                        else this.proposedSchedules = defaultData.proposedSchedules;
+
+                        this.proposedScheduleIndex =
+                            raw_data.proposedScheduleIndex === undefined
+                                ? 0
+                                : raw_data.proposedScheduleIndex;
+                    } else {
+                        this.proposedSchedules = defaultData[field];
+                    }
+                }
+            } else if (this[field] instanceof Array) {
+                const raw_arr = raw_data[field];
+                if (raw_arr instanceof Array) {
+                    this[field] = raw_arr;
+                } else this[field] = defaultData[field];
+            } else if (this[field] instanceof Object) {
+                if (typeof this[field].fromJSON === 'function') {
+                    const parsed = this[field].fromJSON(raw_data[field]);
+                    if (parsed) this[field] = parsed;
+                    else {
+                        this.noti.warn(`Fail to parse ${field}`);
+                        this[field] = defaultData[field];
+                    }
+                } else {
+                    if (
+                        Object.keys(this[field])
+                            .sort()
+                            .toString() ===
+                        Object.keys(raw_data[field])
+                            .sort()
+                            .toString()
+                    )
+                        this[field] = raw_data[field];
+                    else this[field] = defaultData[field];
+                }
+            } else if (typeof raw_data[field] === typeof this[field]) this[field] = raw_data[field];
+            else {
+                this[field] = defaultData[field];
+            }
+        }
+        if (!this.proposedSchedule.empty()) {
+            this.currentSchedule = this.proposedSchedule;
+            this.generateSchedules(true);
+        }
+    }
+    removeTimeSlot(n: number) {
+        this.timeSlots.splice(n, 1);
+    }
+    addTimeSlot() {
+        this.timeSlots.push([false, false, false, false, false, '', '']);
+    }
+    /**
+     * Preprocess the time filters so that they are of the correct format
+     *
+     * returns null on parsing error
+     */
+    computeFilter(): Event[] | null {
+        const timeSlotsRecord = [];
+        for (const time of this.timeSlots) {
+            let days = '';
+            for (let j = 0; j < 5; j++) {
+                if (time[j]) days += Meta.days[j];
+            }
+
+            if (!days) continue;
+
+            const startTime = time[5].split(':');
+            const endTime = time[6].split(':');
+            if (
+                isNaN(+startTime[0]) ||
+                isNaN(+startTime[1]) ||
+                isNaN(+endTime[0]) ||
+                isNaN(+endTime[1])
+            ) {
+                this.noti.error('Invalid time input.');
+                return null;
+            }
+            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
+            timeSlotsRecord.push(new Event(days, false));
+        }
+        return timeSlotsRecord;
+    }
+    onUploadJson(event: { target: HTMLInputElement }) {
+        const input = event.target;
+        if (!input.files) return;
+
+        const reader = new FileReader();
+        try {
+            reader.onload = () => {
+                if (reader.result) {
+                    const result = reader.result.toString();
+                    localStorage.setItem((this.currentSemester as Semester).id, result);
+                    const raw_data = JSON.parse(result);
                     const semester = raw_data.currentSemester;
                     for (let i = 0; i < this.semesters.length; i++) {
                         if (this.semesters[i].id === semester.id) {
@@ -1561,26 +1474,30 @@ export default Vue.extend({
                             break;
                         }
                     }
-                };
-                reader.readAsText(input.files[0]);
-            } catch (error) {
-                console.warn(error);
-                this.noti.error(error);
-            }
-        },
-        saveToJson() {
-            const json = localStorage.getItem(this.currentSemester.id);
+                }
+            };
+            reader.readAsText(input.files[0]);
+        } catch (error) {
+            console.warn(error);
+            this.noti.error(error.message);
+        }
+    }
+    saveToJson() {
+        if (!this.currentSemester) return;
+
+        const json = localStorage.getItem(this.currentSemester.id);
+        if (json) {
             const blob = new Blob([json], { type: 'text/json' });
             let url = window.URL.createObjectURL(blob);
             this.downloadURL = url;
             url = url.substring(5);
             window.URL.revokeObjectURL(url);
-        },
-        saveToIcal() {
-            this.icalURL = this.currentSchedule.toICal();
         }
     }
-});
+    saveToIcal() {
+        this.icalURL = this.currentSchedule.toICal();
+    }
+}
 </script>
 
 <style scoped>

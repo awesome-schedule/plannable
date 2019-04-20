@@ -286,7 +286,7 @@ class ScheduleEvaluator {
         else return 0;
     }
 
-    public static validateOptions(options: SortOptions) {
+    public static validateOptions(options?: SortOptions) {
         if (!options) return ScheduleEvaluator.optionDefaults;
         for (const option of options.sortBy) {
             if (typeof ScheduleEvaluator.sortFunctions[option.name] !== 'function')
@@ -314,7 +314,7 @@ class ScheduleEvaluator {
      */
     private sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
 
-    constructor(options: SortOptions, events: Event[]) {
+    constructor(options?: SortOptions, events: Event[] = []) {
         this.options = ScheduleEvaluator.validateOptions(options);
         this.events = events;
     }
@@ -324,7 +324,7 @@ class ScheduleEvaluator {
      * Group the time blocks and sort them in order.
      *
      * @remarks insertion sort is used as there are not many elements in each day array.
-     * This method has pretty high overhead
+     * This method has a pretty high overhead
      */
     public add(schedule: RawAlgoSchedule) {
         const days = Meta.days;
@@ -382,7 +382,7 @@ class ScheduleEvaluator {
      * @param assign whether assign to the coeff field of each `CmpSchedule`
      * @returns the computed/cached array of coefficients
      */
-    public computeCoeffFor(funcName: string, assign = true) {
+    public computeCoeffFor(funcName: string, assign = true): Float32Array {
         const schedules = this._schedules;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {

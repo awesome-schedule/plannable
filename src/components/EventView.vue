@@ -81,6 +81,7 @@
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import App from '../App.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Event from '../models/Event';

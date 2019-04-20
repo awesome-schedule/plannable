@@ -272,6 +272,14 @@
                     title="Time periods when you don't want to have class"
                 >
                     No Class Time
+                    <div
+                        style="float: right"
+                        title="Click to add a time period when you don't want to have class"
+                        class="filter-add px-4"
+                        @click="addTimeSlot"
+                    >
+                        <i class="fas fa-plus"></i>
+                    </div>
                 </li>
                 <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
                     <table style="width:100%">
@@ -323,14 +331,6 @@
                             </td>
                         </tr>
                     </table>
-                </li>
-                <li
-                    class="list-group-item filter-add"
-                    style="text-align:center"
-                    title="Click to add a time period when you don't want to have class"
-                    @click="addTimeSlot"
-                >
-                    <i class="fas fa-plus"></i>
                 </li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox mt-2">
@@ -451,7 +451,7 @@
             </button>
             <form class="mx-2">
                 <div
-                    class="form-group row no-gutters mt-1 mb-1"
+                    class="form-group row no-gutters mt-2 mb-1"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
                     <label for="schedule-start" class="col-sm-5 col-form-label"
@@ -491,7 +491,7 @@
                         />
                     </div>
                 </div>
-                <div class="form-group row no-gutters mb-2" title="height of a class on schedule">
+                <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
                     <label for="class-height" class="col-sm-5 col-form-label">Grid Height</label>
                     <div class="col-sm-7">
                         <input

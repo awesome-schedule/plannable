@@ -84,8 +84,8 @@ export default class GridSchedule extends Vue {
     @Prop(Boolean) readonly showInstructor!: boolean;
     @Prop(Number) readonly partialHeight!: number;
     @Prop(Number) readonly fullHeight!: number;
-    @Prop(Number) readonly earliest!: string;
-    @Prop(Number) readonly latest!: string;
+    @Prop(String) readonly earliest!: string;
+    @Prop(String) readonly latest!: string;
     @Prop(Boolean) readonly timeOptionStandard!: boolean;
 
     name = 'GridSchedule';

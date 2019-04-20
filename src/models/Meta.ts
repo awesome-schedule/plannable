@@ -1,3 +1,7 @@
+import Schedule from './Schedule';
+import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
+import Notification from './Notification';
+
 /**
  * key: department + number + type, e.g. cs11105
  */
@@ -100,6 +104,102 @@ class Meta {
         Closed: 0,
         'Wait List': 2
     });
+
+    public static readonly storageVersion = 2;
+
+    public static readonly storageFields = [
+        // schedules
+        // note: this field is for uploadJSON
+        'currentScheduleIndex',
+
+        'currentSemester',
+        'currentSchedule',
+        'proposedSchedules',
+        'sortOptions',
+        'cpIndex',
+        'proposedScheduleIndex',
+
+        // settings
+        'allowWaitList',
+        'allowClosed',
+        'showTime',
+        'showRoom',
+        'showInstructor',
+        'showClasslistTitle',
+        'fullHeight',
+        'partialHeight',
+        'timeSlots',
+        'earliest',
+        'latest'
+    ];
+
+    public static readonly semesterListExpirationTime = 86400 * 1000; // one day
+    public static readonly semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 }
 
 export default Meta;
+
+/**
+ * use a standalone method to get rid of deep copy issues
+ */
+export function getDefaultData() {
+    return {
+        semesters: null,
+        currentSemester: null,
+        currentScheduleIndex: 0,
+        currentSchedule: new Schedule(),
+        proposedSchedules: [new Schedule()],
+        proposedScheduleIndex: 0,
+        cpIndex: -1,
+        generated: false,
+        maxNumSchedules: Infinity,
+
+        sideBar: {
+            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
+            showEvent: false,
+            showFilter: false,
+            showSetting: false,
+            showExport: false,
+            showSelectColor: false,
+            showInfo: false
+        },
+
+        // autocompletion related fields
+        isEntering: false,
+        inputCourses: null,
+
+        // modal object binding
+        modalSection: null,
+        modalCourse: null,
+
+        // display options
+        showTime: false,
+        showRoom: true,
+        showInstructor: true,
+        showClasslistTitle: false,
+        fullHeight: 40,
+        partialHeight: 25,
+        earliest: '08:00:00',
+        latest: '19:00:00',
+        standard: false,
+
+        // filter options
+        timeSlots: [],
+        allowWaitlist: true,
+        allowClosed: true,
+        sortOptions: ScheduleEvaluator.getDefaultOptions(),
+        sortModes: ScheduleEvaluator.sortModes,
+
+        // other
+        noti: new Notification(),
+        navHeight: 500,
+        loading: false,
+        mobile: window.screen.width < 900,
+        scrollable: false,
+        tempScheduleIndex: null,
+        drag: false,
+        downloadURL: '',
+        days: Meta.days,
+        eventToEdit: null
+    } as { [x: string]: any };
+}

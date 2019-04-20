@@ -1,5 +1,5 @@
 import Course from './Course';
-import { RawCatalog } from './Meta';
+import Meta, { RawCatalog } from './Meta';
 
 export interface Semester {
     id: string;
@@ -13,7 +13,7 @@ class Catalog {
      */
     public static fromJSON(
         data: { modified: string; semester: Semester; raw_data: RawCatalog },
-        expTime = 2 * 3600 * 1000
+        expTime = Meta.semesterDataExpirationTime
     ) {
         if (
             data &&
@@ -47,7 +47,7 @@ class Catalog {
 
     public fromJSON(
         data: { modified: string; semester: Semester; raw_data: RawCatalog },
-        expTime = 2 * 3600 * 1000
+        expTime = Meta.semesterDataExpirationTime
     ) {
         return Catalog.fromJSON(data, expTime);
     }

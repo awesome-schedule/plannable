@@ -64,7 +64,6 @@ export interface Options {
     events: Event[];
     timeSlots: Event[];
     status: string[];
-    noClassDay: string[];
     sortOptions: SortOptions;
 }
 
@@ -72,7 +71,6 @@ class ScheduleGenerator {
     public static readonly optionDefaults: Options = {
         events: [],
         status: [],
-        noClassDay: [],
         timeSlots: [],
         sortOptions: ScheduleEvaluator.getDefaultOptions()
     };

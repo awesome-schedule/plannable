@@ -59,7 +59,7 @@
         </div>
         <div class="input-group flex-nowrap mt-1 px-1">
             <div class="input-group-prepend" style="width:25%">
-                <span class="input-group-text w-100">Place</span>
+                <span class="input-group-text w-100">Location</span>
             </div>
             <input v-model="eventRoom" type="text" class="form-control" />
         </div>

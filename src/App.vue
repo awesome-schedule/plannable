@@ -69,19 +69,11 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
-                title="collapse searching results"
+                title="Tutorials, miscellaneous information and acknowledgments"
                 class="tab-icon mb-4"
                 @click="switchSideBar('showInfo')"
             >
                 <i class="fas fa-info-circle"></i>
-            </div>
-            <div
-                v-if="isEntering && sideBar.showSelectClass"
-                title="Tutorials, miscellaneous information and acknowledgments"
-                class="tab-icon mb-4"
-                @click="closeClassList"
-            >
-                <i class="fas fa-caret-square-up"></i>
             </div>
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
@@ -129,7 +121,17 @@
                     @keyup.esc="closeClassList($event)"
                 />
                 <div class="input-group-append">
-                    <span class="input-group-text p-1"><i class="fas fa-search"></i></span>
+                    <span
+                        class="input-group-text px-2"
+                        style="pointer: cursor"
+                        @click="closeClassList"
+                        ><i
+                            v-if="isEntering && sideBar.showSelectClass"
+                            class="fas fa-times click-icon"
+                        >
+                        </i>
+                        <i v-else class="fas fa-search click-icon"></i>
+                    </span>
                 </div>
             </div>
 

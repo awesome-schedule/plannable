@@ -40,7 +40,7 @@
                                     {{ crs.title }}
                                 </p>
                             </td>
-                            <td v-if="!isEntering" class="pl-2">
+                            <td v-if="!isEntering" class="pl-2 pr-1">
                                 <button
                                     type="button"
                                     class="close"

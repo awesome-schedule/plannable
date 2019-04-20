@@ -4,9 +4,8 @@
             <div v-if="isEditingEvent">Edit Event</div>
             <div v-else>Add Event</div>
         </div>
-
-        <div class="input-group my-3" style="width:98%;margin-left:1%">
-            <div class="input-group-prepend" style="width:30%">
+        <div class="input-group my-3 px-1">
+            <div class="input-group-prepend" style="width:25%">
                 <span class="input-group-text w-100">Title</span>
             </div>
             <input v-model="eventTitle" class="form-control" type="text" />
@@ -23,7 +22,7 @@
             </button>
         </div>
         <br />
-<!-- 
+        <!-- 
         <div class="form-group row no-gutters my-3" style="width:98%;margin-left:1%">
             <label for="event-time-from" class="col-sm-5 col-form-label">From</label>
             <div class="col-sm-7">
@@ -36,9 +35,9 @@
             </div>
         </div> -->
 
-        <div class="input-group mt-3 ml-1" style="width:98%">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text" style="width:100%">From</span>
+        <div class="input-group mt-3 px-1">
+            <div class="input-group-prepend" style="width:25%">
+                <span class="input-group-text w-100">From</span>
             </div>
             <input
                 v-model="eventTimeFrom"
@@ -47,9 +46,9 @@
                 style="-webkit-appearance:button"
             />
         </div>
-        <div class="input-group mt-1 ml-1" style="width:98%">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text" style="width:100%">to</span>
+        <div class="input-group mt-1 px-1">
+            <div class="input-group-prepend" style="width:25%">
+                <span class="input-group-text w-100">to</span>
             </div>
             <input
                 v-model="eventTimeTo"
@@ -58,9 +57,9 @@
                 style="-webkit-appearance:button"
             />
         </div>
-        <div class="input-group flex-nowrap mt-3 ml-1" style="width:98%">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text" style="width:100%">Place</span>
+        <div class="input-group flex-nowrap mt-1 px-1">
+            <div class="input-group-prepend" style="width:25%">
+                <span class="input-group-text w-100">Place</span>
             </div>
             <input v-model="eventRoom" type="text" class="form-control" />
         </div>
@@ -164,7 +163,7 @@ export default class EventView extends Vue {
             }
 
             if (invalid) {
-                $parent.noti.error('Please enter a valid time!');
+                $parent.noti.error('Please select at least one day');
                 return;
             }
             this.schedule.addEvent(

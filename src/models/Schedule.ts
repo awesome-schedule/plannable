@@ -456,7 +456,7 @@ class Schedule {
                         const [, start, , end] = m.days.split(' ');
                         const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
-                        let startTime = new Date(
+                        const startTime = new Date(
                             startDate.getTime() +
                                 dayoffset * 24 * 60 * 60 * 1000 +
                                 startMin * 60 * 1000
@@ -502,11 +502,11 @@ class Schedule {
                     //     startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
                     // );
 
-                    let startTime = new Date(
+                    const startTime = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
                     );
 
-                    let startAtDay = new Date(
+                    const startAtDay = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000
                     );
 
@@ -542,7 +542,7 @@ class Schedule {
         ical += 'END:VCALENDAR';
 
         const blob = new Blob([ical], { type: 'text' });
-        let url = window.URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(blob);
 
         // url = url.substring(5);
 

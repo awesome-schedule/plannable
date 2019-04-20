@@ -917,11 +917,12 @@ export default class App extends Vue {
         this.switchProposed(len);
     }
     deleteProposed() {
-        if (!confirm('Are you sure?')) return;
+        const idx = this.proposedScheduleIndex;
+
+        if (!confirm(`Are you sure to delete schedule ${idx}?`)) return;
         if (this.proposedSchedules.length === 1) {
             return this.noti.error('This is the only schedule left!');
         }
-        const idx = this.proposedScheduleIndex;
 
         // if the schedule to be deleted corresponds to generated schedules,
         // this deletion invalidates the generated schedules immediately.

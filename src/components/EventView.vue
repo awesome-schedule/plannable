@@ -1,12 +1,13 @@
 <template>
     <nav class="d-block bg-light sidebar" style="scrollbar-width:thin !important">
-        <button id="semester" class="btn btn-info nav-btn mt-0" type="button">
+        <div id="semester" class="btn bg-info nav-btn mt-0" style="color:white">
             <div v-if="isEditingEvent">Edit Event</div>
             <div v-else>Add Event</div>
-        </button>
+        </div>
+
         <div class="input-group my-3" style="width:98%;margin-left:1%">
-            <div class="input-group-prepend">
-                <span class="input-group-text">Title</span>
+            <div class="input-group-prepend" style="width:30%">
+                <span class="input-group-text w-100">Title</span>
             </div>
             <input v-model="eventTitle" class="form-control" type="text" />
         </div>
@@ -22,9 +23,22 @@
             </button>
         </div>
         <br />
+<!-- 
+        <div class="form-group row no-gutters my-3" style="width:98%;margin-left:1%">
+            <label for="event-time-from" class="col-sm-5 col-form-label">From</label>
+            <div class="col-sm-7">
+                <input
+                    id="event-time-from"
+                    v-model="eventTimeFrom"
+                    type="time"
+                    class="form-control"
+                />
+            </div>
+        </div> -->
+
         <div class="input-group mt-3 ml-1" style="width:98%">
-            <div class="input-group-prepend">
-                <span class="input-group-text">From</span>
+            <div class="input-group-prepend" style="width:30%">
+                <span class="input-group-text" style="width:100%">From</span>
             </div>
             <input
                 v-model="eventTimeFrom"
@@ -34,8 +48,8 @@
             />
         </div>
         <div class="input-group mt-1 ml-1" style="width:98%">
-            <div class="input-group-prepend">
-                <span class="input-group-text">to</span>
+            <div class="input-group-prepend" style="width:30%">
+                <span class="input-group-text" style="width:100%">to</span>
             </div>
             <input
                 v-model="eventTimeTo"
@@ -45,8 +59,8 @@
             />
         </div>
         <div class="input-group flex-nowrap mt-3 ml-1" style="width:98%">
-            <div class="input-group-prepend">
-                <span class="input-group-text">Place (Optional)</span>
+            <div class="input-group-prepend" style="width:30%">
+                <span class="input-group-text" style="width:100%">Place</span>
             </div>
             <input v-model="eventRoom" type="text" class="form-control" />
         </div>

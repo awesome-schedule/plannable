@@ -103,9 +103,8 @@
             <div class="input-group mt-2">
                 <input
                     type="text"
-                    class="form-control"
+                    class="form-control form-control-sm"
                     placeholder="Title/Number/Topic/Professor"
-                    style="font-size: 10pt"
                     @input="getClass($event.target.value)"
                     @keyup.esc="closeClassList($event)"
                 />
@@ -143,8 +142,8 @@
                         class="btn btn-info nav-btn"
                         :title="
                             generated
-                                ? 'Click to edit selected classes'
-                                : 'Click to edit generated schedules'
+                                ? 'Click to edit your schedule'
+                                : 'Click to view generated schedules'
                         "
                         @click="switchSchedule(!generated)"
                     >
@@ -444,15 +443,15 @@
                     class="form-group row no-gutters mt-2 mb-1"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-start" class="col-sm-5 col-form-label"
+                    <label for="schedule-start" class="col-sm-6 col-form-label"
                         >Schedule Start</label
                     >
-                    <div class="col-sm-7">
+                    <div class="col-sm-6">
                         <input
                             id="schedule-start"
                             v-model="earliest"
                             type="time"
-                            class="form-control"
+                            class="form-control form-control-sm"
                         />
                     </div>
                 </div>
@@ -460,35 +459,35 @@
                     class="form-group row no-gutters mb-1"
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-end" class="col-sm-5 col-form-label">Schedule End</label>
-                    <div class="col-sm-7">
+                    <label for="schedule-end" class="col-sm-6 col-form-label">Schedule End</label>
+                    <div class="col-sm-6">
                         <input
                             id="schedule-end"
                             v-model="latest"
                             type="time"
-                            class="form-control"
+                            class="form-control form-control-sm"
                         />
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-1" title="height of a class on schedule">
-                    <label for="class-height" class="col-sm-5 col-form-label">Class Height</label>
-                    <div class="col-sm-7">
+                    <label for="class-height" class="col-sm-6 col-form-label">Class Height</label>
+                    <div class="col-sm-6">
                         <input
                             id="class-height"
                             v-model.number="fullHeight"
                             type="number"
-                            class="form-control"
+                            class="form-control form-control-sm"
                         />
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
-                    <label for="class-height" class="col-sm-5 col-form-label">Grid Height</label>
-                    <div class="col-sm-7">
+                    <label for="class-height" class="col-sm-6 col-form-label">Grid Height</label>
+                    <div class="col-sm-6">
                         <input
                             id="class-height"
                             v-model.number="partialHeight"
                             type="number"
-                            class="form-control"
+                            class="form-control form-control-sm"
                         />
                     </div>
                 </div>
@@ -1360,7 +1359,7 @@ export default class App extends Vue {
                 // if true, we're dealing legacy code
                 if (raw_data.proposedSchedule) {
                     this.proposedScheduleIndex = 0;
-                    const s = Schedule.fromJSON(raw_data.proposedShedule);
+                    const s = Schedule.fromJSON(raw_data.proposedSchedule);
                     if (s) this.proposedSchedule = s;
                 } else {
                     const schedules: ScheduleJSON[] | undefined = raw_data.proposedSchedules;

@@ -164,36 +164,36 @@
                     </button>
                 </div>
                 <div class="mx-1">
-                    <div class="mx-4">
+                    <div class="mx-3">
                         <div
                             class="row no-gutters align-items-center justify-content-between"
                             style="font-size: 24px"
                         >
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="fas fa-long-arrow-alt-left click-icon"
                                     title="previous schedule"
                                     @click="switchProposed(proposedScheduleIndex - 1)"
                                 ></i>
                             </div>
-                            <div class="col-md-auto" style="font-size: 20px;">
+                            <div class="col-auto" style="font-size: 20px;">
                                 {{ proposedScheduleIndex + 1 }}
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="fas fa-long-arrow-alt-right click-icon"
                                     title="next schedule"
                                     @click="switchProposed(proposedScheduleIndex + 1)"
                                 ></i>
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="far fa-calendar-plus click-icon"
                                     title="new schedule"
                                     @click="newProposed"
                                 ></i>
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="far fa-copy click-icon"
                                     title="copy the current schedule to a new schedule"
@@ -201,7 +201,7 @@
                                 >
                                 </i>
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="far fa-calendar-times click-icon"
                                     title="delete current schedule"

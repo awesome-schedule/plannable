@@ -85,7 +85,7 @@
                 <div class="ml-2 crs-info" v-html="scheduleBlock.section.description"></div>
             </div>
         </div>
-        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
+        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px;height:100%">
             <div
                 v-if="isSection(scheduleBlock)"
                 data-toggle="modal"

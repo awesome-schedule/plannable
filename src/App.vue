@@ -49,9 +49,10 @@
                 <i class="fab fa-elementor"></i>
             </div>
             <div
-                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'" 
-                title="Filters" 
-                @click="switchSideBar('showFilter')">
+                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                title="Filters"
+                @click="switchSideBar('showFilter')"
+            >
                 <i class="fas fa-filter"></i>
             </div>
             <div
@@ -1543,7 +1544,7 @@ export default class App extends Vue {
 .tab-icon-active {
     font-size: 1.8vw;
     margin-left: 20%;
-    color: #1f1f1f
+    color: #1f1f1f;
 }
 
 .click-icon {
@@ -1697,6 +1698,12 @@ export default class App extends Vue {
         font-size: 6vw;
         margin-left: 20%;
         color: #5e5e5e;
+    }
+
+    .tab-icon-active {
+        font-size: 6vw;
+        margin-left: 20%;
+        color: #1f1f1f;
     }
 }
 

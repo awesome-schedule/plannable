@@ -18,7 +18,7 @@ export interface SortMode {
 type OrderedBlocks = [number[], number[], number[], number[], number[]];
 type OrderedRooms = [string[], string[], string[], string[], string[]];
 
-interface CmpSchedule {
+export interface CmpSchedule {
     schedule: RawAlgoSchedule;
     blocks: OrderedBlocks;
     rooms: OrderedRooms;
@@ -333,9 +333,10 @@ class ScheduleEvaluator {
         const blocks: OrderedBlocks = [[], [], [], [], []];
         const rooms: OrderedRooms = [[], [], [], [], []];
         for (const course of schedule) {
+            const timeDict = course[1];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
-                const timeBlock = course[1][days[k]] as number[];
+                const timeBlock = timeDict[days[k]] as number[];
                 if (!timeBlock) continue;
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason

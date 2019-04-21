@@ -451,10 +451,10 @@
                     class="form-group row no-gutters mt-2 mb-1"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-start" class="col-sm-6 col-form-label"
+                    <label for="schedule-start" class="col-lg-6 col-form-label"
                         >Schedule Start</label
                     >
-                    <div class="col-sm-6">
+                    <div class="col-lg-6">
                         <input
                             id="schedule-start"
                             v-model="earliest"
@@ -467,8 +467,8 @@
                     class="form-group row no-gutters mb-1"
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-end" class="col-sm-6 col-form-label">Schedule End</label>
-                    <div class="col-sm-6">
+                    <label for="schedule-end" class="col-lg-6 col-form-label">Schedule End</label>
+                    <div class="col-lg-6">
                         <input
                             id="schedule-end"
                             v-model="latest"
@@ -478,8 +478,8 @@
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-1" title="height of a class on schedule">
-                    <label for="class-height" class="col-sm-6 col-form-label">Class Height</label>
-                    <div class="col-sm-6">
+                    <label for="class-height" class="col-lg-6 col-form-label">Class Height</label>
+                    <div class="col-lg-6">
                         <input
                             id="class-height"
                             v-model.number="fullHeight"
@@ -489,8 +489,8 @@
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
-                    <label for="class-height" class="col-sm-6 col-form-label">Grid Height</label>
-                    <div class="col-sm-6">
+                    <label for="class-height" class="col-lg-6 col-form-label">Grid Height</label>
+                    <div class="col-lg-6">
                         <input
                             id="class-height"
                             v-model.number="partialHeight"

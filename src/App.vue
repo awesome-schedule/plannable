@@ -742,6 +742,7 @@ import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
+import { AxiosError } from 'axios';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -999,7 +1000,7 @@ export default class App extends Vue {
                 this.selectSemester(0);
                 if (typeof success === 'function') success();
             })
-            .catch(err => {
+            .catch((err: string | AxiosError) => {
                 console.warn(err);
                 let errStr = `Failed to fetch semester list: `;
                 if (typeof err === 'string') errStr += err;
@@ -1253,7 +1254,7 @@ export default class App extends Vue {
                     this.loading = false;
                 }
             })
-            .catch(err => {
+            .catch((err: string | AxiosError) => {
                 console.warn(err);
                 let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
                 if (typeof err === 'string') errStr += err;
@@ -1292,7 +1293,11 @@ export default class App extends Vue {
         const timeFilters = this.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeFilters === null) return;
+        if (timeFilters === null) {
+            this.noti.error(`Invalid time filter`);
+            return;
+        }
+
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
 
@@ -1476,7 +1481,7 @@ export default class App extends Vue {
                     raw_data = JSON.parse(result);
                 } catch (error) {
                     console.error(error);
-                    this.noti.error(error.message);
+                    this.noti.error(error.message + ': File Format Error');
                     return;
                 }
                 localStorage.setItem((this.currentSemester as Semester).id, result);

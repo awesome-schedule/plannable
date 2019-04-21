@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
 import { Semester } from '../models/Catalog';
@@ -39,7 +39,7 @@ export function getSemesterList(cors_proxy = CORS_PROXY, count = 5): Promise<Sem
                 console.timeEnd('parse semester list');
                 resolve(records);
             })
-            .catch(error => {
+            .catch((error: AxiosError) => {
                 reject(error);
             });
     });
@@ -66,7 +66,7 @@ export function getSemesterData(semesterId: string, cors_proxy = CORS_PROXY): Pr
             .then(data => {
                 resolve(data);
             })
-            .catch(err => {
+            .catch((err: AxiosError | Error) => {
                 reject(err);
             });
     });

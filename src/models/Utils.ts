@@ -204,6 +204,12 @@ export function openVAGrade(course: Course) {
     );
 }
 
+/**
+ * Apply timeout on a promise
+ * @param promise the promise to apply the timeout on
+ * @param time time in millisecond
+ * @param msg the error message on time out
+ */
 export function timeout<T>(
     promise: Promise<T>,
     time: number,
@@ -216,5 +222,5 @@ export function timeout<T>(
                 reject(msg);
             }, time);
         })
-    ]);
+    ]) as Promise<T>;
 }

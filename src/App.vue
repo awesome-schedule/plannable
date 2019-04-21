@@ -110,11 +110,12 @@
             </div>
             <div class="input-group mt-2">
                 <input
+                    ref="classSearch"
                     type="text"
                     class="form-control form-control-sm"
                     placeholder="Title/Number/Topic/Professor"
                     @input="getClass($event.target.value)"
-                    @keyup.esc="closeClassList($event)"
+                    @keyup.esc="closeClassList"
                 />
                 <div class="input-group-append">
                     <span
@@ -732,7 +733,7 @@ import Information from './components/Information.vue';
 import Section from './models/Section';
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
-import Catalog, { Semester } from './models/Catalog';
+import Catalog, { Semester, CatalogJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -741,6 +742,7 @@ import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
+import { AxiosError } from 'axios';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -920,7 +922,7 @@ export default class App extends Vue {
     }
     copyCurrent() {
         const len = this.proposedSchedules.length;
-        this.proposedSchedules.push(this.proposedSchedules[len - 1].copy());
+        this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
     }
     deleteProposed() {
@@ -998,7 +1000,7 @@ export default class App extends Vue {
                 this.selectSemester(0);
                 if (typeof success === 'function') success();
             })
-            .catch(err => {
+            .catch((err: string | AxiosError) => {
                 console.warn(err);
                 let errStr = `Failed to fetch semester list: `;
                 if (typeof err === 'string') errStr += err;
@@ -1175,7 +1177,7 @@ export default class App extends Vue {
             this.fetchSemesterData(semesterId, defaultCallback);
             return;
         }
-        const temp = Catalog.fromJSON(JSON.parse(allRecords_raw as string));
+        const temp = allRecords_raw ? Catalog.fromJSON(JSON.parse(allRecords_raw)) : null;
 
         /**
          * The callback that gets executes after the global `Catalog` object is assigned
@@ -1252,7 +1254,7 @@ export default class App extends Vue {
                     this.loading = false;
                 }
             })
-            .catch(err => {
+            .catch((err: string | AxiosError) => {
                 console.warn(err);
                 let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
                 if (typeof err === 'string') errStr += err;
@@ -1269,8 +1271,8 @@ export default class App extends Vue {
                 this.loading = false;
             });
     }
-    closeClassList(event: { target: HTMLInputElement }) {
-        event.target.value = '';
+    closeClassList() {
+        (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
     }
     generateSchedules(parsed = false) {
@@ -1291,7 +1293,11 @@ export default class App extends Vue {
         const timeFilters = this.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeFilters === null) return;
+        if (timeFilters === null) {
+            this.noti.error(`Invalid time filter`);
+            return;
+        }
+
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
 
@@ -1475,7 +1481,7 @@ export default class App extends Vue {
                     raw_data = JSON.parse(result);
                 } catch (error) {
                     console.error(error);
-                    this.noti.error(error.message);
+                    this.noti.error(error.message + ': File Format Error');
                     return;
                 }
                 localStorage.setItem((this.currentSemester as Semester).id, result);

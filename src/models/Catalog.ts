@@ -6,15 +6,18 @@ export interface Semester {
     name: string;
 }
 
+export interface CatalogJSON {
+    modified: string;
+    semester: Semester;
+    raw_data: RawCatalog;
+}
+
 class Catalog {
     /**
      * Parse AllRecords from parsed JSON
      * @returns `null` if data is invalid
      */
-    public static fromJSON(
-        data: { modified: string; semester: Semester; raw_data: RawCatalog },
-        expTime = Meta.semesterDataExpirationTime
-    ) {
+    public static fromJSON(data: CatalogJSON, expTime = Meta.semesterDataExpirationTime) {
         if (
             data &&
             typeof data.modified === 'string' &&
@@ -52,7 +55,7 @@ class Catalog {
         return Catalog.fromJSON(data, expTime);
     }
 
-    public toJSON() {
+    public toJSON(): CatalogJSON {
         return {
             semester: this.semester,
             raw_data: this.raw_data,

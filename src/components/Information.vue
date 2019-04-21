@@ -34,21 +34,21 @@
                 </ol>
                 <div class="carousel-inner">
                     <div class="carousel-item active">
-                        <img src="images/zhenhong.jpg" class="d-block w-100" alt="First slide" />
+                        <img src="../assets/zhenhong.jpg" class="d-block w-100" alt="First slide" />
                         <div class="carousel-caption d-none d-md-block">
                             <h5>First slide label</h5>
                             <p>Nulla vitae elit libero, a pharetra augue mollis interdum.</p>
                         </div>
                     </div>
                     <div class="carousel-item">
-                        <img src="images/zhenhong.jpg" class="second-slide" alt="Second slide" />
+                        <img src="../assets/zhenhong.jpg" class="second-slide" alt="Second slide" />
                         <div class="carousel-caption d-none d-md-block">
                             <h5>Second slide label</h5>
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                         </div>
                     </div>
                     <div class="carousel-item">
-                        <img src="images/zhenhong.jpg" class="third-slide" alt="Third slide" />
+                        <img src="../assets/zhenhong.jpg" class="third-slide" alt="Third slide" />
                         <div class="carousel-caption d-none d-md-block">
                             <h5>Third slide label</h5>
                             <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
@@ -80,7 +80,7 @@
 
 <script>
 import Vue from 'vue';
-export default Vue.component('Information', {});
+export default Vue.extend({});
 $('#myCarousel').carousel();
 </script>
 

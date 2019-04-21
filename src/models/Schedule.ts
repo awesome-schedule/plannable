@@ -40,10 +40,11 @@ class Schedule {
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
-    public static fromJSON(obj: ScheduleJSON) {
+    public static fromJSON(obj?: ScheduleJSON) {
+        if (!obj) return null;
         const schedule = new Schedule();
-        schedule.title = obj.title;
-        schedule.id = obj.id;
+        schedule.title = obj.title ? obj.title : 'schedule';
+        schedule.id = obj.id ? obj.id : 0;
         if (obj.events)
             schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
         if (obj.savedColors) Schedule.savedColors = obj.savedColors;

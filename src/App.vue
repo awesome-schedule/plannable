@@ -928,7 +928,7 @@ export default class App extends Vue {
     deleteProposed() {
         const idx = this.proposedScheduleIndex;
 
-        if (!confirm(`Are you sure to delete schedule ${idx}?`)) return;
+        if (!confirm(`Are you sure to delete schedule ${idx + 1}?`)) return;
         if (this.proposedSchedules.length === 1) {
             return this.noti.error('This is the only schedule left!');
         }
@@ -942,6 +942,8 @@ export default class App extends Vue {
         this.proposedSchedules.splice(idx, 1);
         if (idx >= this.proposedSchedules.length) {
             this.switchProposed(idx - 1);
+        } else {
+            this.switchProposed(idx);
         }
         this.saveStatus();
     }

@@ -110,11 +110,12 @@
             </div>
             <div class="input-group mt-2">
                 <input
+                    ref="classSearch"
                     type="text"
                     class="form-control form-control-sm"
                     placeholder="Title/Number/Topic/Professor"
                     @input="getClass($event.target.value)"
-                    @keyup.esc="closeClassList($event)"
+                    @keyup.esc="closeClassList"
                 />
                 <div class="input-group-append">
                     <span
@@ -732,7 +733,7 @@ import Information from './components/Information.vue';
 import Section from './models/Section';
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
-import Catalog, { Semester } from './models/Catalog';
+import Catalog, { Semester, CatalogJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -920,7 +921,7 @@ export default class App extends Vue {
     }
     copyCurrent() {
         const len = this.proposedSchedules.length;
-        this.proposedSchedules.push(this.proposedSchedules[len - 1].copy());
+        this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
     }
     deleteProposed() {
@@ -1175,7 +1176,7 @@ export default class App extends Vue {
             this.fetchSemesterData(semesterId, defaultCallback);
             return;
         }
-        const temp = Catalog.fromJSON(JSON.parse(allRecords_raw as string));
+        const temp = allRecords_raw ? Catalog.fromJSON(JSON.parse(allRecords_raw)) : null;
 
         /**
          * The callback that gets executes after the global `Catalog` object is assigned
@@ -1269,8 +1270,8 @@ export default class App extends Vue {
                 this.loading = false;
             });
     }
-    closeClassList(event: { target: HTMLInputElement }) {
-        event.target.value = '';
+    closeClassList() {
+        (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
     }
     generateSchedules(parsed = false) {

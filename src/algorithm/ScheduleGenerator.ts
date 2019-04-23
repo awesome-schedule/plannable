@@ -250,7 +250,6 @@ class ScheduleGenerator {
                     pathMemory[i] = 0;
                 }
             }
-            exhausted = false;
 
 
             // if all possibilities are exhausted, then break out the loop

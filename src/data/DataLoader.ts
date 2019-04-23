@@ -4,6 +4,8 @@ import querystring from 'querystring';
 import { Semester } from '../models/Catalog';
 import Meta, { RawCatalog, RawSection, RawMeeting } from '../models/Meta';
 
+// currently the two pages that we use has the cross origin header,
+// so no need to use cross origin proxy
 const CORS_PROXY = '';
 
 /**

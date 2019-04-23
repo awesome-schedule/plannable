@@ -625,25 +625,14 @@
                     </div>
                 </li>
                 <li class="list-group-item">
-                    <a
-                        class="btn btn-outline-dark"
-                        style="width:100%"
-                        :href="downloadURL"
-                        download="schedule.json"
-                        @click="saveToJson"
-                        >Export
-                    </a>
+                    <button class="btn btn-outline-dark" style="width:100%" @click="saveToJson">
+                        Export
+                    </button>
                 </li>
                 <li class="list-group-item">
-                    <a
-                        class="btn btn-outline-dark"
-                        :href="icalURL"
-                        style="width:100%"
-                        download="schedule.ical"
-                        @click="saveToIcal"
-                    >
+                    <button class="btn btn-outline-dark" style="width:100%" @click="saveToIcal">
                         Export to ICalendar
-                    </a>
+                    </button>
                 </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-primary w-100" @click="print">
@@ -740,7 +729,7 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { getSemesterList, getSemesterData } from './data/DataLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
-import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
+import { to12hr, parseTimeAsInt, timeout, savePlain } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
 import { AxiosError } from 'axios';
 
@@ -839,10 +828,8 @@ export default class App extends Vue {
     scrollable = false;
     tempScheduleIndex: number | null = null;
     drag = false;
-    downloadURL = '';
     days = Meta.days;
     eventToEdit: Event | null = null;
-    icalURL = '';
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -870,6 +857,9 @@ export default class App extends Vue {
     set proposedSchedule(schedule: Schedule) {
         this.proposedSchedules[this.proposedScheduleIndex] = schedule;
     }
+    /**
+     * the proposed schedule that is currently active
+     */
     get proposedSchedule() {
         return this.proposedSchedules[this.proposedScheduleIndex];
     }
@@ -885,6 +875,8 @@ export default class App extends Vue {
     created() {
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
+
+        // load the cached list of semesters, if it exists
         const storage = localStorage.getItem('semesters');
         if (!storage) {
             this.fetchSemesterList();
@@ -892,6 +884,8 @@ export default class App extends Vue {
         }
         const sms = JSON.parse(storage);
         const modified = sms.modified;
+
+        // if data exists and is not expired
         if (
             modified &&
             new Date().getTime() - new Date(modified).getTime() < Meta.semesterListExpirationTime
@@ -899,7 +893,9 @@ export default class App extends Vue {
             this.semesters = sms['semesterList'];
             this.selectSemester(0);
         } else {
+            // fetch a fresh list of semesters
             this.fetchSemesterList(undefined, () => {
+                // if failed to fetch, just use the old data
                 this.semesters = sms['semesterList'];
                 this.selectSemester(0);
             });
@@ -991,6 +987,8 @@ export default class App extends Vue {
         timeout(getSemesterList(), 10000)
             .then(res => {
                 this.semesters = res;
+
+                // save newly fetched semester data to local storage
                 localStorage.setItem(
                     'semesters',
                     JSON.stringify({
@@ -998,16 +996,13 @@ export default class App extends Vue {
                         semesterList: res
                     })
                 );
-                // get the latest semester
+                // select the latest semester
                 this.selectSemester(0);
                 if (typeof success === 'function') success();
             })
             .catch((err: string | AxiosError) => {
                 console.warn(err);
-                let errStr = `Failed to fetch semester list: `;
-                if (typeof err === 'string') errStr += err;
-                else if (err.response) errStr += `request rejected by the server. `;
-                else if (err.request) errStr += `No response received. `;
+                let errStr = `Failed to fetch semester list: ${this.errToStr(err)}`;
                 if (typeof reject === 'function') {
                     errStr += 'Old data is used instead';
                     this.noti.warn(errStr);
@@ -1018,6 +1013,14 @@ export default class App extends Vue {
                 this.noti.error(errStr);
                 this.loading = false;
             });
+    }
+    errToStr(err: string | AxiosError) {
+        let errStr = '';
+        if (typeof err === 'string') errStr += err;
+        else if (err.response) errStr += `request rejected by the server`;
+        else if (err.request) errStr += `No internet`;
+        else errStr += err.message;
+        return errStr + '. ';
     }
     onDocChange() {
         this.saveStatus();
@@ -1111,6 +1114,7 @@ export default class App extends Vue {
             return;
         }
         // if current schedule is displayed, switch to proposed schedule
+        // because we're adding stuff to the proposed schedule
         if (this.generated) {
             this.switchSchedule(false);
         }
@@ -1131,6 +1135,7 @@ export default class App extends Vue {
      * @param force whether to force-update semester data
      */
     selectSemester(semesterId: number | string, parsed_data?: { [x: string]: any }, force = false) {
+        // do a linear search to find the index of the semester given its string id
         if (typeof semesterId === 'string') {
             for (let i = 0; i < this.semesters.length; i++) {
                 const semester = this.semesters[i];
@@ -1258,10 +1263,9 @@ export default class App extends Vue {
             })
             .catch((err: string | AxiosError) => {
                 console.warn(err);
-                let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
-                if (typeof err === 'string') errStr += err;
-                else if (err.response) errStr += `request rejected by the server. `;
-                else if (err.request) errStr += `No response received. `;
+                let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: ${this.errToStr(
+                    err
+                )}`;
                 if (typeof reject === 'function') {
                     errStr += 'Old data is used instead';
                     reject();
@@ -1277,7 +1281,7 @@ export default class App extends Vue {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
     }
-    generateSchedules(parsed = false) {
+    generateSchedules() {
         if (this.generated) this.currentSchedule = this.proposedSchedule;
         this.generated = false;
 
@@ -1334,7 +1338,9 @@ export default class App extends Vue {
         }
         if (optIdx !== undefined) {
             const option = this.sortOptions.sortBy[optIdx];
+
             if (option.enabled) {
+                // disable options that are mutually exclusive to this one
                 for (const key of option.exclusive) {
                     for (const opt of this.sortOptions.sortBy) {
                         if (opt.name === key) opt.enabled = false;
@@ -1348,6 +1354,7 @@ export default class App extends Vue {
             if (!this.generated) {
                 this.switchSchedule(true);
             } else {
+                // re-assign the current schedule
                 this.currentSchedule = window.scheduleEvaluator.getSchedule(
                     this.currentScheduleIndex
                 );
@@ -1372,7 +1379,7 @@ export default class App extends Vue {
         const defaultData = getDefaultData();
         for (const field of Meta.storageFields) {
             if (field === 'proposedSchedules') {
-                // if true, we're dealing legacy code
+                // if true, we're dealing with legacy storage
                 if (raw_data.proposedSchedule) {
                     this.proposedScheduleIndex = 0;
                     const s = Schedule.fromJSON(raw_data.proposedSchedule);
@@ -1429,7 +1436,7 @@ export default class App extends Vue {
         }
         if (!this.proposedSchedule.empty()) {
             this.currentSchedule = this.proposedSchedule;
-            this.generateSchedules(true);
+            this.generateSchedules();
         }
     }
     removeTimeSlot(n: number) {
@@ -1439,7 +1446,7 @@ export default class App extends Vue {
         this.timeSlots.push([false, false, false, false, false, '', '']);
     }
     /**
-     * Preprocess the time filters so that they are of the correct format
+     * Preprocess the time filters and convert them to array of events
      *
      * returns null on parsing error
      */
@@ -1508,16 +1515,10 @@ export default class App extends Vue {
         if (!this.currentSemester) return;
 
         const json = localStorage.getItem(this.currentSemester.id);
-        if (json) {
-            const blob = new Blob([json], { type: 'text/json' });
-            let url = window.URL.createObjectURL(blob);
-            this.downloadURL = url;
-            url = url.substring(5);
-            window.URL.revokeObjectURL(url);
-        }
+        if (json) savePlain(json, 'schedule.json');
     }
     saveToIcal() {
-        this.icalURL = this.currentSchedule.toICal();
+        savePlain(this.currentSchedule.toICal(), 'schedule.ical');
     }
 }
 </script>

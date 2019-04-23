@@ -3,6 +3,7 @@ import Catalog from './Catalog';
 import Schedule from './Schedule';
 import Meta, { RawCourse } from './Meta';
 import Course from './Course';
+import { saveAs } from 'file-saver';
 
 /**
  * @example
@@ -223,4 +224,8 @@ export function timeout<T>(
             }, time);
         })
     ]) as Promise<T>;
+}
+
+export function savePlain(str: string, filename: string) {
+    saveAs(new Blob([str], { type: 'text/plain;charset=utf-8' }), filename);
 }

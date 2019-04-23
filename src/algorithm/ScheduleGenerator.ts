@@ -1,7 +1,6 @@
 import Catalog from '../models/Catalog';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
-import Section from '../models/Section';
 import Event from '../models/Event';
 import * as Utils from '../models/Utils';
 
@@ -23,8 +22,9 @@ export type TimeBlock = [number, number];
  * because it is possible for a single section to have multiple meetings in a day
  *
  * @example
- * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]} // represents that this `Section` or `Event` will
- * //take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]}
+ * // represents that this `Section` or `Event` will
+ * // take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
  *
  * @see TimeBlock
  */
@@ -131,7 +131,7 @@ class ScheduleGenerator {
             for (const time in combined) {
                 let no_match = false;
                 const sids = combined[time];
-                const tmp_dict: TimeDict = {};
+                const tmp_dict: TimeDict = Object.create(null);
 
                 // there may be multiple meeting times. parse each of them and add to tmp_dict
                 for (const t of time.split('|')) {
@@ -214,10 +214,29 @@ class ScheduleGenerator {
             );
     }
 
-    public createSchedule(classList: RawAlgoSchedule[]) {
+    /**
+     * @param classList a tuple of sections of courses, whose length is the number of distinct courses chosen
+     *
+     * @example
+     * classList[i][j] // represents the jth section of the ith class
+     */
+    public createSchedule(classList: RawAlgoCourse[][]) {
+        /**
+         * current index of course
+         */
         let classNum = 0;
+        /**
+         * the index of the section within the course indicated by `classNum`
+         */
         let choiceNum = 0;
+        /**
+         * record the index of sections that are already tested
+         */
         const pathMemory = new Int32Array(classList.length);
+        /**
+         * The current schedule, build incrementally and in-place.
+         * After one successful build, all elements are removed (**in-place**)
+         */
         const timeTable: RawAlgoSchedule = [];
 
         const evaluator = new ScheduleEvaluator(this.options.sortOptions, this.options.events);

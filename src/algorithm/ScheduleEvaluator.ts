@@ -10,9 +10,9 @@ export enum Mode {
 }
 
 export interface SortMode {
-    mode: Mode;
-    title: string;
-    description: string;
+    readonly mode: Mode;
+    readonly title: string;
+    readonly description: string;
 }
 
 type OrderedBlocks = [number[], number[], number[], number[], number[]];

@@ -538,10 +538,7 @@ class Schedule {
             }
         }
         ical += 'END:VCALENDAR';
-
-        const blob = new Blob([ical], { type: 'text' });
-        const url = window.URL.createObjectURL(blob);
-        return url;
+        return ical;
     }
 
     public dateToICalString(date: Date) {

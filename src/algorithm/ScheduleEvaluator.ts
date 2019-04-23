@@ -18,7 +18,7 @@ export interface SortMode {
 type OrderedBlocks = [number[], number[], number[], number[], number[]];
 type OrderedRooms = [string[], string[], string[], string[], string[]];
 
-interface CmpSchedule {
+export interface CmpSchedule {
     schedule: RawAlgoSchedule;
     blocks: OrderedBlocks;
     rooms: OrderedRooms;
@@ -324,7 +324,10 @@ class ScheduleEvaluator {
      * Group the time blocks and sort them in order.
      *
      * @remarks insertion sort is used as there are not many elements in each day array.
-     * This method has a pretty high overhead
+     *
+     * @remarks This method has a pretty high performance overhead.
+     * It will have a even higher overhead if the meeting room for each section is fetched and ordered,
+     * which is necessary to compute the total walking distance.
      */
     public add(schedule: RawAlgoSchedule) {
         const days = Meta.days;
@@ -333,9 +336,10 @@ class ScheduleEvaluator {
         const blocks: OrderedBlocks = [[], [], [], [], []];
         const rooms: OrderedRooms = [[], [], [], [], []];
         for (const course of schedule) {
+            const timeDict = course[1];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
-                const timeBlock = course[1][days[k]] as number[];
+                const timeBlock = timeDict[days[k]] as number[];
                 if (!timeBlock) continue;
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
@@ -379,10 +383,10 @@ class ScheduleEvaluator {
      * if it exists, don't do anything
      *
      * @param funcName the name of the sorting option
-     * @param assign whether assign to the coeff field of each `CmpSchedule`
+     * @param assign whether assign to the `coeff` field of each `CmpSchedule`
      * @returns the computed/cached array of coefficients
      */
-    public computeCoeffFor(funcName: string, assign = true): Float32Array {
+    public computeCoeffFor(funcName: string, assign: boolean): Float32Array {
         const schedules = this._schedules;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {
@@ -425,7 +429,7 @@ class ScheduleEvaluator {
         if (this.options.mode === Mode.fallback) {
             console.time('precomputing coefficients');
             if (count === 1) {
-                this.computeCoeffFor(this.options.sortBy[lastIdx].name);
+                this.computeCoeffFor(this.options.sortBy[lastIdx].name, true);
             } else {
                 this.options.sortBy
                     .filter(x => x.enabled)
@@ -444,7 +448,7 @@ class ScheduleEvaluator {
                 const len = schedules.length;
                 const coeffs = new Float32Array(len);
 
-                // finding the minimum and maximum are quite fast for 1e6 elements, so not cached.
+                // finding the minimum and maximum is quite fast for 1e6 elements, so not cached.
                 for (const option of options) {
                     const coeff = this.computeCoeffFor(option.name, false);
 
@@ -495,11 +499,12 @@ class ScheduleEvaluator {
      * sort the array of schedules according to their quality coefficients computed using the given
      *
      * @param quick quick mode: use Floyd–Rivest algorithm to select first
-     * 100 elements and then sort only these elements
+     * 100 elements and then sort only these elements.
+     * @param quickThresh Automatically enable quick mode if the length of schedules is greater than `quickThresh`
      *
      * @see {@link https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm}
      */
-    public sort(quick = false) {
+    public sort(quick = false, quickThresh = 50000) {
         console.time('sorting: ');
 
         const schedules = this._schedules.concat();
@@ -520,8 +525,8 @@ class ScheduleEvaluator {
             ? (a, b) => b.coeff - a.coeff
             : (a, b) => a.coeff - b.coeff;
         if (this.options.mode === Mode.combined || options.length === 1) {
-            if (quick) {
-                this.partialSort(schedules, cmpFunc, 100);
+            if (quick || schedules.length > quickThresh) {
+                this.partialSort(schedules, cmpFunc, 1000);
             } else {
                 schedules.sort(cmpFunc);
             }
@@ -538,8 +543,8 @@ class ScheduleEvaluator {
                 }
                 return r;
             };
-            if (quick) {
-                this.partialSort(schedules, func, 100);
+            if (quick || schedules.length > quickThresh) {
+                this.partialSort(schedules, func, 1000);
             } else {
                 schedules.sort(func);
             }
@@ -547,10 +552,17 @@ class ScheduleEvaluator {
         console.timeEnd('sorting: ');
     }
 
-    public partialSort<T>(arr: T[], compare: (x: T, y: T) => number, index: number) {
-        quickselect(arr, index, 0, arr.length - 1, compare);
-        const slc = arr.slice(0, index).sort(compare);
-        for (let i = 0; i < index; i++) arr[i] = slc[i];
+    /**
+     * use Floyd–Rivest selection algorithm to select `num` smallest elements.
+     * Then, sort these elements in order.
+     *
+     * @see https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm
+     * @see https://github.com/mourner/quickselect
+     */
+    public partialSort<T>(arr: T[], compare: (x: T, y: T) => number, num: number) {
+        quickselect(arr, num, 0, arr.length - 1, compare);
+        const slc = arr.slice(0, num).sort(compare);
+        for (let i = 0; i < num; i++) arr[i] = slc[i];
     }
 
     /**

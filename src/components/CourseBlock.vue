@@ -85,11 +85,12 @@
                 <div class="ml-2 crs-info" v-html="scheduleBlock.section.description"></div>
             </div>
         </div>
-        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
+        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px;height:100%">
             <div
                 v-if="isSection(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#modal"
+                style="height:!00%"
                 @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
             >
                 {{ firstSec.department }} <br />
@@ -100,6 +101,7 @@
                 v-if="isSectionArray(scheduleBlock)"
                 data-toggle="modal"
                 data-target="#class-list-modal"
+                style="height:100%"
                 @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
             >
                 {{ firstSec.department }} <br />
@@ -108,6 +110,7 @@
             </div>
             <div
                 v-if="isEvent(scheduleBlock)"
+                style="height:100%"
                 @click="$parent.$emit('editEvent', scheduleBlock.section)"
             >
                 {{ scheduleBlock.section.days }}
@@ -137,7 +140,7 @@ export default class CourseBlock extends Vue {
     @Prop(String) readonly day!: string;
 
     name = 'CourseBlock';
-    mobile = window.screen.width < 900;
+    mobile = window.screen.width < 450;
 
     get startPx() {
         let start = 48;

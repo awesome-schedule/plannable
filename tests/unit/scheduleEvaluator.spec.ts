@@ -1,4 +1,7 @@
-import ScheduleEvaluator, { SortOptionJSON } from '../../src/algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, {
+    SortOptionJSON,
+    CmpSchedule
+} from '../../src/algorithm/ScheduleEvaluator';
 import 'jest';
 import { RawAlgoSchedule } from '../../src/algorithm/ScheduleGenerator';
 
@@ -36,6 +39,32 @@ describe('Schedule Evaluator Test', () => {
 
     it('lunch Test', () => {
         expect(1).toBe(1);
+    });
+
+    it('variance test', () => {
+        const cmpSchedule: CmpSchedule = {
+            schedule: [
+                ['mubd26205', { Tu: [1080, 1220], Th: [1080, 1220], Fr: [1080, 1220] }, [0]],
+                ['psyc32405', { Mo: [600, 650], We: [600, 650], Fr: [600, 650] }, [0]],
+                ['cs21025', { Tu: [570, 645], Th: [570, 645] }, [0]],
+                ['stat20205', { Mo: [840, 915], We: [840, 915] }, [0]],
+                ['cs21105', { Mo: [540, 590], We: [540, 590], Fr: [540, 590] }, [0]],
+                ['cs21104', { Mo: [1020, 1125] }, [0, 4]],
+                ['stat20204', { Tu: [1020, 1070] }, [0]],
+                ['fren20105', { Mo: [660, 710], We: [660, 710], Fr: [660, 710] }, [1]]
+            ],
+            blocks: [
+                [540, 590, 600, 650, 660, 710, 840, 915, 1020, 1125],
+                [570, 645, 1020, 1070, 1080, 1220],
+                [540, 590, 600, 650, 660, 710, 840, 915],
+                [570, 645, 1080, 1220],
+                [540, 590, 600, 650, 660, 710, 1080, 1220]
+            ],
+            rooms: [[], [], [], [], []],
+            coeff: 1790,
+            index: 0
+        };
+        expect(ScheduleEvaluator.sortFunctions.variance(cmpSchedule)).toBe(1790);
     });
 
     it('Sort Option JSON Parse', () => {

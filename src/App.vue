@@ -49,9 +49,10 @@
                 <i class="fab fa-elementor"></i>
             </div>
             <div
-                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'" 
-                title="Filters" 
-                @click="switchSideBar('showFilter')">
+                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                title="Filters"
+                @click="switchSideBar('showFilter')"
+            >
                 <i class="fas fa-filter"></i>
             </div>
             <div
@@ -109,11 +110,12 @@
             </div>
             <div class="input-group mt-2">
                 <input
+                    ref="classSearch"
                     type="text"
                     class="form-control form-control-sm"
                     placeholder="Title/Number/Topic/Professor"
                     @input="getClass($event.target.value)"
-                    @keyup.esc="closeClassList($event)"
+                    @keyup.esc="closeClassList"
                 />
                 <div class="input-group-append">
                     <span
@@ -163,36 +165,36 @@
                     </button>
                 </div>
                 <div class="mx-1">
-                    <div class="mx-4">
+                    <div class="mx-3">
                         <div
                             class="row no-gutters align-items-center justify-content-between"
                             style="font-size: 24px"
                         >
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="fas fa-long-arrow-alt-left click-icon"
                                     title="previous schedule"
                                     @click="switchProposed(proposedScheduleIndex - 1)"
                                 ></i>
                             </div>
-                            <div class="col-md-auto" style="font-size: 20px;">
+                            <div class="col-auto" style="font-size: 20px;">
                                 {{ proposedScheduleIndex + 1 }}
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="fas fa-long-arrow-alt-right click-icon"
                                     title="next schedule"
                                     @click="switchProposed(proposedScheduleIndex + 1)"
                                 ></i>
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="far fa-calendar-plus click-icon"
                                     title="new schedule"
                                     @click="newProposed"
                                 ></i>
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="far fa-copy click-icon"
                                     title="copy the current schedule to a new schedule"
@@ -200,7 +202,7 @@
                                 >
                                 </i>
                             </div>
-                            <div class="col-md-auto">
+                            <div class="col-auto">
                                 <i
                                     class="far fa-calendar-times click-icon"
                                     title="delete current schedule"
@@ -450,10 +452,10 @@
                     class="form-group row no-gutters mt-2 mb-1"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-start" class="col-sm-6 col-form-label"
+                    <label for="schedule-start" class="col-lg-6 col-form-label"
                         >Schedule Start</label
                     >
-                    <div class="col-sm-6">
+                    <div class="col-lg-6">
                         <input
                             id="schedule-start"
                             v-model="earliest"
@@ -466,8 +468,8 @@
                     class="form-group row no-gutters mb-1"
                     title="Schedule grid later than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-end" class="col-sm-6 col-form-label">Schedule End</label>
-                    <div class="col-sm-6">
+                    <label for="schedule-end" class="col-lg-6 col-form-label">Schedule End</label>
+                    <div class="col-lg-6">
                         <input
                             id="schedule-end"
                             v-model="latest"
@@ -477,8 +479,8 @@
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-1" title="height of a class on schedule">
-                    <label for="class-height" class="col-sm-6 col-form-label">Class Height</label>
-                    <div class="col-sm-6">
+                    <label for="class-height" class="col-lg-6 col-form-label">Class Height</label>
+                    <div class="col-lg-6">
                         <input
                             id="class-height"
                             v-model.number="fullHeight"
@@ -488,8 +490,8 @@
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
-                    <label for="class-height" class="col-sm-6 col-form-label">Grid Height</label>
-                    <div class="col-sm-6">
+                    <label for="class-height" class="col-lg-6 col-form-label">Grid Height</label>
+                    <div class="col-lg-6">
                         <input
                             id="class-height"
                             v-model.number="partialHeight"
@@ -731,7 +733,7 @@ import Information from './components/Information.vue';
 import Section from './models/Section';
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
-import Catalog, { Semester } from './models/Catalog';
+import Catalog, { Semester, CatalogJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -740,6 +742,7 @@ import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
+import { AxiosError } from 'axios';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -919,13 +922,13 @@ export default class App extends Vue {
     }
     copyCurrent() {
         const len = this.proposedSchedules.length;
-        this.proposedSchedules.push(this.proposedSchedules[len - 1].copy());
+        this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
     }
     deleteProposed() {
         const idx = this.proposedScheduleIndex;
 
-        if (!confirm(`Are you sure to delete schedule ${idx}?`)) return;
+        if (!confirm(`Are you sure to delete schedule ${idx + 1}?`)) return;
         if (this.proposedSchedules.length === 1) {
             return this.noti.error('This is the only schedule left!');
         }
@@ -939,6 +942,8 @@ export default class App extends Vue {
         this.proposedSchedules.splice(idx, 1);
         if (idx >= this.proposedSchedules.length) {
             this.switchProposed(idx - 1);
+        } else {
+            this.switchProposed(idx);
         }
         this.saveStatus();
     }
@@ -997,7 +1002,7 @@ export default class App extends Vue {
                 this.selectSemester(0);
                 if (typeof success === 'function') success();
             })
-            .catch(err => {
+            .catch((err: string | AxiosError) => {
                 console.warn(err);
                 let errStr = `Failed to fetch semester list: `;
                 if (typeof err === 'string') errStr += err;
@@ -1174,7 +1179,7 @@ export default class App extends Vue {
             this.fetchSemesterData(semesterId, defaultCallback);
             return;
         }
-        const temp = Catalog.fromJSON(JSON.parse(allRecords_raw as string));
+        const temp = allRecords_raw ? Catalog.fromJSON(JSON.parse(allRecords_raw)) : null;
 
         /**
          * The callback that gets executes after the global `Catalog` object is assigned
@@ -1251,7 +1256,7 @@ export default class App extends Vue {
                     this.loading = false;
                 }
             })
-            .catch(err => {
+            .catch((err: string | AxiosError) => {
                 console.warn(err);
                 let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
                 if (typeof err === 'string') errStr += err;
@@ -1268,8 +1273,8 @@ export default class App extends Vue {
                 this.loading = false;
             });
     }
-    closeClassList(event: { target: HTMLInputElement }) {
-        event.target.value = '';
+    closeClassList() {
+        (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
     }
     generateSchedules(parsed = false) {
@@ -1290,7 +1295,11 @@ export default class App extends Vue {
         const timeFilters = this.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeFilters === null) return;
+        if (timeFilters === null) {
+            this.noti.error(`Invalid time filter`);
+            return;
+        }
+
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
 
@@ -1474,7 +1483,7 @@ export default class App extends Vue {
                     raw_data = JSON.parse(result);
                 } catch (error) {
                     console.error(error);
-                    this.noti.error(error.message);
+                    this.noti.error(error.message + ': File Format Error');
                     return;
                 }
                 localStorage.setItem((this.currentSemester as Semester).id, result);
@@ -1542,7 +1551,7 @@ export default class App extends Vue {
 .tab-icon-active {
     font-size: 1.8vw;
     margin-left: 20%;
-    color: #1f1f1f
+    color: #1f1f1f;
 }
 
 .click-icon {
@@ -1696,6 +1705,12 @@ export default class App extends Vue {
         font-size: 6vw;
         margin-left: 20%;
         color: #5e5e5e;
+    }
+
+    .tab-icon-active {
+        font-size: 6vw;
+        margin-left: 20%;
+        color: #1f1f1f;
     }
 }
 

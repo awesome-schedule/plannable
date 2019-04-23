@@ -7,9 +7,26 @@ import { hashCode } from './Utils';
  * Represents all public information of a Course
  */
 export interface CourseFields {
+    /**
+     * department name, short form, all capitalized. e.g `CS`
+     */
     department: string;
+    /**
+     * Course number, e.g. `2150`
+     */
     number: number;
+    /**
+     * One of the keys of `Meta.TYPE_PARSE`
+     *
+     * @see Meta.TYPE_PARSE
+     */
     type: string;
+    /**
+     * Units (credits), usually a number, but could be a range represented as a string like
+     *
+     * @example
+     * "1", "3", "2.5", "1 - 12"
+     */
     units: string;
     title: string;
     description: string;
@@ -31,7 +48,7 @@ class Course implements CourseFields, Hashable {
     public readonly raw: RawCourse;
     /**
      * Array of section ids contained in this object.
-     * Can be all sections of a subset of the sections
+     * Can be all sections of a subset or the sections
      */
     public readonly sids: number[];
     public readonly sections: Section[];
@@ -89,9 +106,10 @@ class Course implements CourseFields, Hashable {
 
     /**
      * Get an object in which the key is the days string and
-     * value is the subset of sections contained in this Course occurring at that time
+     * value is the array of section indices contained in this Course occurring at that time
      *
-     * e.g. `{"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : array of section indices }`
+     * @example
+     * {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [1,2,3,7,9]}`
      */
     public getCombined() {
         const combined: { [x: string]: number[] } = {};

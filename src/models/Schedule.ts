@@ -566,7 +566,7 @@ class Schedule {
     /**
      * get a copy of this schedule
      */
-    public copy() {
+    public copy(deepCopyEvent = true) {
         const AllCopy: { [x: string]: Set<number> | -1 } = {};
         for (const key in this.All) {
             const sections = this.All[key];
@@ -577,7 +577,12 @@ class Schedule {
             }
         }
         // note: is it desirable to deep-copy all the events?
-        const cpy = new Schedule([], this.title, this.id, this.events.map(e => e.copy()));
+        const cpy = new Schedule(
+            [],
+            this.title,
+            this.id,
+            deepCopyEvent ? this.events.map(e => e.copy()) : this.events
+        );
         cpy.All = AllCopy;
         cpy.computeSchedule();
         return cpy;

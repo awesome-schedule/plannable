@@ -8,8 +8,17 @@ import Event from './Event';
  * @see {@link GridSchedule.vue}
  */
 class ScheduleBlock {
+    /**
+     * background color in hex, e.g. `#ffffff`
+     */
     public backgroundColor: string;
+    /**
+     * start time in 24hr format: `13:00`
+     */
     public start: string;
+    /**
+     * end time in 24hr format: `15:00`
+     */
     public end: string;
     public section: Section | Section[] | Event;
 

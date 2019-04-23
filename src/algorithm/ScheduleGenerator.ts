@@ -75,6 +75,10 @@ class ScheduleGenerator {
         sortOptions: ScheduleEvaluator.getDefaultOptions()
     };
 
+    /**
+     * validate the options object. Default values are supplied for missing keys.
+     * @param options
+     */
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
@@ -96,6 +100,7 @@ class ScheduleGenerator {
     /**
      * The entrance of the schedule generator
      * returns a sorted `ScheduleEvaluator` Object
+     *
      * @see ScheduleEvaluator
      */
     public getSchedules(
@@ -105,52 +110,61 @@ class ScheduleGenerator {
         console.time('algorithm bootstrapping');
         this.options = ScheduleGenerator.validateOptions(options);
 
-        const courses = schedule.All;
-
-        const classList: RawAlgoSchedule[] = [];
-
-        const timeSlots: TimeDict[] = [];
-
-        for (const event of this.options.events) timeSlots.push(event.toTimeDict());
+        // convert events to TimeDicts so that we can easily check for time conflict
+        const timeSlots: TimeDict[] = this.options.events.map(e => e.toTimeDict());
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
 
+        const classList: RawAlgoSchedule[] = [];
+        const courses = schedule.All;
+
+        // for each course selected, form an array of sections
         for (const key in courses) {
             const classes: RawAlgoSchedule = [];
-            /**
-             * get course with specific sections specified by Schedule
-             */
+
+            // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
 
-            // combine any section of occurring at the same time
+            // combine all sections of this course occurring at the same time
             const combined = courseRec.getCombined();
+
+            // for each combined section, form a RawAlgoCourse
             for (const time in combined) {
                 let no_match = false;
                 const sids = combined[time];
-                const algoCourse: RawAlgoCourse = [key, {}, []];
                 const tmp_dict: TimeDict = {};
 
+                // there may be multiple meeting times. parse each of them and add to tmp_dict
                 for (const t of time.split('|')) {
                     // skip empty string
                     if (!t) continue;
+
+                    // parse the meeting time
                     const tmp1 = Utils.parseTimeAll(t);
+
+                    // skip TBA or ill-formated time
                     if (tmp1 === null) {
                         no_match = true;
                         break;
                     }
 
                     const [date, timeBlock] = tmp1;
+
+                    // for each day
                     for (const d of date) {
-                        // the timeBlock is flattened
                         const dayBlock = tmp_dict[d];
+
+                        // the timeBlock is flattened
                         if (dayBlock) {
                             dayBlock.push(...timeBlock);
                         } else {
+                            // copy
                             tmp_dict[d] = timeBlock.concat();
                         }
                     }
                 }
                 if (no_match) continue;
 
+                // don't include this combined section if it conflicts with any time filter or event,.
                 for (const td of timeSlots) {
                     if (Utils.checkTimeConflict(td, tmp_dict)) {
                         no_match = true;
@@ -159,17 +173,20 @@ class ScheduleGenerator {
                 }
                 if (no_match) continue;
 
-                algoCourse[1] = tmp_dict;
+                const sectionIndices: number[] = [];
 
                 for (const sid of sids) {
                     const section = courseRec.getSection(sid);
-                    // insert filter method
-                    if (this.filterStatus(section)) continue;
-                    algoCourse[2].push(sid);
+
+                    // filter out sections with unwanted status
+                    if (this.options.status.includes(section.status)) continue;
+
+                    sectionIndices.push(sid);
                 }
-                if (algoCourse[2].length !== 0) classes.push(algoCourse);
+                if (sectionIndices.length !== 0) classes.push([key, tmp_dict, sectionIndices]);
             }
 
+            // throw an error of none of the sections pass the filter
             if (classes.length === 0) {
                 throw new Error(
                     `No sections of ${courseRec.department} ${courseRec.number} ${
@@ -280,10 +297,6 @@ class ScheduleGenerator {
             if (Utils.checkTimeConflict(algoCourse[1], timeDict)) return true;
         }
         return false;
-    }
-
-    public filterStatus(section: Section) {
-        return this.options.status.includes(section.status);
     }
 }
 

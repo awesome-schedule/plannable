@@ -2,6 +2,7 @@ import 'jest';
 import Schedule from '../../src/models/Schedule';
 import * as Utils from '../../src/models/Utils';
 import data from './data';
+import * as schedule from './schedule.json';
 
 describe('Schedule Test', () => {
     it('Schedule Static Field Test', () => {
@@ -21,5 +22,15 @@ describe('Schedule Test', () => {
         console.log(prob);
         // we expect the hashes to be quite uniformly distributed
         expect(prob.some(x => x > 11)).toBe(false);
+    });
+
+    it('From Json', () => {
+        const word = <any>schedule;
+
+        const s = JSON.stringify(word);
+        const l = JSON.parse(s);
+        console.log(l.title);
+        const k = Schedule.fromJSON(l);
+        console.log(k);
     });
 });

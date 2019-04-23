@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/jest": "^24.0.11",
         "@types/jquery": "^3.3.29",
-        "@types/node": "^11.13.5",
+        "@types/node": "^11.13.7",
         "@types/papaparse": "^4.5.9",
         "@types/randomcolor": "^0.5.1",
         "@vue/cli-plugin-babel": "^3.6.0",
@@ -41,6 +41,7 @@
         "eslint": "^5.16.0",
         "eslint-plugin-vue": "^5.0.0",
         "html-webpack-externals-plugin": "^3.8.0",
+        "jest": "^24.0.0",
         "ts-jest": "^24.0.2",
         "typedoc": "^0.14.2",
         "typescript": "^3.4.4",

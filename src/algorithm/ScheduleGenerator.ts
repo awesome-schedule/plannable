@@ -241,7 +241,7 @@ class ScheduleGenerator {
             while (choiceNum >= classList[classNum].length) {
                 classNum -= 1;
                 if (classNum < 0) {
-                    exhausted = true
+                    exhausted = true;
                     break;
                 }
                 timeTable.pop();
@@ -250,7 +250,6 @@ class ScheduleGenerator {
                     pathMemory[i] = 0;
                 }
             }
-
 
             // if all possibilities are exhausted, then break out the loop
             if (exhausted) {

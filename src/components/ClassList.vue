@@ -67,7 +67,7 @@
                         >
                             <a
                                 v-if="!generated && idx === 0"
-                                style="font-size: 1rem; padding: 0.5rem 0.5rem 0.5rem 1rem"
+                                style="font-size: 1rem; padding: 0.5rem 0 0.5rem 1rem"
                                 class="list-group-item list-group-item-action class-section"
                                 :class="{ active: schedule.All[crs.key] === -1 }"
                                 :title="
@@ -76,13 +76,16 @@
                                         : 'click to select'
                                 "
                                 @click="select(crs.key, -1)"
-                                >Any Section
-                                <div style="float:right;" class="mr-1">
-                                    <i
-                                        v-if="schedule.All[crs.key] === -1"
-                                        class="far fa-check-square"
-                                    ></i>
-                                    <i v-else class="far fa-square"></i>
+                            >
+                                <div class="row no-gutters justify-content-between">
+                                    <div class="col-md-auto">Any Section</div>
+                                    <div class="col col-sm-1 align-self-center">
+                                        <i
+                                            v-if="schedule.All[crs.key] === -1"
+                                            class="far fa-check-square"
+                                        ></i>
+                                        <i v-else class="far fa-square"></i>
+                                    </div>
                                 </div>
                             </a>
                             <div
@@ -97,8 +100,8 @@
                                 @mouseover="preview(crs.key, crs.sids[idx])"
                                 @mouseleave="removePreview()"
                             >
-                                <div class="row no-gutters">
-                                    <div class="col-md-auto mr-auto">
+                                <div class="row no-gutters justify-content-between">
+                                    <div class="col-md-auto">
                                         <ul
                                             class="list-unstyled class-info"
                                             style="font-size: 0.75rem;"
@@ -114,7 +117,7 @@
                                             </li>
                                         </ul>
                                     </div>
-                                    <div class="col col-sm-1 align-self-center mr-1">
+                                    <div class="col col-sm-1 align-self-center">
                                         <i
                                             v-if="isActive(crs.key, crs.sids[idx])"
                                             class="far fa-check-square"

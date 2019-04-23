@@ -232,14 +232,28 @@ class ScheduleGenerator {
                 timeTable.pop();
             }
 
-            [classNum, choiceNum, exhausted] = this.AlgorithmRetract(
-                classList,
-                classNum,
-                choiceNum,
-                pathMemory,
-                timeTable
-            );
+            /**
+             * Algorithm Retract
+             * when all possibilities in on class have exhausted, retract one class
+             * explore the next possibilities in the nearest possible class
+             * reset the memory path forward to zero
+             */
+            while (choiceNum >= classList[classNum].length) {
+                classNum -= 1;
+                if (classNum < 0) {
+                    exhausted = true
+                    break;
+                }
+                timeTable.pop();
+                choiceNum = pathMemory[classNum];
+                for (let i = classNum + 1; i < pathMemory.length; i++) {
+                    pathMemory[i] = 0;
+                }
+            }
+            exhausted = false;
 
+
+            // if all possibilities are exhausted, then break out the loop
             if (exhausted) {
                 break;
             }
@@ -258,33 +272,6 @@ class ScheduleGenerator {
             }
         }
         return evaluator;
-    }
-
-    public AlgorithmRetract(
-        classList: RawAlgoSchedule[],
-        classNum: number,
-        choiceNum: number,
-        pathMemory: Int32Array,
-        timeTable: RawAlgoSchedule
-    ): [number, number, boolean] {
-        /**
-         * when all possibilities in on class have exhausted, retract one class
-         * explore the next possibilities in the nearest possible class
-         * reset the memory path forward to zero
-         */
-
-        while (choiceNum >= classList[classNum].length) {
-            classNum -= 1;
-            if (classNum < 0) {
-                return [classNum, choiceNum, true];
-            }
-            timeTable.pop();
-            choiceNum = pathMemory[classNum];
-            for (let i = classNum + 1; i < pathMemory.length; i++) {
-                pathMemory[i] = 0;
-            }
-        }
-        return [classNum, choiceNum, false];
     }
 
     /**

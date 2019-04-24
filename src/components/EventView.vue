@@ -66,9 +66,9 @@
 
         <textarea
             v-model="eventDescription"
-            class="mt-3 ml-1"
+            class="my-3 form-control"
             placeholder="Description"
-            style="width:98%;height:100px;border-radius: 3px 3px 3px 3px"
+            style="width:96%;height:100px;margin:auto auto;"
         ></textarea>
         <button
             v-if="!isEditingEvent"

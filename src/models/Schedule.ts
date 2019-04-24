@@ -511,12 +511,12 @@ class Schedule {
                     ical += 'BEGIN:VEVENT\n';
                     ical += 'UID:\n';
                     ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
-                    ical += 'DTSTART:' + this.dateToICalString(startAtDay) + '\n';
+                    ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
                     // ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
                     ical +=
-                        'RRULES:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
+                        'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                         Meta.days[d].toUpperCase() +
-                        'BYHOUR=' +
+                        ';BYHOUR=' +
                         startTime.getHours() +
                         ';BYMINUTE=' +
                         startTime.getMinutes() +
@@ -525,14 +525,14 @@ class Schedule {
                         '\n';
                     ical +=
                         'DURATION=P' +
-                        (endMin - startMin) / 60 +
+                        Math.floor((endMin - startMin) / 60) +
                         'H' +
                         ((endMin - startMin) % 60) +
                         'M' +
                         '\n';
-                    ical += 'SUMMARY:' + '\n';
-                    ical += 'DESCRIPTION:' + '\n';
-                    ical += 'LOCATION:' + '\n';
+                    ical += 'SUMMARY:' + sb.section.title + '\n';
+                    ical += 'DESCRIPTION:' + sb.section.description + '\n';
+                    ical += 'LOCATION:' + sb.section.room + '\n';
                     ical += 'END:VEVENT\n';
                 }
             }

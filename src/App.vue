@@ -625,14 +625,32 @@
                     </div>
                 </li>
                 <li class="list-group-item">
-                    <button class="btn btn-outline-dark" style="width:100%" @click="saveToJson">
-                        Export
-                    </button>
-                </li>
-                <li class="list-group-item">
-                    <button class="btn btn-outline-dark" style="width:100%" @click="saveToIcal">
-                        Export to ICalendar
-                    </button>
+                    <div class="form-group row">
+                        <input
+                            v-model="exportJson"
+                            class="form-control col-6 mr-3"
+                            placeholder="filename"
+                            type="text"
+                        />
+                        <button
+                            class="btn btn-outline-dark col-5"
+                            style="width:auto"
+                            @click="saveToJson"
+                        >
+                            Export
+                        </button>
+                    </div>
+                    <div class="form-group row">
+                        <input
+                            v-model="exportICal"
+                            class="form-control col-6 mr-3"
+                            placeholder="filename"
+                            type="text"
+                        />
+                        <button class="btn btn-outline-dark col-5" @click="saveToIcal">
+                            Export iCal
+                        </button>
+                    </div>
                 </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-primary w-100" @click="print">
@@ -830,6 +848,8 @@ export default class App extends Vue {
     drag = false;
     days = Meta.days;
     eventToEdit: Event | null = null;
+    exportJson: string = 'schedule';
+    exportICal: string = 'schedule';
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -1515,10 +1535,13 @@ export default class App extends Vue {
         if (!this.currentSemester) return;
 
         const json = localStorage.getItem(this.currentSemester.id);
-        if (json) savePlain(json, 'schedule.json');
+        if (json) savePlain(json, (this.exportJson ? this.exportJson : 'schedule') + '.json');
     }
     saveToIcal() {
-        savePlain(this.currentSchedule.toICal(), 'schedule.ical');
+        savePlain(
+            this.currentSchedule.toICal(),
+            (this.exportICal ? this.exportICal : 'schedule') + '.ical'
+        );
     }
 }
 </script>

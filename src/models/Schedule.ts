@@ -454,6 +454,7 @@ class Schedule {
                     }
                     for (const m of (section as Section).meetings) {
                         if (m.days === 'TBD' || m.days === 'TBA') continue;
+                        if (m.days.indexOf(Meta.days[d]) === -1) continue;
                         const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
                         const [, start, , end] = m.days.split(' ');
                         const [startMin, endMin] = Utils.parseTimeAsInt(start, end);

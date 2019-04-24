@@ -26,11 +26,7 @@
                 ></path>
             </svg>
         </a>
-        <section-modal
-            id="modal"
-            :semester="currentSemester"
-            :section="modalSection"
-        ></section-modal>
+        <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
         <course-modal :course="modalCourse"></course-modal>
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
@@ -142,7 +138,7 @@
                     :generated="generated"
                     @update_course="updateCourse"
                     @close="closeClassList"
-                    @trigger-classlist-modal="showClassListModal"
+                    @trigger-classlist-modal="showCourseModal"
                 ></ClassList>
             </div>
             <div>
@@ -219,7 +215,7 @@
                         :generated="generated"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
-                        @trigger-classlist-modal="showClassListModal"
+                        @trigger-classlist-modal="showCourseModal"
                     ></ClassList>
                     <div class="btn-group mt-3" role="group" style="width:100%">
                         <button
@@ -1073,9 +1069,10 @@ export default class App extends Vue {
 
     showModal(section: Section) {
         this.modalSection = section;
+        (window as any).$('#modal').modal();
     }
 
-    showClassListModal(course: Course) {
+    showCourseModal(course: Course) {
         this.modalCourse = course;
         (window as any).$('#course-modal').modal();
     }

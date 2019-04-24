@@ -1,7 +1,7 @@
 <template>
-    <div class="modal fade" tabindex="-1" role="dialog">
-        <div v-if="section !== null" class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
+    <div id="modal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div v-if="section" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         {{ section.department }} {{ section.number }} {{ section.title }}

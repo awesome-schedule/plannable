@@ -11,15 +11,10 @@
             color: 'white',
             cursor: 'pointer'
         }"
+        @click="showModal"
     >
-        <div v-if="!mobile" style="height:100%">
-            <div
-                v-if="isSection(scheduleBlock)"
-                data-toggle="modal"
-                data-target="#modal"
-                style="height:100%"
-                @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
-            >
+        <div v-if="!mobile">
+            <div v-if="isSection">
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
                     {{ firstSec.department }} {{ firstSec.number }}-{{ firstSec.section }}
                     {{ firstSec.type }}
@@ -38,13 +33,7 @@
                     </div>
                 </template>
             </div>
-            <div
-                v-if="isSectionArray(scheduleBlock)"
-                data-toggle="modal"
-                data-target="#class-list-modal"
-                style="height:100%"
-                @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
-            >
+            <div v-if="isSectionArray">
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
                     {{ firstSec.department }}
                     {{ firstSec.number }}-{{ firstSec.section }} +{{
@@ -70,11 +59,7 @@
                     {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
                 </div>
             </div>
-            <div
-                v-if="isEvent(scheduleBlock)"
-                style="height:100%"
-                @click="$parent.$emit('editEvent', scheduleBlock.section)"
-            >
+            <div v-if="isEvent">
                 <div class="ml-2 mt-2">
                     {{ scheduleBlock.section.title }}
                 </div>
@@ -85,34 +70,18 @@
                 <div class="ml-2 crs-info" v-html="scheduleBlock.section.description"></div>
             </div>
         </div>
-        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px;height:100%">
-            <div
-                v-if="isSection(scheduleBlock)"
-                data-toggle="modal"
-                data-target="#modal"
-                style="height:!00%"
-                @click="$parent.$emit('trigger-modal', scheduleBlock.section)"
-            >
+        <div v-else class="mt-2 ml-2" style="color:white; font-size:10px">
+            <div v-if="isSection">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }}
             </div>
-            <div
-                v-if="isSectionArray(scheduleBlock)"
-                data-toggle="modal"
-                data-target="#class-list-modal"
-                style="height:100%"
-                @click="$parent.$parent.showClassListModal(sectionsToCourse(scheduleBlock.section))"
-            >
+            <div v-if="isSectionArray">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
             </div>
-            <div
-                v-if="isEvent(scheduleBlock)"
-                style="height:100%"
-                @click="$parent.$emit('editEvent', scheduleBlock.section)"
-            >
+            <div v-if="isEvent">
                 {{ scheduleBlock.section.days }}
             </div>
         </div>
@@ -139,33 +108,27 @@ export default class CourseBlock extends Vue {
     @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
 
-    name = 'CourseBlock';
     mobile = window.screen.width < 450;
 
     get startPx() {
-        let start = 48;
-        const t = this.scheduleBlock.start.split(':');
-        const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
-
-        const temp = this.timeToNum(this.scheduleBlock.start, true);
-        for (let i = this.absoluteEarliest; i < temp; i++) {
-            start += this.heightInfo[i - this.absoluteEarliest];
-        }
-        start += (min / 30) * this.fullHeight;
-        return start;
+        return this.getPx(this.scheduleBlock.start, true);
     }
 
     get endPx() {
-        let end = 48;
-        const t = this.scheduleBlock.end.split(':');
+        return this.getPx(this.scheduleBlock.end, false);
+    }
+
+    getPx(time: string, start: boolean) {
+        let px = 48;
+        const t = time.split(':');
         const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-        const temp = this.timeToNum(this.scheduleBlock.end, false);
+        const temp = this.timeToNum(time, start);
         for (let i = this.absoluteEarliest; i < temp; i++) {
-            end += this.heightInfo[i - this.absoluteEarliest];
+            px += this.heightInfo[i - this.absoluteEarliest];
         }
-        end += (min / 30) * this.fullHeight;
-        return end;
+        px += (min / 30) * this.fullHeight;
+        return px;
     }
 
     get firstSec() {
@@ -190,6 +153,15 @@ export default class CourseBlock extends Vue {
         }
         return null;
     }
+    get isSection() {
+        return this.scheduleBlock.section instanceof Section;
+    }
+    get isEvent() {
+        return this.scheduleBlock.section instanceof Event;
+    }
+    get isSectionArray() {
+        return this.scheduleBlock.section instanceof Array && this.scheduleBlock.section.length;
+    }
 
     timeToNum(time: string, start: boolean) {
         const sep = time.split(':');
@@ -210,18 +182,17 @@ export default class CourseBlock extends Vue {
         }
         return t - 1;
     }
-    isSection(crs: ScheduleBlock) {
-        return crs.section instanceof Section;
-    }
-    isEvent(crs: ScheduleBlock) {
-        return crs.section instanceof Event;
-    }
-    isSectionArray(crs: ScheduleBlock) {
-        return crs.section instanceof Array;
-    }
-    sectionsToCourse(sections: Section[]) {
-        const course = sections[0].course;
-        return new Course(course.raw, course.key, sections.map(x => x.sid));
+
+    showModal() {
+        const $parent = this.$parent as any;
+        const section = this.scheduleBlock.section;
+        if (this.isSection) {
+            $parent.$emit('trigger-modal', section);
+        } else if (this.isSectionArray) {
+            $parent.$parent.showCourseModal(Section.sectionsToCourse(section as Section[]));
+        } else if (this.isEvent) {
+            $parent.$emit('editEvent', section);
+        }
     }
 }
 </script>

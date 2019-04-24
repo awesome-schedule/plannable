@@ -10,6 +10,11 @@ import { parseTimeAll } from './Utils';
  * and it holds additional information specific to that section.
  */
 class Section implements CourseFields, Hashable {
+    public static sectionsToCourse(sections: Section[]) {
+        const course = sections[0].course;
+        return new Course(course.raw, course.key, sections.map(x => x.sid));
+    }
+
     public department: string;
     public number: number;
     public type: string;

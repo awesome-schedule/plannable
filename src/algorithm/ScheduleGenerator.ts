@@ -73,6 +73,7 @@ export interface Options {
     timeSlots: Event[];
     status: string[];
     sortOptions: SortOptions;
+    combineSections: boolean;
 }
 
 class ScheduleGenerator {
@@ -80,7 +81,8 @@ class ScheduleGenerator {
         events: [],
         status: [],
         timeSlots: [],
-        sortOptions: ScheduleEvaluator.getDefaultOptions()
+        sortOptions: ScheduleEvaluator.getDefaultOptions(),
+        combineSections: true
     };
 
     /**
@@ -90,7 +92,7 @@ class ScheduleGenerator {
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
-            if (!options[field]) {
+            if (!options[field] && options[field] !== false) {
                 console.warn(`Non-existent field ${field}. Default value used`);
                 options[field] = ScheduleGenerator.optionDefaults[field];
             }
@@ -135,14 +137,15 @@ class ScheduleGenerator {
             // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
 
-            // combine all sections of this course occurring at the same time
-            const combined = courseRec.getCombined();
+            // combine all sections of this course occurring at the same time, if enabled
+            const combined = this.options.combineSections
+                ? Object.values(courseRec.getCombined())
+                : courseRec.sections.map(s => [s]);
 
             // for each combined section, form a RawAlgoCourse
-            for (const time in combined) {
+            for (const sections of combined) {
                 let no_match = false;
-                const sids = combined[time];
-                const tmp = courseRec.getSection(sids[0]).getRoomTime();
+                const tmp = sections[0].getRoomTime();
                 if (!tmp) continue;
 
                 const [timeDict, roomDict] = tmp;
@@ -157,13 +160,11 @@ class ScheduleGenerator {
                 if (no_match) continue;
 
                 const sectionIndices: number[] = [];
-                for (const sid of sids) {
-                    const section = courseRec.getSection(sid);
-
+                for (const section of sections) {
                     // filter out sections with unwanted status
                     if (this.options.status.includes(section.status)) continue;
 
-                    sectionIndices.push(sid);
+                    sectionIndices.push(section.sid);
                 }
 
                 const roomNumberDict: RoomNumberDict = {};
@@ -234,7 +235,7 @@ class ScheduleGenerator {
         while (true) {
             if (classNum >= classList.length) {
                 evaluator.add(timeTable);
-                // if (evaluator.size() >= 100000) break;
+                if (evaluator.size() >= 250000) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
                 timeTable.pop();

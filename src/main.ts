@@ -12,6 +12,7 @@ declare global {
         querystring: typeof querystring;
         scheduleEvaluator: ScheduleEvaluator;
         catalog: Catalog;
+        timeMatrix: Int32Array;
     }
 }
 

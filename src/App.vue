@@ -327,7 +327,7 @@
                     </table>
                 </li>
                 <li class="list-group-item">
-                    <div class="custom-control custom-checkbox mt-2">
+                    <div class="custom-control custom-checkbox my-1">
                         <input
                             id="awt"
                             v-model="allowWaitlist"
@@ -336,7 +336,7 @@
                         />
                         <label class="custom-control-label" for="awt">Allow Wait List</label>
                     </div>
-                    <div class="custom-control custom-checkbox mt-1">
+                    <div class="custom-control custom-checkbox">
                         <input
                             id="ac"
                             v-model="allowClosed"
@@ -344,6 +344,17 @@
                             class="custom-control-input"
                         />
                         <label class="custom-control-label" for="ac">Allow Closed</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div class="custom-control custom-checkbox">
+                        <input
+                            id="comb-sec"
+                            v-model="combineSections"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="comb-sec">Combine Sections</label>
                     </div>
                 </li>
                 <li
@@ -831,6 +842,7 @@ export default class App extends Vue {
     timeSlots: Array<[boolean, boolean, boolean, boolean, boolean, string, string]> = [];
     allowWaitlist = true;
     allowClosed = true;
+    combineSections = true;
     sortOptions = ScheduleEvaluator.getDefaultOptions();
     sortModes = ScheduleEvaluator.sortModes;
 
@@ -1329,7 +1341,8 @@ export default class App extends Vue {
                 events: this.currentSchedule.events,
                 timeSlots: timeFilters,
                 status: constraintStatus,
-                sortOptions: this.sortOptions
+                sortOptions: this.sortOptions,
+                combineSections: this.combineSections
             });
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;

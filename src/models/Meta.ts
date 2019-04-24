@@ -122,6 +122,7 @@ class Meta {
         // settings
         'allowWaitList',
         'allowClosed',
+        'combineSections',
         'showTime',
         'showRoom',
         'showInstructor',

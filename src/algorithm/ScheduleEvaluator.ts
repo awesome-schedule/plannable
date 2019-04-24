@@ -16,7 +16,7 @@ export interface SortMode {
 }
 
 type OrderedBlocks = [number[], number[], number[], number[], number[]];
-type OrderedRooms = [string[], string[], string[], string[], string[]];
+type OrderedRooms = [number[], number[], number[], number[], number[]];
 
 export interface CmpSchedule {
     schedule: RawAlgoSchedule;
@@ -264,6 +264,19 @@ class ScheduleEvaluator {
             return total;
         },
 
+        distance(schedule: CmpSchedule) {
+            const timeMatrix = window.timeMatrix;
+            const len = timeMatrix.length ** 0.5;
+            const rooms = schedule.rooms;
+            let dist = 0;
+            for (const dayRooms of rooms) {
+                for (let i = 0; i < dayRooms.length - 1; i++) {
+                    dist += timeMatrix[dayRooms[i] * len + dayRooms[i + 1]];
+                }
+            }
+            return dist;
+        },
+
         IamFeelingLucky() {
             return Math.random();
         }
@@ -334,16 +347,17 @@ class ScheduleEvaluator {
         const rooms: OrderedRooms = [[], [], [], [], []];
         for (const course of schedule) {
             const timeDict = course[1];
+            const roomDict = course[3];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
-                const timeBlock = timeDict[days[k]] as number[];
+                const day = days[k];
+                const timeBlock = timeDict[day];
+                const roomBlock = roomDict[day];
                 if (!timeBlock) continue;
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
                 const block: number[] = blocks[k];
-
-                // const room: string[] = rooms[k];
-                // const courseRoom = new Array(timeBlock.length / 2).fill(course[0]);
+                const room: number[] = rooms[k];
 
                 // hi = half of i
                 for (let i = 0, hi = 0; i < timeBlock.length; i += 2, hi += 1) {
@@ -354,7 +368,7 @@ class ScheduleEvaluator {
                     for (; j < block.length; j += 2, hj += 1) if (ele < block[j]) break;
 
                     block.splice(j, 0, ele, timeBlock[i + 1]);
-                    // room.splice(hj, 0, courseRoom[hi]);
+                    room.splice(hj, 0, roomBlock[hi]);
                 }
             }
         }

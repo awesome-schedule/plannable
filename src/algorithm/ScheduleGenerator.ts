@@ -37,6 +37,14 @@ export interface TimeDict {
     Fr?: number[];
 }
 
+export interface RoomDict {
+    [x: string]: string[];
+}
+
+export interface RoomNumberDict {
+    [x: string]: number[];
+}
+
 /**
  * The data structure used in the algorithm to represent a Course that
  * possibly has multiple sections combined (occurring at the same time)
@@ -52,7 +60,7 @@ export interface TimeDict {
  *
  * @see TimeDict
  */
-export type RawAlgoCourse = [string, TimeDict, number[]];
+export type RawAlgoCourse = [string, TimeDict, number[], RoomNumberDict];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -101,6 +109,9 @@ class ScheduleGenerator {
      * The entrance of the schedule generator
      * returns a sorted `ScheduleEvaluator` Object
      *
+     * Note that this method does not need to run very fast. It only preprocess the select
+     * courses so that they are stored in a desirable format.
+     *
      * @see ScheduleEvaluator
      */
     public getSchedules(
@@ -131,42 +142,14 @@ class ScheduleGenerator {
             for (const time in combined) {
                 let no_match = false;
                 const sids = combined[time];
-                const tmp_dict: TimeDict = Object.create(null);
+                const tmp = courseRec.getSection(sids[0]).getRoomTime();
+                if (!tmp) continue;
 
-                // there may be multiple meeting times. parse each of them and add to tmp_dict
-                for (const t of time.split('|')) {
-                    // skip empty string
-                    if (!t) continue;
-
-                    // parse the meeting time
-                    const tmp1 = Utils.parseTimeAll(t);
-
-                    // skip TBA or ill-formated time
-                    if (tmp1 === null) {
-                        no_match = true;
-                        break;
-                    }
-
-                    const [date, timeBlock] = tmp1;
-
-                    // for each day
-                    for (const d of date) {
-                        const dayBlock = tmp_dict[d];
-
-                        // the timeBlock is flattened
-                        if (dayBlock) {
-                            dayBlock.push(...timeBlock);
-                        } else {
-                            // copy
-                            tmp_dict[d] = timeBlock.concat();
-                        }
-                    }
-                }
-                if (no_match) continue;
+                const [timeDict, roomDict] = tmp;
 
                 // don't include this combined section if it conflicts with any time filter or event,.
                 for (const td of timeSlots) {
-                    if (Utils.checkTimeConflict(td, tmp_dict)) {
+                    if (Utils.checkTimeConflict(td, timeDict)) {
                         no_match = true;
                         break;
                     }
@@ -174,7 +157,6 @@ class ScheduleGenerator {
                 if (no_match) continue;
 
                 const sectionIndices: number[] = [];
-
                 for (const sid of sids) {
                     const section = courseRec.getSection(sid);
 
@@ -183,7 +165,14 @@ class ScheduleGenerator {
 
                     sectionIndices.push(sid);
                 }
-                if (sectionIndices.length !== 0) classes.push([key, tmp_dict, sectionIndices]);
+
+                const roomNumberDict: RoomNumberDict = {};
+                for (const day in roomDict) {
+                    roomNumberDict[day] = roomDict[day].map(x => 1);
+                }
+
+                if (sectionIndices.length !== 0)
+                    classes.push([key, timeDict, sectionIndices, roomNumberDict]);
             }
 
             // throw an error of none of the sections pass the filter

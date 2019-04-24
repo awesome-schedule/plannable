@@ -5,7 +5,7 @@
                 <div class="col-md-auto">
                     <!-- Navbar -->
                     <nav id="navbar-example3" class="navbar navbar-light bg-light">
-                        <a class="navbar-brand" href="#">Website Guide</a>
+                        <!-- <a class="navbar-brand" href="#">Website Guide</a> -->
                         <nav class="nav nav-pills flex-column">
                             <a class="nav-link" href="#item-1">General Introduction</a>
                             <a class="nav-link" href="#item-2">Basic Operations</a>
@@ -23,7 +23,7 @@
                 </div>
                 <div class="col">
                     <!-- documentation -->
-                    <div data-spy="scroll" data-target="#navbar-example3" data-offset="10">
+                    <body data-spy="scroll" data-target="#navbar-example3" data-offset="10">
                     <h4 id="item-1">General Introduction</h4>
                     <p>
                         This is a website which helps UVa students to schedule their classes more
@@ -107,7 +107,7 @@
                     <p>...</p>
                     <h5 id="item-3-2">Item 3-2</h5>
                     <p>...</p>
-                    </div>
+                    </body>
                 </div>
             </div>
         </div>
@@ -115,14 +115,15 @@
 </template>
 
 <script>
+
 import Vue from 'vue';
 export default Vue.extend({});
 $('#myCarousel').carousel();
-$('template').scrollspy({ target: '#navbar-example3' });
+$('body').scrollspy({ target: '#navbar-example3' });
 </script>
 
 <style scoped>
-.template{
+.body{
     position: relative;
 }
 .info-panel {
@@ -147,5 +148,7 @@ $('template').scrollspy({ target: '#navbar-example3' });
     height: 30%;
     width: 100%;
 } 
+
+
 
 </style>

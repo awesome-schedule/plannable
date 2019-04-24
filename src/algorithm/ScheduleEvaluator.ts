@@ -227,25 +227,22 @@ class ScheduleEvaluator {
             const lunchStart = 11 * 60;
             const lunchEnd = 14 * 60;
             const lunchMinOverlap = 60;
-            const lunchOverlap = new Int32Array(5);
             const blocks = schedule.blocks;
+            let totalOverlap = 0;
             for (let i = 0; i < 5; i++) {
                 const day = blocks[i];
+                let dayOverlap = 0;
                 for (let j = 0; j < day.length; j += 2) {
-                    lunchOverlap[i] += ScheduleEvaluator.calcOverlap(
+                    dayOverlap += ScheduleEvaluator.calcOverlap(
                         lunchStart,
                         lunchEnd,
                         day[j],
                         day[j + 1]
                     );
                 }
+                if (dayOverlap > lunchMinOverlap) totalOverlap += dayOverlap;
             }
-            let overlap = 0;
-            for (let i = 0; i < lunchOverlap.length; i++) {
-                const o = lunchOverlap[i];
-                if (o > lunchMinOverlap) overlap += o;
-            }
-            return overlap;
+            return totalOverlap;
         },
 
         /**

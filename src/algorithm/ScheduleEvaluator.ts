@@ -122,6 +122,14 @@ class ScheduleEvaluator {
                 description: 'Start my day as late as possible'
             },
             {
+                name: 'distance',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Walking Distance',
+                description: 'Minimize the total walking distance'
+            },
+            {
                 name: 'IamFeelingLucky',
                 enabled: false,
                 reverse: false,
@@ -142,7 +150,7 @@ class ScheduleEvaluator {
             };
         },
         fromJSON(raw: SortOptionJSON) {
-            if (raw && raw.mode && raw.sortBy) {
+            if (raw && raw.mode !== undefined && raw.sortBy) {
                 this.mode = raw.mode;
                 for (const raw_sort of raw.sortBy) {
                     for (const sort of this.sortBy) {
@@ -271,7 +279,10 @@ class ScheduleEvaluator {
             let dist = 0;
             for (const dayRooms of rooms) {
                 for (let i = 0; i < dayRooms.length - 1; i++) {
-                    dist += timeMatrix[dayRooms[i] * len + dayRooms[i + 1]];
+                    const r1 = dayRooms[i];
+                    const r2 = dayRooms[i + 1];
+                    if (r1 === -1 || r2 === -1) continue;
+                    dist += timeMatrix[r1 * len + r2];
                 }
             }
             return dist;

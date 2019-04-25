@@ -175,18 +175,18 @@ class ScheduleGenerator {
                 const buildingList: string[] = [];
                 const keymap: string[] = [];
                 for (const day in roomDict) {
-                    const numberList: number[] = [];
-                    for (const room of roomDict[day]) {
-                        const result = findBestMatch(room, buildingList);
-                        // we set the match threshold to 0.5
-                        if (result.bestMatch.rating >= 0.5) {
-                            const newroom: string = buildingList[result.bestMatchIndex];
-                            numberList.push(keymap.indexOf(newroom));
-                            continue;
-                        }
-                        numberList.push(-1);
-                    }
-                    roomNumberDict[day] = numberList;
+                    // const numberList: number[] = [];
+                    // for (const room of roomDict[day]) {
+                    //     const result = findBestMatch(room, buildingList);
+                    //     // we set the match threshold to 0.5
+                    //     if (result.bestMatch.rating >= 0.5) {
+                    //         const newroom: string = buildingList[result.bestMatchIndex];
+                    //         numberList.push(keymap.indexOf(newroom));
+                    //         continue;
+                    //     }
+                    //     numberList.push(-1);
+                    // }
+                    roomNumberDict[day] = roomDict[day].map(x => 1);
                 }
 
                 if (sectionIndices.length !== 0)

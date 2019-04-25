@@ -768,10 +768,11 @@ import Catalog, { Semester, CatalogJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import { getSemesterList, getSemesterData } from './data/DataLoader';
+import { loadSemesterData } from './data/CatalogLoader';
+import { loadSemesterList } from './data/SemesterListLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
-import { to12hr, parseTimeAsInt, timeout, savePlain } from './models/Utils';
+import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
 import { AxiosError } from 'axios';
 
@@ -921,30 +922,16 @@ export default class App extends Vue {
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
 
-        // load the cached list of semesters, if it exists
-        const storage = localStorage.getItem('semesters');
-        if (!storage) {
-            this.fetchSemesterList();
-            return;
-        }
-        const sms = JSON.parse(storage);
-        const modified = sms.modified;
-
-        // if data exists and is not expired
-        if (
-            modified &&
-            new Date().getTime() - new Date(modified).getTime() < Meta.semesterListExpirationTime
-        ) {
-            this.semesters = sms['semesterList'];
-            this.selectSemester(0);
-        } else {
-            // fetch a fresh list of semesters
-            this.fetchSemesterList(undefined, () => {
-                // if failed to fetch, just use the old data
-                this.semesters = sms['semesterList'];
+        loadSemesterList().then(data => {
+            const semesters = data.payload;
+            console.log(data);
+            if (data.level !== 'info') this.noti.notify(data);
+            if (semesters) {
+                this.semesters = semesters;
                 this.selectSemester(0);
-            });
-        }
+            }
+            this.loading = false;
+        });
     }
 
     generatedEmpty() {
@@ -1028,45 +1015,6 @@ export default class App extends Vue {
         if (this.sideBar.showSelectColor) this.switchSchedule(true);
     }
 
-    fetchSemesterList(success?: () => void, reject?: () => void) {
-        timeout(getSemesterList(), 10000)
-            .then(res => {
-                this.semesters = res;
-
-                // save newly fetched semester data to local storage
-                localStorage.setItem(
-                    'semesters',
-                    JSON.stringify({
-                        modified: new Date().toJSON(),
-                        semesterList: res
-                    })
-                );
-                // select the latest semester
-                this.selectSemester(0);
-                if (typeof success === 'function') success();
-            })
-            .catch((err: string | AxiosError) => {
-                console.warn(err);
-                let errStr = `Failed to fetch semester list: ${this.errToStr(err)}`;
-                if (typeof reject === 'function') {
-                    errStr += 'Old data is used instead';
-                    this.noti.warn(errStr);
-                    this.loading = false;
-                    reject();
-                    return;
-                }
-                this.noti.error(errStr);
-                this.loading = false;
-            });
-    }
-    errToStr(err: string | AxiosError) {
-        let errStr = '';
-        if (typeof err === 'string') errStr += err;
-        else if (err.response) errStr += `request rejected by the server`;
-        else if (err.request) errStr += `No internet`;
-        else errStr += err.message;
-        return errStr + '. ';
-    }
     onDocChange() {
         this.saveStatus();
     }
@@ -1127,8 +1075,8 @@ export default class App extends Vue {
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to rerender component
         (this.$refs.selectedClassList as Vue).$forceUpdate();
-        if (this.$refs.enteringClassList instanceof Vue)
-            (this.$refs.enteringClassList as Vue).$forceUpdate();
+        const classList = this.$refs.enteringClassList;
+        if (classList instanceof Vue) (classList as Vue).$forceUpdate();
     }
     /**
      * Switch to `idx` page. If update is true, also update the pagination status.
@@ -1171,16 +1119,21 @@ export default class App extends Vue {
      * Select a semester and fetch all its associated data.
      *
      * This method will assign a correct Catalog object to `window.catalog`
-     * which will be either requested from remote or parsed from `localStorage`
      *
-     * After that, schedules and settings will be parsed from `localStorage`
+     * Then, schedules and settings will be parsed from `localStorage`
      * and assigned to relevant fields of `this`.
+     *
      * If no local data is present, then default values will be assigned.
+     *
      * @param semesterId index or id of this semester
      * @param parsed_data
      * @param force whether to force-update semester data
      */
-    selectSemester(semesterId: number | string, parsed_data?: { [x: string]: any }, force = false) {
+    async selectSemester(
+        semesterId: number | string,
+        parsed_data?: { [x: string]: any },
+        force = false
+    ) {
         // do a linear search to find the index of the semester given its string id
         if (typeof semesterId === 'string') {
             for (let i = 0; i < this.semesters.length; i++) {
@@ -1196,80 +1149,25 @@ export default class App extends Vue {
 
         this.currentSemester = this.semesters[semesterId];
         this.loading = true;
-        const data = localStorage.getItem(this.currentSemester.id);
-        const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
 
-        /**
-         * The callback that gets executes when no local data is present
-         */
-        const defaultCallback = () => {
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            const defaultData = getDefaultData();
-            for (const field of Meta.storageFields) {
-                if (field !== 'currentSemester') this[field] = defaultData[field];
+        const result = await loadSemesterData(semesterId, force);
+        if (result.level !== 'info') this.noti.notify(result);
+
+        //  if the global `Catalog` object is assigned
+        if (result.payload) {
+            const data = localStorage.getItem(this.currentSemester.id);
+
+            let raw_data: { [x: string]: any } = {};
+            if (parsed_data) {
+                raw_data = parsed_data;
+            } else if (data) {
+                raw_data = JSON.parse(data);
             }
-            this.saveAllRecords();
-            this.saveStatus();
-            this.loading = false;
-        };
-        let raw_data: { [x: string]: any };
-        if (parsed_data) {
-            raw_data = parsed_data;
-        } else if (data) {
-            raw_data = JSON.parse(data);
-        } else {
-            this.fetchSemesterData(semesterId, defaultCallback);
-            return;
-        }
 
-        // storage version mismatch implies API update: use dafault data instead
-        if (Meta.storageVersion !== raw_data.storageVersion) {
-            // clear local storage
-            localStorage.clear();
-            this.fetchSemesterData(semesterId, defaultCallback);
-            return;
-        }
-        const temp = allRecords_raw ? Catalog.fromJSON(JSON.parse(allRecords_raw)) : null;
-
-        /**
-         * The callback that gets executes after the global `Catalog` object is assigned
-         */
-        const callback = () => {
             this.generated = false;
             window.scheduleEvaluator.clear();
             this.parseLocalData(raw_data);
             this.loading = false;
-        };
-
-        // if data does not exist or is not in correct format
-        if (temp === null) {
-            this.fetchSemesterData(semesterId, () => {
-                this.saveAllRecords();
-                callback();
-            });
-        } else {
-            // if data expired
-            if (temp.expired || force) {
-                if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`, 5);
-                // in this case, we only need to update window.catalog. Save a set of fresh data
-                this.fetchSemesterData(
-                    semesterId,
-                    () => {
-                        this.saveAllRecords();
-                        if (force) this.noti.success('Success!', 3);
-                        callback();
-                    },
-                    () => {
-                        // if failed, just use the old data.
-                        window.catalog = temp.catalog;
-                        callback();
-                    }
-                );
-            } else {
-                window.catalog = temp.catalog;
-                callback();
-            }
         }
     }
 
@@ -1287,42 +1185,7 @@ export default class App extends Vue {
             JSON.stringify(window.catalog.toJSON())
         );
     }
-    /**
-     * fetch basic class data for the given semester for fast class search and rendering
-     * this method will assign to the global `window.catalog` object
-     *
-     * This method will set the flag `loading` to true on start, to false on return.
-     * When on error, a proper error message will be displayed to the user.
-     *
-     * @param success func to execute on success
-     * @param reject func to execute on failure
-     */
-    fetchSemesterData(semesterIdx: number, success?: () => void, reject?: () => void) {
-        this.loading = true;
-        timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
-            .then(data => {
-                window.catalog = new Catalog(this.currentSemester as Semester, data);
-                if (typeof success === 'function') {
-                    success();
-                    this.loading = false;
-                }
-            })
-            .catch((err: string | AxiosError) => {
-                console.warn(err);
-                let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: ${this.errToStr(
-                    err
-                )}`;
-                if (typeof reject === 'function') {
-                    errStr += 'Old data is used instead';
-                    reject();
-                    this.noti.warn(errStr);
-                    this.loading = false;
-                    return;
-                }
-                this.noti.error(errStr);
-                this.loading = false;
-            });
-    }
+
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
@@ -1422,6 +1285,7 @@ export default class App extends Vue {
     parseLocalData(raw_data: { [x: string]: any }) {
         const defaultData = getDefaultData();
         for (const field of Meta.storageFields) {
+            if (field === 'currentSemester') continue;
             if (field === 'proposedSchedules') {
                 // if true, we're dealing with legacy storage
                 if (raw_data.proposedSchedule) {
@@ -1458,7 +1322,8 @@ export default class App extends Vue {
                     const parsed = this[field].fromJSON(raw_data[field]);
                     if (parsed) this[field] = parsed;
                     else {
-                        this.noti.warn(`Fail to parse ${field}`);
+                        // this.noti.warn(`Fail to parse ${field}`);
+                        console.warn('failed to parse', field);
                         this[field] = defaultData[field];
                     }
                 } else {

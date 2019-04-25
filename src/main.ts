@@ -4,7 +4,7 @@ import querystring from 'querystring';
 import axios from 'axios';
 import { openLousList, openVAGrade } from './models/Utils';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import Catalog from './models/Catalog';
+import Catalog, { Semester } from './models/Catalog';
 
 declare global {
     interface Window {
@@ -13,6 +13,8 @@ declare global {
         scheduleEvaluator: ScheduleEvaluator;
         catalog: Catalog;
         timeMatrix: Int32Array;
+        buildingList: string[];
+        semesters: Semester[];
     }
 }
 

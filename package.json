@@ -12,7 +12,6 @@
         "tsdoc": "typedoc --out ./docs/tsdoc ./src"
     },
     "dependencies": {
-        "@types/string-similarity": "^3.0.0",
         "axios": "^0.18",
         "file-saver": "^2.0.1",
         "papaparse": "^4.6.3",
@@ -23,6 +22,7 @@
         "vuedraggable": "^2.20.0"
     },
     "devDependencies": {
+        "@types/string-similarity": "^3.0.0",
         "@babel/preset-typescript": "^7.3.3",
         "@types/file-saver": "^2.0.0",
         "@types/jest": "^24.0.11",

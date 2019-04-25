@@ -21,6 +21,6 @@
         },
         "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/unit/stringSimilarity.d.ts"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
     "exclude": ["node_modules"]
 }

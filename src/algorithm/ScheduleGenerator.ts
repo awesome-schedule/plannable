@@ -184,12 +184,11 @@ class ScheduleGenerator {
                         // we set the match threshold to 0.5
                         if (roomMatch.bestMatch.rating >= 0.5) {
                             numberList.push(roomMatch.bestMatchIndex);
-                            continue;
                         } else {
                             // mismatch!
                             console.warn(room, roomMatch);
+                            numberList.push(-1);
                         }
-                        numberList.push(-1);
                     }
                     roomNumberDict[day] = numberList;
                 }

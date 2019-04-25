@@ -6,6 +6,15 @@ import Catalog, { Semester } from '../models/Catalog';
 import { NotiMsg } from '@/models/Notification';
 import { errToStr } from '@/models/Utils';
 
+/**
+ * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
+ * set of data from Lou's list and save to `localStorage`.
+ *
+ * storage key: 1198data
+ *
+ * @param idx index of the semester to load data
+ * @param force force update
+ */
 export async function loadSemesterData(idx: number, force = false): Promise<NotiMsg<Catalog>> {
     const semester = window.semesters[idx];
     const allRecords_raw = localStorage.getItem(`${semester.id}data`);

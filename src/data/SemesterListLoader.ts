@@ -12,6 +12,8 @@ interface SemesterListJSON {
 /**
  * Try to load semester list from localStorage. If it expires or does not exist,
  * load a fresh semester list from Lou's list and store it in localStorage.
+ *
+ * storage key: "semesters"
  */
 export async function loadSemesterList(count = 5): Promise<NotiMsg<Semester[]>> {
     // load the cached list of semesters, if it exists

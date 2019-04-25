@@ -775,7 +775,6 @@ import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
-import { AxiosError } from 'axios';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -929,7 +928,6 @@ export default class App extends Vue {
 
             const data = await loadSemesterList();
             const semesters = data.payload;
-            console.log(data);
             if (data.level !== 'info') this.noti.notify(data);
             if (semesters) {
                 this.semesters = semesters;
@@ -1128,7 +1126,7 @@ export default class App extends Vue {
      * Then, schedules and settings will be parsed from `localStorage`
      * and assigned to relevant fields of `this`.
      *
-     * If no local data is present, then default values will be assigned.
+     * If no local data is present, default values will be assigned.
      *
      * @param semesterId index or id of this semester
      * @param parsed_data
@@ -1155,6 +1153,7 @@ export default class App extends Vue {
         this.currentSemester = this.semesters[semesterId];
         this.loading = true;
 
+        if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`);
         const result = await loadSemesterData(semesterId, force);
         if (result.level !== 'info') this.noti.notify(result);
 
@@ -1176,21 +1175,6 @@ export default class App extends Vue {
         }
     }
 
-    saveAllRecords() {
-        if (!this.currentSemester) return;
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.endsWith('data')) {
-                localStorage.removeItem(key);
-            }
-        }
-        localStorage.setItem(
-            `${this.currentSemester.id}data`,
-            JSON.stringify(window.catalog.toJSON())
-        );
-    }
-
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
@@ -1202,26 +1186,25 @@ export default class App extends Vue {
         if (this.currentSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
 
-        const constraintStatus = [];
-        if (!this.allowWaitlist) constraintStatus.push('Wait List');
-        if (!this.allowClosed) constraintStatus.push('Closed');
+        const status = [];
+        if (!this.allowWaitlist) status.push('Wait List');
+        if (!this.allowClosed) status.push('Closed');
 
-        const timeFilters = this.computeFilter();
+        const timeSlots = this.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeFilters === null) {
+        if (timeSlots === null) {
             this.noti.error(`Invalid time filter`);
             return;
         }
 
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
-
         try {
             const evaluator = generator.getSchedules(this.currentSchedule, {
                 events: this.currentSchedule.events,
-                timeSlots: timeFilters,
-                status: constraintStatus,
+                timeSlots,
+                status,
                 sortOptions: this.sortOptions,
                 combineSections: this.combineSections,
                 maxNumSchedules: this.maxNumSchedules

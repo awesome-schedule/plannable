@@ -368,10 +368,17 @@ class Schedule {
 
     public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
         const [days, start, , end] = dayTimes.split(' ');
-        const [startMin, endMin] = Utils.parseTimeAsString(start, end);
-        for (let i = 0; i < days.length; i += 2) {
-            const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
-            this.days[days.substr(i, 2)].push(scheduleBlock);
+        if (days && start && end) {
+            const [startMin, endMin] = Utils.parseTimeAsString(start, end);
+            // wait... start time equals end time?
+            if (startMin === endMin) {
+                console.warn(events, startMin, endMin);
+                return;
+            }
+            for (let i = 0; i < days.length; i += 2) {
+                const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
+                this.days[days.substr(i, 2)].push(scheduleBlock);
+            }
         }
     }
 

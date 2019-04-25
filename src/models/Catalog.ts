@@ -1,13 +1,13 @@
 import Course from './Course';
 import Meta, { RawCatalog } from './Meta';
+import Expirable from '@/data/Expirable';
 
 export interface Semester {
     id: string;
     name: string;
 }
 
-export interface CatalogJSON {
-    modified: string;
+export interface CatalogJSON extends Expirable {
     semester: Semester;
     raw_data: RawCatalog;
 }

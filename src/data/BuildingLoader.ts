@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { NotiMsg } from '@/models/Notification';
+import Expirable from './Expirable';
+import { loadFromCache } from './Loader';
 
 const api =
     window.location.host.indexOf('localhost') === -1 &&
@@ -7,14 +9,48 @@ const api =
         ? `${window.location.protocol}//${window.location.host}/`
         : 'http://localhost:8000/';
 
+interface TimeMatrixJSON extends Expirable {
+    timeMatrix: number[];
+}
+
+interface BuildingListJSON extends Expirable {
+    buildingList: string[];
+}
+
 /**
- * Try to load walking time matrix between buildings from localStorage.
+ * Try to load the walking time matrix between buildings from localStorage.
  * If it expires or does not exist,
  * load a fresh one from data backend and store it in localStorage.
  *
  * storage key: "timeMatrix"
  */
 export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
+    const data = await loadFromCache(
+        'timeMatrix',
+        requestTimeMatrix,
+        (x: TimeMatrixJSON) => Int32Array.from(x.timeMatrix),
+        x => `Failed to load time matrix: ${x}. Old data is used instead`,
+        x => `Failed to load time matrix: ${x}. `,
+        1000 * 86400,
+        50000
+    );
+    return data;
+}
+
+export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
+    const data = await loadFromCache(
+        'buildingList',
+        requestBuildingList,
+        (x: BuildingListJSON) => x.buildingList,
+        x => `Failed to load building list: ${x}. Old data is used instead`,
+        x => `Failed to load building list: ${x}. `,
+        1000 * 86400,
+        50000
+    );
+    return data;
+}
+
+export async function requestTimeMatrix(): Promise<Int32Array> {
     const res = await axios.get(`${api}/data/time_matrix.json`);
     const data: number[][] = res.data;
 
@@ -31,21 +67,13 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
             })
         );
 
-        return {
-            payload: window.timeMatrix = flattened,
-            msg: 'success',
-            level: 'info'
-        };
+        return flattened;
     } else {
-        throw new Error('Failed to fetch building matrix');
-        // return {
-        //     msg: 'Failed to fetch building matrix',
-        //     level: 'error'
-        // };
+        throw new Error('Data format error');
     }
 }
 
-export async function loadBuildingList(): Promise<string[]> {
+export async function requestBuildingList(): Promise<string[]> {
     const res = await axios.get(`${api}/data/building_list.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {
@@ -57,7 +85,7 @@ export async function loadBuildingList(): Promise<string[]> {
             })
         );
 
-        return (window.buildingList = data);
+        return data;
     } else {
         throw new Error('Data format error');
     }

@@ -177,20 +177,26 @@ class ScheduleGenerator {
 
                 // Map the room to a number
                 const roomNumberDict: RoomNumberDict = {};
-                for (const day in roomDict) {
-                    const numberList: number[] = [];
-                    for (const room of roomDict[day]) {
-                        const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
-                        // we set the match threshold to 0.5
-                        if (roomMatch.bestMatch.rating >= 0.5) {
-                            numberList.push(roomMatch.bestMatchIndex);
-                        } else {
-                            // mismatch!
-                            console.warn(room, roomMatch);
-                            numberList.push(-1);
+                if (buildingList && buildingList.length) {
+                    for (const day in roomDict) {
+                        const numberList: number[] = [];
+                        for (const room of roomDict[day]) {
+                            const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
+                            // we set the match threshold to 0.5
+                            if (roomMatch.bestMatch.rating >= 0.5) {
+                                numberList.push(roomMatch.bestMatchIndex);
+                            } else {
+                                // mismatch!
+                                console.warn(room, roomMatch);
+                                numberList.push(-1);
+                            }
                         }
+                        roomNumberDict[day] = numberList;
                     }
-                    roomNumberDict[day] = numberList;
+                } else {
+                    for (const day in roomDict) {
+                        roomNumberDict[day] = roomDict[day].map(x => -1);
+                    }
                 }
 
                 if (sectionIndices.length !== 0)

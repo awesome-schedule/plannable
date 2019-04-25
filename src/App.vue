@@ -760,6 +760,7 @@ import CourseModal from './components/CourseModal.vue';
 import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
+import draggable from 'vuedraggable';
 
 import Section from './models/Section';
 import Course from './models/Course';
@@ -772,7 +773,6 @@ import { loadSemesterData } from './data/CatalogLoader';
 import { loadSemesterList } from './data/SemesterListLoader';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import Notification from './models/Notification';
-import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
 
@@ -923,8 +923,12 @@ export default class App extends Vue {
         this.loading = true;
 
         (async () => {
-            await loadTimeMatrix();
-            await loadBuildingList();
+            const pay1 = await loadTimeMatrix();
+            console[pay1.level](pay1.msg);
+            if (pay1.payload) window.timeMatrix = pay1.payload;
+            const pay2 = await loadBuildingList();
+            console[pay2.level](pay2.msg);
+            if (pay2.payload) window.buildingList = pay2.payload;
 
             const data = await loadSemesterList();
             const semesters = data.payload;

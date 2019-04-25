@@ -217,14 +217,16 @@ export function timeout<T>(
     time: number,
     msg = 'Time out fetching data. Please try again later'
 ): Promise<T> {
-    return Promise.race([
-        promise,
-        new Promise((resolve, reject) => {
-            setTimeout(() => {
-                reject(msg);
-            }, time);
-        })
-    ]) as Promise<T>;
+    if (time > 0) {
+        return Promise.race([
+            promise,
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    reject(msg);
+                }, time);
+            })
+        ]) as Promise<T>;
+    } else return promise;
 }
 
 export function savePlain(str: string, filename: string) {

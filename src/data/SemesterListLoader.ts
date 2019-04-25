@@ -3,9 +3,9 @@ import { Semester } from '../models/Catalog';
 import { timeout, errToStr } from '../models/Utils';
 import Meta from '@/models/Meta';
 import { NotiMsg } from '../models/Notification';
+import Expirable from './Expirable';
 
-interface SemesterListJSON {
-    modified: string;
+interface SemesterListJSON extends Expirable {
     semesterList: Semester[];
 }
 

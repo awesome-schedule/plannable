@@ -4,15 +4,29 @@ import { errToStr, timeout } from '../models/Utils';
 
 export async function loadFromCache<T, T_JSON extends Expirable>(
     key: string,
-    request: () => Promise<T>,
-    construct: (x: T_JSON) => T,
-    warnMsg: (err: string) => string,
-    errMsg: (err: string) => string,
-    expireTime: number,
-    timeoutTime = -1,
-    parse: (x: string | null) => T_JSON | null = x => (x ? JSON.parse(x) : x),
-    validator: (x: T_JSON | null) => x is T_JSON = defaultValidator,
-    force = false
+    {
+        request,
+        construct,
+        warnMsg,
+        errMsg,
+        infoMsg = '',
+        expireTime = Infinity,
+        timeoutTime = -1,
+        parse = x => (x ? JSON.parse(x) : x),
+        validator = defaultValidator,
+        force = false
+    }: {
+        request: () => Promise<T>;
+        construct: (x: T_JSON) => T;
+        warnMsg: (err: string) => string;
+        errMsg: (err: string) => string;
+        infoMsg?: string;
+        expireTime?: number;
+        timeoutTime?: number;
+        parse?: (x: string | null) => T_JSON | null;
+        validator?: (x: T_JSON | null) => x is T_JSON;
+        force?: boolean;
+    }
 ): Promise<NotiMsg<T>> {
     const storage = localStorage.getItem(key);
     const data: T_JSON | null = parse(storage);
@@ -22,11 +36,12 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
             try {
                 return {
                     payload: await timeout(request(), timeoutTime),
-                    msg: '',
+                    msg: infoMsg,
                     level: 'info'
                 };
             } catch (err) {
                 return {
+                    payload: construct(data),
                     msg: warnMsg(errToStr(err)),
                     level: 'warn'
                 };
@@ -34,7 +49,7 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         } else {
             return {
                 payload: construct(data),
-                msg: '',
+                msg: infoMsg,
                 level: 'info'
             };
         }
@@ -43,7 +58,7 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         try {
             return {
                 payload: await timeout(request(), timeoutTime),
-                msg: '',
+                msg: infoMsg,
                 level: 'info'
             };
         } catch (err) {

@@ -1160,6 +1160,7 @@ export default class App extends Vue {
         if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`);
         const result = await loadSemesterData(semesterId, force);
         if (result.level !== 'info') this.noti.notify(result);
+        if (result.payload) window.catalog = result.payload;
 
         //  if the global `Catalog` object is assigned
         if (result.payload) {

@@ -2,9 +2,9 @@ import axios from 'axios';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
 import Meta, { RawCatalog, RawSection, RawMeeting } from '../models/Meta';
-import Catalog, { Semester } from '../models/Catalog';
+import Catalog, { Semester, CatalogJSON } from '../models/Catalog';
 import { NotiMsg } from '@/models/Notification';
-import { errToStr } from '@/models/Utils';
+import { loadFromCache } from './Loader';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -17,51 +17,16 @@ import { errToStr } from '@/models/Utils';
  */
 export async function loadSemesterData(idx: number, force = false): Promise<NotiMsg<Catalog>> {
     const semester = window.semesters[idx];
-    const allRecords_raw = localStorage.getItem(`${semester.id}data`);
-    const temp = allRecords_raw ? Catalog.fromJSON(JSON.parse(allRecords_raw)) : null;
-    const successMsg = `Successfully loaded ${semester.name} data!`;
-
-    // if data does not exist or is not in correct format
-    if (temp === null) {
-        try {
-            return {
-                payload: window.catalog = await requestSemesterData(semester),
-                msg: successMsg,
-                level: 'info'
-            };
-        } catch (err) {
-            return {
-                msg: `Failed to fetch ${semester.name} data: ${errToStr(err)}`,
-                level: 'error'
-            };
-        }
-    } else {
-        // if data expired
-        if (temp.expired || force) {
-            // in this case, we only need to update window.catalog. Save a set of fresh data
-            try {
-                return {
-                    payload: window.catalog = await requestSemesterData(semester),
-                    msg: `Successfully updated ${semester.name} data!`,
-                    level: 'info'
-                };
-            } catch (err) {
-                return {
-                    payload: window.catalog = temp.catalog,
-                    msg: `Failed to fetch ${semester.name} data: ${errToStr(
-                        err
-                    )}. Old data is used`,
-                    level: 'warn'
-                };
-            }
-        } else {
-            return {
-                payload: window.catalog = temp.catalog,
-                msg: successMsg,
-                level: 'info'
-            };
-        }
-    }
+    return loadFromCache<Catalog, CatalogJSON>(`${semester.id}data`, {
+        request: () => requestSemesterData(semester),
+        construct: x => Catalog.fromJSON(x),
+        errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
+        warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
+        infoMsg: `Successfully loaded ${semester.name} data!`,
+        expireTime: Meta.semesterDataExpirationTime,
+        timeoutTime: 10000,
+        force
+    });
 }
 
 function saveCatalog(catalog: Catalog) {

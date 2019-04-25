@@ -12,6 +12,7 @@
         "tsdoc": "typedoc --out ./docs/tsdoc ./src"
     },
     "dependencies": {
+        "@types/string-similarity": "^3.0.0",
         "axios": "^0.18",
         "file-saver": "^2.0.1",
         "papaparse": "^4.6.3",

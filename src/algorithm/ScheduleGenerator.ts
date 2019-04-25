@@ -3,6 +3,7 @@ import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Event from '../models/Event';
 import * as Utils from '../models/Utils';
+import { findBestMatch } from 'string-similarity';
 
 /**
  * A `TimeBlock` defines the start and end time of a 'Block'
@@ -169,9 +170,23 @@ class ScheduleGenerator {
                     sectionIndices.push(section.sid);
                 }
 
+                // Map the room to a number
                 const roomNumberDict: RoomNumberDict = {};
+                const buildingList: string[] = [];
+                const keymap: string[] = [];
                 for (const day in roomDict) {
-                    roomNumberDict[day] = roomDict[day].map(x => 1);
+                    const numberList: number[] = [];
+                    for (const room of roomDict[day]) {
+                        const result = findBestMatch(room, buildingList);
+                        // we set the match threshold to 0.5
+                        if (result.bestMatch.rating >= 0.5) {
+                            const newroom: string = buildingList[result.bestMatchIndex];
+                            numberList.push(keymap.indexOf(newroom));
+                            continue;
+                        }
+                        numberList.push(-1);
+                    }
+                    roomNumberDict[day] = numberList;
                 }
 
                 if (sectionIndices.length !== 0)

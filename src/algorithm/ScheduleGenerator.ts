@@ -74,6 +74,7 @@ export interface Options {
     status: string[];
     sortOptions: SortOptions;
     combineSections: boolean;
+    maxNumSchedules: number;
 }
 
 class ScheduleGenerator {
@@ -82,7 +83,8 @@ class ScheduleGenerator {
         status: [],
         timeSlots: [],
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        combineSections: true
+        combineSections: true,
+        maxNumSchedules: 200000
     };
 
     /**
@@ -229,13 +231,15 @@ class ScheduleGenerator {
          */
         const timeTable: RawAlgoSchedule = [];
 
+        const maxNumSchedules = this.options.maxNumSchedules;
+
         const evaluator = new ScheduleEvaluator(this.options.sortOptions, this.options.events);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
             if (classNum >= classList.length) {
                 evaluator.add(timeTable);
-                if (evaluator.size() >= 250000) break;
+                if (evaluator.size() >= maxNumSchedules) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
                 timeTable.pop();

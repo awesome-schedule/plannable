@@ -347,7 +347,10 @@
                     </div>
                 </li>
                 <li class="list-group-item">
-                    <div class="custom-control custom-checkbox">
+                    <div
+                        class="custom-control custom-checkbox"
+                        title="Combine sections ocurring at the same time"
+                    >
                         <input
                             id="comb-sec"
                             v-model="combineSections"
@@ -355,6 +358,20 @@
                             class="custom-control-input"
                         />
                         <label class="custom-control-label" for="comb-sec">Combine Sections</label>
+                    </div>
+                </li>
+                <li class="list-group-item pb-0">
+                    <div class="form-group">
+                        <label for="num-schedule">Max number of schedules</label>
+                        <input
+                            id="num-schedule"
+                            v-model.number="maxNumSchedules"
+                            type="number"
+                            class="form-control"
+                        />
+                        <small class="form-text text-muted"
+                            >May crash your browser if too big</small
+                        >
                     </div>
                 </li>
                 <li
@@ -796,7 +813,7 @@ export default class App extends Vue {
      * indicates whether the currently showing schedule is the generated schedule
      */
     generated = false;
-    maxNumSchedules = Infinity;
+    maxNumSchedules = 200000;
 
     /**
      * sidebar display status
@@ -866,7 +883,7 @@ export default class App extends Vue {
         return false;
     }
     get scheduleLength() {
-        return Math.min(window.scheduleEvaluator.size(), this.maxNumSchedules);
+        return window.scheduleEvaluator.size();
     }
     get scheduleWidth() {
         return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
@@ -1119,7 +1136,7 @@ export default class App extends Vue {
      * @param update  whether to update the pagination status
      */
     switchPage(idx: number, update = false) {
-        if (0 <= idx && idx < Math.min(window.scheduleEvaluator.size(), this.maxNumSchedules)) {
+        if (0 <= idx && idx < window.scheduleEvaluator.size()) {
             this.currentScheduleIndex = idx;
             if (update) {
                 this.tempScheduleIndex = idx;
@@ -1318,12 +1335,8 @@ export default class App extends Vue {
             return this.noti.warn(`There are no classes in your schedule!`);
 
         const constraintStatus = [];
-        if (!this.allowWaitlist) {
-            constraintStatus.push('Wait List');
-        }
-        if (!this.allowClosed) {
-            constraintStatus.push('Closed');
-        }
+        if (!this.allowWaitlist) constraintStatus.push('Wait List');
+        if (!this.allowClosed) constraintStatus.push('Closed');
 
         const timeFilters = this.computeFilter();
 
@@ -1342,7 +1355,8 @@ export default class App extends Vue {
                 timeSlots: timeFilters,
                 status: constraintStatus,
                 sortOptions: this.sortOptions,
-                combineSections: this.combineSections
+                combineSections: this.combineSections,
+                maxNumSchedules: this.maxNumSchedules
             });
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;

@@ -1,7 +1,5 @@
 import axios from 'axios';
-
-// currently the two pages that we use has the cross origin header,
-// so no need to use cross origin proxy
+import { NotiMsg } from '@/models/Notification';
 
 const api =
     window.location.host.indexOf('localhost') === -1 &&
@@ -9,22 +7,30 @@ const api =
         ? `${window.location.protocol}//${window.location.host}/`
         : 'http://localhost:8000/';
 
-export async function fetchTimeMatrix(): Promise<Int32Array> {
+export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
     const res = await axios.get(`${api}/data/time_matrix.json`);
     const data: number[][] = res.data;
+
     if (data instanceof Array && data.length) {
         const flattened = new Int32Array(data.length ** 2);
-        for (let i = 0; i < data.length; i++) {
-            flattened.set(data[i], i * data.length);
-        }
-        window.timeMatrix = flattened;
-        return flattened;
+
+        for (let i = 0; i < data.length; i++) flattened.set(data[i], i * data.length);
+
+        return {
+            payload: window.timeMatrix = flattened,
+            msg: 'success',
+            level: 'info'
+        };
     } else {
-        throw new Error('Data format error');
+        throw new Error('Failed to fetch building matrix');
+        // return {
+        //     msg: 'Failed to fetch building matrix',
+        //     level: 'error'
+        // };
     }
 }
 
-export async function fetchBuildingList(): Promise<string[]> {
+export async function loadBuildingList(): Promise<string[]> {
     const res = await axios.get(`${api}/data/building_list.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {

@@ -109,29 +109,31 @@ class Meta {
 
     public static readonly storageFields = [
         // schedules
-        // note: this field is for uploadJSON
-        'currentScheduleIndex',
+        'currentSemester', // note: this field is for uploadJSON
 
-        'currentSemester',
+        'currentScheduleIndex',
         'currentSchedule',
         'proposedSchedules',
-        'sortOptions',
-        'cpIndex',
         'proposedScheduleIndex',
+        'cpIndex',
 
-        // settings
+        // filters
         'allowWaitList',
         'allowClosed',
+        'sortOptions',
+        'timeSlots',
         'combineSections',
+
+        // settings
         'showTime',
         'showRoom',
         'showInstructor',
         'showClasslistTitle',
         'fullHeight',
         'partialHeight',
-        'timeSlots',
         'earliest',
-        'latest'
+        'latest',
+        'standard'
     ];
 
     public static readonly semesterListExpirationTime = 86400 * 1000; // one day
@@ -145,33 +147,13 @@ export default Meta;
  */
 export function getDefaultData() {
     return {
-        semesters: null,
+        semesters: [],
         currentSemester: null,
         currentScheduleIndex: 0,
         currentSchedule: new Schedule(),
         proposedSchedules: [new Schedule()],
         proposedScheduleIndex: 0,
         cpIndex: -1,
-        generated: false,
-        maxNumSchedules: Infinity,
-
-        sideBar: {
-            showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
-            showEvent: false,
-            showFilter: false,
-            showSetting: false,
-            showExport: false,
-            showSelectColor: false,
-            showInfo: false
-        },
-
-        // autocompletion related fields
-        isEntering: false,
-        inputCourses: null,
-
-        // modal object binding
-        modalSection: null,
-        modalCourse: null,
 
         // display options
         showTime: false,
@@ -189,18 +171,6 @@ export function getDefaultData() {
         allowWaitlist: true,
         allowClosed: true,
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        sortModes: ScheduleEvaluator.sortModes,
-
-        // other
-        noti: new Notification(),
-        navHeight: 500,
-        loading: false,
-        mobile: window.screen.width < 900,
-        scrollable: false,
-        tempScheduleIndex: null,
-        drag: false,
-        downloadURL: '',
-        days: Meta.days,
-        eventToEdit: null
+        combineSections: true
     } as { [x: string]: any };
 }

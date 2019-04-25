@@ -770,6 +770,7 @@ import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadSemesterData } from './data/CatalogLoader';
 import { loadSemesterList } from './data/SemesterListLoader';
+import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import Notification from './models/Notification';
 import draggable from 'vuedraggable';
 import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
@@ -922,7 +923,11 @@ export default class App extends Vue {
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
 
-        loadSemesterList().then(data => {
+        (async () => {
+            await loadTimeMatrix();
+            await loadBuildingList();
+
+            const data = await loadSemesterList();
             const semesters = data.payload;
             console.log(data);
             if (data.level !== 'info') this.noti.notify(data);
@@ -931,7 +936,7 @@ export default class App extends Vue {
                 this.selectSemester(0);
             }
             this.loading = false;
-        });
+        })();
     }
 
     generatedEmpty() {

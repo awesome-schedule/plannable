@@ -10,7 +10,7 @@ describe('Schedule Test', () => {
     it('Schedule Color Hash', async () => {
         const len = Schedule.bgColors.length;
         const frequencies = new Float32Array(len);
-        const raw_data = await data;
+        const { raw_data } = await data;
         for (const key in raw_data) {
             const hash = Utils.hashCode(key) % len;
             frequencies[hash] += 1;

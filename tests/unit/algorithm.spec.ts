@@ -1,4 +1,3 @@
-import Catalog from '../../src/models/Catalog';
 import data from './data';
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import Schedule from '../../src/models/Schedule';
@@ -6,14 +5,14 @@ import 'jest';
 
 describe('ScheduleGenerator Test', () => {
     it('Data Validation', async () => {
-        const allRecords = new Catalog({ id: '1198', name: 'Fall 2019' }, await data);
+        const allRecords = await data;
         expect(typeof data).toBe('object');
         const course = allRecords.getCourse('cs11105');
         expect(typeof course.sections[0].id).toBe('number');
     });
 
     it('ScheduleGenerator', async () => {
-        const allRecords = new Catalog({ id: '1198', name: 'Fall 2019' }, await data);
+        const allRecords = await data;
         const generator = new ScheduleGenerator(allRecords);
         expect(typeof generator.createSchedule).toBe('function');
         const schedule = new Schedule();

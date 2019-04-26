@@ -386,7 +386,7 @@ class ScheduleEvaluator {
                     for (; j < block.length; j += 2, hj += 1) if (ele < block[j]) break;
 
                     block.splice(j, 0, ele, timeBlock[i + 1]);
-                    room.splice(hj, 0, roomBlock[hi]);
+                    room.splice(hj, 0, (roomBlock as number[])[hi]);
                 }
             }
         }

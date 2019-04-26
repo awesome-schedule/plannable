@@ -956,6 +956,7 @@ export default class App extends Vue {
         this.loading = true;
 
         (async () => {
+            // note: the order is very important
             const pay1 = await loadTimeMatrix();
             console[pay1.level](pay1.msg);
             if (pay1.payload) window.timeMatrix = pay1.payload;

@@ -14,6 +14,21 @@ import { findBestMatch } from 'string-similarity';
 export type TimeBlock = [number, number];
 
 /**
+ * The generate type used to store some information about each day within a week
+ *
+ * @todo decide whether it is better to annotate the index signature as
+ * `[x: string]: T[]` or `[x: string]: T[] | undefined`
+ */
+export interface WeekDict<T> {
+    [x: string]: T[] | undefined;
+    Mo?: T[];
+    Tu?: T[];
+    We?: T[];
+    Th?: T[];
+    Fr?: T[];
+}
+
+/**
  * `TimeDict` is a data structure used to store the time blocks in a week
  * that a certain `Section` or `Event` will take place.
  * The keys of a `TimeDict` are abbreviated day strings like `Mo` or `Tu`.
@@ -29,23 +44,20 @@ export type TimeBlock = [number, number];
  *
  * @see TimeBlock
  */
-export interface TimeDict {
-    [x: string]: number[] | undefined;
-    Mo?: number[];
-    Tu?: number[];
-    We?: number[];
-    Th?: number[];
-    Fr?: number[];
-}
-
+export interface TimeDict extends WeekDict<number> {}
 /**
  * key: same as TimeDict
  *
  * value: the name of the building
+ *
+ * if `timeDict[key]` exists, then `roomDict[key][i]` corresponds the room of the time block
+ * `[timeDict[key][i * 2], timeDict[key][i * 2 + 1]]`
+ *
+ * @example
+ * if (timeDict[key])
+ *     expect(timeDict[key].length).toBe(roomDict[key].length / 2);
  */
-export interface RoomDict {
-    [x: string]: string[];
-}
+export interface RoomDict extends WeekDict<string> {}
 
 /**
  * key: same as TimeDict
@@ -54,9 +66,7 @@ export interface RoomDict {
  *
  * @see https://github.com/awesome-schedule/data/blob/master/building_list.json
  */
-export interface RoomNumberDict {
-    [x: string]: number[];
-}
+export interface RoomNumberDict extends WeekDict<number> {}
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -192,7 +202,8 @@ class ScheduleGenerator {
                 if (buildingList && buildingList.length) {
                     for (const day in roomDict) {
                         const numberList: number[] = [];
-                        for (const room of roomDict[day]) {
+                        const rooms = roomDict[day] as string[];
+                        for (const room of rooms) {
                             const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
                             // we set the match threshold to 0.5
                             if (roomMatch.bestMatch.rating >= 0.5) {
@@ -207,7 +218,7 @@ class ScheduleGenerator {
                     }
                 } else {
                     for (const day in roomDict) {
-                        roomNumberDict[day] = roomDict[day].map(x => -1);
+                        roomNumberDict[day] = (roomDict[day] as string[]).map(x => -1);
                     }
                 }
 

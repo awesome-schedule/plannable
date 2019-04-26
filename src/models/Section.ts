@@ -2,7 +2,7 @@ import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
-import { TimeDict, RoomDict } from '@/algorithm/ScheduleGenerator';
+import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
 import { parseTimeAll } from './Utils';
 
 /**
@@ -101,10 +101,7 @@ class Section implements CourseFields, Hashable {
             const tmp1 = parseTimeAll(t);
 
             // skip TBA or ill-formated time
-            if (tmp1 === null) {
-                return null;
-            }
-
+            if (tmp1 === null) return null;
             const [date, timeBlock] = tmp1;
 
             // for each day
@@ -114,7 +111,7 @@ class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
                 if (dayBlock) {
                     dayBlock.push(...timeBlock);
-                    roomBlock.push(meeting.room);
+                    (roomBlock as string[]).push(meeting.room);
                 } else {
                     // copy
                     timeDict[day] = timeBlock.concat();

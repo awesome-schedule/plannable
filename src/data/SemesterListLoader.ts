@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Semester } from '../models/Catalog';
-import Meta from '@/models/Meta';
+import Meta from '../models/Meta';
 import { NotiMsg } from '../models/Notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';

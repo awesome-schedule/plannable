@@ -1,4 +1,4 @@
-import { TimeDict, TimeBlock } from '@/algorithm/ScheduleGenerator';
+import { TimeDict, TimeBlock } from '../algorithm/ScheduleGenerator';
 import Catalog from './Catalog';
 import Schedule from './Schedule';
 import Meta, { RawCourse } from './Meta';

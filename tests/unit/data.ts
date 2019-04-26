@@ -23,6 +23,9 @@ async function getData() {
         data = JSON.parse(fs.readFileSync(filepath).toString());
     } else {
         data = await getSemesterData(semester);
+
+        // cache the data, if possible
+        fs.writeFileSync(filepath, JSON.stringify(data));
     }
     return data;
 }

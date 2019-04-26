@@ -26,51 +26,59 @@
                 ></path>
             </svg>
         </a>
-        <section-modal
-            id="modal"
-            :semester="currentSemester"
-            :section="modalSection"
-        ></section-modal>
+        <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
         <course-modal :course="modalCourse"></course-modal>
         <!-- Tab Icons Start (Leftmost bar) -->
-        <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
+        <nav
+            class="d-block bg-light tab-bar"
+            :style="{
+                width: sideBarWidth + 'vw',
+                'max-height': navHeight + 'px'
+            }"
+        >
             <div
-                :class="(sideBar.showSelectClass ? 'tab-icon-active ' : 'tab-icon ') + 'mt-0 mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showSelectClass }"
                 title="Select Classes"
                 @click="switchSideBar('showSelectClass')"
             >
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
-                :class="(sideBar.showEvent ? 'tab-icon-active ' : 'tab-icon ') + 'mt-0 mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showEvent }"
                 title="Edit Events"
                 @click="switchSideBar('showEvent')"
             >
                 <i class="fab fa-elementor"></i>
             </div>
             <div
-                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showFilter }"
                 title="Filters"
                 @click="switchSideBar('showFilter')"
             >
                 <i class="fas fa-filter"></i>
             </div>
             <div
-                :class="(sideBar.showSetting ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showSetting }"
                 title="Display Settings"
                 @click="switchSideBar('showSetting')"
             >
                 <i class="fas fa-cog"></i>
             </div>
             <div
-                :class="(sideBar.showSelectColor ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showSelectColor }"
                 title="Customize Colors"
                 @click="switchSideBar('showSelectColor')"
             >
                 <i class="fas fa-palette"></i>
             </div>
             <div
-                :class="(sideBar.showExport ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showExport }"
                 title="Import/Export Schedule"
                 @click="switchSideBar('showExport')"
             >
@@ -78,11 +86,20 @@
             </div>
             <div
                 title="Tutorials, miscellaneous information and acknowledgments"
+                :class="{ 'tab-icon-active': sideBar.showInfo }"
                 class="tab-icon mb-4"
                 @click="switchSideBar('showInfo')"
             >
                 <i class="fas fa-info-circle"></i>
             </div>
+            <!-- <div
+                title="What's happening"
+                :class="{ 'tab-icon-active': sideBar.showExternal }"
+                class="tab-icon mb-4"
+                @click="switchSideBar('showExternal')"
+            >
+                <i class="fas fa-external-link-alt"></i>
+            </div> -->
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 
@@ -142,7 +159,7 @@
                     :generated="generated"
                     @update_course="updateCourse"
                     @close="closeClassList"
-                    @trigger-classlist-modal="showClassListModal"
+                    @trigger-classlist-modal="showCourseModal"
                 ></ClassList>
             </div>
             <div>
@@ -219,7 +236,7 @@
                         :generated="generated"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
-                        @trigger-classlist-modal="showClassListModal"
+                        @trigger-classlist-modal="showCourseModal"
                     ></ClassList>
                     <div class="btn-group mt-3" role="group" style="width:100%">
                         <button
@@ -331,7 +348,7 @@
                     </table>
                 </li>
                 <li class="list-group-item">
-                    <div class="custom-control custom-checkbox mt-2">
+                    <div class="custom-control custom-checkbox my-1">
                         <input
                             id="awt"
                             v-model="allowWaitlist"
@@ -340,7 +357,7 @@
                         />
                         <label class="custom-control-label" for="awt">Allow Wait List</label>
                     </div>
-                    <div class="custom-control custom-checkbox mt-1">
+                    <div class="custom-control custom-checkbox">
                         <input
                             id="ac"
                             v-model="allowClosed"
@@ -348,6 +365,34 @@
                             class="custom-control-input"
                         />
                         <label class="custom-control-label" for="ac">Allow Closed</label>
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div
+                        class="custom-control custom-checkbox"
+                        title="Combine sections ocurring at the same time"
+                    >
+                        <input
+                            id="comb-sec"
+                            v-model="combineSections"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="comb-sec">Combine Sections</label>
+                    </div>
+                </li>
+                <li class="list-group-item pb-0">
+                    <div class="form-group">
+                        <label for="num-schedule">Max number of schedules</label>
+                        <input
+                            id="num-schedule"
+                            v-model.number="maxNumSchedules"
+                            type="number"
+                            class="form-control"
+                        />
+                        <small class="form-text text-muted"
+                            >May crash your browser if too big</small
+                        >
                     </div>
                 </li>
                 <li
@@ -625,25 +670,32 @@
                     </div>
                 </li>
                 <li class="list-group-item">
-                    <a
-                        class="btn btn-outline-dark"
-                        style="width:100%"
-                        :href="downloadURL"
-                        download="schedule.json"
-                        @click="saveToJson"
-                        >Export
-                    </a>
-                </li>
-                <li class="list-group-item">
-                    <a
-                        class="btn btn-outline-dark"
-                        :href="icalURL"
-                        style="width:100%"
-                        download="schedule.ical"
-                        @click="saveToIcal"
-                    >
-                        Export to ICalendar
-                    </a>
+                    <div class="form-group row">
+                        <input
+                            v-model="exportJson"
+                            class="form-control col-6 mr-3"
+                            placeholder="filename"
+                            type="text"
+                        />
+                        <button
+                            class="btn btn-outline-dark col-5"
+                            style="width:auto"
+                            @click="saveToJson"
+                        >
+                            Export
+                        </button>
+                    </div>
+                    <div class="form-group row">
+                        <input
+                            v-model="exportICal"
+                            class="form-control col-6 mr-3"
+                            placeholder="filename"
+                            type="text"
+                        />
+                        <button class="btn btn-outline-dark col-5" @click="saveToIcal">
+                            Export iCal
+                        </button>
+                    </div>
                 </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-primary w-100" @click="print">
@@ -657,6 +709,11 @@
         <palette v-else-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
 
         <information v-else-if="sideBar.showInfo"></information>
+
+        <external
+            v-else-if="sideBar.showExternal"
+            :style="{ 'margin-left': sideBarWidth + 1 + 'vw' }"
+        ></external>
 
         <transition name="fade">
             <div
@@ -678,12 +735,13 @@
             </div>
         </transition>
         <div
+            v-if="!sideBar.showInfo && !sideBar.showExternal"
             class="schedule"
-            :style="
-                `width:${
-                    mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw'
-                }; margin-left:${mobile ? 11 : scheduleLeft}vw; margin-right: ${mobile ? '1vw' : 0}`
-            "
+            :style="{
+                width: mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
+                'margin-left': (mobile ? 11 : scheduleLeft) + 'vw',
+                'margin-right': mobile ? '1vw' : 0
+            }"
         >
             <div class="container-fluid my-3">
                 <div class="row justify-content-center">
@@ -729,6 +787,8 @@ import CourseModal from './components/CourseModal.vue';
 import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
+import External from './components/External.vue';
+import draggable from 'vuedraggable';
 
 import Section from './models/Section';
 import Course from './models/Course';
@@ -737,12 +797,12 @@ import Catalog, { Semester, CatalogJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import { getSemesterList, getSemesterData } from './data/DataLoader';
+import { loadSemesterData } from './data/CatalogLoader';
+import { loadSemesterList } from './data/SemesterListLoader';
+import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import Notification from './models/Notification';
-import draggable from 'vuedraggable';
-import { to12hr, parseTimeAsInt, timeout } from './models/Utils';
+import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
-import { AxiosError } from 'axios';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -759,7 +819,8 @@ window.scheduleEvaluator = new ScheduleEvaluator();
         draggable,
         Palette,
         EventView,
-        Information
+        Information,
+        External
     }
 })
 export default class App extends Vue {
@@ -782,7 +843,7 @@ export default class App extends Vue {
      * indicates whether the currently showing schedule is the generated schedule
      */
     generated = false;
-    maxNumSchedules = Infinity;
+    maxNumSchedules = 200000;
 
     /**
      * sidebar display status
@@ -795,7 +856,8 @@ export default class App extends Vue {
         showSetting: false,
         showExport: false,
         showSelectColor: false,
-        showInfo: false
+        showInfo: false,
+        showExternal: false
     };
 
     // autocompletion related fields
@@ -828,6 +890,7 @@ export default class App extends Vue {
     timeSlots: Array<[boolean, boolean, boolean, boolean, boolean, string, string]> = [];
     allowWaitlist = true;
     allowClosed = true;
+    combineSections = true;
     sortOptions = ScheduleEvaluator.getDefaultOptions();
     sortModes = ScheduleEvaluator.sortModes;
 
@@ -836,13 +899,14 @@ export default class App extends Vue {
     navHeight = 500;
     loading = false;
     mobile = window.screen.width < 900;
+    sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
     tempScheduleIndex: number | null = null;
     drag = false;
-    downloadURL = '';
     days = Meta.days;
     eventToEdit: Event | null = null;
-    icalURL = '';
+    exportJson: string = 'schedule';
+    exportICal: string = 'schedule';
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -851,7 +915,7 @@ export default class App extends Vue {
         return false;
     }
     get scheduleLength() {
-        return Math.min(window.scheduleEvaluator.size(), this.maxNumSchedules);
+        return window.scheduleEvaluator.size();
     }
     get scheduleWidth() {
         return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
@@ -870,6 +934,9 @@ export default class App extends Vue {
     set proposedSchedule(schedule: Schedule) {
         this.proposedSchedules[this.proposedScheduleIndex] = schedule;
     }
+    /**
+     * the proposed schedule that is currently active
+     */
     get proposedSchedule() {
         return this.proposedSchedules[this.proposedScheduleIndex];
     }
@@ -885,25 +952,24 @@ export default class App extends Vue {
     created() {
         this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
-        const storage = localStorage.getItem('semesters');
-        if (!storage) {
-            this.fetchSemesterList();
-            return;
-        }
-        const sms = JSON.parse(storage);
-        const modified = sms.modified;
-        if (
-            modified &&
-            new Date().getTime() - new Date(modified).getTime() < Meta.semesterListExpirationTime
-        ) {
-            this.semesters = sms['semesterList'];
-            this.selectSemester(0);
-        } else {
-            this.fetchSemesterList(undefined, () => {
-                this.semesters = sms['semesterList'];
+
+        (async () => {
+            const pay1 = await loadTimeMatrix();
+            console[pay1.level](pay1.msg);
+            if (pay1.payload) window.timeMatrix = pay1.payload;
+            const pay2 = await loadBuildingList();
+            console[pay2.level](pay2.msg);
+            if (pay2.payload) window.buildingList = pay2.payload;
+
+            const data = await loadSemesterList();
+            const semesters = data.payload;
+            if (data.level !== 'info') this.noti.notify(data);
+            if (semesters) {
+                window.semesters = this.semesters = semesters;
                 this.selectSemester(0);
-            });
-        }
+            }
+            this.loading = false;
+        })();
     }
 
     generatedEmpty() {
@@ -928,7 +994,7 @@ export default class App extends Vue {
     deleteProposed() {
         const idx = this.proposedScheduleIndex;
 
-        if (!confirm(`Are you sure to delete schedule ${idx}?`)) return;
+        if (!confirm(`Are you sure to delete schedule ${idx + 1}?`)) return;
         if (this.proposedSchedules.length === 1) {
             return this.noti.error('This is the only schedule left!');
         }
@@ -942,6 +1008,8 @@ export default class App extends Vue {
         this.proposedSchedules.splice(idx, 1);
         if (idx >= this.proposedSchedules.length) {
             this.switchProposed(idx - 1);
+        } else {
+            this.switchProposed(idx);
         }
         this.saveStatus();
     }
@@ -985,38 +1053,6 @@ export default class App extends Vue {
         if (this.sideBar.showSelectColor) this.switchSchedule(true);
     }
 
-    fetchSemesterList(success?: () => void, reject?: () => void) {
-        timeout(getSemesterList(), 10000)
-            .then(res => {
-                this.semesters = res;
-                localStorage.setItem(
-                    'semesters',
-                    JSON.stringify({
-                        modified: new Date().toJSON(),
-                        semesterList: res
-                    })
-                );
-                // get the latest semester
-                this.selectSemester(0);
-                if (typeof success === 'function') success();
-            })
-            .catch((err: string | AxiosError) => {
-                console.warn(err);
-                let errStr = `Failed to fetch semester list: `;
-                if (typeof err === 'string') errStr += err;
-                else if (err.response) errStr += `request rejected by the server. `;
-                else if (err.request) errStr += `No response received. `;
-                if (typeof reject === 'function') {
-                    errStr += 'Old data is used instead';
-                    this.noti.warn(errStr);
-                    this.loading = false;
-                    reject();
-                    return;
-                }
-                this.noti.error(errStr);
-                this.loading = false;
-            });
-    }
     onDocChange() {
         this.saveStatus();
     }
@@ -1048,9 +1084,10 @@ export default class App extends Vue {
 
     showModal(section: Section) {
         this.modalSection = section;
+        (window as any).$('#modal').modal();
     }
 
-    showClassListModal(course: Course) {
+    showCourseModal(course: Course) {
         this.modalCourse = course;
         (window as any).$('#course-modal').modal();
     }
@@ -1076,8 +1113,8 @@ export default class App extends Vue {
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to rerender component
         (this.$refs.selectedClassList as Vue).$forceUpdate();
-        if (this.$refs.enteringClassList instanceof Vue)
-            (this.$refs.enteringClassList as Vue).$forceUpdate();
+        const classList = this.$refs.enteringClassList;
+        if (classList instanceof Vue) (classList as Vue).$forceUpdate();
     }
     /**
      * Switch to `idx` page. If update is true, also update the pagination status.
@@ -1085,7 +1122,7 @@ export default class App extends Vue {
      * @param update  whether to update the pagination status
      */
     switchPage(idx: number, update = false) {
-        if (0 <= idx && idx < Math.min(window.scheduleEvaluator.size(), this.maxNumSchedules)) {
+        if (0 <= idx && idx < window.scheduleEvaluator.size()) {
             this.currentScheduleIndex = idx;
             if (update) {
                 this.tempScheduleIndex = idx;
@@ -1109,6 +1146,7 @@ export default class App extends Vue {
             return;
         }
         // if current schedule is displayed, switch to proposed schedule
+        // because we're adding stuff to the proposed schedule
         if (this.generated) {
             this.switchSchedule(false);
         }
@@ -1119,16 +1157,22 @@ export default class App extends Vue {
      * Select a semester and fetch all its associated data.
      *
      * This method will assign a correct Catalog object to `window.catalog`
-     * which will be either requested from remote or parsed from `localStorage`
      *
-     * After that, schedules and settings will be parsed from `localStorage`
+     * Then, schedules and settings will be parsed from `localStorage`
      * and assigned to relevant fields of `this`.
-     * If no local data is present, then default values will be assigned.
+     *
+     * If no local data is present, default values will be assigned.
+     *
      * @param semesterId index or id of this semester
      * @param parsed_data
      * @param force whether to force-update semester data
      */
-    selectSemester(semesterId: number | string, parsed_data?: { [x: string]: any }, force = false) {
+    async selectSemester(
+        semesterId: number | string,
+        parsed_data?: { [x: string]: any },
+        force = false
+    ) {
+        // do a linear search to find the index of the semester given its string id
         if (typeof semesterId === 'string') {
             for (let i = 0; i < this.semesters.length; i++) {
                 const semester = this.semesters[i];
@@ -1143,170 +1187,63 @@ export default class App extends Vue {
 
         this.currentSemester = this.semesters[semesterId];
         this.loading = true;
-        const data = localStorage.getItem(this.currentSemester.id);
-        const allRecords_raw = localStorage.getItem(`${this.currentSemester.id}data`);
 
-        /**
-         * The callback that gets executes when no local data is present
-         */
-        const defaultCallback = () => {
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            const defaultData = getDefaultData();
-            for (const field of Meta.storageFields) {
-                if (field !== 'currentSemester') this[field] = defaultData[field];
+        if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`);
+        const result = await loadSemesterData(semesterId, force);
+        if (result.level !== 'info') this.noti.notify(result);
+        if (result.payload) window.catalog = result.payload;
+
+        //  if the global `Catalog` object is assigned
+        if (result.payload) {
+            const data = localStorage.getItem(this.currentSemester.id);
+
+            let raw_data: { [x: string]: any } = {};
+            if (parsed_data) {
+                raw_data = parsed_data;
+            } else if (data) {
+                raw_data = JSON.parse(data);
             }
-            this.saveAllRecords();
-            this.saveStatus();
-            this.loading = false;
-        };
-        let raw_data: { [x: string]: any };
-        if (parsed_data) {
-            raw_data = parsed_data;
-        } else if (data) {
-            raw_data = JSON.parse(data);
-        } else {
-            this.fetchSemesterData(semesterId, defaultCallback);
-            return;
-        }
 
-        // storage version mismatch implies API update: use dafault data instead
-        if (Meta.storageVersion !== raw_data.storageVersion) {
-            // clear local storage
-            localStorage.clear();
-            this.fetchSemesterData(semesterId, defaultCallback);
-            return;
-        }
-        const temp = allRecords_raw ? Catalog.fromJSON(JSON.parse(allRecords_raw)) : null;
-
-        /**
-         * The callback that gets executes after the global `Catalog` object is assigned
-         */
-        const callback = () => {
             this.generated = false;
             window.scheduleEvaluator.clear();
             this.parseLocalData(raw_data);
             this.loading = false;
-        };
-
-        // if data does not exist or is not in correct format
-        if (temp === null) {
-            this.fetchSemesterData(semesterId, () => {
-                this.saveAllRecords();
-                callback();
-            });
-        } else {
-            // if data expired
-            if (temp.expired || force) {
-                if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`, 5);
-                // in this case, we only need to update window.catalog. Save a set of fresh data
-                this.fetchSemesterData(
-                    semesterId,
-                    () => {
-                        this.saveAllRecords();
-                        if (force) this.noti.success('Success!', 3);
-                        callback();
-                    },
-                    () => {
-                        // if failed, just use the old data.
-                        window.catalog = temp.catalog;
-                        callback();
-                    }
-                );
-            } else {
-                window.catalog = temp.catalog;
-                callback();
-            }
         }
     }
 
-    saveAllRecords() {
-        if (!this.currentSemester) return;
-
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.endsWith('data')) {
-                localStorage.removeItem(key);
-            }
-        }
-        localStorage.setItem(
-            `${this.currentSemester.id}data`,
-            JSON.stringify(window.catalog.toJSON())
-        );
-    }
-    /**
-     * fetch basic class data for the given semester for fast class search and rendering
-     * this method will assign to the global `window.catalog` object
-     *
-     * This method will set the flag `loading` to true on start, to false on return.
-     * When on error, a proper error message will be displayed to the user.
-     *
-     * @param success func to execute on success
-     * @param reject func to execute on failure
-     */
-    fetchSemesterData(semesterIdx: number, success?: () => void, reject?: () => void) {
-        this.loading = true;
-        timeout(getSemesterData(this.semesters[semesterIdx].id), 10000)
-            .then(data => {
-                window.catalog = new Catalog(this.currentSemester as Semester, data);
-                if (typeof success === 'function') {
-                    success();
-                    this.loading = false;
-                }
-            })
-            .catch((err: string | AxiosError) => {
-                console.warn(err);
-                let errStr = `Failed to fetch ${this.semesters[semesterIdx].name}: `;
-                if (typeof err === 'string') errStr += err;
-                else if (err.response) errStr += `request rejected by the server. `;
-                else if (err.request) errStr += `No response received. `;
-                if (typeof reject === 'function') {
-                    errStr += 'Old data is used instead';
-                    reject();
-                    this.noti.warn(errStr);
-                    this.loading = false;
-                    return;
-                }
-                this.noti.error(errStr);
-                this.loading = false;
-            });
-    }
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
     }
-    generateSchedules(parsed = false) {
+    generateSchedules() {
         if (this.generated) this.currentSchedule = this.proposedSchedule;
         this.generated = false;
 
         if (this.currentSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
 
-        const constraintStatus = [];
-        if (!this.allowWaitlist) {
-            constraintStatus.push('Wait List');
-        }
-        if (!this.allowClosed) {
-            constraintStatus.push('Closed');
-        }
+        const status = [];
+        if (!this.allowWaitlist) status.push('Wait List');
+        if (!this.allowClosed) status.push('Closed');
 
-        const timeFilters = this.computeFilter();
+        const timeSlots = this.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeFilters === null) {
+        if (timeSlots === null) {
             this.noti.error(`Invalid time filter`);
             return;
         }
 
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
-
         try {
             const evaluator = generator.getSchedules(this.currentSchedule, {
                 events: this.currentSchedule.events,
-                timeSlots: timeFilters,
-                status: constraintStatus,
-                sortOptions: this.sortOptions
+                timeSlots,
+                status,
+                sortOptions: this.sortOptions,
+                combineSections: this.combineSections,
+                maxNumSchedules: this.maxNumSchedules
             });
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;
@@ -1332,7 +1269,9 @@ export default class App extends Vue {
         }
         if (optIdx !== undefined) {
             const option = this.sortOptions.sortBy[optIdx];
+
             if (option.enabled) {
+                // disable options that are mutually exclusive to this one
                 for (const key of option.exclusive) {
                     for (const opt of this.sortOptions.sortBy) {
                         if (opt.name === key) opt.enabled = false;
@@ -1346,6 +1285,7 @@ export default class App extends Vue {
             if (!this.generated) {
                 this.switchSchedule(true);
             } else {
+                // re-assign the current schedule
                 this.currentSchedule = window.scheduleEvaluator.getSchedule(
                     this.currentScheduleIndex
                 );
@@ -1369,8 +1309,9 @@ export default class App extends Vue {
     parseLocalData(raw_data: { [x: string]: any }) {
         const defaultData = getDefaultData();
         for (const field of Meta.storageFields) {
+            if (field === 'currentSemester') continue;
             if (field === 'proposedSchedules') {
-                // if true, we're dealing legacy code
+                // if true, we're dealing with legacy storage
                 if (raw_data.proposedSchedule) {
                     this.proposedScheduleIndex = 0;
                     const s = Schedule.fromJSON(raw_data.proposedSchedule);
@@ -1405,7 +1346,8 @@ export default class App extends Vue {
                     const parsed = this[field].fromJSON(raw_data[field]);
                     if (parsed) this[field] = parsed;
                     else {
-                        this.noti.warn(`Fail to parse ${field}`);
+                        // this.noti.warn(`Fail to parse ${field}`);
+                        // console.warn('failed to parse', field);
                         this[field] = defaultData[field];
                     }
                 } else {
@@ -1427,7 +1369,7 @@ export default class App extends Vue {
         }
         if (!this.proposedSchedule.empty()) {
             this.currentSchedule = this.proposedSchedule;
-            this.generateSchedules(true);
+            this.generateSchedules();
         }
     }
     removeTimeSlot(n: number) {
@@ -1437,7 +1379,7 @@ export default class App extends Vue {
         this.timeSlots.push([false, false, false, false, false, '', '']);
     }
     /**
-     * Preprocess the time filters so that they are of the correct format
+     * Preprocess the time filters and convert them to array of events
      *
      * returns null on parsing error
      */
@@ -1506,16 +1448,13 @@ export default class App extends Vue {
         if (!this.currentSemester) return;
 
         const json = localStorage.getItem(this.currentSemester.id);
-        if (json) {
-            const blob = new Blob([json], { type: 'text/json' });
-            let url = window.URL.createObjectURL(blob);
-            this.downloadURL = url;
-            url = url.substring(5);
-            window.URL.revokeObjectURL(url);
-        }
+        if (json) savePlain(json, (this.exportJson ? this.exportJson : 'schedule') + '.json');
     }
     saveToIcal() {
-        this.icalURL = this.currentSchedule.toICal();
+        savePlain(
+            this.currentSchedule.toICal(),
+            (this.exportICal ? this.exportICal : 'schedule') + '.ical'
+        );
     }
 }
 </script>
@@ -1547,8 +1486,6 @@ export default class App extends Vue {
 }
 
 .tab-icon-active {
-    font-size: 1.8vw;
-    margin-left: 20%;
     color: #1f1f1f;
 }
 
@@ -1687,18 +1624,6 @@ export default class App extends Vue {
         width: 100%;
     }
 
-    .tab-bar {
-        display: block;
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 10; /* Behind the navbar */
-        padding: 26px 0 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-        width: 10vw !important;
-    }
-
     .tab-icon {
         font-size: 6vw;
         margin-left: 20%;
@@ -1706,8 +1631,6 @@ export default class App extends Vue {
     }
 
     .tab-icon-active {
-        font-size: 6vw;
-        margin-left: 20%;
         color: #1f1f1f;
     }
 }

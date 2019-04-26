@@ -2,12 +2,19 @@ import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
+import { TimeDict, RoomDict } from '@/algorithm/ScheduleGenerator';
+import { parseTimeAll } from './Utils';
 
 /**
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
  */
 class Section implements CourseFields, Hashable {
+    public static sectionsToCourse(sections: Section[]) {
+        const course = sections[0].course;
+        return new Course(course.raw, course.key, sections.map(x => x.sid));
+    }
+
     public department: string;
     public number: number;
     public type: string;
@@ -22,6 +29,9 @@ class Section implements CourseFields, Hashable {
     public id: number;
     public section: string;
     public topic: string;
+    /**
+     * one of "Open", "Closed" and "Wait List"
+     */
     public status: string;
     public enrollment: number;
     public enrollment_limit: number;
@@ -75,6 +85,45 @@ class Section implements CourseFields, Hashable {
      */
     public hash() {
         return this.course.hash();
+    }
+
+    public getRoomTime(): [TimeDict, RoomDict] | null {
+        const timeDict: TimeDict = {};
+        const roomDict: RoomDict = {};
+
+        // there may be multiple meeting times. parse each of them and add to tmp_dict
+        for (const meeting of this.meetings) {
+            const t = meeting.days;
+            // skip empty string
+            if (!t) continue;
+
+            // parse the meeting time
+            const tmp1 = parseTimeAll(t);
+
+            // skip TBA or ill-formated time
+            if (tmp1 === null) {
+                return null;
+            }
+
+            const [date, timeBlock] = tmp1;
+
+            // for each day
+            for (const day of date) {
+                const dayBlock = timeDict[day];
+                const roomBlock = roomDict[day];
+                // the timeBlock is flattened
+                if (dayBlock) {
+                    dayBlock.push(...timeBlock);
+                    roomBlock.push(meeting.room);
+                } else {
+                    // copy
+                    timeDict[day] = timeBlock.concat();
+                    roomDict[day] = [meeting.room];
+                }
+            }
+        }
+
+        return [timeDict, roomDict];
     }
 }
 

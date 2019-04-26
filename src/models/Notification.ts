@@ -1,3 +1,9 @@
+export interface NotiMsg<T> {
+    level: 'info' | 'error' | 'warn';
+    msg: string;
+    payload?: T;
+}
+
 class Notification {
     public static readonly TYPES: { [x: string]: string } = Object.freeze({
         info: 'info',
@@ -16,12 +22,20 @@ class Notification {
         this.class = '';
         this.job = null;
     }
+    public notify<T>(msg: NotiMsg<T>): void;
+    public notify(msg: string, type: string, timeout: number): void;
 
-    public notify(msg: string, type: string, timeout = 5) {
+    public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5) {
         if (this.job) clearTimeout(this.job);
-        this.msg = msg;
-        this.class = Notification.TYPES[type];
-        this.clear(timeout);
+        if (typeof msg === 'string') {
+            this.msg = msg;
+            this.class = Notification.TYPES[type];
+            this.clear(timeout);
+        } else {
+            this.msg = msg.msg;
+            this.class = Notification.TYPES[msg.level];
+            this.clear(timeout);
+        }
     }
 
     public warn(msg: string, timeout = 5) {

@@ -1,9 +1,9 @@
 import Catalog from '../models/Catalog';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
-import Section from '../models/Section';
 import Event from '../models/Event';
 import * as Utils from '../models/Utils';
+import { findBestMatch } from 'string-similarity';
 
 /**
  * A `TimeBlock` defines the start and end time of a 'Block'
@@ -23,8 +23,9 @@ export type TimeBlock = [number, number];
  * because it is possible for a single section to have multiple meetings in a day
  *
  * @example
- * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]} // represents that this `Section` or `Event` will
- * //take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]}
+ * // represents that this `Section` or `Event` will
+ * // take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
  *
  * @see TimeBlock
  */
@@ -35,6 +36,14 @@ export interface TimeDict {
     We?: number[];
     Th?: number[];
     Fr?: number[];
+}
+
+export interface RoomDict {
+    [x: string]: string[];
+}
+
+export interface RoomNumberDict {
+    [x: string]: number[];
 }
 
 /**
@@ -52,7 +61,7 @@ export interface TimeDict {
  *
  * @see TimeDict
  */
-export type RawAlgoCourse = [string, TimeDict, number[]];
+export type RawAlgoCourse = [string, TimeDict, number[], RoomNumberDict];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -65,6 +74,8 @@ export interface Options {
     timeSlots: Event[];
     status: string[];
     sortOptions: SortOptions;
+    combineSections: boolean;
+    maxNumSchedules: number;
 }
 
 class ScheduleGenerator {
@@ -72,13 +83,19 @@ class ScheduleGenerator {
         events: [],
         status: [],
         timeSlots: [],
-        sortOptions: ScheduleEvaluator.getDefaultOptions()
+        sortOptions: ScheduleEvaluator.getDefaultOptions(),
+        combineSections: true,
+        maxNumSchedules: 200000
     };
 
+    /**
+     * validate the options object. Default values are supplied for missing keys.
+     * @param options
+     */
     public static validateOptions(options: Options) {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
-            if (!options[field]) {
+            if (!options[field] && options[field] !== false) {
                 console.warn(`Non-existent field ${field}. Default value used`);
                 options[field] = ScheduleGenerator.optionDefaults[field];
             }
@@ -96,6 +113,10 @@ class ScheduleGenerator {
     /**
      * The entrance of the schedule generator
      * returns a sorted `ScheduleEvaluator` Object
+     *
+     * Note that this method does not need to run very fast. It only preprocess the select
+     * courses so that they are stored in a desirable format.
+     *
      * @see ScheduleEvaluator
      */
     public getSchedules(
@@ -104,72 +125,85 @@ class ScheduleGenerator {
     ): ScheduleEvaluator {
         console.time('algorithm bootstrapping');
         this.options = ScheduleGenerator.validateOptions(options);
+        const buildingList: string[] = window.buildingList;
 
-        const courses = schedule.All;
-
-        const classList: RawAlgoSchedule[] = [];
-
-        const timeSlots: TimeDict[] = [];
-
-        for (const event of this.options.events) timeSlots.push(event.toTimeDict());
+        // convert events to TimeDicts so that we can easily check for time conflict
+        const timeSlots: TimeDict[] = this.options.events.map(e => e.toTimeDict());
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
 
+        const classList: RawAlgoSchedule[] = [];
+        const courses = schedule.All;
+
+        // for each course selected, form an array of sections
         for (const key in courses) {
             const classes: RawAlgoSchedule = [];
-            /**
-             * get course with specific sections specified by Schedule
-             */
+
+            // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
 
-            // combine any section of occurring at the same time
-            const combined = courseRec.getCombined();
-            for (const time in combined) {
+            // combine all sections of this course occurring at the same time, if enabled
+            const combined = this.options.combineSections
+                ? Object.values(courseRec.getCombined())
+                : courseRec.sections.map(s => [s]);
+
+            // for each combined section, form a RawAlgoCourse
+            for (const sections of combined) {
                 let no_match = false;
-                const sids = combined[time];
-                const algoCourse: RawAlgoCourse = [key, {}, []];
-                const tmp_dict: TimeDict = {};
 
-                for (const t of time.split('|')) {
-                    // skip empty string
-                    if (!t) continue;
-                    const tmp1 = Utils.parseTimeAll(t);
-                    if (tmp1 === null) {
-                        no_match = true;
-                        break;
-                    }
+                // only take the time and room info of the first section
+                // time will be the same for sections in this array
+                // but rooms..., well this is a compromise
+                const tmp = sections[0].getRoomTime();
+                if (!tmp) continue;
 
-                    const [date, timeBlock] = tmp1;
-                    for (const d of date) {
-                        // the timeBlock is flattened
-                        const dayBlock = tmp_dict[d];
-                        if (dayBlock) {
-                            dayBlock.push(...timeBlock);
-                        } else {
-                            tmp_dict[d] = timeBlock.concat();
-                        }
-                    }
-                }
-                if (no_match) continue;
+                const [timeDict, roomDict] = tmp;
 
+                // don't include this combined section if it conflicts with any time filter or event,.
                 for (const td of timeSlots) {
-                    if (Utils.checkTimeConflict(td, tmp_dict)) {
+                    if (Utils.checkTimeConflict(td, timeDict)) {
                         no_match = true;
                         break;
                     }
                 }
                 if (no_match) continue;
 
-                algoCourse[1] = tmp_dict;
+                const sectionIndices: number[] = [];
+                for (const section of sections) {
+                    // filter out sections with unwanted status
+                    if (this.options.status.includes(section.status)) continue;
 
-                for (const sid of sids) {
-                    const section = courseRec.getSection(sid);
-                    // insert filter method
-                    if (this.filterStatus(section)) continue;
-                    algoCourse[2].push(sid);
+                    sectionIndices.push(section.sid);
                 }
-                if (algoCourse[2].length !== 0) classes.push(algoCourse);
+
+                // Map the room to a number
+                const roomNumberDict: RoomNumberDict = {};
+                if (buildingList && buildingList.length) {
+                    for (const day in roomDict) {
+                        const numberList: number[] = [];
+                        for (const room of roomDict[day]) {
+                            const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
+                            // we set the match threshold to 0.5
+                            if (roomMatch.bestMatch.rating >= 0.5) {
+                                numberList.push(roomMatch.bestMatchIndex);
+                            } else {
+                                // mismatch!
+                                console.warn(room, roomMatch);
+                                numberList.push(-1);
+                            }
+                        }
+                        roomNumberDict[day] = numberList;
+                    }
+                } else {
+                    for (const day in roomDict) {
+                        roomNumberDict[day] = roomDict[day].map(x => -1);
+                    }
+                }
+
+                if (sectionIndices.length !== 0)
+                    classes.push([key, timeDict, sectionIndices, roomNumberDict]);
             }
 
+            // throw an error of none of the sections pass the filter
             if (classes.length === 0) {
                 throw new Error(
                     `No sections of ${courseRec.department} ${courseRec.number} ${
@@ -197,11 +231,32 @@ class ScheduleGenerator {
             );
     }
 
-    public createSchedule(classList: RawAlgoSchedule[]) {
+    /**
+     * @param classList a tuple of sections of courses, whose length is the number of distinct courses chosen
+     *
+     * @example
+     * classList[i][j] // represents the jth section of the ith class
+     */
+    public createSchedule(classList: RawAlgoCourse[][]) {
+        /**
+         * current index of course
+         */
         let classNum = 0;
+        /**
+         * the index of the section within the course indicated by `classNum`
+         */
         let choiceNum = 0;
+        /**
+         * record the index of sections that are already tested
+         */
         const pathMemory = new Int32Array(classList.length);
+        /**
+         * The current schedule, build incrementally and in-place.
+         * After one successful build, all elements are removed (**in-place**)
+         */
         const timeTable: RawAlgoSchedule = [];
+
+        const maxNumSchedules = this.options.maxNumSchedules;
 
         const evaluator = new ScheduleEvaluator(this.options.sortOptions, this.options.events);
         let exhausted = false;
@@ -209,20 +264,32 @@ class ScheduleGenerator {
         while (true) {
             if (classNum >= classList.length) {
                 evaluator.add(timeTable);
-                // if (evaluator.size() >= 100000) break;
+                if (evaluator.size() >= maxNumSchedules) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
                 timeTable.pop();
             }
 
-            [classNum, choiceNum, exhausted] = this.AlgorithmRetract(
-                classList,
-                classNum,
-                choiceNum,
-                pathMemory,
-                timeTable
-            );
+            /**
+             * Algorithm Retract
+             * when all possibilities in on class have exhausted, retract one class
+             * explore the next possibilities in the nearest possible class
+             * reset the memory path forward to zero
+             */
+            while (choiceNum >= classList[classNum].length) {
+                classNum -= 1;
+                if (classNum < 0) {
+                    exhausted = true;
+                    break;
+                }
+                timeTable.pop();
+                choiceNum = pathMemory[classNum];
+                for (let i = classNum + 1; i < pathMemory.length; i++) {
+                    pathMemory[i] = 0;
+                }
+            }
 
+            // if all possibilities are exhausted, then break out the loop
             if (exhausted) {
                 break;
             }
@@ -243,33 +310,6 @@ class ScheduleGenerator {
         return evaluator;
     }
 
-    public AlgorithmRetract(
-        classList: RawAlgoSchedule[],
-        classNum: number,
-        choiceNum: number,
-        pathMemory: Int32Array,
-        timeTable: RawAlgoSchedule
-    ): [number, number, boolean] {
-        /**
-         * when all possibilities in on class have exhausted, retract one class
-         * explore the next possibilities in the nearest possible class
-         * reset the memory path forward to zero
-         */
-
-        while (choiceNum >= classList[classNum].length) {
-            classNum -= 1;
-            if (classNum < 0) {
-                return [classNum, choiceNum, true];
-            }
-            timeTable.pop();
-            choiceNum = pathMemory[classNum];
-            for (let i = classNum + 1; i < pathMemory.length; i++) {
-                pathMemory[i] = 0;
-            }
-        }
-        return [classNum, choiceNum, false];
-    }
-
     /**
      * compare the new class to see if it has conflicts with the existing time table
      *
@@ -280,10 +320,6 @@ class ScheduleGenerator {
             if (Utils.checkTimeConflict(algoCourse[1], timeDict)) return true;
         }
         return false;
-    }
-
-    public filterStatus(section: Section) {
-        return this.options.status.includes(section.status);
     }
 }
 

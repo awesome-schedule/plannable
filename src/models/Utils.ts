@@ -3,6 +3,8 @@ import Catalog from './Catalog';
 import Schedule from './Schedule';
 import Meta, { RawCourse } from './Meta';
 import Course from './Course';
+import { saveAs } from 'file-saver';
+import { AxiosError } from 'axios';
 
 /**
  * @example
@@ -215,12 +217,27 @@ export function timeout<T>(
     time: number,
     msg = 'Time out fetching data. Please try again later'
 ): Promise<T> {
-    return Promise.race([
-        promise,
-        new Promise((resolve, reject) => {
-            setTimeout(() => {
-                reject(msg);
-            }, time);
-        })
-    ]) as Promise<T>;
+    if (time > 0) {
+        return Promise.race([
+            promise,
+            new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    reject(msg);
+                }, time);
+            })
+        ]) as Promise<T>;
+    } else return promise;
+}
+
+export function savePlain(str: string, filename: string) {
+    saveAs(new Blob([str], { type: 'text/plain;charset=utf-8' }), filename);
+}
+
+export function errToStr(err: string | AxiosError) {
+    let errStr = '';
+    if (typeof err === 'string') errStr += err;
+    else if (err.response) errStr += `request rejected by the server`;
+    else if (err.request) errStr += `No internet`;
+    else errStr += err.message;
+    return errStr;
 }

@@ -57,6 +57,7 @@
                             :absolute-earliest="absoluteEarliest"
                             :style="`left:${idx * 20}%`"
                             :day="day"
+                            @load="incOccupy(scheduleBlock)"
                         ></course-block>
                     </template>
                 </div>
@@ -97,6 +98,8 @@ export default class GridSchedule extends Vue {
     fri = window.screen.width > 450 ? 'Friday' : 'Fri';
     // note: we need Schedule.days because it's an array that keeps the keys in order
     days = Meta.days;
+
+    occupy = Array((5 * 24 * 60) / 5).fill(0);
 
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero

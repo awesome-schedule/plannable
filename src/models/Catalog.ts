@@ -1,13 +1,13 @@
 import Course from './Course';
 import Meta, { RawCatalog } from './Meta';
+import Expirable from '@/data/Expirable';
 
 export interface Semester {
     id: string;
     name: string;
 }
 
-export interface CatalogJSON {
-    modified: string;
+export interface CatalogJSON extends Expirable {
     semester: Semester;
     raw_data: RawCatalog;
 }
@@ -17,28 +17,8 @@ class Catalog {
      * Parse AllRecords from parsed JSON
      * @returns `null` if data is invalid
      */
-    public static fromJSON(data: CatalogJSON, expTime = Meta.semesterDataExpirationTime) {
-        if (
-            data &&
-            typeof data.modified === 'string' &&
-            data.semester instanceof Object &&
-            data.raw_data instanceof Object
-        ) {
-            const now = new Date().getTime();
-            const dataTime = new Date(data.modified).getTime();
-            if (now - dataTime > expTime)
-                return {
-                    catalog: new Catalog(data.semester, data.raw_data),
-                    expired: true
-                };
-            else {
-                return {
-                    catalog: new Catalog(data.semester, data.raw_data),
-                    expired: false
-                };
-            }
-        }
-        return null;
+    public static fromJSON(data: CatalogJSON) {
+        return new Catalog(data.semester, data.raw_data);
     }
     public semester: Semester;
     public raw_data: RawCatalog;
@@ -48,11 +28,8 @@ class Catalog {
         this.raw_data = raw_data;
     }
 
-    public fromJSON(
-        data: { modified: string; semester: Semester; raw_data: RawCatalog },
-        expTime = Meta.semesterDataExpirationTime
-    ) {
-        return Catalog.fromJSON(data, expTime);
+    public fromJSON(data: CatalogJSON) {
+        return Catalog.fromJSON(data);
     }
 
     public toJSON(): CatalogJSON {

@@ -2,16 +2,16 @@ import 'jest';
 import Schedule from '../../src/models/Schedule';
 import * as Utils from '../../src/models/Utils';
 import data from './data';
-
 describe('Schedule Test', () => {
     it('Schedule Static Field Test', () => {
         expect(Schedule.fields).toEqual(['All', 'title', 'id']);
     });
 
-    it('Schedule Color Hash', () => {
+    it('Schedule Color Hash', async () => {
         const len = Schedule.bgColors.length;
         const frequencies = new Float32Array(len);
-        for (const key in data) {
+        const raw_data = await data;
+        for (const key in raw_data) {
             const hash = Utils.hashCode(key) % len;
             frequencies[hash] += 1;
         }
@@ -20,5 +20,9 @@ describe('Schedule Test', () => {
         console.log(prob);
         // we expect the hashes to be quite uniformly distributed
         expect(prob.some(x => x > 11)).toBe(false);
+    });
+
+    it('From Json', () => {
+        expect(1).toBe(1);
     });
 });

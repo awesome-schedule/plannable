@@ -368,10 +368,17 @@ class Schedule {
 
     public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
         const [days, start, , end] = dayTimes.split(' ');
-        const [startMin, endMin] = Utils.parseTimeAsString(start, end);
-        for (let i = 0; i < days.length; i += 2) {
-            const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
-            this.days[days.substr(i, 2)].push(scheduleBlock);
+        if (days && start && end) {
+            const [startMin, endMin] = Utils.parseTimeAsString(start, end);
+            // wait... start time equals end time?
+            if (startMin === endMin) {
+                console.warn(events, startMin, endMin);
+                return;
+            }
+            for (let i = 0; i < days.length; i += 2) {
+                const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
+                this.days[days.substr(i, 2)].push(scheduleBlock);
+            }
         }
     }
 
@@ -454,6 +461,7 @@ class Schedule {
                     }
                     for (const m of (section as Section).meetings) {
                         if (m.days === 'TBD' || m.days === 'TBA') continue;
+                        if (m.days.indexOf(Meta.days[d]) === -1) continue;
                         const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
                         const [, start, , end] = m.days.split(' ');
                         const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
@@ -511,12 +519,12 @@ class Schedule {
                     ical += 'BEGIN:VEVENT\n';
                     ical += 'UID:\n';
                     ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
-                    ical += 'DTSTART:' + this.dateToICalString(startAtDay) + '\n';
+                    ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
                     // ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
                     ical +=
-                        'RRULES:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
+                        'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                         Meta.days[d].toUpperCase() +
-                        'BYHOUR=' +
+                        ';BYHOUR=' +
                         startTime.getHours() +
                         ';BYMINUTE=' +
                         startTime.getMinutes() +
@@ -525,23 +533,20 @@ class Schedule {
                         '\n';
                     ical +=
                         'DURATION=P' +
-                        (endMin - startMin) / 60 +
+                        Math.floor((endMin - startMin) / 60) +
                         'H' +
                         ((endMin - startMin) % 60) +
                         'M' +
                         '\n';
-                    ical += 'SUMMARY:' + '\n';
-                    ical += 'DESCRIPTION:' + '\n';
-                    ical += 'LOCATION:' + '\n';
+                    ical += 'SUMMARY:' + sb.section.title + '\n';
+                    ical += 'DESCRIPTION:' + sb.section.description + '\n';
+                    ical += 'LOCATION:' + sb.section.room + '\n';
                     ical += 'END:VEVENT\n';
                 }
             }
         }
         ical += 'END:VCALENDAR';
-
-        const blob = new Blob([ical], { type: 'text' });
-        const url = window.URL.createObjectURL(blob);
-        return url;
+        return ical;
     }
 
     public dateToICalString(date: Date) {

@@ -4,6 +4,10 @@ module.exports = {
     configureWebpack: config => {
         if (process.env.NODE_ENV === 'production') {
             return {
+                externals: {
+                    jquery: 'jQuery',
+                    bootstrap: 'bootstrap'
+                },
                 plugins: [
                     new HtmlWebpackExternalsPlugin({
                         externals: [

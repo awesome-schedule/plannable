@@ -1,5 +1,5 @@
 <template>
-    <div class="info-panel">
+    <div id="info-panel">
         <div class="container">
             <div class="row">
                 <div class="col-md-auto">
@@ -273,25 +273,21 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import Vue from 'vue';
-export default Vue.extend({});
-$('#myCarousel').carousel();
-$('body').scrollspy({ target: '#navbar-example3' });
+import $ from 'jquery';
+import 'bootstrap';
+
+export default Vue.extend({
+    mounted() {
+        $('#myCarousel').carousel();
+        $('body').scrollspy({ target: '#navbar-example3' });
+    }
+});
 </script>
 
 <style scoped>
-.body {
-    position: relative;
-}
-.info-panel {
-    width: 97vw;
-    height: 100vh;
-    left: 3vw;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
-    overflow-y: auto;
+#info-panel {
     background-color: antiquewhite;
     /* background-color: rgb(244, 247, 248); */
 }

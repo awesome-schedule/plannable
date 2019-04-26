@@ -1,7 +1,7 @@
 <template>
     <div id="info-panel">
-        <nav id="navbar-scrollspy" class="navbar navbar-light bg-light sidebar">
-            <a class="navbar-brand" href="#">Guide</a>
+        <nav id="navbar-scrollspy" class="navbar d-block navbar-light bg-light sidebar">
+            <a class="navbar-brand" href="#">Website Guide</a>
             <nav class="nav nav-pills flex-column">
                 <a class="nav-link" href="#item-1">General Introduction</a>
                 <a class="nav-link" href="#item-2">Basic Operations</a>

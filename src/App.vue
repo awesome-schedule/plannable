@@ -103,11 +103,7 @@
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 
-        <nav
-            v-if="sideBar.showSelectClass"
-            class="d-block bg-light sidebar"
-            style="scrollbar-width:thin !important"
-        >
+        <nav v-if="sideBar.showSelectClass" class="d-block bg-light sidebar">
             <div class="dropdown">
                 <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
                     <span v-if="loading" class="spinner-border spinner-border-sm"></span>
@@ -275,11 +271,7 @@
         >
         </event-view>
 
-        <nav
-            v-else-if="sideBar.showFilter"
-            class="d-block bg-light sidebar"
-            style="scrollbar-width:thin !important"
-        >
+        <nav v-else-if="sideBar.showFilter" class="d-block bg-light sidebar">
             <div class="btn bg-info nav-btn" style="color:white">
                 Filters
             </div>
@@ -484,11 +476,7 @@
             </ul>
         </nav>
 
-        <nav
-            v-else-if="sideBar.showSetting"
-            class="d-block bg-light sidebar"
-            style="scrollbar-width:thin !important"
-        >
+        <nav v-else-if="sideBar.showSetting" class="d-block bg-light sidebar">
             <div class="btn bg-info nav-btn" style="color:white">
                 Schedule Display settings
             </div>
@@ -1511,6 +1499,7 @@ export default class App extends Vue {
     overflow-y: auto;
     left: 3vw;
     width: 19vw;
+    scrollbar-width: thin !important;
 }
 
 .tab-bar {
@@ -1618,6 +1607,7 @@ export default class App extends Vue {
         overflow-y: auto;
         left: 10vw !important;
         width: 75vw !important;
+        scrollbar-width: thin !important;
     }
 
     .nav-btn {

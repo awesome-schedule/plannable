@@ -21,6 +21,9 @@
                     >
                         {{ meeting.days }} {{ meeting.room }}
                     </div>
+                    <div style="color:#a0a0a0">
+                        {{ section.status }} {{ section.enrollment }}/{{ section.enrollment_limit }}
+                    </div>
                     <br />
                     <div>{{ section.description }}</div>
                     <div v-if="semester !== null" class="mt-2">

@@ -2,11 +2,19 @@ import Expirable from './Expirable';
 import { NotiMsg } from '../models/Notification';
 import { errToStr, timeout } from '../models/Utils';
 
+/**
+ * @template T the type of the object to construct
+ * @template T_JSON the JSON representation of the object T
+ * @param key the key in the localStorage
+ * @param request the async function to request data from remote, if local data expires or does not exist
+ * @param construct function to construct the actual object T from its JSON representation
+ * @param param3 other params
+ */
 export async function loadFromCache<T, T_JSON extends Expirable>(
     key: string,
+    request: () => Promise<T>,
+    construct: (x: T_JSON) => T,
     {
-        request,
-        construct,
         warnMsg,
         errMsg,
         infoMsg = '',
@@ -16,8 +24,6 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         validator = defaultValidator,
         force = false
     }: {
-        request: () => Promise<T>;
-        construct: (x: T_JSON) => T;
         warnMsg: (err: string) => string;
         errMsg: (err: string) => string;
         infoMsg?: string;

@@ -17,16 +17,19 @@ import { loadFromCache } from './Loader';
  */
 export async function loadSemesterData(idx: number, force = false): Promise<NotiMsg<Catalog>> {
     const semester = window.semesters[idx];
-    return loadFromCache<Catalog, CatalogJSON>(`${semester.id}data`, {
-        request: () => requestSemesterData(semester),
-        construct: x => Catalog.fromJSON(x),
-        errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
-        warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
-        infoMsg: `Successfully loaded ${semester.name} data!`,
-        expireTime: Meta.semesterDataExpirationTime,
-        timeoutTime: 10000,
-        force
-    });
+    return loadFromCache<Catalog, CatalogJSON>(
+        `${semester.id}data`,
+        () => requestSemesterData(semester),
+        x => Catalog.fromJSON(x),
+        {
+            errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
+            warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
+            infoMsg: `Successfully loaded ${semester.name} data!`,
+            expireTime: Meta.semesterDataExpirationTime,
+            timeoutTime: 10000,
+            force
+        }
+    );
 }
 
 function saveCatalog(catalog: Catalog) {

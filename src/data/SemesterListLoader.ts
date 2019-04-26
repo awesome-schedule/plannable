@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { Semester } from '../models/Catalog';
-import { timeout, errToStr } from '../models/Utils';
 import Meta from '@/models/Meta';
 import { NotiMsg } from '../models/Notification';
 import Expirable from './Expirable';
+import { loadFromCache } from './Loader';
 
 interface SemesterListJSON extends Expirable {
     semesterList: Semester[];
@@ -17,52 +17,17 @@ interface SemesterListJSON extends Expirable {
  */
 export async function loadSemesterList(count = 5): Promise<NotiMsg<Semester[]>> {
     // load the cached list of semesters, if it exists
-    const storage = localStorage.getItem('semesters');
-    const successMsg = `Successfully loaded semester list!`;
-    if (!storage) {
-        try {
-            return {
-                payload: window.semesters = await timeout(requestSemesterList(count), 10000),
-                msg: successMsg,
-                level: 'info'
-            };
-        } catch (err) {
-            return {
-                msg: `Failed to fetch semester list: ${errToStr(err)}`,
-                level: 'error'
-            };
+    return loadFromCache<Semester[], SemesterListJSON>(
+        'semesters',
+        () => requestSemesterList(count),
+        x => x.semesterList,
+        {
+            errMsg: x => `Failed to fetch semester list: ${x}`,
+            warnMsg: x => `Failed to fetch semester list: ${x}. Old data is used`,
+            expireTime: Meta.semesterListExpirationTime,
+            timeoutTime: 10000
         }
-    }
-    const raw: SemesterListJSON = JSON.parse(storage);
-    const modified = raw.modified;
-
-    // if data exists and is not expired
-    if (
-        modified &&
-        new Date().getTime() - new Date(modified).getTime() < Meta.semesterListExpirationTime
-    ) {
-        return {
-            payload: window.semesters = raw.semesterList,
-            msg: successMsg,
-            level: 'info'
-        };
-    } else {
-        try {
-            // try to fetch a fresh list of semesters
-            return {
-                payload: window.semesters = await timeout(requestSemesterList(count), 10000),
-                msg: successMsg,
-                level: 'info'
-            };
-        } catch (err) {
-            // if failed, use old data
-            return {
-                payload: window.semesters = raw.semesterList,
-                msg: `Failed to fetch semester list: ${errToStr(err)}. Old data is used instead`,
-                level: 'info'
-            };
-        }
-    }
+    );
 }
 
 /**

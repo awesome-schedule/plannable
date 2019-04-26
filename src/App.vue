@@ -934,7 +934,7 @@ export default class App extends Vue {
             const semesters = data.payload;
             if (data.level !== 'info') this.noti.notify(data);
             if (semesters) {
-                this.semesters = semesters;
+                window.semesters = this.semesters = semesters;
                 this.selectSemester(0);
             }
             this.loading = false;
@@ -1316,7 +1316,7 @@ export default class App extends Vue {
                     if (parsed) this[field] = parsed;
                     else {
                         // this.noti.warn(`Fail to parse ${field}`);
-                        console.warn('failed to parse', field);
+                        // console.warn('failed to parse', field);
                         this[field] = defaultData[field];
                     }
                 } else {

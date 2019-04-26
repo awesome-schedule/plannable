@@ -1236,6 +1236,8 @@ export default class App extends Vue {
             return;
         }
 
+        if (!this.validateSortOptions()) return;
+
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
         try {
@@ -1265,10 +1267,22 @@ export default class App extends Vue {
         }
     }
 
-    changeSorting(optIdx: number) {
+    validateSortOptions() {
         if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-            return this.noti.error('You must have at least one sort option!');
+            this.noti.error('You must have at least one sort option!');
+            return false;
+        } else if (
+            Object.values(this.sortOptions.sortBy).some(x => x.name === 'distance' && x.enabled) &&
+            (!window.buildingList || !window.timeMatrix)
+        ) {
+            this.noti.error('Building list fails to load. Please disable "walking distance"');
+            return false;
         }
+        return true;
+    }
+
+    changeSorting(optIdx: number) {
+        if (!this.validateSortOptions()) return;
         if (optIdx !== undefined) {
             const option = this.sortOptions.sortBy[optIdx];
 

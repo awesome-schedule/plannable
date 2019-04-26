@@ -229,10 +229,20 @@ export function timeout<T>(
     } else return promise;
 }
 
+/**
+ * save a string a as text file
+ *
+ * @param str the string to save as a file
+ * @param filename
+ */
 export function savePlain(str: string, filename: string) {
     saveAs(new Blob([str], { type: 'text/plain;charset=utf-8' }), filename);
 }
 
+/**
+ * convert an (axios request) error to string message
+ * @param err
+ */
 export function errToStr(err: string | AxiosError) {
     let errStr = '';
     if (typeof err === 'string') errStr += err;

@@ -708,7 +708,7 @@
 
         <palette v-else-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
 
-        <information v-else-if="sideBar.showInfo"></information>
+        <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 
         <external
             v-else-if="sideBar.showExternal"
@@ -1506,7 +1506,6 @@ export default class App extends Vue {
     position: fixed;
     top: 0;
     bottom: 0;
-    left: 0;
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     overflow-y: auto;

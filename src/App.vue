@@ -29,7 +29,13 @@
         <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
         <course-modal :course="modalCourse"></course-modal>
         <!-- Tab Icons Start (Leftmost bar) -->
-        <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
+        <nav
+            class="d-block bg-light tab-bar"
+            :style="{
+                width: sideBarWidth + 'vw',
+                'max-height': navHeight + 'px'
+            }"
+        >
             <div
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
@@ -85,6 +91,14 @@
                 @click="switchSideBar('showInfo')"
             >
                 <i class="fas fa-info-circle"></i>
+            </div>
+            <div
+                title="What's happening"
+                :class="{ 'tab-icon-active': sideBar.showExternal }"
+                class="tab-icon mb-4"
+                @click="switchSideBar('showExternal')"
+            >
+                <i class="fas fa-external-link-alt"></i>
             </div>
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
@@ -696,7 +710,10 @@
 
         <information v-else-if="sideBar.showInfo"></information>
 
-        <external v-else-if="sideBar.showExternal"></external>
+        <external
+            v-else-if="sideBar.showExternal"
+            :style="{ 'margin-left': sideBarWidth + 1 + 'vw' }"
+        ></external>
 
         <transition name="fade">
             <div
@@ -718,12 +735,13 @@
             </div>
         </transition>
         <div
+            v-if="!sideBar.showInfo && !sideBar.showExternal"
             class="schedule"
-            :style="
-                `width:${
-                    mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw'
-                }; margin-left:${mobile ? 11 : scheduleLeft}vw; margin-right: ${mobile ? '1vw' : 0}`
-            "
+            :style="{
+                width: mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
+                'margin-left': (mobile ? 11 : scheduleLeft) + 'vw',
+                'margin-right': mobile ? '1vw' : 0
+            }"
         >
             <div class="container-fluid my-3">
                 <div class="row justify-content-center">
@@ -881,6 +899,7 @@ export default class App extends Vue {
     navHeight = 500;
     loading = false;
     mobile = window.screen.width < 900;
+    sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
     tempScheduleIndex: number | null = null;
     drag = false;
@@ -1603,18 +1622,6 @@ export default class App extends Vue {
     .nav-btn {
         border-radius: 0 !important;
         width: 100%;
-    }
-
-    .tab-bar {
-        display: block;
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 10; /* Behind the navbar */
-        padding: 26px 0 0;
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-        width: 10vw !important;
     }
 
     .tab-icon {

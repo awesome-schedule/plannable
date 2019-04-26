@@ -189,8 +189,11 @@
                         >
                             <div class="col-auto">
                                 <i
-                                    class="fas fa-long-arrow-alt-left click-icon"
+                                    class="fas fa-long-arrow-alt-left"
                                     title="previous schedule"
+                                    :class="
+                                        proposedScheduleIndex > 0 ? 'click-icon' : 'icon-disabled'
+                                    "
                                     @click="switchProposed(proposedScheduleIndex - 1)"
                                 ></i>
                             </div>
@@ -199,8 +202,13 @@
                             </div>
                             <div class="col-auto">
                                 <i
-                                    class="fas fa-long-arrow-alt-right click-icon"
+                                    class="fas fa-long-arrow-alt-right"
                                     title="next schedule"
+                                    :class="
+                                        proposedScheduleIndex < proposedSchedules.length - 1
+                                            ? 'click-icon'
+                                            : 'icon-disabled'
+                                    "
                                     @click="switchProposed(proposedScheduleIndex + 1)"
                                 ></i>
                             </div>
@@ -221,9 +229,14 @@
                             </div>
                             <div class="col-auto">
                                 <i
-                                    class="far fa-calendar-times click-icon"
+                                    class="far fa-calendar-times"
+                                    :class="
+                                        proposedSchedules.length > 1
+                                            ? 'click-icon'
+                                            : 'icon-disabled'
+                                    "
                                     title="delete current schedule"
-                                    @click="deleteProposed"
+                                    @click="deleteProposed()"
                                 ></i>
                             </div>
                         </div>
@@ -934,7 +947,8 @@ export default class App extends Vue {
         );
     }
     set proposedSchedule(schedule: Schedule) {
-        this.proposedSchedules[this.proposedScheduleIndex] = schedule;
+        // need Vue's reactivity
+        this.$set(this.proposedSchedules, this.proposedScheduleIndex, schedule);
     }
     /**
      * the proposed schedule that is currently active
@@ -995,12 +1009,10 @@ export default class App extends Vue {
         this.switchProposed(len);
     }
     deleteProposed() {
+        if (this.proposedSchedules.length === 1) return;
         const idx = this.proposedScheduleIndex;
 
         if (!confirm(`Are you sure to delete schedule ${idx + 1}?`)) return;
-        if (this.proposedSchedules.length === 1) {
-            return this.noti.error('This is the only schedule left!');
-        }
 
         // if the schedule to be deleted corresponds to generated schedules,
         // this deletion invalidates the generated schedules immediately.
@@ -1385,6 +1397,7 @@ export default class App extends Vue {
             }
         }
         if (!this.proposedSchedule.empty()) {
+            console.log('generating schedules from local data..');
             this.currentSchedule = this.proposedSchedule;
             this.generateSchedules();
         }
@@ -1444,13 +1457,10 @@ export default class App extends Vue {
                     return;
                 }
                 localStorage.setItem((this.currentSemester as Semester).id, result);
-                const semester = raw_data.currentSemester;
-                for (let i = 0; i < this.semesters.length; i++) {
-                    if (this.semesters[i].id === semester.id) {
-                        this.selectSemester(i, raw_data);
-                        break;
-                    }
-                }
+                const semester: Semester = raw_data.currentSemester;
+                this.selectSemester(semester.id, raw_data);
+            } else {
+                this.noti.warn('File is empty!');
             }
         };
 
@@ -1496,25 +1506,26 @@ export default class App extends Vue {
     color: #888888;
 }
 .tab-icon:hover {
-    color: #666666;
+    color: #444444;
 }
 .tab-icon:active {
     color: #bbbbbb;
 }
-
 .tab-icon-active {
-    color: #1f1f1f;
+    color: black;
 }
 
 .click-icon {
     cursor: pointer;
 }
-
 .click-icon:hover {
-    color: #3e3e3e;
+    color: #6f6f6f;
 }
 .click-icon:active {
-    color: #bbbbbb;
+    color: #cbcbcb;
+}
+.icon-disabled {
+    color: #999999;
 }
 
 .sidebar {

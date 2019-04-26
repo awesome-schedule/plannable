@@ -6,10 +6,10 @@ Contribution log by Hanzhi Zhou
 
 This project is a continuation of our hackathon project of the same name. Initial team members include
 
-- **Zichao Hu** - [OAHC2022](https://github.com/OAHC2022)
-- **Hanzhi Zhou** - [hanzhi713](https://github.com/hanzhi713)
-- **Kaiying Shan** - [kaiyingshan](https://github.com/kaiyingshan)
-- **Minjun Long** - [Elena6918](https://github.com/Elena6918)
+-   **Zichao Hu** - [OAHC2022](https://github.com/OAHC2022)
+-   **Hanzhi Zhou** - [hanzhi713](https://github.com/hanzhi713)
+-   **Kaiying Shan** - [kaiyingshan](https://github.com/kaiyingshan)
+-   **Minjun Long** - [Elena6918](https://github.com/Elena6918)
 
 For the following parts, those with the most contributions are listed first.
 
@@ -81,11 +81,14 @@ These are mainly TypeScript files in [models](/templates/src/models)
 | Notification  | A wrapper for displaying notifications to user                      | Hanzhi Zhou               |
 | ScheduleBlock | A wrapper with fields required for rendering using GridSchedule.vue | Hanzhi Zhou               |
 
-### Data Fetching
+### Data Fetching and Caching
 
-| Name       | Description                                                    | Contributor               |
-| ---------- | -------------------------------------------------------------- | ------------------------- |
-| DataLoader | Script for fetching the list of semesters and parsing raw data | Kaiying Shan, Hanzhi Zhou |
+| Name               | Description                                                      | Contributor               |
+| ------------------ | ---------------------------------------------------------------- | ------------------------- |
+| BuildingLoader     | For loading the list of buildings and the distance matrix        | Hanzhi Zhou               |
+| CatalogLoader      | For loading the catalog of courses of a given semester           | Hanzhi Zhou, Kaiying Shan |
+| SemesterListLoader | For loading loading the list of semesters                        | Hanzhi Zhou               |
+| Loader             | For local data fetching, expiration checking and sending request | Hanzhi Zhou               |
 
 ### Algorithm
 

@@ -285,7 +285,7 @@ class Schedule {
     public computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
-        console.time('render schedule');
+
         this.cleanSchedule();
 
         for (const key in this.All) {
@@ -335,11 +335,7 @@ class Schedule {
 
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
-        for (const event of this.events) {
-            if (event.display) this.place(event);
-        }
-
-        console.timeEnd('render schedule');
+        for (const event of this.events) if (event.display) this.place(event);
     }
 
     /**
@@ -397,6 +393,7 @@ class Schedule {
         this.colorSlots.forEach(x => x.clear());
         this.totalCredit = 0;
         this.currentCourses = [];
+        this.currentIds = {};
     }
     /**
      * instantiate a `Schedule` object from its JSON representation

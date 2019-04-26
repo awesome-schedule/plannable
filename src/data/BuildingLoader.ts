@@ -9,11 +9,11 @@ const api =
         ? `${window.location.protocol}//${window.location.host}/`
         : 'http://localhost:8000/';
 
-interface TimeMatrixJSON extends Expirable {
+export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
 }
 
-interface BuildingListJSON extends Expirable {
+export interface BuildingListJSON extends Expirable {
     buildingList: string[];
 }
 
@@ -25,10 +25,10 @@ interface BuildingListJSON extends Expirable {
  * storage key: "timeMatrix"
  */
 export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
-    const data = await loadFromCache(
+    const data = await loadFromCache<Int32Array, TimeMatrixJSON>(
         'timeMatrix',
         requestTimeMatrix,
-        (x: TimeMatrixJSON) => Int32Array.from(x.timeMatrix),
+        x => Int32Array.from(x.timeMatrix),
         {
             warnMsg: x => `Failed to load time matrix: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load time matrix: ${x}. `,
@@ -40,10 +40,10 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
 }
 
 export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
-    const data = await loadFromCache(
+    const data = await loadFromCache<string[], BuildingListJSON>(
         'buildingList',
         requestBuildingList,
-        (x: BuildingListJSON) => x.buildingList,
+        x => x.buildingList,
         {
             warnMsg: x => `Failed to load building list: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load building list: ${x}. `,

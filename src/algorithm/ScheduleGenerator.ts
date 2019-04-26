@@ -38,10 +38,22 @@ export interface TimeDict {
     Fr?: number[];
 }
 
+/**
+ * key: same as TimeDict
+ *
+ * value: the name of the building
+ */
 export interface RoomDict {
     [x: string]: string[];
 }
 
+/**
+ * key: same as TimeDict
+ *
+ * value: the index of the building in the building list
+ *
+ * @see https://github.com/awesome-schedule/data/blob/master/building_list.json
+ */
 export interface RoomNumberDict {
     [x: string]: number[];
 }
@@ -131,12 +143,12 @@ class ScheduleGenerator {
         const timeSlots: TimeDict[] = this.options.events.map(e => e.toTimeDict());
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
 
-        const classList: RawAlgoSchedule[] = [];
+        const classList: RawAlgoCourse[][] = [];
         const courses = schedule.All;
 
         // for each course selected, form an array of sections
         for (const key in courses) {
-            const classes: RawAlgoSchedule = [];
+            const classes: RawAlgoCourse[] = [];
 
             // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
@@ -252,7 +264,7 @@ class ScheduleGenerator {
         const pathMemory = new Int32Array(classList.length);
         /**
          * The current schedule, build incrementally and in-place.
-         * After one successful build, all elements are removed (**in-place**)
+         * After one successful build, all elements are removed **in-place**
          */
         const timeTable: RawAlgoSchedule = [];
 

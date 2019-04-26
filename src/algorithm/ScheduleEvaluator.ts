@@ -83,7 +83,7 @@ export interface SortOptions {
     sortBy: SortOption[];
     mode: Mode;
     toJSON: () => SortOptionJSON;
-    fromJSON: (x: SortOptionJSON) => void;
+    fromJSON: (x: SortOptionJSON) => SortOptions;
 }
 
 class ScheduleEvaluator {
@@ -272,8 +272,13 @@ class ScheduleEvaluator {
             return total;
         },
 
+        /**
+         * compute the sum of walking distances between each consecutive pair of classes
+         */
         distance(schedule: CmpSchedule) {
             const timeMatrix = window.timeMatrix;
+
+            // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5;
             const rooms = schedule.rooms;
             let dist = 0;
@@ -281,6 +286,8 @@ class ScheduleEvaluator {
                 for (let i = 0; i < dayRooms.length - 1; i++) {
                     const r1 = dayRooms[i];
                     const r2 = dayRooms[i + 1];
+
+                    // skip unknown buildings
                     if (r1 === -1 || r2 === -1) continue;
                     dist += timeMatrix[r1 * len + r2];
                 }

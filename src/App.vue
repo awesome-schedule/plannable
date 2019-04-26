@@ -790,6 +790,8 @@ import Information from './components/Information.vue';
 import External from './components/External.vue';
 import draggable from 'vuedraggable';
 
+import 'bootstrap';
+import $ from 'jquery';
 import Section from './models/Section';
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
@@ -1084,12 +1086,12 @@ export default class App extends Vue {
 
     showModal(section: Section) {
         this.modalSection = section;
-        (window as any).$('#modal').modal();
+        $('#modal').modal();
     }
 
     showCourseModal(course: Course) {
         this.modalCourse = course;
-        (window as any).$('#course-modal').modal();
+        $('#course-modal').modal();
     }
 
     removeCourse(key: string) {

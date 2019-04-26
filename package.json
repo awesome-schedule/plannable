@@ -13,7 +13,9 @@
     },
     "dependencies": {
         "axios": "^0.18",
+        "bootstrap": "^4.3.1",
         "file-saver": "^2.0.1",
+        "jquery": "^3.3.1",
         "papaparse": "^4.6.3",
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
@@ -22,14 +24,15 @@
         "vuedraggable": "^2.20.0"
     },
     "devDependencies": {
-        "@types/string-similarity": "^3.0.0",
         "@babel/preset-typescript": "^7.3.3",
+        "@types/bootstrap": "^4.3.0",
         "@types/file-saver": "^2.0.0",
         "@types/jest": "^24.0.11",
         "@types/jquery": "^3.3.29",
         "@types/node": "^11.13.7",
         "@types/papaparse": "^4.5.9",
         "@types/randomcolor": "^0.5.1",
+        "@types/string-similarity": "^3.0.0",
         "@vue/cli-plugin-babel": "^3.6.0",
         "@vue/cli-plugin-eslint": "^3.6.0",
         "@vue/cli-plugin-typescript": "^3.6.0",

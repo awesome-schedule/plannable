@@ -6,7 +6,7 @@ import { errToStr, timeout } from '../models/Utils';
  * @template T the type of the object to construct
  * @template T_JSON the JSON representation of the object T
  * @param key the key in the localStorage
- * @param request the async function to request data from remote, if local data expires or does not exist
+ * @param request the async function used to request data from remote, if local data expires or does not exist
  * @param construct function to construct the actual object T from its JSON representation
  * @param param3 other params
  */

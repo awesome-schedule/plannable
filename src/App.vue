@@ -31,42 +31,48 @@
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav class="d-block bg-light tab-bar" :style="`width:3vw;max-height:${navHeight}`">
             <div
-                :class="(sideBar.showSelectClass ? 'tab-icon-active ' : 'tab-icon ') + 'mt-0 mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showSelectClass }"
                 title="Select Classes"
                 @click="switchSideBar('showSelectClass')"
             >
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
-                :class="(sideBar.showEvent ? 'tab-icon-active ' : 'tab-icon ') + 'mt-0 mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showEvent }"
                 title="Edit Events"
                 @click="switchSideBar('showEvent')"
             >
                 <i class="fab fa-elementor"></i>
             </div>
             <div
-                :class="(sideBar.showFilter ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showFilter }"
                 title="Filters"
                 @click="switchSideBar('showFilter')"
             >
                 <i class="fas fa-filter"></i>
             </div>
             <div
-                :class="(sideBar.showSetting ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showSetting }"
                 title="Display Settings"
                 @click="switchSideBar('showSetting')"
             >
                 <i class="fas fa-cog"></i>
             </div>
             <div
-                :class="(sideBar.showSelectColor ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showSelectColor }"
                 title="Customize Colors"
                 @click="switchSideBar('showSelectColor')"
             >
                 <i class="fas fa-palette"></i>
             </div>
             <div
-                :class="(sideBar.showExport ? 'tab-icon-active ' : 'tab-icon ') + 'mb-4'"
+                class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showExport }"
                 title="Import/Export Schedule"
                 @click="switchSideBar('showExport')"
             >
@@ -74,6 +80,7 @@
             </div>
             <div
                 title="Tutorials, miscellaneous information and acknowledgments"
+                :class="{ 'tab-icon-active': sideBar.showInfo }"
                 class="tab-icon mb-4"
                 @click="switchSideBar('showInfo')"
             >
@@ -689,6 +696,8 @@
 
         <information v-else-if="sideBar.showInfo"></information>
 
+        <external v-else-if="sideBar.showExternal"></external>
+
         <transition name="fade">
             <div
                 v-if="noti.msg.length > 0"
@@ -760,6 +769,7 @@ import CourseModal from './components/CourseModal.vue';
 import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
+import External from './components/External.vue';
 import draggable from 'vuedraggable';
 
 import Section from './models/Section';
@@ -791,7 +801,8 @@ window.scheduleEvaluator = new ScheduleEvaluator();
         draggable,
         Palette,
         EventView,
-        Information
+        Information,
+        External
     }
 })
 export default class App extends Vue {
@@ -827,7 +838,8 @@ export default class App extends Vue {
         showSetting: false,
         showExport: false,
         showSelectColor: false,
-        showInfo: false
+        showInfo: false,
+        showExternal: false
     };
 
     // autocompletion related fields
@@ -1455,8 +1467,6 @@ export default class App extends Vue {
 }
 
 .tab-icon-active {
-    font-size: 1.8vw;
-    margin-left: 20%;
     color: #1f1f1f;
 }
 
@@ -1614,8 +1624,6 @@ export default class App extends Vue {
     }
 
     .tab-icon-active {
-        font-size: 6vw;
-        margin-left: 20%;
         color: #1f1f1f;
     }
 }

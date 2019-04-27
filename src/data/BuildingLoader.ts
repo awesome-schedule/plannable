@@ -30,6 +30,7 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
         requestTimeMatrix,
         x => Int32Array.from(x.timeMatrix),
         {
+            infoMsg: 'Time matrix loaded',
             warnMsg: x => `Failed to load time matrix: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load time matrix: ${x}. `,
             expireTime: 1000 * 86400,
@@ -45,6 +46,7 @@ export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
         requestBuildingList,
         x => x.buildingList,
         {
+            infoMsg: 'Building list loaded',
             warnMsg: x => `Failed to load building list: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load building list: ${x}. `,
             expireTime: 1000 * 86400,
@@ -55,7 +57,7 @@ export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
 }
 
 export async function requestTimeMatrix(): Promise<Int32Array> {
-    const res = await axios.get(`${api}/data/time_matrix.json`);
+    const res = await axios.get(`${api}/data/Distance/Time_Matrix.json`);
     const data: number[][] = res.data;
 
     if (data instanceof Array && data.length) {
@@ -78,7 +80,7 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
 }
 
 export async function requestBuildingList(): Promise<string[]> {
-    const res = await axios.get(`${api}/data/building_list.json`);
+    const res = await axios.get(`${api}/data/Distance/Building_Array.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {
         localStorage.setItem(

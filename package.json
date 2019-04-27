@@ -21,6 +21,7 @@
         "randomcolor": "^0.5.4",
         "string-similarity": "^3.0.0",
         "vue": "^2.6.10",
+        "vue-github-button": "^1.0.8",
         "vuedraggable": "^2.20.0"
     },
     "devDependencies": {

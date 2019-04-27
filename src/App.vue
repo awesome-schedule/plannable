@@ -780,11 +780,22 @@
                 @trigger-modal="showModal"
                 @editEvent="editEvent"
             ></grid-schedule>
-            <div style="text-align: center" class="mb-2">
-                If you find any bugs, please file an issue at
-                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
-                    >our GitHub repository</a
-                >. We recommend Google Chrome for best experience.
+            <div class="row pb-3 align-items-center justify-content-center">
+                <div class="col-md-auto">
+                    If you find any bugs, please file an issue at
+                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                        >our GitHub repository</a
+                    >. We recommend Google Chrome for best experience.
+                </div>
+                <div class="col-md-auto align-self-center">
+                    <github-button
+                        class="pt-1"
+                        href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                        data-show-count="true"
+                        aria-label="Star awesome-schedule/Awesome-SchedulAR on GitHub"
+                        >Star
+                    </github-button>
+                </div>
             </div>
         </div>
     </div>
@@ -802,6 +813,7 @@ import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
 import draggable from 'vuedraggable';
+import GithubButton from 'vue-github-button';
 
 import 'bootstrap';
 import $ from 'jquery';
@@ -835,7 +847,8 @@ window.scheduleEvaluator = new ScheduleEvaluator();
         Palette,
         EventView,
         Information,
-        External
+        External,
+        GithubButton
     }
 })
 export default class App extends Vue {

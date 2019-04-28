@@ -312,53 +312,37 @@
                     </div>
                 </li>
                 <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
-                    <table style="width:100%">
-                        <tr>
-                            <td>
-                                <div class="btn-group mb-2" role="group" style="width:70%;">
-                                    <button
-                                        v-for="(day, j) in days"
-                                        :key="j"
-                                        :class="
-                                            'btn btn-outline-secondary' +
-                                                (value[j] ? ' active' : '')
-                                        "
-                                        type="button"
-                                        @click="updateFilterDay(i, j)"
-                                    >
-                                        {{ day }}
-                                    </button>
-                                </div>
-                                <input
-                                    v-model="value[5]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                                -
-                                <input
-                                    v-model="value[6]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                            </td>
-                            <td>
-                                <button
-                                    type="button"
-                                    class="close"
-                                    style="font-size:2rem"
-                                    tabindex="-1"
-                                >
-                                    <span aria-hidden="true" @click="removeTimeSlot(i)"
-                                        >&times;
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="btn-group btn-days mb-2" role="group">
+                        <button
+                            v-for="(day, j) in days"
+                            :key="j"
+                            :class="'btn btn-outline-secondary' + (value[j] ? ' active' : '')"
+                            type="button"
+                            @click="updateFilterDay(i, j)"
+                        >
+                            {{ day }}
+                        </button>
+                    </div>
+                    <input
+                        v-model="value[5]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    -
+                    <input
+                        v-model="value[6]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    <div class="float-right">
+                        <button type="button" class="close" style="font-size:2rem" tabindex="-1">
+                            <span aria-hidden="true" @click="removeTimeSlot(i)">&times; </span>
+                        </button>
+                    </div>
                 </li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox my-1">
@@ -1666,5 +1650,25 @@ export default class App extends Vue {
 .sidebar::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
+}
+
+.day-link {
+    color: #007bff;
+    line-height: 2rem;
+    cursor: pointer;
+}
+
+.day-link:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-days {
+    width: 100%;
+}
+
+.btn-days .btn {
+    border-radius: 0;
+    padding: 0.25rem 0.25rem;
 }
 </style>

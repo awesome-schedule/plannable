@@ -55,7 +55,6 @@
                         <div
                             v-for="(sec, idx) in crs.sections"
                             :key="idx"
-                            class="list-group"
                             :class="{ show: isEntering && expandOnEntering }"
                         >
                             <a

@@ -4,71 +4,71 @@
             <div v-if="isEditingEvent">Edit Event</div>
             <div v-else>Add Event</div>
         </div>
-        <div class="input-group my-3 px-1">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text w-100">Title</span>
+        <form class="mt-2 mx-2">
+            <div class="form-group row no-gutters mb-1">
+                <label for="event-title" class="col-lg-5 col-form-label">Title</label>
+                <div class="col-lg-7">
+                    <input
+                        id="event-title"
+                        v-model="eventTitle"
+                        type="text"
+                        class="form-control form-control-sm"
+                    />
+                </div>
             </div>
-            <input v-model="eventTitle" class="form-control" type="text" />
-        </div>
-        <div class="btn-group" role="group" style="width:98%;margin-left:1%">
-            <button
-                v-for="(day, idx) in days"
-                :key="idx"
-                :class="'btn btn-secondary' + (eventWeek[idx] ? ' active' : '')"
-                type="button"
-                @click="updateDay(idx)"
-            >
-                {{ day }}
-            </button>
-        </div>
-        <br />
-        <!-- 
-        <div class="form-group row no-gutters my-3" style="width:98%;margin-left:1%">
-            <label for="event-time-from" class="col-sm-5 col-form-label">From</label>
-            <div class="col-sm-7">
-                <input
-                    id="event-time-from"
-                    v-model="eventTimeFrom"
-                    type="time"
-                    class="form-control"
-                />
+            <div class="form-group row no-gutters mb-1">
+                <label for="event-from" class="col-lg-5 col-form-label">Start</label>
+                <div class="col-lg-7">
+                    <input
+                        id="event-from"
+                        v-model="eventTimeFrom"
+                        type="time"
+                        style="-webkit-appearance:button"
+                        class="form-control form-control-sm"
+                    />
+                </div>
             </div>
-        </div> -->
-
-        <div class="input-group mt-3 px-1">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text w-100">From</span>
+            <div class="form-group row no-gutters mb-1">
+                <label for="event-to" class="col-lg-5 col-form-label">End</label>
+                <div class="col-lg-7">
+                    <input
+                        id="event-to"
+                        v-model="eventTimeTo"
+                        type="time"
+                        style="-webkit-appearance:button"
+                        class="form-control form-control-sm"
+                    />
+                </div>
             </div>
-            <input
-                v-model="eventTimeFrom"
-                class="form-control"
-                type="time"
-                style="-webkit-appearance:button"
-            />
-        </div>
-        <div class="input-group mt-1 px-1">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text w-100">to</span>
+            <div class="btn-group btn-days mb-2" role="group">
+                <button
+                    v-for="(day, idx) in days"
+                    :key="idx"
+                    class="btn btn-outline-secondary"
+                    :class="{ active: eventWeek[idx] }"
+                    type="button"
+                    @click="updateDay(idx)"
+                >
+                    {{ day }}
+                </button>
             </div>
-            <input
-                v-model="eventTimeTo"
-                class="form-control"
-                type="time"
-                style="-webkit-appearance:button"
-            />
-        </div>
-        <div class="input-group flex-nowrap mt-1 px-1">
-            <div class="input-group-prepend" style="width:30%">
-                <span class="input-group-text w-100">Location</span>
+            <div class="form-group row no-gutters mb-1">
+                <label for="event-loc" class="col-lg-5 col-form-label">Location</label>
+                <div class="col-lg-7">
+                    <input
+                        id="event-loc"
+                        v-model="eventRoom"
+                        type="text"
+                        class="form-control form-control-sm"
+                    />
+                </div>
             </div>
-            <input v-model="eventRoom" type="text" class="form-control" />
-        </div>
-
+        </form>
         <textarea
             v-model="eventDescription"
-            class="my-3 form-control"
+            class="my-2 mx-auto form-control"
+            style="width: 98%"
             placeholder="Description"
-            style="width:96%;height:100px;margin:auto auto;"
         ></textarea>
         <button
             v-if="!isEditingEvent"
@@ -98,7 +98,7 @@ import App from '../App.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
-import { to12hr } from '../models/Utils';
+import { to12hr, to24hr } from '../models/Utils';
 
 @Component
 export default class EventView extends Vue {
@@ -131,16 +131,8 @@ export default class EventView extends Vue {
         this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
     }
     getEventDays() {
-        let days = '';
-        for (let i = 0; i < 5; i++) {
-            if (this.eventWeek[i]) {
-                days += Meta.days[i];
-            }
-        }
-        days += ' ';
-        days += to12hr(this.eventTimeFrom);
-        days += ' - ';
-        days += to12hr(this.eventTimeTo);
+        let days = this.eventWeek.reduce((acc, x, i) => acc + (x ? Meta.days[i] : ''), '');
+        days += ` ${to12hr(this.eventTimeFrom)} - ${to12hr(this.eventTimeTo)}`;
         return days;
     }
     addEvent() {
@@ -148,24 +140,14 @@ export default class EventView extends Vue {
         try {
             const days = this.getEventDays();
 
-            if (days.indexOf('NaN') !== -1) {
-                $parent.noti.error('Please enter a valid time!');
-                return;
-            }
-
-            let invalid = true;
-
-            for (const d of Meta.days) {
-                if (days.indexOf(d) !== -1) {
-                    invalid = false;
-                    continue;
-                }
-            }
-
-            if (invalid) {
+            if (days.startsWith(' ')) {
                 $parent.noti.error('Please select at least one day');
                 return;
+            } else if (days.indexOf('NaN') !== -1) {
+                $parent.noti.error('Please check your start/end time');
+                return;
             }
+
             this.schedule.addEvent(
                 days,
                 true,
@@ -194,26 +176,8 @@ export default class EventView extends Vue {
                 this.$set(this.eventWeek, i, false);
             }
         }
-        const [starthr, startmin] = start.substring(0, start.length - 2).split(':');
-        const start24 =
-            (start.substring(start.length - 2, start.length) === 'AM'
-                ? parseInt(starthr) === 12
-                    ? '00'
-                    : starthr
-                : '' + (parseInt(starthr) === 12 ? 12 : parseInt(starthr) + 12)) +
-            ':' +
-            startmin;
-        this.eventTimeFrom = start24;
-        const [endhr, endmin] = end.substring(0, end.length - 2).split(':');
-        const end24 =
-            (end.substring(end.length - 2, end.length) === 'AM'
-                ? parseInt(endhr) === 12
-                    ? '00'
-                    : endhr
-                : '' + (parseInt(endhr) === 12 ? 12 : parseInt(endhr) + 12)) +
-            ':' +
-            endmin;
-        this.eventTimeTo = end24;
+        this.eventTimeFrom = to24hr(start);
+        this.eventTimeTo = to24hr(end);
         this.toBeModifiedDays = event.days;
     }
     endEditEvent() {
@@ -236,7 +200,7 @@ export default class EventView extends Vue {
         const $parent = this.$parent as any;
         this.eventTitle = '';
         this.eventRoom = '';
-        this.eventWeek.forEach((x, i) => this.$set(this.eventWeek, i, false));
+        this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));
         this.eventTimeFrom = '';
         this.eventTimeTo = '';
         this.eventDescription = '';

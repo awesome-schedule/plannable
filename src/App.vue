@@ -830,6 +830,7 @@ import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import Notification from './models/Notification';
 import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
+import { toICal } from './models/ICal';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -1492,7 +1493,7 @@ export default class App extends Vue {
     }
     saveToIcal() {
         savePlain(
-            this.currentSchedule.toICal(),
+            toICal(this.currentSchedule),
             (this.exportICal ? this.exportICal : 'schedule') + '.ical'
         );
     }

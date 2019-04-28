@@ -258,6 +258,11 @@ export default class GridSchedule extends Vue {
         }
         return t - 1;
     }
+
+    // 12:00 AM Monday --> index 0
+    timeTo5MinBlock(time: string) {
+        return true;
+    }
 }
 </script>
 

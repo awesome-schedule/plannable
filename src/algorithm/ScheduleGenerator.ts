@@ -14,9 +14,9 @@ import { findBestMatch } from 'string-similarity';
 export type TimeBlock = [number, number];
 
 /**
- * The generate type used to store some information about each day within a week
+ * The generic type used to store some information about each day within a week
  *
- * @todo decide whether it is better to annotate the index signature as
+ * @todo decide whether it is better to state the index signature as
  * `[x: string]: T[]` or `[x: string]: T[] | undefined`
  */
 export interface WeekDict<T> {

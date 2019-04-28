@@ -312,53 +312,37 @@
                     </div>
                 </li>
                 <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
-                    <table style="width:100%">
-                        <tr>
-                            <td>
-                                <div class="btn-group mb-2" role="group" style="width:70%;">
-                                    <button
-                                        v-for="(day, j) in days"
-                                        :key="j"
-                                        :class="
-                                            'btn btn-outline-secondary' +
-                                                (value[j] ? ' active' : '')
-                                        "
-                                        type="button"
-                                        @click="updateFilterDay(i, j)"
-                                    >
-                                        {{ day }}
-                                    </button>
-                                </div>
-                                <input
-                                    v-model="value[5]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                                -
-                                <input
-                                    v-model="value[6]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                            </td>
-                            <td>
-                                <button
-                                    type="button"
-                                    class="close"
-                                    style="font-size:2rem"
-                                    tabindex="-1"
-                                >
-                                    <span aria-hidden="true" @click="removeTimeSlot(i)"
-                                        >&times;
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="btn-group btn-days mb-2" role="group">
+                        <button
+                            v-for="(day, j) in days"
+                            :key="j"
+                            :class="'btn btn-outline-secondary' + (value[j] ? ' active' : '')"
+                            type="button"
+                            @click="updateFilterDay(i, j)"
+                        >
+                            {{ day }}
+                        </button>
+                    </div>
+                    <input
+                        v-model="value[5]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    -
+                    <input
+                        v-model="value[6]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    <div class="float-right">
+                        <button type="button" class="close" style="font-size:2rem" tabindex="-1">
+                            <span aria-hidden="true" @click="removeTimeSlot(i)">&times; </span>
+                        </button>
+                    </div>
                 </li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox my-1">
@@ -1002,10 +986,16 @@ export default class App extends Vue {
             this.loading = false;
         })();
     }
-
+    /**
+     * whether there're schedules generated. Because script between <template>
+     * tag cannot access global objects, we need a method
+     */
     generatedEmpty() {
         return window.scheduleEvaluator.empty();
     }
+    /**
+     * switch to next/previous proposed schedule. has bound checking.
+     */
     switchProposed(index: number) {
         if (index < this.proposedSchedules.length && index >= 0) {
             this.proposedScheduleIndex = index;
@@ -1017,6 +1007,10 @@ export default class App extends Vue {
         this.proposedSchedules.push(new Schedule());
         this.switchProposed(this.proposedSchedules.length - 1);
     }
+    /**
+     * copy the current schedule and append to the proposedSchedule array.
+     * Immediately switch to the last proposed schedule.
+     */
     copyCurrent() {
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
@@ -1042,18 +1036,17 @@ export default class App extends Vue {
         }
         this.saveStatus();
     }
-
     editEvent(event: Event) {
         if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
         this.eventToEdit = event;
     }
-
     switchSchedule(generated: boolean) {
         if (
             generated &&
             !window.scheduleEvaluator.empty() &&
             this.cpIndex === this.proposedScheduleIndex
         ) {
+            // dont do anything if already in "generated" mode
             if (!this.generated) {
                 this.generated = true;
                 this.proposedSchedule = this.currentSchedule;
@@ -1067,11 +1060,9 @@ export default class App extends Vue {
             this.currentSchedule = this.proposedSchedule;
         }
     }
-
     updateFilterDay(i: number, j: number) {
         this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
     }
-
     switchSideBar(key: string) {
         this.getClass('');
         for (const other in this.sideBar) {
@@ -1081,7 +1072,6 @@ export default class App extends Vue {
 
         if (this.sideBar.showSelectColor) this.switchSchedule(true);
     }
-
     onDocChange() {
         this.saveStatus();
     }
@@ -1096,11 +1086,6 @@ export default class App extends Vue {
         this.cpIndex = -1;
         this.saveStatus();
     }
-    cleanSchedules() {
-        this.switchSchedule(false);
-        window.scheduleEvaluator.clear();
-        this.currentSchedule.cleanSchedule();
-    }
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             this.currentSchedule.clean();
@@ -1110,17 +1095,14 @@ export default class App extends Vue {
             this.cpIndex = -1;
         }
     }
-
     showModal(section: Section) {
         this.modalSection = section;
         $('#modal').modal();
     }
-
     showCourseModal(course: Course) {
         this.modalCourse = course;
         $('#course-modal').modal();
     }
-
     removeCourse(key: string) {
         this.currentSchedule.remove(key);
         if (this.generated) {
@@ -1239,7 +1221,6 @@ export default class App extends Vue {
             this.loading = false;
         }
     }
-
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
@@ -1348,7 +1329,10 @@ export default class App extends Vue {
         // note: toJSON() will automatically be called if such method exists on an object
         localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
     }
-
+    /**
+     * parse schedules and settings stored locally for currentSemester.
+     * Use default value for fields that do not exist on local data.
+     */
     parseLocalData(raw_data: { [x: string]: any }) {
         const defaultData = getDefaultData();
         for (const field of Meta.storageFields) {
@@ -1423,8 +1407,7 @@ export default class App extends Vue {
         this.timeSlots.push([false, false, false, false, false, '', '']);
     }
     /**
-     * Preprocess the time filters and convert them to array of events
-     *
+     * Preprocess the time filters and convert them to array of event.
      * returns null on parsing error
      */
     computeFilter(): Event[] | null {
@@ -1458,7 +1441,6 @@ export default class App extends Vue {
         if (!input.files) return;
 
         const reader = new FileReader();
-
         reader.onload = () => {
             if (reader.result) {
                 let raw_data, result;
@@ -1546,7 +1528,6 @@ export default class App extends Vue {
     position: fixed;
     top: 0;
     bottom: 0;
-    left: 0;
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     overflow-y: auto;
@@ -1563,8 +1544,6 @@ export default class App extends Vue {
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
-
-/* for tab icons in navigation bar */
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
@@ -1615,45 +1594,33 @@ export default class App extends Vue {
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-
     .sidebar {
         display: none !important;
     }
-
     nav {
         display: none !important;
     }
-
     .tab-bar {
         display: none !important;
     }
-
     div .schedule {
         width: calc(100vw - 1.6cm) !important;
         height: calc(100vw - 1.6cm) !important;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
     }
-
     div #noti {
         display: none !important;
     }
-
     .github-corner {
         display: none !important;
     }
 }
 
 @media (max-width: 450px) {
-    /* .schedule {
-        width: 85% !important;
-        margin-left: 11vw !important;
-    } */
-
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
-        left: 0;
         z-index: 10; /* Behind the navbar */
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
         overflow-y: auto;
@@ -1684,5 +1651,25 @@ export default class App extends Vue {
 .sidebar::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
+}
+
+.day-link {
+    color: #007bff;
+    line-height: 2rem;
+    cursor: pointer;
+}
+
+.day-link:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-days {
+    width: 100%;
+}
+
+.btn-days .btn {
+    border-radius: 0;
+    padding: 0.25rem 0.25rem;
 }
 </style>

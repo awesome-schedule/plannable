@@ -148,6 +148,28 @@ export function to12hr(time: string) {
 }
 
 /**
+ * convert 12 hr to 24 hr
+ *
+ * @example
+ * to12hr('5:00PM') => '17:00'
+ *
+ * @author Kaiying Shan
+ * @param time
+ */
+export function to24hr(time: string) {
+    const [hour, minute] = time.substring(0, time.length - 2).split(':');
+    return (
+        (time.substring(time.length - 2) === 'AM'
+            ? parseInt(hour) === 12
+                ? '00'
+                : hour
+            : '' + (parseInt(hour) === 12 ? 12 : parseInt(hour) + 12)) +
+        ':' +
+        minute
+    );
+}
+
+/**
  * Calculate a 32 bit FNV-1a hash
  * @see https://gist.github.com/vaiorabbit/5657561
  * @see http://isthe.com/chongo/tech/comp/fnv/

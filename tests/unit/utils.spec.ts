@@ -11,4 +11,13 @@ describe('Utility Tests', () => {
         ]);
         expect(Utils.parseTimeAll('TBA')).toBe(null);
     });
+
+    it('to24hr', () => {
+        expect(Utils.to24hr('5:00PM')).toBe('17:00');
+        expect(Utils.to24hr('5:00AM')).toBe('5:00');
+        expect(Utils.to24hr('12:00PM')).toBe('12:00');
+        expect(Utils.to24hr('12:00AM')).toBe('00:00');
+
+        expect(Utils.to24hr(Utils.to12hr('12:00'))).toBe('12:00');
+    });
 });

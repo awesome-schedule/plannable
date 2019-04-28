@@ -3,7 +3,7 @@
 > Note: the credit of the name goes to [OAHC2022](https://github.com/OAHC2022)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b323d65880a148aa85e5a811e4791d53)](https://app.codacy.com/app/hanzhi713/Awesome-SchedulAR?utm_source=github.com&utm_medium=referral&utm_content=awesome-schedule/Awesome-SchedulAR&utm_campaign=Badge_Grade_Dashboard)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)](https://travis-ci.org/awesome-schedule/)
 
 A website which helps UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters and sorting options. Once you've finalized your class selection, hit "Generate" button and get all the possible schedules satisfying to your requirements.

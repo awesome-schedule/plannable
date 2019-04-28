@@ -1,19 +1,12 @@
 <template>
     <div id="class-list w-100">
-        <div class="card-body p-0">
+        <div class="card-body p-0" tabindex="-1" @keyup.esc="$emit('close')">
             <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
                 <div class="list-group-item class-title py-1 px-0">
                     <table class="w-100">
                         <tr>
                             <td class="expand-icon pr-2">
-                                <button
-                                    type="button"
-                                    class="close"
-                                    style="font-size:1.2rem"
-                                    @click="collapse(crs.key)"
-                                >
-                                    <i class="fas" :class="expanded(crs.key)"></i>
-                                </button>
+                                <i class="fas" :class="expanded(crs.key)"></i>
                             </td>
                             <td>
                                 <h6 class="mb-1">

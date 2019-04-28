@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)](https://travis-ci.org/awesome-schedule/)
 
-A website which helps UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters. (After you click the "+" button, the course you selected will be added to the section below automatically. Delete your input from Course Title to view the change.) Once finalize your class selection, hit "Generate" button and get all the possible schedules satisfying to your requirements.
+A website which helps UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters and sorting options. Once you've finalized your class selection, hit "Generate" button and get all the possible schedules satisfying to your requirements.
 
 ## Demo
 
@@ -19,7 +19,7 @@ This site is a pure front-end build. It fetches data from Lou's list on page loa
 
 ### Install Dependencies
 
-- Node.js >= 8.10
+-   Node.js >= 8.10
 
 Clone the repository
 
@@ -37,24 +37,10 @@ npm run serve
 
 Then you can view the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
 
-Note: The back-end is currently abandoned. It has the following dependencies
-
-- Python >= 3.5
-- Flask >= 1.0
-- Requests >= 2.1
-- Schedule >= 0.50
-
-which can be installed with
-
-```bash
-pip install flask flask-cors requests schedule
-```
-
 ## Built With
 
-- [Vue.js](https://vuejs.org) - Front-end framework
-- [Bootstrap](https://getbootstrap.com/) - Front-end component library
-- <s>[Flask](http://flask.pocoo.org/) - Back-end framework</s>
+-   [Vue.js](https://vuejs.org) - Front-end framework
+-   [Bootstrap](https://getbootstrap.com/) - Front-end component library
 
 ## Contributors
 

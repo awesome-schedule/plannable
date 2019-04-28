@@ -1001,10 +1001,16 @@ export default class App extends Vue {
             this.loading = false;
         })();
     }
-
+    /**
+     * whether there're schedules generated. Because script between <template>
+     * tag cannot access global objects, we need a method
+     */
     generatedEmpty() {
         return window.scheduleEvaluator.empty();
     }
+    /**
+     * switch to next/previous proposed schedule. has bound checking.
+     */
     switchProposed(index: number) {
         if (index < this.proposedSchedules.length && index >= 0) {
             this.proposedScheduleIndex = index;
@@ -1016,6 +1022,10 @@ export default class App extends Vue {
         this.proposedSchedules.push(new Schedule());
         this.switchProposed(this.proposedSchedules.length - 1);
     }
+    /**
+     * copy the current schedule and append to the proposedSchedule array.
+     * Immediately switch to the last proposed schedule.
+     */
     copyCurrent() {
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
@@ -1041,18 +1051,17 @@ export default class App extends Vue {
         }
         this.saveStatus();
     }
-
     editEvent(event: Event) {
         if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
         this.eventToEdit = event;
     }
-
     switchSchedule(generated: boolean) {
         if (
             generated &&
             !window.scheduleEvaluator.empty() &&
             this.cpIndex === this.proposedScheduleIndex
         ) {
+            // dont do anything if already in "generated" mode
             if (!this.generated) {
                 this.generated = true;
                 this.proposedSchedule = this.currentSchedule;
@@ -1066,11 +1075,9 @@ export default class App extends Vue {
             this.currentSchedule = this.proposedSchedule;
         }
     }
-
     updateFilterDay(i: number, j: number) {
         this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
     }
-
     switchSideBar(key: string) {
         this.getClass('');
         for (const other in this.sideBar) {
@@ -1080,7 +1087,6 @@ export default class App extends Vue {
 
         if (this.sideBar.showSelectColor) this.switchSchedule(true);
     }
-
     onDocChange() {
         this.saveStatus();
     }
@@ -1095,11 +1101,6 @@ export default class App extends Vue {
         this.cpIndex = -1;
         this.saveStatus();
     }
-    cleanSchedules() {
-        this.switchSchedule(false);
-        window.scheduleEvaluator.clear();
-        this.currentSchedule.cleanSchedule();
-    }
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             this.currentSchedule.clean();
@@ -1109,17 +1110,14 @@ export default class App extends Vue {
             this.cpIndex = -1;
         }
     }
-
     showModal(section: Section) {
         this.modalSection = section;
         $('#modal').modal();
     }
-
     showCourseModal(course: Course) {
         this.modalCourse = course;
         $('#course-modal').modal();
     }
-
     removeCourse(key: string) {
         this.currentSchedule.remove(key);
         if (this.generated) {
@@ -1238,7 +1236,6 @@ export default class App extends Vue {
             this.loading = false;
         }
     }
-
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
@@ -1347,7 +1344,10 @@ export default class App extends Vue {
         // note: toJSON() will automatically be called if such method exists on an object
         localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
     }
-
+    /**
+     * parse schedules and settings stored locally for currentSemester.
+     * Use default value for fields that do not exist on local data.
+     */
     parseLocalData(raw_data: { [x: string]: any }) {
         const defaultData = getDefaultData();
         for (const field of Meta.storageFields) {
@@ -1422,8 +1422,7 @@ export default class App extends Vue {
         this.timeSlots.push([false, false, false, false, false, '', '']);
     }
     /**
-     * Preprocess the time filters and convert them to array of events
-     *
+     * Preprocess the time filters and convert them to array of event.
      * returns null on parsing error
      */
     computeFilter(): Event[] | null {
@@ -1457,7 +1456,6 @@ export default class App extends Vue {
         if (!input.files) return;
 
         const reader = new FileReader();
-
         reader.onload = () => {
             if (reader.result) {
                 let raw_data, result;
@@ -1545,7 +1543,6 @@ export default class App extends Vue {
     position: fixed;
     top: 0;
     bottom: 0;
-    left: 0;
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     overflow-y: auto;
@@ -1562,8 +1559,6 @@ export default class App extends Vue {
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
-
-/* for tab icons in navigation bar */
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
@@ -1614,45 +1609,33 @@ export default class App extends Vue {
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-
     .sidebar {
         display: none !important;
     }
-
     nav {
         display: none !important;
     }
-
     .tab-bar {
         display: none !important;
     }
-
     div .schedule {
         width: calc(100vw - 1.6cm) !important;
         height: calc(100vw - 1.6cm) !important;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
     }
-
     div #noti {
         display: none !important;
     }
-
     .github-corner {
         display: none !important;
     }
 }
 
 @media (max-width: 450px) {
-    /* .schedule {
-        width: 85% !important;
-        margin-left: 11vw !important;
-    } */
-
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
-        left: 0;
         z-index: 10; /* Behind the navbar */
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
         overflow-y: auto;

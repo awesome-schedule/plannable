@@ -332,7 +332,7 @@ class Schedule {
             const sections = this.All[key];
             if (!(sections instanceof Set) || !sections.has(secIdx)) {
                 const section = catalog.getSection(key, secIdx);
-                section.course.key += 'preview';
+                // section.course.key += 'preview';
                 this.place(section);
             }
         }

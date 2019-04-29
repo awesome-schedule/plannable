@@ -247,6 +247,10 @@ class Schedule {
     }
 
     public preview(key: string, section: number) {
+        const sections = this.All[key];
+        if(sections !== -1 && sections.has(section)){
+            return;
+        }
         this.previous = [key, section];
         this.computeSchedule();
     }

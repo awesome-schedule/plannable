@@ -126,10 +126,10 @@ class Section implements CourseFields, Hashable {
         return [timeDict, roomDict];
     }
 
-    public equals(sc: Section) : boolean {
-        if(this.key === sc.key && this.section === sc.section){
+    public equals(sc: Section): boolean {
+        if (this.key === sc.key && this.section === sc.section) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }

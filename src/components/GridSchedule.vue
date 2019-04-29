@@ -266,6 +266,26 @@ export default class GridSchedule extends Vue {
         return t - 1;
     }
 
+    // numDuplicate(day: string) {
+    //     const sbs: ScheduleBlock[] = this.schedule.days[day];
+    //     let count = 0;
+    //     const s: Set<string> = new Set();
+    //     for (const sb of sbs) {
+    //         let sc: Section;
+    //         if (sb.section instanceof Section) {
+    //             sc = sb.section;
+    //         } else if (sb.section instanceof Array) {
+    //             sc = sb.section[0];
+    //         } else {
+    //             continue;
+    //         }
+    //         if (!s.add(sc.key + sc.section)) {
+    //             count++;
+    //         }
+    //     }
+    //     return count;
+    // }
+
     numConflict(scheduleBlock: ScheduleBlock, day: string, previousClassOnly: boolean) {
         let count = 0;
         for (const sb of this.schedule.days[day]) {
@@ -275,7 +295,7 @@ export default class GridSchedule extends Vue {
             } else if (sb.section instanceof Array) {
                 sc = sb.section[0];
             } else {
-                return 0;
+                continue;
             }
 
             if (scheduleBlock.section instanceof Section) {
@@ -295,7 +315,6 @@ export default class GridSchedule extends Vue {
                 }
             }
         }
-        // console.log(count);
         return count;
     }
 
@@ -305,8 +324,6 @@ export default class GridSchedule extends Vue {
 
         const tb1 = parseTimeAsInt(start1, end1);
         const tb2 = parseTimeAsInt(start2, end2);
-
-        console.log(s1 + ' ' + s2);
 
         if ((tb1[0] >= tb2[0] && tb1[0] < tb2[1]) || (tb1[1] > tb2[0] && tb1[1] <= tb2[1])) {
             return true;

@@ -24,6 +24,31 @@ export function parseTimeAll(time: string): [string[], TimeBlock] | null {
     }
     return null;
 }
+
+/**
+ * @example
+ * expect(parseTimeAll('MoWeFr 10:00AM - 11:00AM')).toEqual({
+ *     Mo: [600, 660],
+ *     We: [600, 660],
+ *     Fr: [600, 660],
+ * })
+ *
+ * @param time
+ * @returns null when fail to parse
+ */
+export function parseTimeAllAsDict(time: string): TimeDict | null {
+    const [days, start, , end] = time.split(' ');
+    if (days && start && end) {
+        const timeDict: TimeDict = {};
+        const block = parseTimeAsInt(start, end);
+        for (let i = 0; i < days.length; i += 2) {
+            timeDict[days.substr(i, 2)] = block;
+        }
+        return timeDict;
+    }
+    return null;
+}
+
 /**
  * Parse time in 12h format to number of minutes from 0:00,
  * assuming that the start time is **always smaller (earlier)** than end time
@@ -60,40 +85,6 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
 }
 
 /**
- * Parse time in 24h format to 12h format,
- * assuming that the start time is **always smaller (earlier)** than end time
- *
- * @example
- * parseTimeAsString('10:00PM', '11:00PM') => ['22:00', '23:00']
- *
- * @param start start time such as `10:00AM`
- * @param end  end time such as `11:00AM`
- */
-export function parseTimeAsString(start: string, end: string): [string, string] {
-    let suffix = start.substr(start.length - 2, 2);
-    let start_time: string;
-    let end_time: string;
-    if (suffix === 'PM') {
-        let [hour, minute] = start.substring(0, start.length - 2).split(':');
-        start_time = `${(+hour % 12) + 12}:${minute}`;
-
-        [hour, minute] = end.substring(0, end.length - 2).split(':');
-        end_time = `${(+hour % 12) + 12}:${minute}`;
-    } else {
-        start_time = start.substring(0, start.length - 2);
-        suffix = end.substr(end.length - 2, 2);
-        const temp = end.substring(0, end.length - 2);
-        if (suffix === 'PM') {
-            const [hour, minute] = temp.split(':');
-            end_time = `${(+hour % 12) + 12}:${minute}`;
-        } else {
-            end_time = temp;
-        }
-    }
-    return [start_time, end_time];
-}
-
-/**
  * return true of two `TimeDict` objects have overlapping time blocks, false otherwise
  * @param timeDict1
  * @param timeDict2
@@ -124,6 +115,14 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
         }
     }
     return false;
+}
+
+export function checkTimeStrConflict(time1: string, time2: string) {
+    const d1 = parseTimeAllAsDict(time1);
+    const d2 = parseTimeAllAsDict(time2);
+    if (!d1 || !d2) return true;
+
+    return checkTimeConflict(d1, d2);
 }
 
 /**
@@ -272,4 +271,32 @@ export function errToStr(err: string | AxiosError) {
     else if (err.request) errStr += `No internet`;
     else errStr += err.message;
     return errStr;
+}
+
+/**
+ * helper function used in
+ * @see GridSchedule.vue
+ * @see CourseBlock.vue
+ *
+ * @param time
+ * @param start
+ */
+export function timeToNum(time: string, start: boolean) {
+    const sep = time.split(':');
+    const min = parseInt(sep[1]);
+    let t = (parseInt(sep[0]) - 8) * 2;
+    if (start) {
+        if (min >= 30) {
+            t += 2;
+        } else {
+            t += 1;
+        }
+    } else {
+        if (min > 30) {
+            t += 2;
+        } else if (min > 0) {
+            t += 1;
+        }
+    }
+    return t - 1;
 }

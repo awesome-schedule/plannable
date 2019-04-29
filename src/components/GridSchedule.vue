@@ -69,7 +69,7 @@
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
-import { to12hr, parseTimeAsInt } from '../models/Utils';
+import { to12hr, checkTimeStrConflict, timeToNum } from '../models/Utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { parse } from 'path';
 import ScheduleBlock from '../models/ScheduleBlock';
@@ -122,7 +122,7 @@ export default class GridSchedule extends Vue {
         let earliest = 817;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
-                const temp = this.timeToNum(course.start, true);
+                const temp = timeToNum(course.start, true);
                 if (temp < earliest && course !== undefined && course !== null) {
                     earliest = temp;
                 }
@@ -137,7 +137,7 @@ export default class GridSchedule extends Vue {
         let latest = 0;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
-                const temp = this.timeToNum(course.end, false);
+                const temp = timeToNum(course.end, false);
                 if (temp > latest && course !== undefined && course !== null) {
                     latest = temp;
                 }
@@ -151,10 +151,10 @@ export default class GridSchedule extends Vue {
     get absoluteEarliest() {
         const early = this.validate(this.earliest, '8:00');
 
-        if (this.timeToNum(early, true) > this.earliestBlock) {
+        if (timeToNum(early, true) > this.earliestBlock) {
             return this.earliestBlock;
         } else {
-            return this.timeToNum(early, true);
+            return timeToNum(early, true);
         }
     }
     /**
@@ -162,10 +162,10 @@ export default class GridSchedule extends Vue {
      */
     get absoluteLatest() {
         const late = this.validate(this.latest, '19:00');
-        if (this.timeToNum(late, false) < this.latestBlock) {
+        if (timeToNum(late, false) < this.latestBlock) {
             return this.latestBlock;
         } else {
-            return this.timeToNum(late, false);
+            return timeToNum(late, false);
         }
     }
     /**
@@ -213,8 +213,8 @@ export default class GridSchedule extends Vue {
         const earliest = this.absoluteEarliest;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
-                const startTime = this.timeToNum(course.start, true);
-                const endTime = this.timeToNum(course.end, false);
+                const startTime = timeToNum(course.start, true);
+                const endTime = timeToNum(course.end, false);
                 for (let i = startTime; i <= endTime; i++) {
                     info[i - earliest] = this.fullHeight;
                 }
@@ -252,26 +252,6 @@ export default class GridSchedule extends Vue {
         );
     }
 
-    timeToNum(time: string, start: boolean) {
-        const sep = time.split(':');
-        const min = parseInt(sep[1]);
-        let t = (parseInt(sep[0]) - 8) * 2;
-        if (start) {
-            if (min >= 30) {
-                t += 2;
-            } else {
-                t += 1;
-            }
-        } else {
-            if (min > 30) {
-                t += 2;
-            } else if (min > 0) {
-                t += 1;
-            }
-        }
-        return t - 1;
-    }
-
     numConflict(scheduleBlock: ScheduleBlock, day: string, previousClassOnly: boolean) {
         let count = 0;
         for (const sb of this.schedule.days[day]) {
@@ -304,7 +284,7 @@ export default class GridSchedule extends Vue {
                             if (sc1.equals(sc2) && m1.days === m2.days) {
                                 continue;
                             }
-                            if (this.checkConflict(m1.days, m2.days)) {
+                            if (checkTimeStrConflict(m1.days, m2.days)) {
                                 count++;
                             }
                         }
@@ -313,25 +293,6 @@ export default class GridSchedule extends Vue {
             }
         }
         return count;
-    }
-
-    checkConflict(s1: string, s2: string) {
-        const [d1, start1, , end1] = s1.split(' ');
-        const [d2, start2, , end2] = s2.split(' ');
-
-        const tb1 = parseTimeAsInt(start1, end1);
-        const tb2 = parseTimeAsInt(start2, end2);
-
-        if (
-            (tb1[0] >= tb2[0] && tb1[0] < tb2[1]) ||
-            (tb1[1] > tb2[0] && tb1[1] <= tb2[1]) ||
-            (tb2[0] >= tb1[0] && tb2[0] < tb1[1]) ||
-            (tb2[1] > tb1[0] && tb2[1] <= tb1[1])
-        ) {
-            return true;
-        }
-
-        return false;
     }
 }
 </script>

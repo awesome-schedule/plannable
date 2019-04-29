@@ -266,26 +266,6 @@ export default class GridSchedule extends Vue {
         return t - 1;
     }
 
-    // numDuplicate(day: string) {
-    //     const sbs: ScheduleBlock[] = this.schedule.days[day];
-    //     let count = 0;
-    //     const s: Set<string> = new Set();
-    //     for (const sb of sbs) {
-    //         let sc: Section;
-    //         if (sb.section instanceof Section) {
-    //             sc = sb.section;
-    //         } else if (sb.section instanceof Array) {
-    //             sc = sb.section[0];
-    //         } else {
-    //             continue;
-    //         }
-    //         if (!s.add(sc.key + sc.section)) {
-    //             count++;
-    //         }
-    //     }
-    //     return count;
-    // }
-
     numConflict(scheduleBlock: ScheduleBlock, day: string, previousClassOnly: boolean) {
         let count = 0;
         for (const sb of this.schedule.days[day]) {
@@ -315,6 +295,7 @@ export default class GridSchedule extends Vue {
                 }
             }
         }
+        console.log(day + ' ' + count);
         return count;
     }
 
@@ -325,64 +306,17 @@ export default class GridSchedule extends Vue {
         const tb1 = parseTimeAsInt(start1, end1);
         const tb2 = parseTimeAsInt(start2, end2);
 
-        if ((tb1[0] >= tb2[0] && tb1[0] < tb2[1]) || (tb1[1] > tb2[0] && tb1[1] <= tb2[1])) {
+        if (
+            (tb1[0] >= tb2[0] && tb1[0] < tb2[1]) ||
+            (tb1[1] > tb2[0] && tb1[1] <= tb2[1]) ||
+            (tb2[0] >= tb1[0] && tb2[0] < tb1[1]) ||
+            (tb2[1] > tb1[0] && tb2[1] <= tb1[1])
+        ) {
             return true;
         }
 
         return false;
     }
-
-    // incOccupy(sb: ScheduleBlock, day: string) {
-    //     if (sb.section instanceof Section) {
-    //         for (const m of sb.section.meetings) {
-    //             if (m.days.indexOf(day) != 0) {
-    //                 const idx = this.timeTo5MinBlock(
-    //                     m.days
-    //                         .split(' ')
-    //                         .splice(1, 2)
-    //                         .join(' ')
-    //                 );
-    //                 this.occupy[idx]++;
-    //             }
-    //         }
-    //         // const idx = timeTo5MinBlock(sb.section.meetings.);
-    //     }
-    // }
-
-    // getOccupyMargin(sb: ScheduleBlock, day: string) {
-    //     let result = 0;
-    //     if (sb.section instanceof Section) {
-    //         for (const m of sb.section.meetings) {
-    //             console.log(m.days);
-    //             if (m.days.indexOf(day) != 0) {
-    //                 const idxStart = this.timeTo5MinBlock(m.days.split(' ')[1]);
-    //                 const idxEnd = this.timeTo5MinBlock
-    //                 const num = this.occupy[idxStart] - 1;
-    //                 // const sep = 20 / num;
-    //                 // result = sep * num;
-    //                 if (num !== 0) {
-    //                     result = 5 * num;
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return result;
-    // }
-
-    // // 12:00 AM Monday --> index 0
-    // timeTo5MinBlock(time: string) {
-    //     const [num, tm] = time.split(' ');
-    //     const [hourStr, minStr] = num.split(':');
-
-    //     let hr = parseInt(hourStr);
-    //     const min = parseInt(minStr);
-
-    //     if (hr === 12) hr = 0;
-
-    //     if (tm === 'PM') hr += 12;
-
-    //     return hr * 12 + Math.floor(min / 5);
-    // }
 }
 </script>
 

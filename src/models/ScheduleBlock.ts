@@ -22,6 +22,8 @@ class ScheduleBlock {
      */
     public end: string;
     public section: Section | Section[] | Event;
+    public pathDepth = 0;
+    public depth = 0;
 
     constructor(
         backgroundColor: string,

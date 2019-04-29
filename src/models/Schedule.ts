@@ -340,6 +340,37 @@ class Schedule {
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
         for (const event of this.events) if (event.display) this.place(event);
+
+        this.computeConflict();
+    }
+
+    public computeConflict(countEvent = true) {
+        for (const day in this.days) {
+            const graph = new Map<ScheduleBlock, ScheduleBlock[]>();
+
+            const blocks = countEvent
+                ? this.days[day]
+                : this.days[day].filter(block => !(block.section instanceof Event));
+
+            for (let i = 0; i < blocks.length; i++) {
+                graph.set(blocks[i], []);
+            }
+            for (let i = 0; i < blocks.length; i++) {
+                for (let j = i + 1; j < blocks.length; j++) {
+                    const ib = blocks[i];
+                    const jb = blocks[j];
+                    if (ib.conflict(jb)) {
+                        graph.get(ib)!.push(jb);
+                        graph.get(jb)!.push(ib);
+                    }
+                }
+            }
+            const result = Utils.depthFirstSearch(graph);
+            for (const [block, data] of result) {
+                block.pathDepth = data.pathDepth;
+                block.depth = data.depth;
+            }
+        }
     }
 
     /**

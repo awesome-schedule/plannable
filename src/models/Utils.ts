@@ -343,3 +343,74 @@ export function timeToNum(time: string, start: boolean) {
     }
     return t;
 }
+
+interface Data<T> {
+    visited: boolean;
+    depth: number;
+    pathDepth: number;
+    parent?: T;
+}
+
+/**
+ * perform depth first search
+ *
+ * @param graph the graph represented as adjacency list
+ * @returns a Map that maps nodes to their data
+ *
+ * @see Data<T>
+ */
+export function depthFirstSearch<T>(graph: Map<T, T[]>): Map<T, Data<T>> {
+    const visited = new Map<T, Data<T>>();
+    for (const node of graph.keys()) {
+        visited.set(node, { visited: false, depth: 0, pathDepth: 0 });
+    }
+    // the graph may have multiple connected components. Do DFS for each component
+    while (true) {
+        let start!: T;
+        // select the first node that haven't been visited as the start node
+        for (const [node, data] of visited) {
+            if (!data.visited) {
+                data.visited = true;
+                start = node;
+                break;
+            }
+        }
+        if (!start) {
+            break;
+        } else {
+            depthFirstSearchRec(start, graph, visited);
+        }
+    }
+    return visited;
+}
+
+function depthFirstSearchRec<T>(start: T, graph: Map<T, T[]>, visited: Map<T, Data<T>>) {
+    const neighbors = graph.get(start)!;
+    const curData = visited.get(start)!;
+    curData.visited = true;
+    let hasUnvisited = false;
+
+    // this part is just regular DFS, except that we record the depth of the current node.
+    for (const adj of neighbors) {
+        const adjData = visited.get(adj)!;
+        if (!adjData.visited) {
+            adjData.depth = curData.depth + 1;
+            adjData.parent = start;
+            depthFirstSearchRec(adj, graph, visited);
+            hasUnvisited = true;
+        }
+    }
+
+    // if no more nodes can be visited from the current node, it is the end of this DFS path.
+    // trace back the parent pointer to update parent nodes' maximum path depth.
+    if (!hasUnvisited) {
+        let curParent: T | undefined = start;
+        curData.pathDepth = Math.max(curData.depth, curData.pathDepth);
+        while (curParent) {
+            const curParentData = visited.get(curParent) as Data<T>;
+            curParentData.pathDepth = Math.max(curData.pathDepth, curParentData.pathDepth);
+            curParent = curParentData.parent;
+        }
+    }
+    return visited;
+}

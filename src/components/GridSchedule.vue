@@ -101,15 +101,13 @@ export default class GridSchedule extends Vue {
     // note: we need Schedule.days because it's an array that keeps the keys in order
     days = Meta.days;
 
-    // occupy = Array((5 * 24 * 60) / 5).fill(0);
-
     style(idx: number, scheduleBlock: ScheduleBlock, day: string) {
         let left = idx * 20;
         let width = 20;
-        const cfl = this.numConflict(scheduleBlock, day, false);
-        if (cfl !== 0) {
-            left += (20 / (cfl + 1)) * this.numConflict(scheduleBlock, day, true);
-            width = 20 / (cfl + 1);
+        const numCfl = scheduleBlock.pathDepth;
+        if (numCfl !== 0) {
+            left += (20 / (numCfl + 1)) * scheduleBlock.depth;
+            width = 20 / (numCfl + 1);
         }
         return { left: left + '%', width: width + '%' };
     }
@@ -250,40 +248,6 @@ export default class GridSchedule extends Vue {
             ':' +
             ((min + 30) % 60 < 10 ? '0' + ((min + 30) % 60) : (min + 30) % 60)
         );
-    }
-
-    numConflict(scheduleBlock: ScheduleBlock, day: string, previousClassOnly: boolean) {
-        let count = 0;
-        for (const sb of this.schedule.days[day]) {
-            let sc1: Section;
-            if (sb.section instanceof Section) {
-                sc1 = sb.section;
-            } else if (sb.section instanceof Array) {
-                sc1 = sb.section[0];
-            } else {
-                continue;
-            }
-
-            let sc2: Section;
-            if (scheduleBlock.section instanceof Section) {
-                sc2 = scheduleBlock.section;
-            } else if (scheduleBlock.section instanceof Array) {
-                sc2 = scheduleBlock.section[0];
-            } else {
-                continue;
-            }
-
-            if (sc1.equals(sc2) && previousClassOnly) {
-                break;
-            } else if (sc1.equals(sc2)) {
-                continue;
-            }
-
-            if (sb.conflict(scheduleBlock)) {
-                count++;
-            }
-        }
-        return count;
     }
 }
 </script>

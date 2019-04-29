@@ -82,8 +82,9 @@ class Schedule {
 
     /**
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
-     * note that if **section** is -1, it means that all sections are allowed.
-     * Otherwise **section** should be a Set of integers
+     *
+     * Note that if **section** is -1, it means that all sections are allowed.
+     * Otherwise, **section** should be a Set of integers
      */
     public All: { [x: string]: Set<number> | -1 };
     public title: string;
@@ -319,7 +320,7 @@ class Schedule {
                 } else {
                     // a subset of the sections
                     if (sections.size > 0) {
-                        const sectionIndices = [...sections.values()];
+                        const sectionIndices = [...sections];
                         this.place(course.getCourse(sectionIndices));
                         this.currentIds[currentIdKey] =
                             course.getSection(sectionIndices[0]).id.toString() +
@@ -464,7 +465,7 @@ class Schedule {
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) obj.All[key] = [...sections.values()];
+            if (sections instanceof Set) obj.All[key] = [...sections];
             else obj.All[key] = sections;
         }
         return obj;

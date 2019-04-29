@@ -2,9 +2,6 @@
     <nav>
         <ul class="pagination justify-content-center" style="margin-bottom: 0">
             <li class="input-group" style="width:80px">
-                <!-- <div class="input-group-prepend">
-                    <span class="input-group-text">Go To</span>
-                </div> -->
                 <input
                     v-model="goto"
                     type="number"

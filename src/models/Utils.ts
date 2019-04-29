@@ -369,7 +369,7 @@ export function depthFirstSearch<T>(graph: Map<T, T[]>): Map<T, Data<T>> {
     }
     // the graph may have multiple connected components. Do DFS for each component
     while (true) {
-        let start!: T;
+        let start: T | undefined;
         // select the first node that haven't been visited as the start node
         for (const [node, data] of visited) {
             if (!data.visited) {

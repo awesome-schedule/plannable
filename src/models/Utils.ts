@@ -117,6 +117,27 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
     return false;
 }
 
+export function checkTimeBlockStrConflict(
+    start1: string,
+    end1: string,
+    start2: string,
+    end2: string
+) {
+    const [a, b] = start1.split(':');
+    const [c, d] = end1.split(':');
+    const [e, f] = start2.split(':');
+    const [g, h] = end2.split(':');
+    return checkTimeBlockConflict(+a * 60 + +b, +c * 60 + +d, +e * 60 + +f, +g * 60 + +h);
+}
+
+export function checkTimeBlockConflict(start1: number, end1: number, start2: number, end2: number) {
+    return (
+        (start1 <= start2 && start2 <= end1) ||
+        (start1 <= end2 && end2 <= end1) ||
+        (start1 >= start2 && end1 <= end2)
+    );
+}
+
 export function checkTimeStrConflict(time1: string, time2: string) {
     const d1 = parseTimeAllAsDict(time1);
     const d2 = parseTimeAllAsDict(time2);
@@ -157,12 +178,13 @@ export function to12hr(time: string) {
  */
 export function to24hr(time: string) {
     const [hour, minute] = time.substring(0, time.length - 2).split(':');
+    const numHour = parseInt(hour);
     return (
         (time.substring(time.length - 2) === 'AM'
-            ? parseInt(hour) === 12
+            ? numHour === 12
                 ? '00'
                 : hour
-            : '' + (parseInt(hour) === 12 ? 12 : parseInt(hour) + 12)) +
+            : '' + (numHour === 12 ? 12 : numHour + 12)) +
         ':' +
         minute
     );

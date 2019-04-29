@@ -56,7 +56,7 @@ class Schedule {
 
         if (isNaN(parseInt(match[3]))) {
             const newKeys = keys.map(x => {
-                const m = x.match(regex) as RegExpMatchArray;
+                const m = x.match(regex)!;
                 const y = m[3]
                     .split(' ')
                     .map(z => z.charAt(0).toUpperCase() + z.substr(1))
@@ -280,7 +280,10 @@ class Schedule {
 
     /**
      * Compute the schedule view based on `this.All` and `this.preview`
-     * @see {@link computeSchedule}
+     *
+     * @remarks this method has a very high time complexity, probably cubic in the number of sections.
+     * However, because we're running on small input sets (usually contain no more than 20 sections), it
+     * usually completes within 50ms.
      */
     public computeSchedule() {
         const catalog = window.catalog;
@@ -330,13 +333,15 @@ class Schedule {
         if (this.previous) {
             const [key, secIdx] = this.previous;
             const sections = this.All[key];
+
+            // do not place into the schedule if the section is already in this.All
             if (!(sections instanceof Set) || !sections.has(secIdx)) {
                 const section = catalog.getSection(key, secIdx);
-                // section.course.key += 'preview';
                 this.place(section);
             }
         }
 
+        // sort currentCourses in alphabetical order
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
         for (const event of this.events) if (event.display) this.place(event);
@@ -344,9 +349,16 @@ class Schedule {
         this.computeConflict();
     }
 
+    /**
+     * construct a graph for the scheduleBlocks in each day. Perform DFS on that graph to determine the
+     * maximum number of conflicting schedules that need to be rendered "in parallel".
+     *
+     * @param countEvent whether to include events in this graph
+     */
     public computeConflict(countEvent = true) {
+        const graph = new Map<ScheduleBlock, ScheduleBlock[]>();
         for (const day in this.days) {
-            const graph = new Map<ScheduleBlock, ScheduleBlock[]>();
+            graph.clear();
 
             const blocks = countEvent
                 ? this.days[day]

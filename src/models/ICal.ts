@@ -1,3 +1,7 @@
+/**
+ * @author Kaiying Shan
+ */
+
 import Schedule from './Schedule';
 import Meta from './Meta';
 import Section from './Section';

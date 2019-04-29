@@ -7,6 +7,7 @@ import { saveAs } from 'file-saver';
 import { AxiosError } from 'axios';
 
 /**
+ * @author Hanzhi Zhou
  * @example
  * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
  *
@@ -26,6 +27,7 @@ export function parseTimeAll(time: string): [string[], TimeBlock] | null {
 }
 
 /**
+ * @author Hanzhi Zhou
  * @example
  * expect(parseTimeAll('MoWeFr 10:00AM - 11:00AM')).toEqual({
  *     Mo: [600, 660],
@@ -53,6 +55,7 @@ export function parseTimeAllAsDict(time: string): TimeDict | null {
  * Parse time in 12h format to number of minutes from 0:00,
  * assuming that the start time is **always smaller (earlier)** than end time
  *
+ * @author Hanzhi Zhou
  * @example
  * parseTimeAsInt('10:00AM', '11:00AM') => [600, 660]
  *
@@ -86,6 +89,8 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
 
 /**
  * return true of two `TimeDict` objects have overlapping time blocks, false otherwise
+ *
+ * @author Zichao Hu, Hanzhi Zhou
  * @param timeDict1
  * @param timeDict2
  */
@@ -117,28 +122,8 @@ export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
     return false;
 }
 
-export function checkTimeBlockStrConflict(
-    start1: string,
-    end1: string,
-    start2: string,
-    end2: string,
-    includeEnd: boolean = true
-) {
-    const [a, b] = start1.split(':');
-    const [c, d] = end1.split(':');
-    const [e, f] = start2.split(':');
-    const [g, h] = end2.split(':');
-    return checkTimeBlockConflict(
-        +a * 60 + +b,
-        +c * 60 + +d,
-        +e * 60 + +f,
-        +g * 60 + +h,
-        includeEnd
-    );
-}
-
 /**
- *
+ * @author Hanzhi Zhou
  * @param start1
  * @param end1
  * @param start2
@@ -163,6 +148,18 @@ export function checkTimeBlockConflict(
     }
 }
 
+/**
+ * calculate the overlap between time block [a, b] and [c, d].
+ *
+ * Return 0 when no overlap or zero overlap.
+ *
+ * @author Hanzhi Zhou
+ *
+ * @param a
+ * @param b
+ * @param c
+ * @param d
+ */
 export function calcOverlap(a: number, b: number, c: number, d: number) {
     if (a <= c && d <= b) return d - c;
     if (a <= c && c <= b) return b - c;
@@ -251,6 +248,7 @@ export function convertKey(cat: Catalog, schedule: Schedule, key: string) {
 /**
  * open a course detail on Lou's list
  *
+ * @author Kaiying Shan
  * @remarks I believe this method is copied somewhere from Lou's list
  */
 export function openLousList(semesterId: number, courseId: number) {
@@ -265,6 +263,7 @@ export function openLousList(semesterId: number, courseId: number) {
 }
 /**
  * view grade distribution of this course on vagrades
+ * @author Hanzhi Zhou
  */
 export function openVAGrade(course: Course) {
     window.open(
@@ -276,6 +275,8 @@ export function openVAGrade(course: Course) {
 
 /**
  * Apply timeout on a promise
+ *
+ * @author Hanzhi Zhou
  * @param promise the promise to apply the timeout on
  * @param time time in millisecond
  * @param msg the error message on time out
@@ -300,6 +301,7 @@ export function timeout<T>(
 /**
  * save a string a as text file
  *
+ * @author Hanzhi Zhou
  * @param str the string to save as a file
  * @param filename
  */
@@ -324,7 +326,7 @@ export function errToStr(err: string | AxiosError) {
  * helper function used in
  * @see GridSchedule.vue
  * @see CourseBlock.vue
- *
+ * @author Kaiying Shan
  * @param time
  * @param start
  */
@@ -352,8 +354,9 @@ interface Data<T> {
 }
 
 /**
- * perform depth first search
+ * perform depth first search on a graph that has multiple connected components
  *
+ * @author Hanzhi Zhou
  * @param graph the graph represented as adjacency list
  * @returns a Map that maps nodes to their data
  *
@@ -383,7 +386,13 @@ export function depthFirstSearch<T>(graph: Map<T, T[]>): Map<T, Data<T>> {
     }
     return visited;
 }
-
+/**
+ * A recursive implementation of depth first search on a single connected component
+ * @author Hanzhi Zhou
+ * @param start
+ * @param graph
+ * @param visited
+ */
 function depthFirstSearchRec<T>(start: T, graph: Map<T, T[]>, visited: Map<T, Data<T>>) {
     const neighbors = graph.get(start)!;
     const curData = visited.get(start)!;

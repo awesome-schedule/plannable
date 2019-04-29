@@ -358,7 +358,7 @@ class ScheduleEvaluator {
                 // time blocks and rooms at day k
                 const day = days[k];
                 const timeBlock = timeDict[day];
-                const roomBlock = roomDict[day];
+                const roomBlock = roomDict[day]!;
                 if (!timeBlock) continue;
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
@@ -374,7 +374,7 @@ class ScheduleEvaluator {
                     for (; j < block.length; j += 2, hj += 1) if (ele < block[j]) break;
 
                     block.splice(j, 0, ele, timeBlock[i + 1]);
-                    room.splice(hj, 0, (roomBlock as number[])[hi]);
+                    room.splice(hj, 0, roomBlock[hi]);
                 }
             }
         }
@@ -550,7 +550,7 @@ class ScheduleEvaluator {
         } else {
             const len = options.length;
             const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-            const coeffs = options.map(x => this.sortCoeffCache[x.name] as Float32Array);
+            const coeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: CmpSchedule, b: CmpSchedule) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {

@@ -1,6 +1,6 @@
 import Section from './Section';
 import Event from './Event';
-import { checkTimeBlockStrConflict } from './Utils';
+import { checkTimeBlockConflict } from './Utils';
 
 /**
  * A `ScheduleBlock` is a data structure that holds
@@ -38,7 +38,17 @@ class ScheduleBlock {
     }
 
     public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
-        return checkTimeBlockStrConflict(this.start, this.end, other.start, other.end, includeEnd);
+        const [a, b] = this.start.split(':');
+        const [c, d] = this.end.split(':');
+        const [e, f] = other.start.split(':');
+        const [g, h] = other.end.split(':');
+        return checkTimeBlockConflict(
+            +a * 60 + +b,
+            +c * 60 + +d,
+            +e * 60 + +f,
+            +g * 60 + +h,
+            includeEnd
+        );
     }
 }
 

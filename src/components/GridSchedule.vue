@@ -295,7 +295,6 @@ export default class GridSchedule extends Vue {
                 }
             }
         }
-        console.log(day + ' ' + count);
         return count;
     }
 

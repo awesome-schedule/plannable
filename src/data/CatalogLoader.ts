@@ -90,8 +90,13 @@ export function parseSemesterData(csv_string: string) {
             []
         ];
         const meetings: RawMeeting[] = [];
+        const s: Set<string> = new Set();
         for (let i = 0; i < 4; i++) {
             if (data[6 + i * 4] && data[6 + i * 4] !== '') {
+                if(s.has(data[6 + i * 4 + 1])) {
+                    continue;
+                }
+                s.add(data[6 + i * 4 + 1]);
                 const tempMeeting: RawMeeting = [
                     data[6 + i * 4],
                     data[6 + i * 4 + 1],

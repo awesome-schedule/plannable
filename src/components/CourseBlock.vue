@@ -93,7 +93,7 @@ import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';
 import Event from '../models/Event';
-import { to12hr } from '../models/Utils';
+import { to12hr, timeToNum } from '../models/Utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component
@@ -123,7 +123,7 @@ export default class CourseBlock extends Vue {
         const t = time.split(':');
         const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-        const temp = this.timeToNum(time, start);
+        const temp = timeToNum(time, start);
         for (let i = this.absoluteEarliest; i < temp; i++) {
             px += this.heightInfo[i - this.absoluteEarliest];
         }
@@ -161,26 +161,6 @@ export default class CourseBlock extends Vue {
     }
     get isSectionArray() {
         return this.scheduleBlock.section instanceof Array && this.scheduleBlock.section.length;
-    }
-
-    timeToNum(time: string, start: boolean) {
-        const sep = time.split(':');
-        const min = parseInt(sep[1]);
-        let t = (parseInt(sep[0]) - 8) * 2;
-        if (start) {
-            if (min >= 30) {
-                t += 2;
-            } else {
-                t += 1;
-            }
-        } else {
-            if (min > 30) {
-                t += 2;
-            } else {
-                t += 1;
-            }
-        }
-        return t - 1;
     }
 
     showModal() {

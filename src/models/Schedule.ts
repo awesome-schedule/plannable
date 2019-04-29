@@ -247,10 +247,6 @@ class Schedule {
     }
 
     public preview(key: string, section: number) {
-        const sections = this.All[key];
-        if(sections instanceof Set && sections.has(section)){
-            return;
-        }
         this.previous = [key, section];
         this.computeSchedule();
     }
@@ -331,10 +327,14 @@ class Schedule {
             }
         }
 
-        if (this.previous !== null) {
-            const section = catalog.getSection(...this.previous);
-            section.course.key += 'preview';
-            this.place(section);
+        if (this.previous) {
+            const [key, secIdx] = this.previous;
+            const sections = this.All[key];
+            if (!(sections instanceof Set) || !sections.has(secIdx)) {
+                const section = catalog.getSection(key, secIdx);
+                section.course.key += 'preview';
+                this.place(section);
+            }
         }
 
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
@@ -369,7 +369,8 @@ class Schedule {
     public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
         const [days, start, , end] = dayTimes.split(' ');
         if (days && start && end) {
-            const [startMin, endMin] = Utils.parseTimeAsString(start, end);
+            const startMin = Utils.to24hr(start);
+            const endMin = Utils.to24hr(end);
             // wait... start time equals end time?
             if (startMin === endMin) {
                 console.warn(events, startMin, endMin);

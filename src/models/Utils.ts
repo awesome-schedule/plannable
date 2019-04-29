@@ -309,16 +309,12 @@ export function timeToNum(time: string, start: boolean) {
     let t = (parseInt(sep[0]) - 8) * 2;
     if (start) {
         if (min >= 30) {
-            t += 2;
-        } else {
             t += 1;
         }
     } else {
-        if (min > 30) {
-            t += 2;
-        } else if (min > 0) {
+        if (min >= 30) {
             t += 1;
         }
     }
-    return t - 1;
+    return t;
 }

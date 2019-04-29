@@ -55,12 +55,7 @@
                             :show-room="showRoom"
                             :show-instructor="showInstructor"
                             :absolute-earliest="absoluteEarliest"
-                            :style="
-                                `left:${idx * 20 +
-                                    (20 / numConflict(scheduleBlock, day, false)) *
-                                        numConflict(scheduleBlock, day, true)}%; width: ${20 /
-                                    numConflict(scheduleBlock, day, false)}%`
-                            "
+                            :style="style(idx, scheduleBlock, day)"
                             :day="day"
                         ></course-block>
                     </template>
@@ -107,6 +102,17 @@ export default class GridSchedule extends Vue {
     days = Meta.days;
 
     // occupy = Array((5 * 24 * 60) / 5).fill(0);
+
+    style(idx: number, scheduleBlock: ScheduleBlock, day: string) {
+        let left = idx * 20;
+        let width = 20;
+        const cfl = this.numConflict(scheduleBlock, day, false);
+        if (cfl !== 0) {
+            left += (20 / (cfl + 1)) * this.numConflict(scheduleBlock, day, true);
+            width = 20 / (cfl + 1);
+        }
+        return { left: left + '%', width: width + '%' };
+    }
 
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
@@ -269,26 +275,37 @@ export default class GridSchedule extends Vue {
     numConflict(scheduleBlock: ScheduleBlock, day: string, previousClassOnly: boolean) {
         let count = 0;
         for (const sb of this.schedule.days[day]) {
-            let sc: Section;
+            let sc1: Section;
             if (sb.section instanceof Section) {
-                sc = sb.section;
+                sc1 = sb.section;
             } else if (sb.section instanceof Array) {
-                sc = sb.section[0];
+                sc1 = sb.section[0];
             } else {
                 continue;
             }
 
+            let sc2: Section;
             if (scheduleBlock.section instanceof Section) {
-                if (sc.equals(scheduleBlock.section) && previousClassOnly) {
-                    break;
-                }
-                for (const m1 of sc.meetings) {
-                    if (m1.days.indexOf(day) !== -1) {
-                        for (const m2 of scheduleBlock.section.meetings) {
-                            if (m2.days.indexOf(day) !== -1) {
-                                if (this.checkConflict(m1.days, m2.days)) {
-                                    count++;
-                                }
+                sc2 = scheduleBlock.section;
+            } else if (scheduleBlock.section instanceof Array) {
+                sc2 = scheduleBlock.section[0];
+            } else {
+                continue;
+            }
+
+            if (sc1.equals(sc2) && previousClassOnly) {
+                break;
+            }
+
+            for (const m1 of sc1.meetings) {
+                if (m1.days.indexOf(day) !== -1) {
+                    for (const m2 of sc2.meetings) {
+                        if (m2.days.indexOf(day) !== -1) {
+                            if (sc1.equals(sc2) && m1.days === m2.days) {
+                                continue;
+                            }
+                            if (this.checkConflict(m1.days, m2.days)) {
+                                count++;
                             }
                         }
                     }

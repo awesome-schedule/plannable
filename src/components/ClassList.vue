@@ -5,8 +5,8 @@
                 <div class="list-group-item class-title py-1 px-0">
                     <table class="w-100">
                         <tr>
-                            <td class="expand-icon pr-2">
-                                <i class="fas" :class="expanded(crs.key)"></i>
+                            <td class="expand-icon pr-2" @click="collapse(crs.key)">
+                                <i class="fas click-icon" :class="expanded(crs.key)"></i>
                             </td>
                             <td>
                                 <h6 class="mb-1">

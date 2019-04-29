@@ -121,29 +121,54 @@ export function checkTimeBlockStrConflict(
     start1: string,
     end1: string,
     start2: string,
-    end2: string
+    end2: string,
+    includeEnd: boolean = true
 ) {
     const [a, b] = start1.split(':');
     const [c, d] = end1.split(':');
     const [e, f] = start2.split(':');
     const [g, h] = end2.split(':');
-    return checkTimeBlockConflict(+a * 60 + +b, +c * 60 + +d, +e * 60 + +f, +g * 60 + +h);
-}
-
-export function checkTimeBlockConflict(start1: number, end1: number, start2: number, end2: number) {
-    return (
-        (start1 <= start2 && start2 <= end1) ||
-        (start1 <= end2 && end2 <= end1) ||
-        (start1 >= start2 && end1 <= end2)
+    return checkTimeBlockConflict(
+        +a * 60 + +b,
+        +c * 60 + +d,
+        +e * 60 + +f,
+        +g * 60 + +h,
+        includeEnd
     );
 }
 
-export function checkTimeStrConflict(time1: string, time2: string) {
-    const d1 = parseTimeAllAsDict(time1);
-    const d2 = parseTimeAllAsDict(time2);
-    if (!d1 || !d2) return true;
+/**
+ *
+ * @param start1
+ * @param end1
+ * @param start2
+ * @param end2
+ * @param includeEnd whether return `true` (conflict) if only the end points touch each other
+ */
+export function checkTimeBlockConflict(
+    start1: number,
+    end1: number,
+    start2: number,
+    end2: number,
+    includeEnd: boolean = true
+) {
+    if (includeEnd) {
+        return (
+            (start1 <= start2 && start2 <= end1) ||
+            (start1 <= end2 && end2 <= end1) ||
+            (start1 >= start2 && end1 <= end2)
+        );
+    } else {
+        return !!calcOverlap(start1, end1, start2, end2);
+    }
+}
 
-    return checkTimeConflict(d1, d2);
+export function calcOverlap(a: number, b: number, c: number, d: number) {
+    if (a <= c && d <= b) return d - c;
+    if (a <= c && c <= b) return b - c;
+    else if (a <= d && d <= b) return d - a;
+    else if (a >= c && b <= d) return b - a;
+    else return 0;
 }
 
 /**

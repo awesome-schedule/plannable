@@ -3,6 +3,7 @@ import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import quickselect from 'quickselect';
+import { calcOverlap } from '../models/Utils';
 
 export enum Mode {
     fallback = 0,
@@ -241,12 +242,7 @@ class ScheduleEvaluator {
                 const day = blocks[i];
                 let dayOverlap = 0;
                 for (let j = 0; j < day.length; j += 2) {
-                    dayOverlap += ScheduleEvaluator.calcOverlap(
-                        lunchStart,
-                        lunchEnd,
-                        day[j],
-                        day[j + 1]
-                    );
+                    dayOverlap += calcOverlap(lunchStart, lunchEnd, day[j], day[j + 1]);
                 }
                 if (dayOverlap > lunchMinOverlap) totalOverlap += dayOverlap;
             }
@@ -304,14 +300,6 @@ class ScheduleEvaluator {
         const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
         options.sortBy = options.sortBy.map(x => Object.assign({}, x));
         return options;
-    }
-
-    public static calcOverlap(a: number, b: number, c: number, d: number) {
-        if (a <= c && d <= b) return d - c;
-        if (a <= c && c <= b) return b - c;
-        else if (a <= d && d <= b) return d - a;
-        else if (a >= c && b <= d) return b - a;
-        else return 0;
     }
 
     public static validateOptions(options?: SortOptions) {

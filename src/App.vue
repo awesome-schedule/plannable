@@ -1041,13 +1041,15 @@ export default class App extends Vue {
         this.eventToEdit = event;
     }
     switchSchedule(generated: boolean) {
-        if (
-            generated &&
-            !window.scheduleEvaluator.empty() &&
-            this.cpIndex === this.proposedScheduleIndex
-        ) {
+        if (generated) {
             // dont do anything if already in "generated" mode
-            if (!this.generated) {
+            // or there are no generated schedules
+            // or the generated schedules do not correspond to the current schedule
+            if (
+                !this.generated &&
+                !window.scheduleEvaluator.empty() &&
+                this.cpIndex === this.proposedScheduleIndex
+            ) {
                 this.generated = true;
                 this.proposedSchedule = this.currentSchedule;
                 this.switchPage(

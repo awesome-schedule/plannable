@@ -317,32 +317,28 @@ class ScheduleGenerator {
                 break;
             }
 
+            // the time dict of the newly chosen class
             const timeDict = classList[classNum][choiceNum][1];
+            let conflict = false;
+            for (const algoCourse of timeTable) {
+                if (Utils.checkTimeConflict(algoCourse[1], timeDict)) {
+                    conflict = true;
+                    break;
+                }
+            }
 
-            if (!this.checkTimeConflict(timeTable, timeDict)) {
+            if (conflict) {
+                choiceNum += 1;
+            } else {
                 // if the schedule matches,
                 // record the next path memory and go to the next class, reset the choiceNum = 0
                 timeTable.push(classList[classNum][choiceNum]);
                 pathMemory[classNum] = choiceNum + 1;
                 classNum += 1;
                 choiceNum = 0;
-            } else {
-                choiceNum += 1;
             }
         }
         return evaluator;
-    }
-
-    /**
-     * compare the new class to see if it has conflicts with the existing time table
-     *
-     * @returns true if it has conflict, false otherwise
-     */
-    public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: TimeDict) {
-        for (const algoCourse of timeTable) {
-            if (Utils.checkTimeConflict(algoCourse[1], timeDict)) return true;
-        }
-        return false;
     }
 }
 

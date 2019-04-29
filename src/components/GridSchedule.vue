@@ -107,6 +107,7 @@ export default class GridSchedule extends Vue {
         const numCfl = scheduleBlock.pathDepth;
         if (numCfl !== 0) {
             left += (20 / (scheduleBlock.maxDepth + 1)) * scheduleBlock.depth;
+
             if (scheduleBlock.pathDepth === scheduleBlock.depth) {
                 width =
                     (20 / (scheduleBlock.maxDepth + 1)) *

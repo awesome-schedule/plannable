@@ -35,8 +35,8 @@ class ScheduleBlock {
         this.section = section;
     }
 
-    public conflict(other: ScheduleBlock) {
-        return checkTimeBlockStrConflict(this.start, this.end, other.start, other.end);
+    public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
+        return checkTimeBlockStrConflict(this.start, this.end, other.start, other.end, includeEnd);
     }
 }
 

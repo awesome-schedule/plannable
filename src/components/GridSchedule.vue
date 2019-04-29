@@ -69,7 +69,7 @@
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
-import { to12hr, checkTimeStrConflict, timeToNum } from '../models/Utils';
+import { to12hr, timeToNum } from '../models/Utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { parse } from 'path';
 import ScheduleBlock from '../models/ScheduleBlock';
@@ -282,23 +282,6 @@ export default class GridSchedule extends Vue {
             if (sb.conflict(scheduleBlock)) {
                 count++;
             }
-
-            // for (const m1 of sc1.meetings) {
-            //     if (m1.days.indexOf(day) !== -1) {
-            //         for (const m2 of sc2.meetings) {
-            //             if (m2.days.indexOf(day) !== -1) {
-            //                 if (sc1.equals(sc2) && m1.days === m2.days) {
-            //                     continue;
-            //                 }
-            //                 if (sb.conflict(scheduleBlock)) {
-            //                     count++;
-            //                 }
-            //                 break;
-            //             }
-            //         }
-            //         // break;
-            //     }
-            // }
         }
         return count;
     }

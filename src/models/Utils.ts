@@ -343,3 +343,58 @@ export function timeToNum(time: string, start: boolean) {
     }
     return t;
 }
+
+interface Data<T> {
+    visited: boolean;
+    depth: number;
+    pathDepth: number;
+    parent?: T;
+}
+
+export function depthFirstSearch<T>(graph: Map<T, T[]>) {
+    const visited = new Map<T, Data<T>>();
+    for (const node of graph.keys()) {
+        visited.set(node, { visited: false, depth: 0, pathDepth: 0 });
+    }
+    while (true) {
+        let start;
+        for (const [node, data] of visited) {
+            if (!data.visited) {
+                data.visited = true;
+                start = node;
+                break;
+            }
+        }
+        if (!start) {
+            break;
+        } else {
+            depthFirstSearchRec(start, graph, visited);
+        }
+    }
+    return visited;
+}
+
+function depthFirstSearchRec<T>(start: T, graph: Map<T, T[]>, visited: Map<T, Data<T>>) {
+    const neighbors = graph.get(start) as T[];
+    const curData = visited.get(start) as Data<T>;
+    curData.visited = true;
+    let hasUnvisited = false;
+    for (const adj of neighbors) {
+        const adjData = visited.get(adj) as Data<T>;
+        if (!adjData.visited) {
+            adjData.depth = curData.depth + 1;
+            adjData.parent = start;
+            depthFirstSearchRec(adj, graph, visited);
+            hasUnvisited = true;
+        }
+    }
+    if (!hasUnvisited) {
+        let curParent: T | undefined = start;
+        while (curParent) {
+            const curParentData = visited.get(curParent) as Data<T>;
+            curParentData.pathDepth = curData.depth;
+            curParent = curParentData.parent;
+        }
+    }
+    return visited;
+}

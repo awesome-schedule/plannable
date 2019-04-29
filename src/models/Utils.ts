@@ -5,6 +5,7 @@ import Meta, { RawCourse } from './Meta';
 import Course from './Course';
 import { saveAs } from 'file-saver';
 import { AxiosError } from 'axios';
+import ScheduleBlock from './ScheduleBlock';
 
 /**
  * @author Hanzhi Zhou
@@ -353,6 +354,15 @@ interface Data<T> {
     parent?: T;
 }
 
+// function findMaxBreadth<T>(node: T, graph: Map<T, T[]>): T | null {
+//     const neighbors = graph.get(node)!;
+//     let maxBreadth = -1;
+//     for (const n of neighbors) {
+
+//     }
+//     return null;
+// }
+
 /**
  * perform depth first search on a graph that has multiple connected components
  *
@@ -370,12 +380,15 @@ export function depthFirstSearch<T>(graph: Map<T, T[]>): Map<T, Data<T>> {
     // the graph may have multiple connected components. Do DFS for each component
     while (true) {
         let start: T | undefined;
+        let maxBreadth = -1;
         // select the first node that haven't been visited as the start node
         for (const [node, data] of visited) {
             if (!data.visited) {
-                data.visited = true;
-                start = node;
-                break;
+                const breadth = graph.get(node)!.length;
+                if (breadth > maxBreadth) {
+                    maxBreadth = breadth;
+                    start = node;
+                }
             }
         }
         if (!start) {
@@ -394,7 +407,12 @@ export function depthFirstSearch<T>(graph: Map<T, T[]>): Map<T, Data<T>> {
  * @param visited
  */
 function depthFirstSearchRec<T>(start: T, graph: Map<T, T[]>, visited: Map<T, Data<T>>) {
-    const neighbors = graph.get(start)!;
+    // sort by breadth
+    const neighbors = graph.get(start)!.sort((a, b) => {
+        const d1 = graph.get(a)!;
+        const d2 = graph.get(b)!;
+        return d2.length - d1.length;
+    });
     const curData = visited.get(start)!;
     curData.visited = true;
     let hasUnvisited = false;

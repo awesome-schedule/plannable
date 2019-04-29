@@ -39,17 +39,20 @@ class ScheduleBlock {
     }
 
     public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
+        const [a, b] = this.timeAsInt();
+        const [c, d] = other.timeAsInt();
+        return checkTimeBlockConflict(a, b, c, d, includeEnd);
+    }
+
+    public timeAsInt(): [number, number] {
         const [a, b] = this.start.split(':');
         const [c, d] = this.end.split(':');
-        const [e, f] = other.start.split(':');
-        const [g, h] = other.end.split(':');
-        return checkTimeBlockConflict(
-            +a * 60 + +b,
-            +c * 60 + +d,
-            +e * 60 + +f,
-            +g * 60 + +h,
-            includeEnd
-        );
+        return [+a * 60 + +b, +c * 60 + +d];
+    }
+
+    public duration() {
+        const [a, b] = this.timeAsInt();
+        return b - a;
     }
 }
 

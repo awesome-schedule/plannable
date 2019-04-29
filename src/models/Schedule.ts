@@ -378,17 +378,24 @@ class Schedule {
                     }
                 }
             }
-            let max_depth = 0;
+            // let max_depth = 0;
             const result = Utils.depthFirstSearch(graph);
             for (const [block, data] of result) {
-                if(data.pathDepth > max_depth){
-                    max_depth = data.pathDepth;
-                }
                 block.pathDepth = data.pathDepth;
                 block.depth = data.depth;
             }
-            for(const [block, _] of result){
-                block.maxDepth = max_depth;
+            for (const [b1, d1] of result) {
+                for (const [b2, d2] of result) {
+                    if (b1.conflict(b2)) {
+                        if (b1.depth > b2.depth) {
+                            b1.maxDepth = b1.depth;
+                            b2.maxDepth = b1.depth;
+                        } else {
+                            b1.maxDepth = b2.depth;
+                            b2.maxDepth = b2.depth;
+                        }
+                    }
+                }
             }
         }
     }

@@ -377,10 +377,17 @@ class Schedule {
                     }
                 }
             }
+            let max_depth = 0;
             const result = Utils.depthFirstSearch(graph);
             for (const [block, data] of result) {
+                if(data.pathDepth > max_depth){
+                    max_depth = data.pathDepth;
+                }
                 block.pathDepth = data.pathDepth;
                 block.depth = data.depth;
+            }
+            for(const [block, _] of result){
+                block.maxDepth = max_depth;
             }
         }
     }

@@ -382,16 +382,19 @@ class Schedule {
             for (const [block, data] of result) {
                 block.pathDepth = data.pathDepth;
                 block.depth = data.depth;
+                block.maxDepth = data.depth;
             }
+
+
             for (const [b1, d1] of result) {
                 for (const [b2, d2] of result) {
                     if (b1.conflict(b2)) {
-                        if (b1.depth > b2.depth) {
-                            b1.maxDepth = b1.depth;
-                            b2.maxDepth = b1.depth;
+                        if (b1.maxDepth > b2.maxDepth) {
+                            b1.maxDepth = b1.maxDepth;
+                            b2.maxDepth = b1.maxDepth;
                         } else {
-                            b1.maxDepth = b2.depth;
-                            b2.maxDepth = b2.depth;
+                            b1.maxDepth = b2.maxDepth;
+                            b2.maxDepth = b2.maxDepth;
                         }
                     }
                 }

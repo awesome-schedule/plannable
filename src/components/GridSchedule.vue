@@ -101,8 +101,6 @@ export default class GridSchedule extends Vue {
     // note: we need Schedule.days because it's an array that keeps the keys in order
     days = Meta.days;
 
-    // occupy = Array((5 * 24 * 60) / 5).fill(0);
-
     style(idx: number, scheduleBlock: ScheduleBlock, day: string) {
         let left = idx * 20;
         let width = 20;

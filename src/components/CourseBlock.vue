@@ -3,13 +3,8 @@
         class="courseBlock"
         :style="{
             'margin-top': startPx + 'px',
-            position: 'absolute',
-            width: '20%',
             height: endPx - startPx + 'px',
-            'background-color': scheduleBlock.backgroundColor,
-            'z-index': '2',
-            color: 'white',
-            cursor: 'pointer'
+            'background-color': scheduleBlock.backgroundColor
         }"
         @click="showModal"
     >
@@ -178,6 +173,15 @@ export default class CourseBlock extends Vue {
 </script>
 
 <style scoped>
+.courseBlock {
+    z-index: 2;
+    color: white;
+    cursor: pointer;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    position: absolute;
+}
+
 .courseBlock:hover {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }

@@ -344,10 +344,14 @@ class Schedule {
         this.computeConflict();
     }
 
-    public computeConflict(countEvent = false) {
+    public computeConflict(countEvent = true) {
         for (const day in this.days) {
             const graph = new Map<ScheduleBlock, ScheduleBlock[]>();
-            const blocks = this.days[day];
+
+            const blocks = countEvent
+                ? this.days[day]
+                : this.days[day].filter(block => !(block.section instanceof Event));
+
             for (let i = 0; i < blocks.length; i++) {
                 graph.set(blocks[i], []);
             }

@@ -23,13 +23,10 @@ export function toICal(schedule: Schedule) {
                     if (m.dates === 'TBD' || m.dates === 'TBA') continue;
                     const [sd, , ed] = m.dates.split(' ');
                     const [sl, sm, sr] = sd.split('/');
-                    // startDate = [sr, sl, sm].join('-') + 'T04:00:00';
                     startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
                     const [el, em, er] = ed.split('/');
-                    // endDate = [er, el, em].join('-') + 'T04:00:00';
                     endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
                     startWeekDay = startDate.getDay();
-                    // console.log(sl + ' ' + sm + ' ' + sr);
                     break;
                 }
             }
@@ -51,19 +48,12 @@ export function toICal(schedule: Schedule) {
                     const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
 
                     const startTime = new Date(
-                        startDate.getTime() +
-                            dayoffset * 24 * 60 * 60 * 1000 +
-                            startMin * 60 * 1000
+                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
                     );
-
-                    // console.log(startDate);
-                    // console.log(startTime);
-                    // console.log(endTime);
                     ical += 'BEGIN:VEVENT\n';
                     ical += 'UID:\n';
                     ical += 'DTSTAMP:' + dateToICalString(startTime) + '\n';
                     ical += 'DTSTART:' + dateToICalString(startTime) + '\n';
-                    // ical += 'DTEND:' + schedule.dateToICalString(endTime) + '\n';
                     ical +=
                         'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                         Meta.days[d].toUpperCase() +
@@ -95,16 +85,10 @@ export function toICal(schedule: Schedule) {
                 const startTime = new Date(
                     startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
                 );
-
-                const startAtDay = new Date(
-                    startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000
-                );
-
                 ical += 'BEGIN:VEVENT\n';
                 ical += 'UID:\n';
                 ical += 'DTSTAMP:' + dateToICalString(startTime) + '\n';
                 ical += 'DTSTART:' + dateToICalString(startTime) + '\n';
-                // ical += 'DTEND:' + schedule.dateToICalString(endTime) + '\n';
                 ical +=
                     'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                     Meta.days[d].toUpperCase() +

@@ -55,9 +55,13 @@
                             :show-room="showRoom"
                             :show-instructor="showInstructor"
                             :absolute-earliest="absoluteEarliest"
-                            :style="`left:${idx * 20}%`"
+                            :style="
+                                `left:${idx * 20 +
+                                    (20 / numConflict(scheduleBlock, day, false)) *
+                                        numConflict(scheduleBlock, day, true)}%; width: ${20 /
+                                    numConflict(scheduleBlock, day, false)}%`
+                            "
                             :day="day"
-                            @load="incOccupy(scheduleBlock)"
                         ></course-block>
                     </template>
                 </div>
@@ -70,8 +74,11 @@
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
-import { to12hr } from '../models/Utils';
+import { to12hr, parseTimeAsInt } from '../models/Utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import { parse } from 'path';
+import ScheduleBlock from '../models/ScheduleBlock';
+import Section from '../models/Section';
 
 @Component({
     components: {
@@ -99,7 +106,7 @@ export default class GridSchedule extends Vue {
     // note: we need Schedule.days because it's an array that keeps the keys in order
     days = Meta.days;
 
-    occupy = Array((5 * 24 * 60) / 5).fill(0);
+    // occupy = Array((5 * 24 * 60) / 5).fill(0);
 
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
@@ -259,10 +266,106 @@ export default class GridSchedule extends Vue {
         return t - 1;
     }
 
-    // 12:00 AM Monday --> index 0
-    timeTo5MinBlock(time: string) {
-        return true;
+    numConflict(scheduleBlock: ScheduleBlock, day: string, previousClassOnly: boolean) {
+        let count = 0;
+        for (const sb of this.schedule.days[day]) {
+            let sc: Section;
+            if (sb.section instanceof Section) {
+                sc = sb.section;
+            } else if (sb.section instanceof Array) {
+                sc = sb.section[0];
+            } else {
+                return 0;
+            }
+
+            if (scheduleBlock.section instanceof Section) {
+                if (sc.equals(scheduleBlock.section) && previousClassOnly) {
+                    break;
+                }
+                for (const m1 of sc.meetings) {
+                    if (m1.days.indexOf(day) !== -1) {
+                        for (const m2 of scheduleBlock.section.meetings) {
+                            if (m2.days.indexOf(day) !== -1) {
+                                if (this.checkConflict(m1.days, m2.days)) {
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // console.log(count);
+        return count;
     }
+
+    checkConflict(s1: string, s2: string) {
+        const [d1, start1, , end1] = s1.split(' ');
+        const [d2, start2, , end2] = s2.split(' ');
+
+        const tb1 = parseTimeAsInt(start1, end1);
+        const tb2 = parseTimeAsInt(start2, end2);
+
+        console.log(s1 + ' ' + s2);
+
+        if ((tb1[0] >= tb2[0] && tb1[0] < tb2[1]) || (tb1[1] > tb2[0] && tb1[1] <= tb2[1])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // incOccupy(sb: ScheduleBlock, day: string) {
+    //     if (sb.section instanceof Section) {
+    //         for (const m of sb.section.meetings) {
+    //             if (m.days.indexOf(day) != 0) {
+    //                 const idx = this.timeTo5MinBlock(
+    //                     m.days
+    //                         .split(' ')
+    //                         .splice(1, 2)
+    //                         .join(' ')
+    //                 );
+    //                 this.occupy[idx]++;
+    //             }
+    //         }
+    //         // const idx = timeTo5MinBlock(sb.section.meetings.);
+    //     }
+    // }
+
+    // getOccupyMargin(sb: ScheduleBlock, day: string) {
+    //     let result = 0;
+    //     if (sb.section instanceof Section) {
+    //         for (const m of sb.section.meetings) {
+    //             console.log(m.days);
+    //             if (m.days.indexOf(day) != 0) {
+    //                 const idxStart = this.timeTo5MinBlock(m.days.split(' ')[1]);
+    //                 const idxEnd = this.timeTo5MinBlock
+    //                 const num = this.occupy[idxStart] - 1;
+    //                 // const sep = 20 / num;
+    //                 // result = sep * num;
+    //                 if (num !== 0) {
+    //                     result = 5 * num;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return result;
+    // }
+
+    // // 12:00 AM Monday --> index 0
+    // timeTo5MinBlock(time: string) {
+    //     const [num, tm] = time.split(' ');
+    //     const [hourStr, minStr] = num.split(':');
+
+    //     let hr = parseInt(hourStr);
+    //     const min = parseInt(minStr);
+
+    //     if (hr === 12) hr = 0;
+
+    //     if (tm === 'PM') hr += 12;
+
+    //     return hr * 12 + Math.floor(min / 5);
+    // }
 }
 </script>
 

@@ -23,6 +23,9 @@ class Section implements CourseFields, Hashable {
     public description: string;
 
     public sid: number;
+    /**
+     * Key of a course; same for all sections.
+     */
     public key: string;
 
     public course: Course;
@@ -121,6 +124,14 @@ class Section implements CourseFields, Hashable {
         }
 
         return [timeDict, roomDict];
+    }
+
+    public equals(sc: Section) : boolean {
+        if(this.key === sc.key && this.section === sc.section){
+            return true;
+        }else{
+            return false;
+        }
     }
 }
 

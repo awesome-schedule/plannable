@@ -333,7 +333,7 @@ class Schedule {
                         const id = combined[0].getSection(0).id;
 
                         // count the total number of sections in this combined course array
-                        const num = combined.reduce((acc, x) => acc + x.sids.length, 0);
+                        const num = sections.size - 1;
                         for (const crs of combined) {
                             this.currentIds[currentIdKey] = num
                                 ? `${id.toString()}+${num}`
@@ -471,7 +471,13 @@ class Schedule {
             if (!course.allSameTime()) return;
             const color = this.getColor(course);
             for (const meeting of course.sections[0].meetings) {
-                this.placeHelper(color, meeting.days, course.sections);
+                // if only one section, just use the section rather than the section array
+                const courseSec = course.sections;
+                if (courseSec.length === 1) {
+                    this.placeHelper(color, meeting.days, courseSec[0]);
+                } else {
+                    this.placeHelper(color, meeting.days, course.sections);
+                }
             }
         }
     }

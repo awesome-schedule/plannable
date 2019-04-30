@@ -4,8 +4,18 @@ interface Comparable<T> {
 
 interface VertexData<T> {
     visited: boolean;
+    /**
+     * depth of the node relative to the root
+     */
     depth: number;
+    /**
+     * the maximum depth of the path starting from the root that the current node is on
+     */
     pathDepth: number;
+    /**
+     * the all of the paths starting at the root and ending at one of the leaves.
+     * if this vertex is not the root, then `path` will be empty
+     */
     path: T[][];
     parent?: T;
     val: T;
@@ -51,7 +61,7 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  *
  * this function first sorts nodes by their breadth in descending order.
  * If two nodes have the same breadth, then they'll be sorted in
- * ascending order according to their `compareTo` method.
+ * descending order according to their `compareTo` method.
  *
  * @param graph
  */

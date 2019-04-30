@@ -6,6 +6,7 @@ import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from './Utils';
 import Hashable from './Hashable';
+import { Vertex, depthFirstSearch } from './Graph';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -357,7 +358,7 @@ class Schedule {
      * @param countEvent whether to include events in this graph
      */
     public computeConflict(countEvent = true) {
-        const graph = new Map<ScheduleBlock, ScheduleBlock[]>();
+        const graph = new Map<Vertex<ScheduleBlock>, Vertex<ScheduleBlock>[]>();
         for (const day in this.days) {
             graph.clear();
 
@@ -365,38 +366,39 @@ class Schedule {
                 ? this.days[day]
                 : this.days[day].filter(block => !(block.section instanceof Event));
 
+            const nodes = [];
             for (let i = 0; i < blocks.length; i++) {
-                graph.set(blocks[i], []);
+                const v = new Vertex(blocks[i]);
+                nodes.push(v);
+                graph.set(v, []);
             }
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
-                    const ib = blocks[i];
-                    const jb = blocks[j];
-                    if (ib.conflict(jb)) {
+                    const ib = nodes[i];
+                    const jb = nodes[j];
+                    if (ib.val.conflict(jb.val)) {
                         graph.get(ib)!.push(jb);
                         graph.get(jb)!.push(ib);
                     }
                 }
             }
-            // let max_depth = 0;
-            const result = Utils.depthFirstSearch(graph);
-            for (const [block, data] of result) {
-                block.pathDepth = data.pathDepth;
-                block.depth = data.depth;
-                block.maxDepth = data.depth;
-            }
 
+            depthFirstSearch(graph);
 
-            for (const [b1, d1] of result) {
-                for (const [b2, d2] of result) {
-                    if (b1.conflict(b2)) {
-                        if (b1.maxDepth > b2.maxDepth) {
-                            b1.maxDepth = b1.maxDepth;
-                            b2.maxDepth = b1.maxDepth;
-                        } else {
-                            b1.maxDepth = b2.maxDepth;
-                            b2.maxDepth = b2.maxDepth;
-                        }
+            for (const node of nodes) {
+                if (node.parent) continue;
+                const paths = node.path;
+                for (const path of paths) {
+                    if (path[0].val.left === -1) {
+                        path[0].val.left = 0;
+                        path[0].val.width = 1 / (path[0].pathDepth + 1);
+                    }
+
+                    for (let i = 1; i < path.length; i++) {
+                        const block = path[i].val;
+                        if (block.left !== -1) continue;
+                        block.left = path[i - 1].val.left + path[i - 1].val.width;
+                        block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
                     }
                 }
             }

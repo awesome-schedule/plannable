@@ -1,3 +1,16 @@
+interface VertexData<T> {
+    visited: boolean;
+    depth: number;
+    pathDepth: number;
+    path: T[][];
+    parent?: T;
+    val: T;
+}
+
+/**
+ * The vertex of the graph.
+ * It holds many attributes that are modified **in-place** when running a graph algorithm
+ */
 export class Vertex<T> {
     public visited: boolean = false;
     public depth: number = 0;
@@ -9,15 +22,22 @@ export class Vertex<T> {
         this.val = t;
     }
 
-    // data() {
-    //     return {
-    //         visited: this.visited,
-    //         val: this.val,
-    //         path: this.path.map(x => x.map(y => y.val)),
-    //         depth: this.depth,
-    //         pathDepth: this.pathDepth
-    //     };
-    // }
+    /**
+     * represent this node without creating cyclic reference
+     */
+    data() {
+        const data: VertexData<T> = {
+            visited: this.visited,
+            val: this.val,
+            path: this.path.map(x => x.map(y => y.val)),
+            depth: this.depth,
+            pathDepth: this.pathDepth
+        };
+        if (this.parent) {
+            data.parent = this.parent.val;
+        }
+        return data;
+    }
 }
 
 export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
@@ -26,10 +46,9 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  * perform depth first search on a graph that has multiple connected components
  *
  * @author Hanzhi Zhou
- * @param graph the graph represented as adjacency list
- * @returns a Map that maps nodes to their data
+ * @param graph the graph represented as an adjacency list
  *
- * @see Data<T>
+ * @see Vertex<T>
  */
 export function depthFirstSearch<T>(graph: Graph<T>) {
     // the graph may have multiple connected components. Do DFS for each component
@@ -37,7 +56,8 @@ export function depthFirstSearch<T>(graph: Graph<T>) {
     while (true) {
         let start: Vertex<T> | undefined;
         let maxBreadth = -1;
-        // select the first node that haven't been visited as the start node
+
+        // select the first node of greatest breadth that haven't been visited as the start node
         for (const node of nodes) {
             if (!node.visited) {
                 const breadth = graph.get(node)!.length;
@@ -50,7 +70,6 @@ export function depthFirstSearch<T>(graph: Graph<T>) {
         if (!start) {
             break;
         } else {
-            console.log('start at ', start.val);
             depthFirstSearchRec(start, graph);
         }
     }
@@ -60,7 +79,6 @@ export function depthFirstSearch<T>(graph: Graph<T>) {
  * @author Hanzhi Zhou
  * @param start
  * @param graph
- * @param visited
  */
 function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     // sort by breadth
@@ -70,10 +88,8 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
         return d2.length - d1.length;
     });
     start.visited = true;
-    // console.log(start.val);
     let hasUnvisited = false;
 
-    // console.log(neighbors);
     // this part is just regular DFS, except that we record the depth of the current node.
     for (const adj of neighbors) {
         if (!adj.visited) {

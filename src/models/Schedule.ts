@@ -291,6 +291,7 @@ class Schedule {
         const catalog = window.catalog;
         if (!catalog) return;
 
+        console.time('compute schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
@@ -349,6 +350,7 @@ class Schedule {
         for (const event of this.events) if (event.display) this.place(event);
 
         this.computeConflict();
+        console.timeEnd('compute schedule');
     }
 
     /**
@@ -359,6 +361,8 @@ class Schedule {
      */
     public computeConflict(countEvent = true) {
         const graph = new Map<Vertex<ScheduleBlock>, Vertex<ScheduleBlock>[]>();
+
+        // construct conflict graph for each column
         for (const day in this.days) {
             graph.clear();
 
@@ -366,12 +370,16 @@ class Schedule {
                 ? this.days[day]
                 : this.days[day].filter(block => !(block.section instanceof Event));
 
-            const nodes = [];
+            // instantiate all the nodes
+            const nodes: Vertex<ScheduleBlock>[] = [];
             for (let i = 0; i < blocks.length; i++) {
                 const v = new Vertex(blocks[i]);
                 nodes.push(v);
                 graph.set(v, []);
             }
+
+            // construct a graph for all scheduleBlocks.
+            // the edge from node i to node j exists iff block[i] conflicts with block[j]
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
                     const ib = nodes[i];
@@ -383,23 +391,41 @@ class Schedule {
                 }
             }
 
+            // perform a depth-first search
             depthFirstSearch(graph);
 
             for (const node of nodes) {
+                // skip any non-root node in the depth-first trees
                 if (node.parent) continue;
+
+                // traverse all the paths starting from the root
                 const paths = node.path;
                 for (const path of paths) {
+                    // compute the left and width of the root node if they're not computed
                     if (path[0].val.left === -1) {
                         path[0].val.left = 0;
                         path[0].val.width = 1 / (path[0].pathDepth + 1);
                     }
 
+                    // computed the left and width of the remaining nodes based on
+                    // the already computed information of the previous node
                     for (let i = 1; i < path.length; i++) {
                         const block = path[i].val;
+
+                        // skip already computed nodes
                         if (block.left !== -1) continue;
+
                         block.left = path[i - 1].val.left + path[i - 1].val.width;
+
+                        // remaining width / number of remaining path length
                         block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
                     }
+                }
+            }
+
+            for (const block of blocks) {
+                if (block.left === -1 || block.width === -1) {
+                    console.error('Uncomputed block found!', block);
                 }
             }
         }

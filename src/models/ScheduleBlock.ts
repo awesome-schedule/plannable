@@ -22,9 +22,6 @@ class ScheduleBlock {
      */
     public end: string;
     public section: Section | Section[] | Event;
-    public depth = 0;
-    public pathDepth = 0;
-    public maxDepth = 0;
     public left = -1;
     public width = -1;
 

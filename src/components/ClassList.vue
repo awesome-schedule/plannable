@@ -1,7 +1,13 @@
 <template>
     <div id="class-list w-100">
         <div class="card-body p-0" tabindex="-1" @keyup.esc="$emit('close')">
-            <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
+            <div
+                v-for="crs in courses"
+                :key="crs.key"
+                class="list-group list-group-flush"
+                @mouseenter="schedule.hover(crs.key)"
+                @mouseleave="schedule.unhover(crs.key)"
+            >
                 <div class="list-group-item class-title py-1 px-0">
                     <table class="w-100">
                         <tr>

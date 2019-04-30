@@ -1,6 +1,7 @@
 <template>
     <div
         class="courseBlock"
+        :class="{ 'block-strong': scheduleBlock.strong }"
         :style="{
             'margin-top': startPx + 'px',
             height: endPx - startPx + 'px',
@@ -182,8 +183,12 @@ export default class CourseBlock extends Vue {
     position: absolute;
 }
 
+.block-strong {
+    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
+}
+
 .courseBlock:hover {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
 }
 
 .crs-info {

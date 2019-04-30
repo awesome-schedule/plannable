@@ -282,6 +282,26 @@ class Schedule {
         this.computeSchedule();
     }
 
+    public hover(key: string, strong: boolean = true) {
+        const sections = this.All[key];
+        if (sections instanceof Set) {
+            Object.values(this.days).forEach(blocks => {
+                for (const block of blocks) {
+                    const container = block.section;
+                    if (!(container instanceof Event)) {
+                        if (Section.has(container, sections, key)) {
+                            block.strong = strong;
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    public unhover(key: string) {
+        this.hover(key, false);
+    }
+
     /**
      * Compute the schedule view based on `this.All` and `this.preview`
      *
@@ -356,11 +376,19 @@ class Schedule {
         if (this.previous) {
             const [key, secIdx] = this.previous;
             const sections = this.All[key];
-
+            const section = catalog.getSection(key, secIdx);
             // do not place into the schedule if the section is already in this.All
             if (!(sections instanceof Set) || !sections.has(secIdx)) {
-                const section = catalog.getSection(key, secIdx);
                 this.place(section);
+            } else {
+                // instead, we highlight the schedule
+                for (const day in this.days) {
+                    const blocks = this.days[day];
+                    for (const block of blocks) {
+                        if (!(block.section instanceof Event))
+                            if (Section.has(block.section, section)) block.strong = true;
+                    }
+                }
             }
         }
 

@@ -24,6 +24,7 @@ class ScheduleBlock {
     public section: Section | Section[] | Event;
     public left = -1;
     public width = -1;
+    public strong = false;
 
     constructor(
         backgroundColor: string,

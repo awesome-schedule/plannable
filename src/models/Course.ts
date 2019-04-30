@@ -111,7 +111,7 @@ class Course implements CourseFields, Hashable {
      * @example
      * {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [1,2,3,7,9]}`
      */
-    public getCombined() {
+    public getCombined(): { [x: string]: Section[] } {
         const combined: { [x: string]: Section[] } = {};
         for (let i = 0; i < this.sections.length; i++) {
             const day = this.sections[i].combinedTime();

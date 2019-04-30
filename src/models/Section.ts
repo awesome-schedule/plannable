@@ -10,9 +10,41 @@ import { parseTimeAll } from './Utils';
  * and it holds additional information specific to that section.
  */
 class Section implements CourseFields, Hashable {
+    /**
+     * convert a section array to a course holding the section array
+     * @param sections
+     */
     public static sectionsToCourse(sections: Section[]) {
         const course = sections[0].course;
         return new Course(course.raw, course.key, sections.map(x => x.sid));
+    }
+
+    /**
+     * check whether the element is in the container
+     */
+    public static has(container: Section | Section[], element: Section): boolean;
+    /**
+     * check whether the set of sections indices with the given key exist in the container
+     * @param container
+     * @param element
+     * @param key
+     */
+    public static has(container: Section | Section[], element: Set<number>, key: string): boolean;
+    public static has(
+        container: Section | Section[],
+        element: Section | Set<number>,
+        key?: string
+    ): boolean {
+        if (container instanceof Section) {
+            if (element instanceof Set) return container.key === key && element.has(container.sid);
+            else return container.equals(element);
+        } else {
+            if (element instanceof Set) {
+                return container.some(x => x.key === key && element.has(x.sid));
+            } else {
+                return container.some(x => x.equals(element));
+            }
+        }
     }
 
     public department: string;
@@ -28,6 +60,9 @@ class Section implements CourseFields, Hashable {
      */
     public key: string;
 
+    /**
+     * a reference to the course that this section belongs to
+     */
     public course: Course;
     public id: number;
     public section: string;
@@ -127,7 +162,7 @@ class Section implements CourseFields, Hashable {
     }
 
     public equals(sc: Section): boolean {
-        if (this.key === sc.key && this.section === sc.section) {
+        if (this.key === sc.key && this.sid === sc.sid) {
             return true;
         } else {
             return false;

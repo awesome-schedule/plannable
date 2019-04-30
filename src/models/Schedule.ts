@@ -6,7 +6,7 @@ import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from './Utils';
 import Hashable from './Hashable';
-import { Vertex, depthFirstSearch } from './Graph';
+import { Vertex, depthFirstSearch, Graph } from './Graph';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -125,10 +125,9 @@ class Schedule {
      * keep track of used colors to avoid color collision
      */
     public colorSlots: Array<Set<string>>;
+    public multiSectionSelect = true;
 
     private previous: [string, number] | null;
-
-    public multiSectionSelect = true;
 
     /**
      * Construct a `Schedule` object from its raw representation
@@ -299,6 +298,9 @@ class Schedule {
 
         for (const key in this.All) {
             const sections = this.All[key];
+            /**
+             * the full course record of key `key`
+             */
             const course = catalog.getCourse(key);
             this.currentCourses.push(course);
 
@@ -323,13 +325,21 @@ class Schedule {
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
                 } else if (sections.size > 0) {
-                    // console.log(multiSelect);
                     if (multiSelect) {
-                        for (const secId of sections) {
-                            this.currentIds[currentIdKey] = course.getSection(secId).id.toString();
-                            this.place(course.getSection(secId));
+                        // try to combine sections even if we're in multi-select mode
+                        const combined: Course[] = Object.values(
+                            course.getCourse([...sections]).getCombined()
+                        ).map(secs => Section.sectionsToCourse(secs));
+                        const id = combined[0].getSection(0).id;
+
+                        // count the total number of sections in this combined course array
+                        const num = combined.reduce((acc, x) => acc + x.sids.length, 0);
+                        for (const crs of combined) {
+                            this.currentIds[currentIdKey] = num
+                                ? `${id.toString()}+${num}`
+                                : id.toString();
+                            this.place(crs);
                         }
-                        // const sectionIdx = sections.values().next().value;
                     } else {
                         // a subset of the sections
                         const sectionIndices = [...sections];
@@ -364,13 +374,14 @@ class Schedule {
     }
 
     /**
-     * construct a graph for the scheduleBlocks in each day. Perform DFS on that graph to determine the
+     * Construct an undirected graph for the scheduleBlocks in each day.
+     * Perform DFS on that graph to determine the
      * maximum number of conflicting schedules that need to be rendered "in parallel".
      *
      * @param countEvent whether to include events in this graph
      */
     public computeConflict(countEvent = true) {
-        const graph = new Map<Vertex<ScheduleBlock>, Vertex<ScheduleBlock>[]>();
+        const graph: Graph<ScheduleBlock> = new Map();
 
         // construct conflict graph for each column
         for (const day in this.days) {
@@ -388,7 +399,7 @@ class Schedule {
                 graph.set(v, []);
             }
 
-            // construct a graph for all scheduleBlocks.
+            // construct an undirected graph for all scheduleBlocks.
             // the edge from node i to node j exists iff block[i] conflicts with block[j]
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {

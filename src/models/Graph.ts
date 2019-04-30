@@ -1,3 +1,7 @@
+interface Comparable<T> {
+    compareTo(other: T): number;
+}
+
 interface VertexData<T> {
     visited: boolean;
     depth: number;
@@ -43,6 +47,25 @@ export class Vertex<T> {
 export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
 
 /**
+ * given a graph, returns a sort function on this graph
+ *
+ * this function first sorts nodes by their breadth in descending order.
+ * If two nodes have the same breadth, then they'll be sorted in
+ * ascending order according to their `compareTo` method.
+ *
+ * @param graph
+ */
+function sortFunc<T extends Comparable<T>>(graph: Graph<T>) {
+    return (a: Vertex<T>, b: Vertex<T>) => {
+        const d1 = graph.get(a)!;
+        const d2 = graph.get(b)!;
+        const result = d2.length - d1.length;
+        if (result) return result;
+        else return b.val.compareTo(a.val);
+    };
+}
+
+/**
  * perform depth first search on a graph that has multiple connected components
  *
  * @author Hanzhi Zhou
@@ -50,25 +73,22 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  *
  * @see Vertex<T>
  */
-export function depthFirstSearch<T>(graph: Graph<T>) {
+export function depthFirstSearch<T extends Comparable<T>>(graph: Graph<T>) {
+    const nodes = Array.from(graph.keys()).sort(sortFunc(graph));
+
     // the graph may have multiple connected components. Do DFS for each component
-    const nodes = Array.from(graph.keys());
     while (true) {
         let start: Vertex<T> | undefined;
-        let maxBreadth = -1;
 
         // select the first node of greatest breadth that haven't been visited as the start node
         for (const node of nodes) {
             if (!node.visited) {
-                const breadth = graph.get(node)!.length;
-                if (breadth > maxBreadth) {
-                    maxBreadth = breadth;
-                    start = node;
-                }
+                start = node;
+                break;
             }
         }
         if (!start) {
-            break;
+            break; // all nodes are visited
         } else {
             depthFirstSearchRec(start, graph);
         }
@@ -80,13 +100,9 @@ export function depthFirstSearch<T>(graph: Graph<T>) {
  * @param start
  * @param graph
  */
-function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
+function depthFirstSearchRec<T extends Comparable<T>>(start: Vertex<T>, graph: Graph<T>) {
     // sort by breadth
-    const neighbors = graph.get(start)!.sort((a, b) => {
-        const d1 = graph.get(a)!;
-        const d2 = graph.get(b)!;
-        return d2.length - d1.length;
-    });
+    const neighbors = graph.get(start)!.sort(sortFunc(graph));
     start.visited = true;
     let hasUnvisited = false;
 

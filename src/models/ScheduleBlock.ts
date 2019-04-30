@@ -53,6 +53,10 @@ class ScheduleBlock {
         const [a, b] = this.timeAsInt();
         return b - a;
     }
+
+    public compareTo(other: ScheduleBlock) {
+        return this.duration() - other.duration();
+    }
 }
 
 export default ScheduleBlock;

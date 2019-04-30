@@ -55,7 +55,10 @@
                             :show-room="showRoom"
                             :show-instructor="showInstructor"
                             :absolute-earliest="absoluteEarliest"
-                            :style="style(idx, scheduleBlock, day)"
+                            :style="{
+                                left: (idx + scheduleBlock.left) * 20 + '%',
+                                width: 20 * scheduleBlock.width + '%'
+                            }"
                             :day="day"
                         ></course-block>
                     </template>
@@ -100,24 +103,6 @@ export default class GridSchedule extends Vue {
     fri = window.screen.width > 450 ? 'Friday' : 'Fri';
     // note: we need Schedule.days because it's an array that keeps the keys in order
     days = Meta.days;
-
-    style(idx: number, scheduleBlock: ScheduleBlock, day: string) {
-        let left = idx * 20;
-        let width = 20;
-        const numCfl = scheduleBlock.pathDepth;
-        if (numCfl !== 0) {
-            left += (20 / (scheduleBlock.maxDepth + 1)) * scheduleBlock.depth;
-
-            if (scheduleBlock.pathDepth === scheduleBlock.depth) {
-                width =
-                    (20 / (scheduleBlock.maxDepth + 1)) *
-                    (scheduleBlock.maxDepth - scheduleBlock.depth + 1);
-            } else {
-                width = 20 / (scheduleBlock.maxDepth + 1);
-            }
-        }
-        return { left: left + '%', width: width + '%' };
-    }
 
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero

@@ -22,21 +22,28 @@ This site is a pure front-end build. It fetches data from Lou's list on page loa
 
 -   Node.js >= 8.10
 
-Clone the repository
+Clone the repository and data
 
 ```bash
 git clone https://github.com/awesome-schedule/Awesome-SchedulAR
+cd Awesome-SchedulAR/backend
+mkdir -p data
+git clone https://github.com/awesome-schedule/data
+cd ..
 ```
 
 Install front end dependencies and launch the development server
 
 ```bash
-cd Awesome-SchedulAR
 npm install
 npm run serve
 ```
 
 Then you can view the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
+
+You probably need to serve the static files in backend/data. To do so, we recommend using `http-server`. If it is not installed, you can run `npm install -g http-server`
+
+Then, you can run `sh run.sh` in the project root to launch the static file server.
 
 ## Built With
 

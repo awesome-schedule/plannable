@@ -20,18 +20,9 @@ describe('Utility Tests', () => {
         expect(Utils.to24hr(Utils.to12hr('12:00'))).toBe('12:00');
     });
 
-    it('time block conflict', () => {
-        expect(Utils.checkTimeBlockStrConflict('12:00', '15:00', '15:00', '17:00')).toBe(true);
-        expect(Utils.checkTimeBlockStrConflict('12:00', '15:00', '15:00', '17:00', false)).toBe(
-            false
-        );
-    });
-
     it('Overlap test', () => {
         expect(Utils.calcOverlap(100, 200, 150, 250)).toBe(50);
         expect(Utils.calcOverlap(150, 250, 100, 200)).toBe(50);
         expect(Utils.calcOverlap(100, 300, 100, 200)).toBe(100);
     });
-
-    // it('Depth first search', () => {});
 });

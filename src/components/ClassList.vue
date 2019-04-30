@@ -80,6 +80,7 @@
                                     </div>
                                 </div>
                             </a>
+                            <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
                             <div
                                 class="list-group-item list-group-item-action container-fluid class-section"
                                 :class="{ active: isActive(crs.key, crs.sids[idx]) }"
@@ -89,7 +90,7 @@
                                         : 'click to select'
                                 "
                                 @click="select(crs.key, crs.sids[idx])"
-                                @mouseover="preview(crs.key, crs.sids[idx])"
+                                @mouseenter="preview(crs.key, crs.sids[idx])"
                                 @mouseleave="removePreview()"
                             >
                                 <div class="row no-gutters justify-content-between">

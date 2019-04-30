@@ -6,6 +6,7 @@ import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from './Utils';
 import Hashable from './Hashable';
+import { Vertex, depthFirstSearch } from './Graph';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -82,8 +83,9 @@ class Schedule {
 
     /**
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
-     * note that if **section** is -1, it means that all sections are allowed.
-     * Otherwise **section** should be a Set of integers
+     *
+     * Note that if **section** is -1, it means that all sections are allowed.
+     * Otherwise, **section** should be a Set of integers
      */
     public All: { [x: string]: Set<number> | -1 };
     public title: string;
@@ -292,6 +294,7 @@ class Schedule {
         const catalog = window.catalog;
         if (!catalog) return;
 
+        console.time('compute schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
@@ -319,26 +322,23 @@ class Schedule {
                     const sectionIdx = sections.values().next().value;
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
-                } else if(sections.size > 0) {
+                } else if (sections.size > 0) {
                     // console.log(multiSelect);
-                    if(multiSelect){
-                        for(const secId of sections){
+                    if (multiSelect) {
+                        for (const secId of sections) {
                             this.currentIds[currentIdKey] = course.getSection(secId).id.toString();
                             this.place(course.getSection(secId));
                         }
                         // const sectionIdx = sections.values().next().value;
-
-                    }else{
+                    } else {
                         // a subset of the sections
-                        const sectionIndices = [...sections.values()];
+                        const sectionIndices = [...sections];
                         this.place(course.getCourse(sectionIndices));
                         this.currentIds[currentIdKey] =
                             course.getSection(sectionIndices[0]).id.toString() +
                             '+' +
                             (sections.size - 1);
                     }
-                    
-                    
                 }
             }
         }
@@ -360,6 +360,7 @@ class Schedule {
         for (const event of this.events) if (event.display) this.place(event);
 
         this.computeConflict();
+        console.timeEnd('compute schedule');
     }
 
     /**
@@ -369,7 +370,9 @@ class Schedule {
      * @param countEvent whether to include events in this graph
      */
     public computeConflict(countEvent = true) {
-        const graph = new Map<ScheduleBlock, ScheduleBlock[]>();
+        const graph = new Map<Vertex<ScheduleBlock>, Vertex<ScheduleBlock>[]>();
+
+        // construct conflict graph for each column
         for (const day in this.days) {
             graph.clear();
 
@@ -377,39 +380,62 @@ class Schedule {
                 ? this.days[day]
                 : this.days[day].filter(block => !(block.section instanceof Event));
 
+            // instantiate all the nodes
+            const nodes: Vertex<ScheduleBlock>[] = [];
             for (let i = 0; i < blocks.length; i++) {
-                graph.set(blocks[i], []);
+                const v = new Vertex(blocks[i]);
+                nodes.push(v);
+                graph.set(v, []);
             }
+
+            // construct a graph for all scheduleBlocks.
+            // the edge from node i to node j exists iff block[i] conflicts with block[j]
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
-                    const ib = blocks[i];
-                    const jb = blocks[j];
-                    if (ib.conflict(jb)) {
+                    const ib = nodes[i];
+                    const jb = nodes[j];
+                    if (ib.val.conflict(jb.val)) {
                         graph.get(ib)!.push(jb);
                         graph.get(jb)!.push(ib);
                     }
                 }
             }
-            // let max_depth = 0;
-            const result = Utils.depthFirstSearch(graph);
-            for (const [block, data] of result) {
-                block.pathDepth = data.pathDepth;
-                block.depth = data.depth;
-                block.maxDepth = data.depth;
+
+            // perform a depth-first search
+            depthFirstSearch(graph);
+
+            for (const node of nodes) {
+                // skip any non-root node in the depth-first trees
+                if (node.parent) continue;
+
+                // traverse all the paths starting from the root
+                const paths = node.path;
+                for (const path of paths) {
+                    // compute the left and width of the root node if they're not computed
+                    if (path[0].val.left === -1) {
+                        path[0].val.left = 0;
+                        path[0].val.width = 1 / (path[0].pathDepth + 1);
+                    }
+
+                    // computed the left and width of the remaining nodes based on
+                    // the already computed information of the previous node
+                    for (let i = 1; i < path.length; i++) {
+                        const block = path[i].val;
+
+                        // skip already computed nodes
+                        if (block.left !== -1) continue;
+
+                        block.left = path[i - 1].val.left + path[i - 1].val.width;
+
+                        // remaining width / number of remaining path length
+                        block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
+                    }
+                }
             }
 
-
-            for (const [b1, d1] of result) {
-                for (const [b2, d2] of result) {
-                    if (b1.conflict(b2)) {
-                        if (b1.maxDepth > b2.maxDepth) {
-                            b1.maxDepth = b1.maxDepth;
-                            b2.maxDepth = b1.maxDepth;
-                        } else {
-                            b1.maxDepth = b2.maxDepth;
-                            b2.maxDepth = b2.maxDepth;
-                        }
-                    }
+            for (const block of blocks) {
+                if (block.left === -1 || block.width === -1) {
+                    console.error('Uncomputed block found!', block);
                 }
             }
         }
@@ -494,7 +520,7 @@ class Schedule {
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) obj.All[key] = [...sections.values()];
+            if (sections instanceof Set) obj.All[key] = [...sections];
             else obj.All[key] = sections;
         }
         return obj;

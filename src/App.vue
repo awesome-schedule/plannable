@@ -157,6 +157,7 @@
                     :is-entering="isEntering"
                     :show-classlist-title="showClasslistTitle"
                     :generated="generated"
+                    :multi-select="multiSelect"
                     @update_course="updateCourse"
                     @close="closeClassList"
                     @trigger-classlist-modal="showCourseModal"
@@ -247,6 +248,7 @@
                         :schedule="currentSchedule"
                         :show-classlist-title="showClasslistTitle"
                         :generated="generated"
+                        :multi-select="multiSelect"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
                         @trigger-classlist-modal="showCourseModal"
@@ -262,6 +264,18 @@
                         <button class="btn btn-outline-info" @click="clear">
                             Clean All
                         </button>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input
+                            id="multiSelect"
+                            v-model="multiSelect"
+                            type="checkbox"
+                            class="custom-control-input"
+                            @change="currentSchedule.computeSchedule(multiSelect)"
+                        />
+                        <label class="custom-control-label" for="multiSelect"
+                            >Show Multiple Section</label
+                        >
                     </div>
                 </div>
             </div>
@@ -920,6 +934,7 @@ export default class App extends Vue {
     eventToEdit: Event | null = null;
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
+    multiSelect: boolean = true;
 
     get sideBarActive() {
         for (const key in this.sideBar) {

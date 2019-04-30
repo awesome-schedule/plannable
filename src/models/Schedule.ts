@@ -126,6 +126,8 @@ class Schedule {
 
     private previous: [string, number] | null;
 
+    public multiSectionSelect = true;
+
     /**
      * Construct a `Schedule` object from its raw representation
      */
@@ -203,18 +205,18 @@ class Schedule {
         if (sections instanceof Set) {
             if (sections.has(section)) return false;
             sections.add(section);
-            if (update) this.computeSchedule();
+            if (update) this.computeSchedule(this.multiSectionSelect);
         } else {
             this.All[key] = new Set([section]);
-            if (update) this.computeSchedule();
+            if (update) this.computeSchedule(this.multiSectionSelect);
         }
         return true;
     }
 
     /**
      * Update a course in the schedule
-     * - If the course is **already in** the schedule, delete it from the schedule
-     * - If the course is **not** in the schedule, add it to the schedule
+     * - If the section is **already in** the schedule, delete it from the schedule
+     * - If the section is **not** in the schedule, add it to the schedule
      *
      * @param update whether to recompute schedule after update
      * @param remove whether to remove the key if the set of sections is empty
@@ -238,17 +240,18 @@ class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        if (update) this.computeSchedule();
+        if (update) this.computeSchedule(this.multiSectionSelect);
     }
 
     public removePreview() {
         this.previous = null;
-        this.computeSchedule();
+        this.computeSchedule(this.multiSectionSelect);
     }
 
-    public preview(key: string, section: number) {
+    public preview(key: string, section: number, multiSelect: boolean = true) {
         this.previous = [key, section];
-        this.computeSchedule();
+        this.computeSchedule(multiSelect);
+        this.multiSectionSelect = multiSelect;
     }
 
     public addEvent(
@@ -285,7 +288,7 @@ class Schedule {
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.
      */
-    public computeSchedule() {
+    public computeSchedule(multiSelect: boolean = true) {
         const catalog = window.catalog;
         if (!catalog) return;
 
@@ -316,9 +319,17 @@ class Schedule {
                     const sectionIdx = sections.values().next().value;
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
-                } else {
-                    // a subset of the sections
-                    if (sections.size > 0) {
+                } else if(sections.size > 0) {
+                    // console.log(multiSelect);
+                    if(multiSelect){
+                        for(const secId of sections){
+                            this.currentIds[currentIdKey] = course.getSection(secId).id.toString();
+                            this.place(course.getSection(secId));
+                        }
+                        // const sectionIdx = sections.values().next().value;
+
+                    }else{
+                        // a subset of the sections
                         const sectionIndices = [...sections.values()];
                         this.place(course.getCourse(sectionIndices));
                         this.currentIds[currentIdKey] =
@@ -326,6 +337,8 @@ class Schedule {
                             '+' +
                             (sections.size - 1);
                     }
+                    
+                    
                 }
             }
         }
@@ -448,7 +461,7 @@ class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.computeSchedule();
+        this.computeSchedule(true);
     }
 
     public cleanSchedule() {

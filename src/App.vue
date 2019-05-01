@@ -1010,20 +1010,23 @@ export default class App extends Vue {
         this.loading = true;
 
         (async () => {
-            // note: the order is very important
-            const pay1 = await loadTimeMatrix();
+            // note: these three can be executed in parallel, i.e. they are not inter-dependent
+            const [pay1, pay2, data] = await Promise.all([
+                loadTimeMatrix(),
+                loadBuildingList(),
+                loadSemesterList()
+            ]);
             console[pay1.level](pay1.msg);
             if (pay1.payload) window.timeMatrix = pay1.payload;
-            const pay2 = await loadBuildingList();
+
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            const data = await loadSemesterList();
             const semesters = data.payload;
             if (data.level !== 'info') this.noti.notify(data);
             if (semesters) {
                 window.semesters = this.semesters = semesters;
-                this.selectSemester(0);
+                await this.selectSemester(0);
             }
             this.loading = false;
         })();
@@ -1246,10 +1249,10 @@ export default class App extends Vue {
         if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`);
         const result = await loadSemesterData(semesterId, force);
         if (result.level !== 'info') this.noti.notify(result);
-        if (result.payload) window.catalog = result.payload;
 
-        //  if the global `Catalog` object is assigned
+        //  if the a catalog object is returned
         if (result.payload) {
+            window.catalog = result.payload;
             const data = localStorage.getItem(this.currentSemester.id);
 
             let raw_data: { [x: string]: any } = {};

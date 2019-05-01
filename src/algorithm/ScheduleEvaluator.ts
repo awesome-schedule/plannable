@@ -469,16 +469,22 @@ class ScheduleEvaluator {
                 for (const option of options) {
                     const coeff = this.computeCoeffFor(option.name, false);
 
-                    let max = 0,
+                    let max = -Infinity,
                         min = Infinity;
                     for (let i = 0; i < len; i++) {
                         const val = coeff[i];
                         if (val > max) max = val;
                         if (val < min) min = val;
-                        coeff[i] = val;
                     }
 
                     const range = max - min;
+
+                    // if all of the values are the same, skip this sorting coefficient
+                    if (!range) {
+                        console.warn(range, option.name);
+                        continue;
+                    }
+
                     const normalizeRatio = range / 100;
 
                     // use Euclidean distance to combine multiple sorting coefficients
@@ -534,14 +540,17 @@ class ScheduleEvaluator {
         }
 
         const options = this.options.sortBy.filter(x => x.enabled);
+        const isCombined = this.options.mode === Mode.combined;
 
         /**
          * The comparator function when there's only one sorting option selected
          */
-        const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number = options[0].reverse
-            ? (a, b) => b.coeff - a.coeff
-            : (a, b) => a.coeff - b.coeff;
-        if (this.options.mode === Mode.combined || options.length === 1) {
+        const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number =
+            options[0].reverse && !isCombined
+                ? (a, b) => b.coeff - a.coeff
+                : (a, b) => a.coeff - b.coeff;
+
+        if (isCombined || options.length === 1) {
             if (quick || schedules.length > quickThresh) {
                 this.partialSort(schedules, cmpFunc, 1000);
             } else {

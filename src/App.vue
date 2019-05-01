@@ -760,53 +760,60 @@
                 @editEvent="editEvent"
             ></grid-schedule>
             <v-footer dark height="auto">
-                    <v-card class="flex" flat tile>
-                        <v-card-title class="teal">
-                            <strong class="subheading">Get connected with us and let us hear your voice! </strong>
+                <v-card class="flex" flat tile>
+                    <v-card-title class="teal">
+                        <strong class="subheading"
+                            >Get connected with us and let us hear your voice!
+                        </strong>
 
-                            <v-spacer></v-spacer>
+                        <v-spacer></v-spacer>
 
-                            <v-btn class="mx-3" title="Checkout our GitHub site to watch/star/fork!" dark icon>
-                                <a
-                                    style="color:inherit;text-decoration: none;"
-                                    target="_blank"
-                                    href="https://github.com/awesome-schedule/Awesome-SchedulAR"
-                                >
-                                    <v-icon size="24px">fab fa-github</v-icon>
-                                </a>
-                            </v-btn>
-                            <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
-                                <a
-                                    style="color:inherit;text-decoration: none;"
-                                    target="_blank"
-                                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
-                                >
-                                    <v-icon size="24px">fas fa-exclamation-circle</v-icon>
-                                </a>
-                            </v-btn>
-                            <v-btn class="mx-3" title="Watch our video on YouTube" dark icon>
-                                <a
-                                    style="color:inherit;text-decoration: none;"
-                                    target="_blank"
-                                    href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
-                                    ><v-icon size="24px">fab fa-youtube-square</v-icon></a
-                                >
-                            </v-btn>
-                            <v-btn class="mx-3" title="Fill out a survey to make us better" dark icon>
-                                <a
-                                    style="color:inherit;text-decoration: none;"
-                                    target="_blank"
-                                    href="https://docs.google.com/forms/d/e/1FAIpQLScsXZdkFFIljwyhuyAOwjGhEbq_LzY-POxEyJsK_jLrBIUmvw/viewform"
-                                    ><v-icon size="24px">fas fa-poll</v-icon></a
-                                >
-                            </v-btn>
-                        </v-card-title>
+                        <v-btn
+                            class="mx-3"
+                            title="Checkout our GitHub site to watch/star/fork!"
+                            dark
+                            icon
+                        >
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                            >
+                                <v-icon size="24px">fab fa-github</v-icon>
+                            </a>
+                        </v-btn>
+                        <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                            >
+                                <v-icon size="24px">fas fa-exclamation-circle</v-icon>
+                            </a>
+                        </v-btn>
+                        <v-btn class="mx-3" title="Watch our video on YouTube" dark icon>
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
+                                ><v-icon size="24px">fab fa-youtube-square</v-icon></a
+                            >
+                        </v-btn>
+                        <v-btn class="mx-3" title="Fill out a survey to make us better" dark icon>
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://docs.google.com/forms/d/e/1FAIpQLScsXZdkFFIljwyhuyAOwjGhEbq_LzY-POxEyJsK_jLrBIUmvw/viewform"
+                                ><v-icon size="24px">fas fa-poll</v-icon></a
+                            >
+                        </v-btn>
+                    </v-card-title>
 
-                        <v-card-actions class="grey darken-3 justify-center">
-                            &copy;2019 — <strong>Awesome Schedule</strong>
-                        </v-card-actions>
-                    </v-card>
-                </v-footer>
+                    <v-card-actions class="grey darken-3 justify-center">
+                        &copy;2019 — <strong>Awesome Schedule</strong>
+                    </v-card-actions>
+                </v-card>
+            </v-footer>
         </div>
     </div>
 </template>

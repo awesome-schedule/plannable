@@ -42,7 +42,7 @@
                                 data-toggle="modal"
                                 data-target="#class-list-modal"
                                 class="fas fa-info-circle click-icon"
-                                :class="{ 'pr-1': !showClasslistTitle }"
+                                :class="{ 'pr-2': !showClasslistTitle }"
                                 title="View class description"
                                 @click="$emit('trigger-classlist-modal', crs)"
                             ></i>

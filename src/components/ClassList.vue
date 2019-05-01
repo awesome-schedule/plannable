@@ -13,7 +13,7 @@
                         <div class="col col-1 pl-1 align-self-center">
                             <i class="fas click-icon" :class="expanded(crs.key)"></i>
                         </div>
-                        <!-- push the last column to the right bu mr-auto -->
+                        <!-- push the last column to the right by mr-auto -->
                         <div class="col-xs-auto mr-auto align-self-center">
                             <h6 class="mb-1">
                                 <span style="cursor: pointer" @click="collapse(crs.key)"
@@ -29,18 +29,28 @@
                                 {{ crs.title }}
                             </p>
                         </div>
-                        <div class="col col-1 pr-1 align-self-center text-center">
+                        <div
+                            class="col align-self-center"
+                            :class="{
+                                'text-center': showClasslistTitle,
+                                'text-right': !showClasslistTitle,
+                                'col-1': showClasslistTitle,
+                                'col-xs-auto': !showClasslistTitle
+                            }"
+                        >
                             <i
                                 data-toggle="modal"
                                 data-target="#class-list-modal"
                                 class="fas fa-info-circle click-icon"
+                                :class="{ 'pr-1': !showClasslistTitle }"
                                 title="View class description"
                                 @click="$emit('trigger-classlist-modal', crs)"
                             ></i>
-                            <br />
+                            <br v-if="showClasslistTitle" />
                             <i
                                 v-if="!isEntering"
                                 class="fas fa-times click-icon"
+                                :class="{ 'pr-1': !showClasslistTitle }"
                                 @click="$emit('remove_course', crs.key)"
                             ></i>
                         </div>

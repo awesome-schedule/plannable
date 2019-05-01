@@ -1,31 +1,5 @@
 <template>
     <div id="app" style="width:100%" @change="onDocChange">
-        <a
-            href="https://github.com/awesome-schedule/Awesome-SchedulAR"
-            target="_blank"
-            class="github-corner d-none d-sm-block"
-            aria-label="View source on GitHub"
-            ><svg
-                width="80"
-                height="80"
-                viewBox="0 0 250 250"
-                style="fill:#70B7FD; color:#fff; position: fixed; top: 0; border: 0; right: 0;z-index: 9999;"
-                aria-hidden="true"
-            >
-                <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
-                <path
-                    d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
-                    fill="currentColor"
-                    style="transform-origin: 130px 106px;"
-                    class="octo-arm"
-                ></path>
-                <path
-                    d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
-                    fill="currentColor"
-                    class="octo-body"
-                ></path>
-            </svg>
-        </a>
         <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
         <course-modal :course="modalCourse"></course-modal>
         <!-- Tab Icons Start (Leftmost bar) -->
@@ -269,8 +243,12 @@
                             class="custom-control-input"
                             @change="currentSchedule.computeSchedule(multiSelect)"
                         />
-                        <label class="custom-control-label" for="multiSelect"
-                            >Show Multiple Section
+                        <label
+                            class="custom-control-label"
+                            for="multiSelect"
+                            title="render all selected sections (except for 'any section')"
+                        >
+                            Show Multiple Section
                         </label>
                     </div>
                 </div>
@@ -318,7 +296,7 @@
                     </div>
                 </li>
                 <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
-                    <div class="btn-group btn-days mb-2" role="group">
+                    <div class="btn-group btn-days my-2" role="group">
                         <button
                             v-for="(day, j) in days"
                             :key="j"
@@ -329,25 +307,33 @@
                             {{ day }}
                         </button>
                     </div>
-                    <input
-                        v-model="value[5]"
-                        type="time"
-                        min="8:00"
-                        max="22:00"
-                        style="-webkit-appearance:button"
-                    />
-                    -
-                    <input
-                        v-model="value[6]"
-                        type="time"
-                        min="8:00"
-                        max="22:00"
-                        style="-webkit-appearance:button"
-                    />
-                    <div class="float-right">
-                        <button type="button" class="close" style="font-size:2rem" tabindex="-1">
-                            <span aria-hidden="true" @click="removeTimeSlot(i)">&times; </span>
-                        </button>
+                    <div class="form-group row no-gutters align-items-center text-center mb-2">
+                        <div class="col col-5 align-self-center">
+                            <input
+                                v-model="value[5]"
+                                type="time"
+                                min="8:00"
+                                max="22:00"
+                                class="form-control form-control-sm"
+                            />
+                        </div>
+                        <div class="col col-1 align-self-center">-</div>
+                        <div class="col col-5">
+                            <input
+                                v-model="value[6]"
+                                type="time"
+                                min="8:00"
+                                max="22:00"
+                                class="form-control form-control-sm"
+                            />
+                        </div>
+                        <div class="col col-1 align-self-center">
+                            <i
+                                class="fas fa-times click-icon"
+                                style="font-size: 1.25rem"
+                                @click="removeTimeSlot(i)"
+                            ></i>
+                        </div>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -537,10 +523,10 @@
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
-                    <label for="class-height" class="col-lg-6 col-form-label">Grid Height</label>
+                    <label for="grid-height" class="col-lg-6 col-form-label">Grid Height</label>
                     <div class="col-lg-6">
                         <input
-                            id="class-height"
+                            id="grid-height"
                             v-model.number="partialHeight"
                             type="number"
                             class="form-control form-control-sm"
@@ -769,23 +755,61 @@
                 @trigger-modal="showModal"
                 @editEvent="editEvent"
             ></grid-schedule>
-            <div class="row pb-3 align-items-center justify-content-center">
-                <div class="col-md-auto">
-                    If you find any bugs, please file an issue at
-                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
-                        >our GitHub repository</a
-                    >. We recommend Google Chrome for best experience.
-                </div>
-                <div class="col-md-auto align-self-center">
-                    <github-button
-                        class="pt-1"
-                        href="https://github.com/awesome-schedule/Awesome-SchedulAR"
-                        data-show-count="true"
-                        aria-label="Star awesome-schedule/Awesome-SchedulAR on GitHub"
-                        >Star
-                    </github-button>
-                </div>
-            </div>
+            <v-footer dark height="auto">
+                <v-card class="flex" flat tile>
+                    <v-card-title class="teal">
+                        <strong class="subheading"
+                            >Get connected with us and let us hear your voice!
+                        </strong>
+
+                        <v-spacer></v-spacer>
+
+                        <v-btn
+                            class="mx-3"
+                            title="Checkout our GitHub site to watch/star/fork!"
+                            dark
+                            icon
+                        >
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                            >
+                                <v-icon size="24px">fab fa-github</v-icon>
+                            </a>
+                        </v-btn>
+                        <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                            >
+                                <v-icon size="24px">fas fa-exclamation-circle</v-icon>
+                            </a>
+                        </v-btn>
+                        <v-btn class="mx-3" title="Watch our video on YouTube" dark icon>
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
+                                ><v-icon size="24px">fab fa-youtube-square</v-icon></a
+                            >
+                        </v-btn>
+                        <v-btn class="mx-3" title="Fill out a survey to make us better" dark icon>
+                            <a
+                                style="color:inherit;text-decoration: none;"
+                                target="_blank"
+                                href="https://docs.google.com/forms/d/e/1FAIpQLScsXZdkFFIljwyhuyAOwjGhEbq_LzY-POxEyJsK_jLrBIUmvw/viewform"
+                                ><v-icon size="24px">fas fa-poll</v-icon></a
+                            >
+                        </v-btn>
+                    </v-card-title>
+
+                    <v-card-actions class="grey darken-3 justify-center">
+                        &copy;2019&nbsp;—&nbsp;<strong>Awesome Schedule</strong>
+                    </v-card-actions>
+                </v-card>
+            </v-footer>
         </div>
     </div>
 </template>
@@ -937,7 +961,7 @@ export default class App extends Vue {
         return window.scheduleEvaluator.size();
     }
     get scheduleWidth() {
-        return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
+        return this.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
     }
     get scheduleLeft() {
         return this.sideBarActive ? 23 : 3;
@@ -1566,37 +1590,6 @@ export default class App extends Vue {
     cursor: pointer;
 }
 
-.github-corner:hover .octo-arm {
-    animation: octocat-wave 560ms ease-in-out;
-}
-
-@keyframes octocat-wave {
-    0%,
-    100% {
-        transform: rotate(0);
-    }
-
-    20%,
-    60% {
-        transform: rotate(-25deg);
-    }
-
-    40%,
-    80% {
-        transform: rotate(10deg);
-    }
-}
-
-@media (max-width: 500px) {
-    .github-corner:hover .octo-arm {
-        animation: none;
-    }
-
-    .github-corner .octo-arm {
-        animation: octocat-wave 560ms ease-in-out;
-    }
-}
-
 @media print {
     @page {
         size: A4 landscape;
@@ -1618,9 +1611,6 @@ export default class App extends Vue {
         margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
     }
     div #noti {
-        display: none !important;
-    }
-    .github-corner {
         display: none !important;
     }
 }
@@ -1661,17 +1651,6 @@ export default class App extends Vue {
 .sidebar::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
-}
-
-.day-link {
-    color: #007bff;
-    line-height: 2rem;
-    cursor: pointer;
-}
-
-.day-link:hover {
-    background-color: #007bff;
-    color: white;
 }
 
 .btn-days {

@@ -1,7 +1,3 @@
-interface Comparable<T> {
-    compareTo(other: T): number;
-}
-
 interface VertexData<T> {
     visited: boolean;
     depth: number;
@@ -66,13 +62,15 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  *
  * @param graph
  */
-function sortFunc<T extends Comparable<T>>(graph: Graph<T>) {
+function sortFunc<T>(graph: Graph<T>) {
     return (a: Vertex<T>, b: Vertex<T>) => {
         const d1 = graph.get(a)!;
         const d2 = graph.get(b)!;
         const result = d2.length - d1.length;
         if (result) return result;
-        else return b.val.compareTo(a.val);
+        else {
+            return +b.val - +a.val;
+        }
     };
 }
 
@@ -84,7 +82,7 @@ function sortFunc<T extends Comparable<T>>(graph: Graph<T>) {
  *
  * @see Vertex<T>
  */
-export function depthFirstSearch<T extends Comparable<T>>(graph: Graph<T>) {
+export function depthFirstSearch<T>(graph: Graph<T>) {
     const nodes = Array.from(graph.keys()).sort(sortFunc(graph));
 
     // the graph may have multiple connected components. Do DFS for each component
@@ -111,7 +109,7 @@ export function depthFirstSearch<T extends Comparable<T>>(graph: Graph<T>) {
  * @param start
  * @param graph
  */
-function depthFirstSearchRec<T extends Comparable<T>>(start: Vertex<T>, graph: Graph<T>) {
+function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     // sort by breadth
     const neighbors = graph.get(start)!.sort(sortFunc(graph));
     start.visited = true;

@@ -5,6 +5,9 @@ import axios from 'axios';
 import { openLousList, openVAGrade } from './models/Utils';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import Catalog, { Semester } from './models/Catalog';
+import Vuetify from 'vuetify';
+
+Vue.use(Vuetify);
 
 declare global {
     interface Window {

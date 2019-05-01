@@ -4,18 +4,8 @@ interface Comparable<T> {
 
 interface VertexData<T> {
     visited: boolean;
-    /**
-     * depth of the node relative to the root
-     */
     depth: number;
-    /**
-     * the maximum depth of the path starting from the root that the current node is on
-     */
     pathDepth: number;
-    /**
-     * the all of the paths starting at the root and ending at one of the leaves.
-     * if this vertex is not the root, then `path` will be empty
-     */
     path: T[][];
     parent?: T;
     val: T;
@@ -27,9 +17,20 @@ interface VertexData<T> {
  */
 export class Vertex<T> {
     public visited: boolean = false;
+    /**
+     * depth of the node relative to the root
+     */
+
     public depth: number = 0;
+    /**
+     * the maximum depth of the path starting from the root that the current node is on
+     */
     public pathDepth: number = 0;
     public parent?: Vertex<T>;
+    /**
+     * the all of the paths starting at the root and ending at one of the leaves.
+     * if this vertex is not the root, then `path` will be empty
+     */
     public path: Vertex<T>[][] = [];
     public val: T;
     constructor(t: T) {

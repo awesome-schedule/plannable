@@ -289,9 +289,7 @@ class Schedule {
                 for (const block of blocks) {
                     const container = block.section;
                     if (!(container instanceof Event)) {
-                        if (Section.has(container, sections, key)) {
-                            block.strong = strong;
-                        }
+                        if (container.has(sections, key)) block.strong = strong;
                     }
                 }
             });
@@ -331,7 +329,7 @@ class Schedule {
             if (sections === -1) {
                 // if there's only one section in this Course, just treat it as a Section
                 if (course.sections.length === 1) {
-                    const section = course.getSection(0);
+                    const section = course.getFirstSection();
                     this.currentIds[currentIdKey] = section.id.toString();
                     this.place(section);
                 } else {
@@ -350,7 +348,7 @@ class Schedule {
                         const combined: Course[] = Object.values(
                             course.getCourse([...sections]).getCombined()
                         ).map(secs => Section.sectionsToCourse(secs));
-                        const id = combined[0].getSection(0).id;
+                        const id = combined[0].getFirstSection().id;
 
                         // count the total number of sections in this combined course array
                         const num = sections.size - 1;
@@ -386,7 +384,7 @@ class Schedule {
                     const blocks = this.days[day];
                     for (const block of blocks) {
                         if (!(block.section instanceof Event))
-                            if (Section.has(block.section, section)) block.strong = true;
+                            if (block.section.has(section)) block.strong = true;
                     }
                 }
             }
@@ -413,8 +411,6 @@ class Schedule {
 
         // construct conflict graph for each column
         for (const day in this.days) {
-            graph.clear();
-
             const blocks = countEvent
                 ? this.days[day]
                 : this.days[day].filter(block => !(block.section instanceof Event));
@@ -477,6 +473,8 @@ class Schedule {
                     console.error('Uncomputed block found!', block);
                 }
             }
+
+            graph.clear();
         }
     }
 
@@ -498,19 +496,19 @@ class Schedule {
         } else {
             if (!course.allSameTime()) return;
             const color = this.getColor(course);
-            for (const meeting of course.sections[0].meetings) {
+            const courseSec = course.sections;
+            for (const meeting of courseSec[0].meetings) {
                 // if only one section, just use the section rather than the section array
-                const courseSec = course.sections;
                 if (courseSec.length === 1) {
                     this.placeHelper(color, meeting.days, courseSec[0]);
                 } else {
-                    this.placeHelper(color, meeting.days, course.sections);
+                    this.placeHelper(color, meeting.days, course);
                 }
             }
         }
     }
 
-    public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
+    public placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
         const [days, start, , end] = dayTimes.split(' ');
         if (days && start && end) {
             const startMin = Utils.to24hr(start);

@@ -1,6 +1,7 @@
 import Section from './Section';
 import Event from './Event';
 import { checkTimeBlockConflict } from './Utils';
+import Course from './Course';
 
 /**
  * A `ScheduleBlock` is a data structure that holds
@@ -21,7 +22,7 @@ class ScheduleBlock {
      * end time in 24hr format: `15:00`
      */
     public end: string;
-    public section: Section | Section[] | Event;
+    public section: Section | Course | Event;
     public left = -1;
     public width = -1;
     public strong = false;
@@ -30,7 +31,7 @@ class ScheduleBlock {
         backgroundColor: string,
         start: string,
         end: string,
-        section: Section | Section[] | Event
+        section: Section | Course | Event
     ) {
         this.backgroundColor = backgroundColor;
         this.start = start;

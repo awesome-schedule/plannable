@@ -54,6 +54,8 @@ class Course implements CourseFields, Hashable {
     public readonly sections: Section[];
 
     /**
+     * @param raw the raw representation of this course
+     * @param key the key of this course, e.g. cs11105
      * @param sids A list of section indices
      */
     constructor(raw: RawCourse, key: string, sids: number[] = []) {
@@ -79,11 +81,19 @@ class Course implements CourseFields, Hashable {
 
     /**
      * Get the course of a given section.
-     * Note that **it is possible** to get a Course whose section index
+     * @param contained By letting contained = true, **it will be possible** to get a Course whose section index
      * is not in the subset of sections contained in this instance
      */
-    public getSection(sid: number): Section {
-        return new Section(this, this.raw[6][sid], sid);
+    public getSection(sid: number, contained = false): Section {
+        if (contained) {
+            return this.sections[sid];
+        } else {
+            return new Section(this, this.raw[6][sid], sid);
+        }
+    }
+
+    public getFirstSection() {
+        return this.sections[0];
     }
 
     /**
@@ -121,6 +131,10 @@ class Course implements CourseFields, Hashable {
         return combined;
     }
 
+    /**
+     * Returns a 32-bit integer hash for this Course.
+     * Hashes are different if the sections contained in this course are different
+     */
     public hash() {
         return hashCode(this.key + this.sids.toString());
     }
@@ -134,6 +148,25 @@ class Course implements CourseFields, Hashable {
             return this.key === object.key && this.sids.toString() === object.sids.toString();
         }
         return false;
+    }
+
+    /**
+     * check whether the section is contained in this course
+     */
+    public has(section: Section): boolean;
+    /**
+     * check whether the set of sections indices with the given key
+     * exist in the section array contained in this course
+     * @param sections the Set of section indices
+     * @param key the key of the section
+     */
+    public has(sections: Set<number>, key: string): boolean;
+    public has(element: Section | Set<number>, key?: string): boolean {
+        if (element instanceof Set) {
+            return this.key === key && this.sids.some(sid => element.has(sid));
+        } else {
+            return this.key === element.key && this.sids.includes(element.sid);
+        }
     }
 }
 

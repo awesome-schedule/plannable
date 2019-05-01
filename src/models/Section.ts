@@ -19,34 +19,6 @@ class Section implements CourseFields, Hashable {
         return new Course(course.raw, course.key, sections.map(x => x.sid));
     }
 
-    /**
-     * check whether the element is in the container
-     */
-    public static has(container: Section | Section[], element: Section): boolean;
-    /**
-     * check whether the set of sections indices with the given key exist in the container
-     * @param container
-     * @param element
-     * @param key
-     */
-    public static has(container: Section | Section[], element: Set<number>, key: string): boolean;
-    public static has(
-        container: Section | Section[],
-        element: Section | Set<number>,
-        key?: string
-    ): boolean {
-        if (container instanceof Section) {
-            if (element instanceof Set) return container.key === key && element.has(container.sid);
-            else return container.equals(element);
-        } else {
-            if (element instanceof Set) {
-                return container.some(x => x.key === key && element.has(x.sid));
-            } else {
-                return container.some(x => x.equals(element));
-            }
-        }
-    }
-
     public department: string;
     public number: number;
     public type: string;
@@ -167,6 +139,21 @@ class Section implements CourseFields, Hashable {
         } else {
             return false;
         }
+    }
+
+    /**
+     * check whether given section is equals to this section
+     */
+    public has(section: Section): boolean;
+    /**
+     * check whether this section exists in the set of sections indices with the given key
+     * @param sections
+     * @param key
+     */
+    public has(sections: Set<number>, key: string): boolean;
+    public has(element: Section | Set<number>, key?: string): boolean {
+        if (element instanceof Set) return this.key === key && element.has(this.sid);
+        else return this.equals(element);
     }
 }
 

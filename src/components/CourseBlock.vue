@@ -1,15 +1,11 @@
 <template>
     <div
         class="courseBlock"
+        :class="{ 'block-strong': scheduleBlock.strong }"
         :style="{
             'margin-top': startPx + 'px',
-            position: 'absolute',
-            width: '20%',
             height: endPx - startPx + 'px',
-            'background-color': scheduleBlock.backgroundColor,
-            'z-index': '2',
-            color: 'white',
-            cursor: 'pointer'
+            'background-color': scheduleBlock.backgroundColor
         }"
         @click="showModal"
     >
@@ -33,11 +29,11 @@
                     </div>
                 </template>
             </div>
-            <div v-if="isSectionArray">
+            <div v-if="isCourse">
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
                     {{ firstSec.department }}
                     {{ firstSec.number }}-{{ firstSec.section }} +{{
-                        scheduleBlock.section.length - 1
+                        scheduleBlock.section.sections.length - 1
                     }}
                     {{ firstSec.type }}
                 </div>
@@ -51,12 +47,16 @@
                 <div v-if="showInstructor" class="ml-2 crs-info">
                     {{ firstSec.instructors.join(', ') }} and
                     {{
-                        scheduleBlock.section.reduce((acc, x) => acc + x.instructors.length, 0) - 1
+                        scheduleBlock.section.sections.reduce(
+                            (acc, x) => acc + x.instructors.length,
+                            0
+                        ) - 1
                     }}
                     more
                 </div>
                 <div v-if="showRoom" class="ml-2 crs-info">
-                    {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
+                    {{ firstSec.meetings[0].room }} and
+                    {{ scheduleBlock.section.sections.length - 1 }} more
                 </div>
             </div>
             <div v-if="isEvent">
@@ -76,7 +76,7 @@
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }}
             </div>
-            <div v-if="isSectionArray">
+            <div v-if="isCourse">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
@@ -93,7 +93,7 @@ import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';
 import Event from '../models/Event';
-import { to12hr } from '../models/Utils';
+import { to12hr, timeToNum } from '../models/Utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component
@@ -123,7 +123,7 @@ export default class CourseBlock extends Vue {
         const t = time.split(':');
         const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-        const temp = this.timeToNum(time, start);
+        const temp = timeToNum(time, start);
         for (let i = this.absoluteEarliest; i < temp; i++) {
             px += this.heightInfo[i - this.absoluteEarliest];
         }
@@ -133,9 +133,8 @@ export default class CourseBlock extends Vue {
 
     get firstSec() {
         const section = this.scheduleBlock.section;
-        if (section instanceof Array) {
-            return section[0];
-        } else return section;
+        if (section instanceof Course) return section.getFirstSection();
+        else return section;
     }
 
     get room() {
@@ -159,28 +158,8 @@ export default class CourseBlock extends Vue {
     get isEvent() {
         return this.scheduleBlock.section instanceof Event;
     }
-    get isSectionArray() {
-        return this.scheduleBlock.section instanceof Array && this.scheduleBlock.section.length;
-    }
-
-    timeToNum(time: string, start: boolean) {
-        const sep = time.split(':');
-        const min = parseInt(sep[1]);
-        let t = (parseInt(sep[0]) - 8) * 2;
-        if (start) {
-            if (min >= 30) {
-                t += 2;
-            } else {
-                t += 1;
-            }
-        } else {
-            if (min > 30) {
-                t += 2;
-            } else {
-                t += 1;
-            }
-        }
-        return t - 1;
+    get isCourse() {
+        return this.scheduleBlock.section instanceof Course;
     }
 
     showModal() {
@@ -188,8 +167,8 @@ export default class CourseBlock extends Vue {
         const section = this.scheduleBlock.section;
         if (this.isSection) {
             $parent.$emit('trigger-modal', section);
-        } else if (this.isSectionArray) {
-            $parent.$parent.showCourseModal(Section.sectionsToCourse(section as Section[]));
+        } else if (this.isCourse) {
+            $parent.$parent.showCourseModal(section);
         } else if (this.isEvent) {
             $parent.$emit('editEvent', section);
         }
@@ -198,8 +177,21 @@ export default class CourseBlock extends Vue {
 </script>
 
 <style scoped>
+.courseBlock {
+    z-index: 2;
+    color: white;
+    cursor: pointer;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    position: absolute;
+}
+
+.block-strong {
+    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
+}
+
 .courseBlock:hover {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
 }
 
 .crs-info {

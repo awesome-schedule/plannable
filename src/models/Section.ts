@@ -2,7 +2,7 @@ import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
-import { TimeDict, RoomDict } from '@/algorithm/ScheduleGenerator';
+import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
 import { parseTimeAll } from './Utils';
 
 /**
@@ -10,6 +10,10 @@ import { parseTimeAll } from './Utils';
  * and it holds additional information specific to that section.
  */
 class Section implements CourseFields, Hashable {
+    /**
+     * convert a section array to a course holding the section array
+     * @param sections
+     */
     public static sectionsToCourse(sections: Section[]) {
         const course = sections[0].course;
         return new Course(course.raw, course.key, sections.map(x => x.sid));
@@ -23,8 +27,14 @@ class Section implements CourseFields, Hashable {
     public description: string;
 
     public sid: number;
+    /**
+     * Key of a course; same for all sections.
+     */
     public key: string;
 
+    /**
+     * a reference to the course that this section belongs to
+     */
     public course: Course;
     public id: number;
     public section: string;
@@ -101,10 +111,7 @@ class Section implements CourseFields, Hashable {
             const tmp1 = parseTimeAll(t);
 
             // skip TBA or ill-formated time
-            if (tmp1 === null) {
-                return null;
-            }
-
+            if (tmp1 === null) return null;
             const [date, timeBlock] = tmp1;
 
             // for each day
@@ -114,7 +121,7 @@ class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
                 if (dayBlock) {
                     dayBlock.push(...timeBlock);
-                    roomBlock.push(meeting.room);
+                    (roomBlock as string[]).push(meeting.room);
                 } else {
                     // copy
                     timeDict[day] = timeBlock.concat();
@@ -124,6 +131,29 @@ class Section implements CourseFields, Hashable {
         }
 
         return [timeDict, roomDict];
+    }
+
+    public equals(sc: Section): boolean {
+        if (this.key === sc.key && this.sid === sc.sid) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * check whether given section is equals to this section
+     */
+    public has(section: Section): boolean;
+    /**
+     * check whether this section exists in the set of sections indices with the given key
+     * @param sections
+     * @param key
+     */
+    public has(sections: Set<number>, key: string): boolean;
+    public has(element: Section | Set<number>, key?: string): boolean {
+        if (element instanceof Set) return this.key === key && element.has(this.sid);
+        else return this.equals(element);
     }
 }
 

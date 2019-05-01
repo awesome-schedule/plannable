@@ -39,7 +39,12 @@ module.exports = {
                 ]
             };
         } else {
-            return {};
+            return {
+                externals: {
+                    jquery: 'jQuery',
+                    bootstrap: 'bootstrap'
+                }
+            };
         }
     }
 };

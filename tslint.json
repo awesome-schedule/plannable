@@ -24,6 +24,7 @@
         "prefer-for-of": false,
         "one-variable-per-declaration": false,
         "member-access": false,
-        "whitespace": false
+        "whitespace": false,
+        "array-type": false
     }
 }

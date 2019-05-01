@@ -3,7 +3,7 @@ import { parse } from 'papaparse';
 import querystring from 'querystring';
 import Meta, { RawCatalog, RawSection, RawMeeting } from '../models/Meta';
 import Catalog, { Semester, CatalogJSON } from '../models/Catalog';
-import { NotiMsg } from '@/models/Notification';
+import { NotiMsg } from '../models/Notification';
 import { loadFromCache } from './Loader';
 
 /**
@@ -60,7 +60,7 @@ export async function requestSemesterData(semester: Semester): Promise<Catalog> 
     const parsed = parseSemesterData(res.data);
     const catalog = new Catalog(semester, parsed);
     saveCatalog(catalog);
-    return (window.catalog = catalog);
+    return catalog;
 }
 
 export function parseSemesterData(csv_string: string) {
@@ -90,8 +90,13 @@ export function parseSemesterData(csv_string: string) {
             []
         ];
         const meetings: RawMeeting[] = [];
+        const s: Set<string> = new Set();
         for (let i = 0; i < 4; i++) {
             if (data[6 + i * 4] && data[6 + i * 4] !== '') {
+                if(s.has(data[6 + i * 4 + 1])) {
+                    continue;
+                }
+                s.add(data[6 + i * 4 + 1]);
                 const tempMeeting: RawMeeting = [
                     data[6 + i * 4],
                     data[6 + i * 4 + 1],

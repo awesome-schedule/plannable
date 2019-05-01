@@ -1,6 +1,5 @@
 import Schedule from './Schedule';
 import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
-import Notification from './Notification';
 
 /**
  * key: department + number + type, e.g. cs11105

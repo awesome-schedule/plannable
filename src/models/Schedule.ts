@@ -6,6 +6,7 @@ import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from './Utils';
 import Hashable from './Hashable';
+import { Vertex, depthFirstSearch, Graph } from './Graph';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -56,7 +57,7 @@ class Schedule {
 
         if (isNaN(parseInt(match[3]))) {
             const newKeys = keys.map(x => {
-                const m = x.match(regex) as RegExpMatchArray;
+                const m = x.match(regex)!;
                 const y = m[3]
                     .split(' ')
                     .map(z => z.charAt(0).toUpperCase() + z.substr(1))
@@ -82,8 +83,9 @@ class Schedule {
 
     /**
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
-     * note that if **section** is -1, it means that all sections are allowed.
-     * Otherwise **section** should be a Set of integers
+     *
+     * Note that if **section** is -1, it means that all sections are allowed.
+     * Otherwise, **section** should be a Set of integers
      */
     public All: { [x: string]: Set<number> | -1 };
     public title: string;
@@ -123,6 +125,7 @@ class Schedule {
      * keep track of used colors to avoid color collision
      */
     public colorSlots: Array<Set<string>>;
+    public multiSectionSelect = true;
 
     private previous: [string, number] | null;
 
@@ -203,18 +206,18 @@ class Schedule {
         if (sections instanceof Set) {
             if (sections.has(section)) return false;
             sections.add(section);
-            if (update) this.computeSchedule();
+            if (update) this.computeSchedule(this.multiSectionSelect);
         } else {
             this.All[key] = new Set([section]);
-            if (update) this.computeSchedule();
+            if (update) this.computeSchedule(this.multiSectionSelect);
         }
         return true;
     }
 
     /**
      * Update a course in the schedule
-     * - If the course is **already in** the schedule, delete it from the schedule
-     * - If the course is **not** in the schedule, add it to the schedule
+     * - If the section is **already in** the schedule, delete it from the schedule
+     * - If the section is **not** in the schedule, add it to the schedule
      *
      * @param update whether to recompute schedule after update
      * @param remove whether to remove the key if the set of sections is empty
@@ -238,17 +241,18 @@ class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        if (update) this.computeSchedule();
+        if (update) this.computeSchedule(this.multiSectionSelect);
     }
 
     public removePreview() {
         this.previous = null;
-        this.computeSchedule();
+        this.computeSchedule(this.multiSectionSelect);
     }
 
-    public preview(key: string, section: number) {
+    public preview(key: string, section: number, multiSelect: boolean = true) {
         this.previous = [key, section];
-        this.computeSchedule();
+        this.computeSchedule(multiSelect);
+        this.multiSectionSelect = multiSelect;
     }
 
     public addEvent(
@@ -278,18 +282,43 @@ class Schedule {
         this.computeSchedule();
     }
 
+    public hover(key: string, strong: boolean = true) {
+        const sections = this.All[key];
+        if (sections instanceof Set) {
+            Object.values(this.days).forEach(blocks => {
+                for (const block of blocks) {
+                    const container = block.section;
+                    if (!(container instanceof Event)) {
+                        if (container.has(sections, key)) block.strong = strong;
+                    }
+                }
+            });
+        }
+    }
+
+    public unhover(key: string) {
+        this.hover(key, false);
+    }
+
     /**
      * Compute the schedule view based on `this.All` and `this.preview`
-     * @see {@link computeSchedule}
+     *
+     * @remarks this method has a very high time complexity, probably cubic in the number of sections.
+     * However, because we're running on small input sets (usually contain no more than 20 sections), it
+     * usually completes within 50ms.
      */
-    public computeSchedule() {
+    public computeSchedule(multiSelect: boolean = true) {
         const catalog = window.catalog;
         if (!catalog) return;
-        console.time('render schedule');
+
+        console.time('compute schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
             const sections = this.All[key];
+            /**
+             * the full course record of key `key`
+             */
             const course = catalog.getCourse(key);
             this.currentCourses.push(course);
 
@@ -300,7 +329,7 @@ class Schedule {
             if (sections === -1) {
                 // if there's only one section in this Course, just treat it as a Section
                 if (course.sections.length === 1) {
-                    const section = course.getSection(0);
+                    const section = course.getFirstSection();
                     this.currentIds[currentIdKey] = section.id.toString();
                     this.place(section);
                 } else {
@@ -313,10 +342,25 @@ class Schedule {
                     const sectionIdx = sections.values().next().value;
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
-                } else {
-                    // a subset of the sections
-                    if (sections.size > 0) {
-                        const sectionIndices = [...sections.values()];
+                } else if (sections.size > 0) {
+                    if (multiSelect) {
+                        // try to combine sections even if we're in multi-select mode
+                        const combined: Course[] = Object.values(
+                            course.getCourse([...sections]).getCombined()
+                        ).map(secs => Section.sectionsToCourse(secs));
+                        const id = combined[0].getFirstSection().id;
+
+                        // count the total number of sections in this combined course array
+                        const num = sections.size - 1;
+                        for (const crs of combined) {
+                            this.currentIds[currentIdKey] = num
+                                ? `${id.toString()}+${num}`
+                                : id.toString();
+                            this.place(crs);
+                        }
+                    } else {
+                        // a subset of the sections
+                        const sectionIndices = [...sections];
                         this.place(course.getCourse(sectionIndices));
                         this.currentIds[currentIdKey] =
                             course.getSection(sectionIndices[0]).id.toString() +
@@ -327,19 +371,111 @@ class Schedule {
             }
         }
 
-        if (this.previous !== null) {
-            const section = catalog.getSection(...this.previous);
-            section.course.key += 'preview';
-            this.place(section);
+        if (this.previous) {
+            const [key, secIdx] = this.previous;
+            const sections = this.All[key];
+            const section = catalog.getSection(key, secIdx);
+            // do not place into the schedule if the section is already in this.All
+            if (!(sections instanceof Set) || !sections.has(secIdx)) {
+                this.place(section);
+            } else {
+                // instead, we highlight the schedule
+                for (const day in this.days) {
+                    const blocks = this.days[day];
+                    for (const block of blocks) {
+                        if (!(block.section instanceof Event))
+                            if (block.section.has(section)) block.strong = true;
+                    }
+                }
+            }
         }
 
+        // sort currentCourses in alphabetical order
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
-        for (const event of this.events) {
-            if (event.display) this.place(event);
-        }
+        for (const event of this.events) if (event.display) this.place(event);
 
-        console.timeEnd('render schedule');
+        this.computeConflict();
+        console.timeEnd('compute schedule');
+    }
+
+    /**
+     * Construct an undirected graph for the scheduleBlocks in each day.
+     * Perform DFS on that graph to determine the
+     * maximum number of conflicting schedules that need to be rendered "in parallel".
+     *
+     * @param countEvent whether to include events in this graph
+     */
+    public computeConflict(countEvent = true) {
+        const graph: Graph<ScheduleBlock> = new Map();
+
+        // construct conflict graph for each column
+        for (const day in this.days) {
+            const blocks = countEvent
+                ? this.days[day]
+                : this.days[day].filter(block => !(block.section instanceof Event));
+
+            // instantiate all the nodes
+            const nodes: Vertex<ScheduleBlock>[] = [];
+            for (let i = 0; i < blocks.length; i++) {
+                const v = new Vertex(blocks[i]);
+                nodes.push(v);
+                graph.set(v, []);
+            }
+
+            // construct an undirected graph for all scheduleBlocks.
+            // the edge from node i to node j exists iff block[i] conflicts with block[j]
+            for (let i = 0; i < blocks.length; i++) {
+                for (let j = i + 1; j < blocks.length; j++) {
+                    const ib = nodes[i];
+                    const jb = nodes[j];
+                    if (ib.val.conflict(jb.val)) {
+                        graph.get(ib)!.push(jb);
+                        graph.get(jb)!.push(ib);
+                    }
+                }
+            }
+
+            // perform a depth-first search
+            depthFirstSearch(graph);
+
+            for (const node of nodes) {
+                // skip any non-root node in the depth-first trees
+                if (node.parent) continue;
+
+                // traverse all the paths starting from the root
+                const paths = node.path;
+                for (const path of paths) {
+                    // compute the left and width of the root node if they're not computed
+                    if (path[0].val.left === -1) {
+                        path[0].val.left = 0;
+                        path[0].val.width = 1 / (path[0].pathDepth + 1);
+                    }
+
+                    // computed the left and width of the remaining nodes based on
+                    // the already computed information of the previous node
+                    for (let i = 1; i < path.length; i++) {
+                        const block = path[i].val;
+
+                        // skip already computed nodes
+                        if (block.left !== -1) continue;
+
+                        block.left = path[i - 1].val.left + path[i - 1].val.width;
+
+                        // remaining width / number of remaining path length
+                        block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
+                    }
+                }
+            }
+
+            for (const block of blocks) {
+                if (block.left === -1 || block.width === -1) {
+                    console.error('Uncomputed block found!', block);
+                }
+            }
+
+            graph.clear();
+        }
     }
 
     /**
@@ -360,16 +496,23 @@ class Schedule {
         } else {
             if (!course.allSameTime()) return;
             const color = this.getColor(course);
-            for (const meeting of course.sections[0].meetings) {
-                this.placeHelper(color, meeting.days, course.sections);
+            const courseSec = course.sections;
+            for (const meeting of courseSec[0].meetings) {
+                // if only one section, just use the section rather than the section array
+                if (courseSec.length === 1) {
+                    this.placeHelper(color, meeting.days, courseSec[0]);
+                } else {
+                    this.placeHelper(color, meeting.days, course);
+                }
             }
         }
     }
 
-    public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
+    public placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
         const [days, start, , end] = dayTimes.split(' ');
         if (days && start && end) {
-            const [startMin, endMin] = Utils.parseTimeAsString(start, end);
+            const startMin = Utils.to24hr(start);
+            const endMin = Utils.to24hr(end);
             // wait... start time equals end time?
             if (startMin === endMin) {
                 console.warn(events, startMin, endMin);
@@ -387,7 +530,7 @@ class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.computeSchedule();
+        this.computeSchedule(true);
     }
 
     public cleanSchedule() {
@@ -397,6 +540,7 @@ class Schedule {
         this.colorSlots.forEach(x => x.clear());
         this.totalCredit = 0;
         this.currentCourses = [];
+        this.currentIds = {};
     }
     /**
      * instantiate a `Schedule` object from its JSON representation
@@ -419,153 +563,10 @@ class Schedule {
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) obj.All[key] = [...sections.values()];
+            if (sections instanceof Set) obj.All[key] = [...sections];
             else obj.All[key] = sections;
         }
         return obj;
-    }
-
-    public toICal() {
-        let ical = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:UVa-Awesome-Schedule\n';
-
-        let startWeekDay: number = 0;
-        let startDate: Date = new Date(2019, 7, 27, 0, 0, 0),
-            endDate: Date = new Date(2019, 11, 6, 0, 0, 0);
-
-        for (const day of Meta.days) {
-            for (const sb of this.days[day]) {
-                if (sb.section instanceof Section) {
-                    for (const m of sb.section.meetings) {
-                        if (m.dates === 'TBD' || m.dates === 'TBA') continue;
-                        const [sd, , ed] = m.dates.split(' ');
-                        const [sl, sm, sr] = sd.split('/');
-                        // startDate = [sr, sl, sm].join('-') + 'T04:00:00';
-                        startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
-                        const [el, em, er] = ed.split('/');
-                        // endDate = [er, el, em].join('-') + 'T04:00:00';
-                        endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
-                        startWeekDay = startDate.getDay();
-                        // console.log(sl + ' ' + sm + ' ' + sr);
-                        break;
-                    }
-                }
-            }
-        }
-
-        for (let d = 0; d < 5; d++) {
-            for (const sb of this.days[Meta.days[d]]) {
-                if (sb.section instanceof Section || sb.section instanceof Array) {
-                    let section = sb.section;
-                    if (sb.section instanceof Array) {
-                        section = (section as Section[])[0];
-                    }
-                    for (const m of (section as Section).meetings) {
-                        if (m.days === 'TBD' || m.days === 'TBA') continue;
-                        if (m.days.indexOf(Meta.days[d]) === -1) continue;
-                        const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
-                        const [, start, , end] = m.days.split(' ');
-                        const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
-
-                        const startTime = new Date(
-                            startDate.getTime() +
-                                dayoffset * 24 * 60 * 60 * 1000 +
-                                startMin * 60 * 1000
-                        );
-
-                        // console.log(startDate);
-                        // console.log(startTime);
-                        // console.log(endTime);
-                        ical += 'BEGIN:VEVENT\n';
-                        ical += 'UID:\n';
-                        ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
-                        ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
-                        // ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
-                        ical +=
-                            'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-                            Meta.days[d].toUpperCase() +
-                            ';BYHOUR=' +
-                            startTime.getHours() +
-                            ';BYMINUTE=' +
-                            startTime.getMinutes() +
-                            ';UNTIL=' +
-                            this.dateToICalString(endDate) +
-                            '\n';
-                        ical +=
-                            'DURATION=P' +
-                            Math.floor((endMin - startMin) / 60) +
-                            'H' +
-                            ((endMin - startMin) % 60) +
-                            'M' +
-                            '\n';
-                        ical += 'SUMMARY:' + m.section.department + ' ' + m.section.number + '\n';
-                        ical += 'DESCRIPTION:' + m.section.title + '\n';
-                        ical += 'LOCATION:' + m.room + '\n';
-                        ical += 'END:VEVENT\n';
-                    }
-                } else if (sb.section instanceof Event) {
-                    const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
-
-                    const [, start, , end] = sb.section.days.split(' ');
-                    const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
-
-                    const startTime = new Date(
-                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
-                    );
-
-                    const startAtDay = new Date(
-                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000
-                    );
-
-                    ical += 'BEGIN:VEVENT\n';
-                    ical += 'UID:\n';
-                    ical += 'DTSTAMP:' + this.dateToICalString(startTime) + '\n';
-                    ical += 'DTSTART:' + this.dateToICalString(startTime) + '\n';
-                    // ical += 'DTEND:' + this.dateToICalString(endTime) + '\n';
-                    ical +=
-                        'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-                        Meta.days[d].toUpperCase() +
-                        ';BYHOUR=' +
-                        startTime.getHours() +
-                        ';BYMINUTE=' +
-                        startTime.getMinutes() +
-                        ';UNTIL=' +
-                        this.dateToICalString(endDate) +
-                        '\n';
-                    ical +=
-                        'DURATION=P' +
-                        Math.floor((endMin - startMin) / 60) +
-                        'H' +
-                        ((endMin - startMin) % 60) +
-                        'M' +
-                        '\n';
-                    ical += 'SUMMARY:' + sb.section.title + '\n';
-                    ical += 'DESCRIPTION:' + sb.section.description + '\n';
-                    ical += 'LOCATION:' + sb.section.room + '\n';
-                    ical += 'END:VEVENT\n';
-                }
-            }
-        }
-        ical += 'END:VCALENDAR';
-        return ical;
-    }
-
-    public dateToICalString(date: Date) {
-        return (
-            date.getFullYear().toString() +
-            (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString()) +
-            (date.getDate() < 10 ? '0' + date.getDate().toString() : date.getDate().toString()) +
-            'T' +
-            (date.getHours() < 10 ? '0' + date.getHours().toString() : date.getHours().toString()) +
-            (date.getMinutes() < 10
-                ? '0' + date.getMinutes().toString()
-                : date.getMinutes().toString()) +
-            '00'
-        );
-    }
-
-    public dateStringToArr(date: string) {
-        const [month, day, year] = date.split('/');
-        return [year, month, day];
     }
 
     /**

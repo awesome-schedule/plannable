@@ -7,20 +7,36 @@ import { errToStr, timeout } from '../models/Utils';
  * @template T_JSON the JSON representation of the object T
  * @param key the key in the localStorage
  * @param request the async function used to request data from remote, if local data expires or does not exist
- * @param construct function to construct the actual object T from its JSON representation
- * @param param3 other params
+ * @param construct function to construct the actual object T from its JSON representation T_JSON
+ * @param obj other optional config options
+ * @param obj.warnMsg the warning message to return when data expired and we failed to request new data from remote
+ * It takes the stringified exception as the parameter
+ * @param obj.errMsg the error message to return when there is no local data and we failed to request data from remote
+ * It takes the stringified exception as the parameter
+ * @param obj.expireTime the expiration time of this T_JSON
+ * @param obj.timeoutTime the timeout in millisecond for requesting data from remote.
+ * A timeout error with appropriate error message will be thrown for
+ * response that does not return within this time interval
+ * @param obj.parse The parser that turns the string (or null if key does not exist) stored in local storage
+ * and turns that into T_JSON or null
+ * @param obj.validator The validator that checks whether the return value of the parser is a valid T_JSON object
+ * @param obj.force whether this is a forced update
+ *
+ * For examples,
+ * @see {@link ./BuildingLoader.ts}
+ * @see {@link ./CatalogLoader.ts}
  */
 export async function loadFromCache<T, T_JSON extends Expirable>(
     key: string,
     request: () => Promise<T>,
     construct: (x: T_JSON) => T,
     {
-        warnMsg,
-        errMsg,
-        infoMsg = '',
+        warnMsg = x => x,
+        errMsg = x => x,
+        infoMsg = 'Success',
         expireTime = Infinity,
         timeoutTime = -1,
-        parse = x => (x ? JSON.parse(x) : x),
+        parse = x => (x ? JSON.parse(x) : null),
         validator = defaultValidator,
         force = false
     }: {
@@ -46,6 +62,7 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
                     level: 'info'
                 };
             } catch (err) {
+                // expired (or force update) but failed to request new data: use the old data and gives a warning
                 return {
                     payload: construct(data),
                     msg: warnMsg(errToStr(err)),

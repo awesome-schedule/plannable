@@ -153,6 +153,7 @@
                     :is-entering="isEntering"
                     :show-classlist-title="showClasslistTitle"
                     :generated="generated"
+                    :multi-select="multiSelect"
                     @update_course="updateCourse"
                     @close="closeClassList"
                     @trigger-classlist-modal="showCourseModal"
@@ -185,8 +186,11 @@
                         >
                             <div class="col-auto">
                                 <i
-                                    class="fas fa-long-arrow-alt-left click-icon"
+                                    class="fas fa-long-arrow-alt-left"
                                     title="previous schedule"
+                                    :class="
+                                        proposedScheduleIndex > 0 ? 'click-icon' : 'icon-disabled'
+                                    "
                                     @click="switchProposed(proposedScheduleIndex - 1)"
                                 ></i>
                             </div>
@@ -195,8 +199,13 @@
                             </div>
                             <div class="col-auto">
                                 <i
-                                    class="fas fa-long-arrow-alt-right click-icon"
+                                    class="fas fa-long-arrow-alt-right"
                                     title="next schedule"
+                                    :class="
+                                        proposedScheduleIndex < proposedSchedules.length - 1
+                                            ? 'click-icon'
+                                            : 'icon-disabled'
+                                    "
                                     @click="switchProposed(proposedScheduleIndex + 1)"
                                 ></i>
                             </div>
@@ -217,9 +226,14 @@
                             </div>
                             <div class="col-auto">
                                 <i
-                                    class="far fa-calendar-times click-icon"
+                                    class="far fa-calendar-times"
+                                    :class="
+                                        proposedSchedules.length > 1
+                                            ? 'click-icon'
+                                            : 'icon-disabled'
+                                    "
                                     title="delete current schedule"
-                                    @click="deleteProposed"
+                                    @click="deleteProposed()"
                                 ></i>
                             </div>
                         </div>
@@ -230,6 +244,7 @@
                         :schedule="currentSchedule"
                         :show-classlist-title="showClasslistTitle"
                         :generated="generated"
+                        :multi-select="multiSelect"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
                         @trigger-classlist-modal="showCourseModal"
@@ -246,9 +261,21 @@
                             Clean All
                         </button>
                     </div>
+                    <div class="custom-control custom-checkbox mt-2 mx-2">
+                        <input
+                            id="multiSelect"
+                            v-model="multiSelect"
+                            type="checkbox"
+                            class="custom-control-input"
+                            @change="currentSchedule.computeSchedule(multiSelect)"
+                        />
+                        <label class="custom-control-label" for="multiSelect"
+                            >Show Multiple Section
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div class="btn bg-info nav-btn mt-3" style="width:100%;color:white">
+            <div class="btn bg-info nav-btn mt-2" style="color:white">
                 Schedule Overview
             </div>
             <ul class="list-group list-group-flush" style="width:99%">
@@ -291,53 +318,37 @@
                     </div>
                 </li>
                 <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
-                    <table style="width:100%">
-                        <tr>
-                            <td>
-                                <div class="btn-group mb-2" role="group" style="width:70%;">
-                                    <button
-                                        v-for="(day, j) in days"
-                                        :key="j"
-                                        :class="
-                                            'btn btn-outline-secondary' +
-                                                (value[j] ? ' active' : '')
-                                        "
-                                        type="button"
-                                        @click="updateFilterDay(i, j)"
-                                    >
-                                        {{ day }}
-                                    </button>
-                                </div>
-                                <input
-                                    v-model="value[5]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                                -
-                                <input
-                                    v-model="value[6]"
-                                    type="time"
-                                    min="8:00"
-                                    max="22:00"
-                                    style="-webkit-appearance:button"
-                                />
-                            </td>
-                            <td>
-                                <button
-                                    type="button"
-                                    class="close"
-                                    style="font-size:2rem"
-                                    tabindex="-1"
-                                >
-                                    <span aria-hidden="true" @click="removeTimeSlot(i)"
-                                        >&times;
-                                    </span>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="btn-group btn-days mb-2" role="group">
+                        <button
+                            v-for="(day, j) in days"
+                            :key="j"
+                            :class="'btn btn-outline-secondary' + (value[j] ? ' active' : '')"
+                            type="button"
+                            @click="updateFilterDay(i, j)"
+                        >
+                            {{ day }}
+                        </button>
+                    </div>
+                    <input
+                        v-model="value[5]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    -
+                    <input
+                        v-model="value[6]"
+                        type="time"
+                        min="8:00"
+                        max="22:00"
+                        style="-webkit-appearance:button"
+                    />
+                    <div class="float-right">
+                        <button type="button" class="close" style="font-size:2rem" tabindex="-1">
+                            <span aria-hidden="true" @click="removeTimeSlot(i)">&times; </span>
+                        </button>
+                    </div>
                 </li>
                 <li class="list-group-item">
                     <div class="custom-control custom-checkbox my-1">
@@ -371,20 +382,6 @@
                             class="custom-control-input"
                         />
                         <label class="custom-control-label" for="comb-sec">Combine Sections</label>
-                    </div>
-                </li>
-                <li class="list-group-item pb-0">
-                    <div class="form-group">
-                        <label for="num-schedule">Max number of schedules</label>
-                        <input
-                            id="num-schedule"
-                            v-model.number="maxNumSchedules"
-                            type="number"
-                            class="form-control"
-                        />
-                        <small class="form-text text-muted"
-                            >May crash your browser if too big</small
-                        >
                     </div>
                 </li>
                 <li
@@ -472,6 +469,23 @@
                     >
                         Apply
                     </button>
+                </li>
+                <div class="btn bg-info nav-btn" style="color:white">
+                    Advanced
+                </div>
+                <li class="list-group-item pb-0">
+                    <div class="form-group">
+                        <label for="num-schedule">Max number of schedules</label>
+                        <input
+                            id="num-schedule"
+                            v-model.number="maxNumSchedules"
+                            type="number"
+                            class="form-control"
+                        />
+                        <small class="form-text text-muted"
+                            >May crash your browser if too big</small
+                        >
+                    </div>
                 </li>
             </ul>
         </nav>
@@ -755,11 +769,22 @@
                 @trigger-modal="showModal"
                 @editEvent="editEvent"
             ></grid-schedule>
-            <div style="text-align: center" class="mb-2">
-                If you find any bugs, please file an issue at
-                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
-                    >our GitHub repository</a
-                >. We recommend Google Chrome for best experience.
+            <div class="row pb-3 align-items-center justify-content-center">
+                <div class="col-md-auto">
+                    If you find any bugs, please file an issue at
+                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                        >our GitHub repository</a
+                    >. We recommend Google Chrome for best experience.
+                </div>
+                <div class="col-md-auto align-self-center">
+                    <github-button
+                        class="pt-1"
+                        href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                        data-show-count="true"
+                        aria-label="Star awesome-schedule/Awesome-SchedulAR on GitHub"
+                        >Star
+                    </github-button>
+                </div>
             </div>
         </div>
     </div>
@@ -777,6 +802,7 @@ import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
 import draggable from 'vuedraggable';
+import GithubButton from 'vue-github-button';
 
 import 'bootstrap';
 import $ from 'jquery';
@@ -793,6 +819,7 @@ import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import Notification from './models/Notification';
 import { to12hr, parseTimeAsInt, timeout, savePlain, errToStr } from './models/Utils';
 import Meta, { getDefaultData } from './models/Meta';
+import { toICal } from './models/ICal';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -810,7 +837,8 @@ window.scheduleEvaluator = new ScheduleEvaluator();
         Palette,
         EventView,
         Information,
-        External
+        External,
+        GithubButton
     }
 })
 export default class App extends Vue {
@@ -897,6 +925,7 @@ export default class App extends Vue {
     eventToEdit: Event | null = null;
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
+    multiSelect: boolean = true;
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -922,7 +951,8 @@ export default class App extends Vue {
         );
     }
     set proposedSchedule(schedule: Schedule) {
-        this.proposedSchedules[this.proposedScheduleIndex] = schedule;
+        // need Vue's reactivity
+        this.$set(this.proposedSchedules, this.proposedScheduleIndex, schedule);
     }
     /**
      * the proposed schedule that is currently active
@@ -944,6 +974,7 @@ export default class App extends Vue {
         this.loading = true;
 
         (async () => {
+            // note: the order is very important
             const pay1 = await loadTimeMatrix();
             console[pay1.level](pay1.msg);
             if (pay1.payload) window.timeMatrix = pay1.payload;
@@ -961,10 +992,16 @@ export default class App extends Vue {
             this.loading = false;
         })();
     }
-
+    /**
+     * whether there're schedules generated. Because script between <template>
+     * tag cannot access global objects, we need a method
+     */
     generatedEmpty() {
         return window.scheduleEvaluator.empty();
     }
+    /**
+     * switch to next/previous proposed schedule. has bound checking.
+     */
     switchProposed(index: number) {
         if (index < this.proposedSchedules.length && index >= 0) {
             this.proposedScheduleIndex = index;
@@ -976,18 +1013,20 @@ export default class App extends Vue {
         this.proposedSchedules.push(new Schedule());
         this.switchProposed(this.proposedSchedules.length - 1);
     }
+    /**
+     * copy the current schedule and append to the proposedSchedule array.
+     * Immediately switch to the last proposed schedule.
+     */
     copyCurrent() {
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
     }
     deleteProposed() {
+        if (this.proposedSchedules.length === 1) return;
         const idx = this.proposedScheduleIndex;
 
         if (!confirm(`Are you sure to delete schedule ${idx + 1}?`)) return;
-        if (this.proposedSchedules.length === 1) {
-            return this.noti.error('This is the only schedule left!');
-        }
 
         // if the schedule to be deleted corresponds to generated schedules,
         // this deletion invalidates the generated schedules immediately.
@@ -1003,19 +1042,20 @@ export default class App extends Vue {
         }
         this.saveStatus();
     }
-
     editEvent(event: Event) {
         if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
         this.eventToEdit = event;
     }
-
     switchSchedule(generated: boolean) {
-        if (
-            generated &&
-            !window.scheduleEvaluator.empty() &&
-            this.cpIndex === this.proposedScheduleIndex
-        ) {
-            if (!this.generated) {
+        if (generated) {
+            // dont do anything if already in "generated" mode
+            // or there are no generated schedules
+            // or the generated schedules do not correspond to the current schedule
+            if (
+                !this.generated &&
+                !window.scheduleEvaluator.empty() &&
+                this.cpIndex === this.proposedScheduleIndex
+            ) {
                 this.generated = true;
                 this.proposedSchedule = this.currentSchedule;
                 this.switchPage(
@@ -1028,11 +1068,9 @@ export default class App extends Vue {
             this.currentSchedule = this.proposedSchedule;
         }
     }
-
     updateFilterDay(i: number, j: number) {
         this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
     }
-
     switchSideBar(key: string) {
         this.getClass('');
         for (const other in this.sideBar) {
@@ -1042,7 +1080,6 @@ export default class App extends Vue {
 
         if (this.sideBar.showSelectColor) this.switchSchedule(true);
     }
-
     onDocChange() {
         this.saveStatus();
     }
@@ -1057,11 +1094,6 @@ export default class App extends Vue {
         this.cpIndex = -1;
         this.saveStatus();
     }
-    cleanSchedules() {
-        this.switchSchedule(false);
-        window.scheduleEvaluator.clear();
-        this.currentSchedule.cleanSchedule();
-    }
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             this.currentSchedule.clean();
@@ -1071,17 +1103,14 @@ export default class App extends Vue {
             this.cpIndex = -1;
         }
     }
-
     showModal(section: Section) {
         this.modalSection = section;
         $('#modal').modal();
     }
-
     showCourseModal(course: Course) {
         this.modalCourse = course;
         $('#course-modal').modal();
     }
-
     removeCourse(key: string) {
         this.currentSchedule.remove(key);
         if (this.generated) {
@@ -1200,7 +1229,6 @@ export default class App extends Vue {
             this.loading = false;
         }
     }
-
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
@@ -1223,6 +1251,8 @@ export default class App extends Vue {
             this.noti.error(`Invalid time filter`);
             return;
         }
+
+        if (!this.validateSortOptions()) return;
 
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog);
@@ -1253,10 +1283,22 @@ export default class App extends Vue {
         }
     }
 
-    changeSorting(optIdx: number) {
+    validateSortOptions() {
         if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-            return this.noti.error('You must have at least one sort option!');
+            this.noti.error('You must have at least one sort option!');
+            return false;
+        } else if (
+            Object.values(this.sortOptions.sortBy).some(x => x.name === 'distance' && x.enabled) &&
+            (!window.buildingList || !window.timeMatrix)
+        ) {
+            this.noti.error('Building list fails to load. Please disable "walking distance"');
+            return false;
         }
+        return true;
+    }
+
+    changeSorting(optIdx: number) {
+        if (!this.validateSortOptions()) return;
         if (optIdx !== undefined) {
             const option = this.sortOptions.sortBy[optIdx];
 
@@ -1295,7 +1337,10 @@ export default class App extends Vue {
         // note: toJSON() will automatically be called if such method exists on an object
         localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
     }
-
+    /**
+     * parse schedules and settings stored locally for currentSemester.
+     * Use default value for fields that do not exist on local data.
+     */
     parseLocalData(raw_data: { [x: string]: any }) {
         const defaultData = getDefaultData();
         for (const field of Meta.storageFields) {
@@ -1358,6 +1403,7 @@ export default class App extends Vue {
             }
         }
         if (!this.proposedSchedule.empty()) {
+            console.log('generating schedules from local data..');
             this.currentSchedule = this.proposedSchedule;
             this.generateSchedules();
         }
@@ -1369,8 +1415,7 @@ export default class App extends Vue {
         this.timeSlots.push([false, false, false, false, false, '', '']);
     }
     /**
-     * Preprocess the time filters and convert them to array of events
-     *
+     * Preprocess the time filters and convert them to array of event.
      * returns null on parsing error
      */
     computeFilter(): Event[] | null {
@@ -1404,7 +1449,6 @@ export default class App extends Vue {
         if (!input.files) return;
 
         const reader = new FileReader();
-
         reader.onload = () => {
             if (reader.result) {
                 let raw_data, result;
@@ -1417,13 +1461,10 @@ export default class App extends Vue {
                     return;
                 }
                 localStorage.setItem((this.currentSemester as Semester).id, result);
-                const semester = raw_data.currentSemester;
-                for (let i = 0; i < this.semesters.length; i++) {
-                    if (this.semesters[i].id === semester.id) {
-                        this.selectSemester(i, raw_data);
-                        break;
-                    }
-                }
+                const semester: Semester = raw_data.currentSemester;
+                this.selectSemester(semester.id, raw_data);
+            } else {
+                this.noti.warn('File is empty!');
             }
         };
 
@@ -1442,7 +1483,7 @@ export default class App extends Vue {
     }
     saveToIcal() {
         savePlain(
-            this.currentSchedule.toICal(),
+            toICal(this.currentSchedule),
             (this.exportICal ? this.exportICal : 'schedule') + '.ical'
         );
     }
@@ -1469,25 +1510,26 @@ export default class App extends Vue {
     color: #888888;
 }
 .tab-icon:hover {
-    color: #666666;
+    color: #444444;
 }
 .tab-icon:active {
     color: #bbbbbb;
 }
-
 .tab-icon-active {
-    color: #1f1f1f;
+    color: black;
 }
 
 .click-icon {
     cursor: pointer;
 }
-
 .click-icon:hover {
-    color: #3e3e3e;
+    color: #6f6f6f;
 }
 .click-icon:active {
-    color: #bbbbbb;
+    color: #cbcbcb;
+}
+.icon-disabled {
+    color: #999999;
 }
 
 .sidebar {
@@ -1511,8 +1553,6 @@ export default class App extends Vue {
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
-
-/* for tab icons in navigation bar */
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
@@ -1563,45 +1603,33 @@ export default class App extends Vue {
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-
     .sidebar {
         display: none !important;
     }
-
     nav {
         display: none !important;
     }
-
     .tab-bar {
         display: none !important;
     }
-
     div .schedule {
         width: calc(100vw - 1.6cm) !important;
         height: calc(100vw - 1.6cm) !important;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
     }
-
     div #noti {
         display: none !important;
     }
-
     .github-corner {
         display: none !important;
     }
 }
 
 @media (max-width: 450px) {
-    /* .schedule {
-        width: 85% !important;
-        margin-left: 11vw !important;
-    } */
-
     .sidebar {
         position: fixed;
         top: 0;
         bottom: 0;
-        left: 0;
         z-index: 10; /* Behind the navbar */
         box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
         overflow-y: auto;
@@ -1633,5 +1661,25 @@ export default class App extends Vue {
 .sidebar::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
+}
+
+.day-link {
+    color: #007bff;
+    line-height: 2rem;
+    cursor: pointer;
+}
+
+.day-link:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-days {
+    width: 100%;
+}
+
+.btn-days .btn {
+    border-radius: 0;
+    padding: 0.25rem 0.25rem;
 }
 </style>

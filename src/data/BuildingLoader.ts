@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { NotiMsg } from '@/models/Notification';
+import { NotiMsg } from '../models/Notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
 
@@ -9,11 +9,11 @@ const api =
         ? `${window.location.protocol}//${window.location.host}/`
         : 'http://localhost:8000/';
 
-interface TimeMatrixJSON extends Expirable {
+export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
 }
 
-interface BuildingListJSON extends Expirable {
+export interface BuildingListJSON extends Expirable {
     buildingList: string[];
 }
 
@@ -25,11 +25,12 @@ interface BuildingListJSON extends Expirable {
  * storage key: "timeMatrix"
  */
 export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
-    const data = await loadFromCache(
+    const data = await loadFromCache<Int32Array, TimeMatrixJSON>(
         'timeMatrix',
         requestTimeMatrix,
-        (x: TimeMatrixJSON) => Int32Array.from(x.timeMatrix),
+        x => Int32Array.from(x.timeMatrix),
         {
+            infoMsg: 'Time matrix loaded',
             warnMsg: x => `Failed to load time matrix: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load time matrix: ${x}. `,
             expireTime: 1000 * 86400,
@@ -40,11 +41,12 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
 }
 
 export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
-    const data = await loadFromCache(
+    const data = await loadFromCache<string[], BuildingListJSON>(
         'buildingList',
         requestBuildingList,
-        (x: BuildingListJSON) => x.buildingList,
+        x => x.buildingList,
         {
+            infoMsg: 'Building list loaded',
             warnMsg: x => `Failed to load building list: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load building list: ${x}. `,
             expireTime: 1000 * 86400,
@@ -55,7 +57,7 @@ export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
 }
 
 export async function requestTimeMatrix(): Promise<Int32Array> {
-    const res = await axios.get(`${api}/data/time_matrix.json`);
+    const res = await axios.get(`${api}/data/Distance/Time_Matrix.json`);
     const data: number[][] = res.data;
 
     if (data instanceof Array && data.length) {
@@ -78,7 +80,7 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
 }
 
 export async function requestBuildingList(): Promise<string[]> {
-    const res = await axios.get(`${api}/data/building_list.json`);
+    const res = await axios.get(`${api}/data/Distance/Building_Array.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {
         localStorage.setItem(

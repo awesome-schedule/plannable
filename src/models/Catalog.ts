@@ -1,6 +1,6 @@
 import Course from './Course';
-import Meta, { RawCatalog } from './Meta';
-import Expirable from '@/data/Expirable';
+import { RawCatalog } from './Meta';
+import Expirable from '../data/Expirable';
 
 export interface Semester {
     id: string;

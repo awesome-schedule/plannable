@@ -3,6 +3,7 @@ import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import quickselect from 'quickselect';
+import { calcOverlap } from '../models/Utils';
 
 export enum Mode {
     fallback = 0,
@@ -83,7 +84,7 @@ export interface SortOptions {
     sortBy: SortOption[];
     mode: Mode;
     toJSON: () => SortOptionJSON;
-    fromJSON: (x: SortOptionJSON) => void;
+    fromJSON: (x: SortOptionJSON) => SortOptions;
 }
 
 class ScheduleEvaluator {
@@ -241,12 +242,7 @@ class ScheduleEvaluator {
                 const day = blocks[i];
                 let dayOverlap = 0;
                 for (let j = 0; j < day.length; j += 2) {
-                    dayOverlap += ScheduleEvaluator.calcOverlap(
-                        lunchStart,
-                        lunchEnd,
-                        day[j],
-                        day[j + 1]
-                    );
+                    dayOverlap += calcOverlap(lunchStart, lunchEnd, day[j], day[j + 1]);
                 }
                 if (dayOverlap > lunchMinOverlap) totalOverlap += dayOverlap;
             }
@@ -272,8 +268,13 @@ class ScheduleEvaluator {
             return total;
         },
 
+        /**
+         * compute the sum of walking distances between each consecutive pair of classes
+         */
         distance(schedule: CmpSchedule) {
             const timeMatrix = window.timeMatrix;
+
+            // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5;
             const rooms = schedule.rooms;
             let dist = 0;
@@ -281,6 +282,8 @@ class ScheduleEvaluator {
                 for (let i = 0; i < dayRooms.length - 1; i++) {
                     const r1 = dayRooms[i];
                     const r2 = dayRooms[i + 1];
+
+                    // skip unknown buildings
                     if (r1 === -1 || r2 === -1) continue;
                     dist += timeMatrix[r1 * len + r2];
                 }
@@ -297,14 +300,6 @@ class ScheduleEvaluator {
         const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
         options.sortBy = options.sortBy.map(x => Object.assign({}, x));
         return options;
-    }
-
-    public static calcOverlap(a: number, b: number, c: number, d: number) {
-        if (a <= c && d <= b) return d - c;
-        if (a <= c && c <= b) return b - c;
-        else if (a <= d && d <= b) return d - a;
-        else if (a >= c && b <= d) return b - a;
-        else return 0;
     }
 
     public static validateOptions(options?: SortOptions) {
@@ -363,7 +358,7 @@ class ScheduleEvaluator {
                 // time blocks and rooms at day k
                 const day = days[k];
                 const timeBlock = timeDict[day];
-                const roomBlock = roomDict[day];
+                const roomBlock = roomDict[day]!;
                 if (!timeBlock) continue;
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
@@ -555,7 +550,7 @@ class ScheduleEvaluator {
         } else {
             const len = options.length;
             const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-            const coeffs = options.map(x => this.sortCoeffCache[x.name] as Float32Array);
+            const coeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: CmpSchedule, b: CmpSchedule) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {

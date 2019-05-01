@@ -14,6 +14,21 @@ import { findBestMatch } from 'string-similarity';
 export type TimeBlock = [number, number];
 
 /**
+ * The generic type used to store some information about each day within a week
+ *
+ * @todo decide whether it is better to state the index signature as
+ * `[x: string]: T[]` or `[x: string]: T[] | undefined`
+ */
+export interface WeekDict<T> {
+    [x: string]: T[] | undefined;
+    Mo?: T[];
+    Tu?: T[];
+    We?: T[];
+    Th?: T[];
+    Fr?: T[];
+}
+
+/**
  * `TimeDict` is a data structure used to store the time blocks in a week
  * that a certain `Section` or `Event` will take place.
  * The keys of a `TimeDict` are abbreviated day strings like `Mo` or `Tu`.
@@ -29,22 +44,29 @@ export type TimeBlock = [number, number];
  *
  * @see TimeBlock
  */
-export interface TimeDict {
-    [x: string]: number[] | undefined;
-    Mo?: number[];
-    Tu?: number[];
-    We?: number[];
-    Th?: number[];
-    Fr?: number[];
-}
+export interface TimeDict extends WeekDict<number> {}
+/**
+ * key: same as TimeDict
+ *
+ * value: the name of the building
+ *
+ * if `timeDict[key]` exists, then `roomDict[key][i]` corresponds the room of the time block
+ * `[timeDict[key][i * 2], timeDict[key][i * 2 + 1]]`
+ *
+ * @example
+ * if (timeDict[key])
+ *     expect(timeDict[key].length).toBe(roomDict[key].length / 2);
+ */
+export interface RoomDict extends WeekDict<string> {}
 
-export interface RoomDict {
-    [x: string]: string[];
-}
-
-export interface RoomNumberDict {
-    [x: string]: number[];
-}
+/**
+ * key: same as TimeDict
+ *
+ * value: the index of the building in the building list
+ *
+ * @see https://github.com/awesome-schedule/data/blob/master/building_list.json
+ */
+export interface RoomNumberDict extends WeekDict<number> {}
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -131,12 +153,12 @@ class ScheduleGenerator {
         const timeSlots: TimeDict[] = this.options.events.map(e => e.toTimeDict());
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
 
-        const classList: RawAlgoSchedule[] = [];
+        const classList: RawAlgoCourse[][] = [];
         const courses = schedule.All;
 
         // for each course selected, form an array of sections
         for (const key in courses) {
-            const classes: RawAlgoSchedule = [];
+            const classes: RawAlgoCourse[] = [];
 
             // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
@@ -180,7 +202,8 @@ class ScheduleGenerator {
                 if (buildingList && buildingList.length) {
                     for (const day in roomDict) {
                         const numberList: number[] = [];
-                        for (const room of roomDict[day]) {
+                        const rooms = roomDict[day] as string[];
+                        for (const room of rooms) {
                             const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
                             // we set the match threshold to 0.5
                             if (roomMatch.bestMatch.rating >= 0.5) {
@@ -195,7 +218,7 @@ class ScheduleGenerator {
                     }
                 } else {
                     for (const day in roomDict) {
-                        roomNumberDict[day] = roomDict[day].map(x => -1);
+                        roomNumberDict[day] = (roomDict[day] as string[]).map(x => -1);
                     }
                 }
 
@@ -252,7 +275,7 @@ class ScheduleGenerator {
         const pathMemory = new Int32Array(classList.length);
         /**
          * The current schedule, build incrementally and in-place.
-         * After one successful build, all elements are removed (**in-place**)
+         * After one successful build, all elements are removed **in-place**
          */
         const timeTable: RawAlgoSchedule = [];
 
@@ -294,32 +317,28 @@ class ScheduleGenerator {
                 break;
             }
 
+            // the time dict of the newly chosen class
             const timeDict = classList[classNum][choiceNum][1];
+            let conflict = false;
+            for (const algoCourse of timeTable) {
+                if (Utils.checkTimeConflict(algoCourse[1], timeDict)) {
+                    conflict = true;
+                    break;
+                }
+            }
 
-            if (!this.checkTimeConflict(timeTable, timeDict)) {
+            if (conflict) {
+                choiceNum += 1;
+            } else {
                 // if the schedule matches,
                 // record the next path memory and go to the next class, reset the choiceNum = 0
                 timeTable.push(classList[classNum][choiceNum]);
                 pathMemory[classNum] = choiceNum + 1;
                 classNum += 1;
                 choiceNum = 0;
-            } else {
-                choiceNum += 1;
             }
         }
         return evaluator;
-    }
-
-    /**
-     * compare the new class to see if it has conflicts with the existing time table
-     *
-     * @returns true if it has conflict, false otherwise
-     */
-    public checkTimeConflict(timeTable: RawAlgoSchedule, timeDict: TimeDict) {
-        for (const algoCourse of timeTable) {
-            if (Utils.checkTimeConflict(algoCourse[1], timeDict)) return true;
-        }
-        return false;
     }
 }
 

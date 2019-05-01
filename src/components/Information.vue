@@ -11,6 +11,9 @@
                 </nav>
                 <a class="nav-link" href="#item-3">Add Event</a>
                 <a class="nav-link" href="#item-4">Filters</a>
+                <nav class="nav nav-pills flex-column">
+                    <a class="nav-link ml-3 my-1" href="#item-4-1">No Class Time</a>
+                </nav>
                 <a class="nav-link" href="#item-5">Display Settings</a>
                 <a class="nav-link" href="#item-6">Customize Colors</a>
                 <a class="nav-link" href="#item-7">Export ICalendar</a>
@@ -130,10 +133,21 @@
                such as club meetings, office hours, etc. This feature is similar to any other calendar which later you can sync it with
                your personal calender on google or apple.
             </p>
+            <div class="GIF">
+            <img src="../assets/AddEvent.gif"/>
+            </div>
+            
             <h3 id="item-4" class="text-primary">4. Filters</h3>
             <p>
                 Filters allow you to set parameters to better navigate your searches and generate your schedules
             </p>
+            <h4 id="item-4-1" class="text-success">No Class Time</h4>
+            <p>
+                You can select time and day at which you do not wish to have class. The input form of time is 08:00:AM.
+            </p>
+            <div class="GIF">
+            <img src="../assets/NoClassTime.gif"/>
+            </div>
             <h3 id="item-5" class="text-primary">5. Display Settings</h3>
             <h3 id="item-5" class="text-primary">5. Customize Colors</h3>
             <h3 id="item-7" class="text-primary">7. Export ICalendar</h3>
@@ -260,6 +274,12 @@ export default class Information extends Vue {
     left: 10%;
     right: 10%;
     height: 30%;
+    width: 100%;
+}
+.GIF {
+    left: 10%;
+    right: 10%;
+    height: auto;
     width: 100%;
 }
 </style>

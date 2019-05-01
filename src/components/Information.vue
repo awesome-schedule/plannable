@@ -9,10 +9,14 @@
                     <a class="nav-link ml-3 my-1" href="#item-2-1">Add Courses</a>
                     <a class="nav-link ml-3 my-1" href="#item-2-2">Multiple set of class</a>
                 </nav>
-                <a class="nav-link" href="#item-3">Item 3</a>
+                <a class="nav-link" href="#item-3">Add Event</a>
+                <a class="nav-link" href="#item-4">Filters</a>
+                <a class="nav-link" href="#item-5">Display Settings</a>
+                <a class="nav-link" href="#item-6">Customize Colors</a>
+                <a class="nav-link" href="#item-7">Export ICalendar</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-3-1">Item 3-1</a>
-                    <a class="nav-link ml-3 my-1" href="#item-3-2">Item 3-2</a>
+                    <a class="nav-link ml-3 my-1" href="#item-7-1">Item 3-1</a>
+                    <a class="nav-link ml-3 my-1" href="#item-7-2">Item 3-2</a>
                 </nav>
             </nav>
         </nav>
@@ -119,14 +123,27 @@
                     </a>
                 </div>
             </div>
-            <h3 id="item-3" class="text-primary">3. Export ICalendar</h3>
+
+            <h3 id="item-3" class="text-primary">3. Add Event</h3>
+            <p>
+               This feature allows you to customize your own schedule. You can add your weekly commitments on the schedule,
+               such as club meetings, office hours, etc. This feature is similar to any other calendar which later you can sync it with
+               your personal calender on google or apple.
+            </p>
+            <h3 id="item-4" class="text-primary">4. Filters</h3>
+            <p>
+                Filters allow you to set parameters to better navigate your searches and generate your schedules
+            </p>
+            <h3 id="item-5" class="text-primary">5. Display Settings</h3>
+            <h3 id="item-5" class="text-primary">5. Customize Colors</h3>
+            <h3 id="item-7" class="text-primary">7. Export ICalendar</h3>
             <p>
                 ICalendar is a standard file which you can import to your Apple/Google Calendar.
                 This website allows you to download the ICalendar to your computer after you have
                 creatd your schedule. Then, you can go to your Apple/Google Calendar and then
                 syncronize your schedule. Instruction is shown below:
             </p>
-            <h4 id="item-3-1" class="text-success">Google Calendar</h4>
+            <h4 id="item-7-1" class="text-success">Google Calendar</h4>
             <div class="bd-example">
                 <div id="googleCalendarInstruction" class="carousel slide" data-ride="carousel">
                     <ol class="carousel-indicators">
@@ -205,7 +222,7 @@
                 </div>
             </div>
 
-            <h5 id="item-3-2"></h5>
+            <h5 id="item-7-2"></h5>
             <p>...</p>
         </div>
     </div>

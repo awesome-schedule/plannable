@@ -273,8 +273,12 @@
                             class="custom-control-input"
                             @change="currentSchedule.computeSchedule(multiSelect)"
                         />
-                        <label class="custom-control-label" for="multiSelect"
-                            >Show Multiple Section
+                        <label
+                            class="custom-control-label"
+                            for="multiSelect"
+                            title="render all selected sections (except for 'any section')"
+                        >
+                            Show Multiple Section
                         </label>
                     </div>
                 </div>

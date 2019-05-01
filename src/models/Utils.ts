@@ -230,22 +230,6 @@ export function hashCode(str: string): number {
 }
 
 /**
- * convert `cs11105` style key to `CS 1110 Lecture`
- */
-export function convertKey(cat: Catalog, schedule: Schedule, key: string) {
-    const raw: RawCourse = cat.raw_data[key];
-    if (raw) return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
-    else {
-        for (const event of schedule.events) {
-            if (event.key === key) {
-                return event.title === '' ? key : event.title;
-            }
-        }
-    }
-    return key;
-}
-
-/**
  * open a course detail on Lou's list
  *
  * @author Kaiying Shan

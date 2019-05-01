@@ -13,6 +13,8 @@
                 <a class="nav-link" href="#item-4">Filters</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1" href="#item-4-1">No Class Time</a>
+                    <a class="nav-link ml-3 my-1" href="#item-4-2">Allow Waitlist/Closed</a>
+                    <a class="nav-link ml-3 my-1" href="#item-4-3">Sort</a>
                 </nav>
                 <a class="nav-link" href="#item-5">Display Settings</a>
                 <a class="nav-link" href="#item-6">Customize Colors</a>
@@ -146,8 +148,23 @@
                 You can select time and day at which you do not wish to have class. The input form of time is 08:00:AM.
             </p>
             <div class="GIF">
-            <img src="../assets/NoClassTime.gif"/>
+                <img src="../assets/NoClassTime.gif"/>
             </div>
+            <h4 id="item-4-2" class="text-success">Allow Waitlist/Closed</h4>
+            <p>
+                By checking on those two buttons, it allows the scheduler to consider the classes when auto-generating schedules
+                even though it may no longer be available.
+                Or you can uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
+            </p>
+            <h4 id="item-4-3" class="text-success">Sort</h4>
+            <p>
+                One powerful feature comes with auto-scheduling is that the 
+                scheduler will generate the schedules for you based on your preference.
+            </p>
+            <div class="GIF">
+                <img src="../assets/Sort.gif"/>
+            </div>
+
             <h3 id="item-5" class="text-primary">5. Display Settings</h3>
             <h3 id="item-5" class="text-primary">5. Customize Colors</h3>
             <h3 id="item-7" class="text-primary">7. Export ICalendar</h3>
@@ -281,5 +298,6 @@ export default class Information extends Vue {
     right: 10%;
     height: auto;
     width: 100%;
+    position: center;
 }
 </style>

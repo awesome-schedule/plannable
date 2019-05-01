@@ -264,9 +264,6 @@ export default class GridSchedule extends Vue {
     text-align: center;
 }
 
-.time {
-}
-
 .time > div {
     text-align: right;
     font-size: 10px;

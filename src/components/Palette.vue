@@ -3,8 +3,8 @@
         <button class="btn btn-info nav-btn">
             Palette
         </button>
-        <ul v-if="$parent.generated" class="list-group list-group-flush mx-1">
-            <li v-for="pair in courseColors()" :key="pair[0]" class="list-group-item py-1 px-2">
+        <ul class="list-group list-group-flush mx-1">
+            <li v-for="(pair, idx) in courseColors()" :key="idx" class="list-group-item py-1 px-2">
                 <div class="row no-gutters justify-content-between w-100">
                     <div class="col-md-auto" style="font-size: 14px">
                         <label :for="`color-${pair[1]}`">
@@ -25,11 +25,6 @@
                         />
                     </div>
                 </div>
-            </li>
-        </ul>
-        <ul v-else class="list-group list-group-flush mx-1">
-            <li class="list-group-item">
-                You need to generate a schedule in order to change its color
             </li>
         </ul>
     </nav>

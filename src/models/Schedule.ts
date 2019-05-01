@@ -282,6 +282,24 @@ class Schedule {
         this.computeSchedule();
     }
 
+    public hover(key: string, strong: boolean = true) {
+        const sections = this.All[key];
+        if (sections instanceof Set) {
+            Object.values(this.days).forEach(blocks => {
+                for (const block of blocks) {
+                    const container = block.section;
+                    if (!(container instanceof Event)) {
+                        if (container.has(sections, key)) block.strong = strong;
+                    }
+                }
+            });
+        }
+    }
+
+    public unhover(key: string) {
+        this.hover(key, false);
+    }
+
     /**
      * Compute the schedule view based on `this.All` and `this.preview`
      *
@@ -311,7 +329,7 @@ class Schedule {
             if (sections === -1) {
                 // if there's only one section in this Course, just treat it as a Section
                 if (course.sections.length === 1) {
-                    const section = course.getSection(0);
+                    const section = course.getFirstSection();
                     this.currentIds[currentIdKey] = section.id.toString();
                     this.place(section);
                 } else {
@@ -330,10 +348,10 @@ class Schedule {
                         const combined: Course[] = Object.values(
                             course.getCourse([...sections]).getCombined()
                         ).map(secs => Section.sectionsToCourse(secs));
-                        const id = combined[0].getSection(0).id;
+                        const id = combined[0].getFirstSection().id;
 
                         // count the total number of sections in this combined course array
-                        const num = combined.reduce((acc, x) => acc + x.sids.length, 0);
+                        const num = sections.size - 1;
                         for (const crs of combined) {
                             this.currentIds[currentIdKey] = num
                                 ? `${id.toString()}+${num}`
@@ -356,11 +374,19 @@ class Schedule {
         if (this.previous) {
             const [key, secIdx] = this.previous;
             const sections = this.All[key];
-
+            const section = catalog.getSection(key, secIdx);
             // do not place into the schedule if the section is already in this.All
             if (!(sections instanceof Set) || !sections.has(secIdx)) {
-                const section = catalog.getSection(key, secIdx);
                 this.place(section);
+            } else {
+                // instead, we highlight the schedule
+                for (const day in this.days) {
+                    const blocks = this.days[day];
+                    for (const block of blocks) {
+                        if (!(block.section instanceof Event))
+                            if (block.section.has(section)) block.strong = true;
+                    }
+                }
             }
         }
 
@@ -385,8 +411,6 @@ class Schedule {
 
         // construct conflict graph for each column
         for (const day in this.days) {
-            graph.clear();
-
             const blocks = countEvent
                 ? this.days[day]
                 : this.days[day].filter(block => !(block.section instanceof Event));
@@ -449,6 +473,8 @@ class Schedule {
                     console.error('Uncomputed block found!', block);
                 }
             }
+
+            graph.clear();
         }
     }
 
@@ -470,13 +496,19 @@ class Schedule {
         } else {
             if (!course.allSameTime()) return;
             const color = this.getColor(course);
-            for (const meeting of course.sections[0].meetings) {
-                this.placeHelper(color, meeting.days, course.sections);
+            const courseSec = course.sections;
+            for (const meeting of courseSec[0].meetings) {
+                // if only one section, just use the section rather than the section array
+                if (courseSec.length === 1) {
+                    this.placeHelper(color, meeting.days, courseSec[0]);
+                } else {
+                    this.placeHelper(color, meeting.days, course);
+                }
             }
         }
     }
 
-    public placeHelper(color: string, dayTimes: string, events: Section | Section[] | Event) {
+    public placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
         const [days, start, , end] = dayTimes.split(' ');
         if (days && start && end) {
             const startMin = Utils.to24hr(start);

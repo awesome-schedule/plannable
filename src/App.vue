@@ -239,7 +239,7 @@
                             Clean All
                         </button>
                     </div>
-                    <div class="custom-control custom-checkbox">
+                    <div class="custom-control custom-checkbox mt-2 mx-2">
                         <input
                             id="multiSelect"
                             v-model="multiSelect"
@@ -247,13 +247,17 @@
                             class="custom-control-input"
                             @change="currentSchedule.computeSchedule(multiSelect)"
                         />
-                        <label class="custom-control-label" for="multiSelect"
-                            >Show Multiple Section</label
+                        <label
+                            class="custom-control-label"
+                            for="multiSelect"
+                            title="render all selected sections (except for 'any section')"
                         >
+                            Show Multiple Section
+                        </label>
                     </div>
                 </div>
             </div>
-            <div class="btn bg-info nav-btn mt-3" style="width:100%;color:white">
+            <div class="btn bg-info nav-btn mt-2" style="color:white">
                 Schedule Overview
             </div>
             <ul class="list-group list-group-flush" style="width:99%">
@@ -366,20 +370,6 @@
                         <label class="custom-control-label" for="comb-sec">Combine Sections</label>
                     </div>
                 </li>
-                <li class="list-group-item pb-0">
-                    <div class="form-group">
-                        <label for="num-schedule">Max number of schedules</label>
-                        <input
-                            id="num-schedule"
-                            v-model.number="maxNumSchedules"
-                            type="number"
-                            class="form-control"
-                        />
-                        <small class="form-text text-muted"
-                            >May crash your browser if too big</small
-                        >
-                    </div>
-                </li>
                 <li
                     class="list-group-item px-3"
                     title="Note that you can drag sort options to change their priority in fallback mode"
@@ -465,6 +455,23 @@
                     >
                         Apply
                     </button>
+                </li>
+                <div class="btn bg-info nav-btn" style="color:white">
+                    Advanced
+                </div>
+                <li class="list-group-item pb-0">
+                    <div class="form-group">
+                        <label for="num-schedule">Max number of schedules</label>
+                        <input
+                            id="num-schedule"
+                            v-model.number="maxNumSchedules"
+                            type="number"
+                            class="form-control"
+                        />
+                        <small class="form-text text-muted"
+                            >May crash your browser if too big</small
+                        >
+                    </div>
                 </li>
             </ul>
         </nav>

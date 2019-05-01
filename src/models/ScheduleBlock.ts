@@ -1,6 +1,7 @@
 import Section from './Section';
 import Event from './Event';
 import { checkTimeBlockConflict } from './Utils';
+import Course from './Course';
 
 /**
  * A `ScheduleBlock` is a data structure that holds
@@ -21,20 +22,25 @@ class ScheduleBlock {
      * end time in 24hr format: `15:00`
      */
     public end: string;
-    public section: Section | Section[] | Event;
+    public duration: number = 0;
+    public section: Section | Course | Event;
     public left = -1;
     public width = -1;
+    public strong = false;
 
     constructor(
         backgroundColor: string,
         start: string,
         end: string,
-        section: Section | Section[] | Event
+        section: Section | Course | Event
     ) {
         this.backgroundColor = backgroundColor;
         this.start = start;
         this.end = end;
         this.section = section;
+
+        const [a, b] = this.timeAsInt();
+        this.duration = b - a;
     }
 
     public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
@@ -49,13 +55,11 @@ class ScheduleBlock {
         return [+a * 60 + +b, +c * 60 + +d];
     }
 
-    public duration() {
-        const [a, b] = this.timeAsInt();
-        return b - a;
-    }
-
-    public compareTo(other: ScheduleBlock) {
-        return this.duration() - other.duration();
+    [Symbol.toPrimitive](hint: any) {
+        if (hint === 'number') {
+            return this.duration;
+        }
+        return null;
     }
 }
 

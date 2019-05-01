@@ -1,7 +1,3 @@
-interface Comparable<T> {
-    compareTo(other: T): number;
-}
-
 interface VertexData<T> {
     visited: boolean;
     depth: number;
@@ -17,9 +13,20 @@ interface VertexData<T> {
  */
 export class Vertex<T> {
     public visited: boolean = false;
+    /**
+     * depth of the node relative to the root
+     */
+
     public depth: number = 0;
+    /**
+     * the maximum depth of the path starting from the root that the current node is on
+     */
     public pathDepth: number = 0;
     public parent?: Vertex<T>;
+    /**
+     * the all of the paths starting at the root and ending at one of the leaves.
+     * if this vertex is not the root, then `path` will be empty
+     */
     public path: Vertex<T>[][] = [];
     public val: T;
     constructor(t: T) {
@@ -51,17 +58,19 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  *
  * this function first sorts nodes by their breadth in descending order.
  * If two nodes have the same breadth, then they'll be sorted in
- * ascending order according to their `compareTo` method.
+ * descending order according to their `compareTo` method.
  *
  * @param graph
  */
-function sortFunc<T extends Comparable<T>>(graph: Graph<T>) {
+function sortFunc<T>(graph: Graph<T>) {
     return (a: Vertex<T>, b: Vertex<T>) => {
         const d1 = graph.get(a)!;
         const d2 = graph.get(b)!;
         const result = d2.length - d1.length;
         if (result) return result;
-        else return b.val.compareTo(a.val);
+        else {
+            return +b.val - +a.val;
+        }
     };
 }
 
@@ -73,7 +82,7 @@ function sortFunc<T extends Comparable<T>>(graph: Graph<T>) {
  *
  * @see Vertex<T>
  */
-export function depthFirstSearch<T extends Comparable<T>>(graph: Graph<T>) {
+export function depthFirstSearch<T>(graph: Graph<T>) {
     const nodes = Array.from(graph.keys()).sort(sortFunc(graph));
 
     // the graph may have multiple connected components. Do DFS for each component
@@ -100,7 +109,7 @@ export function depthFirstSearch<T extends Comparable<T>>(graph: Graph<T>) {
  * @param start
  * @param graph
  */
-function depthFirstSearchRec<T extends Comparable<T>>(start: Vertex<T>, graph: Graph<T>) {
+function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     // sort by breadth
     const neighbors = graph.get(start)!.sort(sortFunc(graph));
     start.visited = true;

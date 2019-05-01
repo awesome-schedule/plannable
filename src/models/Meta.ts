@@ -132,7 +132,8 @@ class Meta {
         'partialHeight',
         'earliest',
         'latest',
-        'standard'
+        'standard',
+        'multiSelect'
     ];
 
     public static readonly semesterListExpirationTime = 86400 * 1000; // one day
@@ -164,6 +165,7 @@ export function getDefaultData() {
         earliest: '08:00:00',
         latest: '19:00:00',
         standard: false,
+        multiSelect: true,
 
         // filter options
         timeSlots: [],

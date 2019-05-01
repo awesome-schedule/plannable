@@ -10,6 +10,10 @@ import { parseTimeAll } from './Utils';
  * and it holds additional information specific to that section.
  */
 class Section implements CourseFields, Hashable {
+    /**
+     * convert a section array to a course holding the section array
+     * @param sections
+     */
     public static sectionsToCourse(sections: Section[]) {
         const course = sections[0].course;
         return new Course(course.raw, course.key, sections.map(x => x.sid));
@@ -28,6 +32,9 @@ class Section implements CourseFields, Hashable {
      */
     public key: string;
 
+    /**
+     * a reference to the course that this section belongs to
+     */
     public course: Course;
     public id: number;
     public section: string;
@@ -127,11 +134,26 @@ class Section implements CourseFields, Hashable {
     }
 
     public equals(sc: Section): boolean {
-        if (this.key === sc.key && this.section === sc.section) {
+        if (this.key === sc.key && this.sid === sc.sid) {
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * check whether given section is equals to this section
+     */
+    public has(section: Section): boolean;
+    /**
+     * check whether this section exists in the set of sections indices with the given key
+     * @param sections
+     * @param key
+     */
+    public has(sections: Set<number>, key: string): boolean;
+    public has(element: Section | Set<number>, key?: string): boolean {
+        if (element instanceof Set) return this.key === key && element.has(this.sid);
+        else return this.equals(element);
     }
 }
 

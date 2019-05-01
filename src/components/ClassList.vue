@@ -1,50 +1,60 @@
 <template>
     <div id="class-list w-100">
         <div class="card-body p-0" tabindex="-1" @keyup.esc="$emit('close')">
-            <div v-for="crs in courses" :key="crs.key" class="list-group list-group-flush">
-                <div class="list-group-item class-title py-1 px-0">
-                    <table class="w-100">
-                        <tr>
-                            <td class="expand-icon pr-2" @click="collapse(crs.key)">
-                                <i class="fas click-icon" :class="expanded(crs.key)"></i>
-                            </td>
-                            <td>
-                                <h6 class="mb-1">
-                                    <span style="cursor: pointer" @click="collapse(crs.key)"
-                                        >{{ crs.department }} {{ crs.number }} {{ crs.type }}
-                                    </span>
-                                    <span class="ml-1" style="font-size:0.8rem">
-                                        <i
-                                            data-toggle="modal"
-                                            data-target="#class-list-modal"
-                                            class="fas fa-info-circle"
-                                            title="View class description"
-                                            style="cursor: pointer"
-                                            @click="$emit('trigger-classlist-modal', crs)"
-                                        ></i>
-                                    </span>
-                                </h6>
+            <div
+                v-for="crs in courses"
+                :key="crs.key"
+                class="list-group list-group-flush w-100"
+                @mouseenter="schedule.hover(crs.key)"
+                @mouseleave="schedule.unhover(crs.key)"
+            >
+                <div class="list-group-item class-title py-1 px-0 w-100">
+                    <div class="row flex-nowrap no-gutters justify-content-between">
+                        <div class="col col-1 pl-1 align-self-center">
+                            <i class="fas click-icon" :class="expanded(crs.key)"></i>
+                        </div>
+                        <!-- push the last column to the right by mr-auto -->
+                        <div class="col-xs-auto mr-auto align-self-center">
+                            <h6 class="mb-1">
+                                <span style="cursor: pointer" @click="collapse(crs.key)"
+                                    >{{ crs.department }} {{ crs.number }} {{ crs.type }}
+                                </span>
+                            </h6>
 
-                                <p
-                                    v-if="showClasslistTitle || isEntering"
-                                    style="font-size: 0.85rem; margin: 0; cursor: pointer"
-                                    @click="collapse(crs.key)"
-                                >
-                                    {{ crs.title }}
-                                </p>
-                            </td>
-                            <td v-if="!isEntering" class="pl-2 pr-1">
-                                <button
-                                    type="button"
-                                    class="close"
-                                    aria-label="Close"
-                                    @click="$emit('remove_course', crs.key)"
-                                >
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                            <p
+                                v-if="showClasslistTitle || isEntering"
+                                style="font-size: 0.85rem; margin: 0; cursor: pointer"
+                                @click="collapse(crs.key)"
+                            >
+                                {{ crs.title }}
+                            </p>
+                        </div>
+                        <div
+                            class="col align-self-center"
+                            :class="{
+                                'text-center': showClasslistTitle,
+                                'text-right': !showClasslistTitle,
+                                'col-1': showClasslistTitle,
+                                'col-xs-auto': !showClasslistTitle
+                            }"
+                        >
+                            <i
+                                data-toggle="modal"
+                                data-target="#class-list-modal"
+                                class="fas fa-info-circle click-icon"
+                                :class="{ 'pr-1': !showClasslistTitle }"
+                                title="View class description"
+                                @click="$emit('trigger-classlist-modal', crs)"
+                            ></i>
+                            <br v-if="showClasslistTitle" />
+                            <i
+                                v-if="!isEntering"
+                                class="fas fa-times click-icon"
+                                :class="{ 'pr-1': !showClasslistTitle }"
+                                @click="$emit('remove_course', crs.key)"
+                            ></i>
+                        </div>
+                    </div>
                 </div>
                 <Expand>
                     <div
@@ -180,6 +190,10 @@ export default class ClassList extends Vue {
 </script>
 
 <style scoped>
+.click-icon {
+    color: #555555;
+}
+
 .trans {
     overflow: hidden;
 }

@@ -92,14 +92,14 @@
             >
                 <i class="fas fa-info-circle"></i>
             </div>
-            <!-- <div
+            <div
                 title="What's happening"
                 :class="{ 'tab-icon-active': sideBar.showExternal }"
                 class="tab-icon mb-4"
                 @click="switchSideBar('showExternal')"
             >
-                <i class="fas fa-external-link-alt"></i>
-            </div> -->
+                <i class="fas fa-bullhorn"></i>
+            </div>
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 

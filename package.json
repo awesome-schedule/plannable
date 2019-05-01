@@ -22,7 +22,8 @@
         "string-similarity": "^3.0.0",
         "vue": "^2.6.10",
         "vue-github-button": "^1.0.8",
-        "vuedraggable": "^2.20.0"
+        "vuedraggable": "^2.20.0",
+        "vuetify": "^1.5.14"
     },
     "devDependencies": {
         "@babel/preset-typescript": "^7.3.3",

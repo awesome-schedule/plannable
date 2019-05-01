@@ -33,6 +33,11 @@ module.exports = {
                                 module: 'axios',
                                 entry: '//unpkg.com/axios/dist/axios.min.js',
                                 global: 'axios'
+                            },
+                            {
+                                module: 'vuetify',
+                                entry: 'https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js',
+                                global: 'Vuetify'
                             }
                         ]
                     })

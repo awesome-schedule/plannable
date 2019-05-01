@@ -1,7 +1,7 @@
 <template>
     <table style="width:100%">
         <tr style="width:100%">
-            <td style="width:5%">
+            <td style="width:3.5%">
                 <div
                     class="grid-container time mb-3"
                     :style="{

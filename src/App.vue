@@ -304,7 +304,7 @@
                     </div>
                 </li>
                 <li v-for="(value, i) in timeSlots" :key="i" class="list-group-item p-1">
-                    <div class="btn-group btn-days mb-2" role="group">
+                    <div class="btn-group btn-days my-2" role="group">
                         <button
                             v-for="(day, j) in days"
                             :key="j"
@@ -315,25 +315,33 @@
                             {{ day }}
                         </button>
                     </div>
-                    <input
-                        v-model="value[5]"
-                        type="time"
-                        min="8:00"
-                        max="22:00"
-                        style="-webkit-appearance:button"
-                    />
-                    -
-                    <input
-                        v-model="value[6]"
-                        type="time"
-                        min="8:00"
-                        max="22:00"
-                        style="-webkit-appearance:button"
-                    />
-                    <div class="float-right">
-                        <button type="button" class="close" style="font-size:2rem" tabindex="-1">
-                            <span aria-hidden="true" @click="removeTimeSlot(i)">&times; </span>
-                        </button>
+                    <div class="form-group row no-gutters align-items-center text-center mb-2">
+                        <div class="col col-5 align-self-center">
+                            <input
+                                v-model="value[5]"
+                                type="time"
+                                min="8:00"
+                                max="22:00"
+                                class="form-control form-control-sm"
+                            />
+                        </div>
+                        <div class="col col-1 align-self-center">-</div>
+                        <div class="col col-5">
+                            <input
+                                v-model="value[6]"
+                                type="time"
+                                min="8:00"
+                                max="22:00"
+                                class="form-control form-control-sm"
+                            />
+                        </div>
+                        <div class="col col-1 align-self-center">
+                            <i
+                                class="fas fa-times click-icon"
+                                style="font-size: 1.25rem"
+                                @click="removeTimeSlot(i)"
+                            ></i>
+                        </div>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -527,10 +535,10 @@
                     </div>
                 </div>
                 <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
-                    <label for="class-height" class="col-lg-6 col-form-label">Grid Height</label>
+                    <label for="grid-height" class="col-lg-6 col-form-label">Grid Height</label>
                     <div class="col-lg-6">
                         <input
-                            id="class-height"
+                            id="grid-height"
                             v-model.number="partialHeight"
                             type="number"
                             class="form-control form-control-sm"
@@ -810,7 +818,7 @@
                     </v-card-title>
 
                     <v-card-actions class="grey darken-3 justify-center">
-                        &copy;2019 — <strong>Awesome Schedule</strong>
+                        &copy;2019&nbsp;—&nbsp;<strong>Awesome Schedule</strong>
                     </v-card-actions>
                 </v-card>
             </v-footer>
@@ -965,7 +973,7 @@ export default class App extends Vue {
         return window.scheduleEvaluator.size();
     }
     get scheduleWidth() {
-        return this.sideBarActive ? 100 - 19 - 3 - 5 : 100 - 3 - 3;
+        return this.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
     }
     get scheduleLeft() {
         return this.sideBarActive ? 23 : 3;
@@ -1593,37 +1601,6 @@ export default class App extends Vue {
     cursor: pointer;
 }
 
-.github-corner:hover .octo-arm {
-    animation: octocat-wave 560ms ease-in-out;
-}
-
-@keyframes octocat-wave {
-    0%,
-    100% {
-        transform: rotate(0);
-    }
-
-    20%,
-    60% {
-        transform: rotate(-25deg);
-    }
-
-    40%,
-    80% {
-        transform: rotate(10deg);
-    }
-}
-
-@media (max-width: 500px) {
-    .github-corner:hover .octo-arm {
-        animation: none;
-    }
-
-    .github-corner .octo-arm {
-        animation: octocat-wave 560ms ease-in-out;
-    }
-}
-
 @media print {
     @page {
         size: A4 landscape;
@@ -1645,9 +1622,6 @@ export default class App extends Vue {
         margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
     }
     div #noti {
-        display: none !important;
-    }
-    .github-corner {
         display: none !important;
     }
 }
@@ -1687,17 +1661,6 @@ export default class App extends Vue {
 .sidebar::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
-}
-
-.day-link {
-    color: #007bff;
-    line-height: 2rem;
-    cursor: pointer;
-}
-
-.day-link:hover {
-    background-color: #007bff;
-    color: white;
 }
 
 .btn-days {

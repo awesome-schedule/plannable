@@ -1,6 +1,7 @@
 import Course from './Course';
-import { RawCatalog } from './Meta';
+import Meta, { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
+import Schedule from './Schedule';
 
 export interface Semester {
     id: string;
@@ -57,6 +58,22 @@ class Catalog {
      */
     public getSection(key: string, section = 0) {
         return new Course(this.raw_data[key], key).getSection(section);
+    }
+
+    /**
+     * convert `cs11105` style key to `CS 1110 Lecture`
+     */
+    convertKey(schedule: Schedule, key: string) {
+        const raw = this.raw_data[key];
+        if (raw) return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
+        else {
+            for (const event of schedule.events) {
+                if (event.key === key) {
+                    return event.title === '' ? key : event.title;
+                }
+            }
+        }
+        return key;
     }
 
     public search(query: string, max_results = 6) {

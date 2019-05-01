@@ -56,113 +56,102 @@
                 click the middle icon to ...
             </p>
             <!-- picture slides illustration -->
-            <div class="bd-example">
-                <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
-                    <ol class="carousel-indicators">
-                        <li
-                            data-target="#carouselExampleCaptions"
-                            data-slide-to="0"
-                            class="active"
-                        ></li>
-                        <li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
-                        <li data-target="#carouselExampleCaptions" data-slide-to="2"></li>
-                    </ol>
-                    <div class="carousel-inner">
-                        <div class="carousel-item active">
+
+            <v-stepper v-model="e1" style="width:54vw;margin:auto auto">
+                <v-stepper-header>
+                    <v-stepper-step :complete="e1 > 1" step="1">Name of step 1</v-stepper-step>
+
+                    <v-divider></v-divider>
+
+                    <v-stepper-step :complete="e1 > 2" step="2">Name of step 2</v-stepper-step>
+
+                    <v-divider></v-divider>
+
+                    <v-stepper-step :complete="e1 > 3" step="3">Name of step 3</v-stepper-step>
+                </v-stepper-header>
+
+                <v-stepper-items>
+                    <v-stepper-content step="1">
+                        <v-card class="mb-5" height="400px" width="54vw">
                             <img
                                 src="../assets/placeholder.png"
-                                class="first-slide"
-                                alt="First slide"
+                                height="400px"
+                                style="margin:auto auto"
                             />
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>First slide label</h5>
-                                <p>
-                                    Nulla vitae elit libero, a pharetra augue mollis interdum.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
+                        </v-card>
+
+                        <button class="btn btn-primary" @click="e1 = 2">
+                            Continue
+                        </button>
+                    </v-stepper-content>
+
+                    <v-stepper-content step="2">
+                        <v-card class="mb-5" height="400px" width="54vw">
                             <img
                                 src="../assets/placeholder.png"
-                                class="second-slide"
-                                alt="Second slide"
+                                height="400px"
+                                style="margin:auto auto"
                             />
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Second slide label</h5>
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="carousel-item">
+                        </v-card>
+
+                        <button class="btn btn-primary" @click="e1 = 3">
+                            Continue
+                        </button>
+                    </v-stepper-content>
+
+                    <v-stepper-content step="3">
+                        <v-card class="mb-5" height="400px" width="54px">
                             <img
                                 src="../assets/placeholder.png"
-                                class="third-slide"
-                                alt="Third slide"
+                                height="400px"
+                                style="margin:auto auto"
                             />
-                            <div class="carousel-caption d-none d-md-block">
-                                <h5>Third slide label</h5>
-                                <p>
-                                    Praesent commodo cursus magna, vel scelerisque nisl consectetur.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <a
-                        class="carousel-control-prev"
-                        href="#carouselExampleCaptions"
-                        role="button"
-                        data-slide="prev"
-                    >
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                    <a
-                        class="carousel-control-next"
-                        href="#carouselExampleCaptions"
-                        role="button"
-                        data-slide="next"
-                    >
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </div>
-            </div>
+                        </v-card>
+
+                        <button class="btn btn-primary" @click="e1 = 1">
+                            Play Again
+                        </button>
+                    </v-stepper-content>
+                </v-stepper-items>
+            </v-stepper>
 
             <h3 id="item-3" class="text-primary">3. Add Event</h3>
             <p>
-               This feature allows you to customize your own schedule. You can add your weekly commitments on the schedule,
-               such as club meetings, office hours, etc. This feature is similar to any other calendar which later you can sync it with
-               your personal calender on google or apple.
+                This feature allows you to customize your own schedule. You can add your weekly
+                commitments on the schedule, such as club meetings, office hours, etc. This feature
+                is similar to any other calendar which later you can sync it with your personal
+                calender on google or apple.
             </p>
             <div class="GIF">
-            <img src="../assets/AddEvent.gif"/>
+                <img src="../assets/AddEvent.gif" />
             </div>
-            
+
             <h3 id="item-4" class="text-primary">4. Filters</h3>
             <p>
-                Filters allow you to set parameters to better navigate your searches and generate your schedules
+                Filters allow you to set parameters to better navigate your searches and generate
+                your schedules
             </p>
             <h4 id="item-4-1" class="text-success">No Class Time</h4>
             <p>
-                You can select time and day at which you do not wish to have class. The input form of time is 08:00:AM.
+                You can select time and day at which you do not wish to have class. The input form
+                of time is 08:00:AM.
             </p>
             <div class="GIF">
-                <img src="../assets/NoClassTime.gif"/>
+                <img src="../assets/NoClassTime.gif" />
             </div>
             <h4 id="item-4-2" class="text-success">Allow Waitlist/Closed</h4>
             <p>
-                By checking on those two buttons, it allows the scheduler to consider the classes when auto-generating schedules
-                even though it may no longer be available.
-                Or you can uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
+                By checking on those two buttons, it allows the scheduler to consider the classes
+                when auto-generating schedules even though it may no longer be available. Or you can
+                uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
             </p>
             <h4 id="item-4-3" class="text-success">Sort</h4>
             <p>
-                One powerful feature comes with auto-scheduling is that the 
-                scheduler will generate the schedules for you based on your preference.
+                One powerful feature comes with auto-scheduling is that the scheduler will generate
+                the schedules for you based on your preference.
             </p>
             <div class="GIF">
-                <img src="../assets/Sort.gif"/>
+                <img src="../assets/Sort.gif" />
             </div>
 
             <h3 id="item-5" class="text-primary">5. Display Settings</h3>
@@ -175,83 +164,35 @@
                 syncronize your schedule. Instruction is shown below:
             </p>
             <h4 id="item-7-1" class="text-success">Google Calendar</h4>
-            <div class="bd-example">
-                <div id="googleCalendarInstruction" class="carousel slide" data-ride="carousel">
-                    <ol class="carousel-indicators">
-                        <li
-                            data-target="#googleCalendarInstruction"
-                            data-slide-to="0"
-                            class="active"
-                        ></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="1"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="2"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="3"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="4"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="5"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="6"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="7"></li>
-                        <li data-target="#googleCalendarInstruction" data-slide-to="8"></li>
-                    </ol>
-                    <div class="carousel-inner text-center">
-                        <div class="carousel-item active">
-                            <img src="../assets/gcal1.png" />
-                            <h5>1. Make Your Schedule and Export</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal2.png" />
-                            <h5>2. Save The File Somewhere You Can Find</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal3.png" />
-                            <h5>3. Go to Google Calendar</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal4.png" />
-                            <h5>4. Click on Setting</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal5.png" />
-                            <h5>5. Select Import & Export</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal6.png" />
-                            <h5>6. Import Data Over Here</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal7.png" />
-                            <h5>7. Find and Open The File You Just Saved</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal8.png" />
-                            <h5>8. Import!</h5>
-                        </div>
-                        <div class="carousel-item">
-                            <img src="../assets/gcal9.png" />
-                            <h5>
-                                9. Now You Can View Your Schedule On Google Calendar!
-                            </h5>
-                        </div>
-                    </div>
-                    <a
-                        class="carousel-control-prev"
-                        href="#googleCalendarInstruction"
-                        role="button"
-                        data-slide="prev"
+            <v-stepper v-model="e2" style="width:54vw;margin:auto auto">
+                <v-stepper-header>
+                    <v-stepper-step
+                        v-for="(step, idx) in icalSteps"
+                        :key="idx"
+                        :complete="e2 > idx"
+                        :step="idx"
                     >
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Previous</span>
-                    </a>
-                    <a
-                        class="carousel-control-next"
-                        href="#googleCalendarInstruction"
-                        role="button"
-                        data-slide="next"
+                        {{ idx }}</v-stepper-step
                     >
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="sr-only">Next</span>
-                    </a>
-                </div>
-            </div>
+                </v-stepper-header>
+
+                <v-stepper-items>
+                    <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
+                        <v-card class="mb-5" height="400px" width="54vw">
+                            <img
+                                :src="icalSteps[idx].src"
+                                height="400px"
+                                style="margin:auto auto"
+                            />
+                            {{ step.src }}
+                        </v-card>
+
+                        <button class="btn btn-primary" @click="e2 !== 9 ? e2++ : (e2 = 1)">
+                            Continue
+                        </button>
+                    </v-stepper-content>
+                </v-stepper-items>
+            </v-stepper>
 
             <h5 id="item-7-2"></h5>
             <p>...</p>
@@ -267,6 +208,50 @@ import $ from 'jquery';
 @Component
 export default class Information extends Vue {
     @Prop(Number) readonly scheduleLeft!: number;
+
+    e1: number = 0;
+
+    e2: number = 0;
+
+    icalSteps = {
+        1: {
+            title: 'Make Your Schedule and Export',
+            src: '../assets/gcal1.png'
+        },
+        2: {
+            title: 'Save The File Somewhere You Can Find',
+            src: '../assets/gcal2.png'
+        },
+        3: {
+            title: 'Go to Google Calendar',
+            src: '../assets/gcal3.png'
+        },
+        4: {
+            title: 'Click on Setting',
+            src: '../assets/gcal4.png'
+        },
+        5: {
+            title: 'Select import and export',
+            src: '../assets/gcal5.png'
+        },
+        6: {
+            title: 'Import Data Over Here',
+            src: '../assets/gcal6.png'
+        },
+        7: {
+            title: 'Find and Open The File You Just Saved',
+            src: '../assets/gcal7.png'
+        },
+        8: {
+            title: 'Import!',
+            src: '../assets/gcal8.png'
+        },
+        9: {
+            title: 'Now You Can View Your Schedule On Google Calendar!',
+            src: '../assets/gcal9.png'
+        }
+    };
+
     mounted() {
         $('#myCarousel').carousel();
         $('body').scrollspy({ target: '#navbar-scrollspy' });

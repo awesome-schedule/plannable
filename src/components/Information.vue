@@ -210,51 +210,54 @@ export default class Information extends Vue {
     @Prop(Number) readonly scheduleLeft!: number;
 
     e1: number = 0;
-
     e2: number = 0;
 
     icalSteps = {
         1: {
             title: 'Make Your Schedule and Export',
-            src: '../assets/gcal1.png'
+            src: this.imgPath('gcal1.png')
         },
         2: {
             title: 'Save The File Somewhere You Can Find',
-            src: '../assets/gcal2.png'
+            src: this.imgPath('gcal2.png')
         },
         3: {
             title: 'Go to Google Calendar',
-            src: '../assets/gcal3.png'
+            src: this.imgPath('gcal3.png')
         },
         4: {
             title: 'Click on Setting',
-            src: '../assets/gcal4.png'
+            src: this.imgPath('gcal4.png')
         },
         5: {
             title: 'Select import and export',
-            src: '../assets/gcal5.png'
+            src: this.imgPath('gcal5.png')
         },
         6: {
             title: 'Import Data Over Here',
-            src: '../assets/gcal6.png'
+            src: this.imgPath('gcal6.png')
         },
         7: {
             title: 'Find and Open The File You Just Saved',
-            src: '../assets/gcal7.png'
+            src: this.imgPath('gcal7.png')
         },
         8: {
             title: 'Import!',
-            src: '../assets/gcal8.png'
+            src: this.imgPath('gcal8.png')
         },
         9: {
             title: 'Now You Can View Your Schedule On Google Calendar!',
-            src: '../assets/gcal9.png'
+            src: this.imgPath('gcal9.png')
         }
     };
 
     mounted() {
         $('#myCarousel').carousel();
         $('body').scrollspy({ target: '#navbar-scrollspy' });
+    }
+
+    imgPath(name: string) {
+        return require('../assets/' + name);
     }
 }
 </script>

@@ -55,7 +55,8 @@
                     more
                 </div>
                 <div v-if="showRoom" class="ml-2 crs-info">
-                    {{ firstSec.meetings[0].room }} and {{ scheduleBlock.section.length - 1 }} more
+                    {{ firstSec.meetings[0].room }} and
+                    {{ scheduleBlock.section.sections.length - 1 }} more
                 </div>
             </div>
             <div v-if="isEvent">

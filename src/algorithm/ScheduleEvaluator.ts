@@ -134,7 +134,7 @@ class ScheduleEvaluator {
                 name: 'IamFeelingLucky',
                 enabled: false,
                 reverse: false,
-                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly'],
+                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
                 title: `I'm Feeling Lucky`,
                 description: 'Sort randomly'
             }

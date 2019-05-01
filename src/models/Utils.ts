@@ -274,7 +274,7 @@ export function timeout<T>(
         return Promise.race([
             promise,
             new Promise((resolve, reject) => {
-                setTimeout(() => {
+                window.setTimeout(() => {
                     reject(msg);
                 }, time);
             })

@@ -126,6 +126,7 @@ class Schedule {
      */
     public colorSlots: Array<Set<string>>;
     public multiSectionSelect = true;
+    public pendingCompute = 0;
 
     private previous: [string, number] | null;
 
@@ -301,13 +302,19 @@ class Schedule {
     }
 
     /**
-     * Compute the schedule view based on `this.All` and `this.preview`
+     * Compute the schedule view based on `this.All` and `this.preview`.
+     * If there is a pending compute task, remove that pending task.
      *
      * @remarks this method has a very high time complexity, probably cubic in the number of sections.
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.
      */
-    public computeSchedule(multiSelect: boolean = true) {
+    public computeSchedule(multiSelect = true) {
+        window.clearTimeout(this.pendingCompute);
+        this.pendingCompute = window.setTimeout(() => this._computeSchedule(multiSelect), 10);
+    }
+
+    public _computeSchedule(multiSelect = true) {
         const catalog = window.catalog;
         if (!catalog) return;
 

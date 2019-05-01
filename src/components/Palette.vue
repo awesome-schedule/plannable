@@ -11,16 +11,18 @@
                     class="list-group-item py-1 px-2"
                 >
                     <div class="row no-gutters justify-content-between w-100">
-                        <div class="col-md-auto" style="font-size: 14px">
+                        <div class="col-sm-auto mr-auto" style="font-size: 14px">
                             <label :for="`color-${pair[1]}`">
                                 {{ convertKey(pair[0]) }}
                             </label>
                         </div>
-                        <div class="col-md-auto">
+                        <div class="col-sm-auto align-self-center">
                             <i
                                 class="fas fa-sync-alt click-icon mr-1"
                                 @click="setColor(pair[0], randomColor())"
                             ></i>
+                        </div>
+                        <div class="col-sm-auto">
                             <input
                                 :id="`color-${pair[0]}`"
                                 type="color"

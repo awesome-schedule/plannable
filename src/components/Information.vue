@@ -35,7 +35,7 @@
             data-target="#navbar-scrollspy"
             data-offset="10"
         >
-            <h2 id="item-1">Welcome to our infomation page!</h2>
+            <h2 id="item-1">Welcome to our information page!</h2>
             <p>
                 This is a website which helps UVa students to schedule their classes more
                 efficiently. Get your class selection done with the searching field and customize

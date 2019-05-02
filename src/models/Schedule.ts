@@ -16,6 +16,11 @@ export interface ScheduleJSON {
     savedColors: { [x: string]: string };
 }
 
+export interface ScheduleOptions {
+    multiSelect: boolean;
+    combineSections: boolean;
+}
+
 /**
  * A schedule is a list of courses with computed properties that aid rendering
  *
@@ -38,6 +43,11 @@ class Schedule {
     ];
 
     public static savedColors: { [x: string]: string } = {};
+    public static options: ScheduleOptions = {
+        multiSelect: true,
+        combineSections: true
+    };
+
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
@@ -86,6 +96,8 @@ class Schedule {
      *
      * Note that if **section** is -1, it means that all sections are allowed.
      * Otherwise, **section** should be a Set of integers
+     *
+     * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
      */
     public All: { [x: string]: Set<number> | -1 };
     public title: string;
@@ -125,7 +137,6 @@ class Schedule {
      * keep track of used colors to avoid color collision
      */
     public colorSlots: Array<Set<string>>;
-    public multiSectionSelect = true;
     public pendingCompute = 0;
 
     private previous: [string, number] | null;
@@ -207,10 +218,10 @@ class Schedule {
         if (sections instanceof Set) {
             if (sections.has(section)) return false;
             sections.add(section);
-            if (update) this.computeSchedule(this.multiSectionSelect);
+            if (update) this.computeSchedule();
         } else {
             this.All[key] = new Set([section]);
-            if (update) this.computeSchedule(this.multiSectionSelect);
+            if (update) this.computeSchedule();
         }
         return true;
     }
@@ -242,18 +253,17 @@ class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        if (update) this.computeSchedule(this.multiSectionSelect);
+        if (update) this.computeSchedule();
     }
 
     public removePreview() {
         this.previous = null;
-        this.computeSchedule(this.multiSectionSelect);
+        this.computeSchedule();
     }
 
-    public preview(key: string, section: number, multiSelect: boolean = true) {
+    public preview(key: string, section: number) {
         this.previous = [key, section];
-        this.computeSchedule(multiSelect);
-        this.multiSectionSelect = multiSelect;
+        this.computeSchedule();
     }
 
     public addEvent(
@@ -309,12 +319,12 @@ class Schedule {
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.
      */
-    public computeSchedule(multiSelect = true) {
+    public computeSchedule() {
         window.clearTimeout(this.pendingCompute);
-        this.pendingCompute = window.setTimeout(() => this._computeSchedule(multiSelect), 10);
+        this.pendingCompute = window.setTimeout(() => this._computeSchedule(), 10);
     }
 
-    public _computeSchedule(multiSelect = true) {
+    public _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
 
@@ -350,7 +360,7 @@ class Schedule {
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
                 } else if (sections.size > 0) {
-                    if (multiSelect) {
+                    if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined: Course[] = Object.values(
                             course.getCourse([...sections]).getCombined()
@@ -486,9 +496,9 @@ class Schedule {
     }
 
     /**
-     * places a `Section`/`Course` into one of the `Mo` to `Fr` array according to its `days` property
+     * places a `Section`/`Course`/`Event`/ into one of the `Mo` to `Fr` array according to its `days` property
      *
-     * @remarks a Course instance if all of its sections occur at the same time
+     * @remarks we can place a Course instance if all of its sections occur at the same time
      */
     public place(course: Section | Course | Event) {
         if (course instanceof Section) {
@@ -502,14 +512,26 @@ class Schedule {
             }
         } else {
             if (!course.allSameTime()) return;
-            const color = this.getColor(course);
             const courseSec = course.sections;
-            for (const meeting of courseSec[0].meetings) {
-                // if only one section, just use the section rather than the section array
-                if (courseSec.length === 1) {
-                    this.placeHelper(color, meeting.days, courseSec[0]);
+            const firstSec = courseSec[0];
+            // if only one section, just use the section rather than the section array
+            if (courseSec.length === 1) {
+                const color = this.getColor(firstSec);
+                for (const meeting of firstSec.meetings)
+                    this.placeHelper(color, meeting.days, firstSec);
+            } else {
+                if (Schedule.options.combineSections) {
+                    const color = this.getColor(course);
+                    for (const meeting of firstSec.meetings)
+                        this.placeHelper(color, meeting.days, course);
                 } else {
-                    this.placeHelper(color, meeting.days, course);
+                    // if we don't combined the sections, we call place each section
+                    for (const section of course.sections) {
+                        // note: sections belonging to the same course will have the same color
+                        const color = this.getColor(section);
+                        for (const meeting of section.meetings)
+                            this.placeHelper(color, meeting.days, section);
+                    }
                 }
             }
         }
@@ -537,7 +559,7 @@ class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.computeSchedule(true);
+        this.computeSchedule();
     }
 
     public cleanSchedule() {
@@ -549,6 +571,7 @@ class Schedule {
         this.currentCourses = [];
         this.currentIds = {};
     }
+
     /**
      * instantiate a `Schedule` object from its JSON representation
      */

@@ -1,3 +1,12 @@
+/**
+ * the graph model and algorithm use primarily for schedule rendering
+ *
+ * @author Hanzhi Zhou
+ */
+
+/**
+ * vertex data
+ */
 interface VertexData<T> {
     visited: boolean;
     depth: number;
@@ -22,12 +31,18 @@ export class Vertex<T> {
      * the maximum depth of the path starting from the root that the current node is on
      */
     public pathDepth: number = 0;
+    /**
+     * the parent of this vertex in the depth first tree
+     */
     public parent?: Vertex<T>;
     /**
      * the all of the paths starting at the root and ending at one of the leaves.
      * if this vertex is not the root, then `path` will be empty
      */
     public path: Vertex<T>[][] = [];
+    /**
+     * the value contained in this vertex
+     */
     public val: T;
     constructor(t: T) {
         this.val = t;
@@ -77,7 +92,6 @@ function sortFunc<T>(graph: Graph<T>) {
 /**
  * perform depth first search on a graph that has multiple connected components
  *
- * @author Hanzhi Zhou
  * @param graph the graph represented as an adjacency list
  *
  * @see Vertex<T>
@@ -105,12 +119,16 @@ export function depthFirstSearch<T>(graph: Graph<T>) {
 }
 /**
  * A recursive implementation of depth first search on a single connected component
- * @author Hanzhi Zhou
  * @param start
  * @param graph
  */
 function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
-    // sort by breadth
+    /**
+     * the neighbors sort by descending breadth
+     *
+     * @remarks Usually we use a priority queue for getting the max/min value,
+     * but since we only have a small number of nodes, it suffices to sort them in place.
+     */
     const neighbors = graph.get(start)!.sort(sortFunc(graph));
     start.visited = true;
     let hasUnvisited = false;
@@ -126,7 +144,7 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     }
 
     // if no more nodes can be visited from the current node, it is the end of this DFS path.
-    // trace back the parent pointer to update parent nodes' maximum path depth.
+    // trace the parent pointer to update parent nodes' maximum path depth until we reach the root
     if (!hasUnvisited) {
         let curParent: Vertex<T> | undefined = start;
         const path: Vertex<T>[] = [];

@@ -121,7 +121,6 @@ export default class App extends Vue {
 
     // other
     noti = new Notification();
-    navHeight = 500;
     loading = false;
     mobile = window.screen.width < 900;
     sideBarWidth = this.mobile ? 10 : 3;
@@ -150,7 +149,7 @@ export default class App extends Vue {
         return this.sideBarActive ? 23 : 3;
     }
     /**
-     * get the list of current ids, sorted in alpabetical order of the keys
+     * get the list of current ids, sorted in alphabetical order of the keys
      */
     get currentIds(): Array<[string, string]> {
         return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
@@ -176,13 +175,24 @@ export default class App extends Vue {
         }
     }
 
+    @Watch('multiSelect')
+    multiSelectWatch() {
+        Schedule.options.multiSelect = this.multiSelect;
+        this.currentSchedule.computeSchedule();
+    }
+
+    @Watch('combineSections')
+    combineSectionWatch() {
+        Schedule.options.combineSections = this.combineSections;
+        this.currentSchedule.computeSchedule();
+    }
+
     created() {
-        this.navHeight = document.documentElement.clientHeight;
         this.loading = true;
 
         (async () => {
             // note: these three can be executed in parallel, i.e. they are not inter-dependent
-            const [pay1, pay2, data] = await Promise.all([
+            const [pay1, pay2, pay3] = await Promise.all([
                 loadTimeMatrix(),
                 loadBuildingList(),
                 loadSemesterList()
@@ -193,8 +203,10 @@ export default class App extends Vue {
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            const semesters = data.payload;
-            if (data.level !== 'info') this.noti.notify(data);
+            const semesters = pay3.payload;
+            if (pay3.level !== 'info') this.noti.notify(pay3);
+            console[pay3.level](pay3.msg);
+
             if (semesters) {
                 window.semesters = this.semesters = semesters;
                 await this.selectSemester(0);
@@ -258,7 +270,7 @@ export default class App extends Vue {
     }
     switchSchedule(generated: boolean) {
         if (generated) {
-            // dont do anything if already in "generated" mode
+            // don't do anything if already in "generated" mode
             // or there are no generated schedules
             // or the generated schedules do not correspond to the current schedule
             if (
@@ -340,7 +352,7 @@ export default class App extends Vue {
             this.saveStatus();
         }
         // note: adding a course to schedule.All cannot be detected by Vue.
-        // Must use forceUpdate to rerender component
+        // Must use forceUpdate to re-render component
         (this.$refs.selectedClassList as Vue).$forceUpdate();
         const classList = this.$refs.enteringClassList;
         if (classList instanceof Vue) (classList as Vue).$forceUpdate();
@@ -420,6 +432,7 @@ export default class App extends Vue {
         if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`);
         const result = await loadSemesterData(semesterId, force);
         if (result.level !== 'info') this.noti.notify(result);
+        console[result.level](result.msg);
 
         //  if the a catalog object is returned
         if (result.payload) {

@@ -81,7 +81,7 @@ class Course implements CourseFields, Hashable {
 
     /**
      * Get the course of a given section.
-     * @param contained By letting contained = true, **it will be possible** to get a Course whose section index
+     * @param contained By letting contained = false, **it will be possible** to get a Course whose section index
      * is not in the subset of sections contained in this instance
      */
     public getSection(sid: number, contained = false): Section {

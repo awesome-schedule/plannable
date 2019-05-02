@@ -14,7 +14,6 @@ export default class ClassList extends Vue {
     @Prop({ default: false, type: Boolean }) readonly isEntering!: boolean;
     @Prop(Boolean) readonly generated!: boolean;
     @Prop(Boolean) readonly showClasslistTitle!: boolean;
-    @Prop(Boolean) readonly multiSelect!: boolean;
 
     collapsed: { [x: string]: string } = {};
     expandOnEntering = false;
@@ -41,7 +40,7 @@ export default class ClassList extends Vue {
             : 'fa-chevron-right';
     }
     preview(key: string, idx: number) {
-        this.schedule.preview(key, idx, this.multiSelect);
+        this.schedule.preview(key, idx);
     }
     removePreview() {
         this.schedule.removePreview();

@@ -6,8 +6,7 @@
         <nav
             class="d-block bg-light tab-bar"
             :style="{
-                width: sideBarWidth + 'vw',
-                'max-height': navHeight + 'px'
+                width: sideBarWidth + 'vw'
             }"
         >
             <div
@@ -131,7 +130,6 @@
                     :is-entering="isEntering"
                     :show-classlist-title="showClasslistTitle"
                     :generated="generated"
-                    :multi-select="multiSelect"
                     @update_course="updateCourse"
                     @close="closeClassList"
                     @trigger-classlist-modal="showCourseModal"
@@ -222,7 +220,6 @@
                         :schedule="currentSchedule"
                         :show-classlist-title="showClasslistTitle"
                         :generated="generated"
-                        :multi-select="multiSelect"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
                         @trigger-classlist-modal="showCourseModal"
@@ -245,7 +242,6 @@
                             v-model="multiSelect"
                             type="checkbox"
                             class="custom-control-input"
-                            @change="currentSchedule.computeSchedule(multiSelect)"
                         />
                         <label
                             class="custom-control-label"
@@ -364,20 +360,6 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
-                <li class="list-group-item">
-                    <div
-                        class="custom-control custom-checkbox"
-                        title="Combine sections ocurring at the same time"
-                    >
-                        <input
-                            id="comb-sec"
-                            v-model="combineSections"
-                            type="checkbox"
-                            class="custom-control-input"
-                        />
-                        <label class="custom-control-label" for="comb-sec">Combine Sections</label>
-                    </div>
-                </li>
                 <li
                     class="list-group-item px-3"
                     title="Note that you can drag sort options to change their priority in fallback mode"
@@ -479,6 +461,20 @@
                         <small class="form-text text-muted"
                             >May crash your browser if too big</small
                         >
+                    </div>
+                </li>
+                <li class="list-group-item">
+                    <div
+                        class="custom-control custom-checkbox"
+                        title="Combine sections ocurring at the same time"
+                    >
+                        <input
+                            id="comb-sec"
+                            v-model="combineSections"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="comb-sec">Combine Sections</label>
                     </div>
                 </li>
             </ul>

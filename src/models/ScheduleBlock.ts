@@ -7,7 +7,7 @@ import Course from './Course';
  * A `ScheduleBlock` is a data structure that holds
  * all the necessary information to render a schedule on `GridSchedule`
  *
- * @see {@link GridSchedule.vue}
+ * @see [[GridSchedule]]
  */
 class ScheduleBlock {
     /**

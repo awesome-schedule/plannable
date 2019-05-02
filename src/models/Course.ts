@@ -118,10 +118,11 @@ class Course implements CourseFields, Hashable {
 
     /**
      * Get an object in which the key is the days string and
-     * value is the array of section indices contained in this Course occurring at that time
-     *
-     * @example
-     * {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [1,2,3,7,9]}`
+     * value is the array of section indices contained in this Course occurring at that time.
+     * For example:
+     * ```js
+     * {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [1,2,3,7,9]}
+     * ```
      */
     public getCombined(): { [x: string]: Section[] } {
         const combined: { [x: string]: Section[] } = {};

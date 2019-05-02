@@ -126,8 +126,10 @@ class Schedule {
      *
      * @remarks If a Course has multiple sections selected, a `+x` will be appended
      *
-     * @example
+     * Example:
+     * ```js
      * {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}
+     * ```
      */
     public currentIds: { [x: string]: string };
 

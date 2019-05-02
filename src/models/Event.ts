@@ -1,4 +1,4 @@
-import * as Utils from './Utils';
+import * as Utils from '../utils';
 import { TimeDict } from '../algorithm/ScheduleGenerator';
 import Hashable from './Hashable';
 

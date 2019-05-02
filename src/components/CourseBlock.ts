@@ -2,7 +2,7 @@ import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';
 import Event from '../models/Event';
-import { to12hr, timeToNum } from '../models/Utils';
+import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component

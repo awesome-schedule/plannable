@@ -1,10 +1,12 @@
 import Expirable from './Expirable';
-import { NotiMsg } from '../models/Notification';
-import { errToStr, timeout } from '../models/Utils';
+import { NotiMsg } from '../utils/Notification';
+import { errToStr, timeout } from '../utils';
 
 /**
- * @template T the type of the object to construct
- * @template T_JSON the JSON representation of the object T
+ * Examples, see [[loadBuildingList]] and [[loadSemesterData]]
+ *
+ * @typeparam T the type of the object to construct
+ * @typeparam T_JSON the JSON representation of the object T
  * @param key the key in the localStorage
  * @param request the async function used to request data from remote, if local data expires or does not exist
  * @param construct function to construct the actual object T from its JSON representation T_JSON
@@ -21,10 +23,6 @@ import { errToStr, timeout } from '../models/Utils';
  * and turns that into T_JSON or null
  * @param obj.validator The validator that checks whether the return value of the parser is a valid T_JSON object
  * @param obj.force whether this is a forced update
- *
- * For examples,
- * @see {@link ./BuildingLoader.ts}
- * @see {@link ./CatalogLoader.ts}
  */
 export async function loadFromCache<T, T_JSON extends Expirable>(
     key: string,

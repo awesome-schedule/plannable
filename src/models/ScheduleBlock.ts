@@ -1,6 +1,6 @@
 import Section from './Section';
 import Event from './Event';
-import { checkTimeBlockConflict } from './Utils';
+import { checkTimeBlockConflict } from '../utils';
 import Course from './Course';
 
 /**

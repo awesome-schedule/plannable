@@ -3,7 +3,7 @@ import { parse } from 'papaparse';
 import querystring from 'querystring';
 import Meta, { RawCatalog, RawSection, RawMeeting } from '../models/Meta';
 import Catalog, { Semester, CatalogJSON } from '../models/Catalog';
-import { NotiMsg } from '../models/Notification';
+import { NotiMsg } from '../utils/Notification';
 import { loadFromCache } from './Loader';
 
 /**

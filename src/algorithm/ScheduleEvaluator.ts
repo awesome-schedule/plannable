@@ -10,7 +10,7 @@ import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import quickselect from 'quickselect';
-import { calcOverlap } from '../models/Utils';
+import { calcOverlap } from '../utils';
 
 export enum Mode {
     fallback = 0,

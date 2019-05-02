@@ -25,7 +25,7 @@ export default class Palette extends Vue {
         );
     }
     /**
-     * colors must always be recomputed becahse `Schedule.savedColors` is not a reactive property
+     * colors must always be recomputed because `Schedule.savedColors` is not a reactive property
      */
     courseColors() {
         return Object.entries(Schedule.savedColors)

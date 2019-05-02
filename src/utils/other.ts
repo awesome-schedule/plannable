@@ -1,5 +1,6 @@
 import Course from '../models/Course';
 import { AxiosError } from 'axios';
+import { saveAs } from 'file-saver';
 
 /**
  * open a course detail on Lou's list
@@ -19,7 +20,6 @@ export function openLousList(semesterId: number, courseId: number) {
 /**
  * view grade distribution of this course on vagrades
  * @author Hanzhi Zhou
- * @remarks This stupid author totally sucks!!!!!!!
  */
 export function openVAGrade(course: Course) {
     window.open(

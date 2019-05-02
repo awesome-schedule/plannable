@@ -18,7 +18,7 @@ export interface CourseFields {
     /**
      * One of the keys of `Meta.TYPE_PARSE`
      *
-     * @see Meta.TYPE_PARSE
+     * @see [[Meta.TYPES_PARSE]]
      */
     type: string;
     /**
@@ -36,6 +36,8 @@ class Course implements CourseFields, Hashable {
     [x: string]: any;
     /**
      * key of this in Catalog, equal to (department + number + `Meta.TYPES_PARSE`\[type\])
+     *
+     * @see [[Meta.TYPES_PARSE]]
      */
     public key: string;
     public readonly department: string;

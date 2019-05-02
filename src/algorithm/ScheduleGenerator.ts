@@ -49,7 +49,7 @@ export interface WeekDict<T> {
  * // represents that this `Section` or `Event` will
  * // take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
  *
- * @see TimeBlock
+ * @see [[TimeBlock]]
  */
 export interface TimeDict extends WeekDict<number> {}
 /**
@@ -88,7 +88,7 @@ export interface RoomNumberDict extends WeekDict<number> {}
  * @example
  * ["span20205",{"Mo":[600,650],"Tu":[600,650]},[0, 1, 2]]
  *
- * @see TimeDict
+ * @see [[TimeDict]]
  */
 export type RawAlgoCourse = [string, TimeDict, number[], RoomNumberDict];
 
@@ -146,7 +146,7 @@ class ScheduleGenerator {
      * Note that this method does not need to run very fast. It only preprocess the select
      * courses so that they are stored in a desirable format.
      *
-     * @see ScheduleEvaluator
+     * @see [[ScheduleEvaluator]]
      */
     public getSchedules(
         schedule: Schedule,

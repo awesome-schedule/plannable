@@ -6,7 +6,7 @@ import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Section from '../models/Section';
 import Event from '../models/Event';
-import * as Utils from './Time';
+import * as Utils from '.';
 
 /**
  * Convert a schedule to iCalendar format.

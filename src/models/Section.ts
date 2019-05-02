@@ -3,7 +3,7 @@ import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
 import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
-import { parseTimeAll } from './Utils';
+import { parseTimeAll, hashCode } from './Utils';
 
 /**
  * A section contains all the fields that a Course has,
@@ -94,7 +94,7 @@ class Section implements CourseFields, Hashable {
      * @returns the hash of the Course that this section belongs to.
      */
     public hash() {
-        return this.course.hash();
+        return hashCode(this.key);
     }
 
     public getRoomTime(): [TimeDict, RoomDict] | null {
@@ -121,7 +121,7 @@ class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
                 if (dayBlock) {
                     dayBlock.push(...timeBlock);
-                    (roomBlock as string[]).push(meeting.room);
+                    roomBlock!.push(meeting.room);
                 } else {
                     // copy
                     timeDict[day] = timeBlock.concat();

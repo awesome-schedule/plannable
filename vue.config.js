@@ -1,16 +1,22 @@
 // vue.config.js
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
+const externals = {
+    jquery: 'jQuery',
+    bootstrap: 'bootstrap'
+};
 module.exports = {
     configureWebpack: config => {
         if (process.env.NODE_ENV === 'production') {
             return {
-                externals: {
-                    jquery: 'jQuery',
-                    bootstrap: 'bootstrap'
-                },
+                externals,
                 plugins: [
                     new HtmlWebpackExternalsPlugin({
                         externals: [
+                            {
+                                module: 'axios',
+                                entry: '//unpkg.com/axios@0.18.0/dist/axios.min.js',
+                                global: 'axios'
+                            },
                             {
                                 module: 'vue',
                                 entry: '//cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js',
@@ -30,13 +36,8 @@ module.exports = {
                                 global: 'Papa'
                             },
                             {
-                                module: 'axios',
-                                entry: '//unpkg.com/axios/dist/axios.min.js',
-                                global: 'axios'
-                            },
-                            {
                                 module: 'vuetify',
-                                entry: 'https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js',
+                                entry: '//cdn.jsdelivr.net/npm/vuetify@1.5.14/dist/vuetify.min.js',
                                 global: 'Vuetify'
                             }
                         ]
@@ -45,10 +46,7 @@ module.exports = {
             };
         } else {
             return {
-                externals: {
-                    jquery: 'jQuery',
-                    bootstrap: 'bootstrap'
-                }
+                externals
             };
         }
     }

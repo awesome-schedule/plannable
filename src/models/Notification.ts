@@ -15,7 +15,7 @@ class Notification {
 
     public msg: string;
     public class: string;
-    public job: NodeJS.Timeout | null;
+    public job: number | null;
 
     constructor() {
         this.msg = '';
@@ -60,7 +60,7 @@ class Notification {
             this.class = '';
             this.job = null;
         } else {
-            this.job = setTimeout(() => {
+            this.job = window.setTimeout(() => {
                 this.clear(0);
             }, timeout * 1000);
         }

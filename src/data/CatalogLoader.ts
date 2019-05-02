@@ -79,6 +79,27 @@ export function parseSemesterData(csv_string: string) {
     for (let j = 1; j < raw_data.length; j++) {
         const data = raw_data[j];
         const key = (data[1] + data[2] + CLASS_TYPES[data[4]]).toLowerCase();
+        const meetings: RawMeeting[] = [];
+        const s = new Set<string>();
+        for (let i = 0; i < 4; i++) {
+            const start = 6 + i * 4; // meeting information starts at index 6
+            if (data[start]) {
+                if (s.has(data[start + 1])) {
+                    continue;
+                }
+
+                s.add(data[start + 1]);
+
+                const tempMeeting: RawMeeting = [
+                    data[start],
+                    data[start + 1],
+                    data[start + 2],
+                    data[start + 3]
+                ];
+                meetings.push(tempMeeting);
+            }
+        }
+
         const tempSection: RawSection = [
             parseInt(data[0]),
             data[3],
@@ -87,26 +108,9 @@ export function parseSemesterData(csv_string: string) {
             parseInt(data[25]),
             parseInt(data[26]),
             parseInt(data[27]),
-            []
+            meetings
         ];
-        const meetings: RawMeeting[] = [];
-        const s: Set<string> = new Set();
-        for (let i = 0; i < 4; i++) {
-            if (data[6 + i * 4] && data[6 + i * 4] !== '') {
-                if(s.has(data[6 + i * 4 + 1])) {
-                    continue;
-                }
-                s.add(data[6 + i * 4 + 1]);
-                const tempMeeting: RawMeeting = [
-                    data[6 + i * 4],
-                    data[6 + i * 4 + 1],
-                    data[6 + i * 4 + 2],
-                    data[6 + i * 4 + 3]
-                ];
-                meetings.push(tempMeeting);
-            }
-        }
-        tempSection[7] = meetings;
+
         if (rawCatalog[key]) {
             rawCatalog[key][6].push(tempSection);
         } else {

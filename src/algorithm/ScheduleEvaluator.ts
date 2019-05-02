@@ -1,3 +1,10 @@
+/**
+ * The goal of the schedule evaluator is to efficiently sort the generated schedules
+ * according to the set of the rules defined by the user
+ *
+ * @author Hanzhi Zhou
+ */
+
 import Schedule from '../models/Schedule';
 import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';
@@ -134,7 +141,7 @@ class ScheduleEvaluator {
                 name: 'IamFeelingLucky',
                 enabled: false,
                 reverse: false,
-                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly'],
+                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
                 title: `I'm Feeling Lucky`,
                 description: 'Sort randomly'
             }
@@ -505,6 +512,11 @@ class ScheduleEvaluator {
         }
     }
 
+    /**
+     * count the number of sort options enabled.
+     *
+     * @returns [number of sort options enabled, the index of the last enabled sort option]
+     */
     public countSortOpt() {
         let count = 0;
         let lastIdx: number = -1;

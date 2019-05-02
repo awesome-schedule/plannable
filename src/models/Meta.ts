@@ -1,3 +1,7 @@
+/**
+ * Meta stores some constants and type definitions
+ */
+
 import Schedule from './Schedule';
 import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
 

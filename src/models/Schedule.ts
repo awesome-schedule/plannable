@@ -1,3 +1,9 @@
+/**
+ * Schedule handles the storage, access, mutation and render of courses and events.
+ *
+ * @author Hanzhi Zhou, Kaiying Shan
+ */
+
 import Section from './Section';
 import Course from './Course';
 import ScheduleBlock from './ScheduleBlock';
@@ -26,7 +32,7 @@ export interface ScheduleOptions {
  *
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
-class Schedule {
+export default class Schedule {
     public static readonly fields = ['All', 'title', 'id'];
     public static readonly bgColors = [
         '#f7867e',
@@ -126,8 +132,10 @@ class Schedule {
      *
      * @remarks If a Course has multiple sections selected, a `+x` will be appended
      *
-     * @example
+     * Example:
+     * ```js
      * {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}
+     * ```
      */
     public currentIds: { [x: string]: string };
 
@@ -643,5 +651,3 @@ class Schedule {
         return Object.keys(this.All).length === 0;
     }
 }
-
-export default Schedule;

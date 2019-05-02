@@ -1,3 +1,8 @@
+/**
+ * @see [[Event]]
+ * @author Kaiying Shan
+ */
+
 import * as Utils from '../utils';
 import { TimeDict } from '../algorithm/ScheduleGenerator';
 import Hashable from './Hashable';
@@ -7,7 +12,7 @@ import Hashable from './Hashable';
  *
  * It is uniquely identified by its `days` property
  */
-class Event implements Hashable {
+export default class Event implements Hashable {
     public key: string;
     public days: string;
     public display: boolean;
@@ -40,7 +45,7 @@ class Event implements Hashable {
     public toTimeDict(): TimeDict {
         const dict: TimeDict = {};
 
-        const [date, timeBlock] = Utils.parseTimeAll(this.days) as [string[], number[]];
+        const [date, timeBlock] = Utils.parseTimeAll(this.days)!;
         for (const day of date) {
             dict[day] = timeBlock;
         }
@@ -48,5 +53,3 @@ class Event implements Hashable {
         return dict;
     }
 }
-
-export default Event;

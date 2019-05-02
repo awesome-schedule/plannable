@@ -6,8 +6,7 @@
         <nav
             class="d-block bg-light tab-bar"
             :style="{
-                width: sideBarWidth + 'vw',
-                'max-height': navHeight + 'px'
+                width: sideBarWidth + 'vw'
             }"
         >
             <div

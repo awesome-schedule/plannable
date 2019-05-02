@@ -26,7 +26,11 @@
             </nav>
         </nav>
         <div
-            :style="{ 'margin-left': scheduleLeft + 'vw' }"
+            :style="{
+                'margin-left': scheduleLeft + 5 + 'vw',
+                'margin-right': '5vw',
+                'margin-top': '5vh'
+            }"
             data-spy="scroll"
             data-target="#navbar-scrollspy"
             data-offset="10"
@@ -171,6 +175,7 @@
                         :key="idx"
                         :complete="e2 > idx"
                         :step="idx"
+                        style="margin:auto auto"
                     >
                         {{ idx }}</v-stepper-step
                     >
@@ -178,17 +183,16 @@
 
                 <v-stepper-items>
                     <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
-                        <v-card class="mb-5" height="400px" width="54vw">
-                            <img
-                                :src="icalSteps[idx].src"
-                                height="400px"
-                                style="margin:auto auto"
-                            />
-                            {{ step.src }}
+                        <v-card class="mb-2" height="468px" width="54vw">
+                            <img :src="icalSteps[idx].src" width="100%" style="margin:auto auto" />
                         </v-card>
-
+                        <v-card-title class="mb-2" primary-title>
+                            <div>
+                                <div>{{ step.title }}</div>
+                            </div>
+                        </v-card-title>
                         <button class="btn btn-primary" @click="e2 !== 9 ? e2++ : (e2 = 1)">
-                            Continue
+                            {{ e2 === 9 ? 'Play Again' : 'Continue' }}
                         </button>
                     </v-stepper-content>
                 </v-stepper-items>
@@ -264,8 +268,6 @@ export default class Information extends Vue {
 
 <style scoped>
 #info-panel {
-    background-color: antiquewhite;
-    /* background-color: rgb(244, 247, 248); */
 }
 #navbar-scrollspy {
     position: fixed;

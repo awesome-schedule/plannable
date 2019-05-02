@@ -9,7 +9,6 @@ import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
 import draggable from 'vuedraggable';
-import GithubButton from 'vue-github-button';
 
 import 'bootstrap';
 import $ from 'jquery';
@@ -43,8 +42,7 @@ window.scheduleEvaluator = new ScheduleEvaluator();
         Palette,
         EventView,
         Information,
-        External,
-        GithubButton
+        External
     }
 })
 export default class App extends Vue {

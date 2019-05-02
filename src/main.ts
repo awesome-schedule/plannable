@@ -2,7 +2,7 @@ import Vue from 'vue';
 import App from './App.vue';
 import querystring from 'querystring';
 import axios from 'axios';
-import { openLousList, openVAGrade } from './models/Utils';
+import { openLousList, openVAGrade } from './utils';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import Catalog, { Semester } from './models/Catalog';
 import Vuetify from 'vuetify';

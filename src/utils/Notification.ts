@@ -1,10 +1,19 @@
+/**
+ * the notification class encapsulates common functions used to inform user about the results of certain actions
+ *
+ * @author Hanzhi Zhou
+ */
+
+/**
+ * @typeparam T the type of the payload
+ */
 export interface NotiMsg<T> {
     level: 'info' | 'error' | 'warn';
     msg: string;
     payload?: T;
 }
 
-class Notification {
+export class Notification {
     public static readonly TYPES: { [x: string]: string } = Object.freeze({
         info: 'info',
         error: 'danger',
@@ -60,9 +69,7 @@ class Notification {
             this.class = '';
             this.job = null;
         } else {
-            this.job = window.setTimeout(() => {
-                this.clear(0);
-            }, timeout * 1000);
+            this.job = window.setTimeout(() => this.clear(0), timeout * 1000);
         }
     }
 }

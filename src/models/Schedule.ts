@@ -4,7 +4,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Event from './Event';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
-import * as Utils from './Utils';
+import * as Utils from '../utils';
 import Hashable from './Hashable';
 import { Vertex, depthFirstSearch, Graph } from './Graph';
 

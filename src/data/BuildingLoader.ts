@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { NotiMsg } from '../models/Notification';
+import { NotiMsg } from '../utils/Notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
 

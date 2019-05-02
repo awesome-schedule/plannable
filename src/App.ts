@@ -23,10 +23,9 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadSemesterData } from './data/CatalogLoader';
 import { loadSemesterList } from './data/SemesterListLoader';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
-import Notification from './models/Notification';
-import { to12hr, savePlain } from './models/Utils';
+import { to12hr, savePlain, Notification } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
-import { toICal } from './models/ICal';
+import { toICal } from './utils/ICal';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly

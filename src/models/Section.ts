@@ -3,7 +3,7 @@ import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
 import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
-import { parseTimeAll, hashCode } from './Utils';
+import { parseTimeAll, hashCode } from '../utils';
 
 /**
  * A section contains all the fields that a Course has,

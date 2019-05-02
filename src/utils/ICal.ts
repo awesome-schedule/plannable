@@ -2,11 +2,11 @@
  * @author Kaiying Shan
  */
 
-import Schedule from './Schedule';
-import Meta from './Meta';
-import Section from './Section';
-import Event from './Event';
-import * as Utils from './Utils';
+import Schedule from '../models/Schedule';
+import Meta from '../models/Meta';
+import Section from '../models/Section';
+import Event from '../models/Event';
+import * as Utils from './Time';
 
 /**
  * Convert a schedule to iCalendar format.

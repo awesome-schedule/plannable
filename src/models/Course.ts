@@ -1,7 +1,7 @@
 import Section from './Section';
 import Meta, { RawCourse } from './Meta';
 import Hashable from './Hashable';
-import { hashCode } from './Utils';
+import { hashCode } from '../utils';
 
 /**
  * Represents all public information of a Course

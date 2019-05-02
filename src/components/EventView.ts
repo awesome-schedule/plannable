@@ -2,7 +2,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
-import { to12hr, to24hr } from '../models/Utils';
+import { to12hr, to24hr } from '../utils';
 
 @Component
 export default class EventView extends Vue {

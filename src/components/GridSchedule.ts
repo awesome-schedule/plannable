@@ -1,7 +1,7 @@
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
-import { to12hr, timeToNum } from '../models/Utils';
+import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component({

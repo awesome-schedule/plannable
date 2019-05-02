@@ -9,7 +9,7 @@ import Catalog from '../models/Catalog';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Event from '../models/Event';
-import * as Utils from '../models/Utils';
+import * as Utils from '../utils';
 import { findBestMatch } from 'string-similarity';
 
 /**

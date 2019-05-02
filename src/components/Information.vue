@@ -3,7 +3,7 @@
         <nav id="navbar-scrollspy" class="navbar d-block navbar-light bg-light sidebar">
             <a class="navbar-brand" href="#">Website Guide</a>
             <nav class="nav nav-pills flex-column">
-                <a class="nav-link" href="#item-1">General Introduction</a>
+                <a class="nav-link" href="#item-1">Introduction</a>
                 <a class="nav-link" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1" href="#item-2-1">Add Courses</a>
@@ -35,14 +35,14 @@
             data-target="#navbar-scrollspy"
             data-offset="10"
         >
-            <h4 id="item-1">General Introduction</h4>
+            <h2 id="item-1">Welcome to our infomation page!</h2>
             <p>
                 This is a website which helps UVa students to schedule their classes more
                 efficiently. Get your class selection done with the searching field and customize
                 them with filters. The website can generate all possible schedules according to your
                 requirements.
             </p>
-            <h4 id="item-2">Basic Operations</h4>
+            <h3 id="item-2">Basic Operations</h3>
             <h5 id="item-2-1">Add Courses</h5>
             <p>
                 You can add courses by searching department, professor, class number, or keywords.
@@ -61,114 +61,108 @@
             </p>
             <!-- picture slides illustration -->
 
-            <v-stepper v-model="e1" style="width:54vw;margin:auto auto">
+            <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
                 <v-stepper-header>
-                    <v-stepper-step :complete="e1 > 1" step="1">Name of step 1</v-stepper-step>
+                    <v-stepper-step :complete="e1 > 1" step="1" color="blue-grey "
+                        >Name of step 1</v-stepper-step
+                    >
 
                     <v-divider></v-divider>
 
-                    <v-stepper-step :complete="e1 > 2" step="2">Name of step 2</v-stepper-step>
+                    <v-stepper-step :complete="e1 > 2" step="2" color="blue-grey "
+                        >Name of step 2</v-stepper-step
+                    >
 
                     <v-divider></v-divider>
 
-                    <v-stepper-step :complete="e1 > 3" step="3">Name of step 3</v-stepper-step>
+                    <v-stepper-step :complete="e1 > 3" step="3" color="blue-grey "
+                        >Name of step 3</v-stepper-step
+                    >
                 </v-stepper-header>
 
                 <v-stepper-items>
                     <v-stepper-content step="1">
-                        <v-card class="mb-5" height="400px" width="54vw">
-                            <img
-                                src="../assets/placeholder.png"
-                                height="400px"
-                                style="margin:auto auto"
-                            />
+                        <v-card class="mb-5" height="468px" width="54vw" style="margin:auto auto">
+                            <v-img :src="imgPath('placeholder.png')"></v-img>
                         </v-card>
 
-                        <button class="btn btn-primary" @click="e1 = 2">
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 2">
                             Continue
-                        </button>
+                        </v-btn>
                     </v-stepper-content>
 
                     <v-stepper-content step="2">
-                        <v-card class="mb-5" height="400px" width="54vw">
-                            <img
-                                src="../assets/placeholder.png"
-                                height="400px"
-                                style="margin:auto auto"
-                            />
+                        <v-card class="mb-5" height="468px" width="54vw" style="margin:auto auto">
+                            <v-img :src="imgPath('placeholder.png')"></v-img>
                         </v-card>
 
-                        <button class="btn btn-primary" @click="e1 = 3">
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 3">
                             Continue
-                        </button>
+                        </v-btn>
                     </v-stepper-content>
 
                     <v-stepper-content step="3">
-                        <v-card class="mb-5" height="400px" width="54px">
-                            <img
-                                src="../assets/placeholder.png"
-                                height="400px"
-                                style="margin:auto auto"
-                            />
+                        <v-card class="mb-5" height="468px" width="54vw" style="margin:auto auto">
+                            <v-img :src="imgPath('placeholder.png')"></v-img>
                         </v-card>
 
-                        <button class="btn btn-primary" @click="e1 = 1">
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 1">
                             Play Again
-                        </button>
+                        </v-btn>
                     </v-stepper-content>
                 </v-stepper-items>
             </v-stepper>
 
-            <h3 id="item-3" class="text-primary">3. Add Event</h3>
+            <h3 id="item-3">Add Event</h3>
             <p>
                 This feature allows you to customize your own schedule. You can add your weekly
                 commitments on the schedule, such as club meetings, office hours, etc. This feature
                 is similar to any other calendar which later you can sync it with your personal
                 calender on google or apple.
             </p>
-            <div class="GIF">
-                <img src="../assets/AddEvent.gif" />
-            </div>
-
-            <h3 id="item-4" class="text-primary">4. Filters</h3>
+            <v-card class="my-5" style="width:85%;margin:auto auto;">
+                <v-img :src="imgPath('AddEvent.gif')"></v-img>
+            </v-card>
+            <h3 id="item-4">Filters</h3>
             <p>
                 Filters allow you to set parameters to better navigate your searches and generate
                 your schedules
             </p>
-            <h4 id="item-4-1" class="text-success">No Class Time</h4>
+            <h5 id="item-4-1">No Class Time</h5>
             <p>
                 You can select time and day at which you do not wish to have class. The input form
                 of time is 08:00:AM.
             </p>
-            <div class="GIF">
-                <img src="../assets/NoClassTime.gif" />
-            </div>
-            <h4 id="item-4-2" class="text-success">Allow Waitlist/Closed</h4>
+            <v-card class="my-5" style="width:85%;margin:auto auto;">
+                <v-img :src="imgPath('NoClassTime.gif')"></v-img>
+            </v-card>
+            <h5 id="item-4-2">Allow Waitlist/Closed</h5>
             <p>
                 By checking on those two buttons, it allows the scheduler to consider the classes
                 when auto-generating schedules even though it may no longer be available. Or you can
                 uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
             </p>
-            <h4 id="item-4-3" class="text-success">Sort</h4>
+            <h5 id="item-4-3">Sort</h5>
             <p>
                 One powerful feature comes with auto-scheduling is that the scheduler will generate
                 the schedules for you based on your preference.
             </p>
-            <div class="GIF">
-                <img src="../assets/Sort.gif" />
-            </div>
 
-            <h3 id="item-5" class="text-primary">5. Display Settings</h3>
-            <h3 id="item-5" class="text-primary">5. Customize Colors</h3>
-            <h3 id="item-7" class="text-primary">7. Export ICalendar</h3>
+            <v-card class="my-5" style="width:85%;margin:auto auto">
+                <v-img :src="imgPath('Sort.gif')"></v-img>
+            </v-card>
+
+            <h3 id="item-5">Display Settings</h3>
+            <h3 id="item-5">Customize Colors</h3>
+            <h3 id="item-7">Export ICalendar</h3>
             <p>
                 ICalendar is a standard file which you can import to your Apple/Google Calendar.
                 This website allows you to download the ICalendar to your computer after you have
                 creatd your schedule. Then, you can go to your Apple/Google Calendar and then
                 syncronize your schedule. Instruction is shown below:
             </p>
-            <h4 id="item-7-1" class="text-success">Google Calendar</h4>
-            <v-stepper v-model="e2" style="width:54vw;margin:auto auto">
+            <h5 id="item-7-1">Google Calendar</h5>
+            <v-stepper v-model="e2" class="my-5" style="width:60vw;margin:auto auto">
                 <v-stepper-header>
                     <v-stepper-step
                         v-for="(step, idx) in icalSteps"
@@ -176,6 +170,7 @@
                         :complete="e2 > idx"
                         :step="idx"
                         style="margin:auto auto"
+                        color="blue-grey"
                     >
                         {{ idx }}</v-stepper-step
                     >
@@ -183,17 +178,21 @@
 
                 <v-stepper-items>
                     <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
-                        <v-card class="mb-2" height="468px" width="54vw">
-                            <img :src="icalSteps[idx].src" width="100%" style="margin:auto auto" />
+                        <v-card class="mb-2" height="468px" width="54vw" style="margin:auto auto">
+                            <v-img :src="icalSteps[idx].src"></v-img>
                         </v-card>
                         <v-card-title class="mb-2" primary-title>
                             <div>
                                 <div>{{ step.title }}</div>
                             </div>
                         </v-card-title>
-                        <button class="btn btn-primary" @click="e2 !== 9 ? e2++ : (e2 = 1)">
+                        <v-btn
+                            color="blue-grey"
+                            style="color:white"
+                            @click="e2 !== 9 ? e2++ : (e2 = 1)"
+                        >
                             {{ e2 === 9 ? 'Play Again' : 'Continue' }}
-                        </button>
+                        </v-btn>
                     </v-stepper-content>
                 </v-stepper-items>
             </v-stepper>

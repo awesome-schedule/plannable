@@ -26,8 +26,9 @@ Clone the repository and data
 
 ```bash
 git clone https://github.com/awesome-schedule/Awesome-SchedulAR
-cd Awesome-SchedulAR/backend
-mkdir -p data
+cd Awesome-SchedulAR
+mkdir -p backend
+cd backend
 git clone https://github.com/awesome-schedule/data
 cd ..
 ```

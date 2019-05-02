@@ -1,10 +1,16 @@
+/**
+ * the model of a Course that has multiple sections
+ *
+ * @author Hanzhi Zhou
+ */
+
 import Section from './Section';
 import Meta, { RawCourse } from './Meta';
 import Hashable from './Hashable';
 import { hashCode } from '../utils';
 
 /**
- * Represents all public information of a Course
+ * represents all public information of a Course
  */
 export interface CourseFields {
     /**
@@ -32,7 +38,7 @@ export interface CourseFields {
     description: string;
 }
 
-class Course implements CourseFields, Hashable {
+export default class Course implements CourseFields, Hashable {
     [x: string]: any;
     /**
      * key of this in Catalog, equal to (department + number + `Meta.TYPES_PARSE`\[type\])
@@ -49,7 +55,7 @@ class Course implements CourseFields, Hashable {
 
     public readonly raw: RawCourse;
     /**
-     * Array of section ids contained in this object.
+     * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
     public readonly sids: number[];
@@ -172,5 +178,3 @@ class Course implements CourseFields, Hashable {
         }
     }
 }
-
-export default Course;

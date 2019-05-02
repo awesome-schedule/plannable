@@ -1,10 +1,25 @@
+/**
+ * asdasd
+ * @author Hanzhi Zhou
+ * @see [[Catalog]]
+ */
+
 import Course from './Course';
 import Meta, { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 
+/**
+ * represents a semester
+ */
 export interface Semester {
+    /**
+     * semester id, e.g. `1198`
+     */
     id: string;
+    /**
+     * semester name, e.g. Fall 2019
+     */
     name: string;
 }
 
@@ -13,7 +28,11 @@ export interface CatalogJSON extends Expirable {
     raw_data: RawCatalog;
 }
 
-class Catalog {
+/**
+ * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
+ */
+
+export default class Catalog {
     /**
      * Parse AllRecords from parsed JSON
      * @returns `null` if data is invalid
@@ -76,6 +95,12 @@ class Catalog {
         return key;
     }
 
+    /**
+     * Perform a linear search in the catalog against
+     * course number, title, topic, professor name and description, in the order specified.
+     * @param query
+     * @param max_results
+     */
     public search(query: string, max_results = 6) {
         console.time('query');
         query = query.trim().toLowerCase();
@@ -141,5 +166,3 @@ class Catalog {
         return results;
     }
 }
-
-export default Catalog;

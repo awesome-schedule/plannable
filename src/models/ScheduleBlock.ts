@@ -1,3 +1,7 @@
+/**
+ * @author Hanzhi Zhou
+ * @see [[ScheduleBlock]]
+ */
 import Section from './Section';
 import Event from './Event';
 import { checkTimeBlockConflict } from '../utils';
@@ -9,7 +13,7 @@ import Course from './Course';
  *
  * @see [[GridSchedule]]
  */
-class ScheduleBlock {
+export default class ScheduleBlock {
     /**
      * background color in hex, e.g. `#ffffff`
      */
@@ -62,5 +66,3 @@ class ScheduleBlock {
         return null;
     }
 }
-
-export default ScheduleBlock;

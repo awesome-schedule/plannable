@@ -556,11 +556,17 @@ class ScheduleEvaluator {
 
         /**
          * The comparator function when there's only one sorting option selected
+         *
+         * if only one option is enabled, the sort direction depends on the `reversed` property of it
+         *
+         * if multiple sort options are enabled and the sort mode is combined, which means
+         * `(!isCombined || options.length === 1)` is false, the `computeCoeff` method
+         * is already taken care of the sort direction of each function, so we sort in ascending order anyway
          */
         const cmpFunc: (a: CmpSchedule, b: CmpSchedule) => number =
-            options[0].reverse && !isCombined
-                ? (a, b) => b.coeff - a.coeff
-                : (a, b) => a.coeff - b.coeff;
+            options[0].reverse && (!isCombined || options.length === 1)
+                ? (a, b) => b.coeff - a.coeff // descending
+                : (a, b) => a.coeff - b.coeff; // ascending
 
         if (isCombined || options.length === 1) {
             if (quick || schedules.length > quickThresh) {

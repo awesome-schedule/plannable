@@ -86,9 +86,9 @@
                             <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 2">
-                            Continue
-                        </v-btn>
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 2"
+                            >Continue</v-btn
+                        >
                     </v-stepper-content>
 
                     <v-stepper-content step="2">
@@ -96,9 +96,9 @@
                             <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 3">
-                            Continue
-                        </v-btn>
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 3"
+                            >Continue</v-btn
+                        >
                     </v-stepper-content>
 
                     <v-stepper-content step="3">
@@ -106,9 +106,9 @@
                             <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 1">
-                            Play Again
-                        </v-btn>
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 1"
+                            >Play Again</v-btn
+                        >
                     </v-stepper-content>
                 </v-stepper-items>
             </v-stepper>
@@ -147,8 +147,9 @@
             <h5 id="item-4-3">Sort Priority</h5>
             <p>
                 One powerful feature comes with auto-scheduling is that the scheduler will generate
-                the schedules for you based on your preference. You can select multiple indexes optimize your schedule,
-                and drag sort options to change their priority in fallback mode.
+                the schedules for you based on your preference. You can select multiple indexes
+                optimize your schedule, and drag sort options to change their priority in fallback
+                mode.
             </p>
             <ol>
                 <li>Variance: Balance the class time each day</li>
@@ -158,7 +159,10 @@
                 <li>Walking Distance: Avoid long distance walking between classes</li>
                 <li>I'm Feeling Lucky: Sort Randomly</li>
                 <li>Combined: Combine all sorting options and given them equal weight</li>
-                <li>Fallback: Sort using the options on top first. If compare equal, sort using the next option.</li>
+                <li>
+                    Fallback: Sort using the options on top first. If compare equal, sort using the
+                    next option.
+                </li>
             </ol>
 
             <v-card class="my-5" style="width:85%;margin:auto auto">
@@ -204,8 +208,7 @@
                             color="blue-grey"
                             style="color:white"
                             @click="e2 !== 9 ? e2++ : (e2 = 1)"
-                        >
-                            {{ e2 === 9 ? 'Play Again' : 'Continue' }}
+                            >{{ e2 === 9 ? 'Play Again' : 'Continue' }}
                         </v-btn>
                         <v-btn v-if="e2 !== 1" color="blue-grey" style="color:white" @click="e2--">
                             Back
@@ -221,6 +224,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable */
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import 'bootstrap';
 import $ from 'jquery';
@@ -283,8 +287,6 @@ export default class Information extends Vue {
 </script>
 
 <style scoped>
-#info-panel {
-}
 #navbar-scrollspy {
     position: fixed;
 }
@@ -306,6 +308,7 @@ export default class Information extends Vue {
     width: 100%;
     position: center;
 }
+
 .about-border {
     display: block;
     width: auto;

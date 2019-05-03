@@ -37,10 +37,9 @@
         >
             <h2 id="item-1">Welcome to our information page!</h2>
             <p>
-                This is a website which helps UVa students to schedule their classes more
-                efficiently. Get your class selection done with the searching field and customize
-                them with filters. The website can generate all possible schedules according to your
-                requirements.
+                This website helps UVa students to schedule their classes more efficiently. Get your
+                class selection done with the searching field and customize them with filters. The
+                website can generate all possible schedules according to your requirements.
             </p>
             <h3 id="item-2">Basic Operations</h3>
             <h5 id="item-2-1">Add Courses</h5>
@@ -82,8 +81,8 @@
 
                 <v-stepper-items>
                     <v-stepper-content step="1">
-                        <v-card class="mb-5" height="468px" width="54vw" style="margin:auto auto">
-                            <v-img :src="imgPath('placeholder.png')"></v-img>
+                        <v-card class="mb-5" width="54vw" style="margin:auto auto">
+                            <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
                         <v-btn color="blue-grey" style="color:white" @click="e1 = 2">
@@ -92,8 +91,8 @@
                     </v-stepper-content>
 
                     <v-stepper-content step="2">
-                        <v-card class="mb-5" height="468px" width="54vw" style="margin:auto auto">
-                            <v-img :src="imgPath('placeholder.png')"></v-img>
+                        <v-card class="mb-5" width="54vw" style="margin:auto auto">
+                            <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
                         <v-btn color="blue-grey" style="color:white" @click="e1 = 3">
@@ -102,8 +101,8 @@
                     </v-stepper-content>
 
                     <v-stepper-content step="3">
-                        <v-card class="mb-5" height="468px" width="54vw" style="margin:auto auto">
-                            <v-img :src="imgPath('placeholder.png')"></v-img>
+                        <v-card class="mb-5" width="54vw" style="margin:auto auto">
+                            <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
                         <v-btn color="blue-grey" style="color:white" @click="e1 = 1">
@@ -178,8 +177,8 @@
 
                 <v-stepper-items>
                     <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
-                        <v-card class="mb-2" height="468px" width="54vw" style="margin:auto auto">
-                            <v-img :src="icalSteps[idx].src"></v-img>
+                        <v-card class="mb-2" width="54vw" style="margin:auto auto">
+                            <v-img :src="icalSteps[idx].src" aspect-ratio="1.7778"></v-img>
                         </v-card>
                         <v-card-title class="mb-2" primary-title>
                             <div>

@@ -192,6 +192,9 @@
                         >
                             {{ e2 === 9 ? 'Play Again' : 'Continue' }}
                         </v-btn>
+                        <v-btn v-if="e2 !== 1" color="blue-grey" style="color:white" @click="e2--">
+                            Back
+                        </v-btn>
                     </v-stepper-content>
                 </v-stepper-items>
             </v-stepper>
@@ -212,7 +215,7 @@ export default class Information extends Vue {
     @Prop(Number) readonly scheduleLeft!: number;
 
     e1: number = 0;
-    e2: number = 0;
+    e2: number = 1;
 
     icalSteps = {
         1: {

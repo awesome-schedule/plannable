@@ -1,0 +1,15 @@
+{
+    "editor.formatOnSave": true,
+    "eslint.autoFixOnSave": true,
+    "vetur.format.defaultFormatter.html": "prettier",
+    "vetur.format.options.tabSize": 4,
+    "eslint.options": { "extensions": [".html", ".js", ".vue", ".jsx"] },
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        {
+            "language": "vue",
+            "autoFix": true
+        }
+    ]
+}

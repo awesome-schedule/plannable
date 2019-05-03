@@ -17,7 +17,7 @@ const semester: Semester = {
     id: '1198',
     name: 'Fall 2019'
 };
-const filename = `CS${semester}Data.json`;
+const filename = `CS${semester.id}Data.json`;
 const filepath = path.join(datadir, filename);
 
 async function getData() {

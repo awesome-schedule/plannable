@@ -1,6 +1,6 @@
 import 'jest';
 import Schedule from '../../src/models/Schedule';
-import * as Utils from '../../src/models/Utils';
+import * as Utils from '../../src/utils';
 import data from './data';
 describe('Schedule Test', () => {
     it('Schedule Static Field Test', () => {

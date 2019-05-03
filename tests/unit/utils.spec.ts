@@ -1,4 +1,4 @@
-import * as Utils from '../../src/models/Utils';
+import * as Utils from '../../src/utils';
 import 'jest';
 
 describe('Utility Tests', () => {

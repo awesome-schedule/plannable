@@ -9,7 +9,7 @@ import { parseTimeAll, hashCode } from '../utils';
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
  */
-class Section implements CourseFields, Hashable {
+export default class Section implements CourseFields, Hashable {
     /**
      * convert a section array to a course holding the section array
      * @param sections
@@ -156,5 +156,3 @@ class Section implements CourseFields, Hashable {
         else return this.equals(element);
     }
 }
-
-export default Section;

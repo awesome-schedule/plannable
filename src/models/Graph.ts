@@ -94,7 +94,7 @@ function sortFunc<T>(graph: Graph<T>) {
  *
  * @param graph the graph represented as an adjacency list
  *
- * @see Vertex<T>
+ * @see [[Vertex]]
  */
 export function depthFirstSearch<T>(graph: Graph<T>) {
     const nodes = Array.from(graph.keys()).sort(sortFunc(graph));

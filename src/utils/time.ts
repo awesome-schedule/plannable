@@ -1,14 +1,13 @@
 import { TimeDict, TimeBlock } from '../algorithm/ScheduleGenerator';
-import { saveAs } from 'file-saver';
-import { AxiosError } from 'axios';
-
 /**
  * @author Hanzhi Zhou
- * @example
- * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
- *
  * @param time
  * @returns null when fail to parse
+ *
+ * Example usage and return value:
+ * ```js
+ * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
+ * ```
  */
 export function parseTimeAll(time: string): [string[], TimeBlock] | null {
     const [days, start, , end] = time.split(' ');
@@ -24,15 +23,17 @@ export function parseTimeAll(time: string): [string[], TimeBlock] | null {
 
 /**
  * @author Hanzhi Zhou
- * @example
+ * @param time
+ * @returns null when fail to parse
+ *
+ * Example:
+ * ```js
  * expect(parseTimeAll('MoWeFr 10:00AM - 11:00AM')).toEqual({
  *     Mo: [600, 660],
  *     We: [600, 660],
  *     Fr: [600, 660],
  * })
- *
- * @param time
- * @returns null when fail to parse
+ * ```
  */
 export function parseTimeAllAsDict(time: string): TimeDict | null {
     const [days, start, , end] = time.split(' ');
@@ -52,11 +53,13 @@ export function parseTimeAllAsDict(time: string): TimeDict | null {
  * assuming that the start time is **always smaller (earlier)** than end time
  *
  * @author Hanzhi Zhou
- * @example
- * parseTimeAsInt('10:00AM', '11:00AM') => [600, 660]
- *
  * @param start start time such as `10:00AM`
  * @param end  end time such as `11:00AM`
+ *
+ * Example usage:
+ * ```js
+ * parseTimeAsInt('10:00AM', '11:00AM') => [600, 660]
+ * ```
  */
 export function parseTimeAsInt(start: string, end: string): TimeBlock {
     let suffix = start.substr(start.length - 2, 2);
@@ -166,12 +169,13 @@ export function calcOverlap(a: number, b: number, c: number, d: number) {
 
 /**
  * convert 24 hour format time to 12 hour format.
- *
- * @example
- * to12hr('17:00') => '5:00PM'
- *
  * @author Kaiying Shan
  * @param time the time in 24 hour format
+ *
+ * Example usage and return value:
+ * ```js
+ * to12hr('17:00') => '5:00PM'
+ * ```
  */
 export function to12hr(time: string) {
     const sep = time.split(':');
@@ -187,12 +191,12 @@ export function to12hr(time: string) {
 
 /**
  * convert 12 hr to 24 hr
- *
- * @example
- * to12hr('5:00PM') => '17:00'
- *
  * @author Kaiying Shan
  * @param time
+ * Example usage and return value:
+ * ```js
+ * to12hr('5:00PM') => '17:00'
+ * ```
  */
 export function to24hr(time: string) {
     const [hour, minute] = time.substring(0, time.length - 2).split(':');
@@ -210,8 +214,8 @@ export function to24hr(time: string) {
 
 /**
  * helper function used in
- * @see GridSchedule.vue
- * @see CourseBlock.vue
+ * @see [[GridSchedule]]
+ * @see [[CourseBlock]]
  * @author Kaiying Shan
  * @param time
  * @param start

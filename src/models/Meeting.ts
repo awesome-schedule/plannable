@@ -1,3 +1,8 @@
+/**
+ * @author Hanzhi Zhou
+ * @see [[Meeting]]
+ */
+
 import { RawMeeting } from './Meta';
 import Section from './Section';
 
@@ -6,7 +11,7 @@ import Section from './Section';
  *
  * It has a reference back to the section that it belongs to
  */
-class Meeting {
+export default class Meeting {
     public section: Section;
     public instructor: string;
     public days: string;
@@ -26,5 +31,3 @@ class Meeting {
         return this.days === other.days;
     }
 }
-
-export default Meeting;

@@ -1,3 +1,7 @@
+/**
+ * @author Hanzhi Zhou
+ * @see [[ScheduleBlock]]
+ */
 import Section from './Section';
 import Event from './Event';
 import { checkTimeBlockConflict } from '../utils';
@@ -7,9 +11,9 @@ import Course from './Course';
  * A `ScheduleBlock` is a data structure that holds
  * all the necessary information to render a schedule on `GridSchedule`
  *
- * @see {@link GridSchedule.vue}
+ * @see [[GridSchedule]]
  */
-class ScheduleBlock {
+export default class ScheduleBlock {
     /**
      * background color in hex, e.g. `#ffffff`
      */
@@ -62,5 +66,3 @@ class ScheduleBlock {
         return null;
     }
 }
-
-export default ScheduleBlock;

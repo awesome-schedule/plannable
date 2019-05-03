@@ -16,7 +16,10 @@ import { findBestMatch } from 'string-similarity';
  * A `TimeBlock` defines the start and end time of a 'Block'
  * that a Meeting will take place. These two numbers are the minutes starting from 0:00
  *
- * @example [600, 660] // represents time from 10:00 to 11:00
+ * To represent time from 10:00 to 11:00:
+ * ```js
+ * [600, 660]
+ * ```
  */
 export type TimeBlock = [number, number];
 
@@ -44,12 +47,16 @@ export interface WeekDict<T> {
  * @remarks The values are not simply `TimeBlock`s
  * because it is possible for a single section to have multiple meetings in a day
  *
- * @example
- * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]}
- * // represents that this `Section` or `Event` will
- * // take place every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ * Example:
  *
- * @see TimeBlock
+ * ```js
+ * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]}
+ * ```
+ *
+ * represents that this `Section` or `Event` will take place
+ * every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ *
+ * @see [[TimeBlock]]
  */
 export interface TimeDict extends WeekDict<number> {}
 /**
@@ -58,11 +65,11 @@ export interface TimeDict extends WeekDict<number> {}
  * value: the name of the building
  *
  * if `timeDict[key]` exists, then `roomDict[key][i]` corresponds the room of the time block
- * `[timeDict[key][i * 2], timeDict[key][i * 2 + 1]]`
- *
- * @example
+ * `[timeDict[key][i * 2], timeDict[key][i * 2 + 1]]`. For example,
+ * ```js
  * if (timeDict[key])
  *     expect(timeDict[key].length).toBe(roomDict[key].length / 2);
+ * ```
  */
 export interface RoomDict extends WeekDict<string> {}
 
@@ -71,7 +78,7 @@ export interface RoomDict extends WeekDict<string> {}
  *
  * value: the index of the building in the building list
  *
- * @see https://github.com/awesome-schedule/data/blob/master/building_list.json
+ * @see https://github.com/awesome-schedule/data/blob/master/Distance/Building_Array.json
  */
 export interface RoomNumberDict extends WeekDict<number> {}
 
@@ -79,16 +86,16 @@ export interface RoomNumberDict extends WeekDict<number> {}
  * The data structure used in the algorithm to represent a Course that
  * possibly has multiple sections combined (occurring at the same time)
  *
- * 0: key of this course
+ * @property 0: key of this course
+ * @property 1: TimeDict
+ * @property 2: an array of section indices
  *
- * 1: TimeDict
- *
- * 2: an array of section indices
- *
- * @example
+ * Example:
+ * ```js
  * ["span20205",{"Mo":[600,650],"Tu":[600,650]},[0, 1, 2]]
+ * ```
  *
- * @see TimeDict
+ * @see [[TimeDict]]
  */
 export type RawAlgoCourse = [string, TimeDict, number[], RoomNumberDict];
 
@@ -146,7 +153,7 @@ class ScheduleGenerator {
      * Note that this method does not need to run very fast. It only preprocess the select
      * courses so that they are stored in a desirable format.
      *
-     * @see ScheduleEvaluator
+     * @see [[ScheduleEvaluator]]
      */
     public getSchedules(
         schedule: Schedule,
@@ -264,8 +271,9 @@ class ScheduleGenerator {
     /**
      * @param classList a tuple of sections of courses, whose length is the number of distinct courses chosen
      *
-     * @example
+     * ```js
      * classList[i][j] // represents the jth section of the ith class
+     * ```
      */
     public createSchedule(classList: RawAlgoCourse[][]) {
         /**

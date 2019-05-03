@@ -42,6 +42,7 @@
                 website can generate all possible schedules according to your requirements.
             </p>
             <h3 id="item-2">Basic Operations</h3>
+            <div class="about-border"></div>
             <h5 id="item-2-1">Add Courses</h5>
             <p>
                 You can add courses by searching department, professor, class number, or keywords.
@@ -113,6 +114,7 @@
             </v-stepper>
 
             <h3 id="item-3">Add Event</h3>
+            <div class="about-border"></div>
             <p>
                 This feature allows you to customize your own schedule. You can add your weekly
                 commitments on the schedule, such as club meetings, office hours, etc. This feature
@@ -123,6 +125,7 @@
                 <v-img :src="imgPath('AddEvent.gif')"></v-img>
             </v-card>
             <h3 id="item-4">Filters</h3>
+            <div class="about-border"></div>
             <p>
                 Filters allow you to set parameters to better navigate your searches and generate
                 your schedules
@@ -141,19 +144,33 @@
                 when auto-generating schedules even though it may no longer be available. Or you can
                 uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
             </p>
-            <h5 id="item-4-3">Sort</h5>
+            <h5 id="item-4-3">Sort Priority</h5>
             <p>
                 One powerful feature comes with auto-scheduling is that the scheduler will generate
-                the schedules for you based on your preference.
+                the schedules for you based on your preference. You can select multiple indexes optimize your schedule,
+                and drag sort options to change their priority in fallback mode.
             </p>
+            <ol>
+                <li>Variance: Balance the class time each day</li>
+                <li>Vertical compactness: Make classes back-to-back</li>
+                <li>Lunch Time: Leave spaces for lunch</li>
+                <li>No Early: Start the day as late as possible</li>
+                <li>Walking Distance: Avoid long distance walking between classes</li>
+                <li>I'm Feeling Lucky: Sort Randomly</li>
+                <li>Combined: Combine all sorting options and given them equal weight</li>
+                <li>Fallback: Sort using the options on top first. If compare equal, sort using the next option.</li>
+            </ol>
 
             <v-card class="my-5" style="width:85%;margin:auto auto">
                 <v-img :src="imgPath('Sort.gif')"></v-img>
             </v-card>
 
             <h3 id="item-5">Display Settings</h3>
+            <div class="about-border"></div>
             <h3 id="item-5">Customize Colors</h3>
+            <div class="about-border"></div>
             <h3 id="item-7">Export ICalendar</h3>
+            <div class="about-border"></div>
             <p>
                 ICalendar is a standard file which you can import to your Apple/Google Calendar.
                 This website allows you to download the ICalendar to your computer after you have
@@ -288,5 +305,12 @@ export default class Information extends Vue {
     height: auto;
     width: 100%;
     position: center;
+}
+.about-border {
+    display: block;
+    width: auto;
+    height: 3px;
+    background: #f1cd8f;
+    margin: 5px auto 20px auto;
 }
 </style>

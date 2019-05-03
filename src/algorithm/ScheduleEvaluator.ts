@@ -98,6 +98,14 @@ class ScheduleEvaluator {
     public static readonly optionDefaults: SortOptions = {
         sortBy: [
             {
+                name: 'distance',
+                enabled: true,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Walking Distance',
+                description: 'Avoid long distance walking between classes'
+            },
+            {
                 name: 'variance',
                 enabled: true,
                 reverse: false,
@@ -128,14 +136,6 @@ class ScheduleEvaluator {
                 exclusive: ['IamFeelingLucky'],
                 title: 'No Early',
                 description: 'Start my day as late as possible'
-            },
-            {
-                name: 'distance',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Walking Distance',
-                description: 'Minimize the total walking distance'
             },
             {
                 name: 'IamFeelingLucky',

@@ -11,7 +11,7 @@ yarn-error.log*
 
 # Editor directories and files
 .idea
-.vscode
+.vscode/ipch
 *.suo
 *.ntvs*
 *.njsproj
@@ -30,11 +30,6 @@ node_modules
 backend/data
 /tests/temp
 deploy_key
-temp.txt
-/src/proto
-backend/temp
 docs/tsdoc
 docs/vuedoc
-docs/docjs
 tests/unit/data
-

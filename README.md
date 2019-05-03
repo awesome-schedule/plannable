@@ -51,6 +51,7 @@ Then, you can run `sh run.sh` in the project root to launch the static file serv
 
 -   [Vue.js](https://vuejs.org) - Front-end framework
 -   [Bootstrap](https://getbootstrap.com/) - Front-end component library
+-   [Vuetify](https://vuetifyjs.com/en/) - Front-end component library
 
 ## Contributors
 

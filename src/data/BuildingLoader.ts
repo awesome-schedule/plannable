@@ -1,3 +1,11 @@
+/**
+ * Script for loading building list and distance (time) matrix
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import axios from 'axios';
 import { NotiMsg } from '../utils/Notification';
 import Expirable from './Expirable';

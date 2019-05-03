@@ -1,3 +1,11 @@
+/**
+ * utilities for time parsing
+ *
+ */
+
+/**
+ *
+ */
 import { TimeDict, TimeBlock } from '../algorithm/ScheduleGenerator';
 /**
  * @author Hanzhi Zhou

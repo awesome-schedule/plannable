@@ -1,9 +1,11 @@
 /**
- * asdasd
  * @author Hanzhi Zhou
  * @see [[Catalog]]
  */
 
+/**
+ *
+ */
 import Course from './Course';
 import Meta, { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
@@ -31,7 +33,6 @@ export interface CatalogJSON extends Expirable {
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
  */
-
 export default class Catalog {
     /**
      * Parse AllRecords from parsed JSON
@@ -40,7 +41,13 @@ export default class Catalog {
     public static fromJSON(data: CatalogJSON) {
         return new Catalog(data.semester, data.raw_data);
     }
+    /**
+     * the semester corresponding to the catalog stored in this object
+     */
     public semester: Semester;
+    /**
+     * the raw representation of the course catalog
+     */
     public raw_data: RawCatalog;
 
     constructor(semester: Semester, raw_data: RawCatalog) {

@@ -5,6 +5,9 @@
  * @author Hanzhi Zhou, Zichao Hu
  */
 
+/**
+ *
+ */
 import Catalog from '../models/Catalog';
 import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';

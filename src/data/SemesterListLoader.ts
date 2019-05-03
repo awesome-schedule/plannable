@@ -1,3 +1,11 @@
+/**
+ * Script for loading and parsing the list of semesters from Lou's list
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import axios from 'axios';
 import { Semester } from '../models/Catalog';
 import Meta from '../models/Meta';

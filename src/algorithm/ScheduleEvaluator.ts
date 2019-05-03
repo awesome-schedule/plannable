@@ -5,6 +5,9 @@
  * @author Hanzhi Zhou
  */
 
+/**
+ *
+ */
 import Schedule from '../models/Schedule';
 import { RawAlgoSchedule } from './ScheduleGenerator';
 import Meta from '../models/Meta';

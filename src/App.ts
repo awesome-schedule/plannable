@@ -342,7 +342,7 @@ export default class App extends Vue {
      * @see Schedule.update
      */
     updateCourse(key: string, section: number, remove: boolean = false) {
-        this.currentSchedule.update(key, section, true, remove);
+        this.currentSchedule.update(key, section, remove);
         if (this.generated) {
             this.noti.warn(`You're editing the generated schedule!`, 3);
         } else {

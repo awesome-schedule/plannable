@@ -1,8 +1,8 @@
 <template>
     <nav class="d-block bg-light sidebar">
-        <button class="btn btn-info nav-btn">
+        <div class="btn bg-info nav-btn" style="color:white">
             Palette
-        </button>
+        </div>
         <ul class="list-group list-group-flush mx-1">
             <template v-if="numColors()">
                 <li
@@ -35,7 +35,7 @@
                 </li>
             </template>
             <li v-else class="list-group-item">
-                There's nothing in your schedule
+                Select your class first. Then come back to change the color for display.
             </li>
         </ul>
     </nav>

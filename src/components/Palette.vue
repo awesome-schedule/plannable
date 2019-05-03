@@ -1,8 +1,8 @@
 <template>
     <nav class="d-block bg-light sidebar">
-        <button class="btn btn-info nav-btn">
+        <div class="btn bg-info nav-btn" style="color:white">
             Palette
-        </button>
+        </div>
         <ul class="list-group list-group-flush mx-1">
             <template v-if="numColors()">
                 <li

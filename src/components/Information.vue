@@ -170,9 +170,7 @@
                         :step="idx"
                         style="margin:auto auto"
                         color="blue-grey"
-                    >
-                        {{ idx }}</v-stepper-step
-                    >
+                    ></v-stepper-step>
                 </v-stepper-header>
 
                 <v-stepper-items>

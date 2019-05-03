@@ -1,5 +1,5 @@
 /**
- * the graph model and algorithm use primarily for schedule rendering
+ * the graph model and algorithm used primarily for schedule rendering
  * @author Hanzhi Zhou
  */
 
@@ -72,8 +72,9 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  *
  * this function first sorts nodes by their breadth in descending order.
  * If two nodes have the same breadth, then they'll be sorted in
- * descending order according to their `compareTo` method.
+ * descending order according the numerical value returned by their `[Symbol.toPrimitive]` method
  *
+ * @see [[ScheduleBlock]]
  * @param graph
  */
 function sortFunc<T>(graph: Graph<T>) {

@@ -13,7 +13,7 @@ A website which helps UVa students to schedule their classes more efficiently. G
 
 [https://awesome-schedule.github.io/](https://awesome-schedule.github.io/)
 
-This site is a pure front-end build. It fetches data from Lou's list on page load.
+Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load.
 
 ## Development
 
@@ -56,6 +56,10 @@ Then, you can run `sh run.sh` in the project root to launch the static file serv
 ## Contributors
 
 Please refer to our [Contribution Log](docs/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)
+
+## Acknowledgement
+
+Prof. Lou Bloomfield for providing data
 
 ## Contributing
 

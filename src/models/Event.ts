@@ -3,6 +3,9 @@
  * @author Kaiying Shan
  */
 
+/**
+ *
+ */
 import * as Utils from '../utils';
 import { TimeDict } from '../algorithm/ScheduleGenerator';
 import Hashable from './Hashable';

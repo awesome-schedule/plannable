@@ -1,9 +1,11 @@
 /**
  * Schedule handles the storage, access, mutation and render of courses and events.
- *
  * @author Hanzhi Zhou, Kaiying Shan
  */
 
+/**
+ *
+ */
 import Section from './Section';
 import Course from './Course';
 import ScheduleBlock from './ScheduleBlock';
@@ -219,17 +221,16 @@ export default class Schedule {
 
     /**
      * Add a course to schedule
-     * @param update whether to recompute the schedule
      */
-    public add(key: string, section: number, update = true) {
+    public add(key: string, section: number) {
         const sections = this.All[key];
         if (sections instanceof Set) {
             if (sections.has(section)) return false;
             sections.add(section);
-            if (update) this.computeSchedule();
+            this.computeSchedule();
         } else {
             this.All[key] = new Set([section]);
-            if (update) this.computeSchedule();
+            this.computeSchedule();
         }
         return true;
     }
@@ -238,11 +239,9 @@ export default class Schedule {
      * Update a course in the schedule
      * - If the section is **already in** the schedule, delete it from the schedule
      * - If the section is **not** in the schedule, add it to the schedule
-     *
-     * @param update whether to recompute schedule after update
      * @param remove whether to remove the key if the set of sections is empty
      */
-    public update(key: string, section: number, update: boolean = true, remove: boolean = true) {
+    public update(key: string, section: number, remove: boolean = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
@@ -261,7 +260,7 @@ export default class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        if (update) this.computeSchedule();
+        this.computeSchedule();
     }
 
     public removePreview() {

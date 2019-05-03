@@ -2,6 +2,10 @@
  * @author Hanzhi Zhou
  * @see [[ScheduleBlock]]
  */
+
+/**
+ *
+ */
 import Section from './Section';
 import Event from './Event';
 import { checkTimeBlockConflict } from '../utils';

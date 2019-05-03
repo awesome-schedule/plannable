@@ -5,6 +5,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b323d65880a148aa85e5a811e4791d53)](https://app.codacy.com/app/hanzhi713/Awesome-SchedulAR?utm_source=github.com&utm_medium=referral&utm_content=awesome-schedule/Awesome-SchedulAR&utm_campaign=Badge_Grade_Dashboard)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)](https://travis-ci.org/awesome-schedule/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 A website which helps UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters and sorting options. Once you've finalized your class selection, hit "Generate" button and get all the possible schedules satisfying to your requirements.
 
@@ -12,7 +13,7 @@ A website which helps UVa students to schedule their classes more efficiently. G
 
 [https://awesome-schedule.github.io/](https://awesome-schedule.github.io/)
 
-This site is a pure front-end build. It fetches data from Lou's list on page load.
+Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load.
 
 ## Development
 
@@ -50,10 +51,15 @@ Then, you can run `sh run.sh` in the project root to launch the static file serv
 
 -   [Vue.js](https://vuejs.org) - Front-end framework
 -   [Bootstrap](https://getbootstrap.com/) - Front-end component library
+-   [Vuetify](https://vuetifyjs.com/en/) - Front-end component library
 
 ## Contributors
 
 Please refer to our [Contribution Log](docs/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)
+
+## Acknowledgement
+
+Prof. Lou Bloomfield for providing data
 
 ## Contributing
 

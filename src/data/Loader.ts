@@ -1,3 +1,17 @@
+/**
+ * contains the template function that helps to load data from cache/remote
+ * @author Hanzhi Zhou
+ *
+ * For example usages
+ * @see [[loadTimeMatrix]]
+ * @see [[loadBuildingList]]
+ * @see [[loadSemesterList]]
+ * @see [[loadSemesterData]]
+ */
+
+/**
+ *
+ */
 import Expirable from './Expirable';
 import { NotiMsg } from '../utils/Notification';
 import { errToStr, timeout } from '../utils';

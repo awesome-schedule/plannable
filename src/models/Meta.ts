@@ -1,7 +1,12 @@
 /**
  * Meta stores some constants and type definitions
+ * @author Hanzhi Zhou
+ * @see [[Meta]]
  */
 
+/**
+ *
+ */
 import Schedule from './Schedule';
 import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
 

@@ -3,6 +3,9 @@
  * @see [[Meeting]]
  */
 
+/**
+ *
+ */
 import { RawMeeting } from './Meta';
 import Section from './Section';
 

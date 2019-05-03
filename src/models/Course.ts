@@ -1,9 +1,11 @@
 /**
  * the model of a Course that has multiple sections
- *
  * @author Hanzhi Zhou
  */
 
+/**
+ *
+ */
 import Section from './Section';
 import Meta, { RawCourse } from './Meta';
 import Hashable from './Hashable';
@@ -38,6 +40,10 @@ export interface CourseFields {
     description: string;
 }
 
+/**
+ * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
+ * depending on the array of section indices passed to its constructor.
+ */
 export default class Course implements CourseFields, Hashable {
     [x: string]: any;
     /**

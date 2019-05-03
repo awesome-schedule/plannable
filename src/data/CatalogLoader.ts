@@ -1,3 +1,11 @@
+/**
+ * Script for loading the catalog for a given semester
+ * @author Hanzhi Zhou, Kaiying Shan
+ */
+
+/**
+ *
+ */
 import axios from 'axios';
 import { parse } from 'papaparse';
 import querystring from 'querystring';

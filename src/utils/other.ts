@@ -1,10 +1,17 @@
+/**
+ * miscellaneous utility functions
+ *
+ */
+
+/**
+ *
+ */
 import Course from '../models/Course';
 import { AxiosError } from 'axios';
 import { saveAs } from 'file-saver';
 
 /**
  * open a course detail on Lou's list
- *
  * @author Kaiying Shan
  */
 export function openLousList(semesterId: number, courseId: number) {

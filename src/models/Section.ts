@@ -1,3 +1,11 @@
+/**
+ * @author Hanzhi Zhou
+ * @see [[Section]]
+ */
+
+/**
+ *
+ */
 import Course, { CourseFields } from './Course';
 import Meta, { RawSection } from './Meta';
 import Meeting from './Meeting';

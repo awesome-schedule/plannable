@@ -1,6 +1,6 @@
 /**
- * the notification class encapsulates common functions used to inform user about the results of certain actions
  *
+ * @see [[Notification]]
  * @author Hanzhi Zhou
  */
 
@@ -13,6 +13,9 @@ export interface NotiMsg<T> {
     payload?: T;
 }
 
+/**
+ * the notification class encapsulates common functions used to inform user about the results of certain actions
+ */
 export class Notification {
     public static readonly TYPES: { [x: string]: string } = Object.freeze({
         info: 'info',

@@ -352,6 +352,20 @@
                         <label class="custom-control-label" for="ac">Allow Closed</label>
                     </div>
                 </li>
+                <li class="list-group-item">
+                    <button
+                        type="button"
+                        class="btn btn-outline-info"
+                        style="width:100%"
+                        @click="generateSchedules"
+                    >
+                        Apply
+                    </button>
+                </li>
+
+                <div class="btn bg-info nav-btn" style="color:white">
+                    Sort Priority
+                </div>
                 <li
                     class="list-group-item px-3"
                     title="Note that you can drag sort options to change their priority in fallback mode"
@@ -428,16 +442,7 @@
                         </div>
                     </template>
                 </li>
-                <li class="list-group-item">
-                    <button
-                        type="button"
-                        class="btn btn-outline-info"
-                        style="width:100%"
-                        @click="generateSchedules"
-                    >
-                        Apply
-                    </button>
-                </li>
+                
                 <div class="btn bg-info nav-btn" style="color:white">
                     Advanced
                 </div>

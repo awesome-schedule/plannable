@@ -1,7 +1,12 @@
 /**
+ * utilities to convert a schedule to a corresponding iCalendar file
+ *
  * @author Kaiying Shan
  */
 
+/**
+ *
+ */
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Section from '../models/Section';

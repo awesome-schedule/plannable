@@ -109,6 +109,16 @@ export type RawAlgoSchedule = RawAlgoCourse[];
 
 export interface Options {
     [x: string]: any;
+    events?: Event[];
+    timeSlots?: Event[];
+    status?: string[];
+    sortOptions?: SortOptions;
+    combineSections?: boolean;
+    maxNumSchedules?: number;
+}
+
+interface FilledOptions {
+    [x: string]: any;
     events: Event[];
     timeSlots: Event[];
     status: string[];
@@ -118,7 +128,7 @@ export interface Options {
 }
 
 class ScheduleGenerator {
-    public static readonly optionDefaults: Options = {
+    public static readonly optionDefaults: FilledOptions = {
         events: [],
         status: [],
         timeSlots: [],
@@ -131,7 +141,7 @@ class ScheduleGenerator {
      * validate the options object. Default values are supplied for missing keys.
      * @param options
      */
-    public static validateOptions(options: Options) {
+    public static validateOptions(options: Options): FilledOptions {
         if (!options) return ScheduleGenerator.optionDefaults;
         for (const field in ScheduleGenerator.optionDefaults) {
             if (!options[field] && options[field] !== false) {
@@ -139,14 +149,17 @@ class ScheduleGenerator {
                 options[field] = ScheduleGenerator.optionDefaults[field];
             }
         }
-        return options;
+        return options as FilledOptions;
     }
 
     public catalog: Catalog;
-    public options: Options;
-    constructor(allRecords: Catalog) {
+    public options: FilledOptions;
+    public buildingList: string[];
+
+    constructor(allRecords: Catalog, buildingList: string[]) {
         this.catalog = allRecords;
         this.options = ScheduleGenerator.optionDefaults;
+        this.buildingList = buildingList;
     }
 
     /**
@@ -164,7 +177,7 @@ class ScheduleGenerator {
     ): ScheduleEvaluator {
         console.time('algorithm bootstrapping');
         this.options = ScheduleGenerator.validateOptions(options);
-        const buildingList: string[] = window.buildingList;
+        const buildingList: string[] = this.buildingList;
 
         // convert events to TimeDicts so that we can easily check for time conflict
         const timeSlots: TimeDict[] = this.options.events.map(e => e.toTimeDict());

@@ -475,7 +475,7 @@ export default class App extends Vue {
         if (!this.validateSortOptions()) return;
 
         this.loading = true;
-        const generator = new ScheduleGenerator(window.catalog);
+        const generator = new ScheduleGenerator(window.catalog, window.buildingList);
         try {
             const evaluator = generator.getSchedules(this.currentSchedule, {
                 events: this.currentSchedule.events,

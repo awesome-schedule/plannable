@@ -35,7 +35,6 @@ export interface ScheduleOptions {
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
 export default class Schedule {
-    public static readonly fields = ['All', 'title', 'id'];
     public static readonly bgColors = [
         '#f7867e',
         '#ffb74c',
@@ -95,7 +94,7 @@ export default class Schedule {
                 else schedule.All[key] = sections;
             }
         }
-        schedule.computeSchedule();
+        schedule._computeSchedule();
         return schedule;
     }
 

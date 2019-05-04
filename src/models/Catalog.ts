@@ -160,8 +160,8 @@ export default class Catalog {
         const results: Course[] = [];
         for (let i = 0, count = 0; i < 5; i++) {
             const match = matches[i];
-            for (let j = 0; j < match.length; j++) {
-                results.push(match[j]);
+            for (const m of match) {
+                results.push(m);
                 count++;
                 if (count >= max_results) {
                     console.timeEnd('query');

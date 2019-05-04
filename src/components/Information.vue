@@ -24,9 +24,10 @@
                     <a class="nav-link ml-3 my-1" href="#item-7-1">Export to iCalendar</a>
                     <a class="nav-link ml-3 my-1" href="#item-7-2">Export to JSON</a>
                 </nav>
-                <a class="nav-link" href="#item-8">Appendix</a>
+                <a class="nav-link" href="#item-8">Authors</a>
+                <a class="nav-link" href="#item-9">Appendix</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-8-1">Sort</a>
+                    <a class="nav-link ml-3 my-1" href="#item-9-1">Sort</a>
                 </nav>
             </nav>
         </nav>
@@ -261,8 +262,33 @@
             <p>
                 You can export your schedule to a JSON file so that it can be re-imported later.
             </p>
-            <h4 id="item-8">Appendix</h4>
-            <h5 id="item-8-1">Calculation of Sort Indicators</h5>
+            <h3 id="item-8">Authors</h3>
+            <p>The primiary contributors of this website are</p>
+            <ol>
+                <li>Hanzhi Zhou</li>
+                <li>Kaiying Shan</li>
+                <li>Zichao Hu</li>
+                <li>Minjun Long</li>
+            </ol>
+            <p>
+                For more details, please refer to our
+                <a
+                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/docs/Contribution.md"
+                >
+                    contribution log
+                </a>
+            </p>
+
+            <h3 id="item-9">Appendix</h3>
+            <h5 id="item-9-1">Calculation of Sort Indicators</h5>
+            For each schedule, a single/array of coefficients are calculated, depending on the sort
+            options enabled. The following formulae provide an overview on how these coefficients
+            are calculated. To know exactly how they are implemented, please refer to
+            <a
+                href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/src/algorithm/ScheduleEvaluator.ts"
+            >
+                our code</a
+            >.
             <vue-mathjax :formula="formula.compactness"></vue-mathjax>
             <div class="py-4 my-4" style="height: 1000px;"></div>
         </div>

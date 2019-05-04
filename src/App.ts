@@ -29,7 +29,7 @@ import { toICal } from './utils/ICal';
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator();
-// window.window.catalog = null;
+// window.catalog = null;
 
 @Component({
     components: {
@@ -47,9 +47,6 @@ window.scheduleEvaluator = new ScheduleEvaluator();
 })
 export default class App extends Vue {
     [x: string]: any;
-
-    name = 'App';
-
     semesters: Semester[] = [];
     currentSemester: Semester | null = null;
     currentScheduleIndex = 0;

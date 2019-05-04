@@ -20,8 +20,6 @@ export default class GridSchedule extends Vue {
     @Prop(String) readonly latest!: string;
     @Prop(Boolean) readonly timeOptionStandard!: boolean;
 
-    name = 'GridSchedule';
-
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
     wed = window.screen.width > 450 ? 'Wednesday' : 'Wed';

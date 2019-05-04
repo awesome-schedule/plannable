@@ -7,11 +7,12 @@ TARGET_BRANCH="master"
 function doCompile {
     mkdir -p backend
     cd backend
-    git clone https://github.com/awesome-schedule/data # clone and server our data
+    git clone https://github.com/awesome-schedule/data # clone and serve our data
     http-server -p 8000 --cors --slient &
     cd ..
     npm run test
     npm run build
+    npm run tsdoc # build our documentation
 }
 
 # Pull requests and commits to other branches shouldn't try to deploy, just build to verify
@@ -40,6 +41,9 @@ doCompile
 
 # copy to out
 cp -rf dist/* out/
+# copy generated documentation
+mkdir -p out/docs/tsdoc
+cp -rf docs/tsdoc/* out/docs/tsdoc/
 
 # Now let's go have some fun with the cloned repo
 cd out

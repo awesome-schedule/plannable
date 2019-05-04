@@ -9,6 +9,7 @@ env:
 install:
     - npm install
     - npm install codecov -g
+    - npm install http-server -g
 after_success:
     - codecov
 # before_install:

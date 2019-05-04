@@ -206,8 +206,7 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let sum = 0;
             let sumSq = 0;
-            for (let i = 0; i < blocks.length; i++) {
-                const day = blocks[i];
+            for (const day of blocks) {
                 let classTime = 0;
                 for (let j = 0; j < day.length; j += 2) {
                     classTime += day[j + 1] - day[j];

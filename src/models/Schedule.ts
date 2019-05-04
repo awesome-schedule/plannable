@@ -448,8 +448,9 @@ export default class Schedule {
 
             // instantiate all the nodes
             const nodes: Vertex<ScheduleBlock>[] = [];
-            for (let i = 0; i < blocks.length; i++) {
-                const v = new Vertex(blocks[i]);
+
+            for (const block of blocks) {
+                const v = new Vertex(block);
                 nodes.push(v);
                 graph.set(v, []);
             }

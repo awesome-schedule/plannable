@@ -138,10 +138,10 @@ export default class Course implements CourseFields, Hashable {
      */
     public getCombined(): { [x: string]: Section[] } {
         const combined: { [x: string]: Section[] } = {};
-        for (let i = 0; i < this.sections.length; i++) {
-            const day = this.sections[i].combinedTime();
-            if (combined[day]) combined[day].push(this.sections[i]);
-            else combined[day] = [this.sections[i]];
+        for (const section of this.sections) {
+            const day = section.combinedTime();
+            if (combined[day]) combined[day].push(section);
+            else combined[day] = [section];
         }
         return combined;
     }

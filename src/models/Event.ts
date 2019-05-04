@@ -46,13 +46,6 @@ export default class Event implements Hashable {
     }
 
     public toTimeDict(): TimeDict {
-        const dict: TimeDict = {};
-
-        const [date, timeBlock] = Utils.parseTimeAll(this.days)!;
-        for (const day of date) {
-            dict[day] = timeBlock;
-        }
-
-        return dict;
+        return Utils.parseTimeAllAsDict(this.days)!;
     }
 }

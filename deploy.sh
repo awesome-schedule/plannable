@@ -5,13 +5,18 @@ SOURCE_BRANCH="master"
 TARGET_BRANCH="master"
 
 function doCompile {
+    mkdir -p backend
+    cd backend
+    git clone https://github.com/awesome-schedule/data # clone and server our data
+    http-server -p 8000 --cors --slient &
+    cd ..
+    npm run test
     npm run build
-    cp -rf dist/* out/
 }
 
 # Pull requests and commits to other branches shouldn't try to deploy, just build to verify
 if [ "$TRAVIS_PULL_REQUEST" != "false" -o "$TRAVIS_BRANCH" != "$SOURCE_BRANCH" ]; then
-    npm run build
+    doCompile
     echo "Not from master. Skipping deploy."
     exit 0
 fi
@@ -32,6 +37,9 @@ cd ..
 
 # Run our compile script
 doCompile
+
+# copy to out
+cp -rf dist/* out/
 
 # Now let's go have some fun with the cloned repo
 cd out

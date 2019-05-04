@@ -33,3 +33,4 @@ deploy_key
 docs/tsdoc
 docs/vuedoc
 tests/unit/data
+/coverage

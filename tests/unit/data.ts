@@ -2,6 +2,18 @@
  * This file prepares data for unit testing
  */
 
+declare global {
+    interface Window {
+        catalog: Catalog;
+        timeMatrix: Int32Array;
+        buildingList: string[];
+        semesters: Semester[];
+    }
+}
+
+/**
+ *
+ */
 import { requestSemesterData } from '../../src/data/CatalogLoader';
 import path from 'path';
 import fs from 'fs';
@@ -17,7 +29,7 @@ const semester: Semester = {
     id: '1198',
     name: 'Fall 2019'
 };
-const filename = `CS${semester}Data.json`;
+const filename = `CS${semester.id}Data.json`;
 const filepath = path.join(datadir, filename);
 
 async function getData() {

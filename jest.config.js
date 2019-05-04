@@ -10,7 +10,21 @@ module.exports = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },
+    // setupTestFrameworkScriptFile: '<rootDir>tests/unit/setup.ts',
     snapshotSerializers: ['jest-serializer-vue'],
     testMatch: ['**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
-    testURL: 'http://localhost/'
+    testURL: 'http://localhost/',
+    collectCoverage: true,
+    collectCoverageFrom: [
+        '**/*.{ts}',
+        '!**/node_modules/**',
+        '!**/*.d.ts',
+        '!**/tests/temp/*.*',
+        '!**/components/*',
+        '!**/App.ts',
+        '!**/main.ts',
+        // this is too expensive to test (requesting a lot of data)
+        // and is already used in other tests (a lot of other tests rely on its data)
+        '!**/CatalogLoader.ts'
+    ]
 };

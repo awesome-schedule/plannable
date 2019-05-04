@@ -6,9 +6,7 @@
                 <a class="nav-link" href="#item-1">Introduction</a>
                 <a class="nav-link" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-2-1">Add Courses</a>
-                    <a class="nav-link ml-3 my-1" href="#item-2-2">Generate schedules</a>
-                    <a class="nav-link ml-3 my-1" href="#item-2-3">Multiple sets of courses</a>
+                    <a class="nav-link ml-3 my-1" href="#item-2-1">Schedule Manipulation</a>
                 </nav>
                 <a class="nav-link" href="#item-3">Add Event</a>
                 <a class="nav-link" href="#item-4">Filters</a>
@@ -51,33 +49,81 @@
                 </strong>
             </p>
             <h3 id="item-2">Basic Operations</h3>
-            <div class="about-border"></div>
-            <h5 id="item-2-1">Add Courses</h5>
-            <p>
-                You can add courses by searching department, professor, class number, or keywords.
-                Pick a section or multiple sections that you want to take, or choose "Any Section"
-                if you don't have a particular preference. To clear your search query, press ESC or
-                click on the delete button at the right end of the search box.
-                <!-- After you finished adding, you can edit class list under "Edited Classes". -->
-            </p>
-            <h5 id="item-2-3">Generate schedules</h5>
-            <p>
-                After you have finished selecting your courses, you can hit the generate button to
-                generate all possibles schedules out of the sections you selected. You can switch
-                between the generated schedule and your current selection by clicking the "Edit
-                Class/View Schedule" button below the search bar.
-            </p>
-            <h5 id="item-2-3">Multiple sets of courses</h5>
-            <p>
-                You can save more than one set of classes you want to take! Click the add icon near
-                the right arrow, you can add another set of classes as a separate schedule. The
-                number displayed shows which set of schedule you are editing. Click the rightmost
-                icon to delete a schedule. If you have certain classes you need to take regardless,
-                click the middle icon to ...
-            </p>
+            <hr />
+            <div id="item-2-1" style="width:100%;height:2px"></div>
+            <v-layout class="mb-4">
+                <v-flex xs8 sm4 class="mr-4">
+                    <v-card>
+                        <v-img :src="imgPath('search_class.png')" aspect-ratio="1.6"></v-img>
+
+                        <v-card-title primary-title>
+                            <div>
+                                <h5 class="headline mb-3">Add Course</h5>
+                                <div>
+                                    You can add courses by
+                                    <font class="amber lighten-3">searching</font> department,
+                                    professor, class number, or keywords . Pick a section or
+                                    multiple sections that you want to take, or choose "<font
+                                        class="amber lighten-3"
+                                        >any section</font
+                                    >" if you don't have a particular preference. To clear your
+                                    search query, press <font class="amber lighten-3">ESC</font> or
+                                    click on the <i class="fas fa-times click-icon"> </i> button at
+                                    the right end of the search box.
+                                </div>
+                            </div>
+                        </v-card-title>
+                    </v-card>
+                </v-flex>
+                <v-flex xs8 sm4 class="mr-4">
+                    <v-card>
+                        <v-img :src="imgPath('generate_schedule.png')" aspect-ratio="1.6"></v-img>
+
+                        <v-card-title primary-title>
+                            <div>
+                                <h5 class="headline mb-3">Generate Schedule</h5>
+                                <div>
+                                    After you have finished selecting your courses, you can hit the
+                                    <font class="lime lighten-3">generate</font> button to generate
+                                    all possibles schedules out of the sections you selected. You
+                                    can switch between the generated schedule and your current
+                                    selection by clicking the "<font class="lime lighten-3"
+                                        >edit class</font
+                                    >/<font class="lime lighten-3">view schedule</font>" button
+                                    below the search bar.
+                                </div>
+                            </div>
+                        </v-card-title>
+                    </v-card>
+                </v-flex>
+                <v-flex xs8 sm4>
+                    <v-card>
+                        <v-img :src="imgPath('multiple_schedule.png')" aspect-ratio="1.6"></v-img>
+
+                        <v-card-title primary-title>
+                            <div>
+                                <h5 class="headline mb-3">Multiple Schedules</h5>
+                                <div>
+                                    You can plan multiple schedules at the same time. Click the
+                                    <i class="far fa-calendar-plus click-icon teal lighten-4"></i>
+                                    icon, you will have a new empty schedule independent with your
+                                    existing schedules. Click
+                                    <i class="fas fa-long-arrow-alt-left teal lighten-4"></i> or
+                                    <i class="fas fa-long-arrow-alt-right teal lighten-4"></i>
+                                    to navigate through your schedules. Click
+                                    <i class="far fa-copy click-icon teal lighten-4"></i> to make a
+                                    copy of the current scheudle, and click
+                                    <i class="far fa-calendar-times teal lighten-4"></i> delete the
+                                    current schedule.
+                                </div>
+                            </div>
+                        </v-card-title>
+                    </v-card>
+                </v-flex>
+            </v-layout>
             <!-- picture slides illustration -->
 
-            <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
+            <!-- <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
                 <v-stepper-header>
                     <v-stepper-step :complete="e1 > 1" step="1" color="blue-grey "
                         >Name of step 1
@@ -127,10 +173,10 @@
                         >
                     </v-stepper-content>
                 </v-stepper-items>
-            </v-stepper>
+            </v-stepper> -->
 
             <h3 id="item-3">Add Event</h3>
-            <div class="about-border"></div>
+            <hr />
             <p>
                 This feature allows you to customize your own schedule. You can add your weekly
                 commitments on the schedule, such as club meetings, office hours, etc. This feature
@@ -141,7 +187,7 @@
                 <v-img :src="imgPath('AddEvent.gif')"></v-img>
             </v-card>
             <h3 id="item-4">Filters</h3>
-            <div class="about-border"></div>
+            <hr />
             <p>
                 Filters allow you to set parameters to better navigate your searches and generate
                 your schedules
@@ -192,11 +238,11 @@
             </v-card>
 
             <h3 id="item-5">Display Settings</h3>
-            <div class="about-border"></div>
+            <hr />
             <h3 id="item-5">Customize Colors</h3>
-            <div class="about-border"></div>
+            <hr />
             <h3 id="item-7">Export</h3>
-            <div class="about-border"></div>
+            <hr />
             <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
                 ICalendar is a standard file format used to represent information in a calednar.
@@ -211,8 +257,9 @@
                         :key="idx"
                         :complete="e2 > idx"
                         :step="idx"
-                        style="margin:auto auto"
+                        style="margin:auto auto;cursor:pointer"
                         color="blue-grey"
+                        @click="e2 = idx"
                     ></v-stepper-step>
                 </v-stepper-header>
 

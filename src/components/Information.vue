@@ -24,6 +24,10 @@
                     <a class="nav-link ml-3 my-1" href="#item-7-1">Export to iCalendar</a>
                     <a class="nav-link ml-3 my-1" href="#item-7-2">Export to JSON</a>
                 </nav>
+                <a class="nav-link" href="#item-8">Appendix</a>
+                <nav class="nav nav-pills flex-column">
+                    <a class="nav-link ml-3 my-1" href="#item-8-1">Sort</a>
+                </nav>
             </nav>
         </nav>
         <div
@@ -168,7 +172,8 @@
                 in fallback mode.
             </p>
             <h6>Sort Options</h6>
-            Currently, we provide the following list of sort options.
+            Currently, we provide the following list of sort options. If you want a mathematical
+            description on how they are computed, see <a href="#item-8-1">Appendix</a>.
             <ol>
                 <li>Variance: Balance the class time each day</li>
                 <li>Vertical compactness: Make classes back-to-back</li>
@@ -182,10 +187,14 @@
             <ol>
                 <li>Combined: Combine all sorting options enabled and given them equal weight</li>
                 <li>
-                    Fallback: Sort using the options on top first. If compare equal, sort using the
-                    next option.
+                    Fallback: Sort using the options on top first. If two schedules are compared
+                    equal using that option, sort using the next option.
                 </li>
             </ol>
+            <h6>Tips on chosing sort modes</h6>
+            If you want to balance between multiple sort options, try "combined". On the other hand,
+            if you want to prioritize a single sort option (such as No Early), then try "fallback",
+            as it will sort using options on top first.
 
             <v-card class="my-5" style="width:85%;margin:auto auto">
                 <v-img :src="imgPath('Sort.gif')"></v-img>
@@ -244,23 +253,47 @@
                 You can export your schedule to a JSON file so that it can re-imported to later to
                 another computer.
             </p>
+            <h4 id="item-8">Appendix</h4>
+            <h5 id="item-8-1">Calculation of Sort Indicators</h5>
+            <vue-mathjax :formula="formula.compactness"></vue-mathjax>
             <div class="py-4 my-4" style="height: 1000px;"></div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-/* eslint-disable */
+// tslint:disable:max-line-length
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import { VueMathjax } from 'vue-mathjax';
 import 'bootstrap';
 import $ from 'jquery';
 
-@Component
+@Component({
+    components: {
+        VueMathjax
+    }
+})
 export default class Information extends Vue {
     @Prop(Number) readonly scheduleLeft!: number;
 
     e1: number = 0;
     e2: number = 1;
+    formula = {
+        compactness: `
+$$
+\\begin{align*}
+    \\text{Variance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}}
+    \\frac{\\text{Classtime}(day)^2}{5} - \\left( \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\frac{\\text{Classtime}(day)}{5} \\right)^2                             \\\\
+    \\text{Compactness} & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\left(\\text{Start}_{i + 1} - \\text{End}_{i} \\right)            \\\\
+                       & \\text{where $n_{day}$ is the number of classes at day $day$}                                                                         \\\\
+    \\text{No Early}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\text{12:00} - \\text{FirstClassStart}                                                     \\\\
+    \\text{Lunch time}  & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day}} \\min(\\text{OverlapBetween}(\\text{Class}_i, \\text{Lunch}), 60) - 60 \\\\
+                       & \\text{where Lunch is defined as the time between 11:00 and 14:00}                                                                    \\\\
+    \\text{Distance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\text{DistanceBetween}(\\text{Class}_i, \\text{Class}_{i+1})
+\\end{align*}
+$$
+        `
+    };
 
     icalSteps = {
         1: {

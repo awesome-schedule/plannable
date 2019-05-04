@@ -66,20 +66,31 @@ Hanzhi Zhou
 
 ### Models and Data Structure
 
-These are mainly TypeScript files in [models](/templates/src/models)
+The underlying models and data structures are the core of our website. These are mainly TypeScript files in [models](/templates/src/models)
 
 | Name          | Description                                                         | Contributor               |
 | ------------- | ------------------------------------------------------------------- | ------------------------- |
 | Meta          | Some metadata and type definitions                                  | Hanzhi Zhou               |
-| Utils         | Commonly used utility functions                                     | Hanzhi Zhou, Kaiying Shan |
 | Catalog       | A wrapper for raw course catalog, course query provider             | Hanzhi Zhou               |
 | Course        | A collection of sections for a specific course                      | Hanzhi Zhou               |
+| Graph         | Model for an undirected graph, used for schedule rendering          | Hanzhi Zhou               |
 | Event         | A structure that holds information of an event                      | Kaiying Shan              |
 | Section       | A specific section of a course                                      | Hanzhi Zhou               |
 | Meeting       | A specific meeting information of a section                         | Hanzhi Zhou               |
 | Schedule      | Schedule data structure, helpers for schedule rendering             | Hanzhi Zhou, Kaiying Shan |
 | Notification  | A wrapper for displaying notifications to user                      | Hanzhi Zhou               |
 | ScheduleBlock | A wrapper with fields required for rendering using GridSchedule.vue | Hanzhi Zhou               |
+
+### Utilities
+
+Commonly used utility functions, found in [src/utils](src/utils)
+
+| Name         | Description                                                                 | Contributor               |
+| ------------ | --------------------------------------------------------------------------- | ------------------------- |
+| ICal         | Convert a schedule to an iCalendar file                                     | Kaiying Shan              |
+| Notification | A wrapper for displaying notifications to user                              | Hanzhi Zhou               |
+| time         | Utilities for parsing and convert in-between different time representations | Hanzhi Zhou, Kaiying Shan |
+| other        | Miscellaneous utility functions                                             | Hanzhi Zhou, Kaiying Shan |
 
 ### Data Fetching and Caching
 
@@ -96,7 +107,7 @@ These are mainly JavaScript files in [algorithm](/templates/src/algorithm)
 
 | Part               | Description                                    | Contributor               |
 | ------------------ | ---------------------------------------------- | ------------------------- |
-| Main Algorithm     | -                                              | Zichao Hu, Hanzhi Zhou    |
+| Schedule Generator | -                                              | Zichao Hu, Hanzhi Zhou    |
 | Schedule Evaluator | Compute quality indicators and perform sorting | Hanzhi Zhou, Kaiying Shan |
 | TypeScript Rewrite | Rewrite everything using TypeScript            | Hanzhi Zhou               |
 

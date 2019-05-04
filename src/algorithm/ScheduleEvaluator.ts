@@ -181,7 +181,7 @@ class ScheduleEvaluator {
         {
             mode: Mode.combined,
             title: 'Combined',
-            description: 'Combine all sorting options and given them equal weight'
+            description: 'Combine all sorting options enabled and given them equal weight'
         },
         {
             mode: Mode.fallback,

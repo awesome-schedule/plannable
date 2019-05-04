@@ -7,7 +7,8 @@
                 <a class="nav-link" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1" href="#item-2-1">Add Courses</a>
-                    <a class="nav-link ml-3 my-1" href="#item-2-2">Multiple set of class</a>
+                    <a class="nav-link ml-3 my-1" href="#item-2-2">Generate schedules</a>
+                    <a class="nav-link ml-3 my-1" href="#item-2-3">Multiple sets of courses</a>
                 </nav>
                 <a class="nav-link" href="#item-3">Add Event</a>
                 <a class="nav-link" href="#item-4">Filters</a>
@@ -18,10 +19,10 @@
                 </nav>
                 <a class="nav-link" href="#item-5">Display Settings</a>
                 <a class="nav-link" href="#item-6">Customize Colors</a>
-                <a class="nav-link" href="#item-7">Export ICalendar</a>
+                <a class="nav-link" href="#item-7">Export</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-7-1">Item 3-1</a>
-                    <a class="nav-link ml-3 my-1" href="#item-7-2">Item 3-2</a>
+                    <a class="nav-link ml-3 my-1" href="#item-7-1">Export to iCalendar</a>
+                    <a class="nav-link ml-3 my-1" href="#item-7-2">Export to JSON</a>
                 </nav>
             </nav>
         </nav>
@@ -41,17 +42,32 @@
                 class selection done with the searching field and customize them with filters. The
                 website can generate all possible schedules according to your requirements.
             </p>
+            <p>
+                <strong
+                    >Important note: It is recommended that you save your calendar frequently (see
+                    <a href="#item-7-2">Export to JSON</a>), because our website saves all its data
+                    in your browser, locally. If the data expired or you cleared your cache, the
+                    data will be permanently lost!
+                </strong>
+            </p>
             <h3 id="item-2">Basic Operations</h3>
             <div class="about-border"></div>
             <h5 id="item-2-1">Add Courses</h5>
             <p>
                 You can add courses by searching department, professor, class number, or keywords.
-                Pick a session you want, or choose "Any Section" if you don't have a preference.
-                Click the delete button at the right of search field to clear the entry and search
-                for other classes. After you finished adding, you can a class list under "Edited
-                Classes".
+                Pick a section or multiple sections that you want to take, or choose "Any Section"
+                if you don't have a particular preference. To clear your search query, press ESC or
+                click on the delete button at the right end of the search box.
+                <!-- After you finished adding, you can edit class list under "Edited Classes". -->
             </p>
-            <h5 id="item-2-2">Multiple set of class</h5>
+            <h5 id="item-2-3">Generate schedules</h5>
+            <p>
+                After you have finished selecting your courses, you can hit the generate button to
+                generate all possibles schedules out of the sections you selected. You can switch
+                between the generated schedule and your current selection by clicking the "Edit
+                Class/View Schedule" button below the search bar.
+            </p>
+            <h5 id="item-2-3">Multiple sets of courses</h5>
             <p>
                 You can save more than one set of classes you want to take! Click the add icon near
                 the right arrow, you can add another set of classes as a separate schedule. The
@@ -64,20 +80,20 @@
             <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
                 <v-stepper-header>
                     <v-stepper-step :complete="e1 > 1" step="1" color="blue-grey "
-                        >Name of step 1</v-stepper-step
-                    >
+                        >Name of step 1
+                    </v-stepper-step>
 
                     <v-divider></v-divider>
 
                     <v-stepper-step :complete="e1 > 2" step="2" color="blue-grey "
-                        >Name of step 2</v-stepper-step
-                    >
+                        >Name of step 2
+                    </v-stepper-step>
 
                     <v-divider></v-divider>
 
                     <v-stepper-step :complete="e1 > 3" step="3" color="blue-grey "
-                        >Name of step 3</v-stepper-step
-                    >
+                        >Name of step 3
+                    </v-stepper-step>
                 </v-stepper-header>
 
                 <v-stepper-items>
@@ -86,9 +102,9 @@
                             <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 2"
-                            >Continue</v-btn
-                        >
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 2">
+                            Continue
+                        </v-btn>
                     </v-stepper-content>
 
                     <v-stepper-content step="2">
@@ -96,9 +112,9 @@
                             <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
                         </v-card>
 
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 3"
-                            >Continue</v-btn
-                        >
+                        <v-btn color="blue-grey" style="color:white" @click="e1 = 3">
+                            Continue
+                        </v-btn>
                     </v-stepper-content>
 
                     <v-stepper-content step="3">
@@ -144,13 +160,15 @@
                 when auto-generating schedules even though it may no longer be available. Or you can
                 uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
             </p>
-            <h5 id="item-4-3">Sort Priority</h5>
+            <h5 id="item-4-3">Sort Schedules</h5>
             <p>
-                One powerful feature comes with auto-scheduling is that the scheduler will generate
-                the schedules for you based on your preference. You can select multiple indexes
-                optimize your schedule, and drag sort options to change their priority in fallback
-                mode.
+                One powerful feature comes with auto-scheduling is that we can sort the generated
+                schedules based on one of a combination of indicators. You can select multiple
+                indicators to optimize your schedule, and drag sort options to change their priority
+                in fallback mode.
             </p>
+            <h6>Sort Options</h6>
+            Currently, we provide the following list of sort options.
             <ol>
                 <li>Variance: Balance the class time each day</li>
                 <li>Vertical compactness: Make classes back-to-back</li>
@@ -158,7 +176,11 @@
                 <li>No Early: Start the day as late as possible</li>
                 <li>Walking Distance: Avoid long distance walking between classes</li>
                 <li>I'm Feeling Lucky: Sort Randomly</li>
-                <li>Combined: Combine all sorting options and given them equal weight</li>
+            </ol>
+            <h6>Sort Modes</h6>
+            And there are two avaiable sort modes.
+            <ol>
+                <li>Combined: Combine all sorting options enabled and given them equal weight</li>
                 <li>
                     Fallback: Sort using the options on top first. If compare equal, sort using the
                     next option.
@@ -173,15 +195,15 @@
             <div class="about-border"></div>
             <h3 id="item-5">Customize Colors</h3>
             <div class="about-border"></div>
-            <h3 id="item-7">Export ICalendar</h3>
+            <h3 id="item-7">Export</h3>
             <div class="about-border"></div>
+            <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
-                ICalendar is a standard file which you can import to your Apple/Google Calendar.
-                This website allows you to download the ICalendar to your computer after you have
-                creatd your schedule. Then, you can go to your Apple/Google Calendar and then
-                syncronize your schedule. Instruction is shown below:
+                ICalendar is a standard file format used to represent information in a calednar.
+                Apple and Google calendar both support importing from iCalendar. Our website can
+                export your schedule to a iCalendar file. The instruction on how to import iCalendar
+                file to your Google calendar is shown below:
             </p>
-            <h5 id="item-7-1">Google Calendar</h5>
             <v-stepper v-model="e2" class="my-5" style="width:60vw;margin:auto auto">
                 <v-stepper-header>
                     <v-stepper-step
@@ -217,8 +239,12 @@
                 </v-stepper-items>
             </v-stepper>
 
-            <h5 id="item-7-2"></h5>
-            <p>...</p>
+            <h5 id="item-7-2">Export to JSON</h5>
+            <p>
+                You can export your schedule to a JSON file so that it can re-imported to later to
+                another computer.
+            </p>
+            <div class="py-4 my-4" style="height: 1000px;"></div>
         </div>
     </div>
 </template>

@@ -6,7 +6,7 @@ export default class Pagination extends Vue {
 
     idx = 0;
     start = 0;
-    goto = 1;
+    goto = null;
 
     get length() {
         if (window.screen.width < 900) {

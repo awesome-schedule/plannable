@@ -455,9 +455,9 @@
                             type="number"
                             class="form-control"
                         />
-                        <small class="form-text text-muted"
-                            >May crash your browser if too big</small
-                        >
+                        <small class="form-text text-muted">
+                            May crash your browser if too big
+                        </small>
                     </div>
                 </li>
                 <li class="list-group-item">
@@ -486,9 +486,9 @@
                     class="form-group row no-gutters mt-2 mb-1"
                     title="Schedule grid earlier than this time won't be displayed if you don't have any class"
                 >
-                    <label for="schedule-start" class="col-lg-6 col-form-label"
-                        >Schedule Start</label
-                    >
+                    <label for="schedule-start" class="col-lg-6 col-form-label">
+                        Schedule Start
+                    </label>
                     <div class="col-lg-6">
                         <input
                             id="schedule-start"
@@ -657,9 +657,12 @@
                         />
                         <label class="custom-file-label" for="customFile">Import From..</label>
                     </div>
+                    <small class="text-center form-text text-muted">
+                        Import a .json file exported by our website
+                    </small>
                 </li>
                 <li class="list-group-item">
-                    <div class="form-group row">
+                    <div class="form-group row mb-0">
                         <input
                             v-model="exportJson"
                             class="form-control col-6 mr-3"
@@ -674,7 +677,10 @@
                             Export
                         </button>
                     </div>
-                    <div class="form-group row">
+                    <small class="text-center form-text text-muted mb-3">
+                        Save a copy which can be imported later
+                    </small>
+                    <div class="form-group row mb-0">
                         <input
                             v-model="exportICal"
                             class="form-control col-6 mr-3"
@@ -685,6 +691,9 @@
                             Export iCal
                         </button>
                     </div>
+                    <small class="form-text text-muted mb-1 text-center">
+                        Google/Apple calendar support iCal files
+                    </small>
                 </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-primary w-100" @click="print">

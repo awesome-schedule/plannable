@@ -202,8 +202,17 @@
 
             <h3 id="item-5">Display Settings</h3>
             <div class="about-border"></div>
-            <h3 id="item-5">Customize Colors</h3>
+            <h3 id="item-6">Customize Colors</h3>
             <div class="about-border"></div>
+            <p>
+                You can switch to the Palette (<i class="fas fa-palette"></i>) to customize the
+                background colors of courses and events. You can either click the
+                <i class="fas fa-sync-alt mr-1"></i> icon to use a random color or click
+                <input type="color" style="width: 30px" value="#deadbb" /> to select your favorite
+                color. If you find that there are courses missing from the palette, it may because
+                you selected "Any Section" for that course and did not switch to "View Schedule"
+                mode.
+            </p>
             <h3 id="item-7">Export</h3>
             <div class="about-border"></div>
             <h5 id="item-7-1">Export to iCalendar</h5>
@@ -250,8 +259,7 @@
 
             <h5 id="item-7-2">Export to JSON</h5>
             <p>
-                You can export your schedule to a JSON file so that it can re-imported to later to
-                another computer.
+                You can export your schedule to a JSON file so that it can be re-imported later.
             </p>
             <h4 id="item-8">Appendix</h4>
             <h5 id="item-8-1">Calculation of Sort Indicators</h5>

@@ -2,6 +2,14 @@ import data from './data';
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import Schedule from '../../src/models/Schedule';
 import 'jest';
+import { loadBuildingList, loadTimeMatrix } from '../../src/data/BuildingLoader';
+import Event from '../../src/models/Event';
+import ScheduleEvaluator from '../../src/algorithm/ScheduleEvaluator';
+
+beforeAll(async () => {
+    (window as any).catalog = await data;
+    (window as any).timeMatrix = (await loadTimeMatrix()).payload!;
+});
 
 describe('ScheduleGenerator Test', () => {
     it('Data Validation', async () => {
@@ -13,7 +21,8 @@ describe('ScheduleGenerator Test', () => {
 
     it('ScheduleGenerator', async () => {
         const allRecords = await data;
-        const generator = new ScheduleGenerator(allRecords);
+        const buildingList = await loadBuildingList();
+        const generator = new ScheduleGenerator(allRecords, buildingList.payload!);
         expect(typeof generator.createSchedule).toBe('function');
         const schedule = new Schedule();
         schedule.All = {
@@ -22,12 +31,29 @@ describe('ScheduleGenerator Test', () => {
             ece23305: -1,
             ece23308: new Set([0]),
             cs41025: -1,
-            cs47745: -1,
             apma31105: -1,
-            phys24194: new Set([0]),
+            phys24194: -1,
             ece26308: -1
         };
-        const result = generator.getSchedules(schedule);
+        const sort = ScheduleEvaluator.getDefaultOptions();
+        sort.sortBy[0].enabled = true;
+        sort.sortBy[1].enabled = true;
+        sort.sortBy[2].enabled = true;
+        sort.sortBy[3].enabled = true;
+        sort.sortBy[4].enabled = true;
+        const result = generator.getSchedules(schedule, {
+            combineSections: false,
+            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
+            sortOptions: sort
+        });
         expect(result.empty()).toBeFalsy();
+
+        sort.mode = 0;
+        const result2 = generator.getSchedules(schedule, {
+            combineSections: false,
+            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
+            sortOptions: sort
+        });
+        expect(result2.empty()).toBeFalsy();
     });
 });

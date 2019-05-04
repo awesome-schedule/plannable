@@ -1,5 +1,6 @@
 import 'jest';
-import { loadTimeMatrix } from '../../src/data/BuildingLoader';
+import { loadTimeMatrix, loadBuildingList } from '../../src/data/BuildingLoader';
+import { loadSemesterList } from '../../src/data/SemesterListLoader';
 describe('Data loader test', () => {
     it('Time matrix symmetry', async () => {
         const msg = await loadTimeMatrix();
@@ -14,5 +15,19 @@ describe('Data loader test', () => {
                 }
             }
         }
+    });
+
+    it('building list', async () => {
+        const data = await loadBuildingList();
+        const payload = data.payload!;
+        expect(payload).toBeTruthy();
+        expect(typeof payload[0]).toBe('string');
+    });
+
+    it('semester data', async () => {
+        const data = await loadSemesterList(5);
+        const payload = data.payload!;
+        expect(payload).toBeTruthy();
+        expect(payload[0].id).toBeTruthy();
     });
 });

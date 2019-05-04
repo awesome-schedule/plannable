@@ -768,7 +768,7 @@
                 @trigger-modal="showModal"
                 @editEvent="editEvent"
             ></grid-schedule>
-            <v-footer dark height="auto">
+            <v-footer id="app-footer" dark height="auto">
                 <v-card class="flex" flat tile>
                     <v-card-title class="teal">
                         <strong class="subheading"
@@ -906,7 +906,7 @@
 
 @media print {
     @page {
-        size: A4 landscape;
+        size: A4 portrait;
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
@@ -921,10 +921,13 @@
     }
     div .schedule {
         width: calc(100vw - 1.6cm) !important;
-        height: calc(100vw - 1.6cm) !important;
-        margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
+        height: calc(100vw - 0.8cm) !important;
+        margin: 0 0.8cm 0.8cm 0.8cm !important;
     }
     div #noti {
+        display: none !important;
+    }
+    #app-footer {
         display: none !important;
     }
 }

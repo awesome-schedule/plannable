@@ -72,7 +72,7 @@ describe('Schedule Evaluator Test', () => {
         const rawSortOptions: SortOptionJSON = {
             sortBy: [
                 {
-                    name: 'variance',
+                    name: 'distance',
                     enabled: false,
                     reverse: true
                 }

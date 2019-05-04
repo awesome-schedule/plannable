@@ -8,7 +8,7 @@ function doCompile {
     mkdir -p backend
     cd backend
     git clone https://github.com/awesome-schedule/data # clone and server our data
-    http-server -p 8000 --cors
+    http-server -p 8000 --cors --slient &
     cd ..
     npm run test
     npm run build

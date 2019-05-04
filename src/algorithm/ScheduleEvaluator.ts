@@ -533,7 +533,8 @@ class ScheduleEvaluator {
     }
 
     /**
-     * sort the array of schedules according to their quality coefficients computed using the given
+     * sort the array of schedules according to their quality coefficients, assuming they are already computed
+     * by `computeCoeff`
      *
      * @param quick quick mode: use Floyd–Rivest algorithm to select first
      * 100 elements and then sort only these elements.
@@ -578,14 +579,21 @@ class ScheduleEvaluator {
             }
         } else {
             const len = options.length;
+
+            // if option[i] is reverse, ifReverse[i] will be -1
             const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
             const coeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: CmpSchedule, b: CmpSchedule) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {
                     const coeff = coeffs[i];
+                    // calculate the difference in coefficients
                     r = ifReverse[i] * (coeff[a.index] - coeff[b.index]);
+
+                    // if non-zero, returns this coefficient
                     if (r) return r;
+
+                    // otherwise, fallback to the next sort option
                 }
                 return r;
             };

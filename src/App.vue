@@ -450,7 +450,7 @@
                         </div>
                     </template>
                 </li>
-                
+
                 <div class="btn bg-info nav-btn" style="color:white">
                     Advanced
                 </div>

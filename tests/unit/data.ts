@@ -2,6 +2,18 @@
  * This file prepares data for unit testing
  */
 
+declare global {
+    interface Window {
+        catalog: Catalog;
+        timeMatrix: Int32Array;
+        buildingList: string[];
+        semesters: Semester[];
+    }
+}
+
+/**
+ *
+ */
 import { requestSemesterData } from '../../src/data/CatalogLoader';
 import path from 'path';
 import fs from 'fs';

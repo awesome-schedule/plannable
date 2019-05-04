@@ -5,7 +5,7 @@ import data from './data';
 import Section from '../../src/models/Section';
 
 beforeAll(async () => {
-    (window as any).catalog = await data;
+    window.catalog = await data;
 });
 
 describe('Schedule Test', () => {
@@ -22,6 +22,17 @@ describe('Schedule Test', () => {
         // console.log(prob);
         // we expect the hashes to be quite uniformly distributed
         expect(prob.some(x => x > 11)).toBe(false);
+    });
+
+    it('schedule set color', () => {
+        const schedule = new Schedule();
+        expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
+            '#CC9393'
+        );
+        schedule.setColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') }, '#ffffff');
+        expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
+            '#ffffff'
+        );
     });
 
     it('From Json new', () => {
@@ -51,7 +62,7 @@ describe('Schedule Test', () => {
         });
     });
 
-    it('add course', () => {
+    it('add/update course', () => {
         const schedule = new Schedule();
         expect(schedule.All).toEqual({});
         schedule.update('cs11105', 1);
@@ -73,9 +84,16 @@ describe('Schedule Test', () => {
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
             3
         );
-        expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
-            '#CC9393'
-        );
+
+        schedule.preview('cs21105', 0);
+        schedule._computeSchedule();
+        schedule.removePreview();
+
+        // preview an already present one
+        schedule.preview('cs21504', 0);
+        schedule._computeSchedule();
+        schedule.removePreview();
+
         for (const i of [0, 1, 2, 3, 4, 5]) schedule.update('chem14105', i);
         for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) schedule.update('chem14114', i);
         Schedule.options.combineSections = false;
@@ -85,11 +103,15 @@ describe('Schedule Test', () => {
         );
 
         schedule.hover('cs21105', true);
+        schedule.hover('cs21504', true);
         for (const day in schedule.days) {
             const blocks = schedule.days[day];
             for (const block of blocks) {
                 if (block.section instanceof Section) {
                     if (block.section.key === 'cs21105') {
+                        expect(block.strong).toBe(true);
+                    }
+                    if (block.section.key === 'cs21504') {
                         expect(block.strong).toBe(true);
                     }
                 }

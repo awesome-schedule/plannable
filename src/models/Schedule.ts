@@ -218,21 +218,21 @@ export default class Schedule {
         this.computeSchedule();
     }
 
-    /**
-     * Add a course to schedule
-     */
-    public add(key: string, section: number) {
-        const sections = this.All[key];
-        if (sections instanceof Set) {
-            if (sections.has(section)) return false;
-            sections.add(section);
-            this.computeSchedule();
-        } else {
-            this.All[key] = new Set([section]);
-            this.computeSchedule();
-        }
-        return true;
-    }
+    // /**
+    //  * Add a course to schedule
+    //  */
+    // public add(key: string, section: number) {
+    //     const sections = this.All[key];
+    //     if (sections instanceof Set) {
+    //         if (sections.has(section)) return false;
+    //         sections.add(section);
+    //         this.computeSchedule();
+    //     } else {
+    //         this.All[key] = new Set([section]);
+    //         this.computeSchedule();
+    //     }
+    //     return true;
+    // }
 
     /**
      * Update a course in the schedule
@@ -259,9 +259,12 @@ export default class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        this.computeSchedule();
+        this._computeSchedule();
     }
 
+    /**
+     * preview and remove preview need to use the async version of compute
+     */
     public removePreview() {
         this.previous = null;
         this.computeSchedule();
@@ -286,7 +289,7 @@ export default class Schedule {
             }
         }
         this.events.push(newEvent);
-        this.computeSchedule();
+        this._computeSchedule();
     }
 
     public deleteEvent(days: string) {
@@ -296,7 +299,7 @@ export default class Schedule {
                 break;
             }
         }
-        this.computeSchedule();
+        this._computeSchedule();
     }
 
     public hover(key: string, strong: boolean = true) {
@@ -327,9 +330,14 @@ export default class Schedule {
      */
     public computeSchedule() {
         window.clearTimeout(this.pendingCompute);
-        this.pendingCompute = window.setTimeout(() => this._computeSchedule(), 10);
+        this.pendingCompute = window.setTimeout(() => {
+            this._computeSchedule();
+        }, 10);
     }
 
+    /**
+     * synchronous version of `computeSchedule`
+     */
     public _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
@@ -565,7 +573,7 @@ export default class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.computeSchedule();
+        this._computeSchedule();
     }
 
     public cleanSchedule() {
@@ -626,7 +634,7 @@ export default class Schedule {
             deepCopyEvent ? this.events.map(e => e.copy()) : this.events
         );
         cpy.All = AllCopy;
-        cpy.computeSchedule();
+        cpy._computeSchedule();
         return cpy;
     }
 

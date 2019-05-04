@@ -7,13 +7,13 @@ import Event from '../../src/models/Event';
 import ScheduleEvaluator from '../../src/algorithm/ScheduleEvaluator';
 
 beforeAll(async () => {
-    (window as any).catalog = await data;
-    (window as any).timeMatrix = (await loadTimeMatrix()).payload!;
+    window.catalog = await data;
+    window.timeMatrix = (await loadTimeMatrix()).payload!;
 });
 
 describe('ScheduleGenerator Test', () => {
     it('Data Validation', async () => {
-        const allRecords = await data;
+        const allRecords = window.catalog;
         expect(typeof data).toBe('object');
         const course = allRecords.getCourse('cs11105');
         expect(typeof course.sections[0].id).toBe('number');

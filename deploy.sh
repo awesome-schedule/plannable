@@ -41,8 +41,7 @@ doCompile
 
 # copy to out
 cp -rf dist/* out/
-# copy github config
-cp -rf config/* out/
+
 # copy generated documentation
 mkdir -p out/docs/tsdoc
 cp -rf docs/tsdoc/* out/docs/tsdoc/

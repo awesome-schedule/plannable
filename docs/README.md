@@ -4,6 +4,8 @@ This folder contains the documentation of the project. It is currently working i
 
 ## Building the documentation
 
+TypeScript documentation that is built from master is available to browse at https://awesome-schedule.github.io/docs/tsdoc/
+
 ### TypeScript
 
 > Note: if you don't have typedoc installed, you can install it globally by `npm install -g typedoc`

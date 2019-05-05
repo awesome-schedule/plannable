@@ -39,6 +39,9 @@ cd ..
 # Run our compile script
 doCompile
 
+cp public/.gitattributes out/
+cp public/.nojekyll out/
+
 # copy to out
 cp -rf dist/* out/
 

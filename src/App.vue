@@ -814,8 +814,8 @@
                                 style="color:inherit;text-decoration: none;"
                                 target="_blank"
                                 href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
-                                ><v-icon size="24px">fab fa-youtube-square</v-icon></a
-                            >
+                                ><v-icon size="22px">fab fa-youtube</v-icon>
+                            </a>
                         </v-btn>
                         <v-btn class="mx-3" title="Fill out a survey to make us better" dark icon>
                             <a

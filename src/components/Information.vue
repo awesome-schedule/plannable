@@ -126,6 +126,10 @@
                     </v-card>
                 </v-flex>
             </v-layout>
+            <h5>Add Class</h5>
+            <v-card class="my-5" style="width:85%;margin:auto auto;">
+                <v-img :src="imgPath('select_class.gif')"></v-img>
+            </v-card>
             <!-- picture slides illustration -->
 
             <!-- <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">

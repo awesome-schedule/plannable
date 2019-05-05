@@ -39,7 +39,7 @@
             data-target="#navbar-scrollspy"
             data-offset="10"
         >
-            <h2 id="item-1">Welcome to our information page!</h2>
+            <h2 id="item-1">Welcome to our information page! Meow~</h2>
             <p>
                 This website helps UVa students to schedule their classes more efficiently. Get your
                 class selection done with the searching field and customize them with filters. The
@@ -317,7 +317,7 @@
             <p>The primiary contributors of this website are</p>
             <ol>
                 <li>Hanzhi Zhou</li>
-                <li>Kaiying Shan</li>
+                <li>Kaiying Shan <s>(non-human; cat)</s></li>
                 <li>Zichao Hu</li>
                 <li>Minjun Long</li>
             </ol>

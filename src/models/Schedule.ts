@@ -15,6 +15,7 @@ import Meta from './Meta';
 import * as Utils from '../utils';
 import Hashable from './Hashable';
 import { Vertex, depthFirstSearch, Graph } from './Graph';
+import { getColoring } from './Coloring';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -426,7 +427,8 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-        this.computeConflict();
+        // this.computeConflict();
+        this.constructAdjList();
         console.timeEnd('compute schedule');
     }
 
@@ -489,10 +491,12 @@ export default class Schedule {
                     for (let i = 1; i < path.length; i++) {
                         const block = path[i].val;
 
-                        // skip already computed nodes
-                        if (block.left !== -1) continue;
-
-                        block.left = path[i - 1].val.left + path[i - 1].val.width;
+                        // // skip already computed nodes
+                        // if (block.left !== -1) continue;
+                        block.left = Math.max(
+                            block.left,
+                            path[i - 1].val.left + path[i - 1].val.width
+                        );
 
                         // remaining width / number of remaining path length
                         block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
@@ -507,6 +511,31 @@ export default class Schedule {
             }
 
             graph.clear();
+        }
+    }
+
+    public constructAdjList() {
+        for (const day in this.days) {
+            const blocks = this.days[day];
+            const graph: number[][] = [];
+            for (const _ of blocks) {
+                graph.push([]);
+            }
+            for (let i = 0; i < blocks.length; i++) {
+                for (let j = i + 1; j < blocks.length; j++) {
+                    if (blocks[i].conflict(blocks[j])) {
+                        graph[i].push(j);
+                        graph[j].push(i);
+                    }
+                }
+            }
+            const fastGraph = graph.map(x => Int8Array.from(x));
+            const [numColors, colors] = getColoring(fastGraph);
+            const width = 1 / numColors;
+            for (let i = 0; i < colors.length; i++) {
+                blocks[i].left = colors[i] * width;
+                blocks[i].width = width;
+            }
         }
     }
 

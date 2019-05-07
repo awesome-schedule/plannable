@@ -15,7 +15,7 @@ import Meta from './Meta';
 import * as Utils from '../utils';
 import Hashable from './Hashable';
 import { Vertex, depthFirstSearch, Graph } from './Graph';
-import { getColoring } from './Coloring';
+import { getColoring, colorDepthSearch } from './Coloring';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -427,8 +427,8 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-        this.computeConflict();
-        // this.constructAdjList();
+        // this.computeConflict();
+        this.constructAdjList();
         console.timeEnd('compute schedule');
     }
 
@@ -528,8 +528,8 @@ export default class Schedule {
                 }
             }
             const fastGraph = graph.map(x => Int8Array.from(x));
-            const colorGraph = getColoring(fastGraph);
-            this.calculateWidth(colorGraph, blocks);
+            const [numColor, colors] = getColoring(fastGraph);
+            this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
         }
     }
 

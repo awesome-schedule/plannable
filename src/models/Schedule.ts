@@ -427,8 +427,8 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-        // this.computeConflict();
-        this.constructAdjList();
+        this.computeConflict();
+        // this.constructAdjList();
         console.timeEnd('compute schedule');
     }
 
@@ -440,7 +440,7 @@ export default class Schedule {
      * @param countEvent whether to include events in this graph
      */
     public computeConflict(countEvent = true) {
-        const graph: Graph<ScheduleBlock> = new Map();
+        const graph: Graph<number> = new Map();
 
         // construct conflict graph for each column
         for (const day in this.days) {
@@ -449,10 +449,10 @@ export default class Schedule {
                 : this.days[day].filter(block => !(block.section instanceof Event));
 
             // instantiate all the nodes
-            const nodes: Vertex<ScheduleBlock>[] = [];
+            const nodes: Vertex<number>[] = [];
 
-            for (const block of blocks) {
-                const v = new Vertex(block);
+            for (let i = 0; i < blocks.length; i++) {
+                const v = new Vertex(i);
                 nodes.push(v);
                 graph.set(v, []);
             }
@@ -461,48 +461,16 @@ export default class Schedule {
             // the edge from node i to node j exists iff block[i] conflicts with block[j]
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
-                    const ib = nodes[i];
-                    const jb = nodes[j];
-                    if (ib.val.conflict(jb.val)) {
-                        graph.get(ib)!.push(jb);
-                        graph.get(jb)!.push(ib);
+                    if (blocks[i].conflict(blocks[j])) {
+                        graph.get(nodes[i])!.push(nodes[j]);
+                        graph.get(nodes[j])!.push(nodes[i]);
                     }
                 }
             }
 
             // perform a depth-first search
             depthFirstSearch(graph);
-
-            for (const node of nodes) {
-                // skip any non-root node in the depth-first trees
-                if (node.parent) continue;
-
-                // traverse all the paths starting from the root
-                const paths = node.path;
-                for (const path of paths) {
-                    // compute the left and width of the root node if they're not computed
-                    if (path[0].val.left === -1) {
-                        path[0].val.left = 0;
-                        path[0].val.width = 1 / (path[0].pathDepth + 1);
-                    }
-
-                    // computed the left and width of the remaining nodes based on
-                    // the already computed information of the previous node
-                    for (let i = 1; i < path.length; i++) {
-                        const block = path[i].val;
-
-                        // // skip already computed nodes
-                        // if (block.left !== -1) continue;
-                        block.left = Math.max(
-                            block.left,
-                            path[i - 1].val.left + path[i - 1].val.width
-                        );
-
-                        // remaining width / number of remaining path length
-                        block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
-                    }
-                }
-            }
+            this.calculateWidth(graph, blocks);
 
             for (const block of blocks) {
                 if (block.left === -1 || block.width === -1) {
@@ -511,6 +479,36 @@ export default class Schedule {
             }
 
             graph.clear();
+        }
+    }
+
+    public calculateWidth(graph: Graph<number>, blocks: ScheduleBlock[]) {
+        for (const node of graph.keys()) {
+            // skip any non-root node in the depth-first trees
+            if (node.parent) continue;
+
+            // traverse all the paths starting from the root
+            const paths = node.path;
+            for (const path of paths) {
+                // compute the left and width of the root node if they're not computed
+                const firstBlock = blocks[path[0].val];
+                if (firstBlock.left === -1) {
+                    firstBlock.left = 0;
+                    firstBlock.width = 1 / (path[0].pathDepth + 1);
+                }
+
+                // computed the left and width of the remaining nodes based on
+                // the already computed information of the previous node
+                for (let i = 1; i < path.length; i++) {
+                    const block = blocks[path[i].val];
+                    const previousBlock = blocks[path[i - 1].val];
+
+                    block.left = Math.max(block.left, previousBlock.left + previousBlock.width);
+
+                    // remaining width / number of remaining path length
+                    block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
+                }
+            }
         }
     }
 
@@ -530,12 +528,8 @@ export default class Schedule {
                 }
             }
             const fastGraph = graph.map(x => Int8Array.from(x));
-            const [numColors, colors] = getColoring(fastGraph);
-            const width = 1 / numColors;
-            for (let i = 0; i < colors.length; i++) {
-                blocks[i].left = colors[i] * width;
-                blocks[i].width = width;
-            }
+            const colorGraph = getColoring(fastGraph);
+            this.calculateWidth(colorGraph, blocks);
         }
     }
 

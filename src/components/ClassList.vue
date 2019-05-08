@@ -10,21 +10,22 @@
             >
                 <div class="list-group-item class-title py-1 px-0 w-100">
                     <div class="row flex-nowrap no-gutters justify-content-between">
-                        <div class="col col-1 pl-1 align-self-center">
+                        <div class="col col-1 pl-1 align-self-center" @click="collapse(crs.key)">
                             <i class="fas click-icon" :class="expanded(crs.key)"></i>
                         </div>
                         <!-- push the last column to the right by mr-auto -->
-                        <div class="col-xs-auto mr-auto align-self-center">
+                        <div
+                            class="col-xs-auto mr-auto align-self-center"
+                            style="cursor: pointer"
+                            @click="collapse(crs.key)"
+                        >
                             <h6 class="mb-1">
-                                <span style="cursor: pointer" @click="collapse(crs.key)"
-                                    >{{ crs.department }} {{ crs.number }} {{ crs.type }}
-                                </span>
+                                <span>{{ crs.department }} {{ crs.number }} {{ crs.type }} </span>
                             </h6>
 
                             <p
                                 v-if="showClasslistTitle || isEntering"
-                                style="font-size: 0.85rem; margin: 0; cursor: pointer"
-                                @click="collapse(crs.key)"
+                                style="font-size: 0.85rem; margin: 0;"
                             >
                                 {{ crs.title }}
                             </p>

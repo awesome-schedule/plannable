@@ -12,12 +12,10 @@ import { Vertex, Graph } from './Graph';
  * An exact graph coloring algorithm using backtracking
  *
  * @remark It will give up if the number of function calls exceed 200000
- * @remark It requires some heuristic to give a good initial ordering of vertices.
- * Ordering by degrees will suffice. Ordering by degree of saturation will be better
  *
  * @param graph
  * @param colors
- * @param orderedBreadth
+ * @param colorOrder A good initial ordering of vertices, probably given by some heuristic.
  * @param opCount
  * @param numColors
  * @param v
@@ -25,13 +23,13 @@ import { Vertex, Graph } from './Graph';
 function graphColorBackTrack(
     graph: Int8Array[],
     colors: Int8Array,
-    orderedBreadth: Int8Array,
+    colorOrder: Int8Array,
     opCount: Int32Array,
     numColors: number,
     v: number
 ) {
     if (v === graph.length) return true;
-    const vertex = orderedBreadth[v];
+    const vertex = colorOrder[v];
     const neighbors = graph[vertex];
     const len = neighbors.length;
     opCount[0]++;
@@ -48,7 +46,7 @@ function graphColorBackTrack(
         if (canColor) {
             colors[vertex] = color;
 
-            if (graphColorBackTrack(graph, colors, orderedBreadth, opCount, numColors, v + 1))
+            if (graphColorBackTrack(graph, colors, colorOrder, opCount, numColors, v + 1))
                 return true;
 
             colors[vertex] = -1;
@@ -58,7 +56,7 @@ function graphColorBackTrack(
 }
 
 /**
- *
+ * Greedily color a graph using degree of saturation algorithm
  * @param adjList
  */
 export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
@@ -91,7 +89,9 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
     for (let i = 1; i < adjList.length; i++) {
         let nextNode = 0,
             maxSat = -1;
-        // find next node to be colored
+
+        // find the next node to be colored:
+        // find the node of the maximum degree of saturation and break the ties by the degree
         for (let j = 0; j < saturations.length; j++) {
             if (colors[j] === -1) {
                 const sat = saturations[j].size;
@@ -105,7 +105,7 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
         }
 
         neighbors = adjList[nextNode];
-        for (let color = 0; color < 999; color++) {
+        for (let color = 0; color < 19260817; color++) {
             let flag = true;
             // find a available color
             for (const v of neighbors) {
@@ -162,9 +162,11 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
         graph.set(vertices[i], Array.from(adjList[i]).map(x => vertices[x]));
     }
 
-    Array.from(graph.keys())
+    vertices
         .filter(x => x.depth === 0)
-        .forEach(root => depthFirstSearchRec(root, graph));
+        .forEach(root => {
+            depthFirstSearchRec(root, graph);
+        });
 
     return graph;
 }

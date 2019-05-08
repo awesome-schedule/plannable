@@ -483,6 +483,10 @@ export default class Schedule {
     }
 
     public calculateWidth(graph: Graph<number>, blocks: ScheduleBlock[]) {
+        // for (const node of graph.keys()) {
+        //     const $$$ = blocks[node.val] as any;
+        //     $$$.data = node;
+        // }
         for (const node of graph.keys()) {
             // skip any non-root node in the depth-first trees
             if (node.parent) continue;
@@ -514,11 +518,9 @@ export default class Schedule {
 
     public constructAdjList() {
         for (const day in this.days) {
-            const blocks = this.days[day];
-            const graph: number[][] = [];
-            for (const _ of blocks) {
-                graph.push([]);
-            }
+            const blocks = this.days[day].sort((a, b) => +b - +a);
+            const graph: number[][] = blocks.map(() => []);
+
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
                     if (blocks[i].conflict(blocks[j])) {
@@ -527,9 +529,10 @@ export default class Schedule {
                     }
                 }
             }
+            // convert to typed array so its much faster
             const fastGraph = graph.map(x => Int8Array.from(x));
-            const [colors, _] = graphColoringExact(fastGraph);
-            // const [colors, _] = dsatur(fastGraph);
+            // const [colors, _] = graphColoringExact(fastGraph);
+            const [colors, _] = dsatur(fastGraph);
             this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
         }
     }

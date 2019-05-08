@@ -99,7 +99,7 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         } catch (err) {
             return {
                 msg: errMsg(errToStr(err)),
-                level: 'warn'
+                level: 'error'
             };
         }
     }

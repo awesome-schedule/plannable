@@ -31,6 +31,15 @@ import { toICal } from './utils/ICal';
 window.scheduleEvaluator = new ScheduleEvaluator();
 // window.catalog = null;
 
+import { createDecorator } from 'vue-class-component';
+import { ComputedOptions } from 'vue';
+
+export const NoCache = createDecorator((options, key) => {
+    // component options should be passed to the callback
+    // and update for the options object affect the component
+    (options.computed![key] as ComputedOptions<any>).cache = false;
+});
+
 @Component({
     components: {
         ClassList,
@@ -133,6 +142,8 @@ export default class App extends Vue {
         }
         return false;
     }
+
+    @NoCache
     get scheduleLength() {
         return window.scheduleEvaluator.size();
     }

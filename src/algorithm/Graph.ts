@@ -24,7 +24,6 @@ export class Vertex<T> {
     /**
      * depth of the node relative to the root
      */
-
     public depth: number = 0;
     /**
      * the maximum depth of the path starting from the root that the current node is on
@@ -42,7 +41,7 @@ export class Vertex<T> {
     /**
      * the value contained in this vertex
      */
-    public val: T;
+    public readonly val: T;
     constructor(t: T) {
         this.val = t;
     }
@@ -148,11 +147,10 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     if (!hasUnvisited) {
         let curParent: Vertex<T> | undefined = start;
         const path: Vertex<T>[] = [];
-        curParent.pathDepth = Math.max(start.depth, start.pathDepth);
 
         while (true) {
             path.unshift(curParent);
-            curParent.pathDepth = Math.max(start.pathDepth, curParent.pathDepth);
+            curParent.pathDepth = Math.max(start.depth, curParent.pathDepth);
 
             // root node of the tree
             if (!curParent.parent) {

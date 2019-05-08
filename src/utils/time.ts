@@ -190,6 +190,8 @@ export function to12hr(time: string) {
     const hr = parseInt(sep[0]);
     if (hr === 12) {
         return time + 'PM';
+    } else if (hr === 0) {
+        return '12:00AM';
     } else if (hr < 12) {
         return time + 'AM';
     } else {
@@ -226,20 +228,10 @@ export function to24hr(time: string) {
  * @see [[CourseBlock]]
  * @author Kaiying Shan
  * @param time
- * @param start
  */
-export function timeToNum(time: string, start: boolean) {
+export function timeToNum(time: string) {
     const sep = time.split(':');
     const min = parseInt(sep[1]);
-    let t = (parseInt(sep[0]) - 8) * 2;
-    if (start) {
-        if (min >= 30) {
-            t += 1;
-        }
-    } else {
-        if (min >= 30) {
-            t += 1;
-        }
-    }
-    return t;
+    const t = (parseInt(sep[0]) - 8) * 2;
+    return min >= 30 ? t + 1 : t;
 }

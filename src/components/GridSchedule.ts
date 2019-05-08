@@ -36,7 +36,7 @@ export default class GridSchedule extends Vue {
         let earliest = 817;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
-                const temp = timeToNum(course.start, true);
+                const temp = timeToNum(course.start);
                 if (temp < earliest && course !== undefined && course !== null) {
                     earliest = temp;
                 }
@@ -51,7 +51,7 @@ export default class GridSchedule extends Vue {
         let latest = 0;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
-                const temp = timeToNum(course.end, false);
+                const temp = timeToNum(course.end);
                 if (temp > latest && course !== undefined && course !== null) {
                     latest = temp;
                 }
@@ -65,10 +65,10 @@ export default class GridSchedule extends Vue {
     get absoluteEarliest() {
         const early = this.validate(this.earliest, '8:00');
 
-        if (timeToNum(early, true) > this.earliestBlock) {
+        if (timeToNum(early) > this.earliestBlock) {
             return this.earliestBlock;
         } else {
-            return timeToNum(early, true);
+            return timeToNum(early);
         }
     }
     /**
@@ -76,10 +76,10 @@ export default class GridSchedule extends Vue {
      */
     get absoluteLatest() {
         const late = this.validate(this.latest, '19:00');
-        if (timeToNum(late, false) < this.latestBlock) {
+        if (timeToNum(late) < this.latestBlock) {
             return this.latestBlock;
         } else {
-            return timeToNum(late, false);
+            return timeToNum(late);
         }
     }
     /**
@@ -127,8 +127,8 @@ export default class GridSchedule extends Vue {
         const earliest = this.absoluteEarliest;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
-                const startTime = timeToNum(course.start, true);
-                const endTime = timeToNum(course.end, false);
+                const startTime = timeToNum(course.start);
+                const endTime = timeToNum(course.end);
                 for (let i = startTime; i <= endTime; i++) {
                     info[i - earliest] = this.fullHeight;
                 }

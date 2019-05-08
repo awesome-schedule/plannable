@@ -20,19 +20,19 @@ export default class CourseBlock extends Vue {
     mobile = window.screen.width < 450;
 
     get startPx() {
-        return this.getPx(this.scheduleBlock.start, true);
+        return this.getPx(this.scheduleBlock.start);
     }
 
     get endPx() {
-        return this.getPx(this.scheduleBlock.end, false);
+        return this.getPx(this.scheduleBlock.end);
     }
 
-    getPx(time: string, start: boolean) {
+    getPx(time: string) {
         let px = 48;
         const t = time.split(':');
         const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
 
-        const temp = timeToNum(time, start);
+        const temp = timeToNum(time);
         for (let i = this.absoluteEarliest; i < temp; i++) {
             px += this.heightInfo[i - this.absoluteEarliest];
         }
@@ -53,7 +53,7 @@ export default class CourseBlock extends Vue {
             if (meeting.days.indexOf(this.day) !== -1) {
                 const convedStart = to12hr(this.scheduleBlock.start);
                 const convedEnd = to12hr(this.scheduleBlock.end);
-                const [days, start, , end] = meeting.days.split(' ');
+                const [, start, , end] = meeting.days.split(' ');
                 if (convedStart === start && convedEnd === end) {
                     return meeting.room;
                 }

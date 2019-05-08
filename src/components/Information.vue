@@ -15,7 +15,7 @@
                     <a class="nav-link ml-3 my-1" href="#item-4-2">Allow Waitlist/Closed</a>
                     <a class="nav-link ml-3 my-1" href="#item-4-3">Sort</a>
                 </nav>
-                <a class="nav-link" href="#item-5">Display Settings</a>
+                <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
                 <a class="nav-link" href="#item-6">Customize Colors</a>
                 <a class="nav-link" href="#item-7">Export</a>
                 <nav class="nav nav-pills flex-column">
@@ -30,10 +30,9 @@
             </nav>
         </nav>
         <div
+            style="margin-right: 5vw;margin-top: 5vh; font-size: 15px;"
             :style="{
-                'margin-left': scheduleLeft + 5 + 'vw',
-                'margin-right': '5vw',
-                'margin-top': '5vh'
+                'margin-left': scheduleLeft + 5 + 'vw'
             }"
             data-spy="scroll"
             data-target="#navbar-scrollspy"
@@ -211,19 +210,19 @@
             </v-card>
             <h5 id="item-4-2">Allow Waitlist/Closed</h5>
             <p>
-                By checking on those two buttons, it allows the scheduler to consider the classes
-                when auto-generating schedules even though it may no longer be available. Or you can
-                uncheck it to enable the scheduler to auto-generate classes in realistic scenario.
+                You can choose to include or exclude wait list or closed sections by ticking these
+                two checkboxes.
             </p>
             <h5 id="item-4-3">Sort Schedules</h5>
             <p>
                 One powerful feature comes with auto-scheduling is that we can sort the generated
-                schedules based on one of a combination of indicators. You can select multiple
-                indicators to optimize your schedule, and drag sort options to change their priority
-                in fallback mode.
+                schedules based on one of a combination of indicators. You can select multiple sort
+                options to optimize your schedule, and drag sort options to change their priority in
+                fallback mode. Note that all of the sort options are responsive, i.e. they will be
+                applied instantly after your changes.
             </p>
             <h6>Sort Options</h6>
-            Currently, we provide the following list of sort options. If you want a mathematical
+            Currently, we provide the following list of sort options. If you prefer a mathematical
             description on how they are computed, see <a href="#item-8-1">Appendix</a>.
             <ol>
                 <li>Variance: Balance the class time each day</li>
@@ -251,8 +250,8 @@
                 <v-img :src="imgPath('Sort.gif')"></v-img>
             </v-card>
 
-            <h3 id="item-5">Display Settings</h3>
-            <hr />
+            <!-- <h3 id="item-5">Display Settings</h3>
+            <hr /> -->
             <h3 id="item-5">Customize Colors</h3>
             <hr />
             <p>
@@ -269,9 +268,9 @@
             <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
                 ICalendar is a standard file format used to represent information in a calednar.
-                Apple and Google calendar both support importing from iCalendar. Our website can
-                export your schedule to a iCalendar file. The instruction on how to import iCalendar
-                file to your Google calendar is shown below:
+                Apple and Google calendar both support importing from iCalendar files. The
+                instruction on how to export your schedule to a iCalendar file and import it to your
+                Google calendar is shown below.
             </p>
             <v-stepper v-model="e2" class="my-5" style="width:60vw;margin:auto auto">
                 <v-stepper-header>
@@ -310,9 +309,16 @@
             </v-stepper>
 
             <h5 id="item-7-2">Export to JSON</h5>
-            <p>
-                You can export your schedule to a JSON file so that it can be re-imported later.
-            </p>
+            <div class="row">
+                <div class="col col-7">
+                    You can export your schedule to a JSON file (a file that ends with .json) so
+                    that it can be re-imported later. It is a dedicated file format that we use to
+                    store information in your schedule, so it could only be used on our website.
+                </div>
+                <div class="col col-md-auto">
+                    <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
+                </div>
+            </div>
             <h3 id="item-8">Authors</h3>
             <p>The primiary contributors of this website are</p>
             <ol>
@@ -332,16 +338,19 @@
 
             <h3 id="item-9">Appendix</h3>
             <h5 id="item-9-1">Calculation of Sort Indicators</h5>
-            For each schedule, a single/array of coefficients are calculated, depending on the sort
-            options enabled. The following formulae provide an overview on how these coefficients
-            are calculated. To know exactly how they are implemented, please refer to
-            <a
-                href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/src/algorithm/ScheduleEvaluator.ts"
-            >
-                our code</a
-            >.
+            <div class="mt-2 mb-4">
+                For each schedule, a single/array of coefficients are calculated, depending on the
+                sort options enabled. The following formulae provide an overview on how these
+                coefficients are calculated. To know exactly how they are implemented, please refer
+                to
+                <a
+                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/src/algorithm/ScheduleEvaluator.ts"
+                >
+                    our code</a
+                >.
+            </div>
             <vue-mathjax :formula="formula.compactness"></vue-mathjax>
-            <div class="py-4 my-4" style="height: 1000px;"></div>
+            <div class="py-4 my-4" style="height: 8000px;"></div>
         </div>
     </div>
 </template>
@@ -420,7 +429,6 @@ $$
     };
 
     mounted() {
-        $('#myCarousel').carousel();
         $('body').scrollspy({ target: '#navbar-scrollspy' });
     }
 
@@ -433,31 +441,5 @@ $$
 <style scoped>
 #navbar-scrollspy {
     position: fixed;
-}
-.container > div {
-    font-size: 20px;
-    font-family: 'Times New Roman', Times, serif;
-    margin-top: 1.5em;
-}
-.carousel-inner > .carousel-item > img {
-    left: 10%;
-    right: 10%;
-    height: 30%;
-    width: 100%;
-}
-.GIF {
-    left: 10%;
-    right: 10%;
-    height: auto;
-    width: 100%;
-    position: center;
-}
-
-.about-border {
-    display: block;
-    width: auto;
-    height: 3px;
-    background: #f1cd8f;
-    margin: 5px auto 20px auto;
 }
 </style>

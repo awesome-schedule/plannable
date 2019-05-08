@@ -15,7 +15,7 @@ import Meta from './Meta';
 import * as Utils from '../utils';
 import Hashable from './Hashable';
 import { Vertex, depthFirstSearch, Graph } from './Graph';
-import { getColoring, colorDepthSearch } from './Coloring';
+import { graphColoringExact, colorDepthSearch, dsatur } from './Coloring';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -528,7 +528,8 @@ export default class Schedule {
                 }
             }
             const fastGraph = graph.map(x => Int8Array.from(x));
-            const [numColor, colors] = getColoring(fastGraph);
+            const [colors, _] = graphColoringExact(fastGraph);
+            // const [colors, _] = dsatur(fastGraph);
             this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
         }
     }

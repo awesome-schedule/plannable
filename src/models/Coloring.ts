@@ -22,7 +22,7 @@ import { Vertex, Graph } from './Graph';
  * @param numColors
  * @param v
  */
-function graphColoringUtil(
+function graphColorBackTrack(
     graph: Int8Array[],
     colors: Int8Array,
     orderedBreadth: Int8Array,
@@ -48,7 +48,7 @@ function graphColoringUtil(
         if (canColor) {
             colors[vertex] = color;
 
-            if (graphColoringUtil(graph, colors, orderedBreadth, opCount, numColors, v + 1))
+            if (graphColorBackTrack(graph, colors, orderedBreadth, opCount, numColors, v + 1))
                 return true;
 
             colors[vertex] = -1;
@@ -57,20 +57,85 @@ function graphColoringUtil(
     return false;
 }
 
-export function getColoring(adjList: Int8Array[]): [number, Int8Array] {
+/**
+ *
+ * @param adjList
+ */
+export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
+    const colors = new Int8Array(adjList.length).fill(-1);
+
+    // keep track of the ordering
+    const colorOrder = new Int8Array(adjList.length);
+    if (!adjList.length) return [colors, colorOrder];
+
+    // keep track of the saturation
+    const saturations = adjList.map(() => new Set<number>());
+
+    // first node is just the one of the maximum degree
+    let start = 0,
+        maxDegree = -1;
+    for (let i = 0; i < adjList.length; i++) {
+        const degree = adjList[i].length;
+        if (degree > maxDegree) {
+            maxDegree = degree;
+            start = i;
+        }
+    }
+
+    let neighbors = adjList[start];
+    for (const v of neighbors) saturations[v].add(0);
+
+    colors[start] = 0;
+    colorOrder[0] = start;
+
+    for (let i = 1; i < adjList.length; i++) {
+        let nextNode = 0,
+            maxSat = -1;
+        // find next node to be colored
+        for (let j = 0; j < saturations.length; j++) {
+            if (colors[j] === -1) {
+                const sat = saturations[j].size;
+                if (sat > maxSat) {
+                    nextNode = j;
+                    maxSat = sat;
+                } else if (sat === maxSat) {
+                    if (adjList[j].length > adjList[nextNode].length) nextNode = j;
+                }
+            }
+        }
+
+        neighbors = adjList[nextNode];
+        for (let color = 0; color < 999; color++) {
+            let flag = true;
+            // find a available color
+            for (const v of neighbors) {
+                if (colors[v] === color) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                // update the saturation degrees of the neighbors
+                colors[nextNode] = color;
+                colorOrder[i] = nextNode;
+                for (const v of neighbors) saturations[v].add(color);
+                break;
+            }
+        }
+    }
+    return [colors, colorOrder];
+}
+
+export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {
     // sort elements by their degrees
-    const orderedBreadth = Int8Array.from(
-        Array.from(adjList.entries())
-            .sort((a, b) => b[1].length - a[1].length)
-            .map(x => x[0])
-    );
-    const colors = new Int8Array(adjList.length);
+    const [colors, dsaturOrder] = dsatur(adjList);
+    colors.fill(-1);
     const opCount = new Int32Array(1);
     let totalCount = 0;
     console.time('coloring');
     let numColors = 1;
     for (let i = 1; i < 100; i++) {
-        if (graphColoringUtil(adjList, colors, orderedBreadth, opCount, i, 0)) {
+        if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, i, 0)) {
             numColors = i;
             break;
         }
@@ -80,7 +145,7 @@ export function getColoring(adjList: Int8Array[]): [number, Int8Array] {
     }
     console.log('op count', totalCount);
     console.timeEnd('coloring');
-    return [numColors, colors];
+    return [colors, numColors];
 }
 
 export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph<number> {

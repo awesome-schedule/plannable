@@ -14,8 +14,8 @@ import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import Meta from './Meta';
 import * as Utils from '../utils';
 import Hashable from './Hashable';
-import { Vertex, depthFirstSearch, Graph } from './Graph';
-import { graphColoringExact, colorDepthSearch, dsatur } from './Coloring';
+import { Vertex, depthFirstSearch, Graph } from '../algorithm/Graph';
+import { graphColoringExact, colorDepthSearch, dsatur } from '../algorithm/Coloring';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -531,8 +531,8 @@ export default class Schedule {
             }
             // convert to typed array so its much faster
             const fastGraph = graph.map(x => Int8Array.from(x));
-            // const [colors, _] = graphColoringExact(fastGraph);
-            const [colors, _] = dsatur(fastGraph);
+            const [colors, _] = graphColoringExact(fastGraph);
+            // const [colors, _] = dsatur(fastGraph);
             this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
         }
     }

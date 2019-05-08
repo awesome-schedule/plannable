@@ -41,7 +41,7 @@ export class Vertex<T> {
     /**
      * the value contained in this vertex
      */
-    public val: T;
+    public readonly val: T;
     constructor(t: T) {
         this.val = t;
     }

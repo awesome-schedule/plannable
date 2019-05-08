@@ -127,7 +127,7 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
 }
 
 export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {
-    // sort elements by their degrees
+    // get a good initial color order using the DSATUR algorithm
     const [colors, dsaturOrder] = dsatur(adjList);
     colors.fill(-1);
     const opCount = new Int32Array(1);

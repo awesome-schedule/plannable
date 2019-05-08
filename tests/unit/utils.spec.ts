@@ -37,7 +37,10 @@ describe('Utility Tests', () => {
         try {
             await axios.get('invalid');
         } catch (e) {
-            expect(Utils.errToStr(e)).toBe('request rejected by the server');
+            expect(
+                Utils.errToStr(e) === 'request rejected by the server' ||
+                    Utils.errToStr(e) === 'No internet'
+            ).toBeTruthy();
         }
         expect(Utils.errToStr('asd')).toBe('asd');
         expect(Utils.errToStr(new Error('asd') as any)).toBe('asd');

@@ -35,7 +35,7 @@ describe('ScheduleGenerator Test', () => {
             phys24194: -1,
             ece26308: -1
         };
-        const sort = ScheduleEvaluator.getDefaultOptions();
+        let sort = ScheduleEvaluator.getDefaultOptions();
         sort.sortBy[0].enabled = true;
         sort.sortBy[1].enabled = true;
         sort.sortBy[2].enabled = true;
@@ -55,5 +55,25 @@ describe('ScheduleGenerator Test', () => {
             sortOptions: sort
         });
         expect(result2.empty()).toBeFalsy();
+
+        sort.sortBy[5].enabled = true;
+        const result3 = generator.getSchedules(schedule, {
+            combineSections: false,
+            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
+            sortOptions: sort
+        });
+        expect(result3.empty()).toBeFalsy();
+
+        sort = ScheduleEvaluator.getDefaultOptions();
+        sort.sortBy[1].enabled = false;
+        const result4 = generator.getSchedules(schedule, {
+            combineSections: false,
+            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
+            sortOptions: sort
+        });
+        expect(result4.empty()).toBeFalsy();
+
+        sort.mode = 0;
+        result4.changeSort(sort, true);
     });
 });

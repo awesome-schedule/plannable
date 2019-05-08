@@ -52,6 +52,7 @@
                                 v-if="!isEntering"
                                 class="fas fa-times click-icon"
                                 :class="{ 'pr-1': !showClasslistTitle }"
+                                title="Remove this class and all its sections from your schedule"
                                 @click="$emit('remove_course', crs.key)"
                             ></i>
                         </div>

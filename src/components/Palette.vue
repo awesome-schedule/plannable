@@ -1,6 +1,6 @@
 <template>
     <nav class="d-block bg-light sidebar">
-        <div class="btn bg-info nav-btn" style="color:white">
+        <div class="btn bg-info nav-btn">
             Palette
         </div>
         <ul class="list-group list-group-flush mx-1">
@@ -28,6 +28,7 @@
                                 type="color"
                                 :value="pair[1]"
                                 style="width: 40px; height: 95%"
+                                title="get a random color"
                                 @change="setColor(pair[0], $event.target.value)"
                             />
                         </div>

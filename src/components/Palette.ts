@@ -44,6 +44,6 @@ export default class Palette extends Vue {
             .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
     }
     convertKey(key: string) {
-        return window.catalog.convertKey(this.parent.currentSchedule, key);
+        return window.catalog.convertKey(key, this.parent.currentSchedule);
     }
 }

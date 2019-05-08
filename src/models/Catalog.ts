@@ -89,10 +89,10 @@ export default class Catalog {
     /**
      * convert `cs11105` style key to `CS 1110 Lecture`
      */
-    convertKey(schedule: Schedule, key: string) {
+    convertKey(key: string, schedule?: Schedule) {
         const raw = this.raw_data[key];
         if (raw) return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
-        else {
+        else if (schedule) {
             for (const event of schedule.events) {
                 if (event.key === key) {
                     return event.title === '' ? key : event.title;

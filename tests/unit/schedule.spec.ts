@@ -55,6 +55,8 @@ describe('Schedule Test', () => {
         const parsed = JSON.parse(json);
         const schedule = Schedule.fromJSON(parsed)!;
         expect(schedule).toBeTruthy();
+        expect(schedule.empty()).toBeFalsy();
+        expect(schedule.has('cs21505')).toBeTruthy();
         expect(schedule.All).toEqual({
             cs21505: new Set([0]),
             cs21504: new Set([1]),
@@ -62,7 +64,7 @@ describe('Schedule Test', () => {
         });
     });
 
-    it('add/update course', () => {
+    it('add/update course/events', () => {
         const schedule = new Schedule();
         expect(schedule.All).toEqual({});
         schedule.update('cs11105', 1);
@@ -79,11 +81,16 @@ describe('Schedule Test', () => {
         schedule.update('cs21504', 2);
         schedule.update('cs21505', -1);
         schedule.update('cs11105', 0);
-        schedule.addEvent('MoTu 12:00AM - 3:00AM', true);
+        schedule.addEvent('MoTu 12:00AM - 3:00AM', true, 'title1');
         schedule._computeSchedule();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
             3
         );
+        try {
+            schedule.addEvent('MoTu 12:15AM - 2:00AM', true);
+        } catch (err) {
+            expect(err.message).toBe(`Your new event conflicts with title1`);
+        }
 
         schedule.preview('cs21105', 0);
         schedule._computeSchedule();
@@ -98,6 +105,7 @@ describe('Schedule Test', () => {
         for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) schedule.update('chem14114', i);
         Schedule.options.combineSections = false;
         schedule._computeSchedule();
+        schedule.computeConflict();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
             3
         );
@@ -120,6 +128,8 @@ describe('Schedule Test', () => {
 
         schedule.copy();
         schedule.toJSON();
+        schedule.deleteEvent('MoTu 12:00AM - 3:00AM');
+        schedule.remove('cs21105');
         schedule.clean();
     });
 });

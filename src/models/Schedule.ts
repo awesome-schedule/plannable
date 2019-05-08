@@ -533,7 +533,10 @@ export default class Schedule {
             const fastGraph = graph.map(x => Int8Array.from(x));
             const [colors, _] = graphColoringExact(fastGraph);
             // const [colors, _] = dsatur(fastGraph);
+
+            console.time('color dfs');
             this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
+            console.timeEnd('color dfs');
         }
     }
 

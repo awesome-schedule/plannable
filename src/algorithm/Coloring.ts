@@ -1,5 +1,5 @@
 /**
- * Utilities for simple graph coloring
+ * Utilities for graph coloring
  * @author Hanzhi Zhou
  */
 
@@ -29,11 +29,10 @@ function graphColorBackTrack(
     v: number
 ) {
     if (v === graph.length) return true;
+    if (opCount[0]++ > 200000) return false;
     const vertex = colorOrder[v];
     const neighbors = graph[vertex];
     const len = neighbors.length;
-    opCount[0]++;
-    if (opCount[0] > 200000) return false;
 
     for (let color = 0; color < numColors; color++) {
         let canColor = true;
@@ -58,6 +57,7 @@ function graphColorBackTrack(
 /**
  * Greedily color a graph using degree of saturation algorithm
  * @param adjList
+ * @return [color array, color order array]
  */
 export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
     const colors = new Int8Array(adjList.length).fill(-1);
@@ -134,7 +134,7 @@ export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {
     let totalCount = 0;
     console.time('coloring');
     let numColors = 1;
-    for (let i = 1; i < 100; i++) {
+    for (let i = 1; i < 19260817; i++) {
         if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, i, 0)) {
             numColors = i;
             break;
@@ -172,15 +172,17 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
 }
 
 /**
- * A special implementation of depth first search on a single connected component.
+ * A special implementation of depth first search on a single connected component,
+ * used to find the maximum depth of the path that the current node is on.
+ *
  * The depth of all nodes are known beforehand.
  */
 function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     const neighbors = graph.get(start)!;
     let hasUnvisited = false;
 
-    // this part is just regular DFS, except that we record the depth of the current node.
     for (const adj of neighbors) {
+        // we only visit nodes of greater depth
         if (adj.depth > start.depth) {
             adj.parent = start;
             depthFirstSearchRec(adj, graph);

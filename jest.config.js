@@ -10,7 +10,7 @@ module.exports = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },
-    // setupTestFrameworkScriptFile: '<rootDir>tests/unit/setup.ts',
+    setupTestFrameworkScriptFile: '<rootDir>/tests/unit/setup.js',
     snapshotSerializers: ['jest-serializer-vue'],
     testMatch: ['**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
     testURL: 'http://localhost/',
@@ -25,6 +25,9 @@ module.exports = {
         '!**/main.ts',
         // this is too expensive to test (requesting a lot of data)
         // and is already used in other tests (a lot of other tests rely on its data)
-        '!**/CatalogLoader.ts'
+        '!**/CatalogLoader.ts',
+        '!**/tests/**',
+        '!**/tests/unit/*.ts',
+        '!**/tests/unit/*.js'
     ]
 };

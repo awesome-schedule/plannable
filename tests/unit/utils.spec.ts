@@ -1,5 +1,12 @@
 import * as Utils from '../../src/utils';
 import 'jest';
+import axios from 'axios';
+import data from './data';
+
+beforeAll(async () => {
+    window.catalog = await data;
+    window.open = jest.fn();
+});
 
 describe('Utility Tests', () => {
     it('parse time', () => {
@@ -24,5 +31,20 @@ describe('Utility Tests', () => {
         expect(Utils.calcOverlap(100, 200, 150, 250)).toBe(50);
         expect(Utils.calcOverlap(150, 250, 100, 200)).toBe(50);
         expect(Utils.calcOverlap(100, 300, 100, 200)).toBe(100);
+    });
+
+    it('err test', async () => {
+        try {
+            await axios.get('invalid');
+        } catch (e) {
+            expect(Utils.errToStr(e)).toBe('request rejected by the server');
+        }
+        expect(Utils.errToStr('asd')).toBe('asd');
+        expect(Utils.errToStr(new Error('asd') as any)).toBe('asd');
+    });
+
+    it('other', () => {
+        Utils.openLousList(1198, 1);
+        Utils.openVAGrade(window.catalog.getCourse('cs11105'));
     });
 });

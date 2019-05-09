@@ -88,6 +88,8 @@ export default class Catalog {
 
     /**
      * convert `cs11105` style key to `CS 1110 Lecture`
+     *
+     * convert key of an event (e.g. `MoFr 1:00PM - 2:00PM`) to its title
      */
     convertKey(key: string, schedule?: Schedule) {
         const raw = this.raw_data[key];

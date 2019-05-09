@@ -30,11 +30,29 @@ export default class ScheduleBlock {
      * end time in 24hr format: `15:00`
      */
     public end: string;
+    /**
+     * duration of the block, in minutes
+     */
     public duration: number = 0;
+    /**
+     * the stuff contained in this block
+     */
     public section: Section | Course | Event;
+    /**
+     * the left of the block relative to the column, a decimal between 0 and 1
+     */
     public left = -1;
+    /**
+     * the width of the block relative to the column, a decimal between 0 and 1
+     */
     public width = -1;
+    /**
+     * whether the block is highlighted
+     */
     public strong = false;
+
+    private startMin: number;
+    private endMin: number;
 
     constructor(
         backgroundColor: string,
@@ -47,26 +65,35 @@ export default class ScheduleBlock {
         this.end = end;
         this.section = section;
 
-        const [a, b] = this.timeAsInt();
-        this.duration = b - a;
+        [this.startMin, this.endMin] = this.timeAsInt();
+        this.duration = this.startMin - this.endMin;
     }
 
+    /**
+     * returns whether this block has conflict with another block
+     * @param other
+     * @param includeEnd whether to treat end-point touch as conflict
+     */
     public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
-        const [a, b] = this.timeAsInt();
-        const [c, d] = other.timeAsInt();
-        return checkTimeBlockConflict(a, b, c, d, includeEnd);
+        return checkTimeBlockConflict(
+            this.startMin,
+            this.endMin,
+            other.startMin,
+            other.endMin,
+            includeEnd
+        );
     }
 
-    public timeAsInt(): [number, number] {
-        const [a, b] = this.start.split(':');
-        const [c, d] = this.end.split(':');
-        return [+a * 60 + +b, +c * 60 + +d];
-    }
-
-    [Symbol.toPrimitive](hint: any) {
+    public [Symbol.toPrimitive](hint: any) {
         if (hint === 'number') {
             return this.duration;
         }
         return null;
+    }
+
+    private timeAsInt(): [number, number] {
+        const [a, b] = this.start.split(':');
+        const [c, d] = this.end.split(':');
+        return [+a * 60 + +b, +c * 60 + +d];
     }
 }

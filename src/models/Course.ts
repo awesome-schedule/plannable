@@ -151,7 +151,7 @@ export default class Course implements CourseFields, Hashable {
      * Hashes are different if the sections contained in this course are different
      */
     public hash() {
-        return hashCode(this.key + this.sids.toString());
+        return hashCode(this.key);
     }
 
     public copy() {

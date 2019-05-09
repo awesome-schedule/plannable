@@ -34,9 +34,12 @@ export default class Section implements CourseFields, Hashable {
     public title: string;
     public description: string;
 
+    /**
+     * the index of the section
+     */
     public sid: number;
     /**
-     * Key of a course; same for all sections.
+     * Key of the course that this section belongs to; same for all sections.
      */
     public key: string;
 
@@ -44,7 +47,13 @@ export default class Section implements CourseFields, Hashable {
      * a reference to the course that this section belongs to
      */
     public course: Course;
+    /**
+     * the id of the section recorded in sis
+     */
     public id: number;
+    /**
+     * the section number recorded in sis
+     */
     public section: string;
     public topic: string;
     /**
@@ -105,7 +114,10 @@ export default class Section implements CourseFields, Hashable {
         return hashCode(this.key);
     }
 
-    public getRoomTime(): [TimeDict, RoomDict] | null {
+    /**
+     * get the time and room of this section's meetings as [[TimeDict]] and [[RoomDict]]
+     */
+    public getTimeRoom(): [TimeDict, RoomDict] | null {
         const timeDict: TimeDict = {};
         const roomDict: RoomDict = {};
 

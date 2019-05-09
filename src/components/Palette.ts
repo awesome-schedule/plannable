@@ -18,6 +18,9 @@ export default class Palette extends Vue {
         this.parent.saveStatus();
         this.$forceUpdate();
     }
+    /**
+     * get the number of events and courses that have colors in total
+     */
     numColors() {
         return (
             Object.entries(Schedule.savedColors).filter(entry => this.schedule.has(entry[0]))
@@ -25,7 +28,8 @@ export default class Palette extends Vue {
         );
     }
     /**
-     * colors must always be recomputed because `Schedule.savedColors` is not a reactive property
+     *
+     * @note colors must always be recomputed because `Schedule.savedColors` is not a reactive property
      */
     courseColors() {
         return Object.entries(Schedule.savedColors)

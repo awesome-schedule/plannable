@@ -96,7 +96,7 @@ export default class EventView extends Vue {
     /**
      * this method is called after deleteEvent, endEditEvent and addEvent
      *
-     * clear all properties and force recomputation of current schedule
+     * clear all properties of this component and force re-computation of the current schedule
      *
      * @param regenerate re-run algorithm if true
      */

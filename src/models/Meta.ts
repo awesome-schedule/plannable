@@ -11,7 +11,11 @@ import Schedule from './Schedule';
 import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
 
 /**
+ * the raw catalog is represented as a big dictionary
+ *
  * key: department + number + type, e.g. cs11105
+ *
+ * value: raw record of the dictionary
  */
 export interface RawCatalog {
     [key: string]: RawCourse;
@@ -22,7 +26,7 @@ export interface RawCatalog {
  *
  * 1: number
  *
- * 2: type: 0 to 9. Use Meta.TYPES_PARSE to convert to string like `Lecture`
+ * 2: type: 0 to 9. Use [[Meta.TYPES_PARSE]] to convert to string like `Lecture`
  *
  * 3: units
  *
@@ -41,7 +45,7 @@ export type RawCourse = [string, number, number, string, string, string, RawSect
  *
  * 2: topic
  *
- * 3: status Use Meta.STATUSES_PARSE to do parsing
+ * 3: status Use [[Meta.STATUSES_PARSE]] to do parsing
  *
  * 4: enrollment
  *
@@ -64,7 +68,7 @@ export type RawSection = [number, string, string, number, number, number, number
  */
 export type RawMeeting = [string, string, string, string];
 
-class Meta {
+export default class Meta {
     public static readonly days = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
     /**
      * lecture type number => meaning
@@ -148,8 +152,6 @@ class Meta {
     public static readonly semesterListExpirationTime = 86400 * 1000; // one day
     public static readonly semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 }
-
-export default Meta;
 
 /**
  * use a standalone method to get rid of deep copy issues

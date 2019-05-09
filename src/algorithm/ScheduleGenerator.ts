@@ -51,11 +51,9 @@ export interface WeekDict<T> {
  * because it is possible for a single section to have multiple meetings in a day
  *
  * Example:
- *
  * ```js
  * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]}
  * ```
- *
  * represents that this `Section` or `Event` will take place
  * every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
  *
@@ -205,7 +203,7 @@ class ScheduleGenerator {
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
-                const tmp = sections[0].getRoomTime();
+                const tmp = sections[0].getTimeRoom();
                 if (!tmp) continue;
 
                 const [timeDict, roomDict] = tmp;

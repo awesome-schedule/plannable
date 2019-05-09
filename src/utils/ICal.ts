@@ -15,8 +15,9 @@ import * as Utils from '.';
 
 /**
  * Convert a schedule to iCalendar format.
+ * @see https://icalendar.org/
  * @param schedule Schedule object to be parsed into iCalendar format.
- * @return parsed iCalendar file in a string.
+ * @return a string of iCalendar format
  */
 export function toICal(schedule: Schedule) {
     let ical = 'BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:UVa-Awesome-Schedule\n';

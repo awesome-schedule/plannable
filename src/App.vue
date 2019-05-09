@@ -106,14 +106,10 @@
                 <div class="input-group-append">
                     <span
                         class="input-group-text px-2"
-                        style="pointer: cursor"
+                        :class="{ 'click-icon': isEntering }"
                         @click="closeClassList"
-                        ><i
-                            v-if="isEntering && sideBar.showSelectClass"
-                            class="fas fa-times click-icon"
-                        >
-                        </i>
-                        <i v-else class="fas fa-search click-icon"></i>
+                        ><i v-if="isEntering && sideBar.showSelectClass" class="fas fa-times"> </i>
+                        <i v-else class="fas fa-search"></i>
                     </span>
                 </div>
             </div>

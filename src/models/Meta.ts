@@ -168,7 +168,7 @@ export function getDefaultData() {
         showTime: false,
         showRoom: true,
         showInstructor: true,
-        showClasslistTitle: false,
+        showClasslistTitle: true,
         fullHeight: 40,
         partialHeight: 25,
         earliest: '08:00:00',

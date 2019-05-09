@@ -125,12 +125,12 @@
                     </v-card>
                 </v-flex>
             </v-layout>
-            <h5>Add Class</h5>
-            <v-card class="my-5" style="width:85%;margin:auto auto;">
+            <h5>Add Classes</h5>
+            <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('select_class.gif')"></v-img>
             </v-card>
             <h5>Generate Class</h5>
-            <v-card class="my-5" style="width:85%;margin:auto auto;">
+            <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('generate_class.gif')"></v-img>
             </v-card>
             <!-- picture slides illustration -->

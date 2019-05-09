@@ -62,7 +62,7 @@
 
                         <v-card-title primary-title>
                             <div>
-                                <h5 class="headline mb-3">Add Course</h5>
+                                <h5 class="headline mb-3">Add Courses</h5>
                                 <div>
                                     You can add courses by
                                     <font class="amber lighten-3">searching</font> department,
@@ -85,7 +85,7 @@
 
                         <v-card-title primary-title>
                             <div>
-                                <h5 class="headline mb-3">Generate Schedule</h5>
+                                <h5 class="headline mb-3">Generate Schedules</h5>
                                 <div>
                                     After you have finished selecting your courses, you can hit the
                                     <font class="lime lighten-3">generate</font> button to generate
@@ -114,9 +114,9 @@
                                     existing schedules. Click
                                     <i class="fas fa-long-arrow-alt-left teal lighten-4"></i> or
                                     <i class="fas fa-long-arrow-alt-right teal lighten-4"></i>
-                                    to navigate through your schedules. Click
+                                    to navigate through your schedules. Use
                                     <i class="far fa-copy click-icon teal lighten-4"></i> to make a
-                                    copy of the current scheudle, and click
+                                    copy of the current scheudle, and use
                                     <i class="far fa-calendar-times teal lighten-4"></i> delete the
                                     current schedule.
                                 </div>
@@ -129,7 +129,7 @@
             <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('select_class.gif')"></v-img>
             </v-card>
-            <h5>Generate Class</h5>
+            <h5>Generate Schedules</h5>
             <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('generate_class.gif')"></v-img>
             </v-card>

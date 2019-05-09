@@ -358,18 +358,13 @@ export default class Schedule {
             this.totalCredit += isNaN(credit) ? 0 : credit;
 
             const currentIdKey = `${course.department} ${course.number} ${course.type}`;
+
+            // if any section, don't render any thing, even if there is only one available section
             if (sections === -1) {
-                // if there's only one section in this Course, just treat it as a Section
-                if (course.sections.length === 1) {
-                    const section = course.getFirstSection();
-                    this.currentIds[currentIdKey] = section.id.toString();
-                    this.place(section);
-                } else {
-                    this.currentIds[currentIdKey] = ' - ';
-                    this.place(course);
-                }
+                this.currentIds[currentIdKey] = ' - ';
+                this.place(course);
             } else {
-                // we need a copy of course
+                // only one section: place that section
                 if (sections.size === 1) {
                     const sectionIdx = sections.values().next().value;
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();

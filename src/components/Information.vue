@@ -296,7 +296,7 @@
                 <v-stepper-items>
                     <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
                         <v-card class="mb-2" width="54vw" style="margin:auto auto">
-                            <v-img :src="icalSteps[idx].src" aspect-ratio="1.7778"></v-img>
+                            <v-img :src="icalSteps[idx].src" aspect-ratio="2.37"></v-img>
                         </v-card>
                         <v-card-title class="mb-2" primary-title>
                             <div>
@@ -400,39 +400,39 @@ $$
     icalSteps = {
         1: {
             title: 'Make Your Schedule and Export',
-            src: this.imgPath('gcal1.png')
+            src: this.imgPath('export1.png')
         },
         2: {
             title: 'Save The File Somewhere You Can Find',
-            src: this.imgPath('gcal2.png')
+            src: this.imgPath('export2.png')
         },
         3: {
             title: 'Go to Google Calendar',
-            src: this.imgPath('gcal3.png')
+            src: this.imgPath('export3.png')
         },
         4: {
             title: 'Click on Setting',
-            src: this.imgPath('gcal4.png')
+            src: this.imgPath('export4.png')
         },
         5: {
-            title: 'Select import and export',
-            src: this.imgPath('gcal5.png')
+            title: 'Select Import and Export',
+            src: this.imgPath('export5.png')
         },
         6: {
-            title: 'Import Data Over Here',
-            src: this.imgPath('gcal6.png')
+            title: 'Find and Open The File You Just Saved',
+            src: this.imgPath('export6.png')
         },
         7: {
-            title: 'Find and Open The File You Just Saved',
-            src: this.imgPath('gcal7.png')
+            title: 'Import',
+            src: this.imgPath('export7.png')
         },
         8: {
-            title: 'Import!',
-            src: this.imgPath('gcal8.png')
+            title: 'Import Successful!',
+            src: this.imgPath('export8.png')
         },
         9: {
             title: 'Now You Can View Your Schedule On Google Calendar!',
-            src: this.imgPath('gcal9.png')
+            src: this.imgPath('export9.png')
         }
     };
 

@@ -7,9 +7,8 @@ env:
         - ENCRYPTION_LABEL: '60d7449a1baf'
         - COMMIT_AUTHOR_EMAIL: '21034047+hanzhi713@users.noreply.github.com'
 install:
-    - npm install
-    - npm install codecov -g
-    - npm install http-server -g
+    - npm install -g codecov http-server
+    - npm ci
 after_success:
     - codecov
 # before_install:

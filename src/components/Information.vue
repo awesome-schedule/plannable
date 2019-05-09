@@ -133,6 +133,10 @@
             <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('generate_class.gif')"></v-img>
             </v-card>
+            <h5>Multiple Schedule</h5>
+            <v-card class="my-3" style="width:85%;margin:auto auto;">
+                <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
+            </v-card>
             <!-- picture slides illustration -->
 
             <!-- <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
@@ -251,7 +255,7 @@
             as it will sort using options on top first.
 
             <v-card class="my-5" style="width:85%;margin:auto auto">
-                <v-img :src="imgPath('Sort.gif')"></v-img>
+                <v-img :src="imgPath('sort.gif')"></v-img>
             </v-card>
 
             <!-- <h3 id="item-5">Display Settings</h3>

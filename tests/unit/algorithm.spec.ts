@@ -9,20 +9,21 @@ import ScheduleEvaluator from '../../src/algorithm/ScheduleEvaluator';
 beforeAll(async () => {
     window.catalog = await data;
     window.timeMatrix = (await loadTimeMatrix()).payload!;
+    window.buildingList = (await loadBuildingList()).payload!;
 });
 
 describe('ScheduleGenerator Test', () => {
-    it('Data Validation', async () => {
+    it('Data Validation', () => {
         const allRecords = window.catalog;
         expect(typeof data).toBe('object');
         const course = allRecords.getCourse('cs11105');
         expect(typeof course.sections[0].id).toBe('number');
     });
 
-    it('ScheduleGenerator', async () => {
-        const allRecords = await data;
-        const buildingList = await loadBuildingList();
-        const generator = new ScheduleGenerator(allRecords, buildingList.payload!);
+    it('ScheduleGenerator', () => {
+        const catalog = window.catalog;
+        const buildingList = window.buildingList;
+        const generator = new ScheduleGenerator(catalog, buildingList);
         expect(typeof generator.createSchedule).toBe('function');
         const schedule = new Schedule();
         schedule.All = {

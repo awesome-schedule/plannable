@@ -9,10 +9,10 @@ beforeAll(async () => {
 });
 
 describe('Schedule Test', () => {
-    it('Schedule Color Hash', async () => {
+    it('Schedule Color Hash', () => {
         const len = Schedule.bgColors.length;
         const frequencies = new Float32Array(len);
-        const { raw_data } = await data;
+        const raw_data = window.catalog.raw_data;
         for (const key in raw_data) {
             const hash = Utils.hashCode(key) % len;
             frequencies[hash] += 1;

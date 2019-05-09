@@ -1,6 +1,5 @@
 import Section from '../../src/models/Section';
 import data from './data';
-import { parseTimeAllAsDict } from '../../src/utils';
 
 describe('section test', () => {
     it('basic', async () => {

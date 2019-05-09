@@ -46,10 +46,10 @@
             </p>
             <p>
                 <strong
-                    >Important note: It is recommended that you save your calendar frequently (see
-                    <a href="#item-7-2">Export to JSON</a>), because our website saves all its data
-                    in your browser, locally. If the data expired or you cleared your cache, the
-                    data will be permanently lost!
+                    >Important note: It is recommended that you save the schedule after you finish (see
+                    <a href="#item-7-2">Export to JSON</a>, or <a href="#item-7-1">Export to iCalender</a>), 
+                    because our website uses your browser cache to store data, which could be lost 
+                    if it expires or the cache is cleared.
                 </strong>
             </p>
             <h3 id="item-2">Basic Operations</h3>
@@ -260,7 +260,7 @@
 
             <!-- <h3 id="item-5">Display Settings</h3>
             <hr /> -->
-            <h3 id="item-5">Customize Colors</h3>
+            <h3 id="item-6">Customize Colors</h3>
             <hr />
             <p>
                 You can switch to the Palette (<i class="fas fa-palette"></i>) to customize the

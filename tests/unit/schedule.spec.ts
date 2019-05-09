@@ -150,12 +150,12 @@ describe('Schedule Test', () => {
 
         Schedule.options.multiSelect = false;
         schedule._computeSchedule();
-        schedule.update('cs21105', -1);
 
-        expect('cs21105' in schedule.All).toBe(false);
+        schedule.update('cs21105', -1);
+        expect(schedule.All).not.toHaveProperty('cs21105');
         schedule.update('cs21105', -1);
         schedule.update('cs21105', -1, false);
-        expect('cs21105' in schedule.All).toBe(true);
+        expect(schedule.All).toHaveProperty('cs21105');
         expect(schedule.All.cs21105).toBeInstanceOf(Set);
         expect((schedule.All.cs21105 as Set<number>).size).toBe(0);
 

@@ -16,7 +16,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 
 @Component
 export default class CourseBlock extends Vue {
-    @Prop(Object) readonly scheduleBlock!: ScheduleBlock;
+    @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;
     @Prop(Array) readonly heightInfo!: number[];
     @Prop(Number) readonly fullHeight!: number;
     @Prop(Number) readonly partialHeight!: number;
@@ -49,10 +49,10 @@ export default class CourseBlock extends Vue {
         return px;
     }
 
-    get firstSec() {
+    get firstSec(): Section | undefined {
         const section = this.scheduleBlock.section;
         if (section instanceof Course) return section.getFirstSection();
-        else return section;
+        else if (section instanceof Section) return section;
     }
 
     get room() {

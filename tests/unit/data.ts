@@ -35,8 +35,10 @@ const filepath = path.join(datadir, filename);
 async function getData() {
     let data: Catalog;
     if (fs.existsSync(filepath)) {
+        console.info('reading data from local cache...');
         data = Catalog.fromJSON(JSON.parse(fs.readFileSync(filepath).toString()));
     } else {
+        console.info('Local cache does not exist. Requesting data from remote..');
         data = await requestSemesterData(semester);
 
         // cache the data, if possible

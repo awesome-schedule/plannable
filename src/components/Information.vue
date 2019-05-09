@@ -286,11 +286,11 @@
                     <v-stepper-step
                         v-for="(step, idx) in icalSteps"
                         :key="idx"
-                        :complete="e2 > idx"
+                        :complete="e2 > +idx"
                         :step="idx"
                         style="margin:auto auto;cursor:pointer"
                         color="blue-grey"
-                        @click="e2 = idx"
+                        @click="e2 = +idx"
                     ></v-stepper-step>
                 </v-stepper-header>
 

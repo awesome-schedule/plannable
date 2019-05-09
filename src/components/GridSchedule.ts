@@ -16,7 +16,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
     }
 })
 export default class GridSchedule extends Vue {
-    @Prop(Object) readonly schedule!: Schedule;
+    @Prop(Schedule) readonly schedule!: Schedule;
     @Prop(Boolean) readonly showTime!: boolean;
     @Prop(Boolean) readonly showRoom!: boolean;
     @Prop(Boolean) readonly showInstructor!: boolean;

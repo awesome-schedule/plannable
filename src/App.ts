@@ -534,7 +534,7 @@ export default class App extends Vue {
         return true;
     }
 
-    changeSorting(optIdx: number) {
+    changeSorting(optIdx?: number) {
         if (!this.validateSortOptions()) return;
         if (optIdx !== undefined) {
             const option = this.sortOptions.sortBy[optIdx];

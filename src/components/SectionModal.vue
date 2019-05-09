@@ -43,17 +43,14 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import Section from '../models/Section';
-export default {
-    props: {
-        section: Section,
-        /**
-         * @type {import("../models/Catalog").Semester}
-         */
-        semester: Object
-    }
-};
+import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Semester } from '../models/Catalog';
+export default class SectionModal extends Vue {
+    @Prop(Object) readonly semester!: Semester;
+    @Prop(Section) readonly section!: Section;
+}
 </script>
 
 <style></style>

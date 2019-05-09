@@ -21,6 +21,14 @@ declare global {
     }
 }
 
+declare module 'vue/types/vue' {
+    // Declare augmentation for Vue
+    interface Vue {
+        openLousList: typeof openLousList;
+        openVAGrade: typeof openVAGrade;
+    }
+}
+
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
     inserted: el => {

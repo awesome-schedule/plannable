@@ -6,7 +6,7 @@
 /**
  *
  */
-import Course from '../models/Course';
+import { CourseFields } from '../models/Course';
 import { AxiosError } from 'axios';
 import { saveAs } from 'file-saver';
 
@@ -14,7 +14,7 @@ import { saveAs } from 'file-saver';
  * open a course detail on Lou's list
  * @author Kaiying Shan
  */
-export function openLousList(semesterId: number, courseId: number) {
+export function openLousList(semesterId: string, courseId: number) {
     window.open(
         'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
             semesterId +
@@ -28,7 +28,7 @@ export function openLousList(semesterId: number, courseId: number) {
  * view grade distribution of this course on vagrades
  * @author Hanzhi Zhou
  */
-export function openVAGrade(course: Course) {
+export function openVAGrade(course: CourseFields) {
     window.open(
         `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
         '_blank',

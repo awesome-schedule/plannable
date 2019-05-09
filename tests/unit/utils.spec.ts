@@ -55,7 +55,7 @@ describe('Utility Tests', () => {
     });
 
     it('other', () => {
-        Utils.openLousList(1198, 1);
+        Utils.openLousList('1198', 1);
         Utils.openVAGrade(window.catalog.getCourse('cs11105'));
 
         expect(Utils.timeToNum('12:00')).toBeTruthy();

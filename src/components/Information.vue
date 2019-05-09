@@ -46,10 +46,11 @@
             </p>
             <p>
                 <strong
-                    >Important note: It is recommended that you save the schedule after you finish (see
-                    <a href="#item-7-2">Export to JSON</a>, or <a href="#item-7-1">Export to iCalender</a>), 
-                    because our website uses your browser cache to store data, which could be lost 
-                    if it expires or the cache is cleared.
+                    >Important note: It is recommended that you save the schedule after you finish
+                    (see <a href="#item-7-2">Export to JSON</a>, or
+                    <a href="#item-7-1">Export to iCalender</a>), because our website uses your
+                    browser cache to store data, which could be lost if it expires or the cache is
+                    cleared.
                 </strong>
             </p>
             <h3 id="item-2">Basic Operations</h3>
@@ -133,7 +134,7 @@
             <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('generate_class.gif')"></v-img>
             </v-card>
-            <h5>Multiple Schedule</h5>
+            <h5>Multiple Schedules</h5>
             <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
             </v-card>

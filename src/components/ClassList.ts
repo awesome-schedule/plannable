@@ -58,7 +58,8 @@ export default class ClassList extends Vue {
         return false;
     }
     expanded(key: string) {
-        return this.collapsed[key] === (this.isEntering && this.expandOnEntering)
+        const status = this.collapsed[key];
+        return (status === undefined && this.isEntering && this.expandOnEntering) || status
             ? 'fa-chevron-down'
             : 'fa-chevron-right';
     }

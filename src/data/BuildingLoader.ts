@@ -28,7 +28,7 @@ export interface BuildingListJSON extends Expirable {
 /**
  * Try to load the walking time matrix between buildings from localStorage.
  * If it expires or does not exist,
- * load a fresh one from data backend and store it in localStorage.
+ * load a fresh one from the data backend and store it in localStorage.
  *
  * storage key: "timeMatrix"
  */
@@ -48,6 +48,13 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
     return data;
 }
 
+/**
+ * Try to load the array of the names of buildings from localStorage.
+ * If it expires or does not exist,
+ * load a fresh one from the data backend and store it in localStorage.
+ *
+ * storage key: "buildingList"
+ */
 export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
     const data = await loadFromCache<string[], BuildingListJSON>(
         'buildingList',
@@ -64,7 +71,7 @@ export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
     return data;
 }
 
-export async function requestTimeMatrix(): Promise<Int32Array> {
+async function requestTimeMatrix(): Promise<Int32Array> {
     const res = await axios.get(`${api}/data/Distance/Time_Matrix.json`);
     const data: number[][] = res.data;
 
@@ -87,7 +94,7 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
     }
 }
 
-export async function requestBuildingList(): Promise<string[]> {
+async function requestBuildingList(): Promise<string[]> {
     const res = await axios.get(`${api}/data/Distance/Building_Array.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {

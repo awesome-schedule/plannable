@@ -213,8 +213,8 @@
                 You can select time and day at which you do not wish to have class. The input form
                 of time is 08:00:AM.
             </p>
-            <v-card class="my-5" style="width:85%;margin:auto auto;">
-                <v-img :src="imgPath('NoClassTime.gif')"></v-img>
+            <v-card class="my-4" style="width:85%;margin:auto auto;">
+                <v-img :src="imgPath('no-class-time.gif')"></v-img>
             </v-card>
             <h5 id="item-4-2">Allow Waitlist/Closed</h5>
             <p>

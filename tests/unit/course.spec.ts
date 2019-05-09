@@ -1,8 +1,12 @@
 import data from './data';
 
+beforeAll(async () => {
+    window.catalog = await data;
+});
+
 describe('course test', () => {
-    it('basic', async () => {
-        const catalog = await data;
+    it('basic', () => {
+        const catalog = window.catalog;
         const course = catalog.getCourse('cs11105');
         expect(course.allSameTime()).toBe(false);
         expect(course.copy().equals(course)).toBe(true);
@@ -11,8 +15,8 @@ describe('course test', () => {
         expect(course.has(new Set([0]), 'cs11105'));
     });
 
-    it('subset', async () => {
-        const catalog = await data;
+    it('subset', () => {
+        const catalog = window.catalog;
         const course = catalog.getCourse('cs11105', new Set([0]));
         expect(course.allSameTime()).toBe(true);
         expect(course.has(course.getSection(1))).toBe(false);

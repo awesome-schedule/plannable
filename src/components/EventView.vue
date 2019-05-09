@@ -1,6 +1,6 @@
 <template>
     <nav class="d-block bg-light sidebar">
-        <div id="semester" class="btn bg-info nav-btn mt-0" style="color:white">
+        <div id="semester" class="btn bg-info nav-btn mt-0">
             <div v-if="isEditingEvent">Edit Event</div>
             <div v-else>Add Event</div>
         </div>

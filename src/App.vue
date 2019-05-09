@@ -228,28 +228,31 @@
                         >
                             Generate
                         </button>
-                        <button class="btn btn-outline-info" @click="clear">
-                            Clean All
+                        <button
+                            class="btn btn-outline-info"
+                            title="Remove all classes from the current schedule"
+                            @click="clear"
+                        >
+                            Clean
                         </button>
                     </div>
-                    <div class="custom-control custom-checkbox mt-2 mx-2">
+                    <div
+                        title="render all selected sections (except for 'any section')"
+                        class="custom-control custom-checkbox mt-2 mx-2"
+                    >
                         <input
                             id="multiSelect"
                             v-model="multiSelect"
                             type="checkbox"
                             class="custom-control-input"
                         />
-                        <label
-                            class="custom-control-label"
-                            for="multiSelect"
-                            title="render all selected sections (except for 'any section')"
-                        >
+                        <label class="custom-control-label" for="multiSelect">
                             Show Multiple Section
                         </label>
                     </div>
                 </div>
             </div>
-            <div class="btn bg-info nav-btn mt-2" style="color:white">
+            <div class="btn bg-info nav-btn mt-2">
                 Schedule Overview
             </div>
             <ul class="list-group list-group-flush" style="width:99%">
@@ -273,7 +276,7 @@
         </event-view>
 
         <nav v-else-if="sideBar.showFilter" class="d-block bg-light sidebar">
-            <div class="btn bg-info nav-btn" style="color:white">
+            <div class="btn bg-info nav-btn">
                 Filters
             </div>
             <ul class="list-group list-group-flush mx-1">
@@ -363,7 +366,7 @@
                     </button>
                 </li>
 
-                <div class="btn bg-info nav-btn" style="color:white">
+                <div class="btn bg-info nav-btn">
                     Sort Priority
                 </div>
                 <li
@@ -443,7 +446,7 @@
                     </template>
                 </li>
 
-                <div class="btn bg-info nav-btn" style="color:white">
+                <div class="btn bg-info nav-btn">
                     Advanced
                 </div>
                 <li class="list-group-item pb-0">
@@ -478,7 +481,7 @@
         </nav>
 
         <nav v-else-if="sideBar.showSetting" class="d-block bg-light sidebar">
-            <div class="btn bg-info nav-btn" style="color:white">
+            <div class="btn bg-info nav-btn">
                 Schedule Display settings
             </div>
             <form class="mx-2">
@@ -546,7 +549,7 @@
                     scrollable
                 </label>
             </div>
-            <div class="btn bg-info nav-btn" style="color:white">
+            <div class="btn bg-info nav-btn">
                 Display Options
             </div>
             <ul class="list-group list-group-flush mx-1">
@@ -600,12 +603,12 @@
                     </div>
                 </li>
             </ul>
-            <div class="btn bg-info nav-btn" style="color:white">
+            <div class="btn bg-info nav-btn">
                 Time Options
             </div>
             <ul class="list-group list-group-flush mx-1">
                 <li>
-                    <div class="btn-group my-3" role="group" style="width:100%">
+                    <div class="btn-group my-3 w-100" role="group">
                         <button
                             class="btn btn-secondary"
                             :class="{ active: standard }"
@@ -641,7 +644,7 @@
         </nav>
 
         <nav v-else-if="sideBar.showExport" class="d-block bg-light sidebar">
-            <div class="btn bg-info nav-btn" style="color:white">
+            <div class="btn bg-info nav-btn">
                 Import/Export Schedule
             </div>
             <ul class="list-group list-group-flush mx-1">
@@ -892,6 +895,7 @@
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
+    color: white !important;
 }
 
 .filter-add:hover {
@@ -941,11 +945,6 @@
         left: 10vw !important;
         width: 75vw !important;
         scrollbar-width: thin !important;
-    }
-
-    .nav-btn {
-        border-radius: 0 !important;
-        width: 100%;
     }
 
     .tab-icon {

@@ -33,6 +33,9 @@ describe('Schedule Test', () => {
         expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
             '#ffffff'
         );
+
+        schedule.setColor('cs11105', '#ffffff');
+        schedule.setColor('cs11105', '#CC9393');
     });
 
     it('From Json new', () => {
@@ -46,6 +49,19 @@ describe('Schedule Test', () => {
             cs21504: new Set([1]),
             cs11105: -1
         });
+
+        expect(schedule.fromJSON()).toBeFalsy();
+        expect(
+            schedule
+                .fromJSON({
+                    All: {},
+                    title: '',
+                    id: 0,
+                    savedColors: {},
+                    events: []
+                })!
+                .empty()
+        ).toBe(true);
     });
 
     // backward compatibility test
@@ -53,7 +69,8 @@ describe('Schedule Test', () => {
         const json = `{"All":{"cs2150lecture":[0],"cs2150laboratory":[1], "cs1110lecture": -1},
         "id":1,"title":"Schedule","events":[]}`;
         const parsed = JSON.parse(json);
-        const schedule = Schedule.fromJSON(parsed)!;
+        let schedule = Schedule.fromJSON(parsed)!;
+        schedule = schedule.fromJSON(parsed)!;
         expect(schedule).toBeTruthy();
         expect(schedule.empty()).toBeFalsy();
         expect(schedule.has('cs21505')).toBeTruthy();
@@ -92,6 +109,8 @@ describe('Schedule Test', () => {
             expect(err.message).toBe(`Your new event conflicts with title1`);
         }
 
+        expect(schedule.has('MoTu 12:00AM - 3:00AM')).toBe(true);
+
         schedule.preview('cs21105', 0);
         schedule._computeSchedule();
         schedule.removePreview();
@@ -125,6 +144,20 @@ describe('Schedule Test', () => {
                 }
             }
         }
+
+        schedule.unhover('cs21105');
+        schedule.unhover('cs21504');
+
+        Schedule.options.multiSelect = false;
+        schedule._computeSchedule();
+        schedule.update('cs21105', -1);
+
+        expect('cs21105' in schedule.All).toBe(false);
+        schedule.update('cs21105', -1);
+        schedule.update('cs21105', -1, false);
+        expect('cs21105' in schedule.All).toBe(true);
+        expect(schedule.All.cs21105).toBeInstanceOf(Set);
+        expect((schedule.All.cs21105 as Set<number>).size).toBe(0);
 
         schedule.copy();
         schedule.toJSON();

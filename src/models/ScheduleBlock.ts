@@ -66,7 +66,7 @@ export default class ScheduleBlock {
         this.section = section;
 
         [this.startMin, this.endMin] = this.timeAsInt();
-        this.duration = this.startMin - this.endMin;
+        this.duration = this.endMin - this.startMin;
     }
 
     /**

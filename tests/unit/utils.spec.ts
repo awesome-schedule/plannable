@@ -62,5 +62,25 @@ describe('Utility Tests', () => {
         expect(Utils.timeToNum('12:00')).toBe(8);
         expect(Utils.timeToNum('12:30')).toBe(9);
         console.info(Utils.timeToNum('12:00'));
+
+        try {
+            // don't know how to test this one
+            Utils.savePlain('sav', 'asv');
+        } catch (err) {}
+    });
+
+    it('timeout', async () => {
+        const result = await Utils.timeout(new Promise((resolve, _) => resolve(1)), -1);
+        expect(result).toBe(1);
+        try {
+            await Utils.timeout(
+                new Promise((resolve, _) => setTimeout(() => resolve(1), 500)),
+                250,
+                'msg: timeout'
+            );
+        } catch (err) {
+            expect(err).toBe('msg: timeout');
+            expect(Utils.errToStr(err)).toBe('msg: timeout');
+        }
     });
 });

@@ -130,7 +130,7 @@ export default class Meta {
         'cpIndex',
 
         // filters
-        'allowWaitList',
+        'allowWaitlist',
         'allowClosed',
         'sortOptions',
         'timeSlots',

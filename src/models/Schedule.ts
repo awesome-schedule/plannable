@@ -59,7 +59,7 @@ export default class Schedule {
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
-    public static fromJSON(obj?: ScheduleJSON) {
+    public static fromJSON(obj?: ScheduleJSON): Schedule | null {
         if (!obj) return null;
         const schedule = new Schedule();
         schedule.title = obj.title ? obj.title : 'schedule';
@@ -615,7 +615,7 @@ export default class Schedule {
     /**
      * instantiate a `Schedule` object from its JSON representation
      */
-    public fromJSON(obj: ScheduleJSON) {
+    public fromJSON(obj?: ScheduleJSON) {
         return Schedule.fromJSON(obj);
     }
 

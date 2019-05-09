@@ -1,6 +1,6 @@
 /**
- * The schedule generator generates all possible schedules satisfying the given constraints
- * out of the classes that the user has selected,
+ * The schedule generator generates all possible schedules satisfying the given constraints (filters)
+ * out of the courses/sections that the user has selected
  *
  * @author Hanzhi Zhou, Zichao Hu
  */

@@ -1,3 +1,15 @@
+/**
+ * Component for
+ *
+ * 1. displaying the list of courses that are match the query string when searching
+ * 2. displaying the list of courses currently selected
+ *
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';

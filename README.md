@@ -35,9 +35,10 @@ git clone https://github.com/awesome-schedule/data
 cd ..
 ```
 
-Install front end dependencies and launch the development server
+Install Vue cli and other dependencies. Then, launch the development server
 
 ```bash
+npm install -g @vue/cli
 npm install
 npm run serve
 ```

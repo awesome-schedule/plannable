@@ -1,5 +1,5 @@
 /**
- * Utilities for graph coloring
+ * Utilities for graph coloring, used for rendering conflicting courses/events
  * @author Hanzhi Zhou
  */
 
@@ -14,11 +14,11 @@ import { Vertex, Graph } from './Graph';
  * @remark It will give up if the number of function calls exceed 200000
  *
  * @param graph
- * @param colors
+ * @param colors array of colors of the vertices
  * @param colorOrder A good initial ordering of vertices, probably given by some heuristic.
- * @param opCount
- * @param numColors
- * @param v
+ * @param opCount variable for counting the total number of function calls
+ * @param numColors number of colors
+ * @param v the number of vertex already colored
  */
 function graphColorBackTrack(
     graph: Int8Array[],

@@ -1,3 +1,12 @@
+/**
+ * the component for adding and editing events
+ *
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';

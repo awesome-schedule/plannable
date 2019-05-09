@@ -1,6 +1,5 @@
 /**
- * utilities for time parsing
- *
+ * Utilities for parsing and convert in-between different time representations
  */
 
 /**

@@ -1,3 +1,12 @@
+/**
+ * The component for showing a list of pages, used for switching between generated schedules
+ *
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Vue, Component, Prop } from 'vue-property-decorator';
 @Component
 export default class Pagination extends Vue {

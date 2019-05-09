@@ -1,3 +1,12 @@
+/**
+ * the component for customizing colors of classes and events
+ *
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';

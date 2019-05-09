@@ -25,34 +25,33 @@ Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
 ### Main Component: [App.vue](/templates/src/App.vue)
 
-| Part Name             | Contributor               |
+| Part Name             | Contributors              |
 | --------------------- | ------------------------- |
-| Nav Bar               | Kaiying Shan              |
 | Schedule Rendering    | Kaiying Shan              |
-| Tab Switching         | Kaiying Shan              |
+| Tab Switching         | Kaiying Shan, Hanzhi Zhou |
 | Semester Switching    | Hanzhi Zhou               |
 | Course Manipulation   | Hanzhi Zhou               |
 | Storage and Cache     | Hanzhi Zhou, Kaiying Shan |
 | Sorting Options       | Hanzhi Zhou               |
-| Filters               | Kaiying Shan              |
+| Filters               | Kaiying Shan, Hanzhi Zhou |
 | Display Options       | Kaiying Shan              |
-| Algorithm Integration | Kaiying Shan              |
-| Import/Export         | Kaiying Shan              |
+| Algorithm Integration | Hanzhi Zhou, Kaiying Shan |
+| Import/Export         | Kaiying Shan, Hanzhi Zhou |
 
 ### Child Components
 
 Child components are located at [components](/templates/src/components)
 
-| Name           | Description                                                             | Contributor               |
-| -------------- | ----------------------------------------------------------------------- | ------------------------- |
-| ClassList      | Displaying the list of classes that are selected/match the query string | Hanzhi Zhou, Kaiying Shan |
-| ClassListModal | Displaying information of a CourseRecord object                         | Kaiying Shan, Hanzhi Zhou |
-| CourseBlock    | A block component for placing a course on GridSchedule                  | Kaiying Shan, Hanzhi Zhou |
-| GridSchedule   | A component for rendering a schedule                                    | Kaiying Shan, Hanzhi Zhou |
-| Modal          | For displaying information of a specific course                         | Kaiying Shan              |
-| Pagination     | For showing a list of pages and switching between generated schedules   | Kaiying Shan, Hanzhi Zhou |
-| Palette        | For customizing colors of classes and events                            | Hanzhi Zhou               |
-| EventView      | A component for adding and editing events                               | Kaiying Shan, Hanzhi Zhou |
+| Name         | Contributors              |
+| ------------ | ------------------------- |
+| ClassList    | Hanzhi Zhou               |
+| CourseBlock  | Kaiying Shan, Hanzhi Zhou |
+| CourseModal  | Kaiying Shan, Hanzhi Zhou |
+| EventView    | Kaiying Shan, Hanzhi Zhou |
+| GridSchedule | Kaiying Shan              |
+| Pagination   | Kaiying Shan, Hanzhi Zhou |
+| Palette      | Hanzhi Zhou               |
+| SectionModal | Kaiying Shan              |
 
 ### Tool chain
 
@@ -62,54 +61,56 @@ Hanzhi Zhou
 
 ### Continuous Integration
 
+Maintenance of CI, code quality tools and coverage reports
+
 Hanzhi Zhou
 
 ### Models and Data Structure
 
 The underlying models and data structures are the core of our website. These are mainly TypeScript files in [models](/templates/src/models)
 
-| Name          | Description                                                         | Contributor               |
-| ------------- | ------------------------------------------------------------------- | ------------------------- |
-| Meta          | Some metadata and type definitions                                  | Hanzhi Zhou               |
-| Catalog       | A wrapper for raw course catalog, course query provider             | Hanzhi Zhou               |
-| Course        | A collection of sections for a specific course                      | Hanzhi Zhou               |
-| Graph         | Model for an undirected graph, used for schedule rendering          | Hanzhi Zhou               |
-| Event         | A structure that holds information of an event                      | Kaiying Shan              |
-| Section       | A specific section of a course                                      | Hanzhi Zhou               |
-| Meeting       | A specific meeting information of a section                         | Hanzhi Zhou               |
-| Schedule      | Schedule data structure, helpers for schedule rendering             | Hanzhi Zhou, Kaiying Shan |
-| Notification  | A wrapper for displaying notifications to user                      | Hanzhi Zhou               |
-| ScheduleBlock | A wrapper with fields required for rendering using GridSchedule.vue | Hanzhi Zhou               |
+| Name          | Contributors              |
+| ------------- | ------------------------- |
+| Catalog       | Hanzhi Zhou               |
+| Course        | Hanzhi Zhou               |
+| Event         | Kaiying Shan              |
+| Meeting       | Hanzhi Zhou               |
+| Meta          | Hanzhi Zhou               |
+| Schedule      | Hanzhi Zhou, Kaiying Shan |
+| ScheduleBlock | Hanzhi Zhou               |
+| Section       | Hanzhi Zhou               |
 
 ### Utilities
 
 Commonly used utility functions, found in [src/utils](src/utils)
 
-| Name         | Description                                                                 | Contributor               |
-| ------------ | --------------------------------------------------------------------------- | ------------------------- |
-| ICal         | Convert a schedule to an iCalendar file                                     | Kaiying Shan              |
-| Notification | A wrapper for displaying notifications to user                              | Hanzhi Zhou               |
-| time         | Utilities for parsing and convert in-between different time representations | Hanzhi Zhou, Kaiying Shan |
-| other        | Miscellaneous utility functions                                             | Hanzhi Zhou, Kaiying Shan |
+| Name         | Contributors              |
+| ------------ | ------------------------- |
+| ICal         | Kaiying Shan              |
+| Notification | Hanzhi Zhou               |
+| time         | Hanzhi Zhou, Kaiying Shan |
+| other        | Hanzhi Zhou, Kaiying Shan |
 
 ### Data Fetching and Caching
 
-| Name               | Description                                                      | Contributor               |
-| ------------------ | ---------------------------------------------------------------- | ------------------------- |
-| BuildingLoader     | For loading the list of buildings and the distance matrix        | Hanzhi Zhou               |
-| CatalogLoader      | For loading the catalog of courses of a given semester           | Hanzhi Zhou, Kaiying Shan |
-| SemesterListLoader | For loading loading the list of semesters                        | Hanzhi Zhou               |
-| Loader             | For local data fetching, expiration checking and sending request | Hanzhi Zhou               |
+| Name               | Contributors              |
+| ------------------ | ------------------------- |
+| BuildingLoader     | Hanzhi Zhou               |
+| CatalogLoader      | Hanzhi Zhou, Kaiying Shan |
+| SemesterListLoader | Hanzhi Zhou               |
+| Loader             | Hanzhi Zhou               |
 
 ### Algorithm
 
 These are mainly JavaScript files in [algorithm](/templates/src/algorithm)
 
-| Part               | Description                                    | Contributor               |
-| ------------------ | ---------------------------------------------- | ------------------------- |
-| Schedule Generator | -                                              | Zichao Hu, Hanzhi Zhou    |
-| Schedule Evaluator | Compute quality indicators and perform sorting | Hanzhi Zhou, Kaiying Shan |
-| TypeScript Rewrite | Rewrite everything using TypeScript            | Hanzhi Zhou               |
+| Name               | Contributor               |
+| ------------------ | ------------------------- |
+| Schedule Generator | ZiChao Hu, Hanzhi Zhou    |
+| Coloring           | Hanzhi Zhou               |
+| Graph              | Hanzhi Zhou               |
+| Schedule Evaluator | Hanzhi Zhou, Kaiying Shan |
+| TypeScript Rewrite | Hanzhi Zhou               |
 
 ## Back-End
 

@@ -1,3 +1,9 @@
+/**
+ * the component for rendering a schedule (with courses and events)
+ *
+ * @author Kaiying Shan
+ */
+
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';

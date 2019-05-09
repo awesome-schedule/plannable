@@ -1,3 +1,12 @@
+/**
+ * the component for rendering a course on GridSchedule
+ *
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Course from '../models/Course';

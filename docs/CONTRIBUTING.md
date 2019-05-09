@@ -10,37 +10,30 @@ Also, please note we have a [code of conduct](./CODE_OF_CONDUCT.md), please foll
 
 > Note: the current documentation is far from complete. However, a lot of information is in the comments of the source code, so please check it out.
 
-This repository is intended to be modular, and it has a number of directories and files that play separate roles.
+> Our TSDoc (documentation built from JSDoc-like docstrings) is available at https://awesome-schedule.github.io/docs/tsdoc/
 
-If you want to contribute to the Front End:
+Our website is a single-page application (SPA). Our source code is intended to be modular, and it has a number of directories and files that play separate roles.
 
-- [App.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/App.vue) : the "view" of this project; the root Vue component that contains almost all of the child components and DOM elements of the main webpage. Here is a brief introduction of the main components of the view layer:
-
-- [components](https://github.com/awesome-schedule/UVaAutoScheduler/tree/master/templates/src/components) : all the child Vue components.
-
-  - [GridSchedule.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/components/GridSchedule.vue) : the class schedule
-  - [CourseBlock.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/components/CourseBlock.vue) : each course of the schedule
-  - [Pagination.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/components/Pagination.vue) : pagination at top of the schedule for page switching
-  - [ClassList.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/components/ClassList.vue) : list of courses on the first left side bar that are selected/searched.
-  - [Modal.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/components/Modal.vue) : modal popped up when clicking course block.
-  - [ClassListModal.vue](https://github.com/awesome-schedule/UVaAutoScheduler/blob/master/templates/src/components/ClassListModal.vue) : modal popped up when clicking the "i" button on class-list.
+-   [App.vue](/src/App.vue) : the root component
+-   [components](/src/components) : all the child components
+-   [algorithm](/src/algorithm) : algorithm for schedule building and rendering
+-   [models](/src/models) : models and data structures used to store and manipulate data
+-   [utils](/src/utils): utilities used across the whole project
 
 <img src="components.png"
      alt="components.png"
      style="margin-left: 10%; width:80%;" />
-
-- [models](https://github.com/awesome-schedule/UVaAutoScheduler/tree/master/templates/src/models) : the data structures that holds course information for App.vue and its child components to render.
 
 ## Pull Request Process :yum:
 
 1. Make sure that your changes are made on the dev branch or a new branch.
 2. Test extensively on your local host to make sure that you didn't screw up anything.
 3. In writing a pull request message,
-   1. Point out which part of the code you have changed, e.g. view, model, or algorithm.
-   2. Make clear that what type of changes that you have made, e.g., fixed a bug, improved performance, changed/added functionality, updated documentation, etc.
-   3. Summarize what does this pull request do and why this is worth doing. Include any of your design decisions and alternatives that you considered.
-   4. (Optional) Explicitly point out the part that you may want a more thoughtful review.
-   5. (Optional) Add any questions, comments, or concerns that you have, including those about your changes and those about the rest of this project.
+    1. Point out which part of the code you have changed, e.g. view, model, or algorithm.
+    2. Make clear that what type of changes that you have made, e.g., fixed a bug, improved performance, changed/added functionality, updated documentation, etc.
+    3. Summarize what does this pull request do and why this is worth doing. Include any of your design decisions and alternatives that you considered.
+    4. (Optional) Explicitly point out the part that you may want a more thoughtful review.
+    5. (Optional) Add any questions, comments, or concerns that you have, including those about your changes and those about the rest of this project.
 4. New pull request!
 
 ---

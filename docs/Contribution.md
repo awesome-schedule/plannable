@@ -15,15 +15,17 @@ For the following parts, those with the most contributions are listed first.
 
 ## Software Architect
 
+Data structure and flow design
+
 Hanzhi Zhou
 
 ## Front-end
 
-### Design
+### UI Design
 
 Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
-### Main Component: [App.vue](/templates/src/App.vue)
+### Main Component: [App.vue](/src/App.vue)
 
 | Part Name             | Contributors              |
 | --------------------- | ------------------------- |
@@ -40,7 +42,7 @@ Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
 ### Child Components
 
-Child components are located at [components](/templates/src/components)
+Child components are in the [components](/src/components) folder.
 
 | Name         | Contributors              |
 | ------------ | ------------------------- |
@@ -67,7 +69,7 @@ Hanzhi Zhou
 
 ### Models and Data Structure
 
-The underlying models and data structures are the core of our website. These are mainly TypeScript files in [models](/templates/src/models)
+The underlying models and data structures are the core of our website. These are mainly TypeScript files in [models](/src/models)
 
 | Name          | Contributors              |
 | ------------- | ------------------------- |
@@ -82,7 +84,7 @@ The underlying models and data structures are the core of our website. These are
 
 ### Utilities
 
-Commonly used utility functions, found in [src/utils](src/utils)
+Commonly used utility functions, found in [src/utils](/src/utils)
 
 | Name         | Contributors              |
 | ------------ | ------------------------- |
@@ -97,20 +99,31 @@ Commonly used utility functions, found in [src/utils](src/utils)
 | ------------------ | ------------------------- |
 | BuildingLoader     | Hanzhi Zhou               |
 | CatalogLoader      | Hanzhi Zhou, Kaiying Shan |
-| SemesterListLoader | Hanzhi Zhou               |
 | Loader             | Hanzhi Zhou               |
+| SemesterListLoader | Hanzhi Zhou               |
 
 ### Algorithm
 
-These are mainly JavaScript files in [algorithm](/templates/src/algorithm)
+We use a number of algorithms to generate, sort and render schedules. They can be found in [src/algorithm](/src/algorithm)
 
-| Name               | Contributor               |
-| ------------------ | ------------------------- |
-| Schedule Generator | ZiChao Hu, Hanzhi Zhou    |
-| Coloring           | Hanzhi Zhou               |
-| Graph              | Hanzhi Zhou               |
-| Schedule Evaluator | Hanzhi Zhou, Kaiying Shan |
-| TypeScript Rewrite | Hanzhi Zhou               |
+| Name               | Contributors           |
+| ------------------ | ---------------------- |
+| Schedule Generator | ZiChao Hu, Hanzhi Zhou |
+| Coloring           | Hanzhi Zhou            |
+| Graph              | Hanzhi Zhou            |
+| Schedule Evaluator | Hanzhi Zhou            |
+
+### Testing
+
+For unit tests, see [tests/unit](/tests/unit)
+
+Hanzhi Zhou
+
+### Documentation
+
+Inline doc writing and doc building
+
+Hanzhi Zhou
 
 ## Back-End
 

@@ -130,6 +130,10 @@
             <v-card class="my-5" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('select_class.gif')"></v-img>
             </v-card>
+            <h5>Generate Class</h5>
+            <v-card class="my-5" style="width:85%;margin:auto auto;">
+                <v-img :src="imgPath('generate_class.gif')"></v-img>
+            </v-card>
             <!-- picture slides illustration -->
 
             <!-- <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
@@ -193,7 +197,7 @@
                 calender on google or apple.
             </p>
             <v-card class="my-5" style="width:85%;margin:auto auto;">
-                <v-img :src="imgPath('AddEvent.gif')"></v-img>
+                <v-img :src="imgPath('add_event.gif')"></v-img>
             </v-card>
             <h3 id="item-4">Filters</h3>
             <hr />

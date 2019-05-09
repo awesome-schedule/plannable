@@ -1,5 +1,5 @@
 <template>
-    <div id="app" style="width:100%" @change="onDocChange">
+    <div id="app w-100" @change="onDocChange">
         <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
         <course-modal :course="modalCourse"></course-modal>
         <!-- Tab Icons Start (Leftmost bar) -->
@@ -216,7 +216,7 @@
                         @remove_course="removeCourse"
                         @trigger-classlist-modal="showCourseModal"
                     ></ClassList>
-                    <div class="btn-group mt-3" role="group" style="width:100%">
+                    <div class="btn-group mt-3 w-100">
                         <button
                             type="button"
                             class="btn btn-outline-info"
@@ -243,7 +243,7 @@
                             class="custom-control-input"
                         />
                         <label class="custom-control-label" for="multiSelect">
-                            Show Multiple Section
+                            Show Multiple Sections
                         </label>
                     </div>
                 </div>
@@ -354,8 +354,7 @@
                 <li class="list-group-item">
                     <button
                         type="button"
-                        class="btn btn-outline-info"
-                        style="width:100%"
+                        class="btn btn-outline-info w-100"
                         @click="generateSchedules"
                     >
                         Apply
@@ -772,46 +771,52 @@
                         </strong>
 
                         <v-spacer></v-spacer>
-
-                        <v-btn
-                            class="mx-3"
-                            title="Checkout our GitHub site to watch/star/fork!"
-                            dark
-                            icon
+                        <a
+                            style="color:inherit;text-decoration: none;"
+                            target="_blank"
+                            href="https://github.com/awesome-schedule/Awesome-SchedulAR"
                         >
-                            <a
-                                style="color:inherit;text-decoration: none;"
-                                target="_blank"
-                                href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                            <v-btn
+                                class="mx-3"
+                                title="Checkout our GitHub site to watch/star/fork!"
+                                dark
+                                icon
                             >
                                 <v-icon size="24px">fab fa-github</v-icon>
-                            </a>
-                        </v-btn>
-                        <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
-                            <a
-                                style="color:inherit;text-decoration: none;"
-                                target="_blank"
-                                href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
-                            >
+                            </v-btn>
+                        </a>
+
+                        <a
+                            style="color:inherit;text-decoration: none;"
+                            target="_blank"
+                            href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                        >
+                            <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
                                 <v-icon size="24px">fas fa-exclamation-circle</v-icon>
-                            </a>
-                        </v-btn>
-                        <v-btn class="mx-3" title="Watch our video on YouTube" dark icon>
-                            <a
-                                style="color:inherit;text-decoration: none;"
-                                target="_blank"
-                                href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
+                            </v-btn>
+                        </a>
+                        <a
+                            style="color:inherit;text-decoration: none;"
+                            target="_blank"
+                            href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
+                        >
+                            <v-btn class="mx-3" title="Watch our video on YouTube" dark icon
                                 ><v-icon size="22px">fab fa-youtube</v-icon>
-                            </a>
-                        </v-btn>
-                        <v-btn class="mx-3" title="Fill out a survey to make us better" dark icon>
-                            <a
-                                style="color:inherit;text-decoration: none;"
-                                target="_blank"
-                                href="https://docs.google.com/forms/d/e/1FAIpQLScsXZdkFFIljwyhuyAOwjGhEbq_LzY-POxEyJsK_jLrBIUmvw/viewform"
-                                ><v-icon size="24px">fas fa-poll</v-icon></a
-                            >
-                        </v-btn>
+                            </v-btn>
+                        </a>
+                        <a
+                            style="color:inherit;text-decoration: none;"
+                            target="_blank"
+                            href="https://docs.google.com/forms/d/e/1FAIpQLScsXZdkFFIljwyhuyAOwjGhEbq_LzY-POxEyJsK_jLrBIUmvw/viewform"
+                        >
+                            <v-btn
+                                class="mx-3"
+                                title="Fill out a survey to make us better"
+                                dark
+                                icon
+                                ><v-icon size="24px">fas fa-poll</v-icon>
+                            </v-btn>
+                        </a>
                     </v-card-title>
 
                     <v-card-actions class="grey darken-3 justify-center">

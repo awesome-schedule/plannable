@@ -46,12 +46,14 @@
 <script lang="ts">
 import Section from '../models/Section';
 import { Semester } from '../models/Catalog';
-export default {
+import Vue from 'vue';
+
+export default Vue.extend({
     props: {
         semester: Object as () => Semester,
         section: Section
     }
-};
+});
 </script>
 
 <style></style>

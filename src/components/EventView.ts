@@ -1,6 +1,5 @@
 /**
  * the component for adding and editing events
- *
  * @author Kaiying Shan, Hanzhi Zhou
  */
 

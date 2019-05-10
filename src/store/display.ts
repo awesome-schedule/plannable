@@ -2,6 +2,7 @@ import { Module, VuexModule, Mutation, Action, getModule } from 'vuex-module-dec
 import store from '.';
 
 export interface DisplayState {
+    [x: string]: any;
     showTime: boolean;
     showRoom: boolean;
     showInstructor: boolean;
@@ -31,6 +32,7 @@ export const defaultDisplay: DisplayState = Object.freeze({
     dynamic: true
 })
 class Display extends VuexModule implements DisplayState {
+    [x: string]: any;
     public showTime = false;
     public showRoom = true;
     public showInstructor = true;
@@ -42,19 +44,9 @@ class Display extends VuexModule implements DisplayState {
     public standard = false;
 
     @Mutation
-    _changeShowTime(bool: boolean) {
-        this.showTime = bool;
-    }
-
-    @Action({ commit: '_changeShowTime' })
-    changeShowTime(bool: boolean) {
-        return bool;
-    }
-
-    @Mutation
     _update(newSettings: Partial<DisplayState>) {
         for (const key in newSettings) {
-            (this as any)[key] = (newSettings as any)[key];
+            this[key] = newSettings[key];
         }
     }
 

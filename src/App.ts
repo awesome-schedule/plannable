@@ -614,7 +614,10 @@ export default class App extends Vue {
                     this[field] = raw_arr;
                 } else this[field] = defaultData[field];
             } else if (this[field] instanceof Object) {
-                if (!raw_data[field]) this[field] = defaultData[field];
+                if (!raw_data[field]) {
+                    this[field] = defaultData[field];
+                    continue;
+                }
                 if (typeof this[field].fromJSON === 'function') {
                     const parsed = this[field].fromJSON(raw_data[field]);
                     if (parsed) this[field] = parsed;

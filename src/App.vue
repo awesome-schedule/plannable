@@ -606,7 +606,7 @@
                     <div class="btn-group my-3 w-100" role="group">
                         <button
                             class="btn btn-secondary"
-                            :class="{ active: standard }"
+                            :class="{ active: display.standard }"
                             type="button"
                             @click="display.standard = true"
                         >
@@ -614,7 +614,7 @@
                         </button>
                         <button
                             class="btn btn-secondary"
-                            :class="{ active: !standard }"
+                            :class="{ active: !display.standard }"
                             type="button"
                             @click="display.standard = false"
                         >

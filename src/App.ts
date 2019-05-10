@@ -42,6 +42,9 @@ window.scheduleEvaluator = new ScheduleEvaluator();
 
 import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
+import displaySettings, { DisplayState, defaultDisplay } from './store/display';
+
+// const someModule = namespace('./store/DisplaySettings');
 
 export const NoCache = createDecorator((options, key) => {
     // component options should be passed to the callback
@@ -106,15 +109,7 @@ export default class App extends Vue {
     modalCourse: Course | null = null;
 
     // display options
-    showTime = false;
-    showRoom = true;
-    showInstructor = true;
-    showClasslistTitle = false;
-    fullHeight = 40;
-    partialHeight = 25;
-    earliest = '08:00:00';
-    latest = '19:00:00';
-    standard = false;
+    display: DisplayState = Object.assign({}, defaultDisplay);
 
     // filter settings
     /**
@@ -199,6 +194,11 @@ export default class App extends Vue {
     combineSectionWatch() {
         Schedule.options.combineSections = this.combineSections;
         this.currentSchedule.computeSchedule();
+    }
+
+    @Watch('display', { deep: true })
+    displayWatch() {
+        displaySettings.update(this.display);
     }
 
     created() {
@@ -614,6 +614,7 @@ export default class App extends Vue {
                     this[field] = raw_arr;
                 } else this[field] = defaultData[field];
             } else if (this[field] instanceof Object) {
+                if (!raw_data[field]) this[field] = defaultData[field];
                 if (typeof this[field].fromJSON === 'function') {
                     const parsed = this[field].fromJSON(raw_data[field]);
                     if (parsed) this[field] = parsed;

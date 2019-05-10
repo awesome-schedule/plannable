@@ -9,6 +9,8 @@ import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import { RootState } from '../store';
+import { State } from 'vuex-class';
 
 @Component({
     components: {
@@ -17,14 +19,15 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 })
 export default class GridSchedule extends Vue {
     @Prop(Schedule) readonly schedule!: Schedule;
-    @Prop(Boolean) readonly showTime!: boolean;
-    @Prop(Boolean) readonly showRoom!: boolean;
-    @Prop(Boolean) readonly showInstructor!: boolean;
-    @Prop(Number) readonly partialHeight!: number;
-    @Prop(Number) readonly fullHeight!: number;
-    @Prop(String) readonly earliest!: string;
-    @Prop(String) readonly latest!: string;
-    @Prop(Boolean) readonly timeOptionStandard!: boolean;
+
+    @State((store: RootState) => store.display.standard) readonly standard!: boolean;
+    @State((store: RootState) => store.display.earliest) readonly earliest!: string;
+    @State((store: RootState) => store.display.latest) readonly latest!: string;
+    @State((store: RootState) => store.display.showTime) readonly showTime!: boolean;
+    @State((store: RootState) => store.display.showRoom) readonly showRoom!: boolean;
+    @State((store: RootState) => store.display.showInstructor) readonly showInstructor!: boolean;
+    @State((store: RootState) => store.display.partialHeight) readonly partialHeight!: number;
+    @State((store: RootState) => store.display.fullHeight) readonly fullHeight!: number;
 
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
@@ -117,7 +120,7 @@ export default class GridSchedule extends Vue {
             reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
         }
 
-        return window.screen.width > 450 ? (this.timeOptionStandard ? stdTime : time) : reducedTime;
+        return window.screen.width > 450 ? (this.standard ? stdTime : time) : reducedTime;
     }
     get items() {
         const arr: number[] = [];

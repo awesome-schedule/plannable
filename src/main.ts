@@ -6,6 +6,7 @@ import { openLousList, openVAGrade } from './utils';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import Catalog, { Semester } from './models/Catalog';
 import Vuetify from 'vuetify';
+import store from './store';
 
 Vue.use(Vuetify);
 
@@ -45,5 +46,6 @@ Vue.prototype.openLousList = openLousList;
 Vue.prototype.openVAGrade = openVAGrade;
 
 new Vue({
+    store,
     render: h => h(App)
 }).$mount('#app');

@@ -7,6 +7,7 @@ import Catalog, { Semester } from './models/Catalog';
 import Vuetify from 'vuetify';
 import store, { RootState } from './store';
 import { Store } from 'vuex';
+import { openLousList, openVAGrade } from './utils';
 
 Vue.use(Vuetify);
 
@@ -22,8 +23,6 @@ declare global {
     }
 }
 
-import { openLousList, openVAGrade } from './utils';
-
 declare module 'vue/types/vue' {
     // Declare augmentation for Vue
     interface Vue {
@@ -32,17 +31,17 @@ declare module 'vue/types/vue' {
     }
 }
 
-// declare module 'vue/types/options' {
-//     interface ComponentOptions<V extends Vue> {
-//         store?: Store<RootState>;
-//     }
-// }
+declare module 'vue/types/options' {
+    interface ComponentOptions<V extends Vue> {
+        store?: Store<RootState>;
+    }
+}
 
-// declare module 'vue/types/vue' {
-//     interface Vue {
-//         $store: Store<RootState>;
-//     }
-// }
+declare module 'vue/types/vue' {
+    interface Vue {
+        $store: Store<RootState>;
+    }
+}
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...

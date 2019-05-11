@@ -1,0 +1,24 @@
+diff --git a/node_modules/vuex/types/vue.d.ts b/node_modules/vuex/types/vue.d.ts
+deleted file mode 100644
+index 302fc4e..0000000
+--- a/node_modules/vuex/types/vue.d.ts
++++ /dev/null
+@@ -1,18 +0,0 @@
+-/**
+- * Extends interfaces in Vue.js
+- */
+-
+-import Vue, { ComponentOptions } from "vue";
+-import { Store } from "./index";
+-
+-declare module "vue/types/options" {
+-  interface ComponentOptions<V extends Vue> {
+-    store?: Store<any>;
+-  }
+-}
+-
+-declare module "vue/types/vue" {
+-  interface Vue {
+-    $store: Store<any>;
+-  }
+-}

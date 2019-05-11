@@ -50,9 +50,6 @@
                             :key="day + _"
                             :schedule-block="scheduleBlock"
                             :height-info="heightInfo"
-                            :full-height="fullHeight"
-                            :show-room="showRoom"
-                            :show-instructor="showInstructor"
                             :absolute-earliest="absoluteEarliest"
                             :style="{
                                 left: (idx + scheduleBlock.left) * 20 + '%',

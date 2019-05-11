@@ -1,9 +1,8 @@
 <template>
     <div id="app w-100" @change="onDocChange">
-        <div>
-            <course-modal :course="modalCourse"></course-modal>
-            <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
-        </div>
+        <course-modal :course="modalCourse"></course-modal>
+        <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
+
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav
             class="d-block bg-light tab-bar"

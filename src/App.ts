@@ -7,6 +7,10 @@
 /**
  *
  */
+import { createDecorator } from 'vue-class-component';
+import { ComputedOptions } from 'vue';
+import displaySettings, { DisplayState, defaultDisplay } from './store/display';
+
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassList from './components/ClassList.vue';
 import Pagination from './components/Pagination.vue';
@@ -39,12 +43,6 @@ import { toICal } from './utils/ICal';
 // otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator();
 // window.catalog = null;
-
-import { createDecorator } from 'vue-class-component';
-import { ComputedOptions } from 'vue';
-import displaySettings, { DisplayState, defaultDisplay } from './store/display';
-
-// const someModule = namespace('./store/DisplaySettings');
 
 export const NoCache = createDecorator((options, key) => {
     // component options should be passed to the callback

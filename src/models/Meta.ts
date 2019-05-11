@@ -167,6 +167,7 @@ export function getDefaultData() {
         allowWaitlist: true,
         allowClosed: true,
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        combineSections: true
+        combineSections: true,
+        multiSelect: true
     } as { [x: string]: any };
 }

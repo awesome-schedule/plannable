@@ -44,15 +44,10 @@ class Display extends VuexModule implements DisplayState {
     public standard = false;
 
     @Mutation
-    _update(newSettings: Partial<DisplayState>) {
+    update(newSettings: Partial<DisplayState>) {
         for (const key in newSettings) {
             this[key] = newSettings[key];
         }
-    }
-
-    @Action({ commit: '_update' })
-    update(newSettings: Partial<DisplayState>) {
-        return newSettings;
     }
 }
 

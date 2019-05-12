@@ -10,6 +10,7 @@
 import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
 import displaySettings, { DisplayState, defaultDisplay } from './store/display';
+(window as any).displaySettings = displaySettings;
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassList from './components/ClassList.vue';
@@ -35,9 +36,10 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadSemesterData } from './data/CatalogLoader';
 import { loadSemesterList } from './data/SemesterListLoader';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
-import { to12hr, savePlain, Notification } from './utils';
+import { to12hr, savePlain } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
 import { toICal } from './utils/ICal';
+import noti from './store/notification';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -125,7 +127,6 @@ export default class App extends Vue {
     sortModes = ScheduleEvaluator.sortModes;
 
     // other
-    noti = new Notification();
     loading = false;
     mobile = window.screen.width < 900;
     sideBarWidth = this.mobile ? 10 : 3;
@@ -177,8 +178,8 @@ export default class App extends Vue {
     @Watch('loading')
     loadingWatch() {
         if (this.mobile) {
-            if (this.loading) this.noti.info('Loading...', 3600);
-            else this.noti.clear();
+            if (this.loading) noti.info('Loading...', 3600);
+            else noti.clear();
         }
     }
 
@@ -216,7 +217,7 @@ export default class App extends Vue {
             if (pay2.payload) window.buildingList = pay2.payload;
 
             const semesters = pay3.payload;
-            if (pay3.level !== 'info') this.noti.notify(pay3);
+            if (pay3.level !== 'info') noti.notify(pay3);
             console[pay3.level](pay3.msg);
 
             if (semesters) {
@@ -225,6 +226,9 @@ export default class App extends Vue {
             }
             this.loading = false;
         })();
+    }
+    clearNoti() {
+        noti.clear();
     }
     /**
      * whether there're schedules generated. Because script between <template>
@@ -348,7 +352,7 @@ export default class App extends Vue {
     removeCourse(key: string) {
         this.currentSchedule.remove(key);
         if (this.generated) {
-            this.noti.warn(`You're editing the generated schedule!`, 3);
+            noti.warn(`You're editing the generated schedule!`, 3);
         } else {
             this.saveStatus();
         }
@@ -359,7 +363,7 @@ export default class App extends Vue {
     updateCourse(key: string, section: number, remove: boolean = false) {
         this.currentSchedule.update(key, section, remove);
         if (this.generated) {
-            this.noti.warn(`You're editing the generated schedule!`, 3);
+            noti.warn(`You're editing the generated schedule!`, 3);
         } else {
             this.saveStatus();
         }
@@ -441,9 +445,9 @@ export default class App extends Vue {
         this.currentSemester = this.semesters[semesterId];
         this.loading = true;
 
-        if (force) this.noti.info(`Updating ${this.currentSemester.name} data...`);
+        if (force) noti.info(`Updating ${this.currentSemester.name} data...`);
         const result = await loadSemesterData(semesterId, force);
-        if (result.level !== 'info') this.noti.notify(result);
+        if (result.level !== 'info') noti.notify(result);
         console[result.level](result.msg);
 
         //  if the a catalog object is returned
@@ -473,7 +477,7 @@ export default class App extends Vue {
         this.generated = false;
 
         if (this.currentSchedule.empty())
-            return this.noti.warn(`There are no classes in your schedule!`);
+            return noti.warn(`There are no classes in your schedule!`);
 
         const status = [];
         if (!this.allowWaitlist) status.push('Wait List');
@@ -483,7 +487,7 @@ export default class App extends Vue {
 
         // null means there's an error processing time filters. Don't continue if that's the case
         if (timeSlots === null) {
-            this.noti.error(`Invalid time filter`);
+            noti.error(`Invalid time filter`);
             return;
         }
 
@@ -503,7 +507,7 @@ export default class App extends Vue {
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;
             this.saveStatus();
-            this.noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
+            noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
             this.cpIndex = this.proposedScheduleIndex;
             this.switchSchedule(true);
             this.loading = false;
@@ -511,7 +515,7 @@ export default class App extends Vue {
             console.warn(err);
             this.generated = false;
             window.scheduleEvaluator.clear();
-            this.noti.error(err.message);
+            noti.error(err.message);
             this.saveStatus();
             this.cpIndex = -1;
             this.loading = false;
@@ -520,13 +524,13 @@ export default class App extends Vue {
 
     validateSortOptions() {
         if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-            this.noti.error('You must have at least one sort option!');
+            noti.error('You must have at least one sort option!');
             return false;
         } else if (
             Object.values(this.sortOptions.sortBy).some(x => x.name === 'distance' && x.enabled) &&
             (!window.buildingList || !window.timeMatrix)
         ) {
-            this.noti.error('Building list fails to load. Please disable "walking distance"');
+            noti.error('Building list fails to load. Please disable "walking distance"');
             return false;
         }
         return true;
@@ -597,7 +601,6 @@ export default class App extends Vue {
 
                         if (propSchedules.length) this.proposedSchedules = propSchedules;
                         else this.proposedSchedules = defaultData.proposedSchedules;
-
                         this.proposedScheduleIndex =
                             raw_data.proposedScheduleIndex === undefined
                                 ? 0
@@ -620,7 +623,7 @@ export default class App extends Vue {
                     const parsed = this[field].fromJSON(raw_data[field]);
                     if (parsed) this[field] = parsed;
                     else {
-                        // this.noti.warn(`Fail to parse ${field}`);
+                        // noti.warn(`Fail to parse ${field}`);
                         // console.warn('failed to parse', field);
                         this[field] = defaultData[field];
                     }
@@ -675,7 +678,7 @@ export default class App extends Vue {
                 isNaN(+endTime[0]) ||
                 isNaN(+endTime[1])
             ) {
-                this.noti.error('Invalid time input.');
+                noti.error('Invalid time input.');
                 return null;
             }
             days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
@@ -685,6 +688,7 @@ export default class App extends Vue {
     }
     onUploadJson(event: { target: EventTarget | null }) {
         const input = event.target as HTMLInputElement;
+
         if (!input.files) return;
 
         const reader = new FileReader();
@@ -696,14 +700,14 @@ export default class App extends Vue {
                     raw_data = JSON.parse(result);
                 } catch (error) {
                     console.error(error);
-                    this.noti.error(error.message + ': File Format Error');
+                    noti.error(error.message + ': File Format Error');
                     return;
                 }
                 localStorage.setItem((this.currentSemester as Semester).id, result);
                 const semester: Semester = raw_data.currentSemester;
                 this.selectSemester(semester.id, raw_data);
             } else {
-                this.noti.warn('File is empty!');
+                noti.warn('File is empty!');
             }
         };
 
@@ -711,7 +715,7 @@ export default class App extends Vue {
             reader.readAsText(input.files[0]);
         } catch (error) {
             console.warn(error);
-            this.noti.error(error.message);
+            noti.error(error.message);
         }
     }
     saveToJson() {

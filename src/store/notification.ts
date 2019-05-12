@@ -56,10 +56,12 @@ class NotiWrapper {
     public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5) {
         if (this.job) window.clearTimeout(this.job);
         if (typeof msg === 'string') {
+            type = TYPES[msg];
             this.noti.set({ msg, type });
             this.clear(timeout);
         } else {
-            this.noti.set({ msg: msg.msg, type: TYPES[msg.level] });
+            type = TYPES[msg.level];
+            this.noti.set({ msg: msg.msg, type });
             this.clear(timeout);
         }
     }

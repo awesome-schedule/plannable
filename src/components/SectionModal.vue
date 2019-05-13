@@ -45,12 +45,15 @@
 
 <script lang="ts">
 import Section from '../models/Section';
-import { Vue, Component, Prop } from 'vue-property-decorator';
 import { Semester } from '../models/Catalog';
-export default class SectionModal extends Vue {
-    @Prop(Object) readonly semester!: Semester;
-    @Prop(Section) readonly section!: Section;
-}
+import Vue from 'vue';
+
+export default Vue.extend({
+    props: {
+        semester: Object as () => Semester,
+        section: Section
+    }
+});
 </script>
 
 <style></style>

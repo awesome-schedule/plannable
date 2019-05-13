@@ -59,52 +59,51 @@ function graphColorBackTrack(
  * @param adjList
  * @return [color array, color order array]
  */
-export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
+export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array, number] {
     const colors = new Int8Array(adjList.length).fill(-1);
 
     // keep track of the ordering
     const colorOrder = new Int8Array(adjList.length);
-    if (!adjList.length) return [colors, colorOrder];
+    if (!adjList.length) return [colors, colorOrder, 0];
 
     // keep track of the saturation
     const saturations = adjList.map(() => new Set<number>());
 
     // first node is just the one of the maximum degree
-    let start = 0,
+    let current = 0,
         maxDegree = -1;
     for (let i = 0; i < adjList.length; i++) {
         const degree = adjList[i].length;
         if (degree > maxDegree) {
             maxDegree = degree;
-            start = i;
+            current = i;
         }
     }
 
-    let neighbors = adjList[start];
+    let neighbors = adjList[current];
     for (const v of neighbors) saturations[v].add(0);
 
-    colors[start] = 0;
-    colorOrder[0] = start;
+    colors[current] = 0;
+    colorOrder[0] = current;
+    let numColors = 0;
 
     for (let i = 1; i < adjList.length; i++) {
-        let nextNode = 0,
-            maxSat = -1;
-
         // find the next node to be colored:
         // find the node of the maximum degree of saturation and break the ties by the degree
+        let maxSat = -1;
         for (let j = 0; j < saturations.length; j++) {
             if (colors[j] === -1) {
                 const sat = saturations[j].size;
                 if (sat > maxSat) {
-                    nextNode = j;
+                    current = j;
                     maxSat = sat;
                 } else if (sat === maxSat) {
-                    if (adjList[j].length > adjList[nextNode].length) nextNode = j;
+                    if (adjList[j].length > adjList[current].length) current = j;
                 }
             }
         }
 
-        neighbors = adjList[nextNode];
+        neighbors = adjList[current];
         for (let color = 0; color < 19260817; color++) {
             let flag = true;
             // find a available color
@@ -116,14 +115,15 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array] {
             }
             if (flag) {
                 // update the saturation degrees of the neighbors
-                colors[nextNode] = color;
-                colorOrder[i] = nextNode;
+                colors[current] = color;
+                if (color > numColors) numColors = color;
+                colorOrder[i] = current;
                 for (const v of neighbors) saturations[v].add(color);
                 break;
             }
         }
     }
-    return [colors, colorOrder];
+    return [colors, colorOrder, numColors + 1];
 }
 
 export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {

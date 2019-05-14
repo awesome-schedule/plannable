@@ -11,8 +11,9 @@ import store from '.';
 
 /**
  * the noti level type corresponds to the three different log levels available in Console
- *
- * [[console.info]] [[console.warn]] [[console.error]]
+ * @see console.info
+ * @see console.warn
+ * @see console.error
  */
 export type NotiLevel = 'info' | 'error' | 'warn';
 /**
@@ -34,12 +35,12 @@ export interface NotiState {
     class: NotiClass;
 }
 
-export const TYPES: { [x: string]: NotiClass } = Object.freeze({
+export const TYPES = Object.freeze({
     info: 'info',
     error: 'danger',
     success: 'success',
     warn: 'warning'
-});
+}) as { [x: string]: NotiClass };
 
 @Module({
     store,

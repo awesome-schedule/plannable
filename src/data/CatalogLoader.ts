@@ -66,7 +66,7 @@ export async function requestSemesterData(semester: Semester): Promise<Catalog> 
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);
-    const catalog = new Catalog(semester, parsed);
+    const catalog = new Catalog(semester, parsed, new Date().toString());
     saveCatalog(catalog);
     return catalog;
 }
@@ -107,6 +107,8 @@ export function parseSemesterData(csv_string: string) {
                 meetings.push(tempMeeting);
             }
         }
+
+        meetings.sort((a, b) => (a[1] === b[1] ? 0 : a[1] < b[1] ? -1 : 1));
 
         const tempSection: RawSection = [
             parseInt(data[0]),

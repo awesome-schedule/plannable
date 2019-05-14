@@ -629,6 +629,9 @@
                     >
                         Update Semester Data
                     </button>
+                    <small class="text-center form-text text-muted">
+                        Last update: {{ lastUpdate }}
+                    </small>
                 </li>
                 <li class="list-group-item">
                     <button class="btn btn-outline-danger w-100" @click="clearCache">

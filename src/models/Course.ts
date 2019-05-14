@@ -7,7 +7,7 @@
  *
  */
 import Section from './Section';
-import Meta, { RawCourse } from './Meta';
+import Meta, { RawCourse, CourseType } from './Meta';
 import Hashable from './Hashable';
 import { hashCode } from '../utils';
 
@@ -24,7 +24,7 @@ export interface CourseFields {
      */
     number: number;
     /**
-     * One of the keys of `Meta.TYPE_PARSE`
+     * One of the keys of `Meta.TYPES_PARSE`
      *
      * @see [[Meta.TYPES_PARSE]]
      */
@@ -54,7 +54,7 @@ export default class Course implements CourseFields, Hashable {
     public key: string;
     public readonly department: string;
     public readonly number: number;
-    public readonly type: string;
+    public readonly type: CourseType;
     public readonly units: string;
     public readonly title: string;
     public readonly description: string;

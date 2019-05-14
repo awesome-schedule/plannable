@@ -21,12 +21,27 @@ export interface RawCatalog {
     [key: string]: RawCourse;
 }
 
+export type CourseType =
+    | 'Clinical'
+    | 'Discussion'
+    | 'Drill'
+    | 'Independent Study'
+    | 'Laboratory'
+    | 'Lecture'
+    | 'Practicum'
+    | 'Seminar'
+    | 'Studio'
+    | 'Workshop'
+    | '';
+
+export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
+
 /**
  * 0: department
  *
  * 1: number
  *
- * 2: type: 0 to 9. Use [[Meta.TYPES_PARSE]] to convert to string like `Lecture`
+ * 2: type: 0 to 9. Use [[Meta.TYPES_PARSE]] to convert `Lecture` like string to number
  *
  * 3: units
  *
@@ -45,7 +60,7 @@ export type RawCourse = [string, number, number, string, string, string, RawSect
  *
  * 2: topic
  *
- * 3: status Use [[Meta.STATUSES_PARSE]] to do parsing
+ * 3: status Use [[Meta.STATUSES_PARSE]] to parse string to number
  *
  * 4: enrollment
  *
@@ -73,7 +88,7 @@ export default class Meta {
     /**
      * lecture type number => meaning
      */
-    public static readonly TYPES: { [x: number]: string } = Object.freeze({
+    public static readonly TYPES: { [x: number]: CourseType } = Object.freeze({
         '-1': '',
         0: 'Clinical',
         1: 'Discussion',
@@ -85,17 +100,17 @@ export default class Meta {
         7: 'Seminar',
         8: 'Studio',
         9: 'Workshop'
-    });
+    }) as { [x: number]: CourseType };
 
     /**
      * status number => meaning
      */
-    public static readonly STATUSES: { [x: number]: string } = Object.freeze({
+    public static readonly STATUSES: { [x: number]: CourseStatus } = Object.freeze({
         '-1': 'TBA',
         1: 'Open',
         0: 'Closed',
         2: 'Wait List'
-    });
+    }) as { [x: number]: CourseStatus };
 
     // maybe do this using enum?
     public static readonly TYPES_PARSE: { [x: string]: number } = Object.freeze({

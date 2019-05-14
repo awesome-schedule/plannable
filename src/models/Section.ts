@@ -7,7 +7,7 @@
  *
  */
 import Course, { CourseFields } from './Course';
-import Meta, { RawSection } from './Meta';
+import Meta, { RawSection, CourseStatus } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
 import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
@@ -59,7 +59,7 @@ export default class Section implements CourseFields, Hashable {
     /**
      * one of "Open", "Closed" and "Wait List"
      */
-    public status: string;
+    public status: CourseStatus;
     public enrollment: number;
     public enrollment_limit: number;
     public wait_list: number;

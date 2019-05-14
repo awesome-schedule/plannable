@@ -39,7 +39,7 @@ export default class Catalog {
      * @returns `null` if data is invalid
      */
     public static fromJSON(data: CatalogJSON) {
-        return new Catalog(data.semester, data.raw_data);
+        return new Catalog(data.semester, data.raw_data, data.modified);
     }
     /**
      * the semester corresponding to the catalog stored in this object
@@ -49,10 +49,12 @@ export default class Catalog {
      * the raw representation of the course catalog
      */
     public raw_data: RawCatalog;
+    public modified: string;
 
-    constructor(semester: Semester, raw_data: RawCatalog) {
+    constructor(semester: Semester, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
         this.raw_data = raw_data;
+        this.modified = modified;
     }
 
     public fromJSON(data: CatalogJSON) {

@@ -144,6 +144,7 @@ export default class App extends Vue {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
     multiSelect: boolean = true;
+    lastUpdate: string = '';
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -451,6 +452,7 @@ export default class App extends Vue {
         //  if the a catalog object is returned
         if (result.payload) {
             window.catalog = result.payload;
+            this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
             const data = localStorage.getItem(this.currentSemester.id);
 
             let raw_data: { [x: string]: any } = {};

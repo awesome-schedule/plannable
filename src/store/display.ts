@@ -1,4 +1,4 @@
-import { Module, VuexModule, Mutation, Action, getModule } from 'vuex-module-decorators';
+import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
 import store from '.';
 
 export interface DisplayState {
@@ -51,4 +51,5 @@ class Display extends VuexModule implements DisplayState {
     }
 }
 
-export default getModule(Display);
+export const display = getModule(Display);
+export default display;

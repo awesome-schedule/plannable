@@ -10,7 +10,7 @@
 import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
 import displaySettings, { DisplayState, defaultDisplay } from './store/display';
-(window as any).displaySettings = displaySettings;
+import { noti } from './store/notification';
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassList from './components/ClassList.vue';
@@ -39,7 +39,6 @@ import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import { to12hr, savePlain } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
 import { toICal } from './utils/ICal';
-import noti from './store/notification';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly

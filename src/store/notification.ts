@@ -9,7 +9,16 @@
 import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
 import store from '.';
 
+/**
+ * the noti level type corresponds to the three different log levels available in Console
+ *
+ * [[console.info]] [[console.warn]] [[console.error]]
+ */
 export type NotiLevel = 'info' | 'error' | 'warn';
+/**
+ * the noti class type corresponds to the bootstrap color classes
+ */
+export type NotiClass = 'info' | 'danger' | 'success' | 'warning' | '';
 
 /**
  * @typeparam T the type of the payload
@@ -22,10 +31,10 @@ export interface NotiMsg<T> {
 
 export interface NotiState {
     msg: string;
-    class: string;
+    class: NotiClass;
 }
 
-export const TYPES: { [x: string]: string } = Object.freeze({
+export const TYPES: { [x: string]: NotiClass } = Object.freeze({
     info: 'info',
     error: 'danger',
     success: 'success',
@@ -39,29 +48,30 @@ export const TYPES: { [x: string]: string } = Object.freeze({
 })
 class Notification extends VuexModule implements NotiState {
     public msg: string = '';
-    public class: string = '';
+    public class: NotiClass = '';
 
     @Mutation
-    public set({ msg, type }: { msg: string; type: string }) {
+    public set({ msg, type }: { msg: string; type: NotiClass }) {
         this.msg = msg;
         this.class = type;
     }
 }
 
+/**
+ * the noti wrapper wraps around the notification store so it is easier to mutate the state of the notification.
+ */
 // tslint:disable-next-line
 class NotiWrapper {
-    public job: number | null = null;
-    private noti = getModule(Notification);
+    public noti = getModule(Notification);
+    private job: number | null = null;
 
     public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5) {
         if (this.job) window.clearTimeout(this.job);
         if (typeof msg === 'string') {
-            type = TYPES[msg];
-            this.noti.set({ msg, type });
+            this.noti.set({ msg, type: TYPES[type] });
             this.clear(timeout);
         } else {
-            type = TYPES[msg.level];
-            this.noti.set({ msg: msg.msg, type });
+            this.noti.set({ msg: msg.msg, type: TYPES[msg.level] });
             this.clear(timeout);
         }
     }
@@ -89,4 +99,5 @@ class NotiWrapper {
     }
 }
 
-export default new NotiWrapper();
+export const noti = new NotiWrapper();
+export default noti;

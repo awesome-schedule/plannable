@@ -10,6 +10,10 @@ export interface RootState {
     noti: NotiState;
 }
 
-export default new Vuex.Store<RootState>({
+// export * from './display';
+// export * from './notification';
+
+export const store = new Vuex.Store<RootState>({
     strict: process.env.NODE_ENV !== 'production'
 });
+export default store;

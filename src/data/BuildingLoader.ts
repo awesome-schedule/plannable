@@ -7,7 +7,7 @@
  *
  */
 import axios from 'axios';
-import { NotiMsg } from '../utils/Notification';
+import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
 

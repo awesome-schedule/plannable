@@ -1,7 +1,8 @@
 <template>
     <div id="app w-100" @change="onDocChange">
-        <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
         <course-modal :course="modalCourse"></course-modal>
+        <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
+
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav
             class="d-block bg-light tab-bar"
@@ -120,7 +121,6 @@
                     :courses="inputCourses"
                     :schedule="currentSchedule"
                     :is-entering="isEntering"
-                    :show-classlist-title="showClasslistTitle"
                     :generated="generated"
                     @update_course="updateCourse"
                     @close="closeClassList"
@@ -210,7 +210,6 @@
                         ref="selectedClassList"
                         :courses="currentSchedule.currentCourses"
                         :schedule="currentSchedule"
-                        :show-classlist-title="showClasslistTitle"
                         :generated="generated"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
@@ -490,7 +489,7 @@
                     <div class="col-lg-6">
                         <input
                             id="schedule-start"
-                            v-model="earliest"
+                            v-model="display.earliest"
                             type="time"
                             class="form-control form-control-sm"
                         />
@@ -504,7 +503,7 @@
                     <div class="col-lg-6">
                         <input
                             id="schedule-end"
-                            v-model="latest"
+                            v-model="display.latest"
                             type="time"
                             class="form-control form-control-sm"
                         />
@@ -515,7 +514,7 @@
                     <div class="col-lg-6">
                         <input
                             id="class-height"
-                            v-model.number="fullHeight"
+                            v-model.number="display.fullHeight"
                             type="number"
                             class="form-control form-control-sm"
                         />
@@ -526,7 +525,7 @@
                     <div class="col-lg-6">
                         <input
                             id="grid-height"
-                            v-model.number="partialHeight"
+                            v-model.number="display.partialHeight"
                             type="number"
                             class="form-control form-control-sm"
                         />
@@ -553,7 +552,7 @@
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayTime"
-                            v-model="showTime"
+                            v-model="display.showTime"
                             type="checkbox"
                             class="custom-control-input"
                         />
@@ -564,7 +563,7 @@
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayRoom"
-                            v-model="showRoom"
+                            v-model="display.showRoom"
                             type="checkbox"
                             class="custom-control-input"
                         />
@@ -575,7 +574,7 @@
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayInstructor"
-                            v-model="showInstructor"
+                            v-model="display.showInstructor"
                             type="checkbox"
                             class="custom-control-input"
                         />
@@ -588,7 +587,7 @@
                     <div class="custom-control custom-checkbox">
                         <input
                             id="displayClasslistTitle"
-                            v-model="showClasslistTitle"
+                            v-model="display.showClasslistTitle"
                             type="checkbox"
                             class="custom-control-input"
                         />
@@ -606,17 +605,17 @@
                     <div class="btn-group my-3 w-100" role="group">
                         <button
                             class="btn btn-secondary"
-                            :class="{ active: standard }"
+                            :class="{ active: display.standard }"
                             type="button"
-                            @click="standard = true"
+                            @click="display.standard = true"
                         >
                             12 Hour
                         </button>
                         <button
                             class="btn btn-secondary"
-                            :class="{ active: !standard }"
+                            :class="{ active: !display.standard }"
                             type="button"
-                            @click="standard = false"
+                            @click="display.standard = false"
                         >
                             24 Hour
                         </button>
@@ -716,19 +715,19 @@
 
         <transition name="fade">
             <div
-                v-if="noti.msg.length > 0"
+                v-if="$store.state.noti.msg.length > 0"
                 id="noti"
                 v-top
                 class="alert mt-1 mb-0"
-                :class="`alert-${noti.class}`"
+                :class="`alert-${$store.state.noti.class}`"
                 :style="
                     `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
                         mobile ? '11' : scheduleLeft + 5
                     }vw;`
                 "
             >
-                {{ noti.msg }}
-                <button type="button" class="close" style="align:center" @click="noti.clear()">
+                {{ $store.state.noti.msg }}
+                <button type="button" class="close" style="align:center" @click="clearNoti">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -755,14 +754,6 @@
             </div>
             <grid-schedule
                 :schedule="currentSchedule"
-                :show-time="showTime"
-                :show-room="showRoom"
-                :show-instructor="showInstructor"
-                :full-height="+fullHeight"
-                :partial-height="+partialHeight"
-                :earliest="earliest"
-                :latest="latest"
-                :time-option-standard="standard"
                 @trigger-modal="showModal"
                 @editEvent="editEvent"
             ></grid-schedule>

@@ -13,7 +13,7 @@
  *
  */
 import Expirable from './Expirable';
-import { NotiMsg } from '../utils/Notification';
+import { NotiMsg } from '../store/notification';
 import { errToStr, timeout } from '../utils';
 
 /**

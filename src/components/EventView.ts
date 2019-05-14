@@ -1,6 +1,5 @@
 /**
  * the component for adding and editing events
- *
  * @author Kaiying Shan, Hanzhi Zhou
  */
 
@@ -12,6 +11,7 @@ import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr, to24hr } from '../utils';
+import noti from '../store/notification';
 
 @Component
 export default class EventView extends Vue {
@@ -49,15 +49,14 @@ export default class EventView extends Vue {
         return days;
     }
     addEvent() {
-        const $parent = this.$parent as any;
         try {
             const days = this.getEventDays();
 
             if (days.startsWith(' ')) {
-                $parent.noti.error('Please select at least one day');
+                noti.error('Please select at least one day');
                 return;
             } else if (days.indexOf('NaN') !== -1) {
-                $parent.noti.error('Please check your start/end time');
+                noti.error('Please check your start/end time');
                 return;
             }
 
@@ -71,7 +70,7 @@ export default class EventView extends Vue {
             // note: we don't need to regenerate schedules if the days property is not changed
             this.cancelEvent(this.toBeModifiedDays !== days);
         } catch (err) {
-            $parent.noti.error(err.message);
+            noti.error(err.message);
         }
     }
     editEvent(event: Event) {

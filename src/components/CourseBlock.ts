@@ -13,18 +13,21 @@ import Course from '../models/Course';
 import Event from '../models/Event';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import { State } from 'vuex-class';
+import { RootState } from '@/store';
 
 @Component
 export default class CourseBlock extends Vue {
     @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;
     @Prop(Array) readonly heightInfo!: number[];
-    @Prop(Number) readonly fullHeight!: number;
-    @Prop(Number) readonly partialHeight!: number;
-    @Prop(Boolean) readonly showTime!: boolean;
-    @Prop(Boolean) readonly showRoom!: boolean;
-    @Prop(Boolean) readonly showInstructor!: boolean;
     @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
+
+    @State((store: RootState) => store.display.showTime) readonly showTime!: boolean;
+    @State((store: RootState) => store.display.showRoom) readonly showRoom!: boolean;
+    @State((store: RootState) => store.display.showInstructor) readonly showInstructor!: boolean;
+    @State((store: RootState) => store.display.partialHeight) readonly partialHeight!: number;
+    @State((store: RootState) => store.display.fullHeight) readonly fullHeight!: number;
 
     mobile = window.screen.width < 450;
 

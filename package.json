@@ -9,7 +9,8 @@
         "test:unit": "vue-cli-service test:unit",
         "test": "vue-cli-service test:unit",
         "update:force": "rm -rf node_modules && rm -f package-lock.json && npm install",
-        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\""
+        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
+        "postinstall": "patch-package"
     },
     "dependencies": {
         "axios": "^0.18",
@@ -23,7 +24,9 @@
         "vue": "^2.6.10",
         "vue-mathjax": "0.0.8",
         "vuedraggable": "^2.20.0",
-        "vuetify": "^1.5.14"
+        "vuetify": "^1.5.14",
+        "vuex": "^3.1.0",
+        "vuex-class": "^0.3.2"
     },
     "devDependencies": {
         "@babel/preset-typescript": "^7.3.3",
@@ -51,12 +54,14 @@
         "eslint-plugin-vue": "^5.0.0",
         "html-webpack-externals-plugin": "^3.8.0",
         "jest": "^24.0.0",
+        "patch-package": "^6.1.2",
         "ts-jest": "^24.0.2",
         "typedoc": "^0.14.2",
         "typedoc-plugin-external-module-name": "^2.0.0",
         "typescript": "^3.4.4",
         "vue-class-component": "^7.0.2",
         "vue-property-decorator": "^8.1.0",
-        "vue-template-compiler": "^2.6.10"
+        "vue-template-compiler": "^2.6.10",
+        "vuex-module-decorators": "^0.9.9"
     }
 }

@@ -1,24 +1,41 @@
-import { Notification } from '../../src/utils';
+import { noti } from '../../src/store/notification';
 
 describe('notification test', () => {
-    it('noti-test', () => {
-        const noti = new Notification();
-        noti.error('asd1');
-        noti.info('asd2');
-        expect(noti.msg).toBe('asd2');
+    it('basic', () => {
+        noti.warn('asd');
+        expect(noti.noti.msg).toBe('asd');
+        expect(noti.noti.class).toBe('warning');
+
+        noti.success('s');
+        expect(noti.noti.msg).toBe('s');
+        expect(noti.noti.class).toBe('success');
+
+        noti.info(';;;');
+        expect(noti.noti.msg).toBe(';;;');
+        expect(noti.noti.class).toBe('info');
+
+        noti.error('.');
+        expect(noti.noti.msg).toBe('.');
+        expect(noti.noti.class).toBe('danger');
+
         noti.notify({
-            msg: 'test',
-            level: 'error'
+            msg: ' ',
+            level: 'info'
         });
-        expect(noti.msg).toBe('test');
+        expect(noti.noti.msg).toBe(' ');
+        expect(noti.noti.class).toBe('info');
     });
 
-    it('noti time', async () => {
-        const noti = new Notification();
-        noti.warn('asd1', 0.6);
-        const _ = await new Promise(accept => {
-            setTimeout(() => accept(), 1000);
+    it('timeout', async () => {
+        noti.error('.');
+        expect(noti.noti.msg).toBe('.');
+        noti.clear(0);
+        expect(noti.noti.msg).toBeFalsy();
+
+        noti.error('.', 0.01);
+        await new Promise(resolve => {
+            setTimeout(() => resolve(), 100);
         });
-        expect(noti.msg).toBe('');
+        expect(noti.noti.msg).toBeFalsy();
     });
 });

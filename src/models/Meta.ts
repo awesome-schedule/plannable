@@ -9,6 +9,7 @@
  */
 import Schedule from './Schedule';
 import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
+import { defaultDisplay } from '@/store/display';
 
 /**
  * the raw catalog is represented as a big dictionary
@@ -152,15 +153,7 @@ export default class Meta {
         'combineSections',
 
         // settings
-        'showTime',
-        'showRoom',
-        'showInstructor',
-        'showClasslistTitle',
-        'fullHeight',
-        'partialHeight',
-        'earliest',
-        'latest',
-        'standard',
+        'display',
         'multiSelect'
     ];
 
@@ -182,22 +175,14 @@ export function getDefaultData() {
         cpIndex: -1,
 
         // display options
-        showTime: false,
-        showRoom: true,
-        showInstructor: true,
-        showClasslistTitle: true,
-        fullHeight: 40,
-        partialHeight: 25,
-        earliest: '08:00:00',
-        latest: '19:00:00',
-        standard: false,
-        multiSelect: true,
+        display: Object.assign({}, defaultDisplay),
 
         // filter options
         timeSlots: [],
         allowWaitlist: true,
         allowClosed: true,
         sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        combineSections: true
+        combineSections: true,
+        multiSelect: true
     } as { [x: string]: any };
 }

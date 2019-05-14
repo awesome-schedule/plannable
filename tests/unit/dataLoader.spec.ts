@@ -15,13 +15,24 @@ describe('Data loader test', () => {
                 }
             }
         }
+
+        await loadTimeMatrix();
+
+        await loadTimeMatrix(true);
     });
 
     it('building list', async () => {
-        const data = await loadBuildingList();
-        const payload = data.payload!;
+        let data = await loadBuildingList();
+        let payload = data.payload!;
         expect(payload).toBeTruthy();
         expect(typeof payload[0]).toBe('string');
+
+        data = await loadBuildingList();
+        payload = data.payload!;
+        expect(payload).toBeTruthy();
+        expect(typeof payload[0]).toBe('string');
+
+        await loadBuildingList(true);
     });
 
     it('semester data', async () => {

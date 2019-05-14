@@ -32,7 +32,7 @@ export interface BuildingListJSON extends Expirable {
  *
  * storage key: "timeMatrix"
  */
-export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
+export async function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>> {
     const data = await loadFromCache<Int32Array, TimeMatrixJSON>(
         'timeMatrix',
         requestTimeMatrix,
@@ -42,7 +42,8 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
             warnMsg: x => `Failed to load time matrix: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load time matrix: ${x}. `,
             expireTime: 1000 * 86400,
-            timeoutTime: 50000
+            timeoutTime: 10000,
+            force
         }
     );
     return data;
@@ -55,7 +56,7 @@ export async function loadTimeMatrix(): Promise<NotiMsg<Int32Array>> {
  *
  * storage key: "buildingList"
  */
-export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
+export async function loadBuildingList(force = false): Promise<NotiMsg<string[]>> {
     const data = await loadFromCache<string[], BuildingListJSON>(
         'buildingList',
         requestBuildingList,
@@ -65,7 +66,8 @@ export async function loadBuildingList(): Promise<NotiMsg<string[]>> {
             warnMsg: x => `Failed to load building list: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load building list: ${x}. `,
             expireTime: 1000 * 86400,
-            timeoutTime: 50000
+            timeoutTime: 10000,
+            force
         }
     );
     return data;

@@ -65,7 +65,7 @@ export default class Catalog {
         return {
             semester: this.semester,
             raw_data: this.raw_data,
-            modified: new Date().toJSON()
+            modified: this.modified
         };
     }
 

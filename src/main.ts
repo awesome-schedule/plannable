@@ -1,3 +1,11 @@
+/**
+ * @license GPL-v3
+ * (c) Hanzhi Zhou, Kaiying Shan, Zichao Hu
+ */
+
+/**
+ *
+ */
 import Vue from 'vue';
 import App from './App.vue';
 import querystring from 'querystring';

@@ -18,7 +18,7 @@ export const defaultDisplay: DisplayState = Object.freeze({
     showTime: false,
     showRoom: true,
     showInstructor: true,
-    showClasslistTitle: false,
+    showClasslistTitle: true,
     fullHeight: 40,
     partialHeight: 25,
     earliest: '08:00:00',
@@ -36,7 +36,7 @@ class Display extends VuexModule implements DisplayState {
     public showTime = false;
     public showRoom = true;
     public showInstructor = true;
-    public showClasslistTitle = false;
+    public showClasslistTitle = true;
     public fullHeight = 40;
     public partialHeight = 25;
     public earliest = '08:00:00';

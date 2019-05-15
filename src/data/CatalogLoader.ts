@@ -53,16 +53,18 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: Semester): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await axios.post(
-        `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
-        querystring.stringify({
-            Semester: semester.id,
-            Group: 'CS',
-            Description: 'Yes',
-            submit: 'Submit Data Request',
-            Extended: 'Yes'
-        })
-    );
+    const res = await (window.location.host.indexOf('plannable.gitee.io') === -1
+        ? axios.post(
+              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
+              querystring.stringify({
+                  Semester: semester.id,
+                  Group: 'CS',
+                  Description: 'Yes',
+                  submit: 'Submit Data Request',
+                  Extended: 'Yes'
+              })
+          )
+        : axios.get(`https://plannable.gitee.io/data/Semester%20Data/CS${semester.id}Data.csv`));
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);

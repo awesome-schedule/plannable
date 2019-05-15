@@ -53,7 +53,7 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: Semester): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host.indexOf('plannable.gitee.io') === -1
+    const res = await (window.location.host.indexOf('cn.plannable.org') === -1
         ? axios.post(
               `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
               querystring.stringify({

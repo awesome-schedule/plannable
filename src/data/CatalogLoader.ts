@@ -64,7 +64,7 @@ export async function requestSemesterData(semester: Semester): Promise<Catalog> 
                   Extended: 'Yes'
               })
           )
-        : axios.get(`https://plannable.gitee.io/data/Semester%20Data/CS${semester.id}Data.csv`));
+        : axios.get(`https://cn.plannable.org/data/Semester%20Data/CS${semester.id}Data.csv`));
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);

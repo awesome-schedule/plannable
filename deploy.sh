@@ -39,8 +39,10 @@ cd ..
 # Run our compile script
 doCompile
 
+# copy some config files for github pages
 cp public/.gitattributes out/
 cp public/.nojekyll out/
+cp public/CNAME out/
 
 # copy to out
 cp -rf dist/* out/

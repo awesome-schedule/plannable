@@ -14,7 +14,8 @@ import Event from '../models/Event';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { State } from 'vuex-class';
-import { RootState } from '@/store';
+import { RootState } from '../store';
+import modal from '../store/modal';
 
 @Component
 export default class CourseBlock extends Vue {
@@ -84,14 +85,13 @@ export default class CourseBlock extends Vue {
     }
 
     showModal() {
-        const $parent = this.$parent as any;
         const section = this.scheduleBlock.section;
         if (this.isSection) {
-            $parent.$emit('trigger-modal', section);
+            modal.showSectionModal(section as Section);
         } else if (this.isCourse) {
-            $parent.$parent.showCourseModal(section);
+            modal.showCourseModal(section as Course);
         } else if (this.isEvent) {
-            $parent.$emit('editEvent', section);
+            this.$parent.$emit('editEvent', section);
         }
     }
 }

@@ -45,7 +45,7 @@
                                 class="fas fa-info-circle click-icon"
                                 :class="{ 'pr-2': !showClasslistTitle }"
                                 title="View class description"
-                                @click="$emit('trigger-classlist-modal', crs)"
+                                @click="showCourseModal(crs)"
                             ></i>
                             <br v-if="showClasslistTitle" />
                             <i

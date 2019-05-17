@@ -12,6 +12,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <div v-if="section.topic" style="color:#a0a0a0">{{ section.topic }}</div>
                     <div style="color:#a0a0a0">{{ section.type }} | {{ section.units }} units</div>
                     <div style="color:#a0a0a0">{{ section.instructors.join(', ') }}</div>
                     <div
@@ -26,7 +27,7 @@
                     </div>
                     <br />
                     <div>{{ section.description }}</div>
-                    <div v-if="semester !== null" class="mt-2">
+                    <div v-if="semester" class="mt-2">
                         <button
                             class="btn btn-outline-info mr-2"
                             @click="openLousList(semester.id, section.id)"
@@ -44,14 +45,18 @@
 </template>
 
 <script lang="ts">
-import Section from '../models/Section';
 import { Semester } from '../models/Catalog';
 import Vue from 'vue';
+import modal from '../store/modal';
 
 export default Vue.extend({
     props: {
-        semester: Object as () => Semester,
-        section: Section
+        semester: Object as () => Semester
+    },
+    computed: {
+        section() {
+            return modal.modalSection;
+        }
     }
 });
 </script>

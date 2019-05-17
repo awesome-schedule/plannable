@@ -51,10 +51,12 @@
 </template>
 
 <script>
-import Course from '../models/Course';
+import modal from '../store/modal';
 export default {
-    props: {
-        course: Course
+    computed: {
+        course() {
+            return modal.modalCourse;
+        }
     }
 };
 </script>

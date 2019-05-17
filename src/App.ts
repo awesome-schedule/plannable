@@ -103,10 +103,6 @@ export default class App extends Vue {
     isEntering = false;
     inputCourses: Course[] | null = null;
 
-    // modal object binding
-    modalSection: Section | null = null;
-    modalCourse: Course | null = null;
-
     // display options
     display: DisplayState = Object.assign({}, defaultDisplay);
 
@@ -136,7 +132,6 @@ export default class App extends Vue {
     eventToEdit: Event | null = null;
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
-    multiSelect: boolean = true;
     lastUpdate: string = '';
 
     get sideBarActive() {
@@ -183,14 +178,8 @@ export default class App extends Vue {
         }
     }
 
-    @Watch('multiSelect')
-    multiSelectWatch() {
-        Schedule.options.multiSelect = this.multiSelect;
-        this.currentSchedule.computeSchedule();
-    }
-
     @Watch('combineSections')
-    combineSectionWatch() {
+    combineSectionsWatch() {
         Schedule.options.combineSections = this.combineSections;
         this.currentSchedule.computeSchedule();
     }
@@ -198,6 +187,12 @@ export default class App extends Vue {
     @Watch('display', { deep: true })
     displayWatch() {
         displaySettings.update(this.display);
+    }
+
+    @Watch('display.multiSelect')
+    multiSelectWatch() {
+        Schedule.options.multiSelect = this.display.multiSelect;
+        this.currentSchedule.computeSchedule();
     }
 
     created() {
@@ -341,14 +336,7 @@ export default class App extends Vue {
             this.cpIndex = -1;
         }
     }
-    showModal(section: Section) {
-        this.modalSection = section;
-        $('#modal').modal();
-    }
-    showCourseModal(course: Course) {
-        this.modalCourse = course;
-        $('#course-modal').modal();
-    }
+
     removeCourse(key: string) {
         this.currentSchedule.remove(key);
         if (this.generated) {

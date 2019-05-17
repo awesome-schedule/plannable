@@ -1,7 +1,7 @@
 <template>
     <div id="app w-100" @change="onDocChange">
-        <course-modal :course="modalCourse"></course-modal>
-        <section-modal :semester="currentSemester" :section="modalSection"></section-modal>
+        <course-modal></course-modal>
+        <section-modal :semester="currentSemester"></section-modal>
 
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav
@@ -124,7 +124,6 @@
                     :generated="generated"
                     @update_course="updateCourse"
                     @close="closeClassList"
-                    @trigger-classlist-modal="showCourseModal"
                 ></ClassList>
             </div>
             <div>
@@ -213,7 +212,6 @@
                         :generated="generated"
                         @update_course="updateCourse"
                         @remove_course="removeCourse"
-                        @trigger-classlist-modal="showCourseModal"
                     ></ClassList>
                     <div class="btn-group mt-3 w-100">
                         <button
@@ -237,7 +235,7 @@
                     >
                         <input
                             id="multiSelect"
-                            v-model="multiSelect"
+                            v-model="display.multiSelect"
                             type="checkbox"
                             class="custom-control-input"
                         />
@@ -752,11 +750,7 @@
                     </div>
                 </div>
             </div>
-            <grid-schedule
-                :schedule="currentSchedule"
-                @trigger-modal="showModal"
-                @editEvent="editEvent"
-            ></grid-schedule>
+            <grid-schedule :schedule="currentSchedule" @editEvent="editEvent"></grid-schedule>
             <v-footer id="app-footer" dark height="auto">
                 <v-card class="flex" flat tile>
                     <v-card-title class="teal">

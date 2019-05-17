@@ -15,7 +15,8 @@ import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 import Course from '../models/Course';
 import { State } from 'vuex-class';
-import { RootState } from '@/store';
+import { RootState } from '../store';
+import modal from '../store/modal';
 
 @Component({
     components: {
@@ -84,5 +85,8 @@ export default class ClassList extends Vue {
     }
     removePreview() {
         this.schedule.removePreview();
+    }
+    showCourseModal(course: Course) {
+        modal.showCourseModal(course);
     }
 }

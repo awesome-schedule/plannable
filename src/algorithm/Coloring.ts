@@ -29,7 +29,10 @@ function graphColorBackTrack(
     v: number
 ) {
     if (v === graph.length) return true;
-    if (opCount[0]++ > 200000) return false;
+    if (opCount[0]++ > 100000) {
+        // console.warn('break at', numColors);
+        return false;
+    }
     const vertex = colorOrder[v];
     const neighbors = graph[vertex];
     const len = neighbors.length;

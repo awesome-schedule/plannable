@@ -153,8 +153,7 @@ export default class Meta {
         'combineSections',
 
         // settings
-        'display',
-        'multiSelect'
+        'display'
     ];
 
     public static readonly semesterListExpirationTime = 86400 * 1000; // one day

@@ -2,6 +2,8 @@ import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators'
 import store from '.';
 import Section from '../models/Section';
 import Course from '../models/Course';
+import $ from 'jquery';
+import 'bootstrap';
 
 export interface ModalState {
     modalSection: Section | null;

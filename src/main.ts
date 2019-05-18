@@ -1,6 +1,5 @@
 /**
- * @license GPL-v3
- * (c) Hanzhi Zhou, Kaiying Shan, Zichao Hu
+ * the entry point of our project
  */
 
 /**
@@ -8,7 +7,6 @@
  */
 import Vue from 'vue';
 import App from './App.vue';
-import AppClass from './App';
 import querystring from 'querystring';
 import axios from 'axios';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';

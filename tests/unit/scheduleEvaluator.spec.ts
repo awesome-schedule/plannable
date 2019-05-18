@@ -84,8 +84,9 @@ describe('Schedule Evaluator Test', () => {
         expect(sortOption.sortBy[0].enabled).toBe(false);
         expect(sortOption.sortBy[0].reverse).toBe(true);
         expect(sortOption.mode).toBe(1);
+        const optionDefaults = ScheduleEvaluator.getDefaultOptions();
         for (let i = 1; i < sortOption.sortBy.length; i++) {
-            expect(sortOption.sortBy[i]).toEqual(ScheduleEvaluator.optionDefaults.sortBy[i]);
+            expect(sortOption.sortBy[i]).toEqual(optionDefaults.sortBy[i]);
         }
     });
 });

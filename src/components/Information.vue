@@ -3,30 +3,30 @@
         <nav id="navbar-scrollspy" class="navbar d-block navbar-light bg-light sidebar">
             <a class="navbar-brand" href="#">Website Guide</a>
             <nav class="nav nav-pills flex-column">
-                <a class="nav-link py-1" href="#item-1">Introduction</a>
-                <a class="nav-link py-1" href="#item-2">Basic Operations</a>
+                <a class="nav-link" href="#item-1">Introduction</a>
+                <a class="nav-link" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-1">Schedule Manipulation</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Enroll in SIS</a>
                 </nav>
-                <a class="nav-link py-1" href="#item-3">Add Event</a>
-                <a class="nav-link py-1" href="#item-4">Filters</a>
+                <a class="nav-link" href="#item-3">Add Event</a>
+                <a class="nav-link" href="#item-4">Filters</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-1">No Class Time</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-2">Allow Waitlist/Closed</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort</a>
                 </nav>
                 <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
-                <a class="nav-link py-1" href="#item-6">Customize Colors</a>
-                <a class="nav-link py-1" href="#item-7">Export</a>
+                <a class="nav-link" href="#item-6">Customize Colors</a>
+                <a class="nav-link" href="#item-7">Export</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-7-1">Export to iCalendar</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-7-2">Export to JSON</a>
                 </nav>
-                <a class="nav-link py-1" href="#item-8">Authors</a>
-                <a class="nav-link py-1" href="#item-9">Contributing</a>
-                <a class="nav-link py-1" href="#item-10">Disclaimer</a>
-                <a class="nav-link py-1" href="#item-11">Appendix</a>
+                <a class="nav-link" href="#item-8">Authors</a>
+                <a class="nav-link" href="#item-9">Contributing</a>
+                <a class="nav-link" href="#item-10">Disclaimer</a>
+                <a class="nav-link" href="#item-11">Appendix</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-11-1">Sort</a>
                 </nav>

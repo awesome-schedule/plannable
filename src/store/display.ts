@@ -21,6 +21,8 @@ export interface DisplayState {
     latest: string;
     standard: boolean;
     multiSelect: boolean;
+    combineSections: boolean;
+    maxNumSchedules: number;
 }
 
 export const defaultDisplay: DisplayState = Object.freeze({
@@ -33,7 +35,9 @@ export const defaultDisplay: DisplayState = Object.freeze({
     earliest: '08:00:00',
     latest: '19:00:00',
     standard: false,
-    multiSelect: true
+    multiSelect: true,
+    combineSections: true,
+    maxNumSchedules: 200000
 });
 
 @Module({
@@ -53,6 +57,8 @@ class Display extends VuexModule implements DisplayState {
     public latest = '19:00:00';
     public standard = false;
     public multiSelect = true;
+    public combineSections = true;
+    public maxNumSchedules = 200000;
 
     @Mutation
     update(newSettings: Partial<DisplayState>) {

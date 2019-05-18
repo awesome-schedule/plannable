@@ -370,11 +370,7 @@
                 <draggable
                     v-model="sortOptions.sortBy"
                     handle=".drag-handle"
-                    @start="drag = true"
-                    @end="
-                        drag = false;
-                        if (sortOptions.mode == 0) changeSorting(undefined);
-                    "
+                    @end="if (sortOptions.mode == 0) changeSorting(undefined);"
                 >
                     <div
                         v-for="(option, optIdx) in sortOptions.sortBy"
@@ -446,7 +442,7 @@
                         <label for="num-schedule">Max number of schedules</label>
                         <input
                             id="num-schedule"
-                            v-model.number="maxNumSchedules"
+                            v-model.number="display.maxNumSchedules"
                             type="number"
                             class="form-control"
                         />
@@ -462,7 +458,7 @@
                     >
                         <input
                             id="comb-sec"
-                            v-model="combineSections"
+                            v-model="display.combineSections"
                             type="checkbox"
                             class="custom-control-input"
                         />
@@ -474,7 +470,7 @@
 
         <nav v-else-if="sideBar.showSetting" class="d-block bg-light sidebar">
             <div class="btn bg-info nav-btn">
-                Schedule Display settings
+                Schedule Display Settings
             </div>
             <form class="mx-2">
                 <div
@@ -518,7 +514,10 @@
                         />
                     </div>
                 </div>
-                <div class="form-group row no-gutters mb-3" title="height of a class on schedule">
+                <div
+                    class="form-group row no-gutters mb-3"
+                    title="height of an empty cell. You can specify a smaller value to compress empty space"
+                >
                     <label for="grid-height" class="col-lg-6 col-form-label">Grid Height</label>
                     <div class="col-lg-6">
                         <input

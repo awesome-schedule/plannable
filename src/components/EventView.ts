@@ -12,6 +12,7 @@ import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr, to24hr } from '../utils';
 import noti from '../store/notification';
+import App from '../App';
 
 @Component
 export default class EventView extends Vue {
@@ -28,6 +29,7 @@ export default class EventView extends Vue {
     isEditingEvent = false;
     days = Meta.days;
     toBeModifiedDays = '';
+    $parent!: App;
 
     mounted() {
         this.$watch(
@@ -116,8 +118,8 @@ export default class EventView extends Vue {
         this.eventTimeTo = '';
         this.eventDescription = '';
         this.isEditingEvent = false;
-        this.$root.eventToEdit = null;
-        if (regenerate) this.$root.generateSchedules();
-        else this.$root.currentSchedule.computeSchedule();
+        this.$parent.eventToEdit = null;
+        if (regenerate) this.$parent.generateSchedules();
+        else this.$parent.currentSchedule.computeSchedule();
     }
 }

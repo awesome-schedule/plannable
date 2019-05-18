@@ -91,7 +91,6 @@ export default class App extends Vue {
      * indicates whether the currently showing schedule is the generated schedule
      */
     generated = false;
-    maxNumSchedules = 200000;
 
     /**
      * sidebar display status
@@ -126,7 +125,6 @@ export default class App extends Vue {
     timeSlots: Array<[boolean, boolean, boolean, boolean, boolean, string, string]> = [];
     allowWaitlist = true;
     allowClosed = true;
-    combineSections = true;
     sortOptions = ScheduleEvaluator.getDefaultOptions();
     sortModes = ScheduleEvaluator.sortModes;
 
@@ -136,7 +134,6 @@ export default class App extends Vue {
     sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
     tempScheduleIndex: number | null = null;
-    drag = false;
     days = Meta.days;
     eventToEdit: Event | null = null;
     exportJson: string = 'schedule';
@@ -187,12 +184,6 @@ export default class App extends Vue {
         }
     }
 
-    @Watch('combineSections')
-    combineSectionsWatch() {
-        Schedule.options.combineSections = this.combineSections;
-        this.currentSchedule.computeSchedule();
-    }
-
     @Watch('display', { deep: true })
     displayWatch() {
         displaySettings.update(this.display);
@@ -200,7 +191,12 @@ export default class App extends Vue {
 
     @Watch('display.multiSelect')
     multiSelectWatch() {
-        Schedule.options.multiSelect = this.display.multiSelect;
+        this.currentSchedule.computeSchedule();
+    }
+
+    @Watch('display.combineSections')
+    combineSectionsWatch() {
+        if (this.generated) this.generateSchedules();
         this.currentSchedule.computeSchedule();
     }
 
@@ -500,7 +496,7 @@ export default class App extends Vue {
                 status,
                 sortOptions: this.sortOptions,
                 combineSections: this.combineSections,
-                maxNumSchedules: this.maxNumSchedules
+                maxNumSchedules: this.display.maxNumSchedules
             });
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;

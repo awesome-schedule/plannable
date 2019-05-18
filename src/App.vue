@@ -100,7 +100,7 @@
                     ref="classSearch"
                     type="text"
                     class="form-control form-control-sm"
-                    placeholder="Title/Number/Topic/Professor"
+                    placeholder="Title/Number/Topic/Prof./Desc."
                     @input="getClass($event.target.value)"
                     @keyup.esc="closeClassList"
                 />

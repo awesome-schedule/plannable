@@ -177,7 +177,7 @@ export default class Schedule {
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
-        this.computeSchedule();
+        this._computeSchedule();
     }
 
     /**

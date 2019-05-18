@@ -70,8 +70,8 @@
                                 <div>
                                     You can add courses by
                                     <font class="amber lighten-3">searching</font> department,
-                                    professor, class number, or keywords . Pick a section or
-                                    multiple sections that you want to take, or choose "<font
+                                    professor, class number, or keywords. Pick a section or multiple
+                                    sections that you want to take, or choose "<font
                                         class="amber lighten-3"
                                         >any section</font
                                     >" if you don't have a particular preference. To clear your

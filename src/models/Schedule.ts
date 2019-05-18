@@ -530,6 +530,12 @@ export default class Schedule {
             // const [colors, _] = dsatur(fastGraph);
 
             console.time('color dfs');
+            // for (let i = 0; i < blocks.length; i++) {
+            //     const block = blocks[i];
+            //     const color = colors[i];
+            //     block.left = color / _;
+            //     block.width = 1 / _;
+            // }
             this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
             console.timeEnd('color dfs');
         }

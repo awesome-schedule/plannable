@@ -12,7 +12,7 @@ export interface ModalState {
 
 @Module({
     store,
-    name: 'display',
+    name: 'modal',
     dynamic: true
 })
 class Modal extends VuexModule implements ModalState {

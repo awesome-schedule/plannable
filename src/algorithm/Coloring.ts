@@ -129,6 +129,12 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array, number] {
     return [colors, colorOrder, numColors + 1];
 }
 
+/**
+ * the entry point of the backtrack graph coloring
+ * @see [[graphColorBackTrack]]
+ * @param adjList
+ * @returns [colors, total number of colors]
+ */
 export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {
     // get a good initial color order using the DSATUR algorithm
     const [colors, dsaturOrder] = dsatur(adjList);

@@ -138,59 +138,6 @@
             <v-card class="my-3" style="width:85%;margin:auto auto;">
                 <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
             </v-card>
-            <!-- picture slides illustration -->
-
-            <!-- <v-stepper v-model="e1" class="my-5" style="width:60vw;margin:auto auto">
-                <v-stepper-header>
-                    <v-stepper-step :complete="e1 > 1" step="1" color="blue-grey "
-                        >Name of step 1
-                    </v-stepper-step>
-
-                    <v-divider></v-divider>
-
-                    <v-stepper-step :complete="e1 > 2" step="2" color="blue-grey "
-                        >Name of step 2
-                    </v-stepper-step>
-
-                    <v-divider></v-divider>
-
-                    <v-stepper-step :complete="e1 > 3" step="3" color="blue-grey "
-                        >Name of step 3
-                    </v-stepper-step>
-                </v-stepper-header>
-
-                <v-stepper-items>
-                    <v-stepper-content step="1">
-                        <v-card class="mb-5" width="54vw" style="margin:auto auto">
-                            <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
-                        </v-card>
-
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 2">
-                            Continue
-                        </v-btn>
-                    </v-stepper-content>
-
-                    <v-stepper-content step="2">
-                        <v-card class="mb-5" width="54vw" style="margin:auto auto">
-                            <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
-                        </v-card>
-
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 3">
-                            Continue
-                        </v-btn>
-                    </v-stepper-content>
-
-                    <v-stepper-content step="3">
-                        <v-card class="mb-5" width="54vw" style="margin:auto auto">
-                            <v-img :src="imgPath('placeholder.png')" aspect-ratio="1.7778"></v-img>
-                        </v-card>
-
-                        <v-btn color="blue-grey" style="color:white" @click="e1 = 1"
-                            >Play Again</v-btn
-                        >
-                    </v-stepper-content>
-                </v-stepper-items>
-            </v-stepper> -->
 
             <h3 id="item-3">Add Event</h3>
             <hr />

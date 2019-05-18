@@ -1,3 +1,11 @@
+/**
+ * the display module handles global display options
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
 import store from '.';
 

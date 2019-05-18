@@ -1,5 +1,5 @@
 /**
- * the notification class encapsulates common functions used to inform user about the results of certain actions
+ * the notification modules encapsulates common functions used to inform user about the results of certain actions
  * @author Hanzhi Zhou
  */
 
@@ -35,6 +35,9 @@ export interface NotiState {
     class: NotiClass;
 }
 
+/**
+ * the mapping from notification levels to bootstrap css classes
+ */
 export const TYPES = Object.freeze({
     info: 'info',
     error: 'danger',

@@ -10,11 +10,15 @@
 
 A website which helps UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters and sorting options. Once you've finalized your class selection, hit "Generate" button and get all the possible schedules satisfying to your requirements.
 
-## Demo
+## Website
 
-[https://awesome-schedule.github.io/](https://awesome-schedule.github.io/)
+https://plannable.org/
 
-Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load.
+Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load and store it in browser cache.
+
+## Mirror
+
+To facilitate access in China, we provide a mirror: https://cn.plannable.org/. It is synchronized with https://plannable.org/ once per hour.
 
 ## Development
 
@@ -40,6 +44,7 @@ Install Vue cli and other dependencies. Then, launch the development server
 ```bash
 npm install -g @vue/cli
 npm install
+patch-package # for better type safety, we need to patch some type definitions
 npm run serve
 ```
 

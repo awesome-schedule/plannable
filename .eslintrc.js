@@ -9,11 +9,9 @@ module.exports = {
     rules: {
         'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
         'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-        'no-console': 'off',
         'prefer-const': 'error',
         'vue/require-default-prop': 'off',
         'no-var': 'error',
-        'vue/no-use-v-if-with-v-for': 'off',
         'vue/no-v-html': 'off'
     },
     parserOptions: {

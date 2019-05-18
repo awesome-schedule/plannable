@@ -40,8 +40,6 @@
                             }"
                         >
                             <i
-                                data-toggle="modal"
-                                data-target="#class-list-modal"
                                 class="fas fa-info-circle click-icon"
                                 :class="{ 'pr-2': !showClasslistTitle }"
                                 title="View class description"

@@ -66,10 +66,22 @@ export default class App extends Vue {
     [x: string]: any;
     semesters: Semester[] = [];
     currentSemester: Semester | null = null;
+    /**
+     * the index of the current schedule in the scheduleEvaluator.schedules array,
+     * only applicable when generated=true
+     */
     currentScheduleIndex = 0;
+    /**
+     * currently rendered schedule
+     */
     currentSchedule = new Schedule();
-
+    /**
+     * the array of proposed schedules
+     */
     proposedSchedules = [new Schedule()];
+    /**
+     * the index of the active proposed
+     */
     proposedScheduleIndex = 0;
     /**
      * The index of the proposed schedule corresponding to the generated schedule

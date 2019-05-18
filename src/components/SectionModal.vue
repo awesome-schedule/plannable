@@ -1,5 +1,5 @@
 <template>
-    <div id="modal" class="modal fade" tabindex="-1" role="dialog">
+    <div id="section-modal" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div v-if="section" class="modal-content">
                 <div class="modal-header">

@@ -98,85 +98,6 @@ export interface SortOptions {
 }
 
 class ScheduleEvaluator {
-    public static readonly optionDefaults: SortOptions = {
-        sortBy: [
-            {
-                name: 'distance',
-                enabled: true,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Walking Distance',
-                description: 'Avoid long distance walking between classes'
-            },
-            {
-                name: 'variance',
-                enabled: true,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Variance',
-                description: 'Balance the class time each day'
-            },
-            {
-                name: 'compactness',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Vertical compactness',
-                description: 'Make classes back-to-back'
-            },
-            {
-                name: 'lunchTime',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Lunch Time',
-                description: 'Leave spaces for lunch'
-            },
-            {
-                name: 'noEarly',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'No Early',
-                description: 'Start my day as late as possible'
-            },
-            {
-                name: 'IamFeelingLucky',
-                enabled: false,
-                reverse: false,
-                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
-                title: `I'm Feeling Lucky`,
-                description: 'Sort randomly'
-            }
-        ],
-        mode: Mode.combined,
-        toJSON() {
-            return {
-                sortBy: this.sortBy.map(x => ({
-                    name: x.name,
-                    enabled: x.enabled,
-                    reverse: x.reverse
-                })),
-                mode: this.mode
-            };
-        },
-        fromJSON(raw: SortOptionJSON) {
-            if (raw && raw.mode !== undefined && raw.sortBy) {
-                this.mode = raw.mode;
-                for (const raw_sort of raw.sortBy) {
-                    for (const sort of this.sortBy) {
-                        if (sort.name === raw_sort.name) {
-                            sort.enabled = raw_sort.enabled;
-                            sort.reverse = raw_sort.reverse;
-                            break;
-                        }
-                    }
-                }
-            }
-            return this;
-        }
-    };
-
     public static readonly sortModes: SortMode[] = [
         {
             mode: Mode.combined,
@@ -305,6 +226,9 @@ class ScheduleEvaluator {
         }
     };
 
+    /**
+     * get a copy of the default options
+     */
     public static getDefaultOptions() {
         const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
         options.sortBy = options.sortBy.map(x => Object.assign({}, x));
@@ -320,9 +244,90 @@ class ScheduleEvaluator {
         return options;
     }
 
-    public options: SortOptions;
-    public events: Event[];
+    private static readonly optionDefaults: SortOptions = {
+        sortBy: [
+            {
+                name: 'distance',
+                enabled: true,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Walking Distance',
+                description: 'Avoid long distance walking between classes'
+            },
+            {
+                name: 'variance',
+                enabled: true,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Variance',
+                description: 'Balance the class time each day'
+            },
+            {
+                name: 'compactness',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Vertical compactness',
+                description: 'Make classes back-to-back'
+            },
+            {
+                name: 'lunchTime',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'Lunch Time',
+                description: 'Leave spaces for lunch'
+            },
+            {
+                name: 'noEarly',
+                enabled: false,
+                reverse: false,
+                exclusive: ['IamFeelingLucky'],
+                title: 'No Early',
+                description: 'Start my day as late as possible'
+            },
+            {
+                name: 'IamFeelingLucky',
+                enabled: false,
+                reverse: false,
+                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
+                title: `I'm Feeling Lucky`,
+                description: 'Sort randomly'
+            }
+        ],
+        mode: Mode.combined,
+        toJSON() {
+            return {
+                sortBy: this.sortBy.map(x => ({
+                    name: x.name,
+                    enabled: x.enabled,
+                    reverse: x.reverse
+                })),
+                mode: this.mode
+            };
+        },
+        fromJSON(raw: SortOptionJSON) {
+            if (raw && raw.mode !== undefined && raw.sortBy) {
+                this.mode = raw.mode;
+                for (const raw_sort of raw.sortBy) {
+                    for (const sort of this.sortBy) {
+                        if (sort.name === raw_sort.name) {
+                            sort.enabled = raw_sort.enabled;
+                            sort.reverse = raw_sort.reverse;
+                            break;
+                        }
+                    }
+                }
+            }
+            return this;
+        }
+    };
 
+    public options: SortOptions;
+    /**
+     * the array of events kept, use to construct generated schedules
+     */
+    public events: Event[];
     /**
      * _schedules keeps the schedules in insertion order,
      * so that we can cache the sorting coefficient of each schedule
@@ -349,10 +354,7 @@ class ScheduleEvaluator {
      * Group the time blocks and sort them in order.
      *
      * @remarks insertion sort is used as there are not many elements in each day array.
-     *
-     * @remarks This method has a pretty high performance overhead.
-     * It will have a even higher overhead if the meeting room for each section is fetched and ordered,
-     * which is necessary to compute the total walking distance.
+     * @remarks This method has a high performance overhead.
      */
     public add(schedule: RawAlgoSchedule) {
         const days = Meta.days;
@@ -452,65 +454,65 @@ class ScheduleEvaluator {
         const [count, lastIdx] = this.countSortOpt();
         const schedules = this._schedules;
 
+        // if there's only one option enabled, just compute coefficients for it and
+        // assign to the .coeff field for each schedule
+        if (count === 1) {
+            this.computeCoeffFor(this.options.sortBy[lastIdx].name, true);
+            return;
+        }
+
         if (this.options.mode === Mode.fallback) {
             console.time('precomputing coefficients');
-            if (count === 1) {
-                this.computeCoeffFor(this.options.sortBy[lastIdx].name, true);
-            } else {
-                this.options.sortBy
-                    .filter(x => x.enabled)
-                    .forEach(x => {
-                        this.computeCoeffFor(x.name, false);
-                    });
-            }
+            this.options.sortBy
+                .filter(x => x.enabled)
+                .forEach(x => {
+                    this.computeCoeffFor(x.name, false);
+                });
+
             console.timeEnd('precomputing coefficients');
         } else {
-            if (count === 1) {
-                this.computeCoeffFor(this.options.sortBy[lastIdx].name, true);
-            } else {
-                console.time('normalizing coefficients');
+            console.time('normalizing coefficients');
 
-                const options = this.options.sortBy.filter(x => x.enabled);
-                const len = schedules.length;
-                const coeffs = new Float32Array(len);
+            const options = this.options.sortBy.filter(x => x.enabled);
+            const len = schedules.length;
+            const coeffs = new Float32Array(len);
 
-                // finding the minimum and maximum is quite fast for 1e6 elements, so not cached.
-                for (const option of options) {
-                    const coeff = this.computeCoeffFor(option.name, false);
+            // finding the minimum and maximum is quite fast for 1e6 elements, so not cached.
+            for (const option of options) {
+                const coeff = this.computeCoeffFor(option.name, false);
 
-                    let max = -Infinity,
-                        min = Infinity;
-                    for (let i = 0; i < len; i++) {
-                        const val = coeff[i];
-                        if (val > max) max = val;
-                        if (val < min) min = val;
-                    }
-
-                    const range = max - min;
-
-                    // if all of the values are the same, skip this sorting coefficient
-                    if (!range) {
-                        console.warn(range, option.name);
-                        continue;
-                    }
-
-                    const normalizeRatio = range / 100;
-
-                    // use Euclidean distance to combine multiple sorting coefficients
-                    if (option.reverse) {
-                        for (let i = 0; i < len; i++) {
-                            coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
-                        }
-                    } else {
-                        for (let i = 0; i < len; i++) {
-                            coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
-                        }
-                    }
+                let max = -Infinity,
+                    min = Infinity;
+                for (let i = 0; i < len; i++) {
+                    const val = coeff[i];
+                    if (val > max) max = val;
+                    if (val < min) min = val;
                 }
 
-                for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
-                console.timeEnd('normalizing coefficients');
+                const range = max - min;
+
+                // if all of the values are the same, skip this sorting coefficient
+                if (!range) {
+                    console.warn(range, option.name);
+                    continue;
+                }
+
+                const normalizeRatio = range / 100;
+
+                // use Euclidean distance to combine multiple sorting coefficients
+                if (option.reverse) {
+                    for (let i = 0; i < len; i++) {
+                        coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
+                    }
+                } else {
+                    for (let i = 0; i < len; i++) {
+                        coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
+                    }
+                }
             }
+
+            for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
+            console.timeEnd('normalizing coefficients');
         }
     }
 

@@ -1,3 +1,11 @@
+/**
+ * the modal module handles modal triggering
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
 import store from '.';
 import Section from '../models/Section';
@@ -22,7 +30,7 @@ class Modal extends VuexModule implements ModalState {
     @Mutation
     showSectionModal(section: Section) {
         this.modalSection = section;
-        $('#modal').modal();
+        $('#section-modal').modal();
     }
 
     @Mutation

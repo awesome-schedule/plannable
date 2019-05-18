@@ -15,7 +15,3 @@ You can build the documentation for typescript files by running
 ```bash
 npm run tsdoc
 ```
-
-### Vue
-
-Currently I don't know a good way to extract comments in single file components. If you find a way, you're more than welcome to submit a pull request.

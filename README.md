@@ -7,6 +7,7 @@
 [![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)](https://travis-ci.org/awesome-schedule/)
 [![codecov](https://codecov.io/gh/awesome-schedule/Awesome-SchedulAR/branch/master/graph/badge.svg)](https://codecov.io/gh/awesome-schedule/Awesome-SchedulAR)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fawesome-schedule%2FAwesome-SchedulAR.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fawesome-schedule%2FAwesome-SchedulAR?ref=badge_shield)
 
 A website which helps UVa students to schedule their classes more efficiently. Get your class selection done with the searching field and customize them with filters and sorting options. Once you've finalized your class selection, hit "Generate" button and get all the possible schedules satisfying to your requirements.
 
@@ -70,3 +71,6 @@ Please refer to [our contribution guide](docs/CONTRIBUTING.md).
 ## License
 
 This project is licensed under the GPL-3.0 - see the [LICENSE](LICENSE) file for details
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fawesome-schedule%2FAwesome-SchedulAR.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fawesome-schedule%2FAwesome-SchedulAR?ref=badge_large)

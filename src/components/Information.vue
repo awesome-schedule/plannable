@@ -248,9 +248,13 @@
             <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
                 ICalendar is a standard file format used to represent information in a calednar.
-                Apple and Google calendar both support importing from iCalendar files. The
-                instruction on how to export your schedule to a iCalendar file and import it to your
-                Google calendar is shown below.
+                Apple and Google calendar both support importing from iCalendar files. Note that we
+                currently do NOT support importing from iCalendar files. If you want to re-import
+                your schedule sometime later, you must use <a href="#item-7-2">export to JSON</a>.
+            </p>
+            <p>
+                The instruction on how to export your schedule to a iCalendar file and import it to
+                your Google calendar is shown below.
             </p>
             <v-stepper v-model="e2" class="my-5 mx-auto" style="width:60vw;">
                 <v-stepper-header>

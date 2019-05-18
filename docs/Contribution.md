@@ -15,7 +15,7 @@ For the following parts, those with the most contributions are listed first.
 
 ## Software Architect
 
-Data structure and flow design
+Website architecture, data structure and data flow design
 
 Hanzhi Zhou
 
@@ -25,7 +25,7 @@ Hanzhi Zhou
 
 Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
-### Main Component: [App.vue](/src/App.vue)
+### Main Component: [src/App.vue](/src/App.vue) and [src/App.ts](/src/App.ts)
 
 | Part Name             | Contributors              |
 | --------------------- | ------------------------- |
@@ -42,18 +42,19 @@ Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
 ### Child Components
 
-Child components are in the [components](/src/components) folder.
+Child components are in the [src/components](/src/components) folder.
 
-| Name         | Contributors              |
-| ------------ | ------------------------- |
-| ClassList    | Hanzhi Zhou               |
-| CourseBlock  | Kaiying Shan, Hanzhi Zhou |
-| CourseModal  | Kaiying Shan, Hanzhi Zhou |
-| EventView    | Kaiying Shan, Hanzhi Zhou |
-| GridSchedule | Kaiying Shan              |
-| Pagination   | Kaiying Shan, Hanzhi Zhou |
-| Palette      | Hanzhi Zhou               |
-| SectionModal | Kaiying Shan              |
+| Name         | Contributors                                     |
+| ------------ | ------------------------------------------------ |
+| ClassList    | Hanzhi Zhou                                      |
+| CourseBlock  | Kaiying Shan, Hanzhi Zhou                        |
+| CourseModal  | Kaiying Shan, Hanzhi Zhou                        |
+| EventView    | Kaiying Shan, Hanzhi Zhou                        |
+| GridSchedule | Kaiying Shan                                     |
+| Information  | Kaiying Shan, Hanzhi Zhou, Zichao Hu, Elena Long |
+| Pagination   | Kaiying Shan, Hanzhi Zhou                        |
+| Palette      | Hanzhi Zhou                                      |
+| SectionModal | Kaiying Shan                                     |
 
 ### Tool chain
 
@@ -69,7 +70,7 @@ Hanzhi Zhou
 
 ### Models and Data Structure
 
-The underlying models and data structures are the core of our website. These are mainly TypeScript files in [models](/src/models)
+The underlying models and data structures are the core of our website. These are mainly TypeScript files in [src/models](/src/models)
 
 | Name          | Contributors              |
 | ------------- | ------------------------- |
@@ -124,16 +125,3 @@ Hanzhi Zhou
 Inline doc writing and doc building
 
 Hanzhi Zhou
-
-## Back-End
-
-> Note: The back-end is no longer active.
-
-Back-end mainly consists of python scripts.
-
-| Name              | Description                          | Contributor |
-| ----------------- | ------------------------------------ | ----------- |
-| Data preparation  | Load and parse raw data              | Hanzhi Zhou |
-| Algorithm         | -                                    | Zichao Hu   |
-| Translation Layer | Translate in between data structures | Hanzhi Zhou |
-| Request Handling  | -                                    | Hanzhi Zhou |

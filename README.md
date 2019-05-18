@@ -74,4 +74,4 @@ Please refer to [our contribution guide](docs/CONTRIBUTING.md).
 
 ## License
 
-This project is licensed under the GPL-3.0 - see the [LICENSE](LICENSE) file for details
+This project is licensed under GPL-3.0 - see the [LICENSE](LICENSE) file for details

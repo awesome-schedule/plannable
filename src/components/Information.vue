@@ -3,29 +3,32 @@
         <nav id="navbar-scrollspy" class="navbar d-block navbar-light bg-light sidebar">
             <a class="navbar-brand" href="#">Website Guide</a>
             <nav class="nav nav-pills flex-column">
-                <a class="nav-link" href="#item-1">Introduction</a>
-                <a class="nav-link" href="#item-2">Basic Operations</a>
+                <a class="nav-link py-1" href="#item-1">Introduction</a>
+                <a class="nav-link py-1" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-2-1">Schedule Manipulation</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-2-1">Schedule Manipulation</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Enroll in SIS</a>
                 </nav>
-                <a class="nav-link" href="#item-3">Add Event</a>
-                <a class="nav-link" href="#item-4">Filters</a>
+                <a class="nav-link py-1" href="#item-3">Add Event</a>
+                <a class="nav-link py-1" href="#item-4">Filters</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-4-1">No Class Time</a>
-                    <a class="nav-link ml-3 my-1" href="#item-4-2">Allow Waitlist/Closed</a>
-                    <a class="nav-link ml-3 my-1" href="#item-4-3">Sort</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-4-1">No Class Time</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-4-2">Allow Waitlist/Closed</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort</a>
                 </nav>
                 <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
-                <a class="nav-link" href="#item-6">Customize Colors</a>
-                <a class="nav-link" href="#item-7">Export</a>
+                <a class="nav-link py-1" href="#item-6">Customize Colors</a>
+                <a class="nav-link py-1" href="#item-7">Export</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-7-1">Export to iCalendar</a>
-                    <a class="nav-link ml-3 my-1" href="#item-7-2">Export to JSON</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-7-1">Export to iCalendar</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-7-2">Export to JSON</a>
                 </nav>
-                <a class="nav-link" href="#item-8">Authors</a>
-                <a class="nav-link" href="#item-9">Appendix</a>
+                <a class="nav-link py-1" href="#item-8">Authors</a>
+                <a class="nav-link py-1" href="#item-9">Contributing</a>
+                <a class="nav-link py-1" href="#item-10">Disclaimer</a>
+                <a class="nav-link py-1" href="#item-11">Appendix</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1" href="#item-9-1">Sort</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-11-1">Sort</a>
                 </nav>
             </nav>
         </nav>
@@ -127,27 +130,49 @@
                 </v-flex>
             </v-layout>
             <h5>Add Classes</h5>
-            <v-card class="my-3" style="width:85%;margin:auto auto;">
+            <v-card class="my-4 mx-auto" style="width:85%">
                 <v-img :src="imgPath('select_class.gif')"></v-img>
             </v-card>
             <h5>Generate Schedules</h5>
-            <v-card class="my-3" style="width:85%;margin:auto auto;">
+            <v-card class="my-4 mx-auto" style="width:85%">
                 <v-img :src="imgPath('generate_class.gif')"></v-img>
             </v-card>
             <h5>Multiple Schedules</h5>
-            <v-card class="my-3" style="width:85%;margin:auto auto;">
+            <v-card class="my-4 mx-auto" style="width:85%">
                 <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
+            </v-card>
+
+            <h5 id="item-2-2">Enroll in SIS</h5>
+            <p>
+                For convenience, we provide a list of course IDs for your currently active schedule
+                at the bottom left corner under "Schedule Overview" (can be seen clearly in the GIFs
+                shown above). These IDs can be direcly entered into SIS, through the input box left
+                to your shopping cart.
+            </p>
+            <v-card class="my-3 mx-auto" style="width:85%">
+                <v-img :src="imgPath('enroll-sis.png')"></v-img>
+            </v-card>
+            <p>
+                If some of the IDs are missing, it may because you are in "Edit class" mode and you
+                selected "Any section" for that course. If there is a "+1" (or a higher number)
+                after an ID, it means that course has more than one sections available at the given
+                time shown in your schedule. To view the list of sections, click the corresponding
+                course block rendered in the grid. For example, in the schedule shown below, there
+                are four available ENWR 1510 at Monday and Wednesday 5:00 to 6:15PM.
+            </p>
+            <v-card class="mt-3 mb-5 mx-auto" style="width:85%">
+                <v-img :src="imgPath('multi-section.png')"></v-img>
             </v-card>
 
             <h3 id="item-3">Add Event</h3>
             <hr />
             <p>
                 This feature allows you to customize your own schedule. You can add your weekly
-                commitments on the schedule, such as club meetings, office hours, etc. This feature
-                is similar to any other calendar which later you can sync it with your personal
-                calender on google or apple.
+                commitments on the schedule, such as club meetings, office hours, etc. The schedule
+                generator will generate schedules that do not conflict with your event. However, if
+                it is not possible to find such a schedule, an error will be thrown.
             </p>
-            <v-card class="my-5" style="width:85%;margin:auto auto;">
+            <v-card class="my-5 mx-auto" style="width:85%;">
                 <v-img :src="imgPath('add_event.gif')"></v-img>
             </v-card>
             <h3 id="item-4">Filters</h3>
@@ -158,10 +183,9 @@
             </p>
             <h5 id="item-4-1">No Class Time</h5>
             <p>
-                You can select time and day at which you do not wish to have class. The input form
-                of time is 08:00:AM.
+                You can select time and day at which you do not wish to have class.
             </p>
-            <v-card class="my-4" style="width:85%;margin:auto auto;">
+            <v-card class="my-4 mx-auto" style="width:85%;">
                 <v-img :src="imgPath('no-class-time.gif')"></v-img>
             </v-card>
             <h5 id="item-4-2">Allow Waitlist/Closed</h5>
@@ -171,8 +195,8 @@
             </p>
             <h5 id="item-4-3">Sort Schedules</h5>
             <p>
-                One powerful feature comes with auto-scheduling is that we can sort the generated
-                schedules based on one of a combination of indicators. You can select multiple sort
+                One powerful feature comes with auto-scheduling is that the generated schedules can
+                be sorted based on one or a combination of options. You can select multiple sort
                 options to optimize your schedule, and drag sort options to change their priority in
                 fallback mode. Note that all of the sort options are responsive, i.e. they will be
                 applied instantly after your changes.
@@ -191,7 +215,7 @@
             <h6>Sort Modes</h6>
             And there are two avaiable sort modes.
             <ol>
-                <li>Combined: Combine all sorting options enabled and given them equal weight</li>
+                <li>Combined: Combine all sorting options enabled and give them equal weight</li>
                 <li>
                     Fallback: Sort using the options on top first. If two schedules are compared
                     equal using that option, sort using the next option.
@@ -202,7 +226,7 @@
             if you want to prioritize a single sort option (such as No Early), then try "fallback",
             as it will sort using options on top first.
 
-            <v-card class="my-5" style="width:85%;margin:auto auto">
+            <v-card class="my-5 mx-auto" style="width:85%">
                 <v-img :src="imgPath('sort.gif')"></v-img>
             </v-card>
 
@@ -228,7 +252,7 @@
                 instruction on how to export your schedule to a iCalendar file and import it to your
                 Google calendar is shown below.
             </p>
-            <v-stepper v-model="e2" class="my-5" style="width:60vw;margin:auto auto">
+            <v-stepper v-model="e2" class="my-5 mx-auto" style="width:60vw;">
                 <v-stepper-header>
                     <v-stepper-step
                         v-for="(step, idx) in icalSteps"
@@ -243,7 +267,7 @@
 
                 <v-stepper-items>
                     <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
-                        <v-card class="mb-2" width="54vw" style="margin:auto auto">
+                        <v-card class="mb-2 mx-auto" width="54vw">
                             <v-img :src="icalSteps[idx].src" aspect-ratio="2.37"></v-img>
                         </v-card>
                         <v-card-title class="mb-2" primary-title>
@@ -275,7 +299,9 @@
                     <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
                 </div>
             </div>
+
             <h3 id="item-8">Authors</h3>
+            <hr />
             <p>The primiary contributors of this website are</p>
             <ol>
                 <li>Hanzhi Zhou</li>
@@ -292,8 +318,41 @@
                 </a>
             </p>
 
-            <h3 id="item-9">Appendix</h3>
-            <h5 id="item-9-1">Calculation of Sort Indicators</h5>
+            <h3 id="item-9">Contributing</h3>
+            <hr />
+            <p>
+                Our website is completely free and open course under the GPL-v3 license. Our source
+                code is
+                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                    >available at GitHub</a
+                >, and we welcome contribution of any kind.
+            </p>
+
+            <h3 id="item-10">Disclaimer</h3>
+            <hr />
+            <p>
+                Although we have made as much effort as we can to ensure that our website is
+                functional and provides correct information, we do not hold any liability for that.
+                This is explicitly covered under the
+                <a
+                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/f56d510b09dbd8abd72314f4d4856f69658f5487/LICENSE#L600"
+                    >GPL license </a
+                >.
+            </p>
+            <p>
+                The only authentic source of course data is the Student Information System (SIS).
+                For your benefit, it is recommended that you put your courses in the shopping cart
+                in SIS as soon as you have finished selecting your schedules and check whether the
+                meeting times are consistent with that shown on our website. If you find any
+                inconsistency, please email to
+                <a href="mailto:zh2wc@virginia.edu">zh2wc@virginia.edu</a> or
+                <a href="mailto:hz2zz@virginia.edu">hz2zz@virginia.edu</a> and open an issue on our
+                GitHub immediately.
+            </p>
+
+            <h3 id="item-11">Appendix</h3>
+            <hr />
+            <h5 id="item-11-1">Calculation of Sort Indicators</h5>
             <div class="mt-2 mb-4">
                 For each schedule, a single/array of coefficients are calculated, depending on the
                 sort options enabled. The following formulae provide an overview on how these
@@ -306,7 +365,7 @@
                 >.
             </div>
             <vue-mathjax :formula="formula.compactness"></vue-mathjax>
-            <div class="py-4 my-4" style="height: 8000px;"></div>
+            <div class="py-4 my-4" style="height: 500px;"></div>
         </div>
     </div>
 </template>

@@ -495,7 +495,7 @@ export default class App extends Vue {
                 timeSlots,
                 status,
                 sortOptions: this.sortOptions,
-                combineSections: this.combineSections,
+                combineSections: this.display.combineSections,
                 maxNumSchedules: this.display.maxNumSchedules
             });
             window.scheduleEvaluator.clear();

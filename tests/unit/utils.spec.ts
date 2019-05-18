@@ -11,6 +11,7 @@ beforeAll(async () => {
 describe('Utility Tests', () => {
     it('parse time', () => {
         expect(Utils.parseTimeAsInt('11:00AM', '1:30PM')).toEqual([11 * 60, 13 * 60 + 30]);
+        expect(Utils.parseTimeAsInt('12:15AM', '1:15AM')).toEqual([15, 75]);
         expect(Utils.parseTimeAll('MoWeFr 11:00AM - 1:50PM')).toEqual([
             ['Mo', 'We', 'Fr'],
             [11 * 60, 13 * 60 + 50]
@@ -29,10 +30,10 @@ describe('Utility Tests', () => {
     });
 
     it('to12hr', () => {
-        expect(Utils.to12hr('13:00')).toBe('1:00PM');
+        expect(Utils.to12hr('13:33')).toBe('1:33PM');
         expect(Utils.to12hr('11:00')).toBe('11:00AM');
-        expect(Utils.to12hr('0:00')).toBe('12:00AM');
-        expect(Utils.to12hr('12:00')).toBe('12:00PM');
+        expect(Utils.to12hr('0:15')).toBe('12:15AM');
+        expect(Utils.to12hr('12:59')).toBe('12:59PM');
     });
 
     it('Overlap test', () => {

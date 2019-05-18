@@ -81,13 +81,13 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
         end_time = ((+hour % 12) + 12) * 60 + +minute;
     } else {
         const t1 = start.substring(0, start.length - 2).split(':');
-        start_time = +t1[0] * 60 + +t1[1];
+        start_time = (+t1[0] % 12) * 60 + +t1[1];
         suffix = end.substr(end.length - 2, 2);
         [hour, minute] = end.substring(0, end.length - 2).split(':');
         if (suffix === 'PM') {
             end_time = ((+hour % 12) + 12) * 60 + +minute;
         } else {
-            end_time = +hour * 60 + +minute;
+            end_time = (+hour % 12) * 60 + +minute;
         }
     }
     return [start_time, end_time];
@@ -190,7 +190,7 @@ export function to12hr(time: string) {
     if (hr === 12) {
         return time + 'PM';
     } else if (hr === 0) {
-        return '12:00AM';
+        return `12:${sep[1]}AM`;
     } else if (hr < 12) {
         return time + 'AM';
     } else {

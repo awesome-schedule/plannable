@@ -8,6 +8,7 @@
  */
 import Vue from 'vue';
 import App from './App.vue';
+import AppClass from './App';
 import querystring from 'querystring';
 import axios from 'axios';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -48,6 +49,7 @@ declare module 'vue/types/options' {
 declare module 'vue/types/vue' {
     interface Vue {
         $store: Store<RootState>;
+        readonly $root: AppClass;
     }
 }
 

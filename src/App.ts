@@ -24,9 +24,6 @@ import Information from './components/Information.vue';
 import External from './components/External.vue';
 import draggable from 'vuedraggable';
 
-import 'bootstrap';
-import $ from 'jquery';
-import Section from './models/Section';
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
 import { Semester } from './models/Catalog';
@@ -709,7 +706,6 @@ export default class App extends Vue {
     }
     saveToJson() {
         if (!this.currentSemester) return;
-
         const json = localStorage.getItem(this.currentSemester.id);
         if (json) savePlain(json, (this.exportJson ? this.exportJson : 'schedule') + '.json');
     }

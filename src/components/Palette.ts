@@ -15,8 +15,6 @@ import randomColor from 'randomcolor';
 export default class Palette extends Vue {
     @Prop(Schedule) readonly schedule!: Schedule;
 
-    parent = this.$parent as any;
-
     randomColor() {
         return randomColor({
             luminosity: 'dark'
@@ -24,7 +22,7 @@ export default class Palette extends Vue {
     }
     setColor(key: string, color: string) {
         this.schedule.setColor(key, color);
-        this.parent.saveStatus();
+        this.$root.saveStatus();
         this.$forceUpdate();
     }
     /**
@@ -57,6 +55,6 @@ export default class Palette extends Vue {
             .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
     }
     convertKey(key: string) {
-        return window.catalog.convertKey(key, this.parent.currentSchedule);
+        return window.catalog.convertKey(key, this.$root.currentSchedule);
     }
 }

@@ -109,7 +109,6 @@ export default class EventView extends Vue {
      * @param regenerate re-run algorithm if true
      */
     cancelEvent(regenerate = false) {
-        const $parent = this.$parent as any;
         this.eventTitle = '';
         this.eventRoom = '';
         this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));
@@ -117,8 +116,8 @@ export default class EventView extends Vue {
         this.eventTimeTo = '';
         this.eventDescription = '';
         this.isEditingEvent = false;
-        $parent.eventToEdit = null;
-        if (regenerate) $parent.generateSchedules();
-        else $parent.currentSchedule.computeSchedule();
+        this.$root.eventToEdit = null;
+        if (regenerate) this.$root.generateSchedules();
+        else this.$root.currentSchedule.computeSchedule();
     }
 }

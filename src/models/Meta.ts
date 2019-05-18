@@ -150,7 +150,6 @@ export default class Meta {
         'allowClosed',
         'sortOptions',
         'timeSlots',
-        'combineSections',
 
         // settings
         'display'

@@ -3,6 +3,7 @@ import Schedule from '../../src/models/Schedule';
 import * as Utils from '../../src/utils';
 import data from './data';
 import Section from '../../src/models/Section';
+import display from '../../src/store/display';
 
 beforeAll(async () => {
     window.catalog = await data;
@@ -122,7 +123,9 @@ describe('Schedule Test', () => {
 
         for (const i of [0, 1, 2, 3, 4, 5]) schedule.update('chem14105', i);
         for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) schedule.update('chem14114', i);
-        Schedule.options.combineSections = false;
+        display.update({
+            combineSections: false
+        });
         schedule._computeSchedule();
         schedule.computeConflict();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
@@ -148,7 +151,9 @@ describe('Schedule Test', () => {
         schedule.unhover('cs21105');
         schedule.unhover('cs21504');
 
-        Schedule.options.multiSelect = false;
+        display.update({
+            multiSelect: false
+        });
         schedule._computeSchedule();
 
         schedule.update('cs21105', -1);

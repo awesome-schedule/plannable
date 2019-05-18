@@ -14,9 +14,8 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 import Course from '../models/Course';
-import { State } from 'vuex-class';
-import { RootState } from '../store';
 import modal from '../store/modal';
+import display from '../store/display';
 
 @Component({
     components: {
@@ -35,8 +34,9 @@ export default class ClassList extends Vue {
     @Prop({ default: false, type: Boolean }) readonly isEntering!: boolean;
     @Prop(Boolean) readonly generated!: boolean;
 
-    @State((store: RootState) => store.display.showClasslistTitle)
-    readonly showClasslistTitle!: boolean;
+    get showClasslistTitle() {
+        return display.showClasslistTitle;
+    }
 
     /**
      * the array used to record which course is collapsed/expanded

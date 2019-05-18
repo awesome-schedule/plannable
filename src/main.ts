@@ -46,6 +46,9 @@ declare module 'vue/types/options' {
     }
 }
 
+/**
+ * note that the type annotation for $root is valid since our Application only has a single root
+ */
 declare module 'vue/types/vue' {
     interface Vue {
         $store: Store<RootState>;

@@ -448,21 +448,11 @@ export default class Schedule {
             depthFirstSearch(graph);
             this.calculateWidth(graph, blocks);
 
-            for (const block of blocks) {
-                if (block.left === -1 || block.width === -1) {
-                    console.error('Uncomputed block found!', block);
-                }
-            }
-
             graph.clear();
         }
     }
 
     public calculateWidth(graph: Graph<number>, blocks: ScheduleBlock[]) {
-        // for (const node of graph.keys()) {
-        //     const $$$ = blocks[node.val] as any;
-        //     $$$.data = node;
-        // }
         for (const node of graph.keys()) {
             // skip any non-root node in the depth-first trees
             if (node.parent) continue;
@@ -497,6 +487,7 @@ export default class Schedule {
             const blocks = this.days[day].sort((a, b) => +b - +a);
             const graph: number[][] = blocks.map(() => []);
 
+            // construct an undirected graph
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
                     if (blocks[i].conflict(blocks[j])) {
@@ -508,18 +499,10 @@ export default class Schedule {
             // convert to typed array so its much faster
             const fastGraph = graph.map(x => Int8Array.from(x));
             const colors = new Int8Array(fastGraph.length);
-            graphColoringExact(fastGraph, colors);
+            const _ = graphColoringExact(fastGraph, colors);
             // const [colors, _] = dsatur(fastGraph);
 
-            console.time('color dfs');
-            // for (let i = 0; i < blocks.length; i++) {
-            //     const block = blocks[i];
-            //     const color = colors[i];
-            //     block.left = color / _;
-            //     block.width = 1 / _;
-            // }
             this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
-            console.timeEnd('color dfs');
         }
     }
 

@@ -308,10 +308,12 @@
             <hr />
             <p>The primiary contributors of this website are</p>
             <ol>
-                <li>Hanzhi Zhou</li>
-                <li>Kaiying Shan <s>(non-human; cat)</s></li>
-                <li>Zichao Hu</li>
-                <li>Minjun Long</li>
+                <li>Hanzhi Zhou <a href="mailto:hz2zz@virginia.edu">hz2zz@virginia.edu</a></li>
+                <li>
+                    Kaiying Shan <s>(non-human; cat)</s>
+                    <a href="mailto:ks5qug@virginia.edu"> ks5qug@virginia.edu</a>
+                </li>
+                <li>Zichao Hu <a href="mailto:zh2wc@virginia.edu">zh2wc@virginia.edu</a></li>
             </ol>
             <p>
                 For more details, please refer to our
@@ -336,22 +338,21 @@
             <hr />
             <p>
                 Although we have made as much effort as we can to ensure that our website is
-                functional and provides correct information, we do not hold any liability for that.
-                This is explicitly covered under the
+                functional and provides the correct information, please remember that our website
+                comes with no warranty and we do not hold any liability for any damages. This is
+                explicitly covered under the
                 <a
-                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/f56d510b09dbd8abd72314f4d4856f69658f5487/LICENSE#L600"
+                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/f56d510b09dbd8abd72314f4d4856f69658f5487/LICENSE#L589"
                     >GPL license </a
                 >.
             </p>
             <p>
                 The only authentic source of course data is the Student Information System (SIS).
                 For your benefit, it is recommended that you put your courses in the shopping cart
-                in SIS as soon as you have finished selecting your schedules and check whether the
-                meeting times are consistent with that shown on our website. If you find any
-                inconsistency, please email to
-                <a href="mailto:zh2wc@virginia.edu">zh2wc@virginia.edu</a> or
-                <a href="mailto:hz2zz@virginia.edu">hz2zz@virginia.edu</a> and open an issue on our
-                GitHub immediately.
+                in SIS and check whether the meeting times are consistent with that shown on our
+                website as soon as you have finished customizing your schedules. If you find any
+                inconsistency, please email to our authors and open an issue on our GitHub
+                immediately.
             </p>
 
             <h3 id="item-11">Appendix</h3>

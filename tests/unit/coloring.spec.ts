@@ -34,9 +34,13 @@ for (let i = 0; i < graph.length; i++) {
 
 describe('graph coloring test', () => {
     it('basic', () => {
-        // g = [[0, 1, 1, 1], [1, 0, 1, 0], [1, 1, 0, 1], [1, 0, 1, 0]];
-
-        // console.log(graph);
-        expect(Coloring.dsatur(adjList)[0]).toEqual(Coloring.graphColoringExact(adjList)[0]);
+        const colors = new Int8Array(adjList.length);
+        Coloring.dsatur(adjList, colors, colors.slice());
+        const dsaturColor = colors.slice();
+        colors.fill(-1);
+        Coloring.graphColoringExact(adjList, colors);
+        const exactColors = colors.slice();
+        // we expect the dsatur to be exact for this graph
+        expect(dsaturColor).toEqual(exactColors);
     });
 });

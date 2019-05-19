@@ -216,22 +216,6 @@ export default class Schedule {
         this.computeSchedule();
     }
 
-    // /**
-    //  * Add a course to schedule
-    //  */
-    // public add(key: string, section: number) {
-    //     const sections = this.All[key];
-    //     if (sections instanceof Set) {
-    //         if (sections.has(section)) return false;
-    //         sections.add(section);
-    //         this.computeSchedule();
-    //     } else {
-    //         this.All[key] = new Set([section]);
-    //         this.computeSchedule();
-    //     }
-    //     return true;
-    // }
-
     /**
      * Update a course in the schedule
      * - If the section is **already in** the schedule, delete it from the schedule
@@ -523,7 +507,8 @@ export default class Schedule {
             }
             // convert to typed array so its much faster
             const fastGraph = graph.map(x => Int8Array.from(x));
-            const [colors, _] = graphColoringExact(fastGraph);
+            const colors = new Int8Array(fastGraph.length);
+            graphColoringExact(fastGraph, colors);
             // const [colors, _] = dsatur(fastGraph);
 
             console.time('color dfs');

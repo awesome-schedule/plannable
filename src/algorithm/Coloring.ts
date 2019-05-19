@@ -8,6 +8,8 @@
  */
 import { Vertex, Graph } from './Graph';
 
+type TypedIntArray = Int8Array | Int16Array | Int32Array;
+
 /**
  * An exact graph coloring algorithm using backtracking
  *
@@ -20,10 +22,10 @@ import { Vertex, Graph } from './Graph';
  * @param numColors number of colors
  * @param v the number of vertex already colored
  */
-function graphColorBackTrack(
-    graph: Int8Array[],
-    colors: Int8Array,
-    colorOrder: Int8Array,
+function graphColorBackTrack<T extends TypedIntArray>(
+    graph: T[],
+    colors: T,
+    colorOrder: T,
     opCount: Int32Array,
     numColors: number,
     v: number
@@ -60,14 +62,13 @@ function graphColorBackTrack(
 /**
  * Greedily color a graph using degree of saturation algorithm
  * @param adjList
- * @return [color array, color order array]
+ * @param colors an array used to record the colors of nodes. colors start from 0.
+ * length must equal to the length of adjList.
+ * @param colorOrder an array used to record the order of coloring
  */
-export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array, number] {
-    const colors = new Int8Array(adjList.length).fill(-1);
-
-    // keep track of the ordering
-    const colorOrder = new Int8Array(adjList.length);
-    if (!adjList.length) return [colors, colorOrder, 0];
+export function dsatur<T extends TypedIntArray>(adjList: T[], colors: T, colorOrder: T): number {
+    colors.fill(-1);
+    if (!adjList.length) return 0;
 
     // keep track of the saturation
     const saturations = adjList.map(() => new Set<number>());
@@ -92,7 +93,7 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array, number] {
 
     for (let i = 1; i < adjList.length; i++) {
         // find the next node to be colored:
-        // find the node of the maximum degree of saturation and break the ties by the degree
+        // find the node of the maximum degree of saturation and break ties by degrees
         let maxSat = -1;
         for (let j = 0; j < saturations.length; j++) {
             if (colors[j] === -1) {
@@ -126,19 +127,22 @@ export function dsatur(adjList: Int8Array[]): [Int8Array, Int8Array, number] {
             }
         }
     }
-    return [colors, colorOrder, numColors + 1];
+    return numColors + 1;
 }
 
 /**
  * the entry point of the backtrack graph coloring
  * @see [[graphColorBackTrack]]
- * @param adjList
- * @returns [colors, total number of colors]
+ * @param adjList adjacency list representation of the graph
+ * @param colors an array used to record the colors of nodes. colors start from 0.
+ * length must equal to the length of adjList.
+ * @returns total number of colors
  */
-export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {
+export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors: T): number {
     // get a good initial color order using the DSATUR algorithm
-    const [colors, dsaturOrder] = dsatur(adjList);
+    const dsaturOrder = colors.slice();
     colors.fill(-1);
+    dsatur(adjList, colors, dsaturOrder);
     const opCount = new Int32Array(1);
     let totalCount = 0;
     console.time('coloring');
@@ -154,7 +158,7 @@ export function graphColoringExact(adjList: Int8Array[]): [Int8Array, number] {
     }
     console.log('op count', totalCount);
     console.timeEnd('coloring');
-    return [colors, numColors];
+    return numColors;
 }
 
 export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph<number> {

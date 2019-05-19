@@ -33,9 +33,8 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadSemesterData } from './data/CatalogLoader';
 import { loadSemesterList } from './data/SemesterListLoader';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
-import { to12hr, savePlain } from './utils';
+import { to12hr, savePlain, toICal } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
-import { toICal } from './utils/ICal';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -116,7 +115,7 @@ export default class App extends Vue {
 
     // filter settings
     /**
-     * index 0 - 4: whether Mo - Tu are selected
+     * index 0 - 4: whether Mo - Fr are selected
      *
      * 6: start time, of 24 hour format
      *

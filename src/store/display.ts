@@ -9,23 +9,7 @@
 import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
 import store from '.';
 
-export interface DisplayState {
-    [x: string]: any;
-    showTime: boolean;
-    showRoom: boolean;
-    showInstructor: boolean;
-    showClasslistTitle: boolean;
-    fullHeight: number;
-    partialHeight: number;
-    earliest: string;
-    latest: string;
-    standard: boolean;
-    multiSelect: boolean;
-    combineSections: boolean;
-    maxNumSchedules: number;
-}
-
-export const defaultDisplay: DisplayState = Object.freeze({
+const _defaultDisplay = {
     showTime: false,
     showRoom: true,
     showInstructor: true,
@@ -38,7 +22,15 @@ export const defaultDisplay: DisplayState = Object.freeze({
     multiSelect: true,
     combineSections: true,
     maxNumSchedules: 200000
-});
+};
+
+export const defaultDisplay = Object.freeze(_defaultDisplay);
+
+type _DisplayState = typeof _defaultDisplay;
+
+export interface DisplayState extends _DisplayState {
+    [x: string]: any;
+}
 
 @Module({
     store,

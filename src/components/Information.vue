@@ -14,7 +14,7 @@
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-1">No Class Time</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-2">Allow Waitlist/Closed</a>
-                    <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort Options</a>
                 </nav>
                 <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
                 <a class="nav-link" href="#item-6">Customize Colors</a>
@@ -33,7 +33,7 @@
             </nav>
         </nav>
         <div
-            style="margin-right: 5vw;margin-top: 5vh; font-size: 15px;"
+            id="info-content"
             :style="{
                 'margin-left': scheduleLeft + 5 + 'vw'
             }"
@@ -129,16 +129,21 @@
                     </v-card>
                 </v-flex>
             </v-layout>
+            <p class="lead px-4 py-2 border-left border-info" style="background-color: #eee">
+                Tip: It is recommeded that you prepare "backup" schedules, especially if you are
+                trying to enroll in some popular courses or popular professors' sections.
+            </p>
+
             <h5>Add Classes</h5>
-            <v-card class="my-4 mx-auto" style="width:85%">
+            <v-card class="my-4 mx-auto gif-center">
                 <v-img :src="imgPath('select_class.gif')"></v-img>
             </v-card>
             <h5>Generate Schedules</h5>
-            <v-card class="my-4 mx-auto" style="width:85%">
+            <v-card class="my-4 mx-auto gif-center">
                 <v-img :src="imgPath('generate_class.gif')"></v-img>
             </v-card>
             <h5>Multiple Schedules</h5>
-            <v-card class="my-4 mx-auto" style="width:85%">
+            <v-card class="my-4 mx-auto gif-center">
                 <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
             </v-card>
 
@@ -149,7 +154,7 @@
                 shown above). These IDs can be direcly entered into SIS, through the input box left
                 to your shopping cart.
             </p>
-            <v-card class="my-3 mx-auto" style="width:85%">
+            <v-card class="my-3 mx-auto gif-center">
                 <v-img :src="imgPath('enroll-sis.png')"></v-img>
             </v-card>
             <p>
@@ -160,7 +165,7 @@
                 course block rendered in the grid. For example, in the schedule shown below, there
                 are four available ENWR 1510 at Monday and Wednesday 5:00 to 6:15PM.
             </p>
-            <v-card class="mt-3 mb-5 mx-auto" style="width:85%">
+            <v-card class="mt-3 mb-5 mx-auto gif-center">
                 <v-img :src="imgPath('multi-section.png')"></v-img>
             </v-card>
 
@@ -172,7 +177,7 @@
                 generator will generate schedules that do not conflict with your event. However, if
                 it is not possible to find such a schedule, an error will be thrown.
             </p>
-            <v-card class="my-5 mx-auto" style="width:85%;">
+            <v-card class="my-5 mx-auto gif-center">
                 <v-img :src="imgPath('add_event.gif')"></v-img>
             </v-card>
             <h3 id="item-4">Filters</h3>
@@ -185,7 +190,7 @@
             <p>
                 You can select time and day at which you do not wish to have class.
             </p>
-            <v-card class="my-4 mx-auto" style="width:85%;">
+            <v-card class="my-4 mx-auto gif-center">
                 <v-img :src="imgPath('no-class-time.gif')"></v-img>
             </v-card>
             <h5 id="item-4-2">Allow Waitlist/Closed</h5>
@@ -201,6 +206,7 @@
                 fallback mode. Note that all of the sort options are responsive, i.e. they will be
                 applied instantly after your changes.
             </p>
+
             <h6>Sort Options</h6>
             Currently, we provide the following list of sort options. If you prefer a mathematical
             description on how they are computed, see <a href="#item-8-1">Appendix</a>.
@@ -212,6 +218,15 @@
                 <li>Walking Distance: Avoid long distance walking between classes</li>
                 <li>I'm Feeling Lucky: Sort Randomly</li>
             </ol>
+            <p>
+                Note that it is possible to reverse one of more of the sort options provided above:
+                just click the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want
+                your schedule to be very compact (i.e. you want to have some time to rest between
+                classes), you can enable "Vertical compactness" and click the
+                <i class="fas fa-arrow-up"></i> icon so it becomes
+                <i class="fas fa-arrow-down"></i>.
+            </p>
+
             <h6>Sort Modes</h6>
             And there are two avaiable sort modes.
             <ol>
@@ -226,7 +241,7 @@
             if you want to prioritize a single sort option (such as No Early), then try "fallback",
             as it will sort using options on top first.
 
-            <v-card class="my-5 mx-auto" style="width:85%">
+            <v-card class="my-5 mx-auto gif-center">
                 <v-img :src="imgPath('sort.gif')"></v-img>
             </v-card>
 
@@ -461,5 +476,29 @@ $$
 <style scoped>
 #navbar-scrollspy {
     position: fixed;
+}
+
+#info-content {
+    margin-right: 5vw;
+    margin-top: 5vh;
+    font-size: 15px;
+}
+
+.gif-center {
+    width: 85%;
+}
+
+@media (max-width: 600px) {
+    #navbar-scrollspy {
+        display: none !important;
+    }
+
+    #info-content {
+        margin-left: 15vw !important;
+    }
+
+    .gif-center {
+    width: 100%;
+}
 }
 </style>

@@ -922,7 +922,7 @@
     }
 }
 
-@media (max-width: 450px) {
+@media (max-width: 600px) {
     .sidebar {
         position: fixed;
         top: 0;

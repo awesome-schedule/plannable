@@ -28,7 +28,8 @@
                 <a class="nav-link" href="#item-10">Disclaimer</a>
                 <a class="nav-link" href="#item-11">Appendix</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1 py-1" href="#item-11-1">Sort</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-11-1">Sort Options</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-11-2">Browser Compacitility</a>
                 </nav>
             </nav>
         </nav>
@@ -53,7 +54,13 @@
                     (see <a href="#item-7-2">Export to JSON</a>, or
                     <a href="#item-7-1">Export to iCalender</a>), because our website uses your
                     browser cache to store data, which could be lost if it expires or the cache is
-                    cleared.
+                    cleared. If you find any problem when using our website, please first check
+                    whether you are using a compatible browser (see
+                    <a href="#item-11-2">browser compatibility</a>). If it is not a problem with
+                    your browser, please consider
+                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                        >opening an issue</a
+                    >.
                 </strong>
             </p>
             <h3 id="item-2">Basic Operations</h3>
@@ -346,7 +353,9 @@
                 code is
                 <a href="https://github.com/awesome-schedule/Awesome-SchedulAR"
                     >available at GitHub</a
-                >, and we welcome contribution of any kind.
+                >, and we welcome contribution of any kind. You can submit bug reports or feature
+                requests through issue, and you can directly contribute to our codebase via pull
+                requests!
             </p>
 
             <h3 id="item-10">Disclaimer</h3>
@@ -372,7 +381,7 @@
 
             <h3 id="item-11">Appendix</h3>
             <hr />
-            <h5 id="item-11-1">Calculation of Sort Indicators</h5>
+            <h5 id="item-11-1">Calculation of Sort Options</h5>
             <div class="mt-2 mb-4">
                 For each schedule, a single/array of coefficients are calculated, depending on the
                 sort options enabled. The following formulae provide an overview on how these
@@ -384,7 +393,15 @@
                     our code</a
                 >.
             </div>
-            <vue-mathjax :formula="formula.compactness"></vue-mathjax>
+            <vue-mathjax :formula="formula"></vue-mathjax>
+
+            <h5 id="item-11-2">Browser Compactibility</h5>
+            <p>
+                Our website should run without problem on mainstream browsers of the latest version
+                (except IE). Due to the fact that our website leverages new CSS3 features (e.g. grid
+                layout), we require Chrome &ge; 57, Edge &ge; 16, Firefox &ge; 52, Opera &ge; 44 or
+                Safari &ge; 10.3.
+            </p>
             <div class="py-4 my-4" style="height: 500px;"></div>
         </div>
     </div>
@@ -407,22 +424,20 @@ export default class Information extends Vue {
 
     e1: number = 0;
     e2: number = 1;
-    formula = {
-        compactness: `
-$$
-\\begin{align*}
-    \\text{Variance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}}
-    \\frac{\\text{Classtime}(day)^2}{5} - \\left( \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\frac{\\text{Classtime}(day)}{5} \\right)^2                             \\\\
-    \\text{Compactness} & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\left(\\text{Start}_{i + 1} - \\text{End}_{i} \\right)            \\\\
-                       & \\text{where $n_{day}$ is the number of classes at day $day$}                                                                         \\\\
-    \\text{No Early}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\text{12:00} - \\text{FirstClassStart}                                                     \\\\
-    \\text{Lunch time}  & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day}} \\min(\\text{OverlapBetween}(\\text{Class}_i, \\text{Lunch}), 60) - 60 \\\\
-                       & \\text{where Lunch is defined as the time between 11:00 and 14:00}                                                                    \\\\
-    \\text{Distance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\text{DistanceBetween}(\\text{Class}_i, \\text{Class}_{i+1})
-\\end{align*}
-$$
-        `
-    };
+    formula = `
+    $$
+    \\begin{align*}
+        \\text{Variance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}}
+        \\frac{\\text{Classtime}(day)^2}{5} - \\left( \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\frac{\\text{Classtime}(day)}{5} \\right)^2                             \\\\
+        \\text{Compactness} & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\left(\\text{Start}_{i + 1} - \\text{End}_{i} \\right)            \\\\
+                        & \\text{where $n_{day}$ is the number of classes at day $day$}                                                                         \\\\
+        \\text{No Early}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\text{12:00} - \\text{FirstClassStart}                                                     \\\\
+        \\text{Lunch time}  & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day}} \\min(\\text{OverlapBetween}(\\text{Class}_i, \\text{Lunch}), 60) - 60 \\\\
+                        & \\text{where Lunch is defined as the time between 11:00 and 14:00}                                                                    \\\\
+        \\text{Distance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\text{DistanceBetween}(\\text{Class}_i, \\text{Class}_{i+1})
+    \\end{align*}
+    $$
+`;
 
     icalSteps = {
         1: {
@@ -498,7 +513,7 @@ $$
     }
 
     .gif-center {
-    width: 100%;
-}
+        width: 100%;
+    }
 }
 </style>

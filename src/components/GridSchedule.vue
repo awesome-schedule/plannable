@@ -1,6 +1,6 @@
 <template>
     <table style="width:100%">
-        <tr style="width:100%">
+        <tr>
             <td style="width:3.5%">
                 <div
                     class="grid-container time mb-3"
@@ -66,7 +66,7 @@
 
 <script lang="ts" src="./GridSchedule.ts"></script>
 
-<style>
+<style scoped>
 .grid-container {
     display: grid;
     grid-gap: 0px;

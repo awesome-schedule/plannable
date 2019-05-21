@@ -259,7 +259,7 @@ class ScheduleGenerator {
                 throw new Error(
                     `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                    } satisfy the filters you given`
+                    } do not conflict your events and satisfy your filters`
                 );
             }
             classList.push(classes);

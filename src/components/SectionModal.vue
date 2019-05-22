@@ -44,21 +44,6 @@
     </div>
 </template>
 
-<script lang="ts">
-import { Semester } from '../models/Catalog';
-import Vue from 'vue';
-import modal from '../store/modal';
-
-export default Vue.extend({
-    props: {
-        semester: Object as () => Semester
-    },
-    computed: {
-        section() {
-            return modal.modalSection;
-        }
-    }
-});
-</script>
+<script lang="ts" src="./SectionModal.ts"></script>
 
 <style></style>

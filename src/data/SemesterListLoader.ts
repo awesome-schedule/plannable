@@ -7,14 +7,14 @@
  *
  */
 import axios from 'axios';
-import { Semester } from '../models/Catalog';
+import { SemesterJSON } from '../models/Catalog';
 import Meta from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
 
 interface SemesterListJSON extends Expirable {
-    semesterList: Semester[];
+    semesterList: SemesterJSON[];
 }
 
 /**
@@ -23,9 +23,9 @@ interface SemesterListJSON extends Expirable {
  *
  * storage key: "semesters"
  */
-export async function loadSemesterList(count = 5): Promise<NotiMsg<Semester[]>> {
+export async function loadSemesterList(count = 5): Promise<NotiMsg<SemesterJSON[]>> {
     // load the cached list of semesters, if it exists
-    return loadFromCache<Semester[], SemesterListJSON>(
+    return loadFromCache<SemesterJSON[], SemesterListJSON>(
         'semesters',
         () => requestSemesterList(count),
         x => x.semesterList,
@@ -42,7 +42,7 @@ export async function loadSemesterList(count = 5): Promise<NotiMsg<Semester[]>> 
 /**
  * Fetch the list of semesters from Lou's list
  */
-export async function requestSemesterList(count = 5): Promise<Semester[]> {
+export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
     console.time('get semester list');
     const response = await axios.get(`https://rabi.phys.virginia.edu/mySIS/CS2/index.php`);
     console.timeEnd('get semester list');
@@ -50,7 +50,7 @@ export async function requestSemesterList(count = 5): Promise<Semester[]> {
     const element = document.createElement('html');
     element.innerHTML = response.data;
     const options = element.getElementsByTagName('option');
-    const records: Semester[] = [];
+    const records: SemesterJSON[] = [];
     for (let i = 0; i < Math.min(count, options.length); i++) {
         const option = options[i];
         const key = option.getAttribute('value');

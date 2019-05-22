@@ -14,6 +14,7 @@ import { noti } from './store/notification';
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassList from './components/ClassList.vue';
+import DisplayView from './components/DisplayView.vue';
 import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import SectionModal from './components/SectionModal.vue';
@@ -26,7 +27,7 @@ import draggable from 'vuedraggable';
 
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
-import { Semester } from './models/Catalog';
+import { SemesterJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -50,6 +51,7 @@ export const NoCache = createDecorator((options, key) => {
 @Component({
     components: {
         ClassList,
+        DisplayView,
         Pagination,
         GridSchedule,
         SectionModal,
@@ -63,8 +65,8 @@ export const NoCache = createDecorator((options, key) => {
 })
 export default class App extends Vue {
     [x: string]: any;
-    semesters: Semester[] = [];
-    currentSemester: Semester | null = null;
+    semesters: SemesterJSON[] = [];
+    currentSemester: SemesterJSON | null = null;
     /**
      * the index of the current schedule in the scheduleEvaluator.schedules array,
      * only applicable when generated=true
@@ -699,8 +701,8 @@ export default class App extends Vue {
                     noti.error(error.message + ': File Format Error');
                     return;
                 }
-                localStorage.setItem((this.currentSemester as Semester).id, result);
-                const semester: Semester = raw_data.currentSemester;
+                localStorage.setItem((this.currentSemester as SemesterJSON).id, result);
+                const semester: SemesterJSON = raw_data.currentSemester;
                 this.selectSemester(semester.id, raw_data);
             } else {
                 noti.warn('File is empty!');

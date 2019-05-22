@@ -14,7 +14,7 @@ import Schedule from './Schedule';
 /**
  * represents a semester
  */
-export interface Semester {
+export interface SemesterJSON {
     /**
      * semester id, e.g. `1198`
      */
@@ -26,7 +26,7 @@ export interface Semester {
 }
 
 export interface CatalogJSON extends Expirable {
-    semester: Semester;
+    semester: SemesterJSON;
     raw_data: RawCatalog;
 }
 
@@ -44,14 +44,14 @@ export default class Catalog {
     /**
      * the semester corresponding to the catalog stored in this object
      */
-    public semester: Semester;
+    public semester: SemesterJSON;
     /**
      * the raw representation of the course catalog
      */
     public raw_data: RawCatalog;
     public modified: string;
 
-    constructor(semester: Semester, raw_data: RawCatalog, modified: string) {
+    constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
         this.raw_data = raw_data;
         this.modified = modified;

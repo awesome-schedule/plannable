@@ -10,7 +10,7 @@ import axios from 'axios';
 import { parse } from 'papaparse';
 import querystring from 'querystring';
 import Meta, { RawCatalog, RawSection, RawMeeting } from '../models/Meta';
-import Catalog, { Semester, CatalogJSON } from '../models/Catalog';
+import Catalog, { SemesterJSON, CatalogJSON } from '../models/Catalog';
 import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
 
@@ -50,7 +50,7 @@ function saveCatalog(catalog: Catalog) {
     localStorage.setItem(`${catalog.semester.id}data`, JSON.stringify(catalog.toJSON()));
 }
 
-export async function requestSemesterData(semester: Semester): Promise<Catalog> {
+export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host.indexOf('cn.plannable.org') === -1

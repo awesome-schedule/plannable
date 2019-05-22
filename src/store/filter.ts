@@ -7,6 +7,8 @@ import noti from './notification';
 import Meta from '@/models/Meta';
 import Event from '../models/Event';
 import { to12hr } from '@/utils';
+import { toJSON } from './helper';
+import schedule from './schedule';
 
 const _defaultFilter = {
     timeSlots: [] as Array<[boolean, boolean, boolean, boolean, boolean, string, string]>,
@@ -19,12 +21,6 @@ type _FilterState = typeof _defaultFilter;
 
 export interface FilterState extends _FilterState {
     [x: string]: any;
-}
-
-export function getDefaultFilter() {
-    const result = Object.assign({}, _defaultFilter);
-    result.sortOptions = ScheduleEvaluator.getDefaultOptions();
-    return result;
 }
 
 @Component
@@ -78,14 +74,14 @@ export class FilterStore extends Vue implements FilterState {
         if (!window.scheduleEvaluator.empty()) {
             // this.loading = true;
             window.scheduleEvaluator.changeSort(this.sortOptions, true);
-            // if (!this.generated) {
-            //     this.switchSchedule(true);
-            // } else {
-            //     // re-assign the current schedule
-            //     this.currentSchedule = window.scheduleEvaluator.getSchedule(
-            //         this.currentScheduleIndex
-            //     );
-            // }
+            if (!schedule.generated) {
+                schedule.switchSchedule(true);
+            } else {
+                // re-assign the current schedule
+                schedule.currentSchedule = window.scheduleEvaluator.getSchedule(
+                    schedule.currentScheduleIndex
+                );
+            }
             // this.loading = false;
         }
     }
@@ -128,17 +124,22 @@ export class FilterStore extends Vue implements FilterState {
         return timeSlotsRecord;
     }
 
-    update(newFilter: Partial<FilterState>) {
-        for (const key in newFilter) {
-            this[key] = newFilter[key];
-        }
+    fromJSON(obj: Partial<FilterState>) {
+        const defaultVal = this.getDefault();
+        this.timeSlots = obj.timeSlots instanceof Array ? obj.timeSlots : defaultVal.timeSlots;
+        this.allowClosed =
+            typeof obj.allowClosed === 'boolean' ? obj.allowClosed : defaultVal.allowClosed;
+        this.allowWaitlist =
+            typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
     }
 
     toJSON() {
-        const result: Partial<FilterState> = {};
-        for (const key in _defaultFilter) {
-            result[key] = this[key];
-        }
+        return toJSON(this, _defaultFilter);
+    }
+
+    getDefault() {
+        const result = Object.assign({}, _defaultFilter);
+        result.sortOptions = ScheduleEvaluator.getDefaultOptions();
         return result;
     }
 }

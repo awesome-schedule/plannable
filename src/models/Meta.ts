@@ -8,9 +8,6 @@
  *
  */
 import Schedule from './Schedule';
-import { getDefaultDisplay } from '@/store/display';
-import { getDefaultFilter } from '@/store/filter';
-
 /**
  * the raw catalog is represented as a big dictionary
  *
@@ -156,22 +153,22 @@ export default class Meta {
     public static readonly semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 }
 
-/**
- * use a standalone method to get rid of deep copy issues
- */
-export function getDefaultData() {
-    return {
-        semesters: [],
-        currentSemester: null,
-        currentScheduleIndex: 0,
-        currentSchedule: new Schedule(),
-        proposedSchedules: [new Schedule()],
-        proposedScheduleIndex: 0,
-        cpIndex: -1,
+// /**
+//  * use a standalone method to get rid of deep copy issues
+//  */
+// export function getDefaultData() {
+//     return {
+//         semesters: [],
+//         currentSemester: null,
+//         currentScheduleIndex: 0,
+//         currentSchedule: new Schedule(),
+//         proposedSchedules: [new Schedule()],
+//         proposedScheduleIndex: 0,
+//         cpIndex: -1,
 
-        // display options
-        display: getDefaultDisplay(),
-        // filter options
-        filter: getDefaultFilter()
-    } as { [x: string]: any };
-}
+//         // display options
+//         display: getDefaultDisplay(),
+//         // filter options
+//         filter: getDefaultFilter()
+//     } as { [x: string]: any };
+// }

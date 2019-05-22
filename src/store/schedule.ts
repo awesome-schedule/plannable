@@ -7,9 +7,29 @@ import noti from './notification';
 import filter from '../store/filter';
 import display from './display';
 import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
+import { toJSON, saveStatus } from './helper';
+
+interface ScheduleStateBase {
+    [x: string]: any;
+    currentScheduleIndex: number;
+    proposedScheduleIndex: number;
+    cpIndex: number;
+    generated: boolean;
+}
+
+export interface ScheduleState extends ScheduleStateBase {
+    currentSchedule: Schedule;
+    proposedSchedules: Schedule[];
+}
+
+export interface ScheduleStateJSON extends ScheduleStateBase {
+    currentSchedule: ScheduleJSON;
+    proposedSchedules: ScheduleJSON[];
+}
 
 @Component
-export class ScheduleStore extends Vue {
+export class ScheduleStore extends Vue implements ScheduleState {
+    [x: string]: any;
     /**
      * the index of the current schedule in the scheduleEvaluator.schedules array,
      * only applicable when generated=true
@@ -70,7 +90,7 @@ export class ScheduleStore extends Vue {
             this.proposedScheduleIndex = index;
             this.switchSchedule(false);
         }
-        // this.saveStatus();
+        saveStatus();
     }
     newProposed() {
         this.proposedSchedules.push(new Schedule());
@@ -103,7 +123,7 @@ export class ScheduleStore extends Vue {
         } else {
             this.switchProposed(idx);
         }
-        // this.saveStatus();
+        saveStatus();
     }
     switchSchedule(generated: boolean) {
         if (generated) {
@@ -142,7 +162,7 @@ export class ScheduleStore extends Vue {
             //     this.tempScheduleIndex = null;
             // }
             this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
-            // this.saveStatus();
+            saveStatus();
         }
     }
 
@@ -152,7 +172,7 @@ export class ScheduleStore extends Vue {
         this.generated = false;
         window.scheduleEvaluator.clear();
         this.cpIndex = -1;
-        // this.saveStatus();
+        saveStatus();
     }
 
     generateSchedules() {
@@ -189,7 +209,6 @@ export class ScheduleStore extends Vue {
             });
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;
-            // this.saveStatus();
             noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
             this.cpIndex = this.proposedScheduleIndex;
             this.switchSchedule(true);
@@ -199,10 +218,56 @@ export class ScheduleStore extends Vue {
             this.generated = false;
             window.scheduleEvaluator.clear();
             noti.error(err.message);
-            // this.saveStatus();
             this.cpIndex = -1;
             // this.loading = false;
         }
+        saveStatus();
+    }
+
+    fromJSON(obj: Partial<ScheduleStateJSON>) {
+        const defaultState = this.getDefault();
+
+        const current = Schedule.fromJSON(obj.currentSchedule);
+        this.currentSchedule = current ? current : defaultState.currentSchedule;
+        const proposed = obj.proposedSchedules;
+        if (proposed instanceof Array) {
+            this.proposedSchedules = proposed.map(x => {
+                const temp = Schedule.fromJSON(x);
+                if (temp) return temp;
+                else return new Schedule();
+            });
+        } else {
+            return defaultState.proposedSchedules;
+        }
+
+        this.currentScheduleIndex =
+            typeof obj.currentScheduleIndex === 'number'
+                ? obj.currentScheduleIndex
+                : defaultState.currentScheduleIndex;
+
+        this.proposedScheduleIndex =
+            typeof obj.proposedScheduleIndex === 'number'
+                ? obj.proposedScheduleIndex
+                : defaultState.proposedScheduleIndex;
+
+        this.cpIndex = typeof obj.cpIndex === 'number' ? obj.cpIndex : defaultState.cpIndex;
+        this.generated =
+            typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
+    }
+
+    toJSON() {
+        return toJSON(this, this.getDefault());
+    }
+
+    getDefault(): ScheduleState {
+        return {
+            currentScheduleIndex: 0,
+            currentSchedule: new Schedule(),
+            proposedSchedules: [new Schedule()],
+            proposedScheduleIndex: 0,
+            cpIndex: -1,
+            generated: false
+        };
     }
 }
 

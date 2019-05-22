@@ -10,7 +10,6 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
-import App from '../App';
 import schedule from '@/store/schedule';
 
 @Component

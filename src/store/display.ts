@@ -7,6 +7,7 @@
  *
  */
 import { Vue, Component } from 'vue-property-decorator';
+import { toJSON } from './helper';
 
 const _defaultDisplay = {
     showTime: false,
@@ -22,10 +23,6 @@ const _defaultDisplay = {
     combineSections: true,
     maxNumSchedules: 200000
 };
-
-export function getDefaultDisplay() {
-    return Object.assign({}, _defaultDisplay);
-}
 
 type _DisplayState = typeof _defaultDisplay;
 
@@ -49,19 +46,25 @@ export class Display extends Vue implements DisplayState {
     public combineSections = true;
     public maxNumSchedules = 200000;
 
-    update(newDisplay: Partial<Display>) {
-        for (const key in _defaultDisplay) {
-            const newVal = newDisplay[key];
-            if (newVal) this[key] = newDisplay[key];
+    fromJSON(obj: Partial<DisplayState>) {
+        const defaultVal = this.getDefault();
+        for (const key in defaultVal) {
+            const val = obj[key];
+            const defVal = defaultVal[key];
+            if (typeof val === typeof defVal) {
+                this[key] = val;
+            } else {
+                this[key] = defVal;
+            }
         }
     }
 
-    toJSON() {
-        const result: Partial<DisplayState> = {};
-        for (const key in _defaultDisplay) {
-            result[key] = this[key];
-        }
-        return result;
+    toJSON(): DisplayState {
+        return toJSON(this, _defaultDisplay);
+    }
+
+    getDefault(): DisplayState {
+        return Object.assign({}, _defaultDisplay);
     }
 }
 

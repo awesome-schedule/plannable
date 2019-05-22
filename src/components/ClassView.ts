@@ -6,6 +6,7 @@ import Course from '../models/Course';
 import noti from '../store/notification';
 import display from '@/store/display';
 import ClassList from './ClassList.vue';
+import { saveStatus } from '@/store/helper';
 
 @Component({
     components: {
@@ -63,7 +64,7 @@ export default class ClassView extends Vue {
         if (schedule.generated) {
             noti.warn(`You're editing the generated schedule!`, 3);
         } else {
-            // this.saveStatus();
+            saveStatus();
         }
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to re-render component
@@ -77,7 +78,7 @@ export default class ClassView extends Vue {
         if (schedule.generated) {
             noti.warn(`You're editing the generated schedule!`, 3);
         } else {
-            // this.saveStatus();
+            saveStatus();
         }
     }
 }

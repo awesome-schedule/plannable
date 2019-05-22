@@ -31,10 +31,11 @@ import Event from './models/Event';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import { savePlain, toICal } from './utils';
-import Meta, { getDefaultData } from './models/Meta';
+import Meta from './models/Meta';
 import semester from './store/semester';
 import filter, { FilterState } from './store/filter';
 import schedule from './store/schedule';
+import { saveStatus } from './store/helper';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -84,14 +85,8 @@ export default class App extends Vue {
     get display() {
         return display;
     }
-    set display(newDisplay: Display) {
-        display.update(newDisplay);
-    }
     get filter() {
         return filter;
-    }
-    set filter(newFilter: FilterState) {
-        filter.update(newFilter);
     }
     get noti() {
         return noti;
@@ -185,7 +180,7 @@ export default class App extends Vue {
         if (this.sideBar.showSelectColor) schedule.switchSchedule(true);
     }
     onDocChange() {
-        this.saveStatus();
+        saveStatus();
     }
     print() {
         window.print();
@@ -238,91 +233,80 @@ export default class App extends Vue {
         }
     }
 
-    saveStatus() {
-        if (!this.currentSemester) return;
+    // /**
+    //  * parse schedules and settings stored locally for currentSemester.
+    //  * Use default value for fields that do not exist on local data.
+    //  */
+    // parseLocalData(raw_data: { [x: string]: any }) {
+    //     const defaultData = getDefaultData();
+    //     for (const field of Meta.storageFields) {
+    //         if (field === 'currentSemester') continue;
+    //         if (field === 'proposedSchedules') {
+    //             // if true, we're dealing with legacy storage
+    //             if (raw_data.proposedSchedule) {
+    //                 this.proposedScheduleIndex = 0;
+    //                 const s = Schedule.fromJSON(raw_data.proposedSchedule);
+    //                 if (s) this.proposedSchedule = s;
+    //             } else {
+    //                 const schedules: ScheduleJSON[] | undefined = raw_data.proposedSchedules;
+    //                 if (schedules && schedules.length) {
+    //                     const propSchedules = [];
+    //                     for (const schedule of schedules) {
+    //                         const temp = Schedule.fromJSON(schedule);
+    //                         if (temp) propSchedules.push(temp);
+    //                     }
 
-        const obj: { [x: string]: any } = Object.create(null);
-        for (const field of Meta.storageFields) {
-            obj[field] = this[field];
-        }
-        obj.storageVersion = Meta.storageVersion;
-        // note: toJSON() will automatically be called if such method exists on an object
-        localStorage.setItem(this.currentSemester.id, JSON.stringify(obj));
-    }
-    /**
-     * parse schedules and settings stored locally for currentSemester.
-     * Use default value for fields that do not exist on local data.
-     */
-    parseLocalData(raw_data: { [x: string]: any }) {
-        const defaultData = getDefaultData();
-        for (const field of Meta.storageFields) {
-            if (field === 'currentSemester') continue;
-            if (field === 'proposedSchedules') {
-                // if true, we're dealing with legacy storage
-                if (raw_data.proposedSchedule) {
-                    this.proposedScheduleIndex = 0;
-                    const s = Schedule.fromJSON(raw_data.proposedSchedule);
-                    if (s) this.proposedSchedule = s;
-                } else {
-                    const schedules: ScheduleJSON[] | undefined = raw_data.proposedSchedules;
-                    if (schedules && schedules.length) {
-                        const propSchedules = [];
-                        for (const schedule of schedules) {
-                            const temp = Schedule.fromJSON(schedule);
-                            if (temp) propSchedules.push(temp);
-                        }
-
-                        if (propSchedules.length) this.proposedSchedules = propSchedules;
-                        else this.proposedSchedules = defaultData.proposedSchedules;
-                        this.proposedScheduleIndex =
-                            raw_data.proposedScheduleIndex === undefined
-                                ? 0
-                                : raw_data.proposedScheduleIndex;
-                    } else {
-                        this.proposedSchedules = defaultData[field];
-                    }
-                }
-            } else if (this[field] instanceof Array) {
-                const raw_arr = raw_data[field];
-                if (raw_arr instanceof Array) {
-                    this[field] = raw_arr;
-                } else this[field] = defaultData[field];
-            } else if (this[field] instanceof Object) {
-                if (!raw_data[field]) {
-                    this[field] = defaultData[field];
-                    continue;
-                }
-                if (typeof this[field].fromJSON === 'function') {
-                    const parsed = this[field].fromJSON(raw_data[field]);
-                    if (parsed) this[field] = parsed;
-                    else {
-                        // noti.warn(`Fail to parse ${field}`);
-                        // console.warn('failed to parse', field);
-                        this[field] = defaultData[field];
-                    }
-                } else {
-                    if (
-                        Object.keys(this[field])
-                            .sort()
-                            .toString() ===
-                        Object.keys(raw_data[field])
-                            .sort()
-                            .toString()
-                    )
-                        this[field] = raw_data[field];
-                    else this[field] = defaultData[field];
-                }
-            } else if (typeof raw_data[field] === typeof this[field]) this[field] = raw_data[field];
-            else {
-                this[field] = defaultData[field];
-            }
-        }
-        if (!this.proposedSchedule.empty()) {
-            console.log('generating schedules from local data..');
-            this.currentSchedule = this.proposedSchedule;
-            this.generateSchedules();
-        }
-    }
+    //                     if (propSchedules.length) this.proposedSchedules = propSchedules;
+    //                     else this.proposedSchedules = defaultData.proposedSchedules;
+    //                     this.proposedScheduleIndex =
+    //                         raw_data.proposedScheduleIndex === undefined
+    //                             ? 0
+    //                             : raw_data.proposedScheduleIndex;
+    //                 } else {
+    //                     this.proposedSchedules = defaultData[field];
+    //                 }
+    //             }
+    //         } else if (this[field] instanceof Array) {
+    //             const raw_arr = raw_data[field];
+    //             if (raw_arr instanceof Array) {
+    //                 this[field] = raw_arr;
+    //             } else this[field] = defaultData[field];
+    //         } else if (this[field] instanceof Object) {
+    //             if (!raw_data[field]) {
+    //                 this[field] = defaultData[field];
+    //                 continue;
+    //             }
+    //             if (typeof this[field].fromJSON === 'function') {
+    //                 const parsed = this[field].fromJSON(raw_data[field]);
+    //                 if (parsed) this[field] = parsed;
+    //                 else {
+    //                     // noti.warn(`Fail to parse ${field}`);
+    //                     // console.warn('failed to parse', field);
+    //                     this[field] = defaultData[field];
+    //                 }
+    //             } else {
+    //                 if (
+    //                     Object.keys(this[field])
+    //                         .sort()
+    //                         .toString() ===
+    //                     Object.keys(raw_data[field])
+    //                         .sort()
+    //                         .toString()
+    //                 )
+    //                     this[field] = raw_data[field];
+    //                 else this[field] = defaultData[field];
+    //             }
+    //         } else if (typeof raw_data[field] === typeof this[field]) this[field] = raw_data[field];
+    //         else {
+    //             this[field] = defaultData[field];
+    //         }
+    //     }
+    //     if (!this.proposedSchedule.empty()) {
+    //         console.log('generating schedules from local data..');
+    //         this.currentSchedule = this.proposedSchedule;
+    //         this.generateSchedules();
+    //     }
+    // }
     onUploadJson(event: { target: EventTarget | null }) {
         const input = event.target as HTMLInputElement;
 

@@ -36,6 +36,7 @@ import { loadSemesterList } from './data/SemesterListLoader';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import { to12hr, savePlain, toICal } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
+import semester from './store/semester';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -65,8 +66,6 @@ export const NoCache = createDecorator((options, key) => {
 })
 export default class App extends Vue {
     [x: string]: any;
-    semesters: SemesterJSON[] = [];
-    currentSemester: SemesterJSON | null = null;
     /**
      * the index of the current schedule in the scheduleEvaluator.schedules array,
      * only applicable when generated=true
@@ -121,6 +120,12 @@ export default class App extends Vue {
     }
     get noti() {
         return noti;
+    }
+    get currentSemester() {
+        return semester.currentSemester;
+    }
+    get semesters() {
+        return semester.semesters;
     }
 
     // filter settings
@@ -212,7 +217,7 @@ export default class App extends Vue {
             const [pay1, pay2, pay3] = await Promise.all([
                 loadTimeMatrix(),
                 loadBuildingList(),
-                loadSemesterList()
+                semester.loadSemesters()
             ]);
             console[pay1.level](pay1.msg);
             if (pay1.payload) window.timeMatrix = pay1.payload;
@@ -220,12 +225,7 @@ export default class App extends Vue {
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            const semesters = pay3.payload;
-            if (pay3.level !== 'info') noti.notify(pay3);
-            console[pay3.level](pay3.msg);
-
-            if (semesters) {
-                window.semesters = this.semesters = semesters;
+            if (pay3) {
                 await this.selectSemester(0);
             }
             this.loading = false;
@@ -426,32 +426,9 @@ export default class App extends Vue {
         parsed_data?: { [x: string]: any },
         force = false
     ) {
-        // do a linear search to find the index of the semester given its string id
-        if (typeof semesterId === 'string') {
-            for (let i = 0; i < this.semesters.length; i++) {
-                const semester = this.semesters[i];
-                if (semester.id === semesterId) {
-                    semesterId = i;
-                    break;
-                }
-            }
-            // not found: return
-            if (typeof semesterId === 'string') return;
-        }
-
-        this.currentSemester = this.semesters[semesterId];
-        this.loading = true;
-
-        if (force) noti.info(`Updating ${this.currentSemester.name} data...`);
-        const result = await loadSemesterData(semesterId, force);
-        if (result.level !== 'info') noti.notify(result);
-        console[result.level](result.msg);
-
-        //  if the a catalog object is returned
-        if (result.payload) {
-            window.catalog = result.payload;
-            this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
-            const data = localStorage.getItem(this.currentSemester.id);
+        const result = await semester.selectSemester(semesterId, force);
+        if (result) {
+            const data = localStorage.getItem(this.currentSemester!.id);
 
             let raw_data: { [x: string]: any } = {};
             if (parsed_data) {

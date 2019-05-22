@@ -9,11 +9,12 @@
  */
 import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
-import { display, DisplayState, Display } from './store/display';
+import { display, Display } from './store/display';
 import { noti } from './store/notification';
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassList from './components/ClassList.vue';
+import FilterView from './components/FilterView.vue';
 import DisplayView from './components/DisplayView.vue';
 import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
@@ -23,7 +24,6 @@ import Palette from './components/Palette.vue';
 import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
-import draggable from 'vuedraggable';
 
 import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
@@ -31,12 +31,11 @@ import { SemesterJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import { loadSemesterData } from './data/CatalogLoader';
-import { loadSemesterList } from './data/SemesterListLoader';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
-import { to12hr, savePlain, toICal } from './utils';
+import { savePlain, toICal } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
 import semester from './store/semester';
+import filter, { FilterState } from './store/filter';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -53,11 +52,11 @@ export const NoCache = createDecorator((options, key) => {
     components: {
         ClassList,
         DisplayView,
+        FilterView,
         Pagination,
         GridSchedule,
         SectionModal,
         CourseModal,
-        draggable,
         Palette,
         EventView,
         Information,
@@ -118,6 +117,12 @@ export default class App extends Vue {
     set display(newDisplay: Display) {
         display.update(newDisplay);
     }
+    get filter() {
+        return filter;
+    }
+    set filter(newFilter: FilterState) {
+        filter.update(newFilter);
+    }
     get noti() {
         return noti;
     }
@@ -127,20 +132,6 @@ export default class App extends Vue {
     get semesters() {
         return semester.semesters;
     }
-
-    // filter settings
-    /**
-     * index 0 - 4: whether Mo - Fr are selected
-     *
-     * 6: start time, of 24 hour format
-     *
-     * 7: end time, of 24 hour format
-     */
-    timeSlots: Array<[boolean, boolean, boolean, boolean, boolean, string, string]> = [];
-    allowWaitlist = true;
-    allowClosed = true;
-    sortOptions = ScheduleEvaluator.getDefaultOptions();
-    sortModes = ScheduleEvaluator.sortModes;
 
     // other
     loading = false;
@@ -310,9 +301,7 @@ export default class App extends Vue {
             this.currentSchedule = this.proposedSchedule;
         }
     }
-    updateFilterDay(i: number, j: number) {
-        this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
-    }
+
     switchSideBar(key: string) {
         this.getClass('');
         for (const other in this.sideBar) {
@@ -455,10 +444,10 @@ export default class App extends Vue {
             return noti.warn(`There are no classes in your schedule!`);
 
         const status = [];
-        if (!this.allowWaitlist) status.push('Wait List');
-        if (!this.allowClosed) status.push('Closed');
+        if (!filter.allowWaitlist) status.push('Wait List');
+        if (!filter.allowClosed) status.push('Closed');
 
-        const timeSlots = this.computeFilter();
+        const timeSlots = filter.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
         if (timeSlots === null) {
@@ -466,7 +455,7 @@ export default class App extends Vue {
             return;
         }
 
-        if (!this.validateSortOptions()) return;
+        if (!filter.validateSortOptions()) return;
 
         this.loading = true;
         const generator = new ScheduleGenerator(window.catalog, window.buildingList);
@@ -475,9 +464,9 @@ export default class App extends Vue {
                 events: this.currentSchedule.events,
                 timeSlots,
                 status,
-                sortOptions: this.sortOptions,
-                combineSections: this.display.combineSections,
-                maxNumSchedules: this.display.maxNumSchedules
+                sortOptions: filter.sortOptions,
+                combineSections: display.combineSections,
+                maxNumSchedules: display.maxNumSchedules
             });
             window.scheduleEvaluator.clear();
             window.scheduleEvaluator = evaluator;
@@ -493,49 +482,6 @@ export default class App extends Vue {
             noti.error(err.message);
             this.saveStatus();
             this.cpIndex = -1;
-            this.loading = false;
-        }
-    }
-
-    validateSortOptions() {
-        if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-            noti.error('You must have at least one sort option!');
-            return false;
-        } else if (
-            Object.values(this.sortOptions.sortBy).some(x => x.name === 'distance' && x.enabled) &&
-            (!window.buildingList || !window.timeMatrix)
-        ) {
-            noti.error('Building list fails to load. Please disable "walking distance"');
-            return false;
-        }
-        return true;
-    }
-
-    changeSorting(optIdx?: number) {
-        if (!this.validateSortOptions()) return;
-        if (optIdx !== undefined) {
-            const option = this.sortOptions.sortBy[optIdx];
-
-            if (option.enabled) {
-                // disable options that are mutually exclusive to this one
-                for (const key of option.exclusive) {
-                    for (const opt of this.sortOptions.sortBy) {
-                        if (opt.name === key) opt.enabled = false;
-                    }
-                }
-            }
-        }
-        if (!window.scheduleEvaluator.empty()) {
-            this.loading = true;
-            window.scheduleEvaluator.changeSort(this.sortOptions, true);
-            if (!this.generated) {
-                this.switchSchedule(true);
-            } else {
-                // re-assign the current schedule
-                this.currentSchedule = window.scheduleEvaluator.getSchedule(
-                    this.currentScheduleIndex
-                );
-            }
             this.loading = false;
         }
     }
@@ -624,42 +570,6 @@ export default class App extends Vue {
             this.currentSchedule = this.proposedSchedule;
             this.generateSchedules();
         }
-    }
-    removeTimeSlot(n: number) {
-        this.timeSlots.splice(n, 1);
-    }
-    addTimeSlot() {
-        this.timeSlots.push([false, false, false, false, false, '', '']);
-    }
-    /**
-     * Preprocess the time filters and convert them to array of event.
-     * returns null on parsing error
-     */
-    computeFilter(): Event[] | null {
-        const timeSlotsRecord = [];
-        for (const time of this.timeSlots) {
-            let days = '';
-            for (let j = 0; j < 5; j++) {
-                if (time[j]) days += Meta.days[j];
-            }
-
-            if (!days) continue;
-
-            const startTime = time[5].split(':');
-            const endTime = time[6].split(':');
-            if (
-                isNaN(+startTime[0]) ||
-                isNaN(+startTime[1]) ||
-                isNaN(+endTime[0]) ||
-                isNaN(+endTime[1])
-            ) {
-                noti.error('Invalid time input.');
-                return null;
-            }
-            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
-            timeSlotsRecord.push(new Event(days, false));
-        }
-        return timeSlotsRecord;
     }
     onUploadJson(event: { target: EventTarget | null }) {
         const input = event.target as HTMLInputElement;

@@ -146,10 +146,7 @@ export default class Meta {
         'cpIndex',
 
         // filters
-        'allowWaitlist',
-        'allowClosed',
-        'sortOptions',
-        'timeSlots',
+        'filter',
 
         // settings
         'display'

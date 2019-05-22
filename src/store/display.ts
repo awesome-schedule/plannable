@@ -6,8 +6,8 @@
 /**
  *
  */
-import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
-import store from '.';
+
+import { Vue, Component } from 'vue-property-decorator';
 
 const _defaultDisplay = {
     showTime: false,
@@ -32,12 +32,8 @@ export interface DisplayState extends _DisplayState {
     [x: string]: any;
 }
 
-@Module({
-    store,
-    name: 'display',
-    dynamic: true
-})
-class Display extends VuexModule implements DisplayState {
+@Component
+export class Display extends Vue implements DisplayState {
     [x: string]: any;
     public showTime = false;
     public showRoom = true;
@@ -52,13 +48,21 @@ class Display extends VuexModule implements DisplayState {
     public combineSections = true;
     public maxNumSchedules = 200000;
 
-    @Mutation
-    update(newSettings: Partial<DisplayState>) {
-        for (const key in newSettings) {
-            this[key] = newSettings[key];
+    update(newDisplay: Partial<Display>) {
+        for (const key in _defaultDisplay) {
+            const newVal = newDisplay[key];
+            if (newVal) this[key] = newDisplay[key];
         }
+    }
+
+    toJSON() {
+        const result: Partial<DisplayState> = {};
+        for (const key in _defaultDisplay) {
+            result[key] = this[key];
+        }
+        return result;
     }
 }
 
-export const display = getModule(Display);
+export const display = new Display();
 export default display;

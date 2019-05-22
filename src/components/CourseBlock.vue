@@ -15,15 +15,15 @@
                     {{ firstSec.department }} {{ firstSec.number }}-{{ firstSec.section }}
                     {{ firstSec.type }}
                 </div>
-                <div v-if="showInstructor" class="ml-2 crs-info">
+                <div v-if="display.showInstructor" class="ml-2 crs-info">
                     {{ firstSec.instructors.join(', ') }}
                 </div>
-                <div v-if="showRoom && room" class="ml-2 crs-info">
+                <div v-if="display.showRoom && room" class="ml-2 crs-info">
                     {{ room }}
                 </div>
-                <template v-if="showTime">
+                <template v-if="display.showTime">
                     <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
-                        <div v-if="showTime" class="ml-2 crs-info">
+                        <div v-if="display.showTime" class="ml-2 crs-info">
                             {{ meeting.days }}
                         </div>
                     </div>
@@ -37,14 +37,14 @@
                     }}
                     {{ firstSec.type }}
                 </div>
-                <template v-if="showTime">
+                <template v-if="display.showTime">
                     <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
-                        <div v-if="showTime" class="ml-2 crs-info">
+                        <div v-if="display.showTime" class="ml-2 crs-info">
                             {{ meeting.days }}
                         </div>
                     </div>
                 </template>
-                <div v-if="showInstructor" class="ml-2 crs-info">
+                <div v-if="display.showInstructor" class="ml-2 crs-info">
                     {{ firstSec.instructors.join(', ') }} and
                     {{
                         scheduleBlock.section.sections.reduce(
@@ -54,7 +54,7 @@
                     }}
                     more
                 </div>
-                <div v-if="showRoom" class="ml-2 crs-info">
+                <div v-if="display.showRoom" class="ml-2 crs-info">
                     {{ firstSec.meetings[0].room }} and
                     {{ scheduleBlock.section.sections.length - 1 }} more
                 </div>

@@ -13,9 +13,8 @@ import Course from '../models/Course';
 import Event from '../models/Event';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { State } from 'vuex-class';
-import { RootState } from '../store';
 import modal from '../store/modal';
+import display from '@/store/display';
 
 @Component
 export default class CourseBlock extends Vue {
@@ -24,11 +23,9 @@ export default class CourseBlock extends Vue {
     @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
 
-    @State((store: RootState) => store.display.showTime) readonly showTime!: boolean;
-    @State((store: RootState) => store.display.showRoom) readonly showRoom!: boolean;
-    @State((store: RootState) => store.display.showInstructor) readonly showInstructor!: boolean;
-    @State((store: RootState) => store.display.partialHeight) readonly partialHeight!: number;
-    @State((store: RootState) => store.display.fullHeight) readonly fullHeight!: number;
+    get display() {
+        return display;
+    }
 
     mobile = window.screen.width < 450;
 
@@ -49,14 +46,15 @@ export default class CourseBlock extends Vue {
         for (let i = this.absoluteEarliest; i < temp; i++) {
             px += this.heightInfo[i - this.absoluteEarliest];
         }
-        px += (min / 30) * this.fullHeight;
+        px += (min / 30) * this.display.fullHeight;
         return px;
     }
 
-    get firstSec(): Section | undefined {
+    get firstSec(): Section {
         const section = this.scheduleBlock.section;
         if (section instanceof Course) return section.getFirstSection();
         else if (section instanceof Section) return section;
+        return (section as any) as Section;
     }
 
     get room() {

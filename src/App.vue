@@ -1,5 +1,5 @@
 <template>
-    <div id="app w-100" @change="onDocChange">
+    <div id="app" class="w-100" @change="onDocChange">
         <course-modal></course-modal>
         <section-modal :semester="currentSemester"></section-modal>
 

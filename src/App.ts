@@ -9,7 +9,7 @@
  */
 import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
-import displaySettings, { DisplayState, defaultDisplay } from './store/display';
+import { display, DisplayState, Display } from './store/display';
 import { noti } from './store/notification';
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
@@ -111,7 +111,12 @@ export default class App extends Vue {
     inputCourses: Course[] | null = null;
 
     // display options
-    display: DisplayState = Object.assign({}, defaultDisplay);
+    get display() {
+        return display;
+    }
+    set display(newDisplay: Display) {
+        display.update(newDisplay);
+    }
 
     // filter settings
     /**
@@ -181,11 +186,6 @@ export default class App extends Vue {
             if (this.loading) noti.info('Loading...', 3600);
             else noti.clear();
         }
-    }
-
-    @Watch('display', { deep: true })
-    displayWatch() {
-        displaySettings.update(this.display);
     }
 
     @Watch('display.multiSelect')

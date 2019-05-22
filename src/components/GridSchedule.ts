@@ -9,8 +9,7 @@ import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import { RootState } from '../store';
-import { State } from 'vuex-class';
+import display from '../store/display';
 
 @Component({
     components: {
@@ -20,14 +19,7 @@ import { State } from 'vuex-class';
 export default class GridSchedule extends Vue {
     @Prop(Schedule) readonly schedule!: Schedule;
 
-    @State((store: RootState) => store.display.standard) readonly standard!: boolean;
-    @State((store: RootState) => store.display.earliest) readonly earliest!: string;
-    @State((store: RootState) => store.display.latest) readonly latest!: string;
-    @State((store: RootState) => store.display.showTime) readonly showTime!: boolean;
-    @State((store: RootState) => store.display.showRoom) readonly showRoom!: boolean;
-    @State((store: RootState) => store.display.showInstructor) readonly showInstructor!: boolean;
-    @State((store: RootState) => store.display.partialHeight) readonly partialHeight!: number;
-    @State((store: RootState) => store.display.fullHeight) readonly fullHeight!: number;
+    display = display;
 
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
@@ -72,7 +64,7 @@ export default class GridSchedule extends Vue {
      * return the block in which the schedule starts with
      */
     get absoluteEarliest() {
-        const early = this.validate(this.earliest, '8:00');
+        const early = this.validate(this.display.earliest, '8:00');
 
         if (timeToNum(early) > this.earliestBlock) {
             return this.earliestBlock;
@@ -84,7 +76,7 @@ export default class GridSchedule extends Vue {
      * return the block in which the schedule ends with
      */
     get absoluteLatest() {
-        const late = this.validate(this.latest, '19:00');
+        const late = this.validate(this.display.latest, '19:00');
         if (timeToNum(late) < this.latestBlock) {
             return this.latestBlock;
         } else {
@@ -120,7 +112,7 @@ export default class GridSchedule extends Vue {
             reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
         }
 
-        return window.screen.width > 450 ? (this.standard ? stdTime : time) : reducedTime;
+        return window.screen.width > 450 ? (this.display.standard ? stdTime : time) : reducedTime;
     }
     get items() {
         const arr: number[] = [];
@@ -132,14 +124,14 @@ export default class GridSchedule extends Vue {
     }
     get heightInfo() {
         const info: number[] = new Array(this.numRow);
-        info.fill(this.partialHeight);
+        info.fill(this.display.partialHeight);
         const earliest = this.absoluteEarliest;
         for (const key in this.schedule.days) {
             for (const course of this.schedule.days[key]) {
                 const startTime = timeToNum(course.start);
                 const endTime = timeToNum(course.end);
                 for (let i = startTime; i <= endTime; i++) {
-                    info[i - earliest] = this.fullHeight;
+                    info[i - earliest] = this.display.fullHeight;
                 }
             }
         }

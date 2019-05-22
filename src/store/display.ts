@@ -6,7 +6,6 @@
 /**
  *
  */
-
 import { Vue, Component } from 'vue-property-decorator';
 
 const _defaultDisplay = {

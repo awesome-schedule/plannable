@@ -117,6 +117,9 @@ export default class App extends Vue {
     set display(newDisplay: Display) {
         display.update(newDisplay);
     }
+    get noti() {
+        return noti;
+    }
 
     // filter settings
     /**

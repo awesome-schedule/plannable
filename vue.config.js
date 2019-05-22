@@ -23,11 +23,6 @@ module.exports = {
                                 global: 'Vue'
                             },
                             {
-                                module: 'vuex',
-                                entry: '//unpkg.com/vuex@3.1.0/dist/vuex.min.js',
-                                global: 'Vuex'
-                            },
-                            {
                                 module: 'vuedraggable',
                                 entry: [
                                     '//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js',

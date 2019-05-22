@@ -712,18 +712,18 @@
 
         <transition name="fade">
             <div
-                v-if="$store.state.noti.msg.length > 0"
+                v-if="noti.msg.length > 0"
                 id="noti"
                 v-top
                 class="alert mt-1 mb-0"
-                :class="`alert-${$store.state.noti.class}`"
+                :class="`alert-${noti.class}`"
                 :style="
                     `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
                         mobile ? '11' : scheduleLeft + 5
                     }vw;`
                 "
             >
-                {{ $store.state.noti.msg }}
+                {{ noti.msg }}
                 <button type="button" class="close" style="align:center" @click="clearNoti">
                     <span aria-hidden="true">&times;</span>
                 </button>

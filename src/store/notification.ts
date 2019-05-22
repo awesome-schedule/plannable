@@ -6,8 +6,7 @@
 /**
  *
  */
-import { Module, VuexModule, Mutation, getModule } from 'vuex-module-decorators';
-import store from '.';
+import { Vue, Component } from 'vue-property-decorator';
 
 /**
  * the noti level type corresponds to the three different log levels available in Console
@@ -45,44 +44,29 @@ export const TYPES = Object.freeze({
     warn: 'warning'
 }) as { [x: string]: NotiClass };
 
-@Module({
-    store,
-    name: 'noti',
-    dynamic: true
-})
-class Notification extends VuexModule implements NotiState {
+@Component
+export class Notification extends Vue implements NotiState {
     public msg: string = '';
     public class: NotiClass = '';
-
-    @Mutation
-    public set({ msg, type }: { msg: string; type: NotiClass }) {
-        this.msg = msg;
-        this.class = type;
-    }
-}
-
-/**
- * the noti wrapper wraps around the notification store so it is easier to mutate the state of the notification.
- */
-// tslint:disable-next-line
-class NotiWrapper {
-    public noti = getModule(Notification);
     private job: number | null = null;
 
     public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5) {
         if (this.job) window.clearTimeout(this.job);
         if (typeof msg === 'string') {
-            this.noti.set({ msg, type: TYPES[type] });
+            this.msg = msg;
+            this.class = TYPES[type];
             this.clear(timeout);
         } else {
-            this.noti.set({ msg: msg.msg, type: TYPES[msg.level] });
+            this.msg = msg.msg;
+            this.class = TYPES[msg.level];
             this.clear(timeout);
         }
     }
 
     public clear(timeout = 0) {
         if (timeout <= 0) {
-            this.noti.set({ msg: '', type: '' });
+            this.msg = '';
+            this.class = '';
             this.job = null;
         } else {
             this.job = window.setTimeout(() => this.clear(0), timeout * 1000);
@@ -103,5 +87,5 @@ class NotiWrapper {
     }
 }
 
-export const noti = new NotiWrapper();
+export const noti = new Notification();
 export default noti;

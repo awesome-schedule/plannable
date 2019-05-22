@@ -12,8 +12,6 @@ import axios from 'axios';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import Catalog, { Semester } from './models/Catalog';
 import Vuetify from 'vuetify';
-import store, { RootState } from './store';
-import { Store } from 'vuex';
 import { openLousList, openVAGrade } from './utils';
 
 Vue.use(Vuetify);
@@ -38,12 +36,6 @@ declare module 'vue/types/vue' {
     }
 }
 
-declare module 'vue/types/options' {
-    interface ComponentOptions<V extends Vue> {
-        store?: Store<RootState>;
-    }
-}
-
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
     inserted: el => {
@@ -60,6 +52,5 @@ Vue.prototype.openLousList = openLousList;
 Vue.prototype.openVAGrade = openVAGrade;
 
 new Vue({
-    store,
     render: h => h(App)
 }).$mount('#app');

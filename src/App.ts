@@ -13,7 +13,7 @@ import { display, Display } from './store/display';
 import { noti } from './store/notification';
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import ClassList from './components/ClassList.vue';
+import ClassView from './components/ClassView.vue';
 import FilterView from './components/FilterView.vue';
 import DisplayView from './components/DisplayView.vue';
 import Pagination from './components/Pagination.vue';
@@ -25,7 +25,6 @@ import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
 
-import Course from './models/Course';
 import Schedule, { ScheduleJSON } from './models/Schedule';
 import { SemesterJSON } from './models/Catalog';
 import Event from './models/Event';
@@ -36,6 +35,7 @@ import { savePlain, toICal } from './utils';
 import Meta, { getDefaultData } from './models/Meta';
 import semester from './store/semester';
 import filter, { FilterState } from './store/filter';
+import schedule from './store/schedule';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -50,7 +50,7 @@ export const NoCache = createDecorator((options, key) => {
 
 @Component({
     components: {
-        ClassList,
+        ClassView,
         DisplayView,
         FilterView,
         Pagination,
@@ -65,31 +65,6 @@ export const NoCache = createDecorator((options, key) => {
 })
 export default class App extends Vue {
     [x: string]: any;
-    /**
-     * the index of the current schedule in the scheduleEvaluator.schedules array,
-     * only applicable when generated=true
-     */
-    currentScheduleIndex = 0;
-    /**
-     * currently rendered schedule
-     */
-    currentSchedule = new Schedule();
-    /**
-     * the array of proposed schedules
-     */
-    proposedSchedules = [new Schedule()];
-    /**
-     * the index of the active proposed
-     */
-    proposedScheduleIndex = 0;
-    /**
-     * The index of the proposed schedule corresponding to the generated schedule
-     */
-    cpIndex = -1;
-    /**
-     * indicates whether the currently showing schedule is the generated schedule
-     */
-    generated = false;
 
     /**
      * sidebar display status
@@ -105,10 +80,6 @@ export default class App extends Vue {
         showInfo: false,
         showExternal: false
     };
-
-    // autocompletion related fields
-    isEntering = false;
-    inputCourses: Course[] | null = null;
 
     // display options
     get display() {
@@ -131,6 +102,9 @@ export default class App extends Vue {
     }
     get semesters() {
         return semester.semesters;
+    }
+    get schedule() {
+        return schedule;
     }
 
     // other
@@ -162,24 +136,6 @@ export default class App extends Vue {
     get scheduleLeft() {
         return this.sideBarActive ? 23 : 3;
     }
-    /**
-     * get the list of current ids, sorted in alphabetical order of the keys
-     */
-    get currentIds(): Array<[string, string]> {
-        return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
-            a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
-        );
-    }
-    set proposedSchedule(schedule: Schedule) {
-        // need Vue's reactivity
-        this.$set(this.proposedSchedules, this.proposedScheduleIndex, schedule);
-    }
-    /**
-     * the proposed schedule that is currently active
-     */
-    get proposedSchedule() {
-        return this.proposedSchedules[this.proposedScheduleIndex];
-    }
 
     @Watch('loading')
     loadingWatch() {
@@ -191,12 +147,6 @@ export default class App extends Vue {
 
     @Watch('display.multiSelect')
     multiSelectWatch() {
-        this.currentSchedule.computeSchedule();
-    }
-
-    @Watch('display.combineSections')
-    combineSectionsWatch() {
-        if (this.generated) this.generateSchedules();
         this.currentSchedule.computeSchedule();
     }
 
@@ -222,86 +172,10 @@ export default class App extends Vue {
             this.loading = false;
         })();
     }
-    clearNoti() {
-        noti.clear();
-    }
-    /**
-     * whether there're schedules generated. Because script between <template>
-     * tag cannot access global objects, we need a method
-     */
-    generatedEmpty() {
-        return window.scheduleEvaluator.empty();
-    }
-    /**
-     * switch to next or previous proposed schedule. has bound checking.
-     */
-    switchProposed(index: number) {
-        if (index < this.proposedSchedules.length && index >= 0) {
-            this.proposedScheduleIndex = index;
-            this.switchSchedule(false);
-        }
-        this.saveStatus();
-    }
-    newProposed() {
-        this.proposedSchedules.push(new Schedule());
-        this.switchProposed(this.proposedSchedules.length - 1);
-    }
-    /**
-     * copy the current schedule and append to the proposedSchedule array.
-     * Immediately switch to the last proposed schedule.
-     */
-    copyCurrent() {
-        const len = this.proposedSchedules.length;
-        this.proposedSchedules.push(this.proposedSchedule.copy());
-        this.switchProposed(len);
-    }
-    deleteProposed() {
-        if (this.proposedSchedules.length === 1) return;
-        const idx = this.proposedScheduleIndex;
-
-        if (!confirm(`Are you sure to delete schedule ${idx + 1}?`)) return;
-
-        // if the schedule to be deleted corresponds to generated schedules,
-        // this deletion invalidates the generated schedules immediately.
-        if (idx === this.cpIndex) {
-            window.scheduleEvaluator.clear();
-            this.cpIndex = -1;
-        }
-        this.proposedSchedules.splice(idx, 1);
-        if (idx >= this.proposedSchedules.length) {
-            this.switchProposed(idx - 1);
-        } else {
-            this.switchProposed(idx);
-        }
-        this.saveStatus();
-    }
     editEvent(event: Event) {
         if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
         this.eventToEdit = event;
     }
-    switchSchedule(generated: boolean) {
-        if (generated) {
-            // don't do anything if already in "generated" mode
-            // or there are no generated schedules
-            // or the generated schedules do not correspond to the current schedule
-            if (
-                !this.generated &&
-                !window.scheduleEvaluator.empty() &&
-                this.cpIndex === this.proposedScheduleIndex
-            ) {
-                this.generated = true;
-                this.proposedSchedule = this.currentSchedule;
-                this.switchPage(
-                    this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex,
-                    true
-                );
-            }
-        } else {
-            this.generated = false;
-            this.currentSchedule = this.proposedSchedule;
-        }
-    }
-
     switchSideBar(key: string) {
         this.getClass('');
         for (const other in this.sideBar) {
@@ -317,14 +191,7 @@ export default class App extends Vue {
     print() {
         window.print();
     }
-    clear() {
-        this.currentSchedule.clean();
-        this.proposedSchedule.clean();
-        this.generated = false;
-        window.scheduleEvaluator.clear();
-        this.cpIndex = -1;
-        this.saveStatus();
-    }
+
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             this.currentSchedule.clean();
@@ -335,67 +202,6 @@ export default class App extends Vue {
         }
     }
 
-    removeCourse(key: string) {
-        this.currentSchedule.remove(key);
-        if (this.generated) {
-            noti.warn(`You're editing the generated schedule!`, 3);
-        } else {
-            this.saveStatus();
-        }
-    }
-    /**
-     * @see Schedule.update
-     */
-    updateCourse(key: string, section: number, remove: boolean = false) {
-        this.currentSchedule.update(key, section, remove);
-        if (this.generated) {
-            noti.warn(`You're editing the generated schedule!`, 3);
-        } else {
-            this.saveStatus();
-        }
-        // note: adding a course to schedule.All cannot be detected by Vue.
-        // Must use forceUpdate to re-render component
-        (this.$refs.selectedClassList as Vue).$forceUpdate();
-        const classList = this.$refs.enteringClassList;
-        if (classList instanceof Vue) (classList as Vue).$forceUpdate();
-    }
-    /**
-     * Switch to `idx` page. If update is true, also update the pagination status.
-     * @param idx
-     * @param update  whether to update the pagination status
-     */
-    switchPage(idx: number, update = false) {
-        if (0 <= idx && idx < window.scheduleEvaluator.size()) {
-            this.currentScheduleIndex = idx;
-            if (update) {
-                this.tempScheduleIndex = idx;
-            } else {
-                this.tempScheduleIndex = null;
-            }
-            this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
-            this.saveStatus();
-        }
-    }
-    /**
-     * get classes that match the input query.
-     * Exit "entering" mode on falsy parameter (set `isEntering` to false)
-     *
-     * @see Catalog.search
-     */
-    getClass(query: string) {
-        if (!query) {
-            this.isEntering = false;
-            this.inputCourses = null;
-            return;
-        }
-        // if current schedule is displayed, switch to proposed schedule
-        // because we're adding stuff to the proposed schedule
-        if (this.generated) {
-            this.switchSchedule(false);
-        }
-        this.inputCourses = window.catalog.search(query);
-        this.isEntering = true;
-    }
     /**
      * Select a semester and fetch all its associated data.
      *
@@ -419,22 +225,18 @@ export default class App extends Vue {
         if (result) {
             const data = localStorage.getItem(this.currentSemester!.id);
 
-            let raw_data: { [x: string]: any } = {};
-            if (parsed_data) {
-                raw_data = parsed_data;
-            } else if (data) {
-                raw_data = JSON.parse(data);
-            }
+            // let raw_data: { [x: string]: any } = {};
+            // if (parsed_data) {
+            //     raw_data = parsed_data;
+            // } else if (data) {
+            //     raw_data = JSON.parse(data);
+            // }
 
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            this.parseLocalData(raw_data);
-            this.loading = false;
+            // this.generated = false;
+            // window.scheduleEvaluator.clear();
+            // this.parseLocalData(raw_data);
+            // this.loading = false;
         }
-    }
-    closeClassList() {
-        (this.$refs.classSearch as HTMLInputElement).value = '';
-        this.getClass('');
     }
     generateSchedules() {
         if (this.generated) this.currentSchedule = this.proposedSchedule;

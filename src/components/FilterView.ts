@@ -1,7 +1,7 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import filter from '../store/filter';
 import display from '../store/display';
 import Meta from '../models/Meta';
@@ -27,4 +27,10 @@ export default class FilterView extends Vue {
     dragEnd() {
         if (filter.sortOptions.mode === 0) filter.changeSorting(undefined);
     }
+
+    // @Watch('display.combineSections')
+    // combineSectionsWatch() {
+    //     if (this.generated) this.generateSchedules();
+    //     this.currentSchedule.computeSchedule();
+    // }
 }

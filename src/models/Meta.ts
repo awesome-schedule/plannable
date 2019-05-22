@@ -8,8 +8,8 @@
  *
  */
 import Schedule from './Schedule';
-import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
-import { defaultDisplay } from '@/store/display';
+import { getDefaultDisplay } from '@/store/display';
+import { getDefaultFilter } from '@/store/filter';
 
 /**
  * the raw catalog is represented as a big dictionary
@@ -170,13 +170,8 @@ export function getDefaultData() {
         cpIndex: -1,
 
         // display options
-        display: Object.assign({}, defaultDisplay),
-
+        display: getDefaultDisplay(),
         // filter options
-        timeSlots: [],
-        allowWaitlist: true,
-        allowClosed: true,
-        sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        combineSections: true
+        filter: getDefaultFilter()
     } as { [x: string]: any };
 }

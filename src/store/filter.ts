@@ -21,6 +21,12 @@ export interface FilterState extends _FilterState {
     [x: string]: any;
 }
 
+export function getDefaultFilter() {
+    const result = Object.assign({}, _defaultFilter);
+    result.sortOptions = ScheduleEvaluator.getDefaultOptions();
+    return result;
+}
+
 @Component
 export class FilterStore extends Vue implements FilterState {
     [x: string]: any;

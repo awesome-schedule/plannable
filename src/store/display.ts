@@ -23,7 +23,9 @@ const _defaultDisplay = {
     maxNumSchedules: 200000
 };
 
-export const defaultDisplay = Object.freeze(_defaultDisplay);
+export function getDefaultDisplay() {
+    return Object.assign({}, _defaultDisplay);
+}
 
 type _DisplayState = typeof _defaultDisplay;
 

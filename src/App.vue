@@ -77,189 +77,7 @@
         </nav>
         <!-- Tab Icons End (Leftmost bar) -->
 
-        <nav v-if="sideBar.showSelectClass" class="d-block bg-light sidebar">
-            <div class="dropdown">
-                <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
-                    <span v-if="loading" class="spinner-border spinner-border-sm"></span>
-                    {{ currentSemester ? currentSemester.name : 'Select Semester' }}
-                    <i class="fas fa-caret-down ml-4" style="font-size: 20px;"></i>
-                </button>
-                <div v-if="semesters.length" class="dropdown-menu w-100">
-                    <a
-                        v-for="(semester, idx) in semesters"
-                        :key="semester.id"
-                        class="dropdown-item w-100"
-                        href="#"
-                        @click="selectSemester(idx)"
-                        >{{ semester.name }}
-                    </a>
-                </div>
-            </div>
-            <div class="input-group mt-2">
-                <input
-                    ref="classSearch"
-                    type="text"
-                    class="form-control form-control-sm"
-                    placeholder="Title/Number/Topic/Prof./Desc."
-                    @input="getClass($event.target.value)"
-                    @keyup.esc="closeClassList"
-                />
-                <div class="input-group-append">
-                    <span
-                        class="input-group-text px-2"
-                        :class="{ 'click-icon': isEntering }"
-                        @click="closeClassList"
-                        ><i v-if="isEntering && sideBar.showSelectClass" class="fas fa-times"> </i>
-                        <i v-else class="fas fa-search"></i>
-                    </span>
-                </div>
-            </div>
-
-            <div v-if="isEntering" ref="classList" class="card card-body p-1">
-                <ClassList
-                    ref="enteringClassList"
-                    :courses="inputCourses"
-                    :schedule="currentSchedule"
-                    :is-entering="isEntering"
-                    :generated="generated"
-                    @update_course="updateCourse"
-                    @close="closeClassList"
-                ></ClassList>
-            </div>
-            <div>
-                <div class="mt-3">
-                    <button
-                        class="btn btn-info nav-btn"
-                        :title="
-                            generated
-                                ? 'Click to edit your schedule'
-                                : 'Click to view generated schedules'
-                        "
-                        @click="switchSchedule(!generated)"
-                    >
-                        {{
-                            generated
-                                ? `View Schedule: ${currentScheduleIndex + 1}`
-                                : 'Edit Classes'
-                        }}
-                        <i class="fas fa-exchange-alt ml-4" style="font-size: 18px;"></i>
-                    </button>
-                </div>
-                <div class="mx-1">
-                    <div class="mx-3">
-                        <div
-                            class="row no-gutters align-items-center justify-content-between"
-                            style="font-size: 24px"
-                        >
-                            <div class="col-auto">
-                                <i
-                                    class="fas fa-long-arrow-alt-left"
-                                    title="previous schedule"
-                                    :class="
-                                        proposedScheduleIndex > 0 ? 'click-icon' : 'icon-disabled'
-                                    "
-                                    @click="switchProposed(proposedScheduleIndex - 1)"
-                                ></i>
-                            </div>
-                            <div class="col-auto" style="font-size: 20px;">
-                                {{ proposedScheduleIndex + 1 }}
-                            </div>
-                            <div class="col-auto">
-                                <i
-                                    class="fas fa-long-arrow-alt-right"
-                                    title="next schedule"
-                                    :class="
-                                        proposedScheduleIndex < proposedSchedules.length - 1
-                                            ? 'click-icon'
-                                            : 'icon-disabled'
-                                    "
-                                    @click="switchProposed(proposedScheduleIndex + 1)"
-                                ></i>
-                            </div>
-                            <div class="col-auto">
-                                <i
-                                    class="far fa-calendar-plus click-icon"
-                                    title="new schedule"
-                                    @click="newProposed"
-                                ></i>
-                            </div>
-                            <div class="col-auto">
-                                <i
-                                    class="far fa-copy click-icon"
-                                    title="copy the current schedule to a new schedule"
-                                    @click="copyCurrent"
-                                >
-                                </i>
-                            </div>
-                            <div class="col-auto">
-                                <i
-                                    class="far fa-calendar-times"
-                                    :class="
-                                        proposedSchedules.length > 1
-                                            ? 'click-icon'
-                                            : 'icon-disabled'
-                                    "
-                                    title="delete current schedule"
-                                    @click="deleteProposed()"
-                                ></i>
-                            </div>
-                        </div>
-                    </div>
-                    <ClassList
-                        ref="selectedClassList"
-                        :courses="currentSchedule.currentCourses"
-                        :schedule="currentSchedule"
-                        :generated="generated"
-                        @update_course="updateCourse"
-                        @remove_course="removeCourse"
-                    ></ClassList>
-                    <div class="btn-group mt-3 w-100">
-                        <button
-                            type="button"
-                            class="btn btn-outline-info"
-                            @click="generateSchedules"
-                        >
-                            Generate
-                        </button>
-                        <button
-                            class="btn btn-outline-info"
-                            title="Remove all classes from the current schedule"
-                            @click="clear"
-                        >
-                            Clean
-                        </button>
-                    </div>
-                    <div
-                        title="render all selected sections (except for 'any section')"
-                        class="custom-control custom-checkbox mt-2 mx-2"
-                    >
-                        <input
-                            id="multiSelect"
-                            v-model="display.multiSelect"
-                            type="checkbox"
-                            class="custom-control-input"
-                        />
-                        <label class="custom-control-label" for="multiSelect">
-                            Show Multiple Sections
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="btn bg-info nav-btn mt-2">
-                Schedule Overview
-            </div>
-            <ul class="list-group list-group-flush" style="width:99%">
-                <li class="list-group-item">Total Credits: {{ currentSchedule.totalCredit }}</li>
-                <li class="list-group-item pr-0">
-                    <table style="width:100%;font-size:14px">
-                        <tr v-for="item in currentIds" :key="item[0]">
-                            <td>{{ item[0] }}</td>
-                            <td>{{ item[1] }}</td>
-                        </tr>
-                    </table>
-                </li>
-            </ul>
-        </nav>
+        <class-view v-if="sideBar.showSelectClass"></class-view>
 
         <event-view
             v-else-if="sideBar.showEvent"
@@ -359,7 +177,7 @@
                 "
             >
                 {{ noti.msg }}
-                <button type="button" class="close" style="align:center" @click="clearNoti">
+                <button type="button" class="close" style="align:center" @click="noti.clear()">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -375,16 +193,19 @@
         >
             <div class="container-fluid my-3">
                 <div class="row justify-content-center">
-                    <div v-if="generated && !generatedEmpty()" class="col">
+                    <div v-if="schedule.generated && !schedule.generatedEmpty()" class="col">
                         <Pagination
                             :schedule-length="scheduleLength"
                             :cur-idx="tempScheduleIndex"
-                            @switch_page="switchPage"
+                            @switch_page="schedule.switchPage"
                         ></Pagination>
                     </div>
                 </div>
             </div>
-            <grid-schedule :schedule="currentSchedule" @editEvent="editEvent"></grid-schedule>
+            <grid-schedule
+                :schedule="schedule.currentSchedule"
+                @editEvent="editEvent"
+            ></grid-schedule>
             <v-footer id="app-footer" dark height="auto">
                 <v-card class="flex" flat tile>
                     <v-card-title class="teal">

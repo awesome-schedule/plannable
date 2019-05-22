@@ -98,7 +98,7 @@ export class FilterStore extends Vue implements FilterState {
      * returns null on parsing error
      */
     computeFilter(): Event[] | null {
-        const timeSlotsRecord = [];
+        const timeSlotsRecord: Event[] = [];
         for (const time of this.timeSlots) {
             let days = '';
             for (let j = 0; j < 5; j++) {
@@ -131,6 +131,7 @@ export class FilterStore extends Vue implements FilterState {
             typeof obj.allowClosed === 'boolean' ? obj.allowClosed : defaultVal.allowClosed;
         this.allowWaitlist =
             typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
+        this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
     }
 
     toJSON() {

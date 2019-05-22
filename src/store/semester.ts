@@ -6,6 +6,7 @@ import { loadSemesterList } from '@/data/SemesterListLoader';
 import noti from './notification';
 import { loadSemesterData } from '@/data/CatalogLoader';
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import { parseStatus } from './helper';
 
 export interface SemesterState {
     [x: string]: any;
@@ -41,6 +42,19 @@ class Semesters extends Vue implements SemesterState {
         }
     }
 
+    /**
+     * Select a semester and fetch all its associated data.
+     *
+     * This method will assign a correct Catalog object to `window.catalog`
+     *
+     * Then, schedules and settings will be parsed from `localStorage`
+     * and assigned to relevant fields of `this`.
+     *
+     * If no local data is present, default values will be assigned.
+     *
+     * @param semesterId index or id of this semester
+     * @param force whether to force-update semester data
+     */
     async selectSemester(semesterId: string | number, force: boolean = false) {
         // do a linear search to find the index of the semester given its string id
         if (typeof semesterId === 'string') {
@@ -70,11 +84,10 @@ class Semesters extends Vue implements SemesterState {
             window.catalog = result.payload;
             this.currentSemester = currentSemester;
             this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
-            return true;
+            parseStatus(currentSemester.id);
         } else {
             this.currentSemester = null;
             this.lastUpdate = '';
-            return false;
         }
     }
 }

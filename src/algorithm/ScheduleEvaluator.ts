@@ -94,7 +94,7 @@ export interface SortOptions {
     sortBy: SortOption[];
     mode: Mode;
     toJSON: () => SortOptionJSON;
-    fromJSON: (x: SortOptionJSON) => SortOptions;
+    fromJSON: (x?: SortOptionJSON) => SortOptions;
 }
 
 class ScheduleEvaluator {
@@ -306,7 +306,7 @@ class ScheduleEvaluator {
                 mode: this.mode
             };
         },
-        fromJSON(raw: SortOptionJSON) {
+        fromJSON(raw?: SortOptionJSON) {
             if (raw && raw.mode !== undefined && raw.sortBy) {
                 this.mode = raw.mode;
                 for (const raw_sort of raw.sortBy) {

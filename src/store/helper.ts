@@ -1,7 +1,15 @@
-import display from './display';
-import filter from './filter';
-import schedule from './schedule';
+import display, { DisplayState } from './display';
+import filter, { FilterState } from './filter';
+import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
+import { SemesterJSON } from '@/models/Catalog';
+
+export interface SemesterStorage {
+    currentSemester: SemesterJSON;
+    display: DisplayState;
+    filter: FilterState;
+    schedule: ScheduleStateJSON;
+}
 
 export function toJSON<State extends object>(thisArg: State, defaultObj: State): State {
     const result = {} as State;
@@ -23,4 +31,21 @@ export function saveStatus() {
             schedule
         })
     );
+}
+
+export function parseStatus(semesterId: string) {
+    const data = localStorage.getItem(semesterId);
+    let parsed: Partial<SemesterStorage> = {};
+    if (data) {
+        try {
+            parsed = JSON.parse(data);
+        } catch (e) {}
+    }
+    display.fromJSON(parsed.display || {});
+    filter.fromJSON(parsed.filter || {});
+    schedule.fromJSON(parsed.schedule || {});
+
+    if (schedule.generated) {
+        schedule.generateSchedules();
+    }
 }

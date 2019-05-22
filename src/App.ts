@@ -25,7 +25,6 @@ import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
 
-import Schedule, { ScheduleJSON } from './models/Schedule';
 import { SemesterJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
@@ -33,7 +32,7 @@ import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import { savePlain, toICal } from './utils';
 import Meta from './models/Meta';
 import semester from './store/semester';
-import filter, { FilterState } from './store/filter';
+import filter from './store/filter';
 import schedule from './store/schedule';
 import { saveStatus } from './store/helper';
 
@@ -161,7 +160,7 @@ export default class App extends Vue {
             if (pay2.payload) window.buildingList = pay2.payload;
 
             if (pay3) {
-                await this.selectSemester(0);
+                await semester.selectSemester(0);
             }
             this.loading = false;
         })();
@@ -171,7 +170,6 @@ export default class App extends Vue {
         this.eventToEdit = event;
     }
     switchSideBar(key: string) {
-        // schedule.getClass('');
         for (const other in this.sideBar) {
             if (other !== key) this.sideBar[other] = false;
         }
@@ -196,117 +194,6 @@ export default class App extends Vue {
         }
     }
 
-    /**
-     * Select a semester and fetch all its associated data.
-     *
-     * This method will assign a correct Catalog object to `window.catalog`
-     *
-     * Then, schedules and settings will be parsed from `localStorage`
-     * and assigned to relevant fields of `this`.
-     *
-     * If no local data is present, default values will be assigned.
-     *
-     * @param semesterId index or id of this semester
-     * @param parsed_data
-     * @param force whether to force-update semester data
-     */
-    async selectSemester(
-        semesterId: number | string,
-        parsed_data?: { [x: string]: any },
-        force = false
-    ) {
-        const result = await semester.selectSemester(semesterId, force);
-        if (result) {
-            const data = localStorage.getItem(this.currentSemester!.id);
-
-            // let raw_data: { [x: string]: any } = {};
-            // if (parsed_data) {
-            //     raw_data = parsed_data;
-            // } else if (data) {
-            //     raw_data = JSON.parse(data);
-            // }
-
-            // this.generated = false;
-            // window.scheduleEvaluator.clear();
-            // this.parseLocalData(raw_data);
-            // this.loading = false;
-        }
-    }
-
-    // /**
-    //  * parse schedules and settings stored locally for currentSemester.
-    //  * Use default value for fields that do not exist on local data.
-    //  */
-    // parseLocalData(raw_data: { [x: string]: any }) {
-    //     const defaultData = getDefaultData();
-    //     for (const field of Meta.storageFields) {
-    //         if (field === 'currentSemester') continue;
-    //         if (field === 'proposedSchedules') {
-    //             // if true, we're dealing with legacy storage
-    //             if (raw_data.proposedSchedule) {
-    //                 this.proposedScheduleIndex = 0;
-    //                 const s = Schedule.fromJSON(raw_data.proposedSchedule);
-    //                 if (s) this.proposedSchedule = s;
-    //             } else {
-    //                 const schedules: ScheduleJSON[] | undefined = raw_data.proposedSchedules;
-    //                 if (schedules && schedules.length) {
-    //                     const propSchedules = [];
-    //                     for (const schedule of schedules) {
-    //                         const temp = Schedule.fromJSON(schedule);
-    //                         if (temp) propSchedules.push(temp);
-    //                     }
-
-    //                     if (propSchedules.length) this.proposedSchedules = propSchedules;
-    //                     else this.proposedSchedules = defaultData.proposedSchedules;
-    //                     this.proposedScheduleIndex =
-    //                         raw_data.proposedScheduleIndex === undefined
-    //                             ? 0
-    //                             : raw_data.proposedScheduleIndex;
-    //                 } else {
-    //                     this.proposedSchedules = defaultData[field];
-    //                 }
-    //             }
-    //         } else if (this[field] instanceof Array) {
-    //             const raw_arr = raw_data[field];
-    //             if (raw_arr instanceof Array) {
-    //                 this[field] = raw_arr;
-    //             } else this[field] = defaultData[field];
-    //         } else if (this[field] instanceof Object) {
-    //             if (!raw_data[field]) {
-    //                 this[field] = defaultData[field];
-    //                 continue;
-    //             }
-    //             if (typeof this[field].fromJSON === 'function') {
-    //                 const parsed = this[field].fromJSON(raw_data[field]);
-    //                 if (parsed) this[field] = parsed;
-    //                 else {
-    //                     // noti.warn(`Fail to parse ${field}`);
-    //                     // console.warn('failed to parse', field);
-    //                     this[field] = defaultData[field];
-    //                 }
-    //             } else {
-    //                 if (
-    //                     Object.keys(this[field])
-    //                         .sort()
-    //                         .toString() ===
-    //                     Object.keys(raw_data[field])
-    //                         .sort()
-    //                         .toString()
-    //                 )
-    //                     this[field] = raw_data[field];
-    //                 else this[field] = defaultData[field];
-    //             }
-    //         } else if (typeof raw_data[field] === typeof this[field]) this[field] = raw_data[field];
-    //         else {
-    //             this[field] = defaultData[field];
-    //         }
-    //     }
-    //     if (!this.proposedSchedule.empty()) {
-    //         console.log('generating schedules from local data..');
-    //         this.currentSchedule = this.proposedSchedule;
-    //         this.generateSchedules();
-    //     }
-    // }
     onUploadJson(event: { target: EventTarget | null }) {
         const input = event.target as HTMLInputElement;
 

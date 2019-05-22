@@ -28,7 +28,6 @@ import External from './components/External.vue';
 import Schedule, { ScheduleJSON } from './models/Schedule';
 import { SemesterJSON } from './models/Catalog';
 import Event from './models/Event';
-import ScheduleGenerator from './algorithm/ScheduleGenerator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
 import { savePlain, toICal } from './utils';
@@ -177,13 +176,13 @@ export default class App extends Vue {
         this.eventToEdit = event;
     }
     switchSideBar(key: string) {
-        this.getClass('');
+        // schedule.getClass('');
         for (const other in this.sideBar) {
             if (other !== key) this.sideBar[other] = false;
         }
         this.sideBar[key] = !this.sideBar[key];
 
-        if (this.sideBar.showSelectColor) this.switchSchedule(true);
+        if (this.sideBar.showSelectColor) schedule.switchSchedule(true);
     }
     onDocChange() {
         this.saveStatus();
@@ -236,55 +235,6 @@ export default class App extends Vue {
             // window.scheduleEvaluator.clear();
             // this.parseLocalData(raw_data);
             // this.loading = false;
-        }
-    }
-    generateSchedules() {
-        if (this.generated) this.currentSchedule = this.proposedSchedule;
-        this.generated = false;
-
-        if (this.currentSchedule.empty())
-            return noti.warn(`There are no classes in your schedule!`);
-
-        const status = [];
-        if (!filter.allowWaitlist) status.push('Wait List');
-        if (!filter.allowClosed) status.push('Closed');
-
-        const timeSlots = filter.computeFilter();
-
-        // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeSlots === null) {
-            noti.error(`Invalid time filter`);
-            return;
-        }
-
-        if (!filter.validateSortOptions()) return;
-
-        this.loading = true;
-        const generator = new ScheduleGenerator(window.catalog, window.buildingList);
-        try {
-            const evaluator = generator.getSchedules(this.currentSchedule, {
-                events: this.currentSchedule.events,
-                timeSlots,
-                status,
-                sortOptions: filter.sortOptions,
-                combineSections: display.combineSections,
-                maxNumSchedules: display.maxNumSchedules
-            });
-            window.scheduleEvaluator.clear();
-            window.scheduleEvaluator = evaluator;
-            this.saveStatus();
-            noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
-            this.cpIndex = this.proposedScheduleIndex;
-            this.switchSchedule(true);
-            this.loading = false;
-        } catch (err) {
-            console.warn(err);
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            noti.error(err.message);
-            this.saveStatus();
-            this.cpIndex = -1;
-            this.loading = false;
         }
     }
 

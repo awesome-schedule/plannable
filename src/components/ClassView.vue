@@ -43,7 +43,6 @@
                 :courses="inputCourses"
                 :schedule="schedule.currentSchedule"
                 :is-entering="isEntering"
-                :generated="schedule.generated"
                 @update_course="updateCourse"
                 @close="closeClassList()"
             ></ClassList>
@@ -134,7 +133,7 @@
                     ref="selectedClassList"
                     :courses="schedule.currentSchedule.currentCourses"
                     :schedule="schedule.currentSchedule"
-                    :generated="schedule.generated"
+                    :show-any="schedule.generated"
                     @update_course="updateCourse"
                     @remove_course="removeCourse"
                 ></ClassList>
@@ -142,7 +141,7 @@
                     <button
                         type="button"
                         class="btn btn-outline-info"
-                        @click="$parent.generateSchedules"
+                        @click="schedule.generateSchedules()"
                     >
                         Generate
                     </button>

@@ -79,12 +79,7 @@
 
         <class-view v-if="sideBar.showSelectClass"></class-view>
 
-        <event-view
-            v-else-if="sideBar.showEvent"
-            :schedule="generated ? proposedSchedule : currentSchedule"
-            :event="eventToEdit"
-        >
-        </event-view>
+        <event-view v-else-if="sideBar.showEvent"> </event-view>
 
         <filter-view v-else-if="sideBar.showFilter"></filter-view>
 
@@ -154,7 +149,7 @@
             </ul>
         </nav>
 
-        <palette v-else-if="sideBar.showSelectColor" :schedule="currentSchedule"></palette>
+        <palette v-else-if="sideBar.showSelectColor"></palette>
 
         <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 

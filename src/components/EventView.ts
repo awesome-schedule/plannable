@@ -7,16 +7,15 @@
  *
  */
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import Schedule from '../models/Schedule';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr, to24hr } from '../utils';
 import noti from '../store/notification';
 import App from '../App';
+import schedule from '@/store/schedule';
 
 @Component
 export default class EventView extends Vue {
-    @Prop(Schedule) readonly schedule!: Schedule;
     @Prop(Event) readonly event!: Event;
 
     // event related fields
@@ -62,7 +61,7 @@ export default class EventView extends Vue {
                 return;
             }
 
-            this.schedule.addEvent(
+            schedule.proposedSchedule.addEvent(
                 days,
                 true,
                 this.eventTitle,
@@ -95,11 +94,11 @@ export default class EventView extends Vue {
         this.toBeModifiedDays = event.days;
     }
     endEditEvent() {
-        this.schedule.deleteEvent(this.toBeModifiedDays);
+        schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.addEvent();
     }
     deleteEvent() {
-        this.schedule.deleteEvent(this.toBeModifiedDays);
+        schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.isEditingEvent = false;
         this.cancelEvent(true);
     }

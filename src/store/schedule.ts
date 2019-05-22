@@ -4,7 +4,9 @@
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import noti from './notification';
-import Course from '@/models/Course';
+import filter from '../store/filter';
+import display from './display';
+import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
 
 @Component
 export class ScheduleStore extends Vue {
@@ -151,6 +153,56 @@ export class ScheduleStore extends Vue {
         window.scheduleEvaluator.clear();
         this.cpIndex = -1;
         // this.saveStatus();
+    }
+
+    generateSchedules() {
+        if (this.generated) this.currentSchedule = this.proposedSchedule;
+        this.generated = false;
+
+        if (this.currentSchedule.empty())
+            return noti.warn(`There are no classes in your schedule!`);
+
+        const status = [];
+        if (!filter.allowWaitlist) status.push('Wait List');
+        if (!filter.allowClosed) status.push('Closed');
+
+        const timeSlots = filter.computeFilter();
+
+        // null means there's an error processing time filters. Don't continue if that's the case
+        if (timeSlots === null) {
+            noti.error(`Invalid time filter`);
+            return;
+        }
+
+        if (!filter.validateSortOptions()) return;
+
+        // this.loading = true;
+        const generator = new ScheduleGenerator(window.catalog, window.buildingList);
+        try {
+            const evaluator = generator.getSchedules(this.currentSchedule, {
+                events: this.currentSchedule.events,
+                timeSlots,
+                status,
+                sortOptions: filter.sortOptions,
+                combineSections: display.combineSections,
+                maxNumSchedules: display.maxNumSchedules
+            });
+            window.scheduleEvaluator.clear();
+            window.scheduleEvaluator = evaluator;
+            // this.saveStatus();
+            noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
+            this.cpIndex = this.proposedScheduleIndex;
+            this.switchSchedule(true);
+            // this.loading = false;
+        } catch (err) {
+            console.warn(err);
+            this.generated = false;
+            window.scheduleEvaluator.clear();
+            noti.error(err.message);
+            // this.saveStatus();
+            this.cpIndex = -1;
+            // this.loading = false;
+        }
     }
 }
 

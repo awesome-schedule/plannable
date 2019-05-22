@@ -32,7 +32,7 @@ export default class ClassList extends Vue {
      */
     @Prop(Schedule) readonly schedule!: Schedule;
     @Prop({ default: false, type: Boolean }) readonly isEntering!: boolean;
-    @Prop(Boolean) readonly generated!: boolean;
+    @Prop({ default: true, type: Boolean }) readonly showAny!: boolean;
 
     get showClasslistTitle() {
         return display.showClasslistTitle;

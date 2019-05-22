@@ -16,6 +16,7 @@ import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassView from './components/ClassView.vue';
 import FilterView from './components/FilterView.vue';
 import DisplayView from './components/DisplayView.vue';
+import ExportView from './components/ExportView.vue';
 import Pagination from './components/Pagination.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import SectionModal from './components/SectionModal.vue';
@@ -52,6 +53,7 @@ export const NoCache = createDecorator((options, key) => {
         ClassView,
         DisplayView,
         FilterView,
+        ExportView,
         Pagination,
         GridSchedule,
         SectionModal,
@@ -108,9 +110,6 @@ export default class App extends Vue {
     tempScheduleIndex: number | null = null;
     days = Meta.days;
     eventToEdit: Event | null = null;
-    exportJson: string = 'schedule';
-    exportICal: string = 'schedule';
-    lastUpdate: string = '';
 
     get sideBarActive() {
         for (const key in this.sideBar) {
@@ -159,9 +158,7 @@ export default class App extends Vue {
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            if (pay3) {
-                await semester.selectSemester(0);
-            }
+            if (pay3) await semester.selectSemester(0);
             this.loading = false;
         })();
     }
@@ -179,62 +176,5 @@ export default class App extends Vue {
     }
     onDocChange() {
         saveStatus();
-    }
-    print() {
-        window.print();
-    }
-
-    clearCache() {
-        if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
-            this.currentSchedule.clean();
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            localStorage.clear();
-            this.cpIndex = -1;
-        }
-    }
-
-    onUploadJson(event: { target: EventTarget | null }) {
-        const input = event.target as HTMLInputElement;
-
-        if (!input.files) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            if (reader.result) {
-                let raw_data, result;
-                try {
-                    result = reader.result.toString();
-                    raw_data = JSON.parse(result);
-                } catch (error) {
-                    console.error(error);
-                    noti.error(error.message + ': File Format Error');
-                    return;
-                }
-                localStorage.setItem((this.currentSemester as SemesterJSON).id, result);
-                const semester: SemesterJSON = raw_data.currentSemester;
-                this.selectSemester(semester.id, raw_data);
-            } else {
-                noti.warn('File is empty!');
-            }
-        };
-
-        try {
-            reader.readAsText(input.files[0]);
-        } catch (error) {
-            console.warn(error);
-            noti.error(error.message);
-        }
-    }
-    saveToJson() {
-        if (!this.currentSemester) return;
-        const json = localStorage.getItem(this.currentSemester.id);
-        if (json) savePlain(json, (this.exportJson ? this.exportJson : 'schedule') + '.json');
-    }
-    saveToIcal() {
-        savePlain(
-            toICal(this.currentSchedule),
-            (this.exportICal ? this.exportICal : 'schedule') + '.ical'
-        );
     }
 }

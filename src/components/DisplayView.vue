@@ -147,16 +147,16 @@
             <li class="list-group-item">
                 <button
                     class="btn btn-outline-info mb-1 w-100"
-                    @click="$parent.selectSemester($parent.currentSemester.id, undefined, true)"
+                    @click="semester.selectSemester(semester.currentSemester.id, true)"
                 >
                     Update Semester Data
                 </button>
                 <small class="text-center form-text text-muted">
-                    Last update: {{ $parent.lastUpdate }}
+                    Last update: {{ semester.lastUpdate }}
                 </small>
             </li>
             <li class="list-group-item">
-                <button class="btn btn-outline-danger w-100" @click="$parent.clearCache">
+                <button class="btn btn-outline-danger w-100" @click="schedule.clearCache">
                     Reset All and Clean
                 </button>
             </li>

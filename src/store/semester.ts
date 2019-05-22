@@ -5,7 +5,7 @@ import { SemesterJSON } from '@/models/Catalog';
 import { loadSemesterList } from '@/data/SemesterListLoader';
 import noti from './notification';
 import { loadSemesterData } from '@/data/CatalogLoader';
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component } from 'vue-property-decorator';
 import { parseStatus } from './helper';
 
 export interface SemesterState {
@@ -68,7 +68,7 @@ class Semesters extends Vue implements SemesterState {
             if (typeof semesterId === 'string') {
                 this.currentSemester = null;
                 this.lastUpdate = '';
-                return false;
+                return;
             }
         }
 

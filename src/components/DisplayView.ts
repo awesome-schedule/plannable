@@ -1,11 +1,17 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import display from '@/store/display';
-import App from '@/App';
+import semester from '@/store/semester';
+import schedule from '@/store/schedule';
 
 @Component
 export default class DisplayView extends Vue {
-    $parent!: App;
     get display() {
         return display;
+    }
+    get semester() {
+        return semester;
+    }
+    get schedule() {
+        return schedule;
     }
 }

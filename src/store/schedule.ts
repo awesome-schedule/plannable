@@ -174,6 +174,15 @@ export class ScheduleStore extends Vue implements ScheduleState {
         this.cpIndex = -1;
         saveStatus();
     }
+    clearCache() {
+        if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
+            this.currentSchedule.clean();
+            this.generated = false;
+            window.scheduleEvaluator.clear();
+            localStorage.clear();
+            this.cpIndex = -1;
+        }
+    }
 
     generateSchedules() {
         if (this.generated) this.currentSchedule = this.proposedSchedule;

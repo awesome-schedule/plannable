@@ -3,12 +3,30 @@ import filter, { FilterState } from './filter';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
 import { SemesterJSON } from '@/models/Catalog';
+import { SortOptions } from '@/algorithm/ScheduleEvaluator';
+import { ScheduleJSON } from '@/models/Schedule';
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
     display: DisplayState;
     filter: FilterState;
     schedule: ScheduleStateJSON;
+}
+
+export interface LegacyStorage {
+    currentSemester: SemesterJSON;
+    currentScheduleIndex: number;
+    proposedScheduleIndex: number;
+    cpIndex: number;
+    currentSchedule: ScheduleJSON;
+    proposedSchedules: ScheduleJSON[];
+
+    display: DisplayState;
+
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    allowWaitlist: boolean;
+    allowClosed: boolean;
+    sortOptions: SortOptions;
 }
 
 export function toJSON<State extends object>(thisArg: State, defaultObj: State): State {
@@ -35,15 +53,24 @@ export function saveStatus() {
 
 export function parseStatus(semesterId: string) {
     const data = localStorage.getItem(semesterId);
-    let parsed: Partial<SemesterStorage> = {};
+    let parsed: any = {};
     if (data) {
         try {
             parsed = JSON.parse(data);
+            // tslint:disable-next-line: no-empty
         } catch (e) {}
     }
-    display.fromJSON(parsed.display || {});
-    filter.fromJSON(parsed.filter || {});
-    schedule.fromJSON(parsed.schedule || {});
+    if (parsed.currentSchedule && parsed.proposedSchedules) {
+        const old: LegacyStorage = parsed;
+        display.fromJSON(old.display || {});
+        filter.fromJSON(old);
+        schedule.fromJSON(old);
+    } else {
+        const newStore: SemesterStorage = parsed;
+        display.fromJSON(newStore.display || {});
+        filter.fromJSON(newStore.filter || {});
+        schedule.fromJSON(newStore.schedule || {});
+    }
 
     if (schedule.generated) {
         schedule.generateSchedules();

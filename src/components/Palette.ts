@@ -9,41 +9,31 @@
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
-import randomColor from 'randomcolor';
-import { schedule, saveStatus } from '../store';
+import { schedule, palette } from '../store';
 
 @Component
 export default class Palette extends Vue {
     get schedule() {
         return schedule.currentSchedule;
     }
+    get palette() {
+        return palette;
+    }
 
-    randomColor() {
-        return randomColor({
-            luminosity: 'dark'
-        }) as string;
-    }
-    setColor(key: string, color: string) {
-        this.schedule.setColor(key, color);
-        this.$forceUpdate();
-        saveStatus();
-    }
     /**
      * get the number of events and courses that have colors in total
      */
     numColors() {
         return (
-            Object.entries(Schedule.savedColors).filter(entry => this.schedule.has(entry[0]))
-                .length + this.schedule.colorSlots.reduce((acc, x) => x.size + acc, 0)
+            palette.colorEntries.length +
+            this.schedule.colorSlots.reduce((acc, x) => x.size + acc, 0)
         );
     }
     /**
-     *
      * @note colors must always be recomputed because `Schedule.savedColors` is not a reactive property
      */
     courseColors() {
-        return Object.entries(Schedule.savedColors)
-            .filter(entry => this.schedule.has(entry[0]))
+        return palette.colorEntries
             .concat(
                 this.schedule.colorSlots.reduce(
                     (arr: Array<[string, string]>, bucket, i) =>

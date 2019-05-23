@@ -10,9 +10,9 @@ interface VertexData<T> {
     visited: boolean;
     depth: number;
     pathDepth: number;
-    path: T[][];
     parent?: T;
-    val: T;
+    readonly path: T[][];
+    readonly val: T;
 }
 
 /**
@@ -37,7 +37,7 @@ export class Vertex<T> {
      * the all of the paths starting at the root and ending at one of the leaves.
      * if this vertex is not the root, then `path` will be empty
      */
-    public path: Vertex<T>[][] = [];
+    public readonly path: Vertex<T>[][] = [];
     /**
      * the value contained in this vertex
      */

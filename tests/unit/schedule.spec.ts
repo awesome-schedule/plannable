@@ -99,7 +99,7 @@ describe('Schedule Test', () => {
         schedule.update('cs21505', -1);
         schedule.update('cs11105', 0);
         schedule.addEvent('MoTu 12:00AM - 3:00AM', true, 'title1');
-        schedule._computeSchedule();
+        schedule.computeSchedule();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
             3
         );
@@ -112,18 +112,19 @@ describe('Schedule Test', () => {
         expect(schedule.has('MoTu 12:00AM - 3:00AM')).toBe(true);
 
         schedule.preview('cs21105', 0);
-        schedule._computeSchedule();
+        schedule.computeSchedule();
         schedule.removePreview();
 
         // preview an already present one
         schedule.preview('cs21504', 0);
-        schedule._computeSchedule();
+        schedule.computeSchedule();
         schedule.removePreview();
 
         for (const i of [0, 1, 2, 3, 4, 5]) schedule.update('chem14105', i);
         for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) schedule.update('chem14114', i);
         display.combineSections = false;
-        schedule._computeSchedule();
+        schedule.computeSchedule();
+        schedule.computeSchedule(false);
         schedule.computeConflict();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
             3
@@ -149,7 +150,7 @@ describe('Schedule Test', () => {
         schedule.unhover('cs21504');
 
         display.multiSelect = false;
-        schedule._computeSchedule();
+        schedule.computeSchedule();
 
         schedule.update('cs21105', -1);
         expect(schedule.All).not.toHaveProperty('cs21105');

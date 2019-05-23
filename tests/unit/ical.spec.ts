@@ -17,7 +17,7 @@ describe('ical test', () => {
         const parsed = JSON.parse(json);
         const schedule = Schedule.fromJSON(parsed)!;
         schedule.addEvent('MoTuFr 5:00AM - 7:00AM', true, 'title');
-        schedule._computeSchedule();
+        schedule.computeSchedule();
         expect(toICal(schedule)).toBeTruthy();
     });
 });

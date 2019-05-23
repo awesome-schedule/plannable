@@ -15,8 +15,8 @@ import Event from '../models/Event';
 import quickselect from 'quickselect';
 import { calcOverlap } from '../utils';
 
-type OrderedBlocks = [number[], number[], number[], number[], number[]];
-type OrderedRooms = [number[], number[], number[], number[], number[]];
+type OrderedBlocks = readonly [number[], number[], number[], number[], number[]];
+type OrderedRooms = readonly [number[], number[], number[], number[], number[]];
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;

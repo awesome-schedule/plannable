@@ -2,27 +2,27 @@
  * Schedule handles the storage, access, mutation and render of courses and events.
  * @author Hanzhi Zhou, Kaiying Shan
  */
+// tslint:disable: member-ordering
 
 /**
  *
  */
-import Section from './Section';
-import Course from './Course';
-import ScheduleBlock from './ScheduleBlock';
-import Event from './Event';
+import { colorDepthSearch, graphColoringExact } from '../algorithm/Coloring';
+import { depthFirstSearch, Graph, Vertex } from '../algorithm/Graph';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
-import Meta from './Meta';
 import * as Utils from '../utils';
+import Course from './Course';
+import Event from './Event';
 import Hashable from './Hashable';
-import { Vertex, depthFirstSearch, Graph } from '../algorithm/Graph';
-import { graphColoringExact, colorDepthSearch, dsatur } from '../algorithm/Coloring';
+import Meta from './Meta';
+import ScheduleBlock from './ScheduleBlock';
+import Section from './Section';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
     title: string;
     id: number;
     events: Event[];
-    savedColors: { [x: string]: string };
 }
 
 export interface ScheduleOptions {
@@ -67,7 +67,6 @@ export class Schedule {
         schedule.id = obj.id ? obj.id : 0;
         if (obj.events)
             schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
-        if (obj.savedColors) Schedule.savedColors = obj.savedColors;
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
         const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
@@ -96,7 +95,7 @@ export class Schedule {
                 else schedule.All[key] = sections;
             }
         }
-        schedule._computeSchedule();
+        schedule.computeSchedule();
         return schedule;
     }
 
@@ -181,7 +180,7 @@ export class Schedule {
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
-        this._computeSchedule();
+        this.computeSchedule();
     }
 
     /**
@@ -245,7 +244,7 @@ export class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        this._computeSchedule();
+        this.computeSchedule();
     }
 
     /**
@@ -253,12 +252,12 @@ export class Schedule {
      */
     public removePreview() {
         this.previous = null;
-        this.computeSchedule();
+        this.computeSchedule(false);
     }
 
     public preview(key: string, section: number) {
         this.previous = [key, section];
-        this.computeSchedule();
+        this.computeSchedule(false);
     }
 
     public addEvent(
@@ -275,7 +274,7 @@ export class Schedule {
             }
         }
         this.events.push(newEvent);
-        this._computeSchedule();
+        this.computeSchedule();
     }
 
     public deleteEvent(days: string) {
@@ -285,7 +284,7 @@ export class Schedule {
                 break;
             }
         }
-        this._computeSchedule();
+        this.computeSchedule();
     }
 
     public hover(key: string, strong: boolean = true) {
@@ -314,17 +313,21 @@ export class Schedule {
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.
      */
-    public computeSchedule() {
+    public computeSchedule(sync = true) {
         window.clearTimeout(this.pendingCompute);
-        this.pendingCompute = window.setTimeout(() => {
+        if (sync) {
             this._computeSchedule();
-        }, 10);
+        } else {
+            this.pendingCompute = window.setTimeout(() => {
+                this._computeSchedule();
+            }, 10);
+        }
     }
 
     /**
      * synchronous version of `computeSchedule`
      */
-    public _computeSchedule() {
+    private _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
 
@@ -574,7 +577,7 @@ export class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this._computeSchedule();
+        this.computeSchedule();
     }
 
     public cleanSchedule() {
@@ -602,8 +605,7 @@ export class Schedule {
             All: {},
             id: this.id,
             title: this.title,
-            events: this.events,
-            savedColors: Schedule.savedColors
+            events: this.events
         };
         // convert set to array
         for (const key in this.All) {
@@ -635,7 +637,7 @@ export class Schedule {
             deepCopyEvent ? this.events.map(e => e.copy()) : this.events
         );
         cpy.All = AllCopy;
-        cpy._computeSchedule();
+        cpy.computeSchedule();
         return cpy;
     }
 

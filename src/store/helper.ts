@@ -15,12 +15,18 @@ import filter, { FilterStateJSON } from './filter';
 import noti from './notification';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
+import palette, { PaletteState } from './palette';
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
     display: DisplayState;
     filter: FilterStateJSON;
     schedule: ScheduleStateJSON;
+    palette: PaletteState;
+}
+
+interface LegacyScheduleJSON extends ScheduleJSON {
+    savedColors: { [x: string]: string };
 }
 
 /**
@@ -31,8 +37,8 @@ export interface LegacyStorage {
     currentScheduleIndex: number;
     proposedScheduleIndex: number;
     cpIndex: number;
-    currentSchedule: ScheduleJSON;
-    proposedSchedules: ScheduleJSON[];
+    currentSchedule: LegacyScheduleJSON;
+    proposedSchedules: LegacyScheduleJSON[];
 
     display: DisplayState;
 
@@ -92,15 +98,14 @@ export function toJSON<State, JSONState>(thisArg: StoreModule<State, JSONState>)
 export function saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
-    localStorage.setItem(
-        currentSemester.id,
-        JSON.stringify({
-            currentSemester,
-            display,
-            filter,
-            schedule
-        })
-    );
+    const obj: SemesterStorage = {
+        currentSemester,
+        display,
+        filter,
+        schedule: schedule.toJSON(),
+        palette
+    };
+    localStorage.setItem(currentSemester.id, JSON.stringify(obj));
 }
 
 /**
@@ -118,15 +123,17 @@ export function parseStatus(semesterId: string) {
         }
     }
     if (parsed.currentSchedule && parsed.proposedSchedules) {
-        const old: LegacyStorage = parsed;
-        display.fromJSON(old.display || {});
-        filter.fromJSON(old);
-        schedule.fromJSON(old);
+        const oldStore: LegacyStorage = parsed;
+        display.fromJSON(oldStore.display || {});
+        filter.fromJSON(oldStore);
+        schedule.fromJSON(oldStore);
+        palette.fromJSON(oldStore.currentSchedule || { savedColors: {} });
     } else {
         const newStore: SemesterStorage = parsed;
         display.fromJSON(newStore.display || {});
         filter.fromJSON(newStore.filter || {});
         schedule.fromJSON(newStore.schedule || {});
+        palette.fromJSON(newStore.palette || {});
     }
 
     if (schedule.generated) {

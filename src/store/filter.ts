@@ -8,7 +8,6 @@ import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr } from '../utils';
 import { toJSON } from './helper';
-import schedule from './schedule';
 
 export interface FilterState {
     [x: string]: any;
@@ -50,35 +49,6 @@ class FilterStore extends Vue implements FilterState {
             return false;
         }
         return true;
-    }
-
-    changeSorting(optIdx?: number) {
-        if (!this.validateSortOptions()) return;
-        if (optIdx !== undefined) {
-            const option = this.sortOptions.sortBy[optIdx];
-
-            if (option.enabled) {
-                // disable options that are mutually exclusive to this one
-                for (const key of option.exclusive) {
-                    for (const opt of this.sortOptions.sortBy) {
-                        if (opt.name === key) opt.enabled = false;
-                    }
-                }
-            }
-        }
-        if (!window.scheduleEvaluator.empty()) {
-            // this.loading = true;
-            window.scheduleEvaluator.changeSort(this.sortOptions, true);
-            if (!schedule.generated) {
-                schedule.switchSchedule(true);
-            } else {
-                // re-assign the current schedule
-                schedule.currentSchedule = window.scheduleEvaluator.getSchedule(
-                    schedule.currentScheduleIndex
-                );
-            }
-            // this.loading = false;
-        }
     }
 
     addTimeSlot() {

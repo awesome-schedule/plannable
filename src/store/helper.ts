@@ -1,10 +1,12 @@
 import display, { DisplayState } from './display';
 import filter, { FilterState } from './filter';
-import schedule, { ScheduleStateJSON } from './schedule';
+import schedule, { ScheduleStateJSON, ScheduleState } from './schedule';
 import semester from './semester';
 import { SemesterJSON } from '../models/Catalog';
 import { SortOptions } from '../algorithm/ScheduleEvaluator';
 import { ScheduleJSON } from '../models/Schedule';
+import noti from './notification';
+import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
@@ -79,6 +81,53 @@ export function parseStatus(semesterId: string) {
     }
 
     if (schedule.generated) {
-        schedule.generateSchedules();
+        generateSchedules();
     }
+}
+
+export const generateSchedules = _generateSchedules.bind(schedule);
+function _generateSchedules(this: ScheduleState) {
+    if (this.generated) this.currentSchedule = this.proposedSchedule;
+    this.generated = false;
+
+    if (this.currentSchedule.empty()) return noti.warn(`There are no classes in your schedule!`);
+
+    const status = [];
+    if (!filter.allowWaitlist) status.push('Wait List');
+    if (!filter.allowClosed) status.push('Closed');
+
+    const timeSlots = filter.computeFilter();
+
+    // null means there's an error processing time filters. Don't continue if that's the case
+    if (timeSlots === null) {
+        noti.error(`Invalid time filter`);
+        return;
+    }
+
+    if (!filter.validateSortOptions()) return;
+
+    // this.loading = true;
+    const generator = new ScheduleGenerator(window.catalog, window.buildingList);
+    try {
+        const evaluator = generator.getSchedules(this.currentSchedule, {
+            events: this.currentSchedule.events,
+            timeSlots,
+            status,
+            sortOptions: filter.sortOptions,
+            combineSections: display.combineSections,
+            maxNumSchedules: display.maxNumSchedules
+        });
+        window.scheduleEvaluator.clear();
+        window.scheduleEvaluator = evaluator;
+        noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
+        this.cpIndex = this.proposedScheduleIndex;
+        this.switchSchedule(true);
+    } catch (err) {
+        console.warn(err);
+        this.generated = false;
+        window.scheduleEvaluator.clear();
+        noti.error(err.message);
+        this.cpIndex = -1;
+    }
+    saveStatus();
 }

@@ -16,7 +16,6 @@ import * as Utils from '../utils';
 import Hashable from './Hashable';
 import { Vertex, depthFirstSearch, Graph } from '../algorithm/Graph';
 import { graphColoringExact, colorDepthSearch, dsatur } from '../algorithm/Coloring';
-import displaySettings from '../store/display';
 
 export interface ScheduleJSON {
     All: { [x: string]: number[] | -1 };
@@ -37,6 +36,11 @@ export interface ScheduleOptions {
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
 export class Schedule {
+    public static readonly options = {
+        combineSections: true,
+        multiSelect: true
+    };
+
     public static readonly bgColors = [
         '#f7867e',
         '#ffb74c',
@@ -351,7 +355,7 @@ export class Schedule {
                     this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
                     this.place(course.getSection(sectionIdx));
                 } else if (sections.size > 0) {
-                    if (displaySettings.multiSelect) {
+                    if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined: Course[] = Object.values(
                             course.getCourse([...sections]).getCombined()
@@ -531,7 +535,7 @@ export class Schedule {
                 for (const meeting of firstSec.meetings)
                     this.placeHelper(color, meeting.days, firstSec);
             } else {
-                if (displaySettings.combineSections) {
+                if (Schedule.options.combineSections) {
                     const color = this.getColor(course);
                     for (const meeting of firstSec.meetings)
                         this.placeHelper(color, meeting.days, course);

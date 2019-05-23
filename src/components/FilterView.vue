@@ -112,7 +112,7 @@
                                 title="Click to reverse sorting"
                                 @click="
                                     option.reverse = !option.reverse;
-                                    filter.changeSorting(optIdx);
+                                    changeSorting(optIdx);
                                 "
                             ></i>
                             <div
@@ -125,7 +125,7 @@
                                     type="checkbox"
                                     class="custom-control-input"
                                     :value="option.name"
-                                    @change="filter.changeSorting(optIdx)"
+                                    @change="changeSorting(optIdx)"
                                 />
                                 <label
                                     class="custom-control-label"
@@ -146,7 +146,7 @@
                             type="radio"
                             :value="mode.mode"
                             class="custom-control-input"
-                            @change="filter.changeSorting()"
+                            @change="changeSorting()"
                         />
                         <label
                             class="custom-control-label"

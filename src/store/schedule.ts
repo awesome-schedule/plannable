@@ -3,15 +3,7 @@
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import noti from './notification';
-import filter from '../store/filter';
-import display from './display';
-import ScheduleGenerator from '../algorithm/ScheduleGenerator';
 import { toJSON, saveStatus } from './helper';
-
-// console.log('.............................');
-// console.log(Schedule);
-// console.log('.............................');
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -161,53 +153,6 @@ class ScheduleStore extends Vue implements ScheduleState {
             window.localStorage.clear();
             window.location.reload(true);
         }
-    }
-
-    generateSchedules() {
-        if (this.generated) this.currentSchedule = this.proposedSchedule;
-        this.generated = false;
-
-        if (this.currentSchedule.empty())
-            return noti.warn(`There are no classes in your schedule!`);
-
-        const status = [];
-        if (!filter.allowWaitlist) status.push('Wait List');
-        if (!filter.allowClosed) status.push('Closed');
-
-        const timeSlots = filter.computeFilter();
-
-        // null means there's an error processing time filters. Don't continue if that's the case
-        if (timeSlots === null) {
-            noti.error(`Invalid time filter`);
-            return;
-        }
-
-        if (!filter.validateSortOptions()) return;
-
-        // this.loading = true;
-        const generator = new ScheduleGenerator(window.catalog, window.buildingList);
-        try {
-            const evaluator = generator.getSchedules(this.currentSchedule, {
-                events: this.currentSchedule.events,
-                timeSlots,
-                status,
-                sortOptions: filter.sortOptions,
-                combineSections: display.combineSections,
-                maxNumSchedules: display.maxNumSchedules
-            });
-            window.scheduleEvaluator.clear();
-            window.scheduleEvaluator = evaluator;
-            noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
-            this.cpIndex = this.proposedScheduleIndex;
-            this.switchSchedule(true);
-        } catch (err) {
-            console.warn(err);
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            noti.error(err.message);
-            this.cpIndex = -1;
-        }
-        saveStatus();
     }
 
     fromJSON(obj: Partial<ScheduleStateJSON>) {

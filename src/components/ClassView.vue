@@ -178,7 +178,7 @@
             </li>
             <li class="list-group-item pr-0">
                 <table style="width:100%;font-size:14px">
-                    <tr v-for="item in schedule.currentIds" :key="item[0]">
+                    <tr v-for="item in currentIds" :key="item[0]">
                         <td>{{ item[0] }}</td>
                         <td>{{ item[1] }}</td>
                     </tr>
@@ -189,3 +189,9 @@
 </template>
 
 <script lang="ts" src="./ClassView.ts"></script>
+
+<style scoped>
+.list-group-item {
+    background-color: #f8f8f8;
+}
+</style>

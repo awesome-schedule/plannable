@@ -65,3 +65,9 @@
 </template>
 
 <script lang="ts" src="./ExportView.ts"></script>
+
+<style scoped>
+.list-group-item {
+    background-color: #f8f8f8;
+}
+</style>

@@ -8,14 +8,26 @@
  *
  */
 import { Vue, Component, Prop } from 'vue-property-decorator';
+import schedule from '@/store/schedule';
+import { createDecorator } from 'vue-class-component';
+import { ComputedOptions } from 'vue';
+
+export const NoCache = createDecorator((options, key) => {
+    // component options should be passed to the callback
+    // and update for the options object affect the component
+    (options.computed![key] as ComputedOptions<any>).cache = false;
+});
+
 @Component
 export default class Pagination extends Vue {
-    @Prop(Number) readonly scheduleLength!: number;
-    @Prop(Number) readonly curIdx!: number;
+    get curIdx() {
+        return schedule.currentScheduleIndex;
+    }
 
-    idx = 0;
-    start = 0;
-    goto = null;
+    @NoCache
+    get scheduleLength() {
+        return window.scheduleEvaluator.size();
+    }
 
     get length() {
         if (window.screen.width < 900) {
@@ -24,6 +36,11 @@ export default class Pagination extends Vue {
             return this.scheduleLength < 10 ? this.scheduleLength : 10;
         }
     }
+
+    idx = 0;
+    start = 0;
+    goto = null;
+
     created() {
         this.autoSwitch();
     }
@@ -41,13 +58,13 @@ export default class Pagination extends Vue {
         idx = +idx;
         if (idx >= 0 && idx < this.scheduleLength && !isNaN(idx)) {
             this.idx = idx;
-            this.$emit('switch_page', this.idx);
+            schedule.switchPage(this.idx);
         } else if (idx >= this.scheduleLength) {
             this.idx = this.scheduleLength - 1;
-            this.$emit('switch_page', this.idx);
+            schedule.switchPage(this.idx);
         } else if (idx < 0) {
             this.idx = 0;
-            this.$emit('switch_page', this.idx);
+            schedule.switchPage(this.idx);
         }
     }
     autoSwitch() {
@@ -55,7 +72,7 @@ export default class Pagination extends Vue {
             this.idx = this.curIdx;
             this.switchPage(this.idx);
             this.updateStart();
-            this.$emit('switch_page', this.idx);
+            schedule.switchPage(this.idx);
         }
     }
 }

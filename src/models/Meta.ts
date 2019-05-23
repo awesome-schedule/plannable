@@ -131,44 +131,6 @@ export default class Meta {
     });
 
     public static readonly storageVersion = 2;
-
-    public static readonly storageFields = [
-        // schedules
-        'currentSemester', // note: this field is for uploadJSON
-
-        'currentScheduleIndex',
-        'currentSchedule',
-        'proposedSchedules',
-        'proposedScheduleIndex',
-        'cpIndex',
-
-        // filters
-        'filter',
-
-        // settings
-        'display'
-    ];
-
     public static readonly semesterListExpirationTime = 86400 * 1000; // one day
     public static readonly semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 }
-
-// /**
-//  * use a standalone method to get rid of deep copy issues
-//  */
-// export function getDefaultData() {
-//     return {
-//         semesters: [],
-//         currentSemester: null,
-//         currentScheduleIndex: 0,
-//         currentSchedule: new Schedule(),
-//         proposedSchedules: [new Schedule()],
-//         proposedScheduleIndex: 0,
-//         cpIndex: -1,
-
-//         // display options
-//         display: getDefaultDisplay(),
-//         // filter options
-//         filter: getDefaultFilter()
-//     } as { [x: string]: any };
-// }

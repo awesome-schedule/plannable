@@ -10,6 +10,7 @@ import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import display from '../store/display';
+import schedule from '@/store/schedule';
 
 @Component({
     components: {
@@ -17,7 +18,9 @@ import display from '../store/display';
     }
 })
 export default class GridSchedule extends Vue {
-    @Prop(Schedule) readonly schedule!: Schedule;
+    get schedule() {
+        return schedule.currentSchedule;
+    }
 
     display = display;
 

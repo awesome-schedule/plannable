@@ -31,6 +31,20 @@ export default class ClassView extends Vue {
     }
 
     /**
+     * get the list of current ids, sorted in alphabetical order of the keys
+     */
+    get currentIds(): Array<[string, string]> {
+        return Object.entries(schedule.currentSchedule.currentIds).sort((a, b) =>
+            a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
+        );
+    }
+
+    @Watch('display.multiSelect')
+    multiSelectWatch() {
+        schedule.currentSchedule.computeSchedule();
+    }
+
+    /**
      * get classes that match the input query.
      * Exit "entering" mode on falsy parameter (set `isEntering` to false)
      *

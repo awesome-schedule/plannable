@@ -126,12 +126,8 @@
         >
             <div class="container-fluid my-3">
                 <div class="row justify-content-center">
-                    <div v-if="schedule.generated && !schedule.generatedEmpty()" class="col">
-                        <Pagination
-                            :schedule-length="scheduleLength"
-                            :cur-idx="tempScheduleIndex"
-                            @switch_page="schedule.switchPage"
-                        ></Pagination>
+                    <div v-if="schedule.generated" class="col">
+                        <Pagination></Pagination>
                     </div>
                 </div>
             </div>
@@ -205,12 +201,6 @@
 </template>
 
 <script lang="ts" src="./App.ts"></script>
-
-<style scoped>
-.list-group-item {
-    background-color: #f8f8f8;
-}
-</style>
 
 <style>
 .fade-enter-active,

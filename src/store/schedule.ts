@@ -56,31 +56,15 @@ export class ScheduleStore extends Vue implements ScheduleState {
      */
     generated = false;
 
-    /**
-     * get the list of current ids, sorted in alphabetical order of the keys
-     */
-    get currentIds(): Array<[string, string]> {
-        return Object.entries(this.currentSchedule.currentIds).sort((a, b) =>
-            a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
-        );
-    }
-    set proposedSchedule(schedule: Schedule) {
+    set proposedSchedule(sche: Schedule) {
         // need Vue's reactivity
-        this.$set(this.proposedSchedules, this.proposedScheduleIndex, schedule);
+        this.$set(this.proposedSchedules, this.proposedScheduleIndex, sche);
     }
     /**
      * the proposed schedule that is currently active
      */
     get proposedSchedule() {
         return this.proposedSchedules[this.proposedScheduleIndex];
-    }
-
-    /**
-     * whether there're schedules generated. Because script between <template>
-     * tag cannot access global objects, we need a method
-     */
-    generatedEmpty() {
-        return window.scheduleEvaluator.empty();
     }
     /**
      * switch to next or previous proposed schedule. has bound checking.
@@ -137,10 +121,7 @@ export class ScheduleStore extends Vue implements ScheduleState {
             ) {
                 this.generated = true;
                 this.proposedSchedule = this.currentSchedule;
-                this.switchPage(
-                    this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex,
-                    true
-                );
+                this.switchPage(this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex);
             }
         } else {
             this.generated = false;
@@ -153,14 +134,9 @@ export class ScheduleStore extends Vue implements ScheduleState {
      * @param idx
      * @param update  whether to update the pagination status
      */
-    switchPage(idx: number, update = false) {
+    switchPage(idx: number) {
         if (0 <= idx && idx < window.scheduleEvaluator.size()) {
             this.currentScheduleIndex = idx;
-            // if (update) {
-            //     this.tempScheduleIndex = idx;
-            // } else {
-            //     this.tempScheduleIndex = null;
-            // }
             this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
             saveStatus();
         }
@@ -174,6 +150,7 @@ export class ScheduleStore extends Vue implements ScheduleState {
         this.cpIndex = -1;
         saveStatus();
     }
+
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             this.currentSchedule.clean();
@@ -221,14 +198,12 @@ export class ScheduleStore extends Vue implements ScheduleState {
             noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
             this.cpIndex = this.proposedScheduleIndex;
             this.switchSchedule(true);
-            // this.loading = false;
         } catch (err) {
             console.warn(err);
             this.generated = false;
             window.scheduleEvaluator.clear();
             noti.error(err.message);
             this.cpIndex = -1;
-            // this.loading = false;
         }
         saveStatus();
     }

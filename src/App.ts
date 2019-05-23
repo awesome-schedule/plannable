@@ -7,8 +7,6 @@
 /**
  *
  */
-import { createDecorator } from 'vue-class-component';
-import { ComputedOptions } from 'vue';
 import { display, Display } from './store/display';
 import { noti } from './store/notification';
 
@@ -26,11 +24,9 @@ import EventView from './components/EventView.vue';
 import Information from './components/Information.vue';
 import External from './components/External.vue';
 
-import { SemesterJSON } from './models/Catalog';
 import Event from './models/Event';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
-import { savePlain, toICal } from './utils';
 import Meta from './models/Meta';
 import semester from './store/semester';
 import filter from './store/filter';
@@ -41,12 +37,6 @@ import { saveStatus } from './store/helper';
 // otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator();
 // window.catalog = null;
-
-export const NoCache = createDecorator((options, key) => {
-    // component options should be passed to the callback
-    // and update for the options object affect the component
-    (options.computed![key] as ComputedOptions<any>).cache = false;
-});
 
 @Component({
     components: {
@@ -118,10 +108,6 @@ export default class App extends Vue {
         return false;
     }
 
-    @NoCache
-    get scheduleLength() {
-        return window.scheduleEvaluator.size();
-    }
     get scheduleWidth() {
         return this.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
     }
@@ -135,11 +121,6 @@ export default class App extends Vue {
             if (this.loading) noti.info('Loading...', 3600);
             else noti.clear();
         }
-    }
-
-    @Watch('display.multiSelect')
-    multiSelectWatch() {
-        this.currentSchedule.computeSchedule();
     }
 
     created() {

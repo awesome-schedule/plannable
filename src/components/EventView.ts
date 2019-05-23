@@ -12,7 +12,7 @@ import Event from '../models/Event';
 import { to12hr, to24hr } from '../utils';
 import noti from '../store/notification';
 import App from '../App';
-import schedule from '@/store/schedule';
+import schedule from '../store/schedule';
 
 @Component
 export default class EventView extends Vue {

@@ -4,9 +4,9 @@ import App from '../App';
 import semester from '../store/semester';
 import Course from '../models/Course';
 import noti from '../store/notification';
-import display from '@/store/display';
+import display from '../store/display';
 import ClassList from './ClassList.vue';
-import { saveStatus } from '@/store/helper';
+import { saveStatus } from '../store/helper';
 
 @Component({
     components: {

@@ -7,8 +7,8 @@
 /**
  *
  */
-import { display, Display } from './store/display';
-import { noti } from './store/notification';
+import display from './store/display';
+import noti from './store/notification';
 
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import ClassView from './components/ClassView.vue';

@@ -45,7 +45,7 @@ export const TYPES = Object.freeze({
 }) as { [x: string]: NotiClass };
 
 @Component
-export class Notification extends Vue implements NotiState {
+class Notification extends Vue implements NotiState {
     public msg: string = '';
     public class: NotiClass = '';
     private job: number | null = null;

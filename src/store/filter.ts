@@ -2,29 +2,24 @@
  *
  */
 import { Vue, Component } from 'vue-property-decorator';
-import ScheduleEvaluator from '@/algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, { SortOptions } from '../algorithm/ScheduleEvaluator';
 import noti from './notification';
-import Meta from '@/models/Meta';
+import Meta from '../models/Meta';
 import Event from '../models/Event';
-import { to12hr } from '@/utils';
+import { to12hr } from '../utils';
 import { toJSON } from './helper';
 import schedule from './schedule';
 
-const _defaultFilter = {
-    timeSlots: [] as Array<[boolean, boolean, boolean, boolean, boolean, string, string]>,
-    allowWaitlist: true,
-    allowClosed: true,
-    sortOptions: ScheduleEvaluator.getDefaultOptions()
-};
-
-type _FilterState = typeof _defaultFilter;
-
-export interface FilterState extends _FilterState {
+export interface FilterState {
     [x: string]: any;
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    allowWaitlist: boolean;
+    allowClosed: boolean;
+    sortOptions: SortOptions;
 }
 
 @Component
-export class FilterStore extends Vue implements FilterState {
+class FilterStore extends Vue implements FilterState {
     [x: string]: any;
     /**
      * index 0 - 4: whether Mo - Fr are selected
@@ -135,13 +130,16 @@ export class FilterStore extends Vue implements FilterState {
     }
 
     toJSON() {
-        return toJSON(this, _defaultFilter);
+        return toJSON(this);
     }
 
-    getDefault() {
-        const result = Object.assign({}, _defaultFilter);
-        result.sortOptions = ScheduleEvaluator.getDefaultOptions();
-        return result;
+    getDefault(): FilterState {
+        return {
+            timeSlots: [] as Array<[boolean, boolean, boolean, boolean, boolean, string, string]>,
+            allowWaitlist: true,
+            allowClosed: true,
+            sortOptions: ScheduleEvaluator.getDefaultOptions()
+        };
     }
 }
 

@@ -123,9 +123,7 @@ describe('Schedule Test', () => {
 
         for (const i of [0, 1, 2, 3, 4, 5]) schedule.update('chem14105', i);
         for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) schedule.update('chem14114', i);
-        display.update({
-            combineSections: false
-        });
+        display.combineSections = false;
         schedule._computeSchedule();
         schedule.computeConflict();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
@@ -151,9 +149,7 @@ describe('Schedule Test', () => {
         schedule.unhover('cs21105');
         schedule.unhover('cs21504');
 
-        display.update({
-            multiSelect: false
-        });
+        display.multiSelect = false;
         schedule._computeSchedule();
 
         schedule.update('cs21105', -1);

@@ -7,10 +7,10 @@
 /**
  *
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
-import schedule from '@/store/schedule';
+import schedule from '../store/schedule';
 
 @Component
 export default class Palette extends Vue {

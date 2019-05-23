@@ -5,10 +5,6 @@
  */
 
 /**
- *
- */
-import Schedule from './Schedule';
-/**
  * the raw catalog is represented as a big dictionary
  *
  * key: department + number + type, e.g. cs11105

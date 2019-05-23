@@ -14,7 +14,7 @@ import Event from '../models/Event';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import modal from '../store/modal';
-import display from '@/store/display';
+import display from '../store/display';
 
 @Component
 export default class CourseBlock extends Vue {

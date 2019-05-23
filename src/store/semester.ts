@@ -1,10 +1,10 @@
 /**
  *
  */
-import { SemesterJSON } from '@/models/Catalog';
-import { loadSemesterList } from '@/data/SemesterListLoader';
+import { SemesterJSON } from '../models/Catalog';
+import { loadSemesterList } from '../data/SemesterListLoader';
 import noti from './notification';
-import { loadSemesterData } from '@/data/CatalogLoader';
+import { loadSemesterData } from '../data/CatalogLoader';
 import { Vue, Component } from 'vue-property-decorator';
 import { parseStatus } from './helper';
 

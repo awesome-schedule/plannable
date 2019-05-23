@@ -6,8 +6,12 @@ import Schedule, { ScheduleJSON } from '../models/Schedule';
 import noti from './notification';
 import filter from '../store/filter';
 import display from './display';
-import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
+import ScheduleGenerator from '../algorithm/ScheduleGenerator';
 import { toJSON, saveStatus } from './helper';
+
+// console.log('.............................');
+// console.log(Schedule);
+// console.log('.............................');
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -28,7 +32,7 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 }
 
 @Component
-export class ScheduleStore extends Vue implements ScheduleState {
+class ScheduleStore extends Vue implements ScheduleState {
     [x: string]: any;
     /**
      * the index of the current schedule in the scheduleEvaluator.schedules array,
@@ -153,11 +157,9 @@ export class ScheduleStore extends Vue implements ScheduleState {
 
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
-            this.currentSchedule.clean();
-            this.generated = false;
-            window.scheduleEvaluator.clear();
-            localStorage.clear();
-            this.cpIndex = -1;
+            this.clear();
+            window.localStorage.clear();
+            window.location.reload(true);
         }
     }
 
@@ -240,7 +242,7 @@ export class ScheduleStore extends Vue implements ScheduleState {
     }
 
     toJSON() {
-        return toJSON(this, this.getDefault());
+        return toJSON(this);
     }
 
     getDefault(): ScheduleState {

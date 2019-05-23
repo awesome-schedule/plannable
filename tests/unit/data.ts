@@ -7,7 +7,7 @@ declare global {
         catalog: Catalog;
         timeMatrix: Int32Array;
         buildingList: string[];
-        semesters: Semester[];
+        semesters: SemesterJSON[];
     }
 }
 
@@ -17,7 +17,7 @@ declare global {
 import { requestSemesterData } from '../../src/data/CatalogLoader';
 import path from 'path';
 import fs from 'fs';
-import Catalog, { Semester } from '../../src/models/Catalog';
+import Catalog, { SemesterJSON } from '../../src/models/Catalog';
 
 const datadir = path.join(__dirname, 'data');
 
@@ -25,7 +25,7 @@ if (!fs.existsSync(datadir)) {
     fs.mkdirSync(datadir);
 }
 
-const semester: Semester = {
+const semester: SemesterJSON = {
     id: '1198',
     name: 'Fall 2019'
 };

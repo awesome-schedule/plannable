@@ -36,7 +36,7 @@ export interface ScheduleOptions {
  *
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
-export default class Schedule {
+export class Schedule {
     public static readonly bgColors = [
         '#f7867e',
         '#ffb74c',
@@ -654,3 +654,5 @@ export default class Schedule {
         return Object.keys(this.All).length === 0;
     }
 }
+
+export default Schedule;

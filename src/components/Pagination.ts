@@ -7,8 +7,8 @@
 /**
  *
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import schedule from '@/store/schedule';
+import { Vue, Component } from 'vue-property-decorator';
+import schedule from '../store/schedule';
 import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
 

@@ -2,9 +2,9 @@ import display, { DisplayState } from './display';
 import filter, { FilterState } from './filter';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
-import { SemesterJSON } from '@/models/Catalog';
-import { SortOptions } from '@/algorithm/ScheduleEvaluator';
-import { ScheduleJSON } from '@/models/Schedule';
+import { SemesterJSON } from '../models/Catalog';
+import { SortOptions } from '../algorithm/ScheduleEvaluator';
+import { ScheduleJSON } from '../models/Schedule';
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
@@ -29,8 +29,13 @@ export interface LegacyStorage {
     sortOptions: SortOptions;
 }
 
-export function toJSON<State extends object>(thisArg: State, defaultObj: State): State {
+interface StorageItem<State> {
+    getDefault(): State;
+}
+
+export function toJSON<State extends object>(thisArg: State & StorageItem<State>): State {
     const result = {} as State;
+    const defaultObj = thisArg.getDefault();
     for (const key in defaultObj) {
         result[key] = thisArg[key];
     }
@@ -57,8 +62,9 @@ export function parseStatus(semesterId: string) {
     if (data) {
         try {
             parsed = JSON.parse(data);
-            // tslint:disable-next-line: no-empty
-        } catch (e) {}
+        } catch (e) {
+            console.warn(e);
+        }
     }
     if (parsed.currentSchedule && parsed.proposedSchedules) {
         const old: LegacyStorage = parsed;

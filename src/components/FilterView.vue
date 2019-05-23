@@ -146,7 +146,7 @@
                             type="radio"
                             :value="mode.mode"
                             class="custom-control-input"
-                            @change="changeSorting()"
+                            @change="changeSorting"
                         />
                         <label
                             class="custom-control-label"

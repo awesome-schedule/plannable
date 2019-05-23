@@ -9,7 +9,7 @@
  *
  */
 import Catalog from '../models/Catalog';
-import ScheduleEvaluator, { SortOptions } from './ScheduleEvaluator';
+import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 import Schedule from '../models/Schedule';
 import Event from '../models/Event';
 import * as Utils from '../utils';
@@ -105,58 +105,47 @@ export type RawAlgoCourse = [string, TimeDict, number[], RoomNumberDict];
  */
 export type RawAlgoSchedule = RawAlgoCourse[];
 
-export interface Options {
+export interface GeneratorOptions {
     [x: string]: any;
-    events?: Event[];
-    timeSlots?: Event[];
-    status?: string[];
-    sortOptions?: SortOptions;
-    combineSections?: boolean;
-    maxNumSchedules?: number;
-}
-
-interface FilledOptions {
-    [x: string]: any;
-    events: Event[];
     timeSlots: Event[];
     status: string[];
-    sortOptions: SortOptions;
+    sortOptions: EvaluatorOptions;
     combineSections: boolean;
     maxNumSchedules: number;
 }
 
 class ScheduleGenerator {
-    public static readonly optionDefaults: FilledOptions = {
-        events: [],
-        status: [],
-        timeSlots: [],
-        sortOptions: ScheduleEvaluator.getDefaultOptions(),
-        combineSections: true,
-        maxNumSchedules: 200000
-    };
+    // public static readonly optionDefaults: FilledOptions = {
+    //     events: [],
+    //     status: [],
+    //     timeSlots: [],
+    //     sortOptions: ScheduleEvaluator.getDefaultOptions(),
+    //     combineSections: true,
+    //     maxNumSchedules: 200000
+    // };
 
-    /**
-     * validate the options object. Default values are supplied for missing keys.
-     * @param options
-     */
-    public static validateOptions(options: Options): FilledOptions {
-        if (!options) return ScheduleGenerator.optionDefaults;
-        for (const field in ScheduleGenerator.optionDefaults) {
-            if (!options[field] && options[field] !== false) {
-                console.warn(`Non-existent field ${field}. Default value used`);
-                options[field] = ScheduleGenerator.optionDefaults[field];
-            }
-        }
-        return options as FilledOptions;
-    }
+    // /**
+    //  * validate the options object. Default values are supplied for missing keys.
+    //  * @param options
+    //  */
+    // public static validateOptions(options: Options): FilledOptions {
+    //     if (!options) return ScheduleGenerator.optionDefaults;
+    //     for (const field in ScheduleGenerator.optionDefaults) {
+    //         if (!options[field] && options[field] !== false) {
+    //             console.warn(`Non-existent field ${field}. Default value used`);
+    //             options[field] = ScheduleGenerator.optionDefaults[field];
+    //         }
+    //     }
+    //     return options as FilledOptions;
+    // }
 
     public catalog: Catalog;
-    public options: FilledOptions;
+    public options: GeneratorOptions;
     public buildingList: string[];
 
-    constructor(allRecords: Catalog, buildingList: string[]) {
+    constructor(allRecords: Catalog, buildingList: string[], options: GeneratorOptions) {
         this.catalog = allRecords;
-        this.options = ScheduleGenerator.optionDefaults;
+        this.options = options;
         this.buildingList = buildingList;
     }
 
@@ -169,16 +158,12 @@ class ScheduleGenerator {
      *
      * @see [[ScheduleEvaluator]]
      */
-    public getSchedules(
-        schedule: Schedule,
-        options: Options = ScheduleGenerator.optionDefaults
-    ): ScheduleEvaluator {
+    public getSchedules(schedule: Schedule): ScheduleEvaluator {
         console.time('algorithm bootstrapping');
-        this.options = ScheduleGenerator.validateOptions(options);
         const buildingList: string[] = this.buildingList;
 
         // convert events to TimeDicts so that we can easily check for time conflict
-        const timeSlots: TimeDict[] = this.options.events.map(e => e.toTimeDict());
+        const timeSlots: TimeDict[] = schedule.events.map(e => e.toTimeDict());
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
 
         const classList: RawAlgoCourse[][] = [];

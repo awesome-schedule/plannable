@@ -15,17 +15,6 @@ import Event from '../models/Event';
 import quickselect from 'quickselect';
 import { calcOverlap } from '../utils';
 
-export enum Mode {
-    fallback = 0,
-    combined = 1
-}
-
-export interface SortMode {
-    readonly mode: Mode;
-    readonly title: string;
-    readonly description: string;
-}
-
 type OrderedBlocks = [number[], number[], number[], number[], number[]];
 type OrderedRooms = [number[], number[], number[], number[], number[]];
 
@@ -47,72 +36,31 @@ export interface SortFunctions {
 }
 
 /**
- * A `SortOption` represents a single sort option
+ * representation of a single sort option
  */
 export interface SortOption {
-    /**
-     * name of this sorting option
-     */
-    readonly name: string;
-    /**
-     * whether or not this option is enabled
-     */
+    name: string;
     enabled: boolean;
-    /**
-     * whether to sort in reverse
-     */
     reverse: boolean;
-    /**
-     * the names of the sorting options that cannot be applied when this option is enabled
-     */
-    readonly exclusive: string[];
-    /**
-     * text displayed next to the checkbox
-     */
-    readonly title: string;
-    /**
-     * text displayed in tooltip
-     */
-    readonly description: string;
 }
 
 /**
- * SortOptionJSON is the JSON representation of SortOptions
- *
- * It only keeps the name and non-readonly fields of the SortOptions
+ * enum for the two sort modes
  */
-export interface SortOptionJSON {
-    sortBy: Array<{
-        name: string;
-        enabled: boolean;
-        reverse: boolean;
-    }>;
-    mode: Mode;
+export enum SortMode {
+    fallback = 0,
+    combined = 1
 }
 
-export interface SortOptions {
+/**
+ * options for the schedule evaluator
+ */
+export interface EvaluatorOptions {
     sortBy: SortOption[];
-    mode: Mode;
-    toJSON: () => SortOptionJSON;
-    fromJSON: (x?: SortOptionJSON) => SortOptions;
+    mode: SortMode;
 }
 
 class ScheduleEvaluator {
-    public static readonly sortModes: SortMode[] = [
-        {
-            mode: Mode.combined,
-            title: 'Combined',
-            description: 'Combine all sorting options enabled and given them equal weight'
-        },
-        {
-            mode: Mode.fallback,
-            title: 'Fallback',
-            description:
-                'Sort using the options on top first. If compare equal, sort using the next option.' +
-                ' You can drag the sorting options to change their order.'
-        }
-    ];
-
     /**
      * defines a number of sorting functions. Note that by default, schedules are sorted in
      * **ascending** order according to the coefficient computed by one or a combination of sorting functions.
@@ -226,104 +174,7 @@ class ScheduleEvaluator {
         }
     };
 
-    /**
-     * get a copy of the default options
-     */
-    public static getDefaultOptions() {
-        const options: SortOptions = Object.assign({}, ScheduleEvaluator.optionDefaults);
-        options.sortBy = options.sortBy.map(x => Object.assign({}, x));
-        return options;
-    }
-
-    public static validateOptions(options?: SortOptions) {
-        if (!options) return ScheduleEvaluator.optionDefaults;
-        for (const option of options.sortBy) {
-            if (typeof ScheduleEvaluator.sortFunctions[option.name] !== 'function')
-                throw new Error(`Non-existent sorting option ${option.name}`);
-        }
-        return options;
-    }
-
-    private static readonly optionDefaults: SortOptions = {
-        sortBy: [
-            {
-                name: 'distance',
-                enabled: true,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Walking Distance',
-                description: 'Avoid long distance walking between classes'
-            },
-            {
-                name: 'variance',
-                enabled: true,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Variance',
-                description: 'Balance the class time each day'
-            },
-            {
-                name: 'compactness',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Vertical compactness',
-                description: 'Make classes back-to-back'
-            },
-            {
-                name: 'lunchTime',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'Lunch Time',
-                description: 'Leave spaces for lunch'
-            },
-            {
-                name: 'noEarly',
-                enabled: false,
-                reverse: false,
-                exclusive: ['IamFeelingLucky'],
-                title: 'No Early',
-                description: 'Start my day as late as possible'
-            },
-            {
-                name: 'IamFeelingLucky',
-                enabled: false,
-                reverse: false,
-                exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
-                title: `I'm Feeling Lucky`,
-                description: 'Sort randomly'
-            }
-        ],
-        mode: Mode.combined,
-        toJSON() {
-            return {
-                sortBy: this.sortBy.map(x => ({
-                    name: x.name,
-                    enabled: x.enabled,
-                    reverse: x.reverse
-                })),
-                mode: this.mode
-            };
-        },
-        fromJSON(raw?: SortOptionJSON) {
-            if (raw && raw.mode !== undefined && raw.sortBy) {
-                this.mode = raw.mode;
-                for (const raw_sort of raw.sortBy) {
-                    for (const sort of this.sortBy) {
-                        if (sort.name === raw_sort.name) {
-                            sort.enabled = raw_sort.enabled;
-                            sort.reverse = raw_sort.reverse;
-                            break;
-                        }
-                    }
-                }
-            }
-            return this;
-        }
-    };
-
-    public options: SortOptions;
+    public options: EvaluatorOptions;
     /**
      * the array of events kept, use to construct generated schedules
      */
@@ -344,8 +195,8 @@ class ScheduleEvaluator {
      */
     private sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
 
-    constructor(options?: SortOptions, events: Event[] = []) {
-        this.options = ScheduleEvaluator.validateOptions(options);
+    constructor(options: EvaluatorOptions, events: Event[] = []) {
+        this.options = options;
         this.events = events;
     }
 
@@ -461,7 +312,7 @@ class ScheduleEvaluator {
             return;
         }
 
-        if (this.options.mode === Mode.fallback) {
+        if (this.options.mode === SortMode.fallback) {
             console.time('precomputing coefficients');
             this.options.sortBy
                 .filter(x => x.enabled)
@@ -557,7 +408,7 @@ class ScheduleEvaluator {
         }
 
         const options = this.options.sortBy.filter(x => x.enabled);
-        const isCombined = this.options.mode === Mode.combined;
+        const isCombined = this.options.mode === SortMode.combined;
 
         /**
          * The comparator function when there's only one sorting option selected
@@ -624,8 +475,8 @@ class ScheduleEvaluator {
     /**
      * change the sorting method and (optionally) do sorting
      */
-    public changeSort(options: SortOptions, doSort = true) {
-        this.options = ScheduleEvaluator.validateOptions(options);
+    public changeSort(options: EvaluatorOptions, doSort = true) {
+        this.options = options;
         this.computeCoeff();
         if (doSort) this.sort();
     }

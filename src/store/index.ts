@@ -4,4 +4,5 @@ export { noti } from './notification';
 export { modal } from './modal';
 export { semester } from './semester';
 export { schedule } from './schedule';
+export { status } from './status';
 export { saveStatus, parseStatus, generateSchedules, getGeneratorOptions } from './helper';

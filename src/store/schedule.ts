@@ -168,7 +168,7 @@ class ScheduleStore extends Vue implements ScheduleState {
                 else return new Schedule();
             });
         } else {
-            return defaultState.proposedSchedules;
+            this.proposedSchedules = defaultState.proposedSchedules;
         }
 
         this.currentScheduleIndex =

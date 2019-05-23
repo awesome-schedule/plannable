@@ -24,9 +24,7 @@ import Palette from './components/Palette.vue';
 import SectionModal from './components/SectionModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
-import Event from './models/Event';
-import Meta from './models/Meta';
-import { filter, noti, saveStatus, schedule, semester } from './store';
+import { filter, noti, saveStatus, semester, status, schedule } from './store';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -50,65 +48,44 @@ window.scheduleEvaluator = new ScheduleEvaluator(filter.sortOptions);
     }
 })
 export default class App extends Vue {
-    [x: string]: any;
-
-    /**
-     * sidebar display status
-     * show the specific sidebar when true, and hide when all false
-     */
-    sideBar: { [x: string]: boolean } = {
-        showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
-        showEvent: false,
-        showFilter: false,
-        showSetting: false,
-        showExport: false,
-        showSelectColor: false,
-        showInfo: false,
-        showExternal: false
-    };
-
     get filter() {
         return filter;
     }
     get noti() {
         return noti;
     }
+    get sideBar() {
+        return status.sideBar;
+    }
     get schedule() {
         return schedule;
     }
 
-    // other
-    loading = false;
+    get scheduleWidth() {
+        return status.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
+    }
+    get scheduleLeft() {
+        return status.sideBarActive ? 23 : 3;
+    }
+
     mobile = window.screen.width < 900;
     sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
-    days = Meta.days;
-    eventToEdit: Event | null = null;
 
-    get sideBarActive() {
-        for (const key in this.sideBar) {
-            if (this.sideBar[key]) return true;
-        }
-        return false;
-    }
-
-    get scheduleWidth() {
-        return this.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
-    }
-    get scheduleLeft() {
-        return this.sideBarActive ? 23 : 3;
+    switchSideBar(bar: string) {
+        status.switchSideBar(bar);
     }
 
     @Watch('loading')
     loadingWatch() {
         if (this.mobile) {
-            if (this.loading) noti.info('Loading...', 3600);
+            if (status.loading) noti.info('Loading...', 3600);
             else noti.clear();
         }
     }
 
     created() {
-        this.loading = true;
+        status.loading = true;
 
         (async () => {
             // note: these three can be executed in parallel, i.e. they are not inter-dependent
@@ -124,21 +101,10 @@ export default class App extends Vue {
             if (pay2.payload) window.buildingList = pay2.payload;
 
             if (pay3) await semester.selectSemester(0);
-            this.loading = false;
+            status.loading = false;
         })();
     }
-    editEvent(event: Event) {
-        if (!this.sideBar.showEvent) this.switchSideBar('showEvent');
-        this.eventToEdit = event;
-    }
-    switchSideBar(key: string) {
-        for (const other in this.sideBar) {
-            if (other !== key) this.sideBar[other] = false;
-        }
-        this.sideBar[key] = !this.sideBar[key];
 
-        if (this.sideBar.showSelectColor) schedule.switchSchedule(true);
-    }
     onDocChange() {
         saveStatus();
     }

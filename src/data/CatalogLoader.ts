@@ -8,9 +8,9 @@
  */
 import axios from 'axios';
 import { parse } from 'papaparse';
-import querystring from 'querystring';
-import Meta, { RawCatalog, RawSection, RawMeeting } from '../models/Meta';
-import Catalog, { SemesterJSON, CatalogJSON } from '../models/Catalog';
+import { stringify } from 'querystring';
+import Catalog, { CatalogJSON, SemesterJSON } from '../models/Catalog';
+import Meta, { RawCatalog, RawMeeting, RawSection } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
 
@@ -34,7 +34,7 @@ export async function loadSemesterData(idx: number, force = false): Promise<Noti
             warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
             infoMsg: `Successfully loaded ${semester.name} data!`,
             expireTime: Meta.semesterDataExpirationTime,
-            timeoutTime: 10000,
+            timeoutTime: 15000,
             force
         }
     );
@@ -53,10 +53,13 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host.indexOf('cn.plannable.org') === -1
+    const res = await (window.location.host.indexOf('localhost') !== -1 ||
+    window.location.host.indexOf('127.0.0.1') !== -1
+        ? axios.get(`http://localhost:8000/data/Semester%20Data/CS${semester.id}Data.csv`) // local dev
+        : window.location.host.indexOf('cn.plannable.org') === -1 // Running in China?
         ? axios.post(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`,
-              querystring.stringify({
+              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // nope
+              stringify({
                   Semester: semester.id,
                   Group: 'CS',
                   Description: 'Yes',
@@ -64,7 +67,7 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
                   Extended: 'Yes'
               })
           )
-        : axios.get(`https://cn.plannable.org/data/Semester%20Data/CS${semester.id}Data.csv`));
+        : axios.get(`https://cn.plannable.org/data/Semester%20Data/CS${semester.id}Data.csv`)); // use the mirror
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);

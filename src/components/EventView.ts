@@ -6,16 +6,18 @@
 /**
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import App from '../App';
 import Event from '../models/Event';
 import Meta from '../models/Meta';
-import { generateSchedules, noti, schedule } from '../store';
+import { generateSchedules, noti, schedule, status } from '../store';
 import { to12hr, to24hr } from '../utils';
 
 @Component
 export default class EventView extends Vue {
-    @Prop(Event) readonly event!: Event;
+    get event() {
+        return status.eventToEdit;
+    }
 
     // event related fields
     eventWeek = [false, false, false, false, false];
@@ -116,7 +118,7 @@ export default class EventView extends Vue {
         this.eventTimeTo = '';
         this.eventDescription = '';
         this.isEditingEvent = false;
-        this.$parent.eventToEdit = null;
+        status.eventToEdit = null;
         if (regenerate) generateSchedules();
         else schedule.currentSchedule.computeSchedule();
     }

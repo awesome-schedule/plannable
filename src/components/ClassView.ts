@@ -1,7 +1,7 @@
 import { Vue, Component } from 'vue-property-decorator';
 import Course from '../models/Course';
 import ClassList from './ClassList.vue';
-import { schedule, display, semester, noti, saveStatus, generateSchedules } from '../store';
+import { schedule, display, semester, noti, saveStatus, generateSchedules, status } from '../store';
 
 @Component({
     components: {
@@ -13,6 +13,9 @@ export default class ClassView extends Vue {
     isEntering = false;
     inputCourses: Course[] | null = null;
 
+    get loading() {
+        return status.loading;
+    }
     get schedule() {
         return schedule;
     }

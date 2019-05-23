@@ -1,12 +1,11 @@
 /**
  *
  */
-import { SemesterJSON } from '../models/Catalog';
-import { loadSemesterList } from '../data/SemesterListLoader';
-import noti from './notification';
+import { Component, Vue } from 'vue-property-decorator';
 import { loadSemesterData } from '../data/CatalogLoader';
-import { Vue, Component } from 'vue-property-decorator';
-import { parseStatus } from './helper';
+import { loadSemesterList } from '../data/SemesterListLoader';
+import { SemesterJSON } from '../models/Catalog';
+import { parseStatus, noti, status } from '.';
 
 export interface SemesterState {
     [x: string]: any;
@@ -72,8 +71,8 @@ class Semesters extends Vue implements SemesterState {
             }
         }
 
+        status.loading = true;
         const currentSemester = this.semesters[semesterId];
-
         if (force) noti.info(`Updating ${currentSemester.name} data...`);
         const result = await loadSemesterData(semesterId, force);
         if (result.level !== 'info') noti.notify(result);
@@ -90,6 +89,7 @@ class Semesters extends Vue implements SemesterState {
             this.currentSemester = null;
             this.lastUpdate = '';
         }
+        status.loading = false;
     }
 }
 

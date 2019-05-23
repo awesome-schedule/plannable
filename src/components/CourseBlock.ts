@@ -12,7 +12,7 @@ import Course from '../models/Course';
 import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
-import { display, modal } from '../store';
+import { display, modal, status } from '../store';
 import { timeToNum, to12hr } from '../utils';
 
 @Component
@@ -88,7 +88,8 @@ export default class CourseBlock extends Vue {
         } else if (this.isCourse) {
             modal.showCourseModal(section as Course);
         } else if (this.isEvent) {
-            this.$parent.$emit('editEvent', section);
+            if (!status.sideBar.showEvent) status.switchSideBar('showEvent');
+            status.eventToEdit = section as Event;
         }
     }
 }

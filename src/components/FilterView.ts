@@ -44,7 +44,6 @@ export default class FilterView extends Vue {
             }
         }
         if (!window.scheduleEvaluator.empty()) {
-            // this.loading = true;
             window.scheduleEvaluator.changeSort(filter.sortOptions, true);
             if (!schedule.generated) {
                 schedule.switchSchedule(true);
@@ -54,7 +53,6 @@ export default class FilterView extends Vue {
                     schedule.currentScheduleIndex
                 );
             }
-            // this.loading = false;
         }
     }
 }

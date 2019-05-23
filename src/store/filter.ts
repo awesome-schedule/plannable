@@ -217,7 +217,7 @@ class FilterStore extends Vue implements FilterState {
     }
 
     /**
-     * Preprocess the time filters and convert them to array of event.
+     * Preprocess the time filters and convert them to an array of event.
      * returns null on parsing error
      */
     computeFilter(): Event[] | null {

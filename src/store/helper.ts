@@ -109,7 +109,6 @@ export function getGeneratorOptions() {
     };
 }
 
-// export const generateSchedules = _generateSchedules.bind(schedule);
 export function generateSchedules() {
     if (schedule.generated) schedule.currentSchedule = schedule.proposedSchedule;
     schedule.generated = false;

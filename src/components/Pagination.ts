@@ -7,10 +7,10 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
-import schedule from '../store/schedule';
-import { createDecorator } from 'vue-class-component';
 import { ComputedOptions } from 'vue';
+import { createDecorator } from 'vue-class-component';
+import { Component, Vue } from 'vue-property-decorator';
+import { schedule } from '../store';
 
 export const NoCache = createDecorator((options, key) => {
     // component options should be passed to the callback
@@ -22,6 +22,10 @@ export const NoCache = createDecorator((options, key) => {
 export default class Pagination extends Vue {
     get curIdx() {
         return schedule.currentScheduleIndex;
+    }
+
+    get generated() {
+        return schedule.generated;
     }
 
     @NoCache

@@ -156,7 +156,7 @@
                 </small>
             </li>
             <li class="list-group-item">
-                <button class="btn btn-outline-danger w-100" @click="schedule.clearCache">
+                <button class="btn btn-outline-danger w-100" @click="schedule.clearCache()">
                     Reset All and Clean
                 </button>
             </li>
@@ -165,9 +165,3 @@
 </template>
 
 <script lang="ts" src="./DisplayView.ts"></script>
-
-<style scoped>
-.list-group-item {
-    background-color: #f8f8f8;
-}
-</style>

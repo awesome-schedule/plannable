@@ -126,12 +126,12 @@
         >
             <div class="container-fluid my-3">
                 <div class="row justify-content-center">
-                    <div v-if="schedule.generated" class="col">
+                    <div class="col">
                         <Pagination></Pagination>
                     </div>
                 </div>
             </div>
-            <grid-schedule @editEvent="editEvent"></grid-schedule>
+            <grid-schedule></grid-schedule>
             <v-footer id="app-footer" dark height="auto">
                 <v-card class="flex" flat tile>
                     <v-card-title class="teal">
@@ -245,6 +245,10 @@
     left: 3vw;
     width: 19vw;
     scrollbar-width: thin !important;
+}
+
+.sidebar .list-group-item {
+    background-color: #f8f8f8;
 }
 
 .tab-bar {

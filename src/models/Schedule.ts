@@ -36,12 +36,12 @@ export interface ScheduleOptions {
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
 export class Schedule {
-    public static readonly options = {
+    public static readonly options: ScheduleOptions = {
         combineSections: true,
         multiSelect: true
     };
 
-    public static readonly bgColors = [
+    public static readonly bgColors: ReadonlyArray<string> = [
         '#f7867e',
         '#ffb74c',
         '#82677E',

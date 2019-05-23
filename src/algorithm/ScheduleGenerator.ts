@@ -115,30 +115,6 @@ export interface GeneratorOptions {
 }
 
 class ScheduleGenerator {
-    // public static readonly optionDefaults: FilledOptions = {
-    //     events: [],
-    //     status: [],
-    //     timeSlots: [],
-    //     sortOptions: ScheduleEvaluator.getDefaultOptions(),
-    //     combineSections: true,
-    //     maxNumSchedules: 200000
-    // };
-
-    // /**
-    //  * validate the options object. Default values are supplied for missing keys.
-    //  * @param options
-    //  */
-    // public static validateOptions(options: Options): FilledOptions {
-    //     if (!options) return ScheduleGenerator.optionDefaults;
-    //     for (const field in ScheduleGenerator.optionDefaults) {
-    //         if (!options[field] && options[field] !== false) {
-    //             console.warn(`Non-existent field ${field}. Default value used`);
-    //             options[field] = ScheduleGenerator.optionDefaults[field];
-    //         }
-    //     }
-    //     return options as FilledOptions;
-    // }
-
     public catalog: Catalog;
     public options: GeneratorOptions;
     public buildingList: string[];

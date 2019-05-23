@@ -15,8 +15,8 @@ import Event from '../models/Event';
 import quickselect from 'quickselect';
 import { calcOverlap } from '../utils';
 
-type OrderedBlocks = readonly [number[], number[], number[], number[], number[]];
-type OrderedRooms = readonly [number[], number[], number[], number[], number[]];
+type OrderedBlocks = [number[], number[], number[], number[], number[]];
+type OrderedRooms = [number[], number[], number[], number[], number[]];
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;
@@ -29,7 +29,7 @@ export interface CmpSchedule {
 export interface SortFunctions {
     [x: string]: (a: CmpSchedule) => number;
     readonly variance: (a: CmpSchedule) => number;
-    readonly  compactness: (a: CmpSchedule) => number;
+    readonly compactness: (a: CmpSchedule) => number;
     readonly noEarly: (a: CmpSchedule) => number;
     readonly lunchTime: (a: CmpSchedule) => number;
     readonly IamFeelingLucky: (a: CmpSchedule) => number;
@@ -56,7 +56,7 @@ export enum SortMode {
  * options for the schedule evaluator
  */
 export interface EvaluatorOptions {
-    readonly sortBy: readonly SortOption[];
+    readonly sortBy: ReadonlyArray<SortOption>;
     mode: SortMode;
 }
 

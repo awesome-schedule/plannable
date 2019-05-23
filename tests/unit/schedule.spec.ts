@@ -57,7 +57,6 @@ describe('Schedule Test', () => {
                     All: {},
                     title: '',
                     id: 0,
-                    savedColors: {},
                     events: []
                 })!
                 .empty()

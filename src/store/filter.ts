@@ -58,7 +58,7 @@ interface DetailedSortOption extends SortOption {
     /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
-    readonly exclusive: readonly string[];
+    readonly exclusive: ReadonlyArray<string>;
     /**
      * text displayed next to the checkbox
      */
@@ -73,7 +73,7 @@ interface DetailedSortOption extends SortOption {
  * A JSON-serializable version of the [[EvaluatorOptions]] with more details
  */
 interface DetailedEvaluatorOptions extends EvaluatorOptions {
-    sortBy: readonly DetailedSortOption[];
+    sortBy: ReadonlyArray<DetailedSortOption>;
     mode: SortMode;
     toJSON: () => EvaluatorOptions;
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
@@ -185,7 +185,7 @@ class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSO
     allowClosed = true;
     sortOptions = getDefaultOptions();
 
-    readonly sortModes: DetailedSortMode[] = [
+    readonly sortModes: ReadonlyArray<DetailedSortMode> = [
         {
             mode: SortMode.combined,
             title: 'Combined',

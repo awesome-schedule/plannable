@@ -14,12 +14,10 @@
                     "
                 />
             </li>
-            <li :class="'page-item' + (start <= 0 && idx <= start ? ' disabled' : '')">
+            <li class="page-item" :class="{ disabled: start <= 0 && idx <= start }">
                 <a
                     class="page-link"
                     href="#"
-                    tabindex="-1"
-                    aria-disabled="true"
                     @click="
                         switchPage(idx - 1);
                         updateStart();
@@ -27,10 +25,12 @@
                     >&laquo;</a
                 >
             </li>
+            <!-- Note: v-for in number gives 1 to number inclusive -->
             <li
                 v-for="index in length"
                 :key="index"
-                :class="'page-item' + (idx === index - 1 + start ? ' active' : '')"
+                class="page-item"
+                :class="{ active: idx === index + start - 1 }"
             >
                 <a
                     class="page-link"
@@ -43,7 +43,7 @@
                     {{ index + start }}
                 </a>
             </li>
-            <li :class="'page-item' + (idx >= scheduleLength - 1 ? ' disabled' : '')">
+            <li class="page-item" :class="{ disabled: idx >= scheduleLength - 1 }">
                 <a
                     class="page-link"
                     href="#"

@@ -8,8 +8,7 @@ import CourseBlock from './CourseBlock.vue';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component } from 'vue-property-decorator';
-import display from '../store/display';
-import schedule from '../store/schedule';
+import { display, schedule } from '../store';
 
 @Component({
     components: {

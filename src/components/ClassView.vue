@@ -1,5 +1,5 @@
 <template>
-    <nav class="d-block bg-light sidebar">
+    <nav class="d-block bg-light sidebar-nocol">
         <div class="dropdown">
             <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
                 <span v-if="loading" class="spinner-border spinner-border-sm"></span>

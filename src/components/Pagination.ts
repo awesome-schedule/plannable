@@ -7,16 +7,8 @@
 /**
  *
  */
-import { ComputedOptions } from 'vue';
-import { createDecorator } from 'vue-class-component';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { schedule } from '../store';
-
-export const NoCache = createDecorator((options, key) => {
-    // component options should be passed to the callback
-    // and update for the options object affect the component
-    (options.computed![key] as ComputedOptions<any>).cache = false;
-});
 
 @Component
 export default class Pagination extends Vue {
@@ -28,9 +20,8 @@ export default class Pagination extends Vue {
         return schedule.generated;
     }
 
-    @NoCache
     get scheduleLength() {
-        return window.scheduleEvaluator.size();
+        return schedule.numGenerated;
     }
 
     get length() {
@@ -41,16 +32,16 @@ export default class Pagination extends Vue {
         }
     }
 
+    /**
+     * zero based schedule index
+     */
     idx = 0;
+    /**
+     * zero based offset
+     */
     start = 0;
     goto = null;
 
-    created() {
-        this.autoSwitch();
-    }
-    updated() {
-        this.autoSwitch();
-    }
     updateStart() {
         if (this.idx < this.start) {
             this.start = this.idx;
@@ -59,24 +50,20 @@ export default class Pagination extends Vue {
         }
     }
     switchPage(idx: number) {
-        idx = +idx;
-        if (idx >= 0 && idx < this.scheduleLength && !isNaN(idx)) {
-            this.idx = idx;
-            schedule.switchPage(this.idx);
-        } else if (idx >= this.scheduleLength) {
+        idx = isNaN(idx) ? 0 : +idx;
+        if (idx >= this.scheduleLength) {
             this.idx = this.scheduleLength - 1;
-            schedule.switchPage(this.idx);
         } else if (idx < 0) {
             this.idx = 0;
-            schedule.switchPage(this.idx);
+        } else {
+            this.idx = idx;
         }
+        schedule.switchPage(this.idx);
     }
+
+    @Watch('curIdx')
     autoSwitch() {
-        if (this.curIdx && this.curIdx >= 0 && this.curIdx < this.scheduleLength) {
-            this.idx = this.curIdx;
-            this.switchPage(this.idx);
-            this.updateStart();
-            schedule.switchPage(this.idx);
-        }
+        this.switchPage(this.curIdx);
+        this.updateStart();
     }
 }

@@ -10,8 +10,7 @@
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
-import schedule from '../store/schedule';
-import { saveStatus } from '@/store/helper';
+import { schedule, saveStatus } from '../store';
 
 @Component
 export default class Palette extends Vue {

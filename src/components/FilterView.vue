@@ -9,7 +9,7 @@
                 <div
                     style="float: right"
                     title="Click to add a time period when you don't want to have class"
-                    class="filter-add px-4"
+                    class="click-icon px-4"
                     @click="filter.addTimeSlot()"
                 >
                     <i class="fas fa-plus"></i>

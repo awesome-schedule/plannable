@@ -32,6 +32,10 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleStateJSON> {
     [x: string]: any;
     /**
+     * total number of generated schedules
+     */
+    numGenerated = 0;
+    /**
      * the index of the current schedule in the scheduleEvaluator.schedules array,
      * only applicable when generated=true
      */
@@ -89,6 +93,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
+        saveStatus();
     }
     deleteProposed() {
         if (this.proposedSchedules.length === 1) return;
@@ -100,6 +105,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         // this deletion invalidates the generated schedules immediately.
         if (idx === this.cpIndex) {
             window.scheduleEvaluator.clear();
+            this.numGenerated = 0;
             this.cpIndex = -1;
         }
         this.proposedSchedules.splice(idx, 1);
@@ -115,11 +121,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             // don't do anything if already in "generated" mode
             // or there are no generated schedules
             // or the generated schedules do not correspond to the current schedule
-            if (
-                !this.generated &&
-                !window.scheduleEvaluator.empty() &&
-                this.cpIndex === this.proposedScheduleIndex
-            ) {
+            if (!this.generated && this.cpIndex === this.proposedScheduleIndex) {
                 this.generated = true;
                 this.switchPage(this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex);
             }
@@ -127,6 +129,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             this.generated = false;
             this.currentSchedule = this.proposedSchedule;
         }
+        saveStatus();
     }
 
     /**
@@ -146,14 +149,16 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         this.currentSchedule.clean();
         this.proposedSchedule.clean();
         this.generated = false;
-        window.scheduleEvaluator.clear();
-        this.cpIndex = -1;
+        if (this.cpIndex === this.proposedScheduleIndex) {
+            this.cpIndex = -1;
+            window.scheduleEvaluator.clear();
+            this.numGenerated = 0;
+        }
         saveStatus();
     }
 
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
-            this.clear();
             window.localStorage.clear();
             window.location.reload(true);
         }

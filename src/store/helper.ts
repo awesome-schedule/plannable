@@ -169,7 +169,9 @@ export function generateSchedules() {
     try {
         const evaluator = generator.getSchedules(schedule.currentSchedule);
         window.scheduleEvaluator = evaluator;
-        noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
+        const num = window.scheduleEvaluator.size();
+        noti.success(`${num} Schedules Generated!`, 3);
+        schedule.numGenerated = num;
         schedule.cpIndex = schedule.proposedScheduleIndex;
         schedule.switchSchedule(true);
     } catch (err) {
@@ -178,6 +180,7 @@ export function generateSchedules() {
         window.scheduleEvaluator.clear();
         noti.error(err.message);
         schedule.cpIndex = -1;
+        schedule.numGenerated = 0;
     }
     saveStatus();
 }

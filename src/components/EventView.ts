@@ -6,14 +6,12 @@
 /**
  *
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import Meta from '../models/Meta';
-import Event from '../models/Event';
-import { to12hr, to24hr } from '../utils';
-import noti from '../store/notification';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import App from '../App';
-import schedule from '../store/schedule';
-import { generateSchedules } from '../store/helper';
+import Event from '../models/Event';
+import Meta from '../models/Meta';
+import { generateSchedules, noti, schedule } from '../store';
+import { to12hr, to24hr } from '../utils';
 
 @Component
 export default class EventView extends Vue {

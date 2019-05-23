@@ -1,7 +1,5 @@
 import { Vue, Component } from 'vue-property-decorator';
-import display from '../store/display';
-import semester from '../store/semester';
-import schedule from '../store/schedule';
+import { display, semester, schedule } from '../store';
 
 @Component
 export default class DisplayView extends Vue {

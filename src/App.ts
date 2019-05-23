@@ -7,31 +7,26 @@
 /**
  *
  */
-import display from './store/display';
-import noti from './store/notification';
 
-import { Vue, Component, Watch } from 'vue-property-decorator';
-import ClassView from './components/ClassView.vue';
-import FilterView from './components/FilterView.vue';
-import DisplayView from './components/DisplayView.vue';
-import ExportView from './components/ExportView.vue';
-import Pagination from './components/Pagination.vue';
-import GridSchedule from './components/GridSchedule.vue';
-import SectionModal from './components/SectionModal.vue';
-import CourseModal from './components/CourseModal.vue';
-import Palette from './components/Palette.vue';
-import EventView from './components/EventView.vue';
-import Information from './components/Information.vue';
-import External from './components/External.vue';
-
-import Event from './models/Event';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import { loadTimeMatrix, loadBuildingList } from './data/BuildingLoader';
+import ClassView from './components/ClassView.vue';
+import CourseModal from './components/CourseModal.vue';
+import DisplayView from './components/DisplayView.vue';
+import EventView from './components/EventView.vue';
+import ExportView from './components/ExportView.vue';
+import External from './components/External.vue';
+import FilterView from './components/FilterView.vue';
+import GridSchedule from './components/GridSchedule.vue';
+import Information from './components/Information.vue';
+import Pagination from './components/Pagination.vue';
+import Palette from './components/Palette.vue';
+import SectionModal from './components/SectionModal.vue';
+
+import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
+import Event from './models/Event';
 import Meta from './models/Meta';
-import semester from './store/semester';
-import filter from './store/filter';
-import schedule from './store/schedule';
-import { saveStatus } from './store/helper';
+import { filter, noti, saveStatus, schedule, semester } from './store';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -72,21 +67,11 @@ export default class App extends Vue {
         showExternal: false
     };
 
-    // display options
-    get display() {
-        return display;
-    }
     get filter() {
         return filter;
     }
     get noti() {
         return noti;
-    }
-    get currentSemester() {
-        return semester.currentSemester;
-    }
-    get semesters() {
-        return semester.semesters;
     }
     get schedule() {
         return schedule;
@@ -97,7 +82,6 @@ export default class App extends Vue {
     mobile = window.screen.width < 900;
     sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
-    tempScheduleIndex: number | null = null;
     days = Meta.days;
     eventToEdit: Event | null = null;
 

@@ -1,8 +1,7 @@
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import { loadBuildingList, loadTimeMatrix } from '../../src/data/BuildingLoader';
 import Schedule from '../../src/models/Schedule';
-import filter from '../../src/store/filter';
-import { getGeneratorOptions } from '../../src/store/helper';
+import { filter, getGeneratorOptions } from '../../src/store';
 import data from './data';
 
 beforeAll(async () => {

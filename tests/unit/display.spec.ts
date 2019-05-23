@@ -1,4 +1,4 @@
-import { display } from '../../src/store/display';
+import { display } from '../../src/store';
 
 describe('notification test', () => {
     it('basic', () => {

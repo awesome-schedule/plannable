@@ -1,14 +1,13 @@
-import { SemesterJSON } from '../models/Catalog';
 import Vue from 'vue';
-import modal from '../store/modal';
+import { semester, modal } from '../store';
 
 export default Vue.extend({
-    props: {
-        semester: Object as () => SemesterJSON
-    },
     computed: {
         section() {
             return modal.modalSection;
+        },
+        semester() {
+            return semester.currentSemester;
         }
     }
 });

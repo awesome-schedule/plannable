@@ -2,7 +2,6 @@ import ScheduleEvaluator, {
     CmpSchedule,
     EvaluatorOptions
 } from '../../src/algorithm/ScheduleEvaluator';
-import 'jest';
 import { RawAlgoSchedule } from '../../src/algorithm/ScheduleGenerator';
 import filter from '../../src/store/filter';
 

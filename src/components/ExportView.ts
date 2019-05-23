@@ -2,11 +2,9 @@
  *
  */
 import { Vue, Component } from 'vue-property-decorator';
-import semester from '../store/semester';
-import noti from '../store/notification';
+import { semester, noti, schedule } from '../store';
 import { SemesterStorage } from '../store/helper';
 import { savePlain, toICal } from '../utils';
-import schedule from '../store/schedule';
 
 @Component
 export default class ExportView extends Vue {

@@ -1,14 +1,10 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
-import filter from '../store/filter';
-import display from '../store/display';
-import Meta from '../models/Meta';
-import App from '../App';
+import { Component, Vue } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import schedule from '@/store/schedule';
-import { generateSchedules } from '@/store/helper';
+import Meta from '../models/Meta';
+import { display, filter, generateSchedules, schedule } from '../store';
 
 @Component({
     components: {
@@ -16,7 +12,6 @@ import { generateSchedules } from '@/store/helper';
     }
 })
 export default class FilterView extends Vue {
-    $parent!: App;
     get filter() {
         return filter;
     }

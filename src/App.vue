@@ -1,7 +1,7 @@
 <template>
     <div id="app" class="w-100" @change="onDocChange">
         <course-modal></course-modal>
-        <section-modal :semester="currentSemester"></section-modal>
+        <section-modal></section-modal>
 
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav
@@ -131,10 +131,7 @@
                     </div>
                 </div>
             </div>
-            <grid-schedule
-                :schedule="schedule.currentSchedule"
-                @editEvent="editEvent"
-            ></grid-schedule>
+            <grid-schedule @editEvent="editEvent"></grid-schedule>
             <v-footer id="app-footer" dark height="auto">
                 <v-card class="flex" flat tile>
                     <v-card-title class="teal">

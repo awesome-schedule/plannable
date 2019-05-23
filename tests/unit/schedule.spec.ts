@@ -1,9 +1,8 @@
-import 'jest';
 import Schedule from '../../src/models/Schedule';
-import * as Utils from '../../src/utils';
-import data from './data';
 import Section from '../../src/models/Section';
 import display from '../../src/store/display';
+import * as Utils from '../../src/utils';
+import data from './data';
 
 beforeAll(async () => {
     window.catalog = await data;

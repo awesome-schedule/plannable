@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import modal from '../store/modal';
+import { modal } from '../store';
 export default {
     computed: {
         course() {

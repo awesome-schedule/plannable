@@ -14,8 +14,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 import Course from '../models/Course';
-import modal from '../store/modal';
-import display from '../store/display';
+import { modal, display } from '../store';
 
 @Component({
     components: {

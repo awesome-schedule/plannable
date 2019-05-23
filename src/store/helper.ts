@@ -1,12 +1,12 @@
+import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
+import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
+import { SemesterJSON } from '../models/Catalog';
+import { ScheduleJSON } from '../models/Schedule';
 import display, { DisplayState } from './display';
 import filter, { FilterState } from './filter';
-import schedule, { ScheduleStateJSON, ScheduleState } from './schedule';
-import semester from './semester';
-import { SemesterJSON } from '../models/Catalog';
-import { SortOptions } from '../algorithm/ScheduleEvaluator';
-import { ScheduleJSON } from '../models/Schedule';
 import noti from './notification';
-import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
+import schedule, { ScheduleStateJSON } from './schedule';
+import semester from './semester';
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
@@ -28,7 +28,7 @@ export interface LegacyStorage {
     timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;
-    sortOptions: SortOptions;
+    sortOptions: EvaluatorOptions;
 }
 
 interface StorageItem<State> {
@@ -85,49 +85,55 @@ export function parseStatus(semesterId: string) {
     }
 }
 
-export const generateSchedules = _generateSchedules.bind(schedule);
-function _generateSchedules(this: ScheduleState) {
-    if (this.generated) this.currentSchedule = this.proposedSchedule;
-    this.generated = false;
-
-    if (this.currentSchedule.empty()) return noti.warn(`There are no classes in your schedule!`);
-
-    const status = [];
+export function getGeneratorOptions() {
+    const status: string[] = [];
     if (!filter.allowWaitlist) status.push('Wait List');
     if (!filter.allowClosed) status.push('Closed');
 
     const timeSlots = filter.computeFilter();
 
     // null means there's an error processing time filters. Don't continue if that's the case
-    if (timeSlots === null) {
+    if (!timeSlots) {
         noti.error(`Invalid time filter`);
         return;
     }
 
     if (!filter.validateSortOptions()) return;
 
+    return {
+        timeSlots,
+        status,
+        sortOptions: filter.sortOptions,
+        combineSections: display.combineSections,
+        maxNumSchedules: display.maxNumSchedules
+    };
+}
+
+// export const generateSchedules = _generateSchedules.bind(schedule);
+export function generateSchedules() {
+    if (schedule.generated) schedule.currentSchedule = schedule.proposedSchedule;
+    schedule.generated = false;
+
+    if (schedule.currentSchedule.empty())
+        return noti.warn(`There are no classes in your schedule!`);
+
+    const options = getGeneratorOptions();
+    if (!options) return;
     // this.loading = true;
-    const generator = new ScheduleGenerator(window.catalog, window.buildingList);
+    const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
     try {
-        const evaluator = generator.getSchedules(this.currentSchedule, {
-            events: this.currentSchedule.events,
-            timeSlots,
-            status,
-            sortOptions: filter.sortOptions,
-            combineSections: display.combineSections,
-            maxNumSchedules: display.maxNumSchedules
-        });
+        const evaluator = generator.getSchedules(schedule.currentSchedule);
         window.scheduleEvaluator.clear();
         window.scheduleEvaluator = evaluator;
         noti.success(`${window.scheduleEvaluator.size()} Schedules Generated!`, 3);
-        this.cpIndex = this.proposedScheduleIndex;
-        this.switchSchedule(true);
+        schedule.cpIndex = schedule.proposedScheduleIndex;
+        schedule.switchSchedule(true);
     } catch (err) {
         console.warn(err);
-        this.generated = false;
+        schedule.generated = false;
         window.scheduleEvaluator.clear();
         noti.error(err.message);
-        this.cpIndex = -1;
+        schedule.cpIndex = -1;
     }
     saveStatus();
 }

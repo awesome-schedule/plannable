@@ -1,10 +1,9 @@
-import data from './data';
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
-import Schedule from '../../src/models/Schedule';
-import 'jest';
 import { loadBuildingList, loadTimeMatrix } from '../../src/data/BuildingLoader';
-import Event from '../../src/models/Event';
-import ScheduleEvaluator from '../../src/algorithm/ScheduleEvaluator';
+import Schedule from '../../src/models/Schedule';
+import filter from '../../src/store/filter';
+import { getGeneratorOptions } from '../../src/store/helper';
+import data from './data';
 
 beforeAll(async () => {
     window.catalog = await data;
@@ -23,7 +22,10 @@ describe('ScheduleGenerator Test', () => {
     it('ScheduleGenerator', () => {
         const catalog = window.catalog;
         const buildingList = window.buildingList;
-        const generator = new ScheduleGenerator(catalog, buildingList);
+        const options = getGeneratorOptions();
+        if (!options) throw new Error('failed to get options');
+
+        const generator = new ScheduleGenerator(catalog, buildingList, options);
         expect(typeof generator.createSchedule).toBe('function');
         const schedule = new Schedule();
         schedule.All = {
@@ -36,42 +38,29 @@ describe('ScheduleGenerator Test', () => {
             phys24194: -1,
             ece26308: -1
         };
-        let sort = ScheduleEvaluator.getDefaultOptions();
+        let sort = options.sortOptions;
         sort.sortBy[0].enabled = true;
         sort.sortBy[1].enabled = true;
         sort.sortBy[2].enabled = true;
         sort.sortBy[3].enabled = true;
         sort.sortBy[4].enabled = true;
-        const result = generator.getSchedules(schedule, {
-            combineSections: false,
-            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
-            sortOptions: sort
-        });
+        const result = generator.getSchedules(schedule);
         expect(result.empty()).toBeFalsy();
 
+        schedule.addEvent('MoFr 12:00PM - 12:30PM', false);
+
         sort.mode = 0;
-        const result2 = generator.getSchedules(schedule, {
-            combineSections: false,
-            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
-            sortOptions: sort
-        });
+        options.combineSections = false;
+        const result2 = generator.getSchedules(schedule);
         expect(result2.empty()).toBeFalsy();
 
         sort.sortBy[5].enabled = true;
-        const result3 = generator.getSchedules(schedule, {
-            combineSections: false,
-            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
-            sortOptions: sort
-        });
+        const result3 = generator.getSchedules(schedule);
         expect(result3.empty()).toBeFalsy();
 
-        sort = ScheduleEvaluator.getDefaultOptions();
+        sort = filter.getDefault().sortOptions;
         sort.sortBy[1].enabled = false;
-        const result4 = generator.getSchedules(schedule, {
-            combineSections: false,
-            events: [new Event('MoFr 12:00PM - 12:30PM', false)],
-            sortOptions: sort
-        });
+        const result4 = generator.getSchedules(schedule);
         expect(result4.empty()).toBeFalsy();
 
         sort.mode = 0;

@@ -1,9 +1,10 @@
 import ScheduleEvaluator, {
-    SortOptionJSON,
-    CmpSchedule
+    CmpSchedule,
+    EvaluatorOptions
 } from '../../src/algorithm/ScheduleEvaluator';
 import 'jest';
 import { RawAlgoSchedule } from '../../src/algorithm/ScheduleGenerator';
+import filter from '../../src/store/filter';
 
 const cmpSchedule: CmpSchedule = {
     schedule: [
@@ -39,15 +40,15 @@ const schedules: RawAlgoSchedule = [
 
 describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
-        const evaluator = new ScheduleEvaluator(ScheduleEvaluator.getDefaultOptions(), []);
+        const evaluator = new ScheduleEvaluator(filter.sortOptions, []);
         evaluator.add(schedules);
         const s = evaluator._schedules[0];
-        const func = ScheduleEvaluator.sortFunctions['compactness'];
+        const func = ScheduleEvaluator.sortFunctions.compactness;
         expect(func(s)).toBe(35 + 20 + 150 + 50 + 0 + 150);
     });
 
     it('Insertion Test', () => {
-        const evaluator = new ScheduleEvaluator(ScheduleEvaluator.getDefaultOptions(), []);
+        const evaluator = new ScheduleEvaluator(filter.sortOptions, []);
         evaluator.add(schedules);
         const s = evaluator._schedules[0];
         expect(s.blocks[0]).toEqual([10, 15, 50, 80, 100, 200, 350, 450]);
@@ -69,7 +70,7 @@ describe('Schedule Evaluator Test', () => {
     });
 
     it('Sort Option JSON Parse', () => {
-        const rawSortOptions: SortOptionJSON = {
+        const rawSortOptions: EvaluatorOptions = {
             sortBy: [
                 {
                     name: 'distance',
@@ -79,12 +80,12 @@ describe('Schedule Evaluator Test', () => {
             ],
             mode: 1
         };
-        const sortOption = ScheduleEvaluator.getDefaultOptions();
+        const sortOption = filter.sortOptions;
         sortOption.fromJSON(rawSortOptions);
         expect(sortOption.sortBy[0].enabled).toBe(false);
         expect(sortOption.sortBy[0].reverse).toBe(true);
         expect(sortOption.mode).toBe(1);
-        const optionDefaults = ScheduleEvaluator.getDefaultOptions();
+        const optionDefaults = filter.sortOptions;
         for (let i = 1; i < sortOption.sortBy.length; i++) {
             expect(sortOption.sortBy[i]).toEqual(optionDefaults.sortBy[i]);
         }

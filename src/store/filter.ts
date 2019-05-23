@@ -9,12 +9,19 @@ import Event from '../models/Event';
 import { to12hr } from '../utils';
 import { toJSON } from './helper';
 
-export interface FilterState {
+interface FilterStateBase {
     [x: string]: any;
     timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;
+}
+
+export interface FilterState extends FilterStateBase {
     sortOptions: DetailedEvaluatorOptions;
+}
+
+export interface FilterStateJSON extends FilterStateBase {
+    sortOptions: EvaluatorOptions;
 }
 
 /**
@@ -240,7 +247,7 @@ class FilterStore extends Vue implements FilterState {
         return timeSlotsRecord;
     }
 
-    fromJSON(obj: Partial<FilterState>) {
+    fromJSON(obj: Partial<FilterStateJSON>) {
         const defaultVal = this.getDefault();
         this.timeSlots = obj.timeSlots instanceof Array ? obj.timeSlots : defaultVal.timeSlots;
         this.allowClosed =

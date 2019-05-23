@@ -1,6 +1,5 @@
-import { Vue, Component, Watch } from 'vue-property-decorator';
+import { Vue, Component } from 'vue-property-decorator';
 import schedule from '../store/schedule';
-import App from '../App';
 import semester from '../store/semester';
 import Course from '../models/Course';
 import noti from '../store/notification';
@@ -14,8 +13,6 @@ import { saveStatus } from '../store/helper';
     }
 })
 export default class ClassView extends Vue {
-    $parent!: App;
-
     // autocompletion related fields
     isEntering = false;
     inputCourses: Course[] | null = null;
@@ -37,11 +34,6 @@ export default class ClassView extends Vue {
         return Object.entries(schedule.currentSchedule.currentIds).sort((a, b) =>
             a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
         );
-    }
-
-    @Watch('display.multiSelect')
-    multiSelectWatch() {
-        schedule.currentSchedule.computeSchedule();
     }
 
     /**

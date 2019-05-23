@@ -6,8 +6,10 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Watch } from 'vue-property-decorator';
 import { toJSON } from './helper';
+import Schedule from '../models/Schedule';
+import schedule from './schedule';
 
 export interface DisplayState {
     [x: string]: any;
@@ -40,6 +42,18 @@ class Display extends Vue implements DisplayState {
     public multiSelect = true;
     public combineSections = true;
     public maxNumSchedules = 200000;
+
+    @Watch('multiSelect')
+    multiSelectWatch() {
+        Schedule.options.multiSelect = this.multiSelect;
+        schedule.currentSchedule.computeSchedule();
+    }
+
+    @Watch('combineSections')
+    combineSectionsWatch() {
+        Schedule.options.combineSections = this.combineSections;
+        schedule.currentSchedule.computeSchedule();
+    }
 
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();

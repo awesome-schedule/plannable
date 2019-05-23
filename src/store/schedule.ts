@@ -30,9 +30,9 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 
 @Component
 class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleStateJSON> {
-    [x: string]: any;
     /**
-     * total number of generated schedules
+     * total number of generated schedules, has the same value as
+     * `window.scheduleEvaluator.size()`
      */
     numGenerated = 0;
     /**
@@ -53,7 +53,8 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
      */
     proposedScheduleIndex = 0;
     /**
-     * The index of the proposed schedule corresponding to the generated schedule
+     * The index of the proposed schedule corresponding to the generated schedules contained in
+     * `window.scheduleEvaluator`
      */
     cpIndex = -1;
     /**

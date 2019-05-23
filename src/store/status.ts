@@ -9,13 +9,28 @@ import { Component, Vue } from 'vue-property-decorator';
 import { schedule } from '.';
 import Event from '../models/Event';
 
+interface Sidebars {
+    showSelectClass: boolean;
+    showEvent: boolean;
+    showFilter: boolean;
+    showSetting: boolean;
+    showExport: boolean;
+    showSelectColor: boolean;
+    showInfo: boolean;
+    showExternal: boolean;
+}
+
+interface SidebarStatus extends Sidebars {
+    [key: string]: boolean;
+}
+
 @Component
 class Status extends Vue {
     /**
      * sidebar display status
      * show the specific sidebar when true, and hide when all false
      */
-    sideBar: { [x: string]: boolean } = {
+    sideBar: SidebarStatus = {
         showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
         showEvent: false,
         showFilter: false,
@@ -26,7 +41,11 @@ class Status extends Vue {
         showExternal: false
     };
 
-    // other
+    /**
+     * indicates whether some IO action is running in the background, such as semester data update
+     *
+     * no need to assign to this value when doing computationally expensive operations
+     */
     loading = false;
 
     eventToEdit: Event | null = null;
@@ -38,7 +57,7 @@ class Status extends Vue {
         return false;
     }
 
-    switchSideBar(key: string) {
+    switchSideBar(key: keyof Sidebars) {
         for (const other in this.sideBar) {
             if (other !== key) this.sideBar[other] = false;
         }

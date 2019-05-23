@@ -79,7 +79,10 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
 }
 
-const optionDefaults: DetailedEvaluatorOptions = {
+/**
+ * a list of sort options with default values assigned
+ */
+const defaultOptions: DetailedEvaluatorOptions = {
     sortBy: [
         {
             name: 'distance',
@@ -162,7 +165,7 @@ const optionDefaults: DetailedEvaluatorOptions = {
  * get a copy of the default options
  */
 function getDefaultOptions() {
-    const options: DetailedEvaluatorOptions = Object.assign({}, optionDefaults);
+    const options: DetailedEvaluatorOptions = Object.assign({}, defaultOptions);
     options.sortBy = options.sortBy.map(x => Object.assign({}, x));
     return options;
 }

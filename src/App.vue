@@ -14,7 +14,7 @@
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
                 title="Select Classes"
-                @click="switchSideBar('showSelectClass')"
+                @click="status.switchSideBar('showSelectClass')"
             >
                 <i class="far fa-calendar-alt"></i>
             </div>
@@ -22,7 +22,7 @@
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showEvent }"
                 title="Edit Events"
-                @click="switchSideBar('showEvent')"
+                @click="status.switchSideBar('showEvent')"
             >
                 <i class="fab fa-elementor"></i>
             </div>
@@ -30,7 +30,7 @@
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showFilter }"
                 title="Filters"
-                @click="switchSideBar('showFilter')"
+                @click="status.switchSideBar('showFilter')"
             >
                 <i class="fas fa-filter"></i>
             </div>
@@ -38,7 +38,7 @@
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showSetting }"
                 title="Display Settings"
-                @click="switchSideBar('showSetting')"
+                @click="status.switchSideBar('showSetting')"
             >
                 <i class="fas fa-cog"></i>
             </div>
@@ -46,7 +46,7 @@
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectColor }"
                 title="Customize Colors"
-                @click="switchSideBar('showSelectColor')"
+                @click="status.switchSideBar('showSelectColor')"
             >
                 <i class="fas fa-palette"></i>
             </div>
@@ -54,7 +54,7 @@
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showExport }"
                 title="Import/Export Schedule"
-                @click="switchSideBar('showExport')"
+                @click="status.switchSideBar('showExport')"
             >
                 <i class="fas fa-download"></i>
             </div>
@@ -62,7 +62,7 @@
                 title="Tutorials, miscellaneous information and acknowledgments"
                 :class="{ 'tab-icon-active': sideBar.showInfo }"
                 class="tab-icon mb-4"
-                @click="switchSideBar('showInfo')"
+                @click="status.switchSideBar('showInfo')"
             >
                 <i class="fas fa-info-circle"></i>
             </div>

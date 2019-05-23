@@ -60,6 +60,9 @@ export default class App extends Vue {
     get schedule() {
         return schedule;
     }
+    get status() {
+        return status;
+    }
 
     get scheduleWidth() {
         return status.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
@@ -71,10 +74,6 @@ export default class App extends Vue {
     mobile = window.screen.width < 900;
     sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
-
-    switchSideBar(bar: string) {
-        status.switchSideBar(bar);
-    }
 
     @Watch('loading')
     loadingWatch() {

@@ -7,7 +7,7 @@
 import CourseBlock from './CourseBlock.vue';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component } from 'vue-property-decorator';
 import display from '../store/display';
 import schedule from '../store/schedule';
 
@@ -20,8 +20,9 @@ export default class GridSchedule extends Vue {
     get schedule() {
         return schedule.currentSchedule;
     }
-
-    display = display;
+    get display() {
+        return display;
+    }
 
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';

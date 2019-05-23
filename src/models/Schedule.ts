@@ -328,7 +328,7 @@ export class Schedule {
         const catalog = window.catalog;
         if (!catalog) return;
 
-        console.time('compute schedule');
+        // console.time('compute schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
@@ -409,7 +409,7 @@ export class Schedule {
 
         // this.computeConflict();
         this.constructAdjList();
-        console.timeEnd('compute schedule');
+        // console.timeEnd('compute schedule');
     }
 
     /**

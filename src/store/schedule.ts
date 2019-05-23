@@ -1,9 +1,14 @@
 /**
+ * the schedule module provides methods to manipulate currently showing schedules
+ * @author Hanzhi Zhou
+ */
+
+/**
  *
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, saveStatus } from './helper';
+import { toJSON, saveStatus, StoreModule } from './helper';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -24,7 +29,7 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 }
 
 @Component
-class ScheduleStore extends Vue implements ScheduleState {
+class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleStateJSON> {
     [x: string]: any;
     /**
      * the index of the current schedule in the scheduleEvaluator.schedules array,
@@ -116,7 +121,6 @@ class ScheduleStore extends Vue implements ScheduleState {
                 this.cpIndex === this.proposedScheduleIndex
             ) {
                 this.generated = true;
-                this.proposedSchedule = this.currentSchedule;
                 this.switchPage(this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex);
             }
         } else {
@@ -186,8 +190,8 @@ class ScheduleStore extends Vue implements ScheduleState {
             typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
     }
 
-    toJSON() {
-        return toJSON(this);
+    toJSON(): ScheduleStateJSON {
+        return toJSON<ScheduleState, ScheduleStateJSON>(this);
     }
 
     getDefault(): ScheduleState {

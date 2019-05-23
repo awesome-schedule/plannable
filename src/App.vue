@@ -247,9 +247,9 @@
     scrollbar-width: thin !important;
 }
 
-.sidebar .list-group-item {
+/* .sidebar .list-group-item {
     background-color: #f8f8f8;
-}
+} */
 
 .tab-bar {
     position: fixed;

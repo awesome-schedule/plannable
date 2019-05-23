@@ -1,4 +1,8 @@
 /**
+ * the status module stores the temporal statuses of the webpage. These statuses are not stored
+ */
+
+/**
  *
  */
 import { Component, Vue } from 'vue-property-decorator';

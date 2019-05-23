@@ -1,4 +1,9 @@
 /**
+ * the filter module handles manipulation of filters
+ * @author Hanzhi Zhou
+ */
+
+/**
  *
  */
 import { Vue, Component } from 'vue-property-decorator';
@@ -7,7 +12,7 @@ import noti from './notification';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr } from '../utils';
-import { toJSON } from './helper';
+import { toJSON, StoreModule } from './helper';
 
 interface FilterStateBase {
     [x: string]: any;
@@ -162,7 +167,7 @@ function getDefaultOptions() {
 }
 
 @Component
-class FilterStore extends Vue implements FilterState {
+class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSON> {
     [x: string]: any;
     /**
      * index 0 - 4: whether Mo - Fr are selected
@@ -257,8 +262,8 @@ class FilterStore extends Vue implements FilterState {
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
     }
 
-    toJSON() {
-        return toJSON(this);
+    toJSON(): FilterStateJSON {
+        return toJSON<FilterState, FilterStateJSON>(this);
     }
 
     getDefault(): FilterState {

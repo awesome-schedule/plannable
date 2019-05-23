@@ -1,4 +1,9 @@
 /**
+ * the semester module handles semester switching
+ * @author Hanzhi Zhou
+ */
+
+/**
  *
  */
 import { Component, Vue } from 'vue-property-decorator';
@@ -20,10 +25,6 @@ class Semesters extends Vue implements SemesterState {
     semesters: SemesterJSON[] = [];
     currentSemester: SemesterJSON | null = null;
     lastUpdate: string = '';
-
-    setSemesters(semesters: SemesterJSON[]) {
-        this.semesters = semesters;
-    }
 
     async loadSemesters() {
         const result = await loadSemesterList();

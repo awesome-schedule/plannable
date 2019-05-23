@@ -145,7 +145,7 @@ export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors
     dsatur(adjList, colors, dsaturOrder);
     const opCount = new Int32Array(1);
     let totalCount = 0;
-    console.time('coloring');
+    // console.time('coloring');
     let numColors = 1;
     for (let i = 1; i < 19260817; i++) {
         if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, i, 0)) {
@@ -156,8 +156,8 @@ export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors
         totalCount += opCount[0];
         opCount[0] = 0;
     }
-    console.log('op count', totalCount);
-    console.timeEnd('coloring');
+    // console.log('op count', totalCount);
+    // console.timeEnd('coloring');
     return numColors;
 }
 

@@ -7,7 +7,7 @@
  *
  */
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import { toJSON } from './helper';
+import { toJSON, StoreModule } from './helper';
 import Schedule from '../models/Schedule';
 import schedule from './schedule';
 
@@ -28,7 +28,7 @@ export interface DisplayState {
 }
 
 @Component
-class Display extends Vue implements DisplayState {
+class Display extends Vue implements StoreModule<DisplayState, DisplayState> {
     [x: string]: any;
     public showTime = false;
     public showRoom = true;
@@ -69,7 +69,7 @@ class Display extends Vue implements DisplayState {
     }
 
     toJSON(): DisplayState {
-        return toJSON(this);
+        return toJSON<DisplayState, DisplayState>(this);
     }
 
     getDefault(): DisplayState {

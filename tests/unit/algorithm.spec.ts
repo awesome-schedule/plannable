@@ -65,5 +65,7 @@ describe('ScheduleGenerator Test', () => {
 
         sort.mode = 0;
         result4.changeSort(sort, true);
+
+        result4.clear();
     });
 });

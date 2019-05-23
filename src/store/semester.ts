@@ -84,6 +84,7 @@ class Semesters extends Vue implements SemesterState {
             window.catalog = result.payload;
             this.currentSemester = currentSemester;
             this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
+
             parseStatus(currentSemester.id);
         } else {
             this.currentSemester = null;

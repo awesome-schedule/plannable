@@ -13,6 +13,7 @@ import { to12hr, to24hr } from '../utils';
 import noti from '../store/notification';
 import App from '../App';
 import schedule from '../store/schedule';
+import { generateSchedules } from '../store/helper';
 
 @Component
 export default class EventView extends Vue {
@@ -118,7 +119,7 @@ export default class EventView extends Vue {
         this.eventDescription = '';
         this.isEditingEvent = false;
         this.$parent.eventToEdit = null;
-        if (regenerate) this.$parent.generateSchedules();
-        else this.$parent.currentSchedule.computeSchedule();
+        if (regenerate) generateSchedules();
+        else schedule.currentSchedule.computeSchedule();
     }
 }

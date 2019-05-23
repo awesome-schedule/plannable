@@ -133,16 +133,12 @@
                     ref="selectedClassList"
                     :courses="schedule.currentSchedule.currentCourses"
                     :schedule="schedule.currentSchedule"
-                    :show-any="schedule.generated"
+                    :show-any="!schedule.generated"
                     @update_course="updateCourse"
                     @remove_course="removeCourse"
                 ></ClassList>
                 <div class="btn-group mt-3 w-100">
-                    <button
-                        type="button"
-                        class="btn btn-outline-info"
-                        @click="schedule.generateSchedules()"
-                    >
+                    <button type="button" class="btn btn-outline-info" @click="generateSchedules()">
                         Generate
                     </button>
                     <button

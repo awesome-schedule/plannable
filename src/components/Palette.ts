@@ -11,6 +11,7 @@ import { Vue, Component } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
 import schedule from '../store/schedule';
+import { saveStatus } from '@/store/helper';
 
 @Component
 export default class Palette extends Vue {
@@ -25,8 +26,8 @@ export default class Palette extends Vue {
     }
     setColor(key: string, color: string) {
         this.schedule.setColor(key, color);
-        // this.$parent.saveStatus();
         this.$forceUpdate();
+        saveStatus();
     }
     /**
      * get the number of events and courses that have colors in total

@@ -119,7 +119,7 @@ export function generateSchedules() {
 
     const options = getGeneratorOptions();
     if (!options) return;
-    // this.loading = true;
+
     const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
     try {
         const evaluator = generator.getSchedules(schedule.currentSchedule);

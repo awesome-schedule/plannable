@@ -80,7 +80,7 @@
                 <button
                     type="button"
                     class="btn btn-outline-info w-100"
-                    @click="$parent.generateSchedules()"
+                    @click="generateSchedules()"
                 >
                     Apply
                 </button>

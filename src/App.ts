@@ -35,7 +35,7 @@ import { saveStatus } from './store/helper';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
-window.scheduleEvaluator = new ScheduleEvaluator();
+window.scheduleEvaluator = new ScheduleEvaluator(filter.sortOptions);
 // window.catalog = null;
 
 @Component({

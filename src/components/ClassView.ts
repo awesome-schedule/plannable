@@ -1,11 +1,7 @@
 import { Vue, Component } from 'vue-property-decorator';
-import schedule from '../store/schedule';
-import semester from '../store/semester';
 import Course from '../models/Course';
-import noti from '../store/notification';
-import display from '../store/display';
 import ClassList from './ClassList.vue';
-import { saveStatus } from '../store/helper';
+import { schedule, display, semester, noti, saveStatus, generateSchedules } from '../store';
 
 @Component({
     components: {
@@ -60,6 +56,10 @@ export default class ClassView extends Vue {
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
         this.getClass('');
+    }
+
+    generateSchedules() {
+        generateSchedules();
     }
 
     /**

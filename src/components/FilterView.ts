@@ -8,6 +8,7 @@ import Meta from '../models/Meta';
 import App from '../App';
 import draggable from 'vuedraggable';
 import schedule from '@/store/schedule';
+import { generateSchedules } from '@/store/helper';
 
 @Component({
     components: {
@@ -29,11 +30,9 @@ export default class FilterView extends Vue {
         if (filter.sortOptions.mode === 0) filter.changeSorting(undefined);
     }
 
-    // @Watch('display.combineSections')
-    // combineSectionsWatch() {
-    //     if (this.generated) this.generateSchedules();
-    //     this.currentSchedule.computeSchedule();
-    // }
+    generateSchedules() {
+        generateSchedules();
+    }
 
     changeSorting(optIdx?: number) {
         if (!filter.validateSortOptions()) return;

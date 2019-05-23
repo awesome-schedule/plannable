@@ -18,11 +18,11 @@ export interface SemesterJSON {
     /**
      * semester id, e.g. `1198`
      */
-    id: string;
+    readonly id: string;
     /**
      * semester name, e.g. Fall 2019
      */
-    name: string;
+    readonly name: string;
 }
 
 export interface CatalogJSON extends Expirable {

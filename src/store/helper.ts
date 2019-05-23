@@ -23,6 +23,9 @@ export interface SemesterStorage {
     schedule: ScheduleStateJSON;
 }
 
+/**
+ * the storage format prior to v4.5
+ */
 export interface LegacyStorage {
     currentSemester: SemesterJSON;
     currentScheduleIndex: number;

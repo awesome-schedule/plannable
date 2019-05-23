@@ -63,6 +63,10 @@ class Notification extends Vue implements NotiState {
         }
     }
 
+    public empty() {
+        return !this.msg && !this.class;
+    }
+
     public clear(timeout = 0) {
         if (timeout <= 0) {
             this.msg = '';

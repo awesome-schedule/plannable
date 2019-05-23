@@ -7,7 +7,6 @@
 /**
  *
  */
-
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import ClassView from './components/ClassView.vue';
@@ -74,14 +73,6 @@ export default class App extends Vue {
     mobile = window.screen.width < 900;
     sideBarWidth = this.mobile ? 10 : 3;
     scrollable = false;
-
-    @Watch('loading')
-    loadingWatch() {
-        if (this.mobile) {
-            if (status.loading) noti.info('Loading...', 3600);
-            else noti.clear();
-        }
-    }
 
     created() {
         status.loading = true;

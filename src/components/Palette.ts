@@ -21,7 +21,7 @@ export default class Palette extends Vue {
     randomColor() {
         return randomColor({
             luminosity: 'dark'
-        });
+        }) as string;
     }
     setColor(key: string, color: string) {
         this.schedule.setColor(key, color);

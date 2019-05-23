@@ -19,27 +19,27 @@ type OrderedBlocks = [number[], number[], number[], number[], number[]];
 type OrderedRooms = [number[], number[], number[], number[], number[]];
 
 export interface CmpSchedule {
-    schedule: RawAlgoSchedule;
-    blocks: OrderedBlocks;
-    rooms: OrderedRooms;
+    readonly schedule: RawAlgoSchedule;
+    readonly blocks: OrderedBlocks;
+    readonly rooms: OrderedRooms;
+    readonly index: number;
     coeff: number;
-    index: number;
 }
 
 export interface SortFunctions {
     [x: string]: (a: CmpSchedule) => number;
-    variance: (a: CmpSchedule) => number;
-    compactness: (a: CmpSchedule) => number;
-    noEarly: (a: CmpSchedule) => number;
-    lunchTime: (a: CmpSchedule) => number;
-    IamFeelingLucky: (a: CmpSchedule) => number;
+    readonly variance: (a: CmpSchedule) => number;
+    readonly  compactness: (a: CmpSchedule) => number;
+    readonly noEarly: (a: CmpSchedule) => number;
+    readonly lunchTime: (a: CmpSchedule) => number;
+    readonly IamFeelingLucky: (a: CmpSchedule) => number;
 }
 
 /**
  * representation of a single sort option
  */
 export interface SortOption {
-    name: string;
+    readonly name: string;
     enabled: boolean;
     reverse: boolean;
 }
@@ -56,7 +56,7 @@ export enum SortMode {
  * options for the schedule evaluator
  */
 export interface EvaluatorOptions {
-    sortBy: SortOption[];
+    readonly sortBy: readonly SortOption[];
     mode: SortMode;
 }
 

@@ -5,9 +5,10 @@
 /**
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
-import { schedule } from '.';
+import { Component, Vue, Watch } from 'vue-property-decorator';
+import { schedule, noti } from '.';
 import Event from '../models/Event';
+import { timingSafeEqual } from 'crypto';
 
 interface Sidebars {
     showSelectClass: boolean;
@@ -26,6 +27,12 @@ interface SidebarStatus extends Sidebars {
 
 @Component
 class Status extends Vue {
+    get sideBarActive() {
+        for (const key in this.sideBar) {
+            if (this.sideBar[key]) return true;
+        }
+        return false;
+    }
     /**
      * sidebar display status
      * show the specific sidebar when true, and hide when all false
@@ -50,11 +57,17 @@ class Status extends Vue {
 
     eventToEdit: Event | null = null;
 
-    get sideBarActive() {
-        for (const key in this.sideBar) {
-            if (this.sideBar[key]) return true;
+    @Watch('loading')
+    loadingWatch() {
+        if (this.loading) {
+            if (noti.empty()) {
+                noti.info('Loading...');
+            }
+        } else {
+            if (noti.msg === 'Loading...') {
+                noti.clear();
+            }
         }
-        return false;
     }
 
     switchSideBar(key: keyof Sidebars) {
@@ -62,8 +75,6 @@ class Status extends Vue {
             if (other !== key) this.sideBar[other] = false;
         }
         this.sideBar[key] = !this.sideBar[key];
-
-        if (this.sideBar.showSelectColor) schedule.switchSchedule(true);
     }
 }
 

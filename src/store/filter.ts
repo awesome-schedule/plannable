@@ -58,7 +58,7 @@ interface DetailedSortOption extends SortOption {
     /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
-    readonly exclusive: string[];
+    readonly exclusive: readonly string[];
     /**
      * text displayed next to the checkbox
      */
@@ -73,7 +73,7 @@ interface DetailedSortOption extends SortOption {
  * A JSON-serializable version of the [[EvaluatorOptions]] with more details
  */
 interface DetailedEvaluatorOptions extends EvaluatorOptions {
-    sortBy: DetailedSortOption[];
+    sortBy: readonly DetailedSortOption[];
     mode: SortMode;
     toJSON: () => EvaluatorOptions;
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
@@ -199,11 +199,20 @@ class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSO
                 ' You can drag the sorting options to change their order.'
         }
     ];
-
+    /**
+     * negate the boolean value at `this.timeSlots[i][j]`
+     * @param i the index of the time filter
+     * @param j the index of the day (0 ~ 4)
+     */
     updateFilterDay(i: number, j: number) {
         this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
     }
 
+    /**
+     * @returns true if the current combination of sort options is valid, false otherwise
+     *
+     * notifications will be given for invalid combination via [[noti]]
+     */
     validateSortOptions() {
         if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
             noti.error('You must have at least one sort option!');

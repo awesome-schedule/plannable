@@ -1,5 +1,5 @@
 /**
- * the schedule module provides methods to manipulate currently showing schedules
+ * the schedule module provides methods to manipulate schedules
  * @author Hanzhi Zhou
  */
 
@@ -82,13 +82,16 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         }
         saveStatus();
     }
+    /**
+     * create a new empty schedule at the end of the proposedSchedules array and immediate switch to it
+     */
     newProposed() {
         this.proposedSchedules.push(new Schedule());
         this.switchProposed(this.proposedSchedules.length - 1);
     }
     /**
-     * copy the current schedule and append to the proposedSchedule array.
-     * Immediately switch to the last proposed schedule.
+     * copy the current schedule and append to the `proposedSchedules` array.
+     * Immediately switch to the newly copied schedule.
      */
     copyCurrent() {
         const len = this.proposedSchedules.length;
@@ -96,6 +99,10 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         this.switchProposed(len);
         saveStatus();
     }
+    /**
+     * delete the current proposed schedule, switch to the schedule after the deleted schedule.
+     * do nothing if this is the last proposed schedule
+     */
     deleteProposed() {
         if (this.proposedSchedules.length === 1) return;
         const idx = this.proposedScheduleIndex;
@@ -117,11 +124,17 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         }
         saveStatus();
     }
+    /**
+     * @param generated
+     * if **true**, try to switch to generated schedules if none of the following conditions are met,
+     * - already in generated mode
+     * - there are no generated schedules
+     * - or the generated schedules do not correspond to the current schedule
+     *
+     * switch to current proposed schedule if **false**
+     */
     switchSchedule(generated: boolean) {
         if (generated) {
-            // don't do anything if already in "generated" mode
-            // or there are no generated schedules
-            // or the generated schedules do not correspond to the current schedule
             if (
                 !this.generated &&
                 this.cpIndex === this.proposedScheduleIndex &&
@@ -138,9 +151,9 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
     }
 
     /**
-     * Switch to `idx` page. If update is true, also update the pagination status.
+     * Switch to `idx` page
+     * assign `currentSchedule` with the generated schedule at index `idx`
      * @param idx
-     * @param update  whether to update the pagination status
      */
     switchPage(idx: number) {
         if (0 <= idx && idx < window.scheduleEvaluator.size()) {
@@ -150,6 +163,9 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         }
     }
 
+    /**
+     * clear the currently active schedules and generated schedules
+     */
     clear() {
         this.currentSchedule.clean();
         this.proposedSchedule.clean();
@@ -162,6 +178,9 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         saveStatus();
     }
 
+    /**
+     * clear the localStorage and reload the page
+     */
     clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             window.localStorage.clear();

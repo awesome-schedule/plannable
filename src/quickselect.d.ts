@@ -6,5 +6,5 @@ declare module 'quickselect' {
         right: number,
         compare: (x: T, y: T) => number
     ): void;
-    export = quickselect;
+    export default quickselect;
 }

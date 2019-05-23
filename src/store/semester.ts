@@ -26,6 +26,9 @@ class Semesters extends Vue implements SemesterState {
     currentSemester: SemesterJSON | null = null;
     lastUpdate: string = '';
 
+    /**
+     * load the list of semesters
+     */
     async loadSemesters() {
         const result = await loadSemesterList();
         const semesters = result.payload;

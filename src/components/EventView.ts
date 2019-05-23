@@ -10,7 +10,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import App from '../App';
 import Event from '../models/Event';
 import Meta from '../models/Meta';
-import { generateSchedules, noti, schedule, status } from '../store';
+import { generateSchedules, noti, schedule, status, saveStatus } from '../store';
 import { to12hr, to24hr } from '../utils';
 
 @Component
@@ -70,7 +70,7 @@ export default class EventView extends Vue {
                 this.eventDescription ? this.eventDescription.split('\n').join('<br />') : ''
             );
             // note: we don't need to regenerate schedules if the days property is not changed
-            this.cancelEvent(this.toBeModifiedDays !== days);
+            this.cancelEvent(this.toBeModifiedDays !== days && schedule.generated);
         } catch (err) {
             noti.error(err.message);
         }
@@ -101,7 +101,7 @@ export default class EventView extends Vue {
     deleteEvent() {
         schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.isEditingEvent = false;
-        this.cancelEvent(true);
+        this.cancelEvent(schedule.generated);
     }
     /**
      * this method is called after deleteEvent, endEditEvent and addEvent
@@ -121,5 +121,6 @@ export default class EventView extends Vue {
         status.eventToEdit = null;
         if (regenerate) generateSchedules();
         else schedule.currentSchedule.computeSchedule();
+        saveStatus();
     }
 }

@@ -30,7 +30,7 @@ export interface FilterStateJSON extends FilterStateBase {
 }
 
 /**
- * a sort mode with detaield description
+ * a sort mode with detailed description
  */
 interface DetailedSortMode {
     readonly mode: SortMode;
@@ -40,6 +40,7 @@ interface DetailedSortMode {
 
 /**
  * A sort option with detailed description
+ * @see [[SortOption]]
  */
 interface DetailedSortOption extends SortOption {
     /**

@@ -121,7 +121,11 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             // don't do anything if already in "generated" mode
             // or there are no generated schedules
             // or the generated schedules do not correspond to the current schedule
-            if (!this.generated && this.cpIndex === this.proposedScheduleIndex) {
+            if (
+                !this.generated &&
+                this.cpIndex === this.proposedScheduleIndex &&
+                this.numGenerated
+            ) {
                 this.generated = true;
                 this.switchPage(this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex);
             }

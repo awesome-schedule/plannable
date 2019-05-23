@@ -254,13 +254,15 @@ class ScheduleGenerator {
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
-        const result = this.createSchedule(classList);
+
+        const evaluator = new ScheduleEvaluator(this.options.sortOptions, schedule.events);
+        this.createSchedule(classList, evaluator);
         console.timeEnd('running algorithm:');
 
-        if (result.size() > 0) {
-            result.computeCoeff();
-            result.sort();
-            return result;
+        if (evaluator.size() > 0) {
+            evaluator.computeCoeff();
+            evaluator.sort();
+            return evaluator;
         } else
             throw new Error(
                 'Given your filter, we cannot generate schedules without overlapping classes'
@@ -274,7 +276,7 @@ class ScheduleGenerator {
      * classList[i][j] // represents the jth section of the ith class
      * ```
      */
-    public createSchedule(classList: RawAlgoCourse[][]) {
+    public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
         /**
          * current index of course
          */
@@ -295,7 +297,6 @@ class ScheduleGenerator {
 
         const maxNumSchedules = this.options.maxNumSchedules;
 
-        const evaluator = new ScheduleEvaluator(this.options.sortOptions, this.options.events);
         let exhausted = false;
         // eslint-disable-next-line
         while (true) {
@@ -352,7 +353,6 @@ class ScheduleGenerator {
                 choiceNum = 0;
             }
         }
-        return evaluator;
     }
 }
 

@@ -10,12 +10,20 @@ import { to12hr, timeToNum } from '../utils';
 import { Vue, Component } from 'vue-property-decorator';
 import { display, schedule } from '../store';
 
+import { createDecorator } from 'vue-class-component';
+import { ComputedOptions } from 'vue';
+
+export const NoCache = createDecorator((options, key) => {
+    (options.computed![key] as ComputedOptions<any>).cache = false;
+});
+
 @Component({
     components: {
         CourseBlock
     }
 })
 export default class GridSchedule extends Vue {
+    @NoCache
     get schedule() {
         return schedule.currentSchedule;
     }

@@ -239,10 +239,11 @@
 .sidebar {
     position: fixed;
     top: 0;
+    bottom: 0;
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     overflow-y: auto;
-    left: 3vw;
+    left: 3vw !important;
     width: 19vw !important;
     scrollbar-width: thin !important;
 }
@@ -302,15 +303,8 @@
 @media (max-width: 600px) {
     .sidebar,
     .sidebar-nocol {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        z-index: 10; /* Behind the navbar */
-        box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-        overflow-y: auto;
         left: 10vw !important;
         width: 75vw !important;
-        scrollbar-width: thin !important;
     }
 
     .tab-icon {

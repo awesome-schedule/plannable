@@ -17,6 +17,13 @@ import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
 import palette, { PaletteState } from './palette';
 
+import { createDecorator } from 'vue-class-component';
+import { ComputedOptions } from 'vue';
+
+export const NoCache = createDecorator((options, key) => {
+    (options.computed![key] as ComputedOptions<any>).cache = false;
+});
+
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
     display: DisplayState;
@@ -41,6 +48,21 @@ export interface LegacyStorage {
     proposedSchedules: LegacyScheduleJSON[];
 
     display: DisplayState;
+
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    allowWaitlist: boolean;
+    allowClosed: boolean;
+    sortOptions: EvaluatorOptions;
+}
+
+/**
+ * the storage format prior to v3.0
+ */
+export interface AncientStorage extends DisplayState {
+    currentSemester: SemesterJSON;
+    currentScheduleIndex: number;
+    currentSchedule: LegacyScheduleJSON;
+    proposedSchedule: LegacyScheduleJSON;
 
     timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
@@ -122,7 +144,16 @@ export function parseStatus(semesterId: string) {
             console.warn(e);
         }
     }
-    if (parsed.currentSchedule && parsed.proposedSchedules) {
+    if (parsed.currentSchedule && parsed.proposedSchedule) {
+        const ancient: AncientStorage = parsed || {};
+        const oldStore: Partial<LegacyStorage> & AncientStorage = ancient;
+        oldStore.proposedScheduleIndex = 0;
+        oldStore.proposedSchedules = [oldStore.proposedSchedule];
+        display.fromJSON(oldStore);
+        filter.fromJSON(oldStore);
+        schedule.fromJSON(oldStore);
+        palette.fromJSON(oldStore.currentSchedule || { savedColors: {} });
+    } else if (parsed.currentSchedule && parsed.proposedSchedules) {
         const oldStore: LegacyStorage = parsed;
         display.fromJSON(oldStore.display || {});
         filter.fromJSON(oldStore);
@@ -135,6 +166,8 @@ export function parseStatus(semesterId: string) {
         schedule.fromJSON(newStore.schedule || {});
         palette.fromJSON(newStore.palette || {});
     }
+
+    schedule.currentSchedule.computeSchedule();
 
     if (schedule.generated) {
         generateSchedules();

@@ -27,12 +27,6 @@ interface SidebarStatus extends Sidebars {
 
 @Component
 class Status extends Vue {
-    get sideBarActive() {
-        for (const key in this.sideBar) {
-            if (this.sideBar[key]) return true;
-        }
-        return false;
-    }
     /**
      * sidebar display status
      * show the specific sidebar when true, and hide when all false
@@ -56,6 +50,13 @@ class Status extends Vue {
     loading = false;
 
     eventToEdit: Event | null = null;
+
+    get sideBarActive() {
+        for (const key in this.sideBar) {
+            if (this.sideBar[key]) return true;
+        }
+        return false;
+    }
 
     @Watch('loading')
     loadingWatch() {

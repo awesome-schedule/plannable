@@ -43,7 +43,7 @@ class Palette extends Vue implements StoreModule<PaletteState, PaletteState> {
     }
 
     fromJSON(obj: PaletteState) {
-        this.savedColors = obj.savedColors;
+        this.savedColors = obj.savedColors || {};
     }
 
     getDefault(): PaletteState {

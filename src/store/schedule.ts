@@ -8,7 +8,7 @@
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, saveStatus, StoreModule } from './helper';
+import { toJSON, saveStatus, StoreModule, NoCache } from './helper';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -69,6 +69,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
     /**
      * the proposed schedule that is currently active
      */
+    @NoCache
     get proposedSchedule() {
         return this.proposedSchedules[this.proposedScheduleIndex];
     }
@@ -217,6 +218,12 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         this.cpIndex = typeof obj.cpIndex === 'number' ? obj.cpIndex : defaultState.cpIndex;
         this.generated =
             typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
+
+        if (!this.generated) {
+            this.$nextTick(() => {
+                this.switchSchedule(false);
+            });
+        }
     }
 
     toJSON(): ScheduleStateJSON {

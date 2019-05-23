@@ -185,7 +185,7 @@ class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSO
     allowClosed = true;
     sortOptions = getDefaultOptions();
 
-    readonly sortModes: ReadonlyArray<DetailedSortMode> = [
+    private readonly sortModes: ReadonlyArray<DetailedSortMode> = [
         {
             mode: SortMode.combined,
             title: 'Combined',

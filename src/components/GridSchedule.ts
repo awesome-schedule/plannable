@@ -8,14 +8,7 @@ import CourseBlock from './CourseBlock.vue';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
 import { Vue, Component } from 'vue-property-decorator';
-import { display, schedule } from '../store';
-
-import { createDecorator } from 'vue-class-component';
-import { ComputedOptions } from 'vue';
-
-export const NoCache = createDecorator((options, key) => {
-    (options.computed![key] as ComputedOptions<any>).cache = false;
-});
+import { display, schedule, NoCache } from '../store';
 
 @Component({
     components: {

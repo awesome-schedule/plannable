@@ -6,7 +6,7 @@ import Store, { SemesterStorage } from '../store';
 import { savePlain, toICal } from '../utils';
 
 @Component
-export default class ExportView extends Mixins(Store) {
+export default class ExportView extends Store {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
 

@@ -6,9 +6,8 @@
 /**
  *
  */
-// import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, StoreModule } from '.';
+import { toJSON, StoreModule, saveStatus } from '.';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -73,6 +72,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         if (index < this.proposedSchedules.length && index >= 0) {
             this.proposedScheduleIndex = index;
             this.switchSchedule(false);
+            saveStatus();
         }
     }
     /**
@@ -81,6 +81,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     newProposed() {
         this.proposedSchedules.push(new Schedule());
         this.switchProposed(this.proposedSchedules.length - 1);
+        saveStatus();
     }
     /**
      * copy the current schedule and append to the `proposedSchedules` array.
@@ -90,6 +91,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
+        saveStatus();
     }
     /**
      * delete the current proposed schedule, switch to the schedule after the deleted schedule.
@@ -114,6 +116,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         } else {
             this.switchProposed(idx);
         }
+        saveStatus();
     }
     /**
      * @param generated
@@ -138,6 +141,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
             this.generated = false;
             this.currentSchedule = this.proposedSchedule;
         }
+        saveStatus();
     }
 
     /**
@@ -149,6 +153,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         if (0 <= idx && idx < window.scheduleEvaluator.size()) {
             this.currentScheduleIndex = idx;
             this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
+            saveStatus();
         }
     }
 
@@ -164,6 +169,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
             window.scheduleEvaluator.clear();
             this.numGenerated = 0;
         }
+        saveStatus();
     }
 
     /**
@@ -203,10 +209,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         this.cpIndex = typeof obj.cpIndex === 'number' ? obj.cpIndex : defaultState.cpIndex;
         this.generated =
             typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
-
-        if (!this.generated) {
-            this.switchSchedule(false);
-        }
     }
 
     toJSON(): ScheduleStateJSON {

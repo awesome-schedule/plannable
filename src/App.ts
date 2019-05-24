@@ -7,7 +7,7 @@
 /**
  *
  */
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import ClassView from './components/ClassView.vue';
 import CourseModal from './components/CourseModal.vue';
 import DisplayView from './components/DisplayView.vue';
@@ -39,7 +39,7 @@ import Store from './store';
         External
     }
 })
-export default class App extends Mixins(Store) {
+export default class App extends Store {
     get sideBar() {
         return this.status.sideBar;
     }
@@ -70,6 +70,7 @@ export default class App extends Mixins(Store) {
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
+            if (pay3.level !== 'info') this.noti.notify(pay3);
             if (pay3) await this.selectSemester(this.semester.semesters[0]);
             this.status.loading = false;
         })();

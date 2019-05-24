@@ -1,15 +1,14 @@
-import { Component, Vue, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Store from '../store';
 import ClassList from './ClassList.vue';
-import Schedule from '@/models/Schedule';
 
 @Component({
     components: {
         ClassList
     }
 })
-export default class ClassView extends Mixins(Store) {
+export default class ClassView extends Store {
     /**
      * get the list of current ids, sorted in alphabetical order of the keys
      */

@@ -24,6 +24,7 @@ const graph = [
 ];
 
 const adjList: Int8Array[] = [];
+// tslint:disable-next-line: prefer-for-of
 for (let i = 0; i < graph.length; i++) {
     const neighbors = [];
     for (let j = 0; j < graph.length; j++) {

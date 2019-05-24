@@ -9,7 +9,6 @@
 import { loadSemesterData } from '../data/CatalogLoader';
 import { loadSemesterList } from '../data/SemesterListLoader';
 import { SemesterJSON } from '../models/Catalog';
-import { noti } from '.';
 export interface SemesterState {
     [x: string]: any;
     semesters: SemesterJSON[];
@@ -30,27 +29,22 @@ class Semesters implements SemesterState {
         const result = await loadSemesterList();
         const semesters = result.payload;
 
-        if (result.level !== 'info') noti.notify(result);
         console[result.level](result.msg);
 
         if (semesters) {
             this.semesters = semesters;
-            return true;
         } else {
             this.semesters = [];
-            return false;
         }
+
+        return result;
     }
 
     /**
-     * DO NOT call this method. call Store.selectSemester instead.
+     * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
-        // do a linear search to find the index of the semester given its string id
-
-        if (force) noti.info(`Updating ${currentSemester.name} data...`);
         const result = await loadSemesterData(currentSemester, force);
-        if (result.level !== 'info') noti.notify(result);
         console[result.level](result.msg);
 
         //  if the a catalog object is returned
@@ -58,12 +52,11 @@ class Semesters implements SemesterState {
             window.catalog = result.payload;
             this.currentSemester = currentSemester;
             this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
-            return true;
         } else {
             this.currentSemester = null;
             this.lastUpdate = '';
-            return false;
         }
+        return result;
     }
 }
 

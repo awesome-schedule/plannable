@@ -15,7 +15,7 @@ import Store from '../store';
         CourseBlock
     }
 })
-export default class GridSchedule extends Mixins(Store) {
+export default class GridSchedule extends Store {
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
     wed = window.screen.width > 450 ? 'Wednesday' : 'Wed';

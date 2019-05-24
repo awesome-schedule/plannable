@@ -14,7 +14,7 @@ import Store from '../store';
 import { to12hr, to24hr } from '../utils';
 
 @Component
-export default class EventView extends Mixins(Store) {
+export default class EventView extends Store {
     get event() {
         return this.status.eventToEdit;
     }

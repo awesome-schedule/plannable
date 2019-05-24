@@ -16,7 +16,7 @@ import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 
 @Component
-export default class CourseBlock extends Mixins(Store) {
+export default class CourseBlock extends Store {
     @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;
     @Prop(Array) readonly heightInfo!: number[];
     @Prop(Number) readonly absoluteEarliest!: number;

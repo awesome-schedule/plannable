@@ -1,18 +1,17 @@
 /**
  *
  */
-import { Component, Mixins, Watch } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import Meta from '../models/Meta';
 import Store from '../store';
-import Schedule from '@/models/Schedule';
 
 @Component({
     components: {
         draggable
     }
 })
-export default class FilterView extends Mixins(Store) {
+export default class FilterView extends Store {
     get days() {
         return Meta.days;
     }

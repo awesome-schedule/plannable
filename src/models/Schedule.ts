@@ -58,7 +58,8 @@ export default class Schedule {
     public static savedColors: { [x: string]: string } = {};
 
     /**
-     * instantiate a `Schedule` object from its JSON representation
+     * instantiate a `Schedule` object from its JSON representation.
+     * the `computeSchedule` method will be invoked
      */
     public static fromJSON(obj?: ScheduleJSON): Schedule | null {
         if (!obj) return null;
@@ -371,7 +372,7 @@ export default class Schedule {
                         const num = sections.size - 1;
                         for (const crs of combined) {
                             this.currentIds[currentIdKey] = num
-                                ? `${id.toString()}+${num}`
+                                ? `${id.toString()}+${num}` // use +n if there're multiple sections
                                 : id.toString();
                             this.place(crs);
                         }
@@ -645,6 +646,8 @@ export default class Schedule {
 
     /**
      * Check whether the given key exists in the Schedule.
+     * @param key
+     * @param render if true,
      *
      * This method will go through the `events` array and `All` property to check for existence of the key
      */

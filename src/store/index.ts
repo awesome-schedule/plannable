@@ -21,7 +21,7 @@ import Vue, { ComputedOptions } from 'vue';
 import { createDecorator } from 'vue-class-component';
 import { Component, Watch } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
-import ScheduleGenerator from '../algorithm/ScheduleGenerator';
+import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
@@ -142,8 +142,14 @@ export function saveStatus() {
     };
     localStorage.setItem(currentSemester.id, JSON.stringify(obj));
 }
-const jobs: { [x: string]: any } = {};
 
+const jobs: { [x: string]: string } = {};
+
+/**
+ * delay the execution of a **method** and store the handler in `jobs`,
+ * cancel all subsequent calls in the meantime
+ * @param timeout delay in millisecond
+ */
 function delay(timeout: number) {
     return (
         target: any,
@@ -166,7 +172,7 @@ function delay(timeout: number) {
 }
 
 @Component
-export default class Store extends Vue {
+class Store extends Vue {
     filter = filter;
     display = display;
     status = status;
@@ -184,7 +190,10 @@ export default class Store extends Vue {
     }
 
     /**
-     * recover all store modules' states from the localStorage, given the semester
+     * recover all store modules' states from the localStorage, given the semester id
+     *
+     * If no local data is present, default values will be assigned.
+     *
      * @param semesterId
      */
     parseStatus(semesterId: string) {
@@ -219,8 +228,8 @@ export default class Store extends Vue {
             this.schedule.fromJSON(newStore.schedule || {});
             this.palette.fromJSON(newStore.palette || {});
         }
-        this.schedule.currentSchedule.computeSchedule();
         if (this.schedule.generated) this.generateSchedules();
+        else this.schedule.switchSchedule(false);
     }
 
     /**
@@ -249,7 +258,7 @@ export default class Store extends Vue {
      * returns null on parsing error
      */
     computeFilter(): Event[] | null {
-        const timeSlotsRecord: Event[] = [];
+        const events: Event[] = [];
         for (const time of this.filter.timeSlots) {
             let days = '';
             for (let j = 0; j < 5; j++) {
@@ -270,12 +279,12 @@ export default class Store extends Vue {
                 return null;
             }
             days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
-            timeSlotsRecord.push(new Event(days, false));
+            events.push(new Event(days, false));
         }
-        return timeSlotsRecord;
+        return events;
     }
 
-    getGeneratorOptions() {
+    getGeneratorOptions(): GeneratorOptions | undefined {
         const filteredStatus: string[] = [];
         if (!this.filter.allowWaitlist) filteredStatus.push('Wait List');
         if (!this.filter.allowClosed) filteredStatus.push('Closed');
@@ -310,7 +319,7 @@ export default class Store extends Vue {
         try {
             const evaluator = generator.getSchedules(this.schedule.proposedSchedule);
             window.scheduleEvaluator = evaluator;
-            const num = window.scheduleEvaluator.size();
+            const num = evaluator.size();
             this.noti.success(`${num} Schedules Generated!`, 3);
             this.schedule.numGenerated = num;
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
@@ -333,15 +342,17 @@ export default class Store extends Vue {
      * Then, schedules and settings will be parsed from `localStorage`
      * and assigned to relevant fields of `this`.
      *
-     * If no local data is present, default values will be assigned.
-     *
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
+        if (force) this.noti.info(`Updating ${currentSemester.name} data...`);
         this.status.loading = true;
+        window.scheduleEvaluator.clear();
+
         const result = await this.semester.selectSemester(currentSemester, force);
-        if (result) this.parseStatus(currentSemester.id);
+        if (result.level !== 'info') this.noti.notify(result);
+        if (result.payload) this.parseStatus(currentSemester.id);
 
         this.status.loading = false;
     }
@@ -350,12 +361,12 @@ export default class Store extends Vue {
     @delay(10)
     loadingWatch() {
         if (this.status.loading) {
-            if (noti.empty()) {
-                noti.info('Loading...');
+            if (this.noti.empty()) {
+                this.noti.info('Loading...');
             }
         } else {
-            if (noti.msg === 'Loading...') {
-                noti.clear();
+            if (this.noti.msg === 'Loading...') {
+                this.noti.clear();
             }
         }
     }
@@ -387,27 +398,22 @@ export default class Store extends Vue {
     //     this.saveStatus();
     // }
 
-    // @Watch('display', { deep: true })
-    // @delay(10)
-    // private w2() {
-    //     this.saveStatus();
-    // }
+    @Watch('display', { deep: true })
+    @delay(10)
+    private w2() {
+        this.saveStatus();
+    }
 
-    // @Watch('filter', { deep: true })
-    // @delay(10)
-    // private w3() {
-    //     this.saveStatus();
-    // }
+    @Watch('filter', { deep: true })
+    @delay(10)
+    private w3() {
+        this.saveStatus();
+    }
 
-    // @Watch('palette', { deep: true })
-    // @delay(10)
-    // private w4() {
-    //     this.saveStatus();
-    // }
-
-    // @Watch('semester', { deep: true })
-    // @delay(10)
-    // private w5() {
-    //     this.saveStatus();
-    // }
+    @Watch('palette', { deep: true })
+    @delay(10)
+    private w4() {
+        this.saveStatus();
+    }
 }
+export default Store;

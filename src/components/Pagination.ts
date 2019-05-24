@@ -11,7 +11,7 @@ import { Component, Mixins, Watch } from 'vue-property-decorator';
 import Store from '../store';
 
 @Component
-export default class Pagination extends Mixins(Store) {
+export default class Pagination extends Store {
     get curIdx() {
         return this.schedule.currentScheduleIndex;
     }

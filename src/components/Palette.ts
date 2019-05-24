@@ -8,12 +8,12 @@
  *
  */
 import randomColor from 'randomcolor';
-import { Component, Mixins, Watch } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Store from '../store';
 
 @Component
-export default class Palette extends Mixins(Store) {
+export default class Palette extends Store {
     set(key: string, color: string) {
         this.$set(this.palette.savedColors, key, color);
     }

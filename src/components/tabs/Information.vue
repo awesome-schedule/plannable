@@ -4,10 +4,14 @@
             <a class="navbar-brand" href="#">Website Guide</a>
             <nav class="nav nav-pills flex-column">
                 <a class="nav-link" href="#item-1">Introduction</a>
+                <nav class="nav nav-pills flex-column">
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-1">Auto-Scheduling</a>
+                </nav>
                 <a class="nav-link" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-1">Schedule Manipulation</a>
-                    <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Enroll in SIS</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Schedule Rendering</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-2-3">Enroll in SIS</a>
                 </nav>
                 <a class="nav-link" href="#item-3">Add Event</a>
                 <a class="nav-link" href="#item-4">Filters</a>
@@ -62,6 +66,24 @@
                         >opening an issue</a
                     >.
                 </strong>
+            </p>
+            <p>
+                <strong>TL; DR</strong><br />
+                We provide tooltips providing brief descriptions for most buttons and icons (place
+                your mouse over them for a while and you will see). You are welcome to skip this
+                guide 😏
+            </p>
+            <h4 id="item-1-1">Introduction to Auto-Scheduling</h4>
+            <hr />
+            <p>
+                Before the invention of auto-scheduling, we have the pick the sections of the
+                courses that we want to take and come up with a schedule. Due to the availability of
+                multiple sections, there may exist up to millions of possible schedules (e.g. 10
+                sections per course and 7 courses in total, considering conflict). It is difficult
+                to both enumerate schedules by hand and come up with an optimal schedule. There is
+                where auto-scheduling comes in. It basically allows you to just provide a list of
+                courses with undetermined or pratially determined sections, and it will do the rest
+                of the hard work for you.
             </p>
             <h3 id="item-2">Basic Operations</h3>
             <hr />
@@ -136,25 +158,56 @@
                     </v-card>
                 </v-flex>
             </v-layout>
-            <p class="lead px-4 py-2 border-left border-info" style="background-color: #eee">
-                Tip: It is recommeded that you prepare "backup" schedules, especially if you are
-                trying to enroll in some popular courses or popular professors' sections.
+            <p class="lead px-4 py-2 border-left border-info" style="background-color: #eeeeee">
+                Tip: It is recommeded that you prepare "backup" schedules using the "Multiple
+                Schedule" function provided, especially if you are trying to enroll in some popular
+                courses or popular professors' sections.
             </p>
 
-            <h5>Add Classes</h5>
-            <v-card class="my-4 mx-auto gif-center">
-                <v-img :src="imgPath('select_class.gif')"></v-img>
-            </v-card>
-            <h5>Generate Schedules</h5>
-            <v-card class="my-4 mx-auto gif-center">
-                <v-img :src="imgPath('generate_class.gif')"></v-img>
-            </v-card>
-            <h5>Multiple Schedules</h5>
-            <v-card class="my-4 mx-auto gif-center">
-                <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
-            </v-card>
+            <v-stepper non-linear class="mb-5">
+                <v-stepper-header>
+                    <v-stepper-step color="blue-grey" editable step="1">
+                        Add Classes
+                    </v-stepper-step>
 
-            <h5 id="item-2-2">Enroll in SIS</h5>
+                    <v-divider></v-divider>
+
+                    <v-stepper-step color="blue-grey" editable step="2">
+                        Generate Schedules
+                    </v-stepper-step>
+
+                    <v-divider></v-divider>
+
+                    <v-stepper-step color="blue-grey" editable step="3">
+                        Multiple Schedules
+                    </v-stepper-step>
+                </v-stepper-header>
+
+                <v-stepper-items>
+                    <v-stepper-content step="1">
+                        <v-card class="mb-5">
+                            <v-img :src="imgPath('select_class.gif')"></v-img>
+                        </v-card>
+                    </v-stepper-content>
+
+                    <v-stepper-content step="2">
+                        <v-card class="mb-5">
+                            <v-img :src="imgPath('generate_class.gif')"></v-img>
+                        </v-card>
+                    </v-stepper-content>
+
+                    <v-stepper-content step="3">
+                        <v-card class="mb-5">
+                            <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
+                        </v-card>
+                    </v-stepper-content>
+                </v-stepper-items>
+            </v-stepper>
+
+            <h5 id="item-2-2">Schedule Rendering</h5>
+            <p></p>
+
+            <h5 id="item-2-3">Enroll in SIS</h5>
             <p>
                 For convenience, we provide a list of course IDs for your currently active schedule
                 at the bottom left corner under "Schedule Overview" (can be seen clearly in the GIFs
@@ -180,9 +233,10 @@
             <hr />
             <p>
                 This feature allows you to customize your own schedule. You can add your weekly
-                commitments on the schedule, such as club meetings, office hours, etc. The schedule
-                generator will generate schedules that do not conflict with your event. However, if
-                it is not possible to find such a schedule, an error will be thrown.
+                commitments on the schedule, such as club meetings, office hours, etc. You can edit
+                an existing event by clicking it the event on the schedule. The schedule generator
+                will generate schedules that do not conflict with your event. However, if it is not
+                possible to find such a schedule, an error will be thrown.
             </p>
             <v-card class="my-5 mx-auto gif-center">
                 <v-img :src="imgPath('add_event.gif')"></v-img>
@@ -257,13 +311,21 @@
             <h3 id="item-6">Customize Colors</h3>
             <hr />
             <p>
+                We have a number of colors built in that are used to automatically color your
+                courses and events (based on hashes, if you are curious). Because we are aware they
+                are not aesthetically appealing, we provide the Palette for you to customize colors.
+            </p>
+            <p>
                 You can switch to the Palette (<i class="fas fa-palette"></i>) to customize the
                 background colors of courses and events. You can either click the
                 <i class="fas fa-sync-alt mr-1"></i> icon to use a random color or click
                 <input type="color" style="width: 30px" value="#deadbb" /> to select your favorite
-                color. If you find that there are courses missing from the palette, it may because
-                you selected "Any Section" for that course and did not switch to "View Schedule"
-                mode.
+                color. The default color can be recovered by clicking the
+                <i class="fas fa-times"></i> icon.
+            </p>
+            <p>
+                If you find that there are courses missing from the palette, it may because you
+                selected "Any Section" for that course and did not switch to "View Schedule" mode.
             </p>
             <h3 id="item-7">Export</h3>
             <hr />
@@ -284,7 +346,7 @@
                         v-for="(step, idx) in icalSteps"
                         :key="idx"
                         :complete="e2 > +idx"
-                        :step="idx"
+                        :step="+idx"
                         style="margin:auto auto;cursor:pointer"
                         color="blue-grey"
                         @click="e2 = +idx"
@@ -292,7 +354,7 @@
                 </v-stepper-header>
 
                 <v-stepper-items>
-                    <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="idx">
+                    <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="+idx">
                         <v-card class="mb-2 mx-auto" width="54vw">
                             <v-img :src="icalSteps[idx].src" aspect-ratio="2.37"></v-img>
                         </v-card>

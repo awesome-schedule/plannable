@@ -1,4 +1,4 @@
-import { Vertex, depthFirstSearch } from '../../src/algorithm/Graph';
+import { Vertex, depthFirstSearch } from '@/algorithm/Graph';
 
 describe('graph test', () => {
     it('depth first search', () => {

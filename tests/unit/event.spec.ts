@@ -1,4 +1,4 @@
-import Event from '../../src/models/Event';
+import Event from '@/models/Event';
 
 describe('event test', () => {
     it('basic', () => {

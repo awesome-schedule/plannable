@@ -483,7 +483,7 @@ export default class Information extends Vue {
     }
 
     imgPath(name: string) {
-        return require('../assets/' + name);
+        return require('@/assets/' + name);
     }
 }
 </script>

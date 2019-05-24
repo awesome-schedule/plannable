@@ -1,5 +1,5 @@
 import data from './data';
-import modal from '../../src/store/modal';
+import modal from '@/store/modal';
 
 beforeAll(async () => {
     window.catalog = await data;

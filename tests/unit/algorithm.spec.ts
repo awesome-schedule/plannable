@@ -1,7 +1,7 @@
-import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
-import { loadBuildingList, loadTimeMatrix } from '../../src/data/BuildingLoader';
-import Schedule from '../../src/models/Schedule';
-import Store from '../../src/store';
+import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
+import { loadBuildingList, loadTimeMatrix } from '@/data/BuildingLoader';
+import Schedule from '@/models/Schedule';
+import Store from '@/store';
 import data from './data';
 
 const store = new Store();

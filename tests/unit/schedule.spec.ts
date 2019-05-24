@@ -1,7 +1,7 @@
-import Schedule from '../../src/models/Schedule';
-import Section from '../../src/models/Section';
-import display from '../../src/store/display';
-import * as Utils from '../../src/utils';
+import Schedule from '@/models/Schedule';
+import Section from '@/models/Section';
+import display from '@/store/display';
+import * as Utils from '@/utils';
 import data from './data';
 
 beforeAll(async () => {

@@ -42,4 +42,4 @@
     </nav>
 </template>
 
-<script lang="ts" src="./Palette.ts"></script>
+<script lang="ts" src="./PaletteView.ts"></script>

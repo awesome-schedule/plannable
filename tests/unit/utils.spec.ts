@@ -1,4 +1,4 @@
-import * as Utils from '../../src/utils';
+import * as Utils from '@/utils';
 import 'jest';
 import axios from 'axios';
 import data from './data';

@@ -87,7 +87,7 @@
 
         <export-view v-else-if="sideBar.showExport"></export-view>
 
-        <palette v-else-if="sideBar.showSelectColor"></palette>
+        <palette-view v-else-if="sideBar.showSelectColor"></palette-view>
 
         <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 

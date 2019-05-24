@@ -3,8 +3,8 @@
  */
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import Meta from '../models/Meta';
-import Store from '../store';
+import Meta from '@/models/Meta';
+import Store from '@/store';
 
 @Component({
     components: {

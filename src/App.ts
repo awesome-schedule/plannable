@@ -8,33 +8,35 @@
  *
  */
 import { Component } from 'vue-property-decorator';
-import ClassView from './components/ClassView.vue';
-import CourseModal from './components/CourseModal.vue';
-import DisplayView from './components/DisplayView.vue';
-import EventView from './components/EventView.vue';
-import ExportView from './components/ExportView.vue';
-import External from './components/External.vue';
-import FilterView from './components/FilterView.vue';
+import ClassView from './components/tabs/ClassView.vue';
+import DisplayView from './components/tabs/DisplayView.vue';
+import EventView from './components/tabs/EventView.vue';
+import ExportView from './components/tabs/ExportView.vue';
+import External from './components/tabs/External.vue';
+import FilterView from './components/tabs/FilterView.vue';
 import GridSchedule from './components/GridSchedule.vue';
-import Information from './components/Information.vue';
+import PaletteView from './components/tabs/PaletteView.vue';
+import Information from './components/tabs/Information.vue';
+
 import Pagination from './components/Pagination.vue';
-import Palette from './components/Palette.vue';
+import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
+
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 
 @Component({
     components: {
         ClassView,
+        EventView,
         DisplayView,
         FilterView,
+        PaletteView,
         ExportView,
         Pagination,
         GridSchedule,
         SectionModal,
         CourseModal,
-        Palette,
-        EventView,
         Information,
         External
     }

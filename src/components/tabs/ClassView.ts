@@ -1,7 +1,7 @@
 import { Component, Vue } from 'vue-property-decorator';
-import Course from '../models/Course';
-import Store from '../store';
-import ClassList from './ClassList.vue';
+import Course from '@/models/Course';
+import Store from '@/store';
+import ClassList from '../ClassList.vue';
 
 @Component({
     components: {

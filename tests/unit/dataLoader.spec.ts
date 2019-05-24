@@ -1,6 +1,6 @@
 import 'jest';
-import { loadTimeMatrix, loadBuildingList } from '../../src/data/BuildingLoader';
-import { loadSemesterList } from '../../src/data/SemesterListLoader';
+import { loadTimeMatrix, loadBuildingList } from '@/data/BuildingLoader';
+import { loadSemesterList } from '@/data/SemesterListLoader';
 describe('Data loader test', () => {
     it('Time matrix symmetry', async () => {
         const msg = await loadTimeMatrix();

@@ -6,12 +6,12 @@
 /**
  *
  */
-import { Component, Mixins } from 'vue-property-decorator';
-import App from '../App';
-import Event from '../models/Event';
-import Meta from '../models/Meta';
-import Store from '../store';
-import { to12hr, to24hr } from '../utils';
+import { Component } from 'vue-property-decorator';
+import App from '@/App';
+import Event from '@/models/Event';
+import Meta from '@/models/Meta';
+import Store from '@/store';
+import { to12hr, to24hr } from '@/utils';
 
 @Component
 export default class EventView extends Store {

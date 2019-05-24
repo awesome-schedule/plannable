@@ -1,4 +1,4 @@
-import * as Coloring from '../../src/algorithm/Coloring';
+import * as Coloring from '@/algorithm/Coloring';
 
 const graph = [
     [0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],

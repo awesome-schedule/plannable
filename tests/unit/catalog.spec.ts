@@ -1,6 +1,6 @@
-import Catalog from '../../src/models/Catalog';
+import Catalog from '@/models/Catalog';
 import data from './data';
-import Schedule from '../../src/models/Schedule';
+import Schedule from '@/models/Schedule';
 
 beforeAll(async () => {
     window.catalog = await data;

@@ -14,10 +14,10 @@ declare global {
 /**
  *
  */
-import { requestSemesterData } from '../../src/data/CatalogLoader';
+import { requestSemesterData } from '@/data/CatalogLoader';
 import path from 'path';
 import fs from 'fs';
-import Catalog, { SemesterJSON } from '../../src/models/Catalog';
+import Catalog, { SemesterJSON } from '@/models/Catalog';
 
 const datadir = path.join(__dirname, 'data');
 

@@ -1,5 +1,5 @@
-import Schedule from '../../src/models/Schedule';
-import { toICal } from '../../src/utils';
+import Schedule from '@/models/Schedule';
+import { toICal } from '@/utils';
 import data from './data';
 
 beforeAll(async () => {

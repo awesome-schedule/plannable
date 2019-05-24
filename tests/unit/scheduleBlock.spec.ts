@@ -1,5 +1,5 @@
-import ScheduleBlock from '../../src/models/ScheduleBlock';
-import Event from '../../src/models/Event';
+import ScheduleBlock from '@/models/ScheduleBlock';
+import Event from '@/models/Event';
 
 describe('schedule block', () => {
     it('basic', () => {

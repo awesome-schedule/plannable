@@ -55,8 +55,8 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host.indexOf('localhost1') !== -1 ||
-    window.location.host.indexOf('127.0.0.11') !== -1
+    const res = await (window.location.host.indexOf('localhost') !== -1 ||
+    window.location.host.indexOf('127.0.0.1') !== -1
         ? axios.get(`http://localhost:8000/data/Semester%20Data/CS${semester.id}Data.csv`) // local dev
         : window.location.host.indexOf('cn.plannable.org') === -1 // Running in China?
         ? axios.post(

@@ -1,9 +1,6 @@
-import ScheduleEvaluator, {
-    CmpSchedule,
-    EvaluatorOptions
-} from '../../src/algorithm/ScheduleEvaluator';
-import { RawAlgoSchedule } from '../../src/algorithm/ScheduleGenerator';
-import filter from '../../src/store/filter';
+import ScheduleEvaluator, { CmpSchedule, EvaluatorOptions } from '@/algorithm/ScheduleEvaluator';
+import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
+import filter from '@/store/filter';
 
 const cmpSchedule: CmpSchedule = {
     schedule: [

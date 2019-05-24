@@ -121,7 +121,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     /**
      * @param generated
      * if **true**, try to switch to generated schedules if none of the following conditions are met,
-     * - already in generated mode
      * - there are no generated schedules
      * - or the generated schedules do not correspond to the current schedule
      *
@@ -129,11 +128,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
      */
     switchSchedule(generated: boolean) {
         if (generated) {
-            if (
-                !this.generated &&
-                this.cpIndex === this.proposedScheduleIndex &&
-                this.numGenerated
-            ) {
+            if (this.cpIndex === this.proposedScheduleIndex && this.numGenerated) {
                 this.generated = true;
                 this.switchPage(this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex);
             }

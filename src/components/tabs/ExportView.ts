@@ -2,8 +2,8 @@
  *
  */
 import { Component, Mixins } from 'vue-property-decorator';
-import Store, { SemesterStorage } from '../store';
-import { savePlain, toICal } from '../utils';
+import Store, { SemesterStorage } from '@/store';
+import { savePlain, toICal } from '@/utils';
 
 @Component
 export default class ExportView extends Store {

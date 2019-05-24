@@ -1,4 +1,4 @@
-import Section from '../../src/models/Section';
+import Section from '@/models/Section';
 import data from './data';
 
 beforeAll(async () => {

@@ -10,7 +10,7 @@
                     style="float: right"
                     title="Click to add a time period when you don't want to have class"
                     class="click-icon px-4"
-                    @click="filter.addTimeSlot()"
+                    @click="addTimeSlot()"
                 >
                     <i class="fas fa-plus"></i>
                 </div>
@@ -22,7 +22,7 @@
                         :key="j"
                         :class="'btn btn-outline-secondary' + (value[j] ? ' active' : '')"
                         type="button"
-                        @click="filter.updateFilterDay(i, j)"
+                        @click="updateFilterDay(i, j)"
                     >
                         {{ day }}
                     </button>
@@ -51,7 +51,7 @@
                         <i
                             class="fas fa-times click-icon"
                             style="font-size: 1.25rem"
-                            @click="filter.removeTimeSlot(i)"
+                            @click="removeTimeSlot(i)"
                         ></i>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                                 title="Click to reverse sorting"
                                 @click="
                                     option.reverse = !option.reverse;
-                                    changeSorting(optIdx);
+                                    changeSorting(+optIdx);
                                 "
                             ></i>
                             <div
@@ -125,7 +125,7 @@
                                     type="checkbox"
                                     class="custom-control-input"
                                     :value="option.name"
-                                    @change="changeSorting(optIdx)"
+                                    @change="changeSorting(+optIdx)"
                                 />
                                 <label
                                     class="custom-control-label"

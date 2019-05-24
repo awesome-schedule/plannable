@@ -6,31 +6,33 @@
 /**
  *
  */
-export * from './filter';
 export * from './display';
-export * from './notification';
+export * from './filter';
 export * from './modal';
-export * from './semester';
-export * from './schedule';
-export * from './status';
+export * from './notification';
 export * from './palette';
+export * from './schedule';
+export * from './semester';
+export * from './status';
 
-import Vue from 'vue';
+import Meta from '@/models/Meta';
+import { to12hr } from '@/utils';
+import Vue, { ComputedOptions } from 'vue';
+import { createDecorator } from 'vue-class-component';
 import { Component, Watch } from 'vue-property-decorator';
-import ScheduleGenerator from '../algorithm/ScheduleGenerator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
+import ScheduleGenerator from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
-import { ScheduleJSON } from '../models/Schedule';
+import Event from '../models/Event';
+import Schedule, { ScheduleJSON } from '../models/Schedule';
 import display, { DisplayState } from './display';
 import filter, { FilterStateJSON } from './filter';
+import modal from './modal';
 import noti from './notification';
+import palette, { PaletteState } from './palette';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
-import palette, { PaletteState } from './palette';
-import modal from './modal';
 import status from './status';
-import { createDecorator } from 'vue-class-component';
-import { ComputedOptions } from 'vue';
 
 export const NoCache = createDecorator((options, key) => {
     (options.computed![key] as ComputedOptions<any>).cache = false;
@@ -215,12 +217,43 @@ export default class Store extends Vue {
         return true;
     }
 
+    /**
+     * Preprocess the time filters and convert them to an array of event.
+     * returns null on parsing error
+     */
+    computeFilter(): Event[] | null {
+        const timeSlotsRecord: Event[] = [];
+        for (const time of this.filter.timeSlots) {
+            let days = '';
+            for (let j = 0; j < 5; j++) {
+                if (time[j]) days += Meta.days[j];
+            }
+
+            if (!days) continue;
+
+            const startTime = time[5].split(':');
+            const endTime = time[6].split(':');
+            if (
+                isNaN(+startTime[0]) ||
+                isNaN(+startTime[1]) ||
+                isNaN(+endTime[0]) ||
+                isNaN(+endTime[1])
+            ) {
+                this.noti.error('Invalid time input.');
+                return null;
+            }
+            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
+            timeSlotsRecord.push(new Event(days, false));
+        }
+        return timeSlotsRecord;
+    }
+
     getGeneratorOptions() {
         const filteredStatus: string[] = [];
         if (!this.filter.allowWaitlist) filteredStatus.push('Wait List');
         if (!this.filter.allowClosed) filteredStatus.push('Closed');
 
-        const timeSlots = this.filter.computeFilter();
+        const timeSlots = this.computeFilter();
 
         // null means there's an error processing time filters. Don't continue if that's the case
         if (!timeSlots) {
@@ -281,9 +314,64 @@ export default class Store extends Vue {
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
         this.status.loading = true;
         const result = await this.semester.selectSemester(currentSemester, force);
-        if (result) {
-            this.parseStatus(currentSemester.id);
-        }
+        if (result) this.parseStatus(currentSemester.id);
+
         this.status.loading = false;
     }
+
+    @Watch('status.loading')
+    loadingWatch() {
+        if (this.status.loading) {
+            if (noti.empty()) {
+                noti.info('Loading...');
+            }
+        } else {
+            if (noti.msg === 'Loading...') {
+                noti.clear();
+            }
+        }
+    }
+
+    // @Watch('display.multiSelect')
+    // private multiSelectWatch() {
+    //     Schedule.options.multiSelect = this.display.multiSelect;
+    //     this.schedule.currentSchedule.computeSchedule();
+    // }
+
+    // @Watch('display.combineSections')
+    // private combineSectionsWatch() {
+    //     Schedule.options.combineSections = this.display.combineSections;
+    //     this.schedule.currentSchedule.computeSchedule();
+    // }
+
+    // @Watch('palette.savedColors', { deep: true })
+    // private wat() {
+    //     Schedule.savedColors = this.palette.savedColors;
+    //     this.schedule.currentSchedule.computeSchedule();
+    // }
+
+    // @Watch('schedule', { deep: true })
+    // private w1() {
+    //     this.saveStatus();
+    // }
+
+    // @Watch('display', { deep: true })
+    // private w2() {
+    //     this.saveStatus();
+    // }
+
+    // @Watch('filter', { deep: true })
+    // private w3() {
+    //     this.saveStatus();
+    // }
+
+    // @Watch('palette', { deep: true })
+    // private w4() {
+    //     this.saveStatus();
+    // }
+
+    // @Watch('semester', { deep: true })
+    // private w5() {
+    //     this.saveStatus();
+    // }
 }

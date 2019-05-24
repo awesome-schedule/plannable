@@ -6,7 +6,6 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
 import Section from '../models/Section';
 import Course from '../models/Course';
 import $ from 'jquery';
@@ -17,8 +16,7 @@ export interface ModalState {
     modalCourse: Course | null;
 }
 
-@Component
-class Modal extends Vue implements ModalState {
+class Modal implements ModalState {
     modalSection: Section | null = null;
     modalCourse: Course | null = null;
 

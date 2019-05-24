@@ -6,12 +6,7 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
 import { SortMode, EvaluatorOptions, SortOption } from '../algorithm/ScheduleEvaluator';
-import noti from './notification';
-import Meta from '../models/Meta';
-import Event from '../models/Event';
-import { to12hr } from '../utils';
 import { toJSON, StoreModule } from '.';
 
 interface FilterStateBase {
@@ -170,8 +165,7 @@ function getDefaultOptions() {
     return options;
 }
 
-@Component
-class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSON> {
+class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     [x: string]: any;
     /**
      * index 0 - 4: whether Mo - Fr are selected
@@ -185,7 +179,7 @@ class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSO
     allowClosed = true;
     sortOptions = getDefaultOptions();
 
-    private readonly sortModes: ReadonlyArray<DetailedSortMode> = [
+    readonly sortModes: ReadonlyArray<DetailedSortMode> = [
         {
             mode: SortMode.combined,
             title: 'Combined',
@@ -199,52 +193,6 @@ class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSO
                 ' You can drag the sorting options to change their order.'
         }
     ];
-    /**
-     * negate the boolean value at `this.timeSlots[i][j]`
-     * @param i the index of the time filter
-     * @param j the index of the day (0 ~ 4)
-     */
-    updateFilterDay(i: number, j: number) {
-        this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
-    }
-
-    addTimeSlot() {
-        this.timeSlots.push([false, false, false, false, false, '', '']);
-    }
-    removeTimeSlot(n: number) {
-        this.timeSlots.splice(n, 1);
-    }
-
-    /**
-     * Preprocess the time filters and convert them to an array of event.
-     * returns null on parsing error
-     */
-    computeFilter(): Event[] | null {
-        const timeSlotsRecord: Event[] = [];
-        for (const time of this.timeSlots) {
-            let days = '';
-            for (let j = 0; j < 5; j++) {
-                if (time[j]) days += Meta.days[j];
-            }
-
-            if (!days) continue;
-
-            const startTime = time[5].split(':');
-            const endTime = time[6].split(':');
-            if (
-                isNaN(+startTime[0]) ||
-                isNaN(+startTime[1]) ||
-                isNaN(+endTime[0]) ||
-                isNaN(+endTime[1])
-            ) {
-                noti.error('Invalid time input.');
-                return null;
-            }
-            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
-            timeSlotsRecord.push(new Event(days, false));
-        }
-        return timeSlotsRecord;
-    }
 
     fromJSON(obj: Partial<FilterStateJSON>) {
         const defaultVal = this.getDefault();

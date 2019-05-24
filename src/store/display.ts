@@ -6,10 +6,7 @@
 /**
  *
  */
-import { Vue, Component, Watch } from 'vue-property-decorator';
 import { toJSON, StoreModule } from '.';
-import Schedule from '../models/Schedule';
-import schedule from './schedule';
 
 export interface DisplayState {
     [x: string]: any;
@@ -27,8 +24,7 @@ export interface DisplayState {
     maxNumSchedules: number;
 }
 
-@Component
-class Display extends Vue implements StoreModule<DisplayState, DisplayState> {
+class Display implements StoreModule<DisplayState, DisplayState> {
     [x: string]: any;
     public showTime = false;
     public showRoom = true;
@@ -42,18 +38,6 @@ class Display extends Vue implements StoreModule<DisplayState, DisplayState> {
     public multiSelect = true;
     public combineSections = true;
     public maxNumSchedules = 200000;
-
-    @Watch('multiSelect')
-    multiSelectWatch() {
-        Schedule.options.multiSelect = this.multiSelect;
-        schedule.currentSchedule.computeSchedule();
-    }
-
-    @Watch('combineSections')
-    combineSectionsWatch() {
-        Schedule.options.combineSections = this.combineSections;
-        schedule.currentSchedule.computeSchedule();
-    }
 
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();

@@ -19,7 +19,7 @@
                         <div class="col-sm-auto align-self-center">
                             <i
                                 class="fas fa-sync-alt click-icon mr-1"
-                                @click="palette.randColor(pair[0])"
+                                @click="randColor(pair[0])"
                             ></i>
                         </div>
                         <div class="col-sm-auto">
@@ -29,7 +29,7 @@
                                 :value="pair[1]"
                                 style="width: 40px; height: 95%"
                                 title="get a random color"
-                                @change="palette.set(pair[0], $event.target.value)"
+                                @change="set(pair[0], $event.target.value)"
                             />
                         </div>
                     </div>

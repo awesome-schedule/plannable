@@ -6,9 +6,9 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
+// import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, StoreModule, NoCache } from '.';
+import { toJSON, StoreModule } from '.';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -28,8 +28,7 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
-@Component
-class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleStateJSON> {
+class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     /**
      * total number of generated schedules, has the same value as
      * `window.scheduleEvaluator.size()`
@@ -61,15 +60,9 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
      * indicates whether the currently showing schedule is the generated schedule
      */
     generated = false;
-
-    set proposedSchedule(sche: Schedule) {
-        // need Vue's reactivity
-        this.$set(this.proposedSchedules, this.proposedScheduleIndex, sche);
-    }
     /**
      * the proposed schedule that is currently active
      */
-    // @NoCache
     get proposedSchedule() {
         return this.proposedSchedules[this.proposedScheduleIndex];
     }
@@ -212,7 +205,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
 
         if (!this.generated) {
-            this.$nextTick(() => this.switchSchedule(false));
+            this.switchSchedule(false);
         }
     }
 

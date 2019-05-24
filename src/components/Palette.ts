@@ -10,15 +10,24 @@
 import { Component, Mixins } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Store from '../store';
+import randomColor from 'randomcolor';
 
 @Component
 export default class Palette extends Mixins(Store) {
+    set(key: string, color: string) {
+        this.$set(this.palette.savedColors, key, color);
+    }
+    randColor(key: string) {
+        this.$set(this.palette.savedColors, key, randomColor({
+            luminosity: 'dark'
+        }) as string);
+    }
+
     colorEntries() {
         return Object.entries(this.palette.savedColors).filter(entry =>
             this.schedule.currentSchedule.has(entry[0], true)
         );
     }
-
     /**
      * get the number of events and courses that have colors in total
      */

@@ -6,7 +6,6 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
 
 /**
  * the noti level type corresponds to the three different log levels available in Console
@@ -44,8 +43,7 @@ export const TYPES = Object.freeze({
     warn: 'warning'
 }) as { [x: string]: NotiClass };
 
-@Component
-class Notification extends Vue implements NotiState {
+class Notification implements NotiState {
     public msg: string = '';
     public class: NotiClass = '';
     private job: number | null = null;

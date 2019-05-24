@@ -6,12 +6,10 @@
 /**
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
 import { loadSemesterData } from '../data/CatalogLoader';
 import { loadSemesterList } from '../data/SemesterListLoader';
 import { SemesterJSON } from '../models/Catalog';
 import { noti } from '.';
-
 export interface SemesterState {
     [x: string]: any;
     semesters: SemesterJSON[];
@@ -19,8 +17,7 @@ export interface SemesterState {
     lastUpdate: string;
 }
 
-@Component
-class Semesters extends Vue implements SemesterState {
+class Semesters implements SemesterState {
     [x: string]: any;
     semesters: SemesterJSON[] = [];
     currentSemester: SemesterJSON | null = null;

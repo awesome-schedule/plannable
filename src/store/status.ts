@@ -5,8 +5,6 @@
 /**
  *
  */
-import { Component, Vue, Watch } from 'vue-property-decorator';
-import { noti } from '.';
 import Event from '../models/Event';
 
 interface Sidebars {
@@ -24,8 +22,7 @@ interface SidebarStatus extends Sidebars {
     [key: string]: boolean;
 }
 
-@Component
-class Status extends Vue {
+class Status {
     /**
      * sidebar display status
      * show the specific sidebar when true, and hide when all false
@@ -55,23 +52,6 @@ class Status extends Vue {
             if (this.sideBar[key]) return true;
         }
         return false;
-    }
-
-    @Watch('loading', { immediate: true })
-    loadingWatch() {
-        if (this.loading) {
-            this.$nextTick(() => {
-                if (noti.empty()) {
-                    noti.info('Loading...');
-                }
-            });
-        } else {
-            this.$nextTick(() => {
-                if (noti.msg === 'Loading...') {
-                    noti.clear();
-                }
-            });
-        }
     }
 
     switchSideBar(key: keyof Sidebars) {

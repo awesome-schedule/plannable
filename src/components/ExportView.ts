@@ -28,7 +28,7 @@ export default class ExportView extends Store {
                     return;
                 }
                 localStorage.setItem(raw_data.currentSemester.id, result);
-                this.semester.selectSemester(raw_data.currentSemester);
+                this.selectSemester(raw_data.currentSemester);
             } else {
                 this.noti.warn('File is empty!');
             }

@@ -1,8 +1,8 @@
-import { modal } from '../store';
-import { Vue, Component } from 'vue-property-decorator';
+import Store from '../store';
+import { Component } from 'vue-property-decorator';
 @Component
-export default class CourseModal extends Vue {
+export default class CourseModal extends Store {
     get course() {
-        return modal.modalCourse;
+        return this.modal.modalCourse;
     }
 }

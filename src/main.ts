@@ -38,7 +38,7 @@ declare module 'vue/types/vue' {
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
-    inserted: el => {
+    inserted: () => {
         // scroll to top
         window.scrollTo(0, 0);
     }

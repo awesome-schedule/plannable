@@ -16,11 +16,11 @@ export default class FilterView extends Store {
         return Meta.days;
     }
     dragEnd() {
-        if (this.filter.sortOptions.mode === 0) this.filter.changeSorting(undefined);
+        if (this.filter.sortOptions.mode === 0) this.changeSorting(undefined);
     }
 
     changeSorting(optIdx?: number) {
-        if (!this.filter.validateSortOptions()) return;
+        if (!this.validateSortOptions()) return;
         if (optIdx !== undefined) {
             const option = this.filter.sortOptions.sortBy[optIdx];
 

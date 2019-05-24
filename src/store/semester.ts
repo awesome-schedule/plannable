@@ -37,7 +37,7 @@ class Semesters extends Vue implements SemesterState {
         console[result.level](result.msg);
 
         if (semesters) {
-            this.semesters = window.semesters = semesters;
+            this.semesters = semesters;
             return true;
         } else {
             this.semesters = [];
@@ -46,17 +46,7 @@ class Semesters extends Vue implements SemesterState {
     }
 
     /**
-     * Select a semester and fetch all its associated data.
-     *
-     * This method will assign a correct Catalog object to `window.catalog`
-     *
-     * Then, schedules and settings will be parsed from `localStorage`
-     * and assigned to relevant fields of `this`.
-     *
-     * If no local data is present, default values will be assigned.
-     *
-     * @param currentSemester index or id of this semester
-     * @param force whether to force-update semester data
+     * DO NOT call this method. call Store.selectSemester instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
         // do a linear search to find the index of the semester given its string id

@@ -648,8 +648,14 @@ export class Schedule {
      *
      * This method will go through the `events` array and `All` property to check for existence of the key
      */
-    public has(key: string) {
-        return key in this.All || this.events.some(x => x.days === key);
+    public has(key: string, rendered = true) {
+        if (rendered)
+            return (
+                Object.values(this.days)
+                    .flat(2)
+                    .find(x => x.section.key === key) !== undefined
+            );
+        else return key in this.All || this.events.some(x => x.days === key);
     }
 
     public clean() {

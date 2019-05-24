@@ -7,7 +7,7 @@
 /**
  *
  */
-import { Component, Vue, Watch } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import ClassView from './components/ClassView.vue';
 import CourseModal from './components/CourseModal.vue';
@@ -21,7 +21,6 @@ import Information from './components/Information.vue';
 import Pagination from './components/Pagination.vue';
 import Palette from './components/Palette.vue';
 import SectionModal from './components/SectionModal.vue';
-
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 import filter from './store/filter';
@@ -78,15 +77,8 @@ export default class App extends Store {
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            if (pay3)
-                await this.selectSemester(
-                    this.semester.semesters[this.semester.semesters.length - 1]
-                );
+            if (pay3) await this.selectSemester(this.semester.semesters[0]);
             this.status.loading = false;
         })();
-    }
-
-    onDocChange() {
-        this.saveStatus();
     }
 }

@@ -6,7 +6,7 @@
 /**
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import App from '../App';
 import Event from '../models/Event';
 import Meta from '../models/Meta';

@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="w-100" @change="onDocChange">
+    <div id="app" class="w-100">
         <course-modal></course-modal>
         <section-modal></section-modal>
 
@@ -318,12 +318,12 @@
     }
 }
 
-.sidebar,
+.sidebar::-webkit-scrollbar,
 .sidebar-nocol::-webkit-scrollbar {
     width: 5px;
 }
 
-.sidebar,
+.sidebar::-webkit-scrollbar-thumb,
 .sidebar-nocol::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;

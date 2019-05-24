@@ -208,25 +208,6 @@ class FilterStore extends Vue implements StoreModule<FilterState, FilterStateJSO
         this.$set(this.timeSlots[i], j, !this.timeSlots[i][j]);
     }
 
-    /**
-     * @returns true if the current combination of sort options is valid, false otherwise
-     *
-     * notifications will be given for invalid combination via [[noti]]
-     */
-    validateSortOptions() {
-        if (!Object.values(this.sortOptions.sortBy).some(x => x.enabled)) {
-            noti.error('You must have at least one sort option!');
-            return false;
-        } else if (
-            Object.values(this.sortOptions.sortBy).some(x => x.name === 'distance' && x.enabled) &&
-            (!window.buildingList || !window.timeMatrix)
-        ) {
-            noti.error('Building list fails to load. Please disable "walking distance"');
-            return false;
-        }
-        return true;
-    }
-
     addTimeSlot() {
         this.timeSlots.push([false, false, false, false, false, '', '']);
     }

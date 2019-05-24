@@ -8,11 +8,11 @@
             </button>
             <div v-if="semester.semesters.length" class="dropdown-menu w-100">
                 <a
-                    v-for="(sem, idx) in semester.semesters"
+                    v-for="sem in semester.semesters"
                     :key="sem.id"
                     class="dropdown-item w-100"
                     href="#"
-                    @click="semester.selectSemester(idx)"
+                    @click="selectSemester(sem)"
                     >{{ sem.name }}
                 </a>
             </div>

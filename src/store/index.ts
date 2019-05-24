@@ -1,14 +1,3 @@
-export { filter } from './filter';
-export { display } from './display';
-export { noti } from './notification';
-export { modal } from './modal';
-export { semester } from './semester';
-export { schedule } from './schedule';
-export { status } from './status';
-export { palette } from './palette';
-
-import Vue from 'vue';
-import Component from 'vue-class-component';
 /**
  * the helper module provides methods to save/retrieve and manipulate store
  * @author Hanzhi Zhou
@@ -17,7 +6,18 @@ import Component from 'vue-class-component';
 /**
  *
  */
-import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
+export * from './filter';
+export * from './display';
+export * from './notification';
+export * from './modal';
+export * from './semester';
+export * from './schedule';
+export * from './status';
+export * from './palette';
+
+import Vue from 'vue';
+import { Component, Watch } from 'vue-property-decorator';
+import ScheduleGenerator from '../algorithm/ScheduleGenerator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import { SemesterJSON } from '../models/Catalog';
 import { ScheduleJSON } from '../models/Schedule';
@@ -29,13 +29,12 @@ import semester from './semester';
 import palette, { PaletteState } from './palette';
 import modal from './modal';
 import status from './status';
+// import { createDecorator } from 'vue-class-component';
+// import { ComputedOptions } from 'vue';
 
-import { createDecorator } from 'vue-class-component';
-import { ComputedOptions } from 'vue';
-
-export const NoCache = createDecorator((options, key) => {
-    (options.computed![key] as ComputedOptions<any>).cache = false;
-});
+// export const NoCache = createDecorator((options, key) => {
+//     (options.computed![key] as ComputedOptions<any>).cache = false;
+// });
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
@@ -147,10 +146,10 @@ export default class Store extends Vue {
         if (!currentSemester) return;
         const obj: SemesterStorage = {
             currentSemester,
-            display: this.display,
-            filter: this.filter,
+            display: this.display.toJSON(),
+            filter: this.filter.toJSON(),
             schedule: this.schedule.toJSON(),
-            palette: this.palette
+            palette: this.palette.toJSON()
         };
         localStorage.setItem(currentSemester.id, JSON.stringify(obj));
     }
@@ -191,12 +190,29 @@ export default class Store extends Vue {
             this.schedule.fromJSON(newStore.schedule || {});
             this.palette.fromJSON(newStore.palette || {});
         }
-
         this.schedule.currentSchedule.computeSchedule();
+        if (this.schedule.generated) this.generateSchedules();
+    }
 
-        if (this.schedule.generated) {
-            this.generateSchedules();
+    /**
+     * @returns true if the current combination of sort options is valid, false otherwise
+     *
+     * notifications will be given for invalid combination via [[noti]]
+     */
+    validateSortOptions() {
+        if (!Object.values(this.filter.sortOptions.sortBy).some(x => x.enabled)) {
+            this.noti.error('You must have at least one sort option!');
+            return false;
+        } else if (
+            Object.values(this.filter.sortOptions.sortBy).some(
+                x => x.name === 'distance' && x.enabled
+            ) &&
+            (!window.buildingList || !window.timeMatrix)
+        ) {
+            this.noti.error('Building list fails to load. Please disable "walking distance"');
+            return false;
         }
+        return true;
     }
 
     getGeneratorOptions() {
@@ -212,7 +228,7 @@ export default class Store extends Vue {
             return;
         }
 
-        if (!this.filter.validateSortOptions()) return;
+        if (!this.validateSortOptions()) return;
 
         return {
             timeSlots,
@@ -235,12 +251,12 @@ export default class Store extends Vue {
 
         const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
         try {
-            const evaluator = generator.getSchedules(schedule.currentSchedule);
+            const evaluator = generator.getSchedules(this.schedule.currentSchedule);
             window.scheduleEvaluator = evaluator;
             const num = window.scheduleEvaluator.size();
             this.noti.success(`${num} Schedules Generated!`, 3);
             this.schedule.numGenerated = num;
-            this.schedule.cpIndex = schedule.proposedScheduleIndex;
+            this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } catch (err) {
             console.warn(err);
@@ -250,9 +266,21 @@ export default class Store extends Vue {
             this.schedule.cpIndex = -1;
             this.schedule.numGenerated = 0;
         }
-        this.saveStatus();
     }
 
+    /**
+     * Select a semester and fetch all its associated data.
+     *
+     * This method will assign a correct Catalog object to `window.catalog`
+     *
+     * Then, schedules and settings will be parsed from `localStorage`
+     * and assigned to relevant fields of `this`.
+     *
+     * If no local data is present, default values will be assigned.
+     *
+     * @param currentSemester the semester to switch to
+     * @param force whether to force-update semester data
+     */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
         this.status.loading = true;
         const result = await this.semester.selectSemester(currentSemester, force);

@@ -189,7 +189,7 @@
                     </v-card-title>
 
                     <v-card-actions class="grey darken-3 justify-center">
-                        &copy;2019&nbsp;—&nbsp;<strong>Awesome Schedule</strong>
+                        &copy;2019&nbsp;—&nbsp;<strong>Plannable</strong>
                     </v-card-actions>
                 </v-card>
             </v-footer>
@@ -278,7 +278,8 @@
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-    .sidebar .sidebar-nocol {
+    .sidebar,
+    .sidebar-nocol {
         display: none !important;
     }
     nav {

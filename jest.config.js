@@ -20,7 +20,7 @@ module.exports = {
         '!**/node_modules/**',
         '!**/*.d.ts',
         '!**/tests/temp/*.*',
-        '!**/components/*',
+        '!**/components/**/*.ts',
         '!**/App.ts',
         '!**/main.ts',
         '!**/store/*.ts',

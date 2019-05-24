@@ -1,7 +1,7 @@
 /**
  *
  */
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 

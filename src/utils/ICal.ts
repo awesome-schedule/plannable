@@ -1,5 +1,5 @@
 /**
- * utilities to convert a schedule to a corresponding iCalendar file
+ * utilities for converting a schedule to a corresponding iCalendar file
  *
  * @author Kaiying Shan
  */
@@ -31,7 +31,7 @@ export function toICal(schedule: Schedule) {
         for (const sb of schedule.days[day]) {
             if (sb.section instanceof Section) {
                 for (const m of sb.section.meetings) {
-                    if (m.dates === 'TBD' || m.dates === 'TBA') continue;
+                    if (!m.dates || m.dates === 'TBD' || m.dates === 'TBA') continue;
                     const [sd, , ed] = m.dates.split(' ');
                     const [sl, sm, sr] = sd.split('/');
                     startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);

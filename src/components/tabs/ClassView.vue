@@ -86,7 +86,11 @@
                                 @click="schedule.switchProposed(schedule.proposedScheduleIndex - 1)"
                             ></i>
                         </div>
-                        <div class="col-auto" style="font-size: 20px;">
+                        <div
+                            class="col-auto"
+                            style="font-size: 20px;"
+                            title="the index of the current schedule"
+                        >
                             {{ schedule.proposedScheduleIndex + 1 }}
                         </div>
                         <div class="col-auto">
@@ -175,6 +179,14 @@
         <ul class="list-group list-group-flush" style="width:99%">
             <li class="list-group-item">
                 Total Credits: {{ schedule.currentSchedule.totalCredit }}
+                <span
+                    v-if="schedule.currentSchedule.totalCredit > 21"
+                    class="ml-2"
+                    style="font-size: 1.2rem"
+                    title="JUST DO IT"
+                >
+                    😮
+                </span>
             </li>
             <li class="list-group-item pr-0">
                 <table style="width:100%;font-size:14px">

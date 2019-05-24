@@ -6,13 +6,12 @@
 /**
  *
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 import App from '@/App';
 import Event from '@/models/Event';
 import Meta from '@/models/Meta';
 import Store from '@/store';
 import { to12hr, to24hr } from '@/utils';
-
 @Component
 export default class EventView extends Store {
     get event() {
@@ -31,16 +30,13 @@ export default class EventView extends Store {
     toBeModifiedDays = '';
     $parent!: App;
 
-    mounted() {
-        this.$watch(
-            'event',
-            () => {
-                if (this.event) this.editEvent(this.event);
-            },
-            {
-                immediate: true
-            }
-        );
+    @Watch('event', { immediate: true })
+    eventWatch() {
+        if (this.event) this.editEvent(this.event);
+    }
+    // need to remove eventToEdit before switching other tabs
+    beforeDestroy() {
+        this.status.eventToEdit = null;
     }
     updateDay(idx: number) {
         this.$set(this.eventWeek, idx, !this.eventWeek[idx]);

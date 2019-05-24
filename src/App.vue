@@ -59,7 +59,7 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
-                title="Tutorials, miscellaneous information and acknowledgments"
+                title="Website guide and miscellaneous information"
                 :class="{ 'tab-icon-active': sideBar.showInfo }"
                 class="tab-icon mb-4"
                 @click="status.switchSideBar('showInfo')"

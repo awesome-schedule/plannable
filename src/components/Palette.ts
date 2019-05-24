@@ -7,10 +7,10 @@
 /**
  *
  */
-import { Component, Mixins } from 'vue-property-decorator';
+import randomColor from 'randomcolor';
+import { Component, Mixins, Watch } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Store from '../store';
-import randomColor from 'randomcolor';
 
 @Component
 export default class Palette extends Mixins(Store) {

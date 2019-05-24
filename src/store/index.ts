@@ -15,8 +15,8 @@ export * from './schedule';
 export * from './semester';
 export * from './status';
 
-import Meta from '@/models/Meta';
-import { to12hr } from '@/utils';
+import Meta from '../models/Meta';
+import { to12hr } from '../utils';
 import Vue, { ComputedOptions } from 'vue';
 import { createDecorator } from 'vue-class-component';
 import { Component, Watch } from 'vue-property-decorator';
@@ -127,8 +127,44 @@ export function toJSON<State, JSONState>(thisArg: StoreModule<State, JSONState>)
     }
     return result;
 }
+/**
+ * save all store modules to localStorage
+ */
+export function saveStatus() {
+    const { currentSemester } = semester;
+    if (!currentSemester) return;
+    const obj: SemesterStorage = {
+        currentSemester,
+        display,
+        filter,
+        schedule: schedule.toJSON(),
+        palette
+    };
+    localStorage.setItem(currentSemester.id, JSON.stringify(obj));
+}
+const jobs: { [x: string]: any } = {};
 
-// You can declare a mixin as the same style as components.
+function delay(timeout: number) {
+    return (
+        target: any,
+        propertyKey: string,
+        descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
+    ) => {
+        const oldVal = descriptor.value!;
+        descriptor.value = function(...args: any[]) {
+            if (jobs[propertyKey]) {
+                console.log('cancelled: ', propertyKey);
+                return;
+            }
+            jobs[propertyKey] = propertyKey;
+            window.setTimeout(() => {
+                oldVal.apply(this, args);
+                delete jobs[propertyKey];
+            }, timeout);
+        };
+    };
+}
+
 @Component
 export default class Store extends Vue {
     filter = filter;
@@ -144,16 +180,7 @@ export default class Store extends Vue {
      * save all store modules to localStorage
      */
     saveStatus() {
-        const { currentSemester } = this.semester;
-        if (!currentSemester) return;
-        const obj: SemesterStorage = {
-            currentSemester,
-            display: this.display.toJSON(),
-            filter: this.filter.toJSON(),
-            schedule: this.schedule.toJSON(),
-            palette: this.palette.toJSON()
-        };
-        localStorage.setItem(currentSemester.id, JSON.stringify(obj));
+        saveStatus();
     }
 
     /**
@@ -320,6 +347,7 @@ export default class Store extends Vue {
     }
 
     @Watch('status.loading')
+    @delay(10)
     loadingWatch() {
         if (this.status.loading) {
             if (noti.empty()) {
@@ -332,45 +360,53 @@ export default class Store extends Vue {
         }
     }
 
-    // @Watch('display.multiSelect')
-    // private multiSelectWatch() {
-    //     Schedule.options.multiSelect = this.display.multiSelect;
-    //     this.schedule.currentSchedule.computeSchedule();
-    // }
+    @Watch('display.multiSelect')
+    @delay(10)
+    private multiSelectWatch() {
+        Schedule.options.multiSelect = this.display.multiSelect;
+        this.schedule.currentSchedule.computeSchedule();
+    }
 
-    // @Watch('display.combineSections')
-    // private combineSectionsWatch() {
-    //     Schedule.options.combineSections = this.display.combineSections;
-    //     this.schedule.currentSchedule.computeSchedule();
-    // }
+    @Watch('display.combineSections')
+    @delay(10)
+    private combineSectionsWatch() {
+        Schedule.options.combineSections = this.display.combineSections;
+        this.schedule.currentSchedule.computeSchedule();
+    }
 
-    // @Watch('palette.savedColors', { deep: true })
-    // private wat() {
-    //     Schedule.savedColors = this.palette.savedColors;
-    //     this.schedule.currentSchedule.computeSchedule();
-    // }
+    @Watch('palette.savedColors', { deep: true })
+    @delay(10)
+    private wat() {
+        Schedule.savedColors = this.palette.savedColors;
+        this.schedule.currentSchedule.computeSchedule();
+    }
 
     // @Watch('schedule', { deep: true })
+    // @delay(10)
     // private w1() {
     //     this.saveStatus();
     // }
 
     // @Watch('display', { deep: true })
+    // @delay(10)
     // private w2() {
     //     this.saveStatus();
     // }
 
     // @Watch('filter', { deep: true })
+    // @delay(10)
     // private w3() {
     //     this.saveStatus();
     // }
 
     // @Watch('palette', { deep: true })
+    // @delay(10)
     // private w4() {
     //     this.saveStatus();
     // }
 
     // @Watch('semester', { deep: true })
+    // @delay(10)
     // private w5() {
     //     this.saveStatus();
     // }

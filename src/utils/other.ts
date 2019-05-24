@@ -6,9 +6,9 @@
 /**
  *
  */
-import { CourseFields } from '../models/Course';
 import { AxiosError } from 'axios';
 import { saveAs } from 'file-saver';
+import { CourseFields } from '../models/Course';
 
 /**
  * open a course detail on Lou's list

@@ -1,10 +1,11 @@
 /**
  *
  */
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component, Mixins, Watch } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import Meta from '../models/Meta';
 import Store from '../store';
+import Schedule from '@/models/Schedule';
 
 @Component({
     components: {

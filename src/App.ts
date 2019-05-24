@@ -8,7 +8,6 @@
  *
  */
 import { Component, Mixins } from 'vue-property-decorator';
-import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import ClassView from './components/ClassView.vue';
 import CourseModal from './components/CourseModal.vue';
 import DisplayView from './components/DisplayView.vue';
@@ -23,12 +22,6 @@ import Palette from './components/Palette.vue';
 import SectionModal from './components/SectionModal.vue';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
-import filter from './store/filter';
-
-// these two properties must be non-reactive,
-// otherwise the reactive observer will slow down execution significantly
-window.scheduleEvaluator = new ScheduleEvaluator(filter.sortOptions);
-// window.catalog = null;
 
 @Component({
     components: {

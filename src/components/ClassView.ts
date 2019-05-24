@@ -1,7 +1,8 @@
-import { Component, Vue, Mixins } from 'vue-property-decorator';
+import { Component, Vue, Mixins, Watch } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Store from '../store';
 import ClassList from './ClassList.vue';
+import Schedule from '@/models/Schedule';
 
 @Component({
     components: {
@@ -9,9 +10,6 @@ import ClassList from './ClassList.vue';
     }
 })
 export default class ClassView extends Mixins(Store) {
-    // autocompletion related fields
-    isEntering = false;
-    inputCourses: Course[] | null = null;
     /**
      * get the list of current ids, sorted in alphabetical order of the keys
      */
@@ -20,6 +18,9 @@ export default class ClassView extends Mixins(Store) {
             a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
         );
     }
+    // autocompletion related fields
+    isEntering = false;
+    inputCourses: Course[] | null = null;
 
     /**
      * get classes that match the input query.

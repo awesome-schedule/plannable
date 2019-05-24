@@ -35,11 +35,11 @@ export interface ScheduleOptions {
  *
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */
-export class Schedule {
-    public static readonly options: ScheduleOptions = {
+export default class Schedule {
+    public static readonly options: ScheduleOptions = Object.seal({
         combineSections: true,
         multiSelect: true
-    };
+    });
 
     public static readonly bgColors: ReadonlyArray<string> = [
         '#f7867e',
@@ -668,5 +668,3 @@ export class Schedule {
         return Object.keys(this.All).length === 0;
     }
 }
-
-export default Schedule;

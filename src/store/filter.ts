@@ -6,7 +6,11 @@
 /**
  *
  */
-import { SortMode, EvaluatorOptions, SortOption } from '../algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, {
+    SortMode,
+    EvaluatorOptions,
+    SortOption
+} from '../algorithm/ScheduleEvaluator';
 import { toJSON, StoreModule } from '.';
 
 interface FilterStateBase {
@@ -164,6 +168,10 @@ function getDefaultOptions() {
     options.sortBy = options.sortBy.map(x => Object.assign({}, x));
     return options;
 }
+
+// these two properties must be non-reactive,
+// otherwise the reactive observer will slow down execution significantly
+window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions());
 
 class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     [x: string]: any;

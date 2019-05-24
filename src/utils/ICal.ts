@@ -7,12 +7,12 @@
 /**
  *
  */
-import Schedule from '../models/Schedule';
-import Meta from '../models/Meta';
-import Section from '../models/Section';
-import Event from '../models/Event';
 import * as Utils from '.';
 import Course from '../models/Course';
+import Event from '../models/Event';
+import Meta from '../models/Meta';
+import Schedule from '../models/Schedule';
+import Section from '../models/Section';
 
 /**
  * Convert a schedule to iCalendar format.

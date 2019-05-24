@@ -4,10 +4,6 @@
  */
 
 /**
- *
- */
-
-/**
  * the noti level type corresponds to the three different log levels available in Console
  * @see console.info
  * @see console.warn

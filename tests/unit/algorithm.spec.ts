@@ -1,8 +1,10 @@
 import ScheduleGenerator from '../../src/algorithm/ScheduleGenerator';
 import { loadBuildingList, loadTimeMatrix } from '../../src/data/BuildingLoader';
 import Schedule from '../../src/models/Schedule';
-import { filter, getGeneratorOptions } from '../../src/store';
+import Store from '../../src/store';
 import data from './data';
+
+const store = new Store();
 
 beforeAll(async () => {
     window.catalog = await data;
@@ -21,7 +23,7 @@ describe('ScheduleGenerator Test', () => {
     it('ScheduleGenerator', () => {
         const catalog = window.catalog;
         const buildingList = window.buildingList;
-        const options = getGeneratorOptions();
+        const options = store.getGeneratorOptions();
         if (!options) throw new Error('failed to get options');
 
         const generator = new ScheduleGenerator(catalog, buildingList, options);
@@ -57,7 +59,7 @@ describe('ScheduleGenerator Test', () => {
         const result3 = generator.getSchedules(schedule);
         expect(result3.empty()).toBeFalsy();
 
-        sort = filter.getDefault().sortOptions;
+        sort = store.filter.getDefault().sortOptions;
         sort.sortBy[1].enabled = false;
         const result4 = generator.getSchedules(schedule);
         expect(result4.empty()).toBeFalsy();

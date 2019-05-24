@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="w-100">
+    <div id="app" class="w-100" @change="saveStatus()">
         <course-modal></course-modal>
         <section-modal></section-modal>
 

@@ -5,7 +5,8 @@
             <nav class="nav nav-pills flex-column">
                 <a class="nav-link" href="#item-1">Introduction</a>
                 <nav class="nav nav-pills flex-column">
-                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-1">Auto-Scheduling</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-1">Intro to Auto-Scheduling</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-2">Planned vs. Generated</a>
                 </nav>
                 <a class="nav-link" href="#item-2">Basic Operations</a>
                 <nav class="nav nav-pills flex-column">
@@ -48,6 +49,11 @@
         >
             <h2 id="item-1">Welcome to our information page! Meow~</h2>
             <p>
+                <small class="text-muted">
+                    Page layout by Kaiying Shan, text by Hanzhi Zhou, media by Zichao Hu
+                </small>
+            </p>
+            <p>
                 This website helps UVa students to schedule their classes more efficiently. Get your
                 class selection done with the searching field and customize them with filters. The
                 website can generate all possible schedules according to your requirements.
@@ -73,8 +79,9 @@
                 your mouse over them for a while and you will see). You are welcome to skip this
                 guide 😏
             </p>
+
             <h4 id="item-1-1">Introduction to Auto-Scheduling</h4>
-            <hr />
+            <!-- <hr /> -->
             <p>
                 Before the invention of auto-scheduling, we have the pick the sections of the
                 courses that we want to take and come up with a schedule. Due to the availability of
@@ -85,6 +92,40 @@
                 courses with undetermined or pratially determined sections, and it will do the rest
                 of the hard work for you.
             </p>
+
+            <h4 id="item-1-2">Planned vs. Generated Schedules</h4>
+            <div>
+                <div class="ml-2 float-right text-center">
+                    <figure>
+                        <img :src="imgPath('edit-class.png')" width="210px" />
+                        <figcaption>Edit Class Mode</figcaption>
+                    </figure>
+                    <figure>
+                        <img :src="imgPath('view-schedule.png')" width="210px" />
+                        <figcaption>View Schedule Mode</figcaption>
+                    </figure>
+                </div>
+                <div>
+                    <p>
+                        You need to be aware of the fact that you are manipulating two sets of
+                        schedules on the same interface: Planned schedules (sometimes also referred
+                        as proposed schedules) and generated schedules. Planned schedules are what
+                        you provide to the auto-scheduler as input. Generated schedules are the
+                        output of the scheduler.
+                    </p>
+                    <p>
+                        To differentiate these two sets of schedules, we provide two edit modes:
+                        Edit Class mode and View Schedule mode. View Schedule mode is not available
+                        until you have clicked the "Generate" button. After you have generated some
+                        schedules, you can switch between your planned schedule and generated
+                        schedules by clicking the button below the searching bar. You should not
+                        modify a generated schedule. Although doing so will not break anything, it
+                        will trigger a warning because it is a common mistake 🤔. What you should do
+                        instead is to switch back to the planned schedule and modify it.
+                    </p>
+                </div>
+            </div>
+
             <h3 id="item-2">Basic Operations</h3>
             <hr />
             <div id="item-2-1" style="width:100%;height:2px"></div>
@@ -205,7 +246,30 @@
             </v-stepper>
 
             <h5 id="item-2-2">Schedule Rendering</h5>
-            <p></p>
+            <p class="mb-1">
+                It is better for you to know under what conditions are courses rendered on the
+                schedule. In Edit Class mode, only the following type courses are rendered on the
+                grid by default.
+            </p>
+            <ul>
+                <li>
+                    Courses that only have one available section and have "Any Section" selected
+                </li>
+                <li>
+                    Courses that have one section selected
+                </li>
+                <li>
+                    Courses that have multiple sections selected if "show multiple sections"
+                    checkbox is checked.
+                </li>
+            </ul>
+            <p>
+                For example, in Fall 2019, CS 1110 has four available sections. If you select "Any
+                Section", then none of the sections will be shown. If you select section 1 and
+                section 2, then they will be both shown on the schedule if "show multiple sections"
+                checkbox is checked. However, PSYC 1010 only has one section available, so selecting
+                "Any Section" for it will result in the "only one" section being rendered.
+            </p>
 
             <h5 id="item-2-3">Enroll in SIS</h5>
             <p>
@@ -244,8 +308,8 @@
             <h3 id="item-4">Filters</h3>
             <hr />
             <p>
-                Filters allow you to set parameters to better navigate your searches and generate
-                your schedules
+                Filters allow you to set parameters to eliminate unwanted or redundant generated
+                schedules. They also help to find the optimal schedule in your definition.
             </p>
             <h5 id="item-4-1">No Class Time</h5>
             <p>
@@ -270,7 +334,7 @@
 
             <h6>Sort Options</h6>
             Currently, we provide the following list of sort options. If you prefer a mathematical
-            description on how they are computed, see <a href="#item-8-1">Appendix</a>.
+            description on how they are computed, see <a href="#item-11-1">Appendix</a>.
             <ol>
                 <li>Variance: Balance the class time each day</li>
                 <li>Vertical compactness: Make classes back-to-back</li>
@@ -446,9 +510,9 @@
             <h5 id="item-11-1">Calculation of Sort Options</h5>
             <div class="mt-2 mb-4">
                 For each schedule, a single/array of coefficients are calculated, depending on the
-                sort options enabled. The following formulae provide an overview on how these
-                coefficients are calculated. To know exactly how they are implemented, please refer
-                to
+                sort options enabled. The generated schedules then are sorted in ascending order.
+                The following formulae provide an overview on how these coefficients are calculated.
+                To know exactly how they are implemented, please refer to
                 <a
                     href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/src/algorithm/ScheduleEvaluator.ts"
                 >
@@ -493,7 +557,7 @@ export default class Information extends Vue {
         \\frac{\\text{Classtime}(day)^2}{5} - \\left( \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\frac{\\text{Classtime}(day)}{5} \\right)^2                             \\\\
         \\text{Compactness} & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\left(\\text{Start}_{i + 1} - \\text{End}_{i} \\right)            \\\\
                         & \\text{where $n_{day}$ is the number of classes at day $day$}                                                                         \\\\
-        \\text{No Early}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\text{12:00} - \\text{FirstClassStart}                                                     \\\\
+        \\text{No Early}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\max \\left(0, \\text{12:00} - \\text{FirstClassStart} \\right)                                                 \\\\
         \\text{Lunch time}  & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day}} \\min(\\text{OverlapBetween}(\\text{Class}_i, \\text{Lunch}), 60) - 60 \\\\
                         & \\text{where Lunch is defined as the time between 11:00 and 14:00}                                                                    \\\\
         \\text{Distance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\text{DistanceBetween}(\\text{Class}_i, \\text{Class}_{i+1})

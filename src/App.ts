@@ -23,7 +23,8 @@ import Palette from './components/Palette.vue';
 import SectionModal from './components/SectionModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
-import { filter, noti, saveStatus, semester, status, schedule } from './store';
+import Store from './store';
+import filter from './store/filter';
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
@@ -46,28 +47,15 @@ window.scheduleEvaluator = new ScheduleEvaluator(filter.sortOptions);
         External
     }
 })
-export default class App extends Vue {
-    get filter() {
-        return filter;
-    }
-    get noti() {
-        return noti;
-    }
+export default class App extends Store {
     get sideBar() {
-        return status.sideBar;
+        return this.status.sideBar;
     }
-    get schedule() {
-        return schedule;
-    }
-    get status() {
-        return status;
-    }
-
     get scheduleWidth() {
-        return status.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
+        return this.status.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
     }
     get scheduleLeft() {
-        return status.sideBarActive ? 23 : 3;
+        return this.status.sideBarActive ? 23 : 3;
     }
 
     mobile = window.screen.width < 900;
@@ -75,14 +63,14 @@ export default class App extends Vue {
     scrollable = false;
 
     created() {
-        status.loading = true;
+        this.status.loading = true;
 
         (async () => {
             // note: these three can be executed in parallel, i.e. they are not inter-dependent
             const [pay1, pay2, pay3] = await Promise.all([
                 loadTimeMatrix(),
                 loadBuildingList(),
-                semester.loadSemesters()
+                this.semester.loadSemesters()
             ]);
             console[pay1.level](pay1.msg);
             if (pay1.payload) window.timeMatrix = pay1.payload;
@@ -90,12 +78,15 @@ export default class App extends Vue {
             console[pay2.level](pay2.msg);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            if (pay3) await semester.selectSemester(0);
-            status.loading = false;
+            if (pay3)
+                await this.selectSemester(
+                    this.semester.semesters[this.semester.semesters.length - 1]
+                );
+            this.status.loading = false;
         })();
     }
 
     onDocChange() {
-        saveStatus();
+        this.saveStatus();
     }
 }

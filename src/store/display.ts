@@ -7,7 +7,7 @@
  *
  */
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import { toJSON, StoreModule } from './helper';
+import { toJSON, StoreModule } from '.';
 import Schedule from '../models/Schedule';
 import schedule from './schedule';
 

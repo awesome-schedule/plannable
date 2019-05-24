@@ -2,7 +2,7 @@
     <nav class="bg-light sidebar-nocol">
         <div class="dropdown">
             <button id="semester" class="btn btn-info nav-btn mt-0" data-toggle="dropdown">
-                <span v-if="loading" class="spinner-border spinner-border-sm"></span>
+                <span v-if="status.loading" class="spinner-border spinner-border-sm"></span>
                 {{ semester.currentSemester ? semester.currentSemester.name : 'Select Semester' }}
                 <i class="fas fa-caret-down ml-4" style="font-size: 20px;"></i>
             </button>

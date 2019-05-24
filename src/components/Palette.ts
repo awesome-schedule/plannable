@@ -9,33 +9,26 @@
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
-import { schedule, palette } from '../store';
+import Store from '../store';
 
 @Component
-export default class Palette extends Vue {
-    get schedule() {
-        return schedule.currentSchedule;
-    }
-    get palette() {
-        return palette;
-    }
-
+export default class Palette extends Store {
     /**
      * get the number of events and courses that have colors in total
      */
     numColors() {
         return (
-            palette.colorEntries.length +
-            this.schedule.colorSlots.reduce((acc, x) => x.size + acc, 0)
+            this.palette.colorEntries.length +
+            this.schedule.currentSchedule.colorSlots.reduce((acc, x) => x.size + acc, 0)
         );
     }
     /**
      * @note colors must always be recomputed because `Schedule.savedColors` is not a reactive property
      */
     courseColors() {
-        return palette.colorEntries
+        return this.palette.colorEntries
             .concat(
-                this.schedule.colorSlots.reduce(
+                this.schedule.currentSchedule.colorSlots.reduce(
                     (arr: Array<[string, string]>, bucket, i) =>
                         arr.concat(
                             [...bucket.values()].map(
@@ -48,6 +41,6 @@ export default class Palette extends Vue {
             .sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1));
     }
     convertKey(key: string) {
-        return window.catalog.convertKey(key, schedule.currentSchedule);
+        return window.catalog.convertKey(key, this.schedule.currentSchedule);
     }
 }

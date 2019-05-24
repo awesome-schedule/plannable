@@ -20,11 +20,13 @@ import { loadFromCache } from './Loader';
  *
  * storage key: 1198data
  *
- * @param idx index of the semester to load data
+ * @param semester the semester to load data
  * @param force force update
  */
-export async function loadSemesterData(idx: number, force = false): Promise<NotiMsg<Catalog>> {
-    const semester = window.semesters[idx];
+export async function loadSemesterData(
+    semester: SemesterJSON,
+    force = false
+): Promise<NotiMsg<Catalog>> {
     return loadFromCache<Catalog, CatalogJSON>(
         `${semester.id}data`,
         () => requestSemesterData(semester),

@@ -10,13 +10,13 @@ import { Component, Vue } from 'vue-property-decorator';
 import App from '../App';
 import Event from '../models/Event';
 import Meta from '../models/Meta';
-import { generateSchedules, noti, schedule, status, saveStatus } from '../store';
+import Store from '../store';
 import { to12hr, to24hr } from '../utils';
 
 @Component
-export default class EventView extends Vue {
+export default class EventView extends Store {
     get event() {
-        return status.eventToEdit;
+        return this.status.eventToEdit;
     }
 
     // event related fields
@@ -55,14 +55,14 @@ export default class EventView extends Vue {
             const days = this.getEventDays();
 
             if (days.startsWith(' ')) {
-                noti.error('Please select at least one day');
+                this.noti.error('Please select at least one day');
                 return;
             } else if (days.indexOf('NaN') !== -1) {
-                noti.error('Please check your start/end time');
+                this.noti.error('Please check your start/end time');
                 return;
             }
 
-            schedule.proposedSchedule.addEvent(
+            this.schedule.proposedSchedule.addEvent(
                 days,
                 true,
                 this.eventTitle,
@@ -70,9 +70,9 @@ export default class EventView extends Vue {
                 this.eventDescription ? this.eventDescription.split('\n').join('<br />') : ''
             );
             // note: we don't need to regenerate schedules if the days property is not changed
-            this.cancelEvent(this.toBeModifiedDays !== days && schedule.generated);
+            this.cancelEvent(this.toBeModifiedDays !== days && this.schedule.generated);
         } catch (err) {
-            noti.error(err.message);
+            this.noti.error(err.message);
         }
     }
     editEvent(event: Event) {
@@ -95,13 +95,13 @@ export default class EventView extends Vue {
         this.toBeModifiedDays = event.days;
     }
     endEditEvent() {
-        schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
+        this.schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.addEvent();
     }
     deleteEvent() {
-        schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
+        this.schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.isEditingEvent = false;
-        this.cancelEvent(schedule.generated);
+        this.cancelEvent(this.schedule.generated);
     }
     /**
      * this method is called after deleteEvent, endEditEvent and addEvent
@@ -118,9 +118,8 @@ export default class EventView extends Vue {
         this.eventTimeTo = '';
         this.eventDescription = '';
         this.isEditingEvent = false;
-        status.eventToEdit = null;
-        if (regenerate) generateSchedules();
-        else schedule.currentSchedule.computeSchedule();
-        saveStatus();
+        this.status.eventToEdit = null;
+        if (regenerate) this.generateSchedules();
+        else this.schedule.currentSchedule.computeSchedule();
     }
 }

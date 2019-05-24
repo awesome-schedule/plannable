@@ -7,24 +7,20 @@
 /**
  *
  */
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Prop } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
-import { display, modal, status } from '../store';
+import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 
 @Component
-export default class CourseBlock extends Vue {
+export default class CourseBlock extends Store {
     @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;
     @Prop(Array) readonly heightInfo!: number[];
     @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
-
-    get display() {
-        return display;
-    }
 
     mobile = window.screen.width < 450;
 
@@ -84,12 +80,12 @@ export default class CourseBlock extends Vue {
     showModal() {
         const section = this.scheduleBlock.section;
         if (this.isSection) {
-            modal.showSectionModal(section as Section);
+            this.modal.showSectionModal(section as Section);
         } else if (this.isCourse) {
-            modal.showCourseModal(section as Course);
+            this.modal.showCourseModal(section as Course);
         } else if (this.isEvent) {
-            if (!status.sideBar.showEvent) status.switchSideBar('showEvent');
-            status.eventToEdit = section as Event;
+            if (!this.status.sideBar.showEvent) this.status.switchSideBar('showEvent');
+            this.status.eventToEdit = section as Event;
         }
     }
 }

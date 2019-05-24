@@ -12,7 +12,7 @@ import noti from './notification';
 import Meta from '../models/Meta';
 import Event from '../models/Event';
 import { to12hr } from '../utils';
-import { toJSON, StoreModule } from './helper';
+import { toJSON, StoreModule } from '.';
 
 interface FilterStateBase {
     [x: string]: any;

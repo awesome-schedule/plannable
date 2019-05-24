@@ -8,7 +8,7 @@
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, saveStatus, StoreModule, NoCache } from './helper';
+import { toJSON, StoreModule, NoCache } from '.';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -81,7 +81,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             this.proposedScheduleIndex = index;
             this.switchSchedule(false);
         }
-        saveStatus();
     }
     /**
      * create a new empty schedule at the end of the proposedSchedules array and immediate switch to it
@@ -98,7 +97,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
-        saveStatus();
     }
     /**
      * delete the current proposed schedule, switch to the schedule after the deleted schedule.
@@ -123,7 +121,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         } else {
             this.switchProposed(idx);
         }
-        saveStatus();
     }
     /**
      * @param generated
@@ -148,7 +145,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             this.generated = false;
             this.currentSchedule = this.proposedSchedule;
         }
-        saveStatus();
     }
 
     /**
@@ -160,7 +156,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
         if (0 <= idx && idx < window.scheduleEvaluator.size()) {
             this.currentScheduleIndex = idx;
             this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
-            saveStatus();
         }
     }
 
@@ -176,7 +171,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             window.scheduleEvaluator.clear();
             this.numGenerated = 0;
         }
-        saveStatus();
     }
 
     /**

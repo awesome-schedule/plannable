@@ -1,13 +1,12 @@
 /**
  *
  */
-import { Vue, Component } from 'vue-property-decorator';
-import { semester, noti, schedule } from '../store';
-import { SemesterStorage } from '../store/helper';
+import { Component } from 'vue-property-decorator';
+import Store, { SemesterStorage } from '../store';
 import { savePlain, toICal } from '../utils';
 
 @Component
-export default class ExportView extends Vue {
+export default class ExportView extends Store {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
 
@@ -25,13 +24,13 @@ export default class ExportView extends Vue {
                     raw_data = JSON.parse(result);
                 } catch (error) {
                     console.error(error);
-                    noti.error(error.message + ': File Format Error');
+                    this.noti.error(error.message + ': File Format Error');
                     return;
                 }
                 localStorage.setItem(raw_data.currentSemester.id, result);
-                semester.selectSemester(raw_data.currentSemester.id);
+                this.semester.selectSemester(raw_data.currentSemester);
             } else {
-                noti.warn('File is empty!');
+                this.noti.warn('File is empty!');
             }
         };
 
@@ -39,17 +38,17 @@ export default class ExportView extends Vue {
             reader.readAsText(input.files[0]);
         } catch (error) {
             console.warn(error);
-            noti.error(error.message);
+            this.noti.error(error.message);
         }
     }
     saveToJson() {
-        if (!semester.currentSemester) return;
-        const json = localStorage.getItem(semester.currentSemester.id);
+        if (!this.semester.currentSemester) return;
+        const json = localStorage.getItem(this.semester.currentSemester.id);
         if (json) savePlain(json, (this.exportJson ? this.exportJson : 'schedule') + '.json');
     }
     saveToIcal() {
         savePlain(
-            toICal(schedule.currentSchedule),
+            toICal(this.schedule.currentSchedule),
             (this.exportICal ? this.exportICal : 'schedule') + '.ical'
         );
     }

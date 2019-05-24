@@ -7,7 +7,7 @@
  *
  */
 import { Vue, Component, Watch } from 'vue-property-decorator';
-import { StoreModule, saveStatus } from './helper';
+import { StoreModule } from '.';
 import schedule from './schedule';
 import Schedule from '../models/Schedule';
 import randomColor from 'randomcolor';
@@ -39,7 +39,6 @@ class Palette extends Vue implements StoreModule<PaletteState, PaletteState> {
     wat() {
         Schedule.savedColors = this.savedColors;
         schedule.currentSchedule.computeSchedule();
-        saveStatus();
     }
 
     fromJSON(obj: PaletteState) {

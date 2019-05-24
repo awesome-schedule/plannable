@@ -8,20 +8,20 @@
  *
  */
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import { schedule } from '../store';
+import Store from '../store';
 
 @Component
-export default class Pagination extends Vue {
+export default class Pagination extends Store {
     get curIdx() {
-        return schedule.currentScheduleIndex;
+        return this.schedule.currentScheduleIndex;
     }
 
     get generated() {
-        return schedule.generated;
+        return this.schedule.generated;
     }
 
     get scheduleLength() {
-        return schedule.numGenerated;
+        return this.schedule.numGenerated;
     }
 
     get length() {
@@ -58,7 +58,7 @@ export default class Pagination extends Vue {
         } else {
             this.idx = idx;
         }
-        schedule.switchPage(this.idx);
+        this.schedule.switchPage(this.idx);
     }
 
     @Watch('curIdx')

@@ -7,23 +7,15 @@
 import CourseBlock from './CourseBlock.vue';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
-import { Vue, Component } from 'vue-property-decorator';
-import { display, schedule, NoCache } from '../store';
+import { Component } from 'vue-property-decorator';
+import Store from '../store';
 
 @Component({
     components: {
         CourseBlock
     }
 })
-export default class GridSchedule extends Vue {
-    @NoCache
-    get schedule() {
-        return schedule.currentSchedule;
-    }
-    get display() {
-        return display;
-    }
-
+export default class GridSchedule extends Store {
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
     wed = window.screen.width > 450 ? 'Wednesday' : 'Wed';
@@ -38,8 +30,9 @@ export default class GridSchedule extends Vue {
      */
     get earliestBlock() {
         let earliest = 817;
-        for (const key in this.schedule.days) {
-            for (const course of this.schedule.days[key]) {
+        const schedule = this.schedule.currentSchedule;
+        for (const key in schedule.days) {
+            for (const course of schedule.days[key]) {
                 const temp = timeToNum(course.start);
                 if (temp < earliest && course !== undefined && course !== null) {
                     earliest = temp;
@@ -53,8 +46,9 @@ export default class GridSchedule extends Vue {
      */
     get latestBlock() {
         let latest = 0;
-        for (const key in this.schedule.days) {
-            for (const course of this.schedule.days[key]) {
+        const schedule = this.schedule.currentSchedule;
+        for (const key in schedule.days) {
+            for (const course of schedule.days[key]) {
                 const temp = timeToNum(course.end);
                 if (temp > latest && course !== undefined && course !== null) {
                     latest = temp;
@@ -129,8 +123,9 @@ export default class GridSchedule extends Vue {
         const info: number[] = new Array(this.numRow);
         info.fill(this.display.partialHeight);
         const earliest = this.absoluteEarliest;
-        for (const key in this.schedule.days) {
-            for (const course of this.schedule.days[key]) {
+        const schedule = this.schedule.currentSchedule;
+        for (const key in schedule.days) {
+            for (const course of schedule.days[key]) {
                 const startTime = timeToNum(course.start);
                 const endTime = timeToNum(course.end);
                 for (let i = startTime; i <= endTime; i++) {

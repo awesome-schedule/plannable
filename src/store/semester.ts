@@ -10,7 +10,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { loadSemesterData } from '../data/CatalogLoader';
 import { loadSemesterList } from '../data/SemesterListLoader';
 import { SemesterJSON } from '../models/Catalog';
-import { parseStatus, noti, status } from '.';
+import { noti } from '.';
 
 export interface SemesterState {
     [x: string]: any;
@@ -55,30 +55,14 @@ class Semesters extends Vue implements SemesterState {
      *
      * If no local data is present, default values will be assigned.
      *
-     * @param semesterId index or id of this semester
+     * @param currentSemester index or id of this semester
      * @param force whether to force-update semester data
      */
-    async selectSemester(semesterId: string | number, force: boolean = false) {
+    async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
         // do a linear search to find the index of the semester given its string id
-        if (typeof semesterId === 'string') {
-            for (let i = 0; i < this.semesters.length; i++) {
-                if (this.semesters[i].id === semesterId) {
-                    semesterId = i;
-                    break;
-                }
-            }
-            // not found: return
-            if (typeof semesterId === 'string') {
-                this.currentSemester = null;
-                this.lastUpdate = '';
-                return;
-            }
-        }
 
-        status.loading = true;
-        const currentSemester = this.semesters[semesterId];
         if (force) noti.info(`Updating ${currentSemester.name} data...`);
-        const result = await loadSemesterData(semesterId, force);
+        const result = await loadSemesterData(currentSemester, force);
         if (result.level !== 'info') noti.notify(result);
         console[result.level](result.msg);
 
@@ -87,13 +71,12 @@ class Semesters extends Vue implements SemesterState {
             window.catalog = result.payload;
             this.currentSemester = currentSemester;
             this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
-
-            parseStatus(currentSemester.id);
+            return true;
         } else {
             this.currentSemester = null;
             this.lastUpdate = '';
+            return false;
         }
-        status.loading = false;
     }
 }
 

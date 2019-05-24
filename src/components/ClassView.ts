@@ -1,6 +1,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import Course from '../models/Course';
-import { display, generateSchedules, noti, saveStatus, schedule, semester, status } from '../store';
+import Store from '../store';
 import ClassList from './ClassList.vue';
 
 @Component({
@@ -8,29 +8,15 @@ import ClassList from './ClassList.vue';
         ClassList
     }
 })
-export default class ClassView extends Vue {
+export default class ClassView extends Store {
     // autocompletion related fields
     isEntering = false;
     inputCourses: Course[] | null = null;
-
-    get loading() {
-        return status.loading;
-    }
-    get schedule() {
-        return schedule;
-    }
-    get semester() {
-        return semester;
-    }
-    get display() {
-        return display;
-    }
-
     /**
      * get the list of current ids, sorted in alphabetical order of the keys
      */
     get currentIds(): Array<[string, string]> {
-        return Object.entries(schedule.currentSchedule.currentIds).sort((a, b) =>
+        return Object.entries(this.schedule.currentSchedule.currentIds).sort((a, b) =>
             a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
         );
     }
@@ -49,8 +35,8 @@ export default class ClassView extends Vue {
         }
         // if current schedule is displayed, switch to proposed schedule
         // because we're adding stuff to the proposed schedule
-        if (schedule.generated) {
-            schedule.switchSchedule(false);
+        if (this.schedule.generated) {
+            this.schedule.switchSchedule(false);
         }
         this.inputCourses = window.catalog.search(query);
         this.isEntering = true;
@@ -61,19 +47,15 @@ export default class ClassView extends Vue {
         this.getClass('');
     }
 
-    generateSchedules() {
-        generateSchedules();
-    }
-
     /**
      * @see Schedule.update
      */
     updateCourse(key: string, section: number, remove: boolean = false) {
-        schedule.currentSchedule.update(key, section, remove);
-        if (schedule.generated) {
-            noti.warn(`You're editing the generated schedule!`, 3);
+        this.schedule.currentSchedule.update(key, section, remove);
+        if (this.schedule.generated) {
+            this.noti.warn(`You're editing the generated schedule!`, 3);
         } else {
-            saveStatus();
+            this.saveStatus();
         }
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to re-render component
@@ -83,11 +65,11 @@ export default class ClassView extends Vue {
     }
 
     removeCourse(key: string) {
-        schedule.currentSchedule.remove(key);
-        if (schedule.generated) {
-            noti.warn(`You're editing the generated schedule!`, 3);
+        this.schedule.currentSchedule.remove(key);
+        if (this.schedule.generated) {
+            this.noti.warn(`You're editing the generated schedule!`, 3);
         } else {
-            saveStatus();
+            this.saveStatus();
         }
     }
 }

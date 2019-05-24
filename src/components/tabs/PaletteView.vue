@@ -18,7 +18,16 @@
                         </div>
                         <div class="col-sm-auto align-self-center">
                             <i
+                                class="fas fa-times click-icon mr-2"
+                                style="font-size: 1.1rem"
+                                title="reset to default"
+                                @click="$delete(palette.savedColors, pair[0])"
+                            ></i>
+                        </div>
+                        <div class="col-sm-auto align-self-center">
+                            <i
                                 class="fas fa-sync-alt click-icon mr-1"
+                                title="get a random color"
                                 @click="randColor(pair[0])"
                             ></i>
                         </div>
@@ -27,8 +36,7 @@
                                 :id="`color-${pair[0]}`"
                                 type="color"
                                 :value="pair[1]"
-                                style="width: 40px; height: 95%"
-                                title="get a random color"
+                                style="width: 35px; height: 95%"
                                 @change="set(pair[0], $event.target.value)"
                             />
                         </div>

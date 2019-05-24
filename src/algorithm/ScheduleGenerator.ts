@@ -119,8 +119,8 @@ class ScheduleGenerator {
     public options: GeneratorOptions;
     public buildingList: string[];
 
-    constructor(allRecords: Catalog, buildingList: string[], options: GeneratorOptions) {
-        this.catalog = allRecords;
+    constructor(catalog: Catalog, buildingList: string[], options: GeneratorOptions) {
+        this.catalog = catalog;
         this.options = options;
         this.buildingList = buildingList;
     }

@@ -150,7 +150,10 @@ export default class Schedule {
     public colorSlots: Array<Set<string>>;
     public pendingCompute = 0;
 
-    private previous: [string, number] | null;
+    /**
+     * the currently previewed (hovered) section
+     */
+    private _preview: Section | null;
 
     /**
      * Construct a `Schedule` object from its raw representation
@@ -169,7 +172,7 @@ export default class Schedule {
             Th: [],
             Fr: []
         };
-        this.previous = null;
+        this._preview = null;
         this.title = title;
         this.id = id;
         this.colorSlots = Array.from({ length: Schedule.bgColors.length }, () => new Set<string>());
@@ -199,26 +202,6 @@ export default class Schedule {
         this.colorSlots[idx].add(obj.key);
         return Schedule.bgColors[idx];
     }
-
-    // public setColor(obj: Hashable | string, color: string) {
-    //     let key: string;
-    //     let idx: number;
-    //     if (typeof obj === 'string') {
-    //         key = obj;
-    //         idx = Utils.hashCode(key) % Schedule.bgColors.length;
-    //     } else {
-    //         key = obj.key;
-    //         idx = obj.hash() % Schedule.bgColors.length;
-    //     }
-    //     const hashColor = Schedule.bgColors[idx];
-    //     if (color === hashColor) {
-    //         if (Schedule.savedColors[key]) delete Schedule.savedColors[key];
-    //     } else {
-    //         Schedule.savedColors[key] = color;
-    //         this.colorSlots[idx].delete(key);
-    //     }
-    //     this.computeSchedule();
-    // }
 
     /**
      * Update a course in the schedule
@@ -252,12 +235,12 @@ export default class Schedule {
      * preview and remove preview need to use the async version of compute
      */
     public removePreview() {
-        this.previous = null;
+        this._preview = null;
         this.computeSchedule(false);
     }
 
-    public preview(key: string, section: number) {
-        this.previous = [key, section];
+    public preview(section: Section) {
+        this._preview = section;
         this.computeSchedule(false);
     }
 
@@ -389,22 +372,22 @@ export default class Schedule {
             }
         }
 
-        if (this.previous) {
-            const [key, secIdx] = this.previous;
-            const sections = this.All[key];
-            const section = catalog.getSection(key, secIdx);
-            // do not place into the schedule if the section is already in this.All
-            if (!(sections instanceof Set) || !sections.has(secIdx)) {
-                this.place(section);
-            } else {
-                // instead, we highlight the schedule
-                for (const day in this.days) {
-                    const blocks = this.days[day];
-                    for (const block of blocks) {
-                        if (!(block.section instanceof Event))
-                            if (block.section.has(section)) block.strong = true;
+        if (this._preview) {
+            const section = this._preview;
+
+            // do not place into the schedule if the section is already rendered
+            // instead, we highlight the schedule
+            let found = false;
+            for (const day in this.days) {
+                const blocks = this.days[day];
+                for (const block of blocks) {
+                    if (!(block.section instanceof Event) && block.section.has(section)) {
+                        found = block.strong = true;
                     }
                 }
+            }
+            if (!found) {
+                this.place(section);
             }
         }
 
@@ -664,7 +647,7 @@ export default class Schedule {
     public clean() {
         this.cleanSchedule();
         this.All = {};
-        this.previous = null;
+        this._preview = null;
     }
 
     public empty() {

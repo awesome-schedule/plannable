@@ -24,20 +24,6 @@ describe('Schedule Test', () => {
         expect(prob.some(x => x > 11)).toBe(false);
     });
 
-    // it('schedule set color', () => {
-    //     const schedule = new Schedule();
-    //     expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
-    //         '#CC9393'
-    //     );
-    //     schedule.setColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') }, '#ffffff');
-    //     expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
-    //         '#ffffff'
-    //     );
-
-    //     schedule.setColor('cs11105', '#ffffff');
-    //     schedule.setColor('cs11105', '#CC9393');
-    // });
-
     it('From Json new', () => {
         const json = `{"All":{"cs21505":[0],"cs21504":[1], "cs11105": -1},
         "id":1,"title":"Schedule","events":[],"savedColors":{"cs21505":"#af2007","cs21504":"#068239"}}`;
@@ -110,12 +96,12 @@ describe('Schedule Test', () => {
 
         expect(schedule.has('MoTu 12:00AM - 3:00AM')).toBe(true);
 
-        schedule.preview('cs21105', 0);
+        schedule.preview(window.catalog.getSection('cs21105', 0));
         schedule.computeSchedule();
         schedule.removePreview();
 
         // preview an already present one
-        schedule.preview('cs21504', 0);
+        schedule.preview(window.catalog.getSection('cs21504', 0));
         schedule.computeSchedule();
         schedule.removePreview();
 

@@ -29,8 +29,18 @@ export default class ClassList extends Vue {
      * the schedule used to extract the already selected sections of the courses given above
      */
     @Prop(Schedule) readonly schedule!: Schedule;
+    /**
+     * whether in Entering mode. when true, no **close** buttons (for removing courses) will be shown
+     */
     @Prop({ default: false, type: Boolean }) readonly isEntering!: boolean;
+    /**
+     * whether to show **Any Section**
+     */
     @Prop({ default: true, type: Boolean }) readonly showAny!: boolean;
+    /**
+     * whether to expand all courses by default in entering mode
+     */
+    @Prop({ default: false, type: Boolean }) readonly expandOnEntering!: boolean;
     @Prop({ default: true, type: Boolean }) readonly showClasslistTitle!: boolean;
 
     /**
@@ -40,10 +50,6 @@ export default class ClassList extends Vue {
      * value: true for collapsed, false otherwise
      */
     collapsed: { [x: string]: boolean } = {};
-    /**
-     * whether to expand all courses by default in entering mode
-     */
-    expandOnEntering = false;
 
     select(key: string, idx: number) {
         // need to pass this event to parent (App.vue) because the parent needs to update some other stuff
@@ -75,13 +81,11 @@ export default class ClassList extends Vue {
             ? 'fa-chevron-down'
             : 'fa-chevron-right';
     }
-    preview(key: string, idx: number) {
-        this.schedule.preview(key, idx);
-    }
-    removePreview() {
-        this.schedule.removePreview();
-    }
-    showCourseModal(course: Course) {
-        this.$emit('course_modal', course);
+    /**
+     * @returns true if none of the sections of this course is selected
+     */
+    emptyCourse(course: Course) {
+        const sections = this.schedule.All[course.key];
+        return sections instanceof Set && sections.size === 0;
     }
 }

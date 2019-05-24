@@ -21,6 +21,13 @@
                         >
                             <h6 class="mb-1">
                                 <span>{{ crs.department }} {{ crs.number }} {{ crs.type }} </span>
+                                <span
+                                    v-if="emptyCourse(crs)"
+                                    class="ml-1 text-warning"
+                                    title="No sections are selected! Any Section will be selected implicitly"
+                                >
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </span>
                             </h6>
 
                             <p
@@ -43,7 +50,7 @@
                                 class="fas fa-info-circle click-icon"
                                 :class="{ 'pr-2': !showClasslistTitle }"
                                 title="View class description"
-                                @click="showCourseModal(crs)"
+                                @click="$emit('course_modal', crs)"
                             ></i>
                             <br v-if="showClasslistTitle" />
                             <i
@@ -100,8 +107,8 @@
                                         : 'click to select'
                                 "
                                 @click="select(crs.key, crs.sids[idx])"
-                                @mouseenter="preview(crs.key, crs.sids[idx])"
-                                @mouseleave="removePreview()"
+                                @mouseenter="schedule.preview(crs.sections[idx])"
+                                @mouseleave="schedule.removePreview()"
                             >
                                 <div class="row no-gutters justify-content-between">
                                     <div class="col-md-auto">

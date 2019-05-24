@@ -145,11 +145,15 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
      * @param idx
      */
     switchPage(idx: number) {
-        if (0 <= idx && idx < window.scheduleEvaluator.size()) {
+        if (idx < 0) {
+            this.currentScheduleIndex = 0;
+        } else if (idx >= window.scheduleEvaluator.size()) {
+            this.currentScheduleIndex = window.scheduleEvaluator.size() - 1;
+        } else {
             this.currentScheduleIndex = idx;
-            this.currentSchedule = window.scheduleEvaluator.getSchedule(idx);
-            saveStatus();
         }
+        this.currentSchedule = window.scheduleEvaluator.getSchedule(this.currentScheduleIndex);
+        saveStatus();
     }
 
     /**

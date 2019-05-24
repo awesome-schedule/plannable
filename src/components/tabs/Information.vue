@@ -48,6 +48,7 @@
             data-offset="10"
         >
             <h2 id="item-1">Welcome to our information page! Meow~</h2>
+            <hr />
             <p>
                 <small class="text-muted">
                     Page layout by Kaiying Shan, text by Hanzhi Zhou, media by Zichao Hu
@@ -287,7 +288,7 @@
                 after an ID, it means that course has more than one sections available at the given
                 time shown in your schedule. To view the list of sections, click the corresponding
                 course block rendered in the grid. For example, in the schedule shown below, there
-                are four available ENWR 1510 at Monday and Wednesday 5:00 to 6:15PM.
+                are five available ENWR 1510 at Monday and Wednesday 5:00 to 6:15PM.
             </p>
             <v-card class="mt-3 mb-5 mx-auto gif-center">
                 <v-img :src="imgPath('multi-section.png')"></v-img>
@@ -296,11 +297,10 @@
             <h3 id="item-3">Add Event</h3>
             <hr />
             <p>
-                This feature allows you to customize your own schedule. You can add your weekly
-                commitments on the schedule, such as club meetings, office hours, etc. You can edit
-                an existing event by clicking it the event on the schedule. The schedule generator
-                will generate schedules that do not conflict with your event. However, if it is not
-                possible to find such a schedule, an error will be thrown.
+                You can add your weekly commitments on the schedule, such as club meetings, office
+                hours, etc. You can edit an existing event by clicking it the event on the schedule.
+                The schedule generator will generate schedules that do not conflict with your event.
+                However, if it is not possible to find such a schedule, an error will be thrown.
             </p>
             <v-card class="my-5 mx-auto gif-center">
                 <v-img :src="imgPath('add_event.gif')"></v-img>

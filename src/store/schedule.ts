@@ -8,7 +8,7 @@
  */
 import { Vue, Component } from 'vue-property-decorator';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, StoreModule } from '.';
+import { toJSON, StoreModule, NoCache } from '.';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -69,6 +69,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
     /**
      * the proposed schedule that is currently active
      */
+    // @NoCache
     get proposedSchedule() {
         return this.proposedSchedules[this.proposedScheduleIndex];
     }
@@ -185,8 +186,6 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
     fromJSON(obj: Partial<ScheduleStateJSON>) {
         const defaultState = this.getDefault();
 
-        const current = Schedule.fromJSON(obj.currentSchedule);
-        this.currentSchedule = current ? current : defaultState.currentSchedule;
         const proposed = obj.proposedSchedules;
         if (proposed instanceof Array) {
             this.proposedSchedules = proposed.map(x => {
@@ -213,7 +212,7 @@ class ScheduleStore extends Vue implements StoreModule<ScheduleState, ScheduleSt
             typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
 
         if (!this.generated) {
-            this.switchSchedule(false);
+            this.$nextTick(() => this.switchSchedule(false));
         }
     }
 

@@ -7,7 +7,7 @@
 import CourseBlock from './CourseBlock.vue';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
-import { Component } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 import Store from '../store';
 
 @Component({
@@ -15,7 +15,7 @@ import Store from '../store';
         CourseBlock
     }
 })
-export default class GridSchedule extends Store {
+export default class GridSchedule extends Mixins(Store) {
     mon = window.screen.width > 450 ? 'Monday' : 'Mon';
     tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
     wed = window.screen.width > 450 ? 'Wednesday' : 'Wed';

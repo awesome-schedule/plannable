@@ -7,7 +7,7 @@
 /**
  *
  */
-import { Component, Prop } from 'vue-property-decorator';
+import { Component, Prop, Mixins } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';
@@ -16,7 +16,7 @@ import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 
 @Component
-export default class CourseBlock extends Store {
+export default class CourseBlock extends Mixins(Store) {
     @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;
     @Prop(Array) readonly heightInfo!: number[];
     @Prop(Number) readonly absoluteEarliest!: number;

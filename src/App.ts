@@ -7,7 +7,7 @@
 /**
  *
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import ClassView from './components/ClassView.vue';
 import CourseModal from './components/CourseModal.vue';
@@ -46,7 +46,7 @@ window.scheduleEvaluator = new ScheduleEvaluator(filter.sortOptions);
         External
     }
 })
-export default class App extends Store {
+export default class App extends Mixins(Store) {
     get sideBar() {
         return this.status.sideBar;
     }

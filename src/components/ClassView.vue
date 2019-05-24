@@ -43,6 +43,7 @@
                 :courses="inputCourses"
                 :schedule="schedule.currentSchedule"
                 :is-entering="isEntering"
+                :show-classlist-title="display.showClasslistTitle"
                 @update_course="updateCourse"
                 @close="closeClassList()"
             ></ClassList>
@@ -134,6 +135,7 @@
                     :courses="schedule.currentSchedule.currentCourses"
                     :schedule="schedule.currentSchedule"
                     :show-any="!schedule.generated"
+                    :show-classlist-title="display.showClasslistTitle"
                     @update_course="updateCourse"
                     @remove_course="removeCourse"
                 ></ClassList>

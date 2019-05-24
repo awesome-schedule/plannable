@@ -7,12 +7,12 @@
 /**
  *
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Store from '../store';
 
 @Component
-export default class Palette extends Store {
+export default class Palette extends Mixins(Store) {
     colorEntries() {
         return Object.entries(this.palette.savedColors).filter(entry =>
             this.schedule.currentSchedule.has(entry[0], true)

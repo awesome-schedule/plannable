@@ -1,4 +1,4 @@
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Mixins } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Store from '../store';
 import ClassList from './ClassList.vue';
@@ -8,7 +8,7 @@ import ClassList from './ClassList.vue';
         ClassList
     }
 })
-export default class ClassView extends Store {
+export default class ClassView extends Mixins(Store) {
     // autocompletion related fields
     isEntering = false;
     inputCourses: Course[] | null = null;
@@ -25,6 +25,9 @@ export default class ClassView extends Store {
      * get classes that match the input query.
      * Exit "entering" mode on falsy parameter (set `isEntering` to false)
      *
+     * if a generated schedule is displayed, switch to proposed schedule,
+     * because we're adding stuff to the proposed schedule
+     *
      * @see Catalog.search
      */
     getClass(query: string) {
@@ -33,8 +36,6 @@ export default class ClassView extends Store {
             this.inputCourses = null;
             return;
         }
-        // if current schedule is displayed, switch to proposed schedule
-        // because we're adding stuff to the proposed schedule
         if (this.schedule.generated) {
             this.schedule.switchSchedule(false);
         }

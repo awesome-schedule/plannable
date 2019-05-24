@@ -57,16 +57,20 @@ class Status extends Vue {
         return false;
     }
 
-    @Watch('loading')
+    @Watch('loading', { immediate: true })
     loadingWatch() {
         if (this.loading) {
-            if (noti.empty()) {
-                noti.info('Loading...');
-            }
+            this.$nextTick(() => {
+                if (noti.empty()) {
+                    noti.info('Loading...');
+                }
+            });
         } else {
-            if (noti.msg === 'Loading...') {
-                noti.clear();
-            }
+            this.$nextTick(() => {
+                if (noti.msg === 'Loading...') {
+                    noti.clear();
+                }
+            });
         }
     }
 

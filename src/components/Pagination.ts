@@ -7,11 +7,11 @@
 /**
  *
  */
-import { Component, Vue, Watch } from 'vue-property-decorator';
+import { Component, Mixins, Watch } from 'vue-property-decorator';
 import Store from '../store';
 
 @Component
-export default class Pagination extends Store {
+export default class Pagination extends Mixins(Store) {
     get curIdx() {
         return this.schedule.currentScheduleIndex;
     }

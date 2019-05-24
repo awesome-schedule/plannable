@@ -1,12 +1,12 @@
 /**
  *
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Mixins } from 'vue-property-decorator';
 import Store, { SemesterStorage } from '../store';
 import { savePlain, toICal } from '../utils';
 
 @Component
-export default class ExportView extends Store {
+export default class ExportView extends Mixins(Store) {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
 

@@ -29,12 +29,12 @@ import semester from './semester';
 import palette, { PaletteState } from './palette';
 import modal from './modal';
 import status from './status';
-// import { createDecorator } from 'vue-class-component';
-// import { ComputedOptions } from 'vue';
+import { createDecorator } from 'vue-class-component';
+import { ComputedOptions } from 'vue';
 
-// export const NoCache = createDecorator((options, key) => {
-//     (options.computed![key] as ComputedOptions<any>).cache = false;
-// });
+export const NoCache = createDecorator((options, key) => {
+    (options.computed![key] as ComputedOptions<any>).cache = false;
+});
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
@@ -240,10 +240,7 @@ export default class Store extends Vue {
     }
 
     generateSchedules() {
-        if (this.schedule.generated) this.schedule.currentSchedule = this.schedule.proposedSchedule;
-        this.schedule.generated = false;
-
-        if (this.schedule.currentSchedule.empty())
+        if (this.schedule.proposedSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
 
         const options = this.getGeneratorOptions();
@@ -251,7 +248,7 @@ export default class Store extends Vue {
 
         const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
         try {
-            const evaluator = generator.getSchedules(this.schedule.currentSchedule);
+            const evaluator = generator.getSchedules(this.schedule.proposedSchedule);
             window.scheduleEvaluator = evaluator;
             const num = window.scheduleEvaluator.size();
             this.noti.success(`${num} Schedules Generated!`, 3);

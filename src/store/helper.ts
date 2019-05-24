@@ -115,7 +115,7 @@ export function toJSON<State, JSONState>(thisArg: StoreModule<State, JSONState>)
 }
 
 /**
- * save all store modules to lcoalStorage
+ * save all store modules to localStorage
  */
 export function saveStatus() {
     const { currentSemester } = semester;

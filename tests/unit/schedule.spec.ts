@@ -24,19 +24,19 @@ describe('Schedule Test', () => {
         expect(prob.some(x => x > 11)).toBe(false);
     });
 
-    it('schedule set color', () => {
-        const schedule = new Schedule();
-        expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
-            '#CC9393'
-        );
-        schedule.setColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') }, '#ffffff');
-        expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
-            '#ffffff'
-        );
+    // it('schedule set color', () => {
+    //     const schedule = new Schedule();
+    //     expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
+    //         '#CC9393'
+    //     );
+    //     schedule.setColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') }, '#ffffff');
+    //     expect(schedule.getColor({ key: 'cs11105', hash: () => Utils.hashCode('cs11105') })).toBe(
+    //         '#ffffff'
+    //     );
 
-        schedule.setColor('cs11105', '#ffffff');
-        schedule.setColor('cs11105', '#CC9393');
-    });
+    //     schedule.setColor('cs11105', '#ffffff');
+    //     schedule.setColor('cs11105', '#CC9393');
+    // });
 
     it('From Json new', () => {
         const json = `{"All":{"cs21505":[0],"cs21504":[1], "cs11105": -1},

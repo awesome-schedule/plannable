@@ -50,16 +50,7 @@
     </div>
 </template>
 
-<script>
-import { modal } from '../store';
-export default {
-    computed: {
-        course() {
-            return modal.modalCourse;
-        }
-    }
-};
-</script>
+<script lang="ts" src="./CourseModal.ts"></script>
 
 <style scoped>
 .info {

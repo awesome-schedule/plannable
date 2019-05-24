@@ -199,25 +199,25 @@ export class Schedule {
         return Schedule.bgColors[idx];
     }
 
-    public setColor(obj: Hashable | string, color: string) {
-        let key: string;
-        let idx: number;
-        if (typeof obj === 'string') {
-            key = obj;
-            idx = Utils.hashCode(key) % Schedule.bgColors.length;
-        } else {
-            key = obj.key;
-            idx = obj.hash() % Schedule.bgColors.length;
-        }
-        const hashColor = Schedule.bgColors[idx];
-        if (color === hashColor) {
-            if (Schedule.savedColors[key]) delete Schedule.savedColors[key];
-        } else {
-            Schedule.savedColors[key] = color;
-            this.colorSlots[idx].delete(key);
-        }
-        this.computeSchedule();
-    }
+    // public setColor(obj: Hashable | string, color: string) {
+    //     let key: string;
+    //     let idx: number;
+    //     if (typeof obj === 'string') {
+    //         key = obj;
+    //         idx = Utils.hashCode(key) % Schedule.bgColors.length;
+    //     } else {
+    //         key = obj.key;
+    //         idx = obj.hash() % Schedule.bgColors.length;
+    //     }
+    //     const hashColor = Schedule.bgColors[idx];
+    //     if (color === hashColor) {
+    //         if (Schedule.savedColors[key]) delete Schedule.savedColors[key];
+    //     } else {
+    //         Schedule.savedColors[key] = color;
+    //         this.colorSlots[idx].delete(key);
+    //     }
+    //     this.computeSchedule();
+    // }
 
     /**
      * Update a course in the schedule

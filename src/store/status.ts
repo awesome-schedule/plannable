@@ -6,9 +6,8 @@
  *
  */
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import { schedule, noti } from '.';
+import { noti } from '.';
 import Event from '../models/Event';
-import { timingSafeEqual } from 'crypto';
 
 interface Sidebars {
     showSelectClass: boolean;

@@ -1,7 +1,7 @@
 <template>
     <nav class="d-block bg-light sidebar">
         <div class="btn bg-info nav-btn">
-            Schedule Display Settings
+            Display Settings
         </div>
         <form class="mx-2">
             <div
@@ -67,10 +67,9 @@
             </label>
         </div> -->
         <div class="btn bg-info nav-btn">
-            Display Options
+            Course Display
         </div>
         <ul class="list-group list-group-flush mx-1">
-            <li class="list-group-item">Course Display</li>
             <li class="list-group-item">
                 <div class="custom-control custom-checkbox">
                     <input
@@ -147,7 +146,7 @@
             <li class="list-group-item">
                 <button
                     class="btn btn-outline-info mb-1 w-100"
-                    @click="semester.selectSemester(semester.currentSemester.id, true)"
+                    @click="selectSemester(semester.currentSemester, true)"
                 >
                     Update Semester Data
                 </button>

@@ -32,11 +32,14 @@
                         height: mainHeight
                     }"
                 >
-                    <div class="placeholder day">{{ mon }}</div>
-                    <div class="placeholder day">{{ tue }}</div>
-                    <div class="placeholder day">{{ wed }}</div>
-                    <div class="placeholder day">{{ thu }}</div>
-                    <div class="placeholder day">{{ fri }}</div>
+                    <template v-if="mobile">
+                        <div v-for="day in days" :key="day" class="placeholder day">{{ day }}</div>
+                    </template>
+                    <template v-else>
+                        <div v-for="day in daysFull" :key="day" class="placeholder day">
+                            {{ day }}
+                        </div>
+                    </template>
                     <div
                         v-for="(item, i) in items"
                         :key="i"

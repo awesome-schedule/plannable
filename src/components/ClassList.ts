@@ -1,5 +1,5 @@
 /**
- * Component for
+ * A **pure** component for
  *
  * 1. displaying the list of courses that are match the query string when searching
  * 2. displaying the list of courses currently selected
@@ -14,7 +14,6 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 import Course from '../models/Course';
-import { modal } from '../store';
 
 @Component({
     components: {
@@ -83,6 +82,6 @@ export default class ClassList extends Vue {
         this.schedule.removePreview();
     }
     showCourseModal(course: Course) {
-        modal.showCourseModal(course);
+        this.$emit('course_modal', course);
     }
 }

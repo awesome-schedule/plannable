@@ -16,11 +16,8 @@ import Store from '../store';
     }
 })
 export default class GridSchedule extends Store {
-    mon = window.screen.width > 450 ? 'Monday' : 'Mon';
-    tue = window.screen.width > 450 ? 'Tuesday' : 'Tue';
-    wed = window.screen.width > 450 ? 'Wednesday' : 'Wed';
-    thu = window.screen.width > 450 ? 'Thursday' : 'Thu';
-    fri = window.screen.width > 450 ? 'Friday' : 'Fri';
+    mobile = window.screen.width < 600;
+    daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     // note: we need Schedule.days because it's an array that keeps the keys in order
     days = Meta.days;
 

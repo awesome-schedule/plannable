@@ -45,6 +45,7 @@
                 :is-entering="isEntering"
                 :show-classlist-title="display.showClasslistTitle"
                 @update_course="updateCourse"
+                @course_modal="modal.showCourseModal($event)"
                 @close="closeClassList()"
             ></ClassList>
         </div>
@@ -138,6 +139,7 @@
                     :show-classlist-title="display.showClasslistTitle"
                     @update_course="updateCourse"
                     @remove_course="removeCourse"
+                    @course_modal="modal.showCourseModal($event)"
                 ></ClassList>
                 <div class="btn-group mt-3 w-100">
                     <button type="button" class="btn btn-outline-info" @click="generateSchedules()">

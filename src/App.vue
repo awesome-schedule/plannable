@@ -1,7 +1,10 @@
 <template>
     <div id="app" class="w-100" @change="saveStatus()">
-        <course-modal></course-modal>
-        <section-modal></section-modal>
+        <course-modal :course="modal.course"></course-modal>
+        <section-modal
+            :semester="semester.currentSemester"
+            :section="modal.section"
+        ></section-modal>
 
         <!-- Tab Icons Start (Leftmost bar) -->
         <nav

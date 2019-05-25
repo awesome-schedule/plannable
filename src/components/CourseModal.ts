@@ -1,8 +1,6 @@
-import Store from '../store';
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
+import Course from '@/models/Course';
 @Component
-export default class CourseModal extends Store {
-    get course() {
-        return this.modal.modalCourse;
-    }
+export default class CourseModal extends Vue {
+    @Prop(Course) readonly course!: Course;
 }

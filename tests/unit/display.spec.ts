@@ -1,4 +1,4 @@
-import { display } from '@/store';
+import display from '@/store/display';
 
 describe('notification test', () => {
     it('basic', () => {

@@ -12,21 +12,21 @@ import $ from 'jquery';
 import 'bootstrap';
 
 export interface ModalState {
-    modalSection: Section | null;
-    modalCourse: Course | null;
+    section: Section | null;
+    course: Course | null;
 }
 
 class Modal implements ModalState {
-    modalSection: Section | null = null;
-    modalCourse: Course | null = null;
+    section: Section | null = null;
+    course: Course | null = null;
 
     showSectionModal(section: Section) {
-        this.modalSection = section;
+        this.section = section;
         $('#section-modal').modal();
     }
 
     showCourseModal(course: Course) {
-        this.modalCourse = course;
+        this.course = course;
         $('#course-modal').modal();
     }
 }

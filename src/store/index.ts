@@ -7,19 +7,9 @@
 /**
  *
  */
-export * from './display';
-export * from './filter';
-export * from './modal';
-export * from './notification';
-export * from './palette';
-export * from './schedule';
-export * from './semester';
-export * from './status';
-
 import Meta from '../models/Meta';
 import { to12hr } from '../utils';
-import Vue, { ComputedOptions } from 'vue';
-import { createDecorator } from 'vue-class-component';
+import Vue from 'vue';
 import { Component, Watch } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
@@ -34,10 +24,6 @@ import palette, { PaletteState } from './palette';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
 import status from './status';
-
-export const NoCache = createDecorator((options, key) => {
-    (options.computed![key] as ComputedOptions<any>).cache = false;
-});
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;

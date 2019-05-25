@@ -1,5 +1,5 @@
 /**
- * the status module stores the temporal statuses of the webpage. These statuses are not stored
+ * the status module stores the temporary statuses of the webpage. We do not save these statuses to localStorage
  * @author Hanzhi Zhou
  */
 

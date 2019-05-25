@@ -8,12 +8,12 @@
 /**
  *
  */
-import Schedule from '../models/Schedule';
-import { RawAlgoSchedule } from './ScheduleGenerator';
-import Meta from '../models/Meta';
-import Event from '../models/Event';
 import quickselect from 'quickselect';
+import Event from '../models/Event';
+import Meta from '../models/Meta';
+import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
+import { RawAlgoSchedule } from './ScheduleGenerator';
 
 type OrderedBlocks = [number[], number[], number[], number[], number[]];
 type OrderedRooms = [number[], number[], number[], number[], number[]];

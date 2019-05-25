@@ -1,5 +1,5 @@
 /**
- * The helper module provides methods to save, retrieve and manipulate store.
+ * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
  * @author Hanzhi Zhou
  */

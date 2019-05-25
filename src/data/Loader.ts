@@ -2,7 +2,7 @@
  * contains the template function that helps to load data from cache/remote
  * @author Hanzhi Zhou
  *
- * For example usages
+ * For example usage
  * @see [[loadTimeMatrix]]
  * @see [[loadBuildingList]]
  * @see [[loadSemesterList]]

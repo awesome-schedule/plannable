@@ -1,6 +1,5 @@
 /**
  * miscellaneous utility functions
- *
  */
 
 /**

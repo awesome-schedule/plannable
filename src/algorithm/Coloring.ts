@@ -175,6 +175,7 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
         graph.set(vertices[i], Array.from(adjList[i]).map(x => vertices[x]));
     }
 
+    // start DFS at each root node
     vertices
         .filter(x => x.depth === 0)
         .forEach(root => {

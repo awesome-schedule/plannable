@@ -1,5 +1,5 @@
 /**
- * the notification modules encapsulates common functions used to inform user about the results of certain actions
+ * the notification module encapsulates common functions used to inform user about the results of certain actions
  * @author Hanzhi Zhou
  */
 

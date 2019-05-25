@@ -8,12 +8,12 @@
 /**
  *
  */
-import Catalog from '../models/Catalog';
-import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
-import Schedule from '../models/Schedule';
-import Event from '../models/Event';
-import * as Utils from '../utils';
 import { findBestMatch } from 'string-similarity';
+import Catalog from '../models/Catalog';
+import Event from '../models/Event';
+import Schedule from '../models/Schedule';
+import { checkTimeConflict } from '../utils';
+import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
 /**
  * A `TimeBlock` defines the start and end time of a 'Block'
@@ -171,7 +171,7 @@ class ScheduleGenerator {
 
                 // don't include this combined section if it conflicts with any time filter or event,.
                 for (const td of timeSlots) {
-                    if (Utils.checkTimeConflict(td, timeDict)) {
+                    if (checkTimeConflict(td, timeDict)) {
                         no_match = true;
                         break;
                     }
@@ -312,7 +312,7 @@ class ScheduleGenerator {
             const timeDict = classList[classNum][choiceNum][1];
             let conflict = false;
             for (const algoCourse of timeTable) {
-                if (Utils.checkTimeConflict(algoCourse[1], timeDict)) {
+                if (checkTimeConflict(algoCourse[1], timeDict)) {
                     conflict = true;
                     break;
                 }

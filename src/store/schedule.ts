@@ -209,6 +209,8 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         this.cpIndex = typeof obj.cpIndex === 'number' ? obj.cpIndex : defaultState.cpIndex;
         this.generated =
             typeof obj.generated === 'boolean' ? obj.generated : defaultState.generated;
+
+        this.numGenerated = 0;
     }
 
     toJSON(): ScheduleStateJSON {

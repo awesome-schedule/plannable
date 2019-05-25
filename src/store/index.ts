@@ -193,6 +193,7 @@ class Store extends Vue {
                 console.warn(e);
             }
         }
+        window.scheduleEvaluator.clear();
         if (parsed.currentSchedule && parsed.proposedSchedule) {
             const ancient: AncientStorage = parsed || {};
             const oldStore: Partial<LegacyStorage> & AncientStorage = ancient;

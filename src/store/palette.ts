@@ -1,5 +1,5 @@
 /**
- * the filter module handles manipulation of filters
+ * the palette module handles the customization of colors of courses and events
  * @author Hanzhi Zhou
  */
 

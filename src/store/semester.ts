@@ -1,5 +1,5 @@
 /**
- * the semester module handles semester switching
+ * the semester module handles semester switching and data retrieval
  * @author Hanzhi Zhou
  */
 

@@ -1,5 +1,6 @@
 /**
- * the helper module provides methods to save/retrieve and manipulate store
+ * The helper module provides methods to save, retrieve and manipulate store.
+ * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
  * @author Hanzhi Zhou
  */
 
@@ -101,7 +102,7 @@ interface StorageItem<State, JSONState> {
     /**
      * recover the state from its JSON representation
      *
-     * @param obj an object that has all or some properties of the `JSONState`.
+     * An object that has all or some properties of the `JSONState` will be passed as a parameter.
      * The missing properties will be assigned with the value returned by the `getDefault` method.
      */
     fromJSON(obj: Partial<JSONState>): void;

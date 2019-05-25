@@ -10,7 +10,7 @@ import App from './App.vue';
 import querystring from 'querystring';
 import axios from 'axios';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import Catalog, { SemesterJSON } from './models/Catalog';
+import Catalog from './models/Catalog';
 import Vuetify from 'vuetify';
 import { openLousList, openVAGrade } from './utils';
 
@@ -24,7 +24,6 @@ declare global {
         catalog: Catalog;
         timeMatrix: Int32Array;
         buildingList: string[];
-        semesters: SemesterJSON[];
     }
 }
 

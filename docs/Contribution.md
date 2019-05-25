@@ -27,34 +27,54 @@ Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
 ### Main Component: [src/App.vue](/src/App.vue) and [src/App.ts](/src/App.ts)
 
-| Part Name             | Contributors              |
-| --------------------- | ------------------------- |
-| Schedule Rendering    | Kaiying Shan              |
-| Tab Switching         | Kaiying Shan, Hanzhi Zhou |
-| Semester Switching    | Hanzhi Zhou               |
-| Course Manipulation   | Hanzhi Zhou               |
-| Storage and Cache     | Hanzhi Zhou, Kaiying Shan |
-| Sorting Options       | Hanzhi Zhou               |
-| Filters               | Kaiying Shan, Hanzhi Zhou |
-| Display Options       | Kaiying Shan              |
-| Algorithm Integration | Hanzhi Zhou, Kaiying Shan |
-| Import/Export         | Kaiying Shan, Hanzhi Zhou |
+Hanzhi Zhou, Kaiying Shan, Elena Long
+
+### State Management
+
+The state management module handles global states and storage. See [src/store](/src/store)
+
+| Name         | Contributors |
+| ------------ | ------------ |
+| display      | Hanzhi Zhou  |
+| filter       | Hanzhi Zhou  |
+| index        | Hanzhi Zhou  |
+| modal        | Hanzhi Zhou  |
+| notification | Hanzhi Zhou  |
+| palette      | Hanzhi Zhou  |
+| schedule     | Hanzhi Zhou  |
+| semester     | Hanzhi Zhou  |
+| status       | Hanzhi Zhou  |
 
 ### Child Components
 
-Child components are in the [src/components](/src/components) folder.
+#### Tabs
 
-| Name         | Contributors                                     |
-| ------------ | ------------------------------------------------ |
-| ClassList    | Hanzhi Zhou                                      |
-| CourseBlock  | Kaiying Shan, Hanzhi Zhou                        |
-| CourseModal  | Kaiying Shan, Hanzhi Zhou                        |
-| EventView    | Kaiying Shan, Hanzhi Zhou                        |
-| GridSchedule | Kaiying Shan                                     |
-| Information  | Kaiying Shan, Hanzhi Zhou, Zichao Hu, Elena Long |
-| Pagination   | Kaiying Shan, Hanzhi Zhou                        |
-| Palette      | Hanzhi Zhou                                      |
-| SectionModal | Kaiying Shan                                     |
+Tabs are components holding the corresponding tab triggered when one clicks the icon on the side bar. [src/components](/src/components/tabs) folder.
+
+| Name        | Contributors                                     |
+| ----------- | ------------------------------------------------ |
+| ClassView   | Hanzhi Zhou                                      |
+| EventView   | Kaiying Shan                                     |
+| DisplayView | Kaiying Shan, Hanzhi Zhou                        |
+| FilterView  | Hanzhi Zhou, Kaiying Shan                        |
+| PaletteView | Hanzhi Zhou                                      |
+| ExportView  | Kaiying Shan, Hanzhi Zhou                        |
+| Information | Kaiying Shan, Hanzhi Zhou, Zichao Hu, Elena Long |
+
+#### Miscellaneous components
+
+These components are used by tabs and the root component (App.vue).
+
+They are located in [src/components](/src/components) folder.
+
+| Name         | Contributors              |
+| ------------ | ------------------------- |
+| ClassList    | Hanzhi Zhou               |
+| CourseBlock  | Kaiying Shan              |
+| CourseModal  | Kaiying Shan, Hanzhi Zhou |
+| GridSchedule | Kaiying Shan              |
+| Pagination   | Kaiying Shan, Hanzhi Zhou |
+| SectionModal | Kaiying Shan              |
 
 ### Tool chain
 

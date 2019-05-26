@@ -67,12 +67,8 @@ export default class Information extends Vue {
         }
     ];
 
-    // get icalSteps() {
-    //     return [...this._icalSteps.entries()].map(entry => [entry[0] + 1, entry[1]]);
-    // }
-
     mounted() {
-        $('body').scrollspy({ target: '#navbar-scrollspy' });
+        $('body').scrollspy({ target: '#navbar-scrollspy', offset: 50 });
     }
 
     imgPath(name: string) {

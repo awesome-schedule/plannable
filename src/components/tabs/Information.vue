@@ -1,35 +1,45 @@
 <template>
     <div id="info-panel">
         <nav id="navbar-scrollspy" class="navbar d-block navbar-light bg-light sidebar">
-            <a class="navbar-brand" href="#">Website Guide</a>
+            <a class="navbar-brand" href="#">User Guide</a>
             <nav class="nav nav-pills flex-column">
                 <a class="nav-link" href="#item-1">Introduction</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-1-1">Intro to Auto-Scheduling</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-1-2">Planned vs. Generated</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-3">Website Address</a>
                 </nav>
-                <a class="nav-link" href="#item-2">Basic Operations</a>
+                <a class="nav-link" href="#item-2">
+                    <i class="far fa-calendar-alt"></i> Basic Operations</a
+                >
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-1">Schedule Manipulation</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Schedule Rendering</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-3">Enroll in SIS</a>
                 </nav>
-                <a class="nav-link" href="#item-3">Add Event</a>
-                <a class="nav-link" href="#item-4">Filters</a>
+                <a class="nav-link" href="#item-3"><i class="fab fa-elementor"></i> Add Event</a>
+                <a class="nav-link" href="#item-4"><i class="fas fa-filter"></i> Filters</a>
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-1">No Class Time</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-2">Allow Waitlist/Closed</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort Options</a>
                 </nav>
                 <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
-                <a class="nav-link" href="#item-6">Customize Colors</a>
-                <a class="nav-link" href="#item-7">Export</a>
+                <a class="nav-link" href="#item-6"
+                    ><i class="fas fa-palette"></i> Customize Colors
+                </a>
+                <a class="nav-link" href="#item-7">
+                    <i class="fas fa-download"></i> Import and Export</a
+                >
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-7-1">Export to iCalendar</a>
-                    <a class="nav-link ml-3 my-1 py-1" href="#item-7-2">Export to JSON</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-7-2">JSON Import/Export</a>
                 </nav>
-                <a class="nav-link" href="#item-8">Authors</a>
                 <a class="nav-link" href="#item-9">Contributing</a>
+                <nav class="nav nav-pills flex-column">
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-9-1">Contact Authors</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-9-2">Bug Reports</a>
+                </nav>
                 <a class="nav-link" href="#item-10">Disclaimer</a>
                 <a class="nav-link" href="#item-11">Appendix</a>
                 <nav class="nav nav-pills flex-column">
@@ -45,9 +55,6 @@
             :style="{
                 'margin-left': scheduleLeft + 5 + 'vw'
             }"
-            data-spy="scroll"
-            data-target="#navbar-scrollspy"
-            data-offset="10"
         >
             <h2 id="item-1">Welcome to our information page! Meow~</h2>
             <hr />
@@ -70,10 +77,7 @@
                     cleared. If you find any problem when using our website, please first check
                     whether you are using a compatible browser (see
                     <a href="#item-11-2">browser compatibility</a>). If it is not a problem with
-                    your browser, please consider
-                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
-                        >opening an issue</a
-                    >.
+                    your browser, please consider <a href="#item-9-2">submit a bug report</a>.
                 </strong>
             </p>
             <p>
@@ -129,7 +133,22 @@
                 </div>
             </div>
 
-            <h3 id="item-2">Basic Operations</h3>
+            <h4 id="item-1-3">Website Address</h4>
+            <p>
+                The primary address of our website is
+                <a href="https://plannable.org">https://plannable.org</a>. It is hosted by GitHub
+                pages. Since we load content from many sources, it may take a while for first-time
+                loading. For users in China, we provide a <strong>mirror</strong> (<a
+                    href="https://cn.plannable.org"
+                    >https://cn.plannable.org</a
+                >) whose content is synchronized with the primary website once per hour. However,
+                your data is not synchronized (and its techniqually impossible to do so). If you
+                want to transfer your data between them, you need to use the
+                <a href="#item-7-2">Export to JSON</a> function provided.
+            </p>
+            <p></p>
+
+            <h3 id="item-2"><i class="far fa-calendar-alt"></i> Basic Operations</h3>
             <hr />
             <div id="item-2-1" style="width:100%;height:2px"></div>
             <v-layout class="mb-4">
@@ -278,8 +297,8 @@
             <h5 id="item-2-2">Schedule Rendering</h5>
             <p class="mb-1">
                 It is better for you to know under what conditions are courses rendered on the
-                schedule. In Edit Class mode, only the following type courses are rendered on the
-                grid by default.
+                schedule. In Edit Class mode, only the following type of courses are rendered on the
+                grid.
             </p>
             <ul>
                 <li>
@@ -296,7 +315,7 @@
             <p>
                 For example, in Fall 2019, CS 1110 has four available sections. If you select "Any
                 Section", then none of the sections will be shown. If you select section 1 and
-                section 2, then they will be both shown on the schedule if "show multiple sections"
+                section 2, they will be both shown on the schedule if "show multiple sections"
                 checkbox is checked. However, PSYC 1010 only has one section available, so selecting
                 "Any Section" for it will result in the "only one" being rendered.
             </p>
@@ -304,9 +323,8 @@
             <h5 id="item-2-3">Enroll in SIS</h5>
             <p>
                 For convenience, we provide a list of course IDs for your currently active schedule
-                at the bottom left corner under "Schedule Overview" (can be seen clearly in the GIFs
-                shown above). These IDs can be direcly entered into SIS, through the input box left
-                to your shopping cart.
+                at the bottom left corner under "Schedule Overview". These IDs can be direcly
+                entered into SIS, through the input box left to your shopping cart.
             </p>
             <v-card class="my-3 mx-auto gif-center">
                 <v-img :src="imgPath('enroll-sis.png')"></v-img>
@@ -323,7 +341,7 @@
                 <v-img :src="imgPath('multi-section.png')"></v-img>
             </v-card>
 
-            <h3 id="item-3">Add Event</h3>
+            <h3 id="item-3"><i class="fab fa-elementor"></i> Add Event</h3>
             <hr />
             <p>
                 You can add your weekly commitments on the schedule, such as club meetings, office
@@ -345,7 +363,7 @@
                     </template>
                 </v-img>
             </v-card>
-            <h3 id="item-4">Filters</h3>
+            <h3 id="item-4"><i class="fas fa-filter"></i> Filters</h3>
             <hr />
             <p>
                 Filters allow you to set parameters to eliminate unwanted or redundant generated
@@ -424,26 +442,24 @@
 
             <!-- <h3 id="item-5">Display Settings</h3>
             <hr /> -->
-            <h3 id="item-6">Customize Colors</h3>
+            <h3 id="item-6"><i class="fas fa-palette"></i> Customize Colors</h3>
             <hr />
             <p>
                 We have a number of colors built in that are used to automatically color your
-                courses and events (based on hashes, if you are curious). Because we are aware they
-                are not aesthetically appealing, we provide the Palette for you to customize colors.
+                courses and events (based on hashes, if you are curious). Because we are aware that
+                they are not aesthetically appealing, we provide the Palette for you to customize
+                colors.
             </p>
             <p>
-                You can switch to the Palette (<i class="fas fa-palette"></i>) to customize the
-                background colors of courses and events. You can either click the
+                You can either click the
                 <i class="fas fa-sync-alt mr-1"></i> icon to use a random color or click
                 <input type="color" style="width: 30px" value="#deadbb" /> to select your favorite
                 color. The default color can be recovered by clicking the
-                <i class="fas fa-times"></i> icon.
+                <i class="fas fa-times"></i> icon. If you find that there are courses missing from
+                the palette, it may because you selected "Any Section" for that course and did not
+                switch to "View Schedule" mode.
             </p>
-            <p>
-                If you find that there are courses missing from the palette, it may because you
-                selected "Any Section" for that course and did not switch to "View Schedule" mode.
-            </p>
-            <h3 id="item-7">Export</h3>
+            <h3 id="item-7"><i class="fas fa-download"></i> Import and Export</h3>
             <hr />
             <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
@@ -493,38 +509,24 @@
                 </v-stepper-items>
             </v-stepper>
 
-            <h5 id="item-7-2">Export to JSON</h5>
+            <h5 id="item-7-2">Export to/Import From JSON</h5>
             <div class="row">
                 <div class="col col-7">
-                    You can export your schedule to a JSON file (a file that ends with .json) so
-                    that it can be re-imported later. It is a dedicated file format that we use to
-                    store information in your schedule, so it could only be used on our website.
+                    <p>
+                        You can export your schedule to a JSON file (a file that ends with .json) so
+                        that it can be re-imported later. It is a dedicated file format that we use
+                        to store information in your schedule, so it could only be used on our
+                        website.
+                    </p>
+                    <p>
+                        To re-import a JSON file, simply click the file chooser, find the file and
+                        confirm.
+                    </p>
                 </div>
                 <div class="col col-md-auto">
                     <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
                 </div>
             </div>
-
-            <h3 id="item-8">Authors</h3>
-            <hr />
-            <p>The primiary contributors of this website are</p>
-            <ol>
-                <li>Hanzhi Zhou <a href="mailto:hz2zz@virginia.edu">hz2zz@virginia.edu</a></li>
-                <li>
-                    Kaiying Shan <s>(non-human; cat)</s>
-                    <a href="mailto:ks5qug@virginia.edu"> ks5qug@virginia.edu</a>
-                </li>
-                <li>Zichao Hu <a href="mailto:zh2wc@virginia.edu">zh2wc@virginia.edu</a></li>
-            </ol>
-            <p>
-                For more details, please refer to our
-                <a
-                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/docs/Contribution.md"
-                    target="_blank"
-                >
-                    contribution log
-                </a>
-            </p>
 
             <h3 id="item-9">Contributing</h3>
             <hr />
@@ -536,6 +538,48 @@
                 >, and we welcome contribution of any kind. You can submit bug reports or feature
                 requests through issue, and you can directly contribute to our codebase via pull
                 requests!
+            </p>
+            <h5 id="item-9-1">Contact Authors</h5>
+
+            <p>The primiary contributors of this website are</p>
+            <ol>
+                <li>
+                    Hanzhi Zhou &nbsp;&nbsp;<i class="fab fa-github"></i>
+                    <a href="https://github.com/hanzhi713"> https://github.com/hanzhi713 </a>
+                    &nbsp;<i class="fas fa-envelope"></i>
+                    <a href="mailto:hz2zz@virginia.edu"> hz2zz@virginia.edu</a>
+                </li>
+                <li>
+                    Kaiying Shan <s>(non-human; cat)</s>&nbsp;&nbsp;
+                    <i class="fab fa-github"></i>
+                    <a href="https://github.com/kaiyingshan"> https://github.com/kaiyingshan </a>
+                    &nbsp;<i class="fas fa-envelope"></i>
+                    <a href="mailto:ks5qug@virginia.edu"> ks5qug@virginia.edu</a>
+                </li>
+                <li>
+                    Zichao Hu &nbsp;&nbsp;<i class="fab fa-github"></i>
+                    <a href="https://github.com/OAHC2022"> https://github.com/OAHC2022 </a>
+                    &nbsp;<i class="fas fa-envelope"></i>
+                    <a href="mailto:zh2wc@virginia.edu"> zh2wc@virginia.edu</a>
+                </li>
+            </ol>
+            <p>
+                Our contribution log is available
+                <a
+                    href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/docs/Contribution.md"
+                    target="_blank"
+                >
+                    here</a
+                >.
+            </p>
+
+            <h5 id="item-9-2">Bug Reports</h5>
+            <p>
+                We track issues and bug reports on GitHub. If you find any problem that appears to
+                be a bug of our website, please submit a bug report by
+                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                    >opening an issue</a
+                >. Note that you will need a GitHub account.
             </p>
 
             <h3 id="item-10">Disclaimer</h3>
@@ -597,7 +641,7 @@
                 updates on an hourly basis.
             </p>
 
-            <div class="py-5 my-5" style="height: 500px;"></div>
+            <div class="py-5 my-5" style="height: 600px;"></div>
         </div>
     </div>
 </template>

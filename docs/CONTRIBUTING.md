@@ -2,7 +2,7 @@
 
 First of all, thank you for considering to contribute! :tada:
 
-When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change. If you are unsure about the functionality or the implementation details of a file, you can contact the authors of that file. Most of the files in our repository have @authors annotated on top.
 
 Also, please note we have a [code of conduct](./CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 

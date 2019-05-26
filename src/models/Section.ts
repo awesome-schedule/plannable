@@ -27,46 +27,48 @@ export default class Section implements CourseFields, Hashable {
         return new Course(course.raw, course.key, sections.map(x => x.sid));
     }
 
-    public department: string;
-    public number: number;
-    public type: string;
-    public units: string;
-    public title: string;
-    public description: string;
+    public readonly department: string;
+    public readonly number: number;
+    public readonly type: string;
+    public readonly units: string;
+    public readonly title: string;
+    public readonly description: string;
 
     /**
      * the index of the section
      */
-    public sid: number;
+    public readonly sid: number;
     /**
      * Key of the course that this section belongs to; same for all sections.
      */
-    public key: string;
+    public readonly key: string;
 
     /**
      * a reference to the course that this section belongs to
      */
-    public course: Course;
+    public readonly course: Course;
     /**
      * the id of the section recorded in sis
      */
-    public id: number;
+    public readonly id: number;
     /**
      * the section number recorded in sis
      */
-    public section: string;
-    public topic: string;
+    public readonly section: string;
+    public readonly topic: string;
     /**
      * one of "Open", "Closed" and "Wait List"
      */
-    public status: CourseStatus;
-    public enrollment: number;
-    public enrollment_limit: number;
-    public wait_list: number;
-    public instructors: string[];
-    public meetings: Meeting[];
+    public readonly status: CourseStatus;
+    public readonly enrollment: number;
+    public readonly enrollment_limit: number;
+    public readonly wait_list: number;
+    public readonly instructors: string[];
+    public readonly meetings: Meeting[];
 
-    constructor(course: Course, raw: RawSection, sid: number) {
+    public readonly isFake: boolean;
+
+    constructor(course: Course, raw: RawSection | undefined, sid: number) {
         this.course = course;
         this.sid = sid;
         this.key = course.key;
@@ -78,19 +80,33 @@ export default class Section implements CourseFields, Hashable {
         this.title = course.title;
         this.description = course.description;
 
-        this.id = raw[0];
-        this.section = raw[1];
-        this.topic = raw[2];
-        this.status = Meta.STATUSES[raw[3]];
-        this.enrollment = raw[4];
-        this.enrollment_limit = raw[5];
-        this.wait_list = raw[6];
-        this.meetings = raw[7].map(x => new Meeting(this, x));
-        const temp = new Set<string>();
-        this.meetings.forEach(x => {
-            x.instructor.split(',').forEach(y => temp.add(y));
-        });
-        this.instructors = [...temp.values()];
+        if (raw) {
+            this.id = raw[0];
+            this.section = raw[1];
+            this.topic = raw[2];
+            this.status = Meta.STATUSES[raw[3]];
+            this.enrollment = raw[4];
+            this.enrollment_limit = raw[5];
+            this.wait_list = raw[6];
+            this.meetings = raw[7].map(x => new Meeting(this, x));
+            const temp = new Set<string>();
+            this.meetings.forEach(x => {
+                x.instructor.split(',').forEach(y => temp.add(y));
+            });
+            this.instructors = [...temp.values()];
+            this.isFake = false;
+        } else {
+            this.id = -1;
+            this.section = 'NOT EXIST!';
+            this.topic = '';
+            this.status = 'TBA';
+            this.enrollment = -1;
+            this.enrollment_limit = -1;
+            this.wait_list = -1;
+            this.meetings = [];
+            this.instructors = [];
+            this.isFake = true;
+        }
     }
 
     public sameTimeAs(other: Section) {

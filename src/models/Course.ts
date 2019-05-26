@@ -18,26 +18,26 @@ export interface CourseFields {
     /**
      * department name, short form, all capitalized. e.g `CS`
      */
-    department: string;
+    readonly department: string;
     /**
      * Course number, e.g. `2150`
      */
-    number: number;
+    readonly number: number;
     /**
      * One of the keys of `Meta.TYPES_PARSE`
      *
      * @see [[Meta.TYPES_PARSE]]
      */
-    type: string;
+    readonly type: string;
     /**
      * Units (credits), usually a number, but could be a range represented as a string like
      *
      * @example
      * "1", "3", "2.5", "1 - 12"
      */
-    units: string;
-    title: string;
-    description: string;
+    readonly units: string;
+    readonly title: string;
+    readonly description: string;
 }
 
 /**
@@ -51,7 +51,7 @@ export default class Course implements CourseFields, Hashable {
      *
      * @see [[Meta.TYPES_PARSE]]
      */
-    public key: string;
+    public readonly key: string;
     public readonly department: string;
     public readonly number: number;
     public readonly type: CourseType;
@@ -59,37 +59,58 @@ export default class Course implements CourseFields, Hashable {
     public readonly title: string;
     public readonly description: string;
 
-    public readonly raw: RawCourse;
+    public readonly raw: RawCourse | undefined;
     /**
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
     public readonly sids: number[];
     public readonly sections: Section[];
+    public readonly hasFakeSections: boolean;
 
     /**
      * @param raw the raw representation of this course
      * @param key the key of this course, e.g. cs11105
      * @param sids A list of section indices
      */
-    constructor(raw: RawCourse, key: string, sids: number[] = []) {
+    constructor(raw: RawCourse | undefined, key: string, sids: number[] = []) {
         this.key = key;
         this.raw = raw;
 
-        this.department = raw[0];
-        this.number = raw[1];
-        this.type = Meta.TYPES[raw[2]];
-        this.units = raw[3];
-        this.title = raw[4];
-        this.description = raw[5];
-
-        if (sids.length > 0) {
-            sids.sort();
-            this.sids = sids;
-            this.sections = sids.map(i => new Section(this, raw[6][i], i));
+        if (sids.length) {
+            this.sids = sids.sort();
         } else {
-            this.sids = Array.from({ length: raw[6].length }, (_, i) => i);
-            this.sections = raw[6].map((x, i) => new Section(this, x, i));
+            this.sids = raw ? Array.from({ length: raw[6].length }, (_, i) => i) : [];
+        }
+
+        if (raw) {
+            this.department = raw[0];
+            this.number = raw[1];
+            this.type = Meta.TYPES[raw[2]];
+            this.units = raw[3];
+            this.title = raw[4];
+            this.description = raw[5];
+
+            this.sections = this.sids.map(i => new Section(this, raw[6][i], i));
+            this.hasFakeSections = this.sections.some(s => s.isFake);
+        } else {
+            const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
+            const match = key.match(regex);
+            if (match) {
+                const [dept, num, type] = match;
+                this.department = dept.toUpperCase();
+                this.number = +num;
+                this.type = Meta.TYPES[+type];
+            } else {
+                this.department = '?';
+                this.number = 0;
+                this.type = '';
+            }
+            this.units = '';
+            this.title = '';
+            this.description = '';
+            this.sections = [];
+            this.hasFakeSections = true;
         }
     }
 
@@ -102,10 +123,14 @@ export default class Course implements CourseFields, Hashable {
         if (contained) {
             return this.sections[sid];
         } else {
+            if (!this.raw) throw new Error(this.key + ' is a dummy course!');
             return new Section(this, this.raw[6][sid], sid);
         }
     }
 
+    /**
+     * get the first section **contained** in this course
+     */
     public getFirstSection() {
         return this.sections[0];
     }

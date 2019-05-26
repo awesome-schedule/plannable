@@ -35,7 +35,9 @@
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-11-1">Sort Options</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-11-2">Browser Compacitility</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-11-3">Source of Data</a>
                 </nav>
+                <a href="" class="mt-5"></a>
             </nav>
         </nav>
         <div
@@ -228,19 +230,46 @@
                 <v-stepper-items>
                     <v-stepper-content step="1">
                         <v-card class="mb-5">
-                            <v-img :src="imgPath('select_class.gif')"></v-img>
+                            <v-img :src="imgPath('select_class.gif')">
+                                <template v-slot:placeholder>
+                                    <v-layout fill-height align-center justify-center ma-0>
+                                        <v-progress-circular
+                                            indeterminate
+                                            color="purple"
+                                        ></v-progress-circular>
+                                    </v-layout>
+                                </template>
+                            </v-img>
                         </v-card>
                     </v-stepper-content>
 
                     <v-stepper-content step="2">
                         <v-card class="mb-5">
-                            <v-img :src="imgPath('generate_class.gif')"></v-img>
+                            <v-img :src="imgPath('generate_class.gif')">
+                                <template v-slot:placeholder>
+                                    <v-layout fill-height align-center justify-center ma-0>
+                                        <v-progress-circular
+                                            indeterminate
+                                            color="purple"
+                                        ></v-progress-circular>
+                                    </v-layout>
+                                </template>
+                            </v-img>
                         </v-card>
                     </v-stepper-content>
 
                     <v-stepper-content step="3">
                         <v-card class="mb-5">
-                            <v-img :src="imgPath('multiple_schedule.gif')"></v-img>
+                            <v-img :src="imgPath('multiple_schedule.gif')">
+                                <template v-slot:placeholder>
+                                    <v-layout fill-height align-center justify-center ma-0>
+                                        <v-progress-circular
+                                            indeterminate
+                                            color="purple"
+                                        ></v-progress-circular>
+                                    </v-layout>
+                                </template>
+                            </v-img>
                         </v-card>
                     </v-stepper-content>
                 </v-stepper-items>
@@ -269,7 +298,7 @@
                 Section", then none of the sections will be shown. If you select section 1 and
                 section 2, then they will be both shown on the schedule if "show multiple sections"
                 checkbox is checked. However, PSYC 1010 only has one section available, so selecting
-                "Any Section" for it will result in the "only one" section being rendered.
+                "Any Section" for it will result in the "only one" being rendered.
             </p>
 
             <h5 id="item-2-3">Enroll in SIS</h5>
@@ -302,8 +331,19 @@
                 The schedule generator will generate schedules that do not conflict with your event.
                 However, if it is not possible to find such a schedule, an error will be thrown.
             </p>
+            <p>
+                Note that events in different planned schedules are independent from each other.
+                That is, when you edit the event in your planned schedule 1, it does not affect your
+                planned schedule 2.
+            </p>
             <v-card class="my-5 mx-auto gif-center">
-                <v-img :src="imgPath('add_event.gif')"></v-img>
+                <v-img :src="imgPath('add_event.gif')">
+                    <template v-slot:placeholder>
+                        <v-layout fill-height align-center justify-center ma-0>
+                            <v-progress-circular indeterminate color="purple"></v-progress-circular>
+                        </v-layout>
+                    </template>
+                </v-img>
             </v-card>
             <h3 id="item-4">Filters</h3>
             <hr />
@@ -316,7 +356,13 @@
                 You can select time and day at which you do not wish to have class.
             </p>
             <v-card class="my-4 mx-auto gif-center">
-                <v-img :src="imgPath('no-class-time.gif')"></v-img>
+                <v-img :src="imgPath('no-class-time.gif')">
+                    <template v-slot:placeholder>
+                        <v-layout fill-height align-center justify-center ma-0>
+                            <v-progress-circular indeterminate color="purple"></v-progress-circular>
+                        </v-layout>
+                    </template>
+                </v-img>
             </v-card>
             <h5 id="item-4-2">Allow Waitlist/Closed</h5>
             <p>
@@ -367,7 +413,13 @@
             as it will sort using options on top first.
 
             <v-card class="my-5 mx-auto gif-center">
-                <v-img :src="imgPath('sort.gif')"></v-img>
+                <v-img :src="imgPath('sort.gif')">
+                    <template v-slot:placeholder>
+                        <v-layout fill-height align-center justify-center ma-0>
+                            <v-progress-circular indeterminate color="purple"></v-progress-circular>
+                        </v-layout>
+                    </template>
+                </v-img>
             </v-card>
 
             <!-- <h3 id="item-5">Display Settings</h3>
@@ -467,6 +519,7 @@
                 For more details, please refer to our
                 <a
                     href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/docs/Contribution.md"
+                    target="_blank"
                 >
                     contribution log
                 </a>
@@ -477,8 +530,8 @@
             <p>
                 Our website is completely free and open course under the GPL-v3 license. Our source
                 code is
-                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR"
-                    >available at GitHub</a
+                <a href="https://github.com/awesome-schedule/Awesome-SchedulAR" target="_blank">
+                    available at GitHub </a
                 >, and we welcome contribution of any kind. You can submit bug reports or feature
                 requests through issue, and you can directly contribute to our codebase via pull
                 requests!
@@ -493,6 +546,7 @@
                 explicitly covered under the
                 <a
                     href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/f56d510b09dbd8abd72314f4d4856f69658f5487/LICENSE#L589"
+                    target="_blank"
                     >GPL license </a
                 >.
             </p>
@@ -515,20 +569,34 @@
                 To know exactly how they are implemented, please refer to
                 <a
                     href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/src/algorithm/ScheduleEvaluator.ts"
+                    target="_blank"
                 >
                     our code</a
                 >.
             </div>
             <vue-mathjax :formula="formula"></vue-mathjax>
 
-            <h5 id="item-11-2">Browser Compactibility</h5>
+            <h5 id="item-11-2" class="mt-4">Browser Compactibility</h5>
             <p>
                 Our website should run without problem on mainstream browsers of the latest version
                 (except IE). Due to the fact that our website leverages new CSS3 features (e.g. grid
                 layout), we require Chrome &ge; 57, Edge &ge; 16, Firefox &ge; 52, Opera &ge; 44 or
                 Safari &ge; 10.3.
             </p>
-            <div class="py-4 my-4" style="height: 500px;"></div>
+
+            <h5 id="item-11-3">Source of Data</h5>
+            <p>
+                Our website fetches course data from
+                <a target="_blank" href="https://rabi.phys.virginia.edu/mySIS/CS2/">Lou's list</a>
+                on page load and stores it in your browser cache. The default cache expiration time
+                is 2 hours, which means if you refresh the page 2 hours after the data is loaded, it
+                will be re-fetched. You can manually update course data by cliking the "Update
+                semester data" button under the setting tab <i class="fas fa-cog"></i>. However,
+                there is no need to update it very frequently, because Lou's list itself only updates on
+                an hourly basis.
+            </p>
+
+            <div class="py-5 my-5" style="height: 500px;"></div>
         </div>
     </div>
 </template>

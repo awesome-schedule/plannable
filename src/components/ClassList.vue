@@ -11,7 +11,10 @@
                 <div class="list-group-item class-title py-1 px-0 w-100">
                     <div class="row flex-nowrap no-gutters justify-content-between">
                         <div class="col col-1 pl-1 align-self-center" @click="collapse(crs.key)">
-                            <i class="fas click-icon" :class="expanded(crs.key)"></i>
+                            <i
+                                class="fas click-icon"
+                                :class="expanded(crs.key) ? 'fa-chevron-down' : 'fa-chevron-right'"
+                            ></i>
                         </div>
                         <!-- push the last column to the right by mr-auto -->
                         <div
@@ -25,6 +28,13 @@
                                     v-if="emptyCourse(crs)"
                                     class="ml-1 text-warning"
                                     title="No sections are selected! Any Section will be selected implicitly"
+                                >
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </span>
+                                <span
+                                    v-if="crs.hasFakeSections"
+                                    class="ml-1 text-danger"
+                                    title="You've select some section(s) that do not exist anymore!"
                                 >
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </span>
@@ -64,11 +74,7 @@
                     </div>
                 </div>
                 <Expand>
-                    <div
-                        v-if="expanded(crs.key) === 'fa-chevron-down'"
-                        :id="`${crs.key}trans`"
-                        class="trans"
-                    >
+                    <div v-if="expanded(crs.key)" :id="`${crs.key}trans`" class="trans">
                         <div
                             v-for="(sec, idx) in crs.sections"
                             :key="idx"
@@ -100,9 +106,14 @@
                             <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
                             <div
                                 class="list-group-item list-group-item-action container-fluid class-section"
-                                :class="{ active: isActive(crs.key, crs.sids[idx]) }"
+                                :class="{
+                                    active: isActive(crs.key, crs.sids[idx]) && !sec.isFake,
+                                    'not-exist': sec.isFake
+                                }"
                                 :title="
-                                    isActive(crs.key, crs.sids[idx])
+                                    sec.isFake
+                                        ? `You've selected a non-existent section! Maybe this section used to exist, but not it has been removed!`
+                                        : isActive(crs.key, crs.sids[idx])
                                         ? 'click to unselect'
                                         : 'click to select'
                                 "
@@ -149,6 +160,11 @@
 <style scoped>
 .click-icon {
     color: #555555;
+}
+
+.not-exist {
+    background: red !important;
+    color: white;
 }
 
 .trans {

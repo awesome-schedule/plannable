@@ -75,11 +75,13 @@ export default class ClassList extends Vue {
         if (sections instanceof Set) return sections.has(idx);
         return false;
     }
+    /**
+     * returns whether course with key=`key` is expanded
+     * @param key
+     */
     expanded(key: string) {
         const status = this.collapsed[key];
-        return (status === undefined && this.isEntering && this.expandOnEntering) || status
-            ? 'fa-chevron-down'
-            : 'fa-chevron-right';
+        return (status === undefined && this.isEntering && this.expandOnEntering) || status;
     }
     /**
      * @returns true if none of the sections of this course is selected

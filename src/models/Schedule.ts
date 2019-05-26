@@ -325,7 +325,8 @@ export default class Schedule {
             /**
              * the full course record of key `key`
              */
-            const course = catalog.getCourse(key);
+            const course = catalog.getCourse(key, sections);
+
             this.currentCourses.push(course);
 
             const credit = parseFloat(course.units);
@@ -333,22 +334,22 @@ export default class Schedule {
 
             const currentIdKey = `${course.department} ${course.number} ${course.type}`;
 
-            // if any section, don't render any thing, even if there is only one available section
+            // if any section
             if (sections === -1) {
                 this.currentIds[currentIdKey] = ' - ';
                 this.place(course);
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
-                    const sectionIdx = sections.values().next().value;
-                    this.currentIds[currentIdKey] = course.getSection(sectionIdx).id.toString();
-                    this.place(course.getSection(sectionIdx));
+                    const sec = course.getFirstSection();
+                    this.currentIds[currentIdKey] = sec.id.toString();
+                    this.place(sec);
                 } else if (sections.size > 0) {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
-                        const combined: Course[] = Object.values(
-                            course.getCourse([...sections]).getCombined()
-                        ).map(secs => Section.sectionsToCourse(secs));
+                        const combined: Course[] = Object.values(course.getCombined()).map(secs =>
+                            Section.sectionsToCourse(secs)
+                        );
                         const id = combined[0].getFirstSection().id;
 
                         // count the total number of sections in this combined course array
@@ -361,12 +362,9 @@ export default class Schedule {
                         }
                     } else {
                         // a subset of the sections
-                        const sectionIndices = [...sections];
-                        this.place(course.getCourse(sectionIndices));
+                        this.place(course);
                         this.currentIds[currentIdKey] =
-                            course.getSection(sectionIndices[0]).id.toString() +
-                            '+' +
-                            (sections.size - 1);
+                            course.getFirstSection().id.toString() + '+' + (sections.size - 1);
                     }
                 }
             }

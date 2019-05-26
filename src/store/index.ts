@@ -7,15 +7,15 @@
 /**
  *
  */
-import Meta from '../models/Meta';
-import { to12hr } from '../utils';
 import Vue from 'vue';
 import { Component, Watch } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import Event from '../models/Event';
+import Meta from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
+import { to12hr } from '../utils';
 import display, { DisplayState } from './display';
 import filter, { FilterStateJSON } from './filter';
 import modal from './modal';
@@ -71,11 +71,6 @@ export interface AncientStorage extends DisplayState {
     sortOptions: EvaluatorOptions;
 }
 
-/**
- * A Store Module must have
- * @typeparam State
- * @typeparam JSONState the JSON representation of its state
- */
 interface StorageItem<State, JSONState> {
     /**
      * a method to obtain the default state
@@ -333,7 +328,8 @@ class Store extends Vue {
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
+    async selectSemester(currentSemester: SemesterJSON | null, force: boolean = false) {
+        if (!currentSemester) return console.error('null current semester');
         if (force) this.noti.info(`Updating ${currentSemester.name} data...`);
         this.status.loading = true;
         window.scheduleEvaluator.clear();

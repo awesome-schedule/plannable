@@ -71,7 +71,7 @@ Prof. Lou Bloomfield for providing data
 
 ## Contributing
 
-Please refer to [our contribution guide](docs/CONTRIBUTING.md).
+Please refer to our [documentation](docs/README.md) and [contributing guide](docs/CONTRIBUTING.md).
 
 ## License
 

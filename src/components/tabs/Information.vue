@@ -592,8 +592,8 @@
                 is 2 hours, which means if you refresh the page 2 hours after the data is loaded, it
                 will be re-fetched. You can manually update course data by cliking the "Update
                 semester data" button under the setting tab <i class="fas fa-cog"></i>. However,
-                there is no need to update it very frequently, because Lou's list itself only updates on
-                an hourly basis.
+                there is no need to update it very frequently, because Lou's list itself only
+                updates on an hourly basis.
             </p>
 
             <div class="py-5 my-5" style="height: 500px;"></div>

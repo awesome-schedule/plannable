@@ -326,8 +326,10 @@ export default class Schedule {
              * the full course record of key `key`
              */
             const course = catalog.getCourse(key, sections);
-
             this.currentCourses.push(course);
+
+            // skip placing empty/faked courses
+            if (!course.sections.length) continue;
 
             const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
@@ -347,7 +349,7 @@ export default class Schedule {
                 } else if (sections.size > 0) {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
-                        const combined: Course[] = Object.values(course.getCombined()).map(secs =>
+                        const combined = Object.values(course.getCombined()).map(secs =>
                             Section.sectionsToCourse(secs)
                         );
                         const id = combined[0].getFirstSection().id;

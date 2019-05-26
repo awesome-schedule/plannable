@@ -66,6 +66,8 @@ export default class Course implements CourseFields, Hashable {
      */
     public readonly sids: number[];
     public readonly sections: Section[];
+
+    public readonly isFake: boolean;
     public readonly hasFakeSections: boolean;
 
     /**
@@ -93,11 +95,12 @@ export default class Course implements CourseFields, Hashable {
 
             this.sections = this.sids.map(i => new Section(this, raw[6][i], i));
             this.hasFakeSections = this.sections.some(s => s.isFake);
+            this.isFake = false;
         } else {
             const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
             const match = key.match(regex);
             if (match) {
-                const [dept, num, type] = match;
+                const [_, dept, num, type] = match;
                 this.department = dept.toUpperCase();
                 this.number = +num;
                 this.type = Meta.TYPES[+type];
@@ -107,10 +110,11 @@ export default class Course implements CourseFields, Hashable {
                 this.type = '';
             }
             this.units = '';
-            this.title = '';
+            this.title = 'NOT EXIST!';
             this.description = '';
             this.sections = [];
-            this.hasFakeSections = true;
+            this.hasFakeSections = false;
+            this.isFake = true;
         }
     }
 

@@ -32,7 +32,14 @@
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </span>
                                 <span
-                                    v-if="crs.hasFakeSections"
+                                    v-if="crs.isFake"
+                                    class="ml-1 text-danger"
+                                    title="This course does not exist any more! Please delete it"
+                                >
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </span>
+                                <span
+                                    v-else-if="crs.hasFakeSections"
                                     class="ml-1 text-danger"
                                     title="You've select some section(s) that do not exist anymore!"
                                 >
@@ -43,6 +50,7 @@
                             <p
                                 v-if="showClasslistTitle || isEntering"
                                 style="font-size: 0.85rem; margin: 0;"
+                                :class="{ 'text-danger': crs.isFake }"
                             >
                                 {{ crs.title }}
                             </p>

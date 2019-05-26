@@ -73,3 +73,9 @@ class Store extends Vue {
 ## Model and Algorithm
 
 Although used everywhere, the model and algorithm layer is meant to be separated from the view layer. The view layer uses models and algorithms by instantiating objects defined by model/algorithm and pass any required parameters into the constructors/methods/functions of the models or algorithms used. It is forbidden to import components/classes directly into the view layer, because circular dependency issues may arise.
+
+## Do you know?
+
+-   **Nested** ternary operators (`? : ? :`) are usually written by Kaiying Shan
+-   **Chained** functional statements (`.map(...).filter(...)`) are usually written by Hanzhi Zhou
+-   **Strange variable names** usually credit to Zichao Hu, whose GitHub username (OAHC2022) is peculiar

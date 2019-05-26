@@ -5,13 +5,13 @@
 /**
  *
  */
-import Vue from 'vue';
-import App from './App.vue';
-import querystring from 'querystring';
 import axios from 'axios';
-import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import Catalog from './models/Catalog';
+import querystring from 'querystring';
+import Vue from 'vue';
 import Vuetify from 'vuetify';
+import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
+import App from './App.vue';
+import Catalog from './models/Catalog';
 import { openLousList, openVAGrade } from './utils';
 
 Vue.use(Vuetify);

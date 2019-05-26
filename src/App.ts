@@ -16,7 +16,6 @@ import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
-import Information from './components/tabs/Information.vue';
 
 import Pagination from './components/Pagination.vue';
 import CourseModal from './components/CourseModal.vue';
@@ -37,7 +36,7 @@ import Store from './store';
         GridSchedule,
         SectionModal,
         CourseModal,
-        Information,
+        Information: () => import('./components/tabs/Information.vue'),
         External
     }
 })

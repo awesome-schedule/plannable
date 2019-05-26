@@ -14,12 +14,11 @@ import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
 import Hashable from './Hashable';
-import Meta from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 
 export interface ScheduleJSON {
-    All: { [x: string]: number[] | -1 };
+    All: { [x: string]: Array<{ id: number; section: string }> | number[] | -1 };
     title: string;
     id: number;
     events: Event[];
@@ -57,6 +56,10 @@ export default class Schedule {
 
     public static savedColors: { [x: string]: string } = {};
 
+    public static isNumberArray(x: Array<any>): x is number[] {
+        return typeof x[0] === 'number';
+    }
+
     /**
      * instantiate a `Schedule` object from its JSON representation.
      * the `computeSchedule` method will be invoked
@@ -70,32 +73,51 @@ export default class Schedule {
             schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
-        const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
-        const match = keys[0].match(regex);
-        if (!match || !match[3]) return null;
 
-        if (isNaN(parseInt(match[3]))) {
-            const newKeys = keys.map(x => {
-                const m = x.match(regex)!;
-                const y = m[3]
-                    .split(' ')
-                    .map(z => z.charAt(0).toUpperCase() + z.substr(1))
-                    .join(' ');
-                return m[1] + m[2] + Meta.TYPES_PARSE[y];
-            });
-            for (let i = 0; i < keys.length; i++) {
-                const sections = obj.All[keys[i]];
-                if (sections instanceof Array) schedule.All[newKeys[i]] = new Set(sections);
-                else schedule.All[newKeys[i]] = sections;
+        const catalog = window.catalog;
+        // convert array to set
+        for (const key of keys) {
+            const sections = obj.All[key];
+            const course = catalog.getCourse(key);
+            // non existent course
+            if (course.isFake) {
+                console.warn(key, 'does not exist anymore');
+                continue;
             }
-        } else {
-            // convert array to set
-            for (const key of keys) {
-                const sections = obj.All[key];
-                if (sections instanceof Array) schedule.All[key] = new Set(sections);
-                else schedule.All[key] = sections;
+            const allSections = course.sections;
+            if (sections instanceof Array) {
+                if (!sections.length) {
+                    schedule.All[key] = new Set();
+                } else {
+                    // backward compatibility for version prior to v5.0 (inclusive)
+                    if (Schedule.isNumberArray(sections)) {
+                        schedule.All[key] = new Set(
+                            sections.filter(sid => {
+                                // sid >= length possibly implies that section is removed from SIS
+                                const isValid = sid < allSections.length;
+                                if (!isValid) console.warn('invalid sec id', sid, 'for', key);
+                                return sid < allSections.length;
+                            })
+                        );
+                    } else {
+                        const set = new Set<number>();
+                        for (const record of sections) {
+                            // check whether the identifier of stored sections match with the existing sections
+                            const idx = allSections.findIndex(
+                                sec => sec.id === record.id && sec.section === record.section
+                            );
+                            if (idx !== -1) set.add(idx);
+                            // if not, it possibly means that section is removed from SIS
+                            else console.warn(record, 'does not exist anymore');
+                        }
+                        schedule.All[key] = set;
+                    }
+                }
+            } else {
+                schedule.All[key] = sections;
             }
         }
+
         schedule.computeSchedule();
         return schedule;
     }
@@ -593,11 +615,16 @@ export default class Schedule {
             title: this.title,
             events: this.events
         };
+        const catalog = window.catalog;
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) obj.All[key] = [...sections];
-            else obj.All[key] = sections;
+            if (sections instanceof Set) {
+                obj.All[key] = [...sections].map(sid => {
+                    const { id, section } = catalog.getSection(key, sid);
+                    return { id, section };
+                });
+            } else obj.All[key] = sections;
         }
         return obj;
     }

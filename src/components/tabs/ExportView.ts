@@ -42,7 +42,7 @@ export default class ExportView extends Store {
         try {
             reader.readAsText(input.files[0]);
         } catch (error) {
-            console.warn(error);
+            console.error(error);
             this.noti.error(error.message);
         }
     }

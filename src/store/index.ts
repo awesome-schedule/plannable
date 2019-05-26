@@ -185,7 +185,7 @@ class Store extends Vue {
             try {
                 parsed = JSON.parse(data);
             } catch (e) {
-                console.warn(e);
+                console.error(e);
             }
         }
         window.scheduleEvaluator.clear();
@@ -308,7 +308,7 @@ class Store extends Vue {
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } catch (err) {
-            console.warn(err);
+            console.error(err);
             this.schedule.generated = false;
             window.scheduleEvaluator.clear();
             this.noti.error(err.message);

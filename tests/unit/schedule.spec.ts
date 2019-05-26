@@ -24,7 +24,8 @@ describe('Schedule Test', () => {
         expect(prob.some(x => x > 11)).toBe(false);
     });
 
-    it('From Json new', () => {
+    // backward compatibility test
+    it('From Json old', () => {
         const json = `{"All":{"cs21505":[0],"cs21504":[1], "cs11105": -1},
         "id":1,"title":"Schedule","events":[],"savedColors":{"cs21505":"#af2007","cs21504":"#068239"}}`;
         const parsed = JSON.parse(json);
@@ -49,21 +50,14 @@ describe('Schedule Test', () => {
         ).toBe(true);
     });
 
-    // backward compatibility test
-    it('From Json old', () => {
-        const json = `{"All":{"cs2150lecture":[0],"cs2150laboratory":[1], "cs1110lecture": -1},
-        "id":1,"title":"Schedule","events":[]}`;
+    // todo
+    it('From Json new', () => {
+        const json = `
+        {"All":{"cs21025":-1,"cs21105":[{"id":15486,"section":"001"}]},"id":0,"title":"Schedule","events":[]}`;
         const parsed = JSON.parse(json);
-        let schedule = Schedule.fromJSON(parsed)!;
-        schedule = schedule.fromJSON(parsed)!;
+        const schedule = Schedule.fromJSON(parsed)!;
         expect(schedule).toBeTruthy();
         expect(schedule.empty()).toBeFalsy();
-        expect(schedule.has('cs21505')).toBeTruthy();
-        expect(schedule.All).toEqual({
-            cs21505: new Set([0]),
-            cs21504: new Set([1]),
-            cs11105: -1
-        });
     });
 
     it('add/update course/events', () => {

@@ -1,5 +1,6 @@
 import Section from '@/models/Section';
 import data from './data';
+import Course from '@/models/Course';
 
 beforeAll(async () => {
     window.catalog = await data;
@@ -33,5 +34,10 @@ describe('section test', () => {
         expect(Object.values(time).reduce((acc, block) => acc + block!.length, 0)).toEqual(
             Object.values(room).reduce((acc, block) => acc + block!.length, 0) * 2
         );
+    });
+
+    it('fake', () => {
+        const section = new Section(new Course(undefined, 'cs11105', []), undefined, 0);
+        expect(section.isFake).toBe(true);
     });
 });

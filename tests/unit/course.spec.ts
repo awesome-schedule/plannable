@@ -1,4 +1,5 @@
 import data from './data';
+import Course from '@/models/Course';
 
 beforeAll(async () => {
     window.catalog = await data;
@@ -26,5 +27,13 @@ describe('course test', () => {
         expect(Object.values(course.getCombined())[0][0].equals(course.getFirstSection())).toBe(
             true
         );
+    });
+
+    it('fake', () => {
+        const course = new Course(undefined, 'cs11105');
+        expect(course.isFake).toBe(true);
+
+        const c = window.catalog.getCourse('cs11105').getCourse([100, 200]);
+        expect(c.hasFakeSections).toBe(true);
     });
 });

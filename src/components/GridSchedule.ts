@@ -1,13 +1,12 @@
 /**
- * the component for rendering a schedule (with courses and events)
- *
+ * the component for rendering a schedule (with courses and events) on a grid
  * @author Kaiying Shan
  */
 
 import CourseBlock from './CourseBlock.vue';
 import Meta from '../models/Meta';
 import { to12hr, timeToNum } from '../utils';
-import { Component, Mixins } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import Store from '../store';
 
 @Component({

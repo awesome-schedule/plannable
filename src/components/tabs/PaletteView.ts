@@ -1,6 +1,5 @@
 /**
  * the component for customizing colors of classes and events
- *
  * @author Hanzhi Zhou
  */
 

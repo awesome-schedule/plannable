@@ -1,4 +1,9 @@
 /**
+ * the component for editing and applying filters
+ * @author Hanzhi Zhou, Kaiying Shan
+ */
+
+/**
  *
  */
 import { Component } from 'vue-property-decorator';

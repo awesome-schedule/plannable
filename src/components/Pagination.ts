@@ -1,13 +1,12 @@
 /**
  * The component for showing a list of pages, used for switching between generated schedules
- *
  * @author Kaiying Shan, Hanzhi Zhou
  */
 
 /**
  *
  */
-import { Component, Mixins, Watch } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 import Store from '../store';
 
 @Component

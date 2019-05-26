@@ -1,3 +1,11 @@
+/**
+ * component for editing classes and manipulating schedules
+ * @author Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Component, Vue } from 'vue-property-decorator';
 import Course from '@/models/Course';
 import Store from '@/store';

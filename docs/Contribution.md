@@ -74,7 +74,7 @@ They are located in [src/components](/src/components) folder.
 | CourseModal  | Kaiying Shan, Hanzhi Zhou |
 | GridSchedule | Kaiying Shan              |
 | Pagination   | Kaiying Shan, Hanzhi Zhou |
-| SectionModal | Kaiying Shan              |
+| SectionModal | Kaiying Shan, Hanzhi Zhou |
 
 ### Tool chain
 

@@ -1,3 +1,11 @@
+/**
+ * Component for displaying detailed information of a single Section
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import Section from '@/models/Section';
 import { SemesterJSON } from '@/models/Catalog';

@@ -459,20 +459,21 @@
             <v-stepper v-model="e2" class="my-5 mx-auto" style="width:60vw;">
                 <v-stepper-header>
                     <v-stepper-step
-                        v-for="(step, idx) in icalSteps"
+                        v-for="idx in icalSteps.length"
                         :key="idx"
-                        :complete="e2 > +idx"
-                        :step="+idx"
+                        :complete="e2 > idx"
+                        :step="idx"
                         style="margin:auto auto;cursor:pointer"
                         color="blue-grey"
-                        @click="e2 = +idx"
+                        :complete-icon="`fas fa-check`"
+                        @click="e2 = idx"
                     ></v-stepper-step>
                 </v-stepper-header>
 
                 <v-stepper-items>
-                    <v-stepper-content v-for="(step, idx) in icalSteps" :key="idx" :step="+idx">
+                    <v-stepper-content v-for="(step, _) in icalSteps" :key="_" :step="_ + 1">
                         <v-card class="mb-2 mx-auto" width="54vw">
-                            <v-img :src="icalSteps[idx].src" aspect-ratio="2.37"></v-img>
+                            <v-img :src="step.src" aspect-ratio="2.37"></v-img>
                         </v-card>
                         <v-card-title class="mb-2" primary-title>
                             <div>
@@ -482,8 +483,8 @@
                         <v-btn
                             color="blue-grey"
                             style="color:white"
-                            @click="e2 !== 9 ? e2++ : (e2 = 1)"
-                            >{{ e2 === 9 ? 'Play Again' : 'Continue' }}
+                            @click="e2 === icalSteps.length ? (e2 = 1) : e2++"
+                            >{{ e2 === icalSteps.length ? 'Play Again' : 'Continue' }}
                         </v-btn>
                         <v-btn v-if="e2 !== 1" color="blue-grey" style="color:white" @click="e2--">
                             Back
@@ -601,86 +602,7 @@
     </div>
 </template>
 
-<script lang="ts">
-// tslint:disable:max-line-length
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import { VueMathjax } from 'vue-mathjax';
-import 'bootstrap';
-import $ from 'jquery';
-
-@Component({
-    components: {
-        VueMathjax
-    }
-})
-export default class Information extends Vue {
-    @Prop(Number) readonly scheduleLeft!: number;
-
-    e1: number = 0;
-    e2: number = 1;
-    formula = `
-    $$
-    \\begin{align*}
-        \\text{Variance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}}
-        \\frac{\\text{Classtime}(day)^2}{5} - \\left( \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\frac{\\text{Classtime}(day)}{5} \\right)^2                             \\\\
-        \\text{Compactness} & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\left(\\text{Start}_{i + 1} - \\text{End}_{i} \\right)            \\\\
-                        & \\text{where $n_{day}$ is the number of classes at day $day$}                                                                         \\\\
-        \\text{No Early}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\max \\left(0, \\text{12:00} - \\text{FirstClassStart} \\right)                                                 \\\\
-        \\text{Lunch time}  & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day}} \\min(\\text{OverlapBetween}(\\text{Class}_i, \\text{Lunch}), 60) - 60 \\\\
-                        & \\text{where Lunch is defined as the time between 11:00 and 14:00}                                                                    \\\\
-        \\text{Distance}    & = \\sum_{day=\\text{Monday}}^{\\text{Friday}} \\sum_{i = 1}^{n_{day} - 1} \\text{DistanceBetween}(\\text{Class}_i, \\text{Class}_{i+1})
-    \\end{align*}
-    $$
-`;
-
-    icalSteps = {
-        1: {
-            title: 'Make Your Schedule and Export',
-            src: this.imgPath('export1.png')
-        },
-        2: {
-            title: 'Save The File Somewhere You Can Find',
-            src: this.imgPath('export2.png')
-        },
-        3: {
-            title: 'Go to Google Calendar',
-            src: this.imgPath('export3.png')
-        },
-        4: {
-            title: 'Click on Setting',
-            src: this.imgPath('export4.png')
-        },
-        5: {
-            title: 'Select Import and Export',
-            src: this.imgPath('export5.png')
-        },
-        6: {
-            title: 'Find and Open The File You Just Saved',
-            src: this.imgPath('export6.png')
-        },
-        7: {
-            title: 'Import',
-            src: this.imgPath('export7.png')
-        },
-        8: {
-            title: 'Import Successful!',
-            src: this.imgPath('export8.png')
-        },
-        9: {
-            title: 'Now You Can View Your Schedule On Google Calendar!',
-            src: this.imgPath('export9.png')
-        }
-    };
-
-    mounted() {
-        $('body').scrollspy({ target: '#navbar-scrollspy' });
-    }
-
-    imgPath(name: string) {
-        return require('@/assets/' + name);
-    }
-}
-</script>
+<script lang="ts" src="./Information.ts"></script>
 
 <style scoped>
 #navbar-scrollspy {
@@ -695,6 +617,10 @@ export default class Information extends Vue {
 
 .gif-center {
     width: 85%;
+}
+
+.check-size {
+    font-size: 0.8rem !important;
 }
 
 @media (max-width: 600px) {

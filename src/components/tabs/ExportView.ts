@@ -1,4 +1,9 @@
 /**
+ * component for import/export/print schedules
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
  *
  */
 import { Component } from 'vue-property-decorator';

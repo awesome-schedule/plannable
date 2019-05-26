@@ -1,13 +1,12 @@
 /**
  * the component for rendering a course on GridSchedule
- *
  * @author Kaiying Shan, Hanzhi Zhou
  */
 
 /**
  *
  */
-import { Component, Prop, Mixins } from 'vue-property-decorator';
+import { Component, Prop } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';

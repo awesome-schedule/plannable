@@ -53,7 +53,20 @@ class Notification implements NotiState {
     public history: NotiState[] = [];
     private job: number | null = null;
 
-    public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5, override = false) {
+    /**
+     * display notification to users.
+     * by default, only notifications of higher level will override the previous notification.
+     * @param msg the message to display
+     * @param type the type of notification
+     * @param timeout timeout in second. this noti msg will be automatically cleared after timeout.
+     * @param override force-override the previous notification, if it exists
+     */
+    public notify<T>(
+        msg: string | NotiMsg<T>,
+        type: 'info' | 'success' | 'warn' | 'error' = 'info',
+        timeout = 5,
+        override = false
+    ) {
         let cls: NotiClass;
         if (typeof msg === 'string') {
             cls = TYPES[type];
@@ -61,11 +74,11 @@ class Notification implements NotiState {
             cls = TYPES[msg.level];
             msg = msg.msg;
         }
-        if (LEVELS[cls] >= LEVELS[cls] || override) {
+        if (!this.cls || LEVELS[cls] >= LEVELS[this.cls] || override) {
             if (this.job) window.clearTimeout(this.job);
             this.history.push({
-                msg,
-                cls
+                msg: this.msg = msg,
+                cls: this.cls = cls
             });
             this.clear(timeout);
         }

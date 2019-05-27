@@ -2,21 +2,23 @@ import { noti } from '@/store/notification';
 
 describe('notification test', () => {
     it('basic', () => {
-        noti.warn('asd');
-        expect(noti.msg).toBe('asd');
-        expect(noti.cls).toBe('warning');
+        noti.info(';;;');
+        expect(noti.msg).toBe(';;;');
+        expect(noti.cls).toBe('info');
 
         noti.success('s');
         expect(noti.msg).toBe('s');
         expect(noti.cls).toBe('success');
 
-        noti.info(';;;');
-        expect(noti.msg).toBe(';;;');
-        expect(noti.cls).toBe('info');
+        noti.warn('asd');
+        expect(noti.msg).toBe('asd');
+        expect(noti.cls).toBe('warning');
 
         noti.error('.');
         expect(noti.msg).toBe('.');
         expect(noti.cls).toBe('danger');
+
+        noti.clear(0);
 
         noti.notify({
             msg: ' ',

@@ -16,6 +16,7 @@ import Event from './Event';
 import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
+import noti from '@/store/notification';
 
 export interface ScheduleJSON {
     All: { [x: string]: Array<{ id: number; section: string }> | number[] | -1 };
@@ -79,9 +80,14 @@ export default class Schedule {
         for (const key of keys) {
             const sections = obj.All[key];
             const course = catalog.getCourse(key);
+            const convKey = [course.department, course.number, course.type].join(' ');
             // non existent course
             if (course.isFake) {
-                console.warn(key, 'does not exist anymore');
+                noti.warn(
+                    `${
+                        course.number ? convKey : key
+                    } does not exist anymore! It probably has been removed!`
+                );
                 continue;
             }
             const allSections = course.sections;
@@ -95,7 +101,11 @@ export default class Schedule {
                             sections.filter(sid => {
                                 // sid >= length possibly implies that section is removed from SIS
                                 const isValid = sid < allSections.length;
-                                if (!isValid) console.warn('invalid sec id', sid, 'for', key);
+                                if (!isValid) {
+                                    noti.warn(
+                                        `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
+                                    );
+                                }
                                 return sid < allSections.length;
                             })
                         );
@@ -108,7 +118,12 @@ export default class Schedule {
                             );
                             if (idx !== -1) set.add(idx);
                             // if not, it possibly means that section is removed from SIS
-                            else console.warn(record, 'does not exist anymore');
+                            else
+                                noti.warn(
+                                    `Section ${
+                                        record.section
+                                    } of ${convKey} does not exist anymore! It probably has been removed!`
+                                );
                         }
                         schedule.All[key] = set;
                     }

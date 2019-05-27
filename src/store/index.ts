@@ -338,7 +338,7 @@ class Store extends Vue {
         window.scheduleEvaluator.clear();
 
         const result = await this.semester.selectSemester(currentSemester, force);
-        if (result.level !== 'info') this.noti.notify(result);
+        this.noti.notify(result);
         if (result.payload) this.parseStatus(currentSemester.id);
 
         this.status.loading = false;

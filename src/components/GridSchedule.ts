@@ -3,11 +3,11 @@
  * @author Kaiying Shan
  */
 
-import CourseBlock from './CourseBlock.vue';
-import Meta from '../models/Meta';
-import { to12hr, timeToNum } from '../utils';
 import { Component } from 'vue-property-decorator';
+import Meta from '../models/Meta';
 import Store from '../store';
+import { timeToNum, to12hr } from '../utils';
+import CourseBlock from './CourseBlock.vue';
 
 @Component({
     components: {

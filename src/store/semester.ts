@@ -45,7 +45,6 @@ class Semesters implements SemesterState {
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
         const result = await loadSemesterData(currentSemester, force);
-        console[result.level](result.msg);
 
         //  if the a catalog object is returned
         if (result.payload) {

@@ -17,6 +17,7 @@ interface Sidebars {
     showSelectColor: boolean;
     showInfo: boolean;
     showExternal: boolean;
+    showLog: boolean;
 }
 
 interface SidebarStatus extends Sidebars {
@@ -36,7 +37,8 @@ class Status {
         showExport: false,
         showSelectColor: false,
         showInfo: false,
-        showExternal: false
+        showExternal: false,
+        showLog: false
     };
 
     /**

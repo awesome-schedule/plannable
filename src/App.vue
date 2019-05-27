@@ -62,6 +62,14 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
+                title="Show logs"
+                :class="{ 'tab-icon-active': sideBar.showLog }"
+                class="tab-icon mb-4"
+                @click="status.switchSideBar('showLog')"
+            >
+                <i class="fas fa-stream"></i>
+            </div>
+            <div
                 title="Website guide and miscellaneous information"
                 :class="{ 'tab-icon-active': sideBar.showInfo }"
                 class="tab-icon mb-4"
@@ -98,6 +106,8 @@
             v-else-if="sideBar.showExternal"
             :style="{ 'margin-left': sideBarWidth + 1 + 'vw' }"
         ></external>
+
+        <log-view v-else-if="sideBar.showLog"></log-view>
 
         <transition name="fade">
             <div

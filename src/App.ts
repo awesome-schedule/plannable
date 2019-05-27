@@ -14,9 +14,10 @@ import EventView from './components/tabs/EventView.vue';
 import ExportView from './components/tabs/ExportView.vue';
 import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
-import GridSchedule from './components/GridSchedule.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
+import LogView from './components/tabs/LogView.vue';
 
+import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
 import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
@@ -37,7 +38,8 @@ import Store from './store';
         SectionModal,
         CourseModal,
         Information: () => import('./components/tabs/Information.vue'),
-        External
+        External,
+        LogView
     }
 })
 export default class App extends Store {
@@ -65,13 +67,13 @@ export default class App extends Store {
                 loadBuildingList(),
                 this.semester.loadSemesters()
             ]);
-            console[pay1.level](pay1.msg);
+            this.noti.notify(pay1);
             if (pay1.payload) window.timeMatrix = pay1.payload;
 
-            console[pay2.level](pay2.msg);
+            this.noti.notify(pay2);
             if (pay2.payload) window.buildingList = pay2.payload;
 
-            if (pay3.level !== 'info') this.noti.notify(pay3);
+            this.noti.notify(pay3);
             if (pay3) await this.selectSemester(this.semester.semesters[0]);
             this.status.loading = false;
         })();

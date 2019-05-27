@@ -13,7 +13,7 @@ type NotiLevel = 'info' | 'error' | 'warn';
 /**
  * the noti class type corresponds to the bootstrap color classes
  */
-type NotiClass = 'info' | 'danger' | 'success' | 'warning' | '';
+type NotiClass = 'info' | 'danger' | 'success' | 'warning';
 
 /**
  * @typeparam T the type of the payload
@@ -24,23 +24,53 @@ export interface NotiMsg<T> {
     payload?: T;
 }
 
+/**
+ * the current state of the notification
+ */
 interface NotiState {
+    /**
+     * the notification message
+     */
     msg: string;
-    cls: NotiClass;
+    /**
+     * @see [[NotiClass]]
+     */
+    cls: NotiClass | '';
 }
 
 /**
- * the mapping from notification levels to bootstrap css classes
+ * A notification item represents a notification state in the past
  */
-const TYPES = Object.freeze({
+interface NotiItem extends NotiState {
+    /**
+     * time stamp created by
+     * ```js
+     * new Date().toLocaleTimeString()
+     * ```
+     */
+    stamp: string;
+}
+
+/**
+ * map notification types to bootstrap css classes
+ */
+const CLAS = Object.freeze({
     info: 'info',
     error: 'danger',
-    success: 'success',
     warn: 'warning'
-}) as { [x: string]: NotiClass };
+}) as { [x in NotiLevel]: NotiClass };
+
+/**
+ * map bootstrap css classes to notification type
+ */
+const CONS = Object.freeze({
+    info: 'info',
+    danger: 'error',
+    success: 'info',
+    warning: 'warn'
+}) as { [x in NotiClass]: NotiLevel };
 
 const LEVELS: { [x in NotiClass]: number } = Object.freeze({
-    '': -1,
     info: 0,
     success: 1,
     warning: 2,
@@ -49,8 +79,11 @@ const LEVELS: { [x in NotiClass]: number } = Object.freeze({
 
 class Notification implements NotiState {
     public msg: string = '';
-    public cls: NotiClass = '';
-    public history: NotiState[] = [];
+    public cls: NotiClass | '' = '';
+    /**
+     * history of the notification states. index 0 corresponds to the most recent one
+     */
+    public history: NotiItem[] = [];
     private job: number | null = null;
 
     /**
@@ -63,23 +96,24 @@ class Notification implements NotiState {
      */
     public notify<T>(
         msg: string | NotiMsg<T>,
-        type: 'info' | 'success' | 'warn' | 'error' = 'info',
+        cls: NotiClass = 'info',
         timeout = 5,
         override = false
     ) {
-        let cls: NotiClass;
-        if (typeof msg === 'string') {
-            cls = TYPES[type];
-        } else {
-            cls = TYPES[msg.level];
+        if (typeof msg !== 'string') {
+            cls = CLAS[msg.level];
             msg = msg.msg;
         }
+        this.history.unshift({
+            msg,
+            cls,
+            stamp: new Date().toLocaleTimeString()
+        });
+        console[CONS[cls]](msg);
         if (!this.cls || LEVELS[cls] >= LEVELS[this.cls] || override) {
             if (this.job) window.clearTimeout(this.job);
-            this.history.push({
-                msg: this.msg = msg,
-                cls: this.cls = cls
-            });
+            this.msg = msg;
+            this.cls = cls;
             this.clear(timeout);
         }
     }
@@ -103,10 +137,10 @@ class Notification implements NotiState {
     }
 
     public warn(msg: string, timeout = 5, override = false) {
-        this.notify(msg, 'warn', timeout, override);
+        this.notify(msg, 'warning', timeout, override);
     }
     public error(msg: string, timeout = 5, override = false) {
-        this.notify(msg, 'error', timeout, override);
+        this.notify(msg, 'danger', timeout, override);
     }
     public success(msg: string, timeout = 5, override = false) {
         this.notify(msg, 'success', timeout, override);

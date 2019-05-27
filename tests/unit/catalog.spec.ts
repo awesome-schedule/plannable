@@ -10,8 +10,11 @@ describe('catalog test', () => {
     it('search', () => {
         const catalog: Catalog = window.catalog;
         expect(catalog.search('cs', 6).length).toBe(6);
-        expect(catalog.search('asdasdasd').length).toBe(0);
+        expect(catalog.search('asdasdasajkgwuoeisd').length).toBe(0);
         expect(catalog.search('john').length).toBeGreaterThan(2);
+        expect(catalog.search('aaron bloomf').length).toBeGreaterThan(2);
+        expect(catalog.search('theory').length).toBeGreaterThan(1);
+        expect(catalog.search('quantum').length).toBeGreaterThan(1);
     });
 
     it('convert key', () => {

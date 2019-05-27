@@ -35,14 +35,20 @@ export function openVAGrade(course: CourseFields) {
     );
 }
 
+/**
+ * highlight a matched part of a short string given that `match` is not undefined and `match.match === expMatch`
+ * @author Hanzhi Zhou
+ * @param str the string to inject highlight
+ * @param expMatch the expected matched field in match.match
+ * @param match the match object
+ */
 export function highlightMatch<T extends string>(str: string, expMatch: T, match?: Match<T>) {
     if (!match || match.match !== expMatch) return str;
     const { start, end } = match;
     return `${str.substring(0, start)}<span class="bg-warning">${str.substring(
         start,
         end
-    )}</span>${str.substring(end)}
-    `;
+    )}</span>${str.substring(end)}`;
 }
 
 /**

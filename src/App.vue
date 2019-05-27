@@ -105,7 +105,7 @@
                 id="noti"
                 v-top
                 class="alert mt-1 mb-0"
-                :class="`alert-${noti.class}`"
+                :class="`alert-${noti.cls}`"
                 :style="
                     `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
                         mobile ? '11' : scheduleLeft + 5

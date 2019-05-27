@@ -4,26 +4,26 @@ describe('notification test', () => {
     it('basic', () => {
         noti.warn('asd');
         expect(noti.msg).toBe('asd');
-        expect(noti.class).toBe('warning');
+        expect(noti.cls).toBe('warning');
 
         noti.success('s');
         expect(noti.msg).toBe('s');
-        expect(noti.class).toBe('success');
+        expect(noti.cls).toBe('success');
 
         noti.info(';;;');
         expect(noti.msg).toBe(';;;');
-        expect(noti.class).toBe('info');
+        expect(noti.cls).toBe('info');
 
         noti.error('.');
         expect(noti.msg).toBe('.');
-        expect(noti.class).toBe('danger');
+        expect(noti.cls).toBe('danger');
 
         noti.notify({
             msg: ' ',
             level: 'info'
         });
         expect(noti.msg).toBe(' ');
-        expect(noti.class).toBe('info');
+        expect(noti.cls).toBe('info');
     });
 
     it('timeout', async () => {

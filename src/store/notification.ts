@@ -9,11 +9,11 @@
  * @see console.warn
  * @see console.error
  */
-export type NotiLevel = 'info' | 'error' | 'warn';
+type NotiLevel = 'info' | 'error' | 'warn';
 /**
  * the noti class type corresponds to the bootstrap color classes
  */
-export type NotiClass = 'info' | 'danger' | 'success' | 'warning' | '';
+type NotiClass = 'info' | 'danger' | 'success' | 'warning' | '';
 
 /**
  * @typeparam T the type of the payload
@@ -24,64 +24,82 @@ export interface NotiMsg<T> {
     payload?: T;
 }
 
-export interface NotiState {
+interface NotiState {
     msg: string;
-    class: NotiClass;
+    cls: NotiClass;
 }
 
 /**
  * the mapping from notification levels to bootstrap css classes
  */
-export const TYPES = Object.freeze({
+const TYPES = Object.freeze({
     info: 'info',
     error: 'danger',
     success: 'success',
     warn: 'warning'
 }) as { [x: string]: NotiClass };
 
+const LEVELS: { [x in NotiClass]: number } = Object.freeze({
+    '': -1,
+    info: 0,
+    success: 1,
+    warning: 2,
+    danger: 3
+});
+
 class Notification implements NotiState {
     public msg: string = '';
-    public class: NotiClass = '';
+    public cls: NotiClass = '';
+    public history: NotiState[] = [];
     private job: number | null = null;
 
-    public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5) {
-        if (this.job) window.clearTimeout(this.job);
+    public notify<T>(msg: string | NotiMsg<T>, type = 'info', timeout = 5, override = false) {
+        let cls: NotiClass;
         if (typeof msg === 'string') {
-            this.msg = msg;
-            this.class = TYPES[type];
-            this.clear(timeout);
+            cls = TYPES[type];
         } else {
-            this.msg = msg.msg;
-            this.class = TYPES[msg.level];
+            cls = TYPES[msg.level];
+            msg = msg.msg;
+        }
+        if (LEVELS[cls] >= LEVELS[cls] || override) {
+            if (this.job) window.clearTimeout(this.job);
+            this.history.push({
+                msg,
+                cls
+            });
             this.clear(timeout);
         }
     }
 
     public empty() {
-        return !this.msg && !this.class;
+        return !this.msg && !this.cls;
     }
 
     public clear(timeout = 0) {
         if (timeout <= 0) {
             this.msg = '';
-            this.class = '';
+            this.cls = '';
             this.job = null;
         } else {
             this.job = window.setTimeout(() => this.clear(0), timeout * 1000);
         }
     }
 
-    public warn(msg: string, timeout = 5) {
-        this.notify(msg, 'warn', timeout);
+    public clearHistory() {
+        this.history = [];
     }
-    public error(msg: string, timeout = 5) {
-        this.notify(msg, 'error', timeout);
+
+    public warn(msg: string, timeout = 5, override = false) {
+        this.notify(msg, 'warn', timeout, override);
     }
-    public success(msg: string, timeout = 5) {
-        this.notify(msg, 'success', timeout);
+    public error(msg: string, timeout = 5, override = false) {
+        this.notify(msg, 'error', timeout, override);
     }
-    public info(msg: string, timeout = 5) {
-        this.notify(msg, 'info', timeout);
+    public success(msg: string, timeout = 5, override = false) {
+        this.notify(msg, 'success', timeout, override);
+    }
+    public info(msg: string, timeout = 5, override = false) {
+        this.notify(msg, 'info', timeout, override);
     }
 }
 

@@ -329,7 +329,10 @@ class Store extends Vue {
      * @param force whether to force-update semester data
      */
     async selectSemester(currentSemester: SemesterJSON | null, force: boolean = false) {
-        if (!currentSemester) return console.error('null current semester');
+        if (!currentSemester) {
+            this.noti.error('No semester data! Please refresh this page');
+            return;
+        }
         if (force) this.noti.info(`Updating ${currentSemester.name} data...`);
         this.status.loading = true;
         window.scheduleEvaluator.clear();

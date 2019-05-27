@@ -30,8 +30,15 @@ describe('course test', () => {
     });
 
     it('fake', () => {
-        const course = new Course(undefined, 'cs11105');
+        let course = new Course(undefined, 'cs11105');
         expect(course.isFake).toBe(true);
+        course = new Course(undefined, 'asdasd');
+        expect(course.isFake).toBe(true);
+        try {
+            course.getSection(0);
+        } catch (err) {
+            expect(err.message.indexOf('dummy')).not.toBe(-1);
+        }
 
         const c = window.catalog.getCourse('cs11105').getCourse([100, 200]);
         expect(c.hasFakeSections).toBe(true);

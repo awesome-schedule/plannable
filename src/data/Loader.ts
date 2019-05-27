@@ -52,8 +52,8 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         validator = defaultValidator,
         force = false
     }: {
-        warnMsg: (err: string) => string;
-        errMsg: (err: string) => string;
+        warnMsg?: (err: string) => string;
+        errMsg?: (err: string) => string;
         infoMsg?: string;
         expireTime?: number;
         timeoutTime?: number;

@@ -136,7 +136,7 @@ export default class Course implements CourseFields, Hashable {
      * get the first section **contained** in this course
      */
     public getFirstSection() {
-        return this.sections[0];
+        return this.getSection(0, true);
     }
 
     /**

@@ -657,13 +657,13 @@ export default class Schedule {
     /**
      * Check whether the given key exists in the Schedule.
      * @param key
-     * @param render if true,
-     *
-     * This method will go through the `events` array and `All` property to check for existence of the key
+     * @param rendered (default to true)
+     * if true, only returns true if the course/event with the given key is rendered
      */
     public has(key: string, rendered = true) {
         if (rendered)
             return (
+                this.events.some(x => x.days === key) ||
                 Object.values(this.days)
                     .flat(2)
                     .find(x => x.section.key === key) !== undefined

@@ -1,6 +1,5 @@
 import Schedule from '@/models/Schedule';
 import Section from '@/models/Section';
-import display from '@/store/display';
 import * as Utils from '@/utils';
 import data from './data';
 
@@ -52,12 +51,20 @@ describe('Schedule Test', () => {
 
     // todo
     it('From Json new', () => {
-        const json = `
+        let json = `
         {"All":{"cs21025":-1,"cs21105":[{"id":15486,"section":"001"}]},"id":0,"title":"Schedule","events":[]}`;
-        const parsed = JSON.parse(json);
-        const schedule = Schedule.fromJSON(parsed)!;
+        let parsed = JSON.parse(json);
+        let schedule = Schedule.fromJSON(parsed)!;
         expect(schedule).toBeTruthy();
         expect(schedule.empty()).toBeFalsy();
+
+        // test for invalid section, invalid key
+        json = `
+        {"All":{"cs21025":[],"cs21105":[{"id":15486,"section":"001"}],
+        "cs213123123": [1], "cs11105": [999],
+        "cs21505": [{"id": "asd", "section": "invalid section"}]},"id":0,"title":"Schedule","events":[]}`;
+        parsed = JSON.parse(json);
+        schedule = Schedule.fromJSON(parsed)!;
     });
 
     it('add/update course/events', () => {
@@ -101,7 +108,7 @@ describe('Schedule Test', () => {
 
         for (const i of [0, 1, 2, 3, 4, 5]) schedule.update('chem14105', i);
         for (const i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) schedule.update('chem14114', i);
-        display.combineSections = false;
+        Schedule.options.combineSections = false;
         schedule.computeSchedule();
         schedule.computeSchedule(false);
         schedule.computeConflict();
@@ -128,7 +135,7 @@ describe('Schedule Test', () => {
         schedule.unhover('cs21105');
         schedule.unhover('cs21504');
 
-        display.multiSelect = false;
+        Schedule.options.multiSelect = false;
         schedule.computeSchedule();
 
         schedule.update('cs21105', -1);
@@ -138,6 +145,8 @@ describe('Schedule Test', () => {
         expect(schedule.All).toHaveProperty('cs21105');
         expect(schedule.All.cs21105).toBeInstanceOf(Set);
         expect((schedule.All.cs21105 as Set<number>).size).toBe(0);
+        expect(schedule.has('cs21105', false)).toBe(true);
+        expect(schedule.has('cs21105', true)).toBe(false);
 
         schedule.copy();
         schedule.toJSON();

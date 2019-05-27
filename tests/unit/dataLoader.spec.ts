@@ -1,6 +1,8 @@
 import 'jest';
 import { loadTimeMatrix, loadBuildingList } from '@/data/BuildingLoader';
 import { loadSemesterList } from '@/data/SemesterListLoader';
+import { loadFromCache } from '@/data/Loader';
+
 describe('Data loader test', () => {
     it('Time matrix symmetry', async () => {
         const msg = await loadTimeMatrix();
@@ -40,5 +42,18 @@ describe('Data loader test', () => {
         const payload = data.payload!;
         expect(payload).toBeTruthy();
         expect(payload[0].id).toBeTruthy();
+    });
+
+    it('test', async () => {
+        const payload = await loadFromCache<string, { modified: string; str: string }>(
+            'dummy',
+            async () => {
+                throw new Error('dummy error');
+            },
+            x => x.str,
+            {}
+        );
+        expect(payload.level).toBe('error');
+        expect(payload.msg).toBe('dummy error');
     });
 });

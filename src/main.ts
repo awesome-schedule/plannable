@@ -12,7 +12,7 @@ import Vuetify from 'vuetify';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
-import { openLousList, openVAGrade, highlightMatch } from './utils';
+import { highlightMatch, openLousList, openVAGrade } from './utils';
 
 Vue.use(Vuetify, {
     iconfont: 'fa',

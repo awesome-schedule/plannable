@@ -6,12 +6,14 @@
 /**
  *
  */
-import Course, { CourseFields } from './Course';
+import Course, { CourseFields, Match } from './Course';
 import Meta, { RawSection, CourseStatus } from './Meta';
 import Meeting from './Meeting';
 import Hashable from './Hashable';
 import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
 import { parseTimeAll, hashCode } from '../utils';
+
+export type SectionMatch = Match<'topic' | 'instructors'>;
 
 /**
  * A section contains all the fields that a Course has,
@@ -67,8 +69,9 @@ export default class Section implements CourseFields, Hashable {
     public readonly meetings: Meeting[];
 
     public readonly isFake: boolean;
+    public readonly match?: SectionMatch;
 
-    constructor(course: Course, raw: RawSection | undefined, sid: number) {
+    constructor(course: Course, raw: RawSection | undefined, sid: number, match?: SectionMatch) {
         this.course = course;
         this.sid = sid;
         this.key = course.key;
@@ -79,6 +82,7 @@ export default class Section implements CourseFields, Hashable {
         this.units = course.units;
         this.title = course.title;
         this.description = course.description;
+        this.match = match;
 
         if (raw) {
             this.id = raw[0];
@@ -89,11 +93,7 @@ export default class Section implements CourseFields, Hashable {
             this.enrollment_limit = raw[5];
             this.wait_list = raw[6];
             this.meetings = raw[7].map(x => new Meeting(this, x));
-            const temp = new Set<string>();
-            this.meetings.forEach(x => {
-                x.instructor.split(',').forEach(y => temp.add(y));
-            });
-            this.instructors = [...temp.values()];
+            this.instructors = Meeting.getInstructors(raw[7]);
             this.isFake = false;
         } else {
             this.id = -1;

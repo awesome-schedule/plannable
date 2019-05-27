@@ -15,6 +15,16 @@ import Section from './Section';
  * It has a reference back to the section that it belongs to
  */
 export default class Meeting {
+    public static getInstructors(meetings: RawMeeting[]) {
+        const profs: string[] = [];
+        for (const meeting of meetings) {
+            const meetingProfs = meeting[0].split(', ');
+            for (const prof of meetingProfs) {
+                if (!profs.includes(prof)) profs.push(prof);
+            }
+        }
+        return profs;
+    }
     public section: Section;
     public instructor: string;
     public days: string;

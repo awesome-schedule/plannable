@@ -18,12 +18,25 @@
                         </div>
                         <!-- push the last column to the right by mr-auto -->
                         <div
-                            class="col-xs-auto mr-auto align-self-center"
+                            class="col-xs-auto mr-auto align-self-center my-0"
                             style="cursor: pointer"
                             @click="collapse(crs.key)"
                         >
                             <h6 class="mb-1">
-                                <span>{{ crs.department }} {{ crs.number }} {{ crs.type }} </span>
+                                <span
+                                    v-if="crs.match && crs.match.match === 'key'"
+                                    v-html="
+                                        highlightMatch(
+                                            crs.department + ' ' + crs.number + ' ' + crs.type,
+                                            'key',
+                                            crs.match
+                                        )
+                                    "
+                                >
+                                </span>
+                                <span v-else>
+                                    {{ crs.department }} {{ crs.number }} {{ crs.type }}
+                                </span>
                                 <span
                                     v-if="emptyCourse(crs)"
                                     class="ml-1 text-warning"
@@ -45,15 +58,15 @@
                                 >
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </span>
+                                <!-- <small class="bg-primary float-right">Topic</small> -->
                             </h6>
 
                             <p
                                 v-if="showClasslistTitle || isEntering"
                                 style="font-size: 0.85rem; margin: 0;"
                                 :class="{ 'text-danger': crs.isFake }"
-                            >
-                                {{ crs.title }}
-                            </p>
+                                v-html="highlightMatch(crs.title, 'title', crs.match)"
+                            ></p>
                         </div>
                         <div
                             class="col align-self-center"
@@ -135,15 +148,32 @@
                                             class="list-unstyled class-info"
                                             style="font-size: 0.75rem;"
                                         >
-                                            <li>Section {{ sec.section }} {{ sec.topic }}</li>
+                                            <li>
+                                                Section {{ sec.section }}
+                                                <span
+                                                    v-html="
+                                                        highlightMatch(
+                                                            sec.topic,
+                                                            'topic',
+                                                            sec.match
+                                                        )
+                                                    "
+                                                ></span>
+                                            </li>
                                             <template v-for="(meeting, j) in sec.meetings">
                                                 <li :key="j">
                                                     {{ meeting.days }}
                                                 </li>
                                             </template>
-                                            <li>
-                                                {{ sec.instructors.join(', ') }}
-                                            </li>
+                                            <li
+                                                v-html="
+                                                    highlightMatch(
+                                                        sec.instructors.join(', '),
+                                                        'instructors',
+                                                        sec.match
+                                                    )
+                                                "
+                                            ></li>
                                         </ul>
                                     </div>
                                     <div class="col col-sm-1 align-self-center">

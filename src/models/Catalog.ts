@@ -6,10 +6,11 @@
 /**
  *
  */
-import Course from './Course';
+import Course, { Match } from './Course';
 import Meta, { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
+import Meeting from './Meeting';
 
 /**
  * represents a semester
@@ -116,50 +117,96 @@ export default class Catalog {
         console.time('query');
         query = query.trim().toLowerCase();
         // query no space
+        const queryLength = query.length;
         const query_no_sp = query.split(' ').join('');
         const matches: Course[][] = [[], [], [], [], []];
 
         for (const key in this.raw_data) {
             const course = this.raw_data[key];
 
+            const keyIdx = key.indexOf(query_no_sp);
             // match with the course number
-            if (key.indexOf(query_no_sp) !== -1) {
-                matches[0].push(new Course(course, key));
+            if (keyIdx !== -1) {
+                const deptLen = course[0].length;
+                const end = keyIdx + query_no_sp.length;
+                matches[0].push(
+                    new Course(course, key, [], {
+                        match: 'key',
+                        start: keyIdx + +(keyIdx >= deptLen),
+                        end: end + +(end > deptLen)
+                    })
+                );
+                continue;
 
                 // match with the title
-            } else if (course[4].toLowerCase().indexOf(query) !== -1) {
-                matches[1].push(new Course(course, key));
-            } else {
-                // check any topic/professor match. Select the sections which only match the topic/professor
-                const topicMatchIdx = [];
-                const profMatchIdx = [];
-
-                for (let i = 0; i < course[6].length; i++) {
-                    const section = course[6][i];
-                    const topic = section[2];
-                    if (topic.toLowerCase().indexOf(query) !== -1) {
-                        topicMatchIdx.push(i);
-                        continue;
-                    }
-                    const meetings = section[7];
-                    for (const meeting of meetings) {
-                        // TODO: better prof name match
-                        if (meeting[0].toLowerCase().indexOf(query) !== -1) {
-                            profMatchIdx.push(i);
-                            break;
-                        }
-                    }
-                }
-                if (topicMatchIdx.length > 0) {
-                    matches[2].push(new Course(course, key, topicMatchIdx));
-                } else if (profMatchIdx.length > 0) {
-                    matches[4].push(new Course(course, key, profMatchIdx));
-                    // lastly, check description match
-                } else if (course[5].toLowerCase().indexOf(query) !== -1) {
-                    matches[3].push(new Course(course, key));
-                }
             }
             if (matches[0].length >= max_results) break;
+
+            const title = course[4].toLowerCase();
+            const titleIdx = title.indexOf(query);
+            if (titleIdx !== -1) {
+                matches[1].push(
+                    new Course(course, key, [], {
+                        match: 'title',
+                        start: titleIdx,
+                        end: titleIdx + queryLength
+                    })
+                );
+                continue;
+            }
+
+            // check any topic/professor match. Select the sections which only match the topic/professor
+            const topicMatchIdx = [];
+            const topicMatches: Match<'topic'>[] = [];
+            const profMatchIdx = [];
+            const profMatches: Match<'instructors'>[] = [];
+
+            for (let i = 0; i < course[6].length; i++) {
+                const section = course[6][i];
+                const topic = section[2];
+                const topicIdx = topic.toLowerCase().indexOf(query);
+                if (topicIdx !== -1) {
+                    topicMatchIdx.push(i);
+                    topicMatches.push({
+                        match: 'topic',
+                        start: topicIdx,
+                        end: topicIdx + queryLength
+                    });
+                    continue;
+                }
+                const profs = Meeting.getInstructors(section[7])
+                    .join(', ')
+                    .toLowerCase();
+                const profIdx = profs.indexOf(query);
+                if (profIdx !== -1) {
+                    profMatchIdx.push(i);
+                    profMatches.push({
+                        match: 'instructors',
+                        start: profIdx,
+                        end: profIdx + queryLength
+                    });
+                }
+            }
+            if (topicMatchIdx.length > 0) {
+                matches[2].push(new Course(course, key, topicMatchIdx, undefined, topicMatches));
+                continue;
+            }
+            if (profMatchIdx.length > 0) {
+                matches[4].push(new Course(course, key, profMatchIdx, undefined, profMatches));
+                continue;
+            }
+            const desc = course[5].toLowerCase();
+            const descIdx = desc.indexOf(query);
+            // lastly, check description match
+            if (descIdx !== -1) {
+                matches[3].push(
+                    new Course(course, key, [], {
+                        match: 'description',
+                        start: descIdx,
+                        end: descIdx + queryLength
+                    })
+                );
+            }
         }
         const results: Course[] = [];
         for (let i = 0, count = 0; i < 5; i++) {

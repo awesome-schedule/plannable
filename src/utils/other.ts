@@ -7,7 +7,7 @@
  */
 import { AxiosError } from 'axios';
 import { saveAs } from 'file-saver';
-import { CourseFields } from '../models/Course';
+import { CourseFields, Match } from '../models/Course';
 
 /**
  * open a course detail on Lou's list
@@ -33,6 +33,16 @@ export function openVAGrade(course: CourseFields) {
         '_blank',
         'width=650,height=700,scrollbars=yes'
     );
+}
+
+export function highlightMatch<T extends string>(str: string, expMatch: T, match?: Match<T>) {
+    if (!match || match.match !== expMatch) return str;
+    const { start, end } = match;
+    return `${str.substring(0, start)}<span class="bg-warning">${str.substring(
+        start,
+        end
+    )}</span>${str.substring(end)}
+    `;
 }
 
 /**

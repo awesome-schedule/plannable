@@ -12,7 +12,7 @@ import Vuetify from 'vuetify';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
-import { openLousList, openVAGrade } from './utils';
+import { openLousList, openVAGrade, highlightMatch } from './utils';
 
 Vue.use(Vuetify, {
     iconfont: 'fa',
@@ -37,6 +37,7 @@ declare module 'vue/types/vue' {
     interface Vue {
         openLousList: typeof openLousList;
         openVAGrade: typeof openVAGrade;
+        highlightMatch: typeof highlightMatch;
     }
 }
 
@@ -54,6 +55,7 @@ window.querystring = querystring;
 Vue.config.productionTip = false;
 Vue.prototype.openLousList = openLousList;
 Vue.prototype.openVAGrade = openVAGrade;
+Vue.prototype.highlightMatch = highlightMatch;
 
 new Vue({
     render: h => h(App)

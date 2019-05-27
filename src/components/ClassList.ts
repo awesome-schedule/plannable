@@ -61,7 +61,7 @@ export default class ClassList extends Vue {
      * @param key
      */
     collapse(key: string) {
-        if (this.collapsed[key]) {
+        if (this.expanded(key)) {
             this.$set(this.collapsed, key, false);
         } else {
             this.$set(this.collapsed, key, true);

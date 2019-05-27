@@ -44,6 +44,7 @@
                 :schedule="schedule.currentSchedule"
                 :is-entering="isEntering"
                 :show-classlist-title="display.showClasslistTitle"
+                :expand-on-entering="display.expandOnEntering"
                 @update_course="updateCourse"
                 @course_modal="modal.showCourseModal($event)"
                 @close="closeClassList()"

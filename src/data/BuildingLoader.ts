@@ -38,9 +38,9 @@ export async function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>
         requestTimeMatrix,
         x => Int32Array.from(x.timeMatrix),
         {
-            infoMsg: 'Time matrix loaded',
-            warnMsg: x => `Failed to load time matrix: ${x}. Old data is used instead`,
-            errMsg: x => `Failed to load time matrix: ${x}. `,
+            infoMsg: 'Walking distance matrix loaded',
+            warnMsg: x => `Failed to load walking distance matrix: ${x}. Old data is used instead`,
+            errMsg: x => `Failed to load walking distance matrix: ${x}. `,
             expireTime: 1000 * 86400,
             timeoutTime: 10000,
             force

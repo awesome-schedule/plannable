@@ -67,9 +67,49 @@
             </label>
         </div> -->
         <div class="btn bg-info nav-btn">
+            Course Search
+        </div>
+        <li class="list-group-item mb-0" style="border-bottom: 0">
+            <label for="num-search-results">
+                Max number of search results
+            </label>
+            <div class="mr-5 mb-2">
+                <input
+                    id="num-search-results"
+                    v-model.number="display.numSearchResults"
+                    class="form-control form-control-sm"
+                    type="number"
+                    min="1"
+                    step="1"
+                />
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input
+                    id="exp-on-entering"
+                    v-model="display.expandOnEntering"
+                    type="checkbox"
+                    class="custom-control-input"
+                />
+                <label for="exp-on-entering" class="custom-control-label">
+                    Expand all when searching
+                </label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input
+                    id="displayClasslistTitle"
+                    v-model="display.showClasslistTitle"
+                    type="checkbox"
+                    class="custom-control-input"
+                />
+                <label for="displayClasslistTitle" class="custom-control-label">
+                    Show title on class list
+                </label>
+            </div>
+        </li>
+        <div class="btn bg-info nav-btn">
             Course Display
         </div>
-        <ul class="list-group list-group-flush mx-1">
+        <ul class="list-group list-group-flush mx-1 mb-0">
             <li class="list-group-item">
                 <div class="custom-control custom-checkbox">
                     <input
@@ -102,19 +142,6 @@
                     />
                     <label for="displayInstructor" class="custom-control-label">
                         Show instructor
-                    </label>
-                </div>
-            </li>
-            <li class="list-group-item mb-0" style="border-bottom: 0">
-                <div class="custom-control custom-checkbox">
-                    <input
-                        id="displayClasslistTitle"
-                        v-model="display.showClasslistTitle"
-                        type="checkbox"
-                        class="custom-control-input"
-                    />
-                    <label for="displayClasslistTitle" class="custom-control-label">
-                        Show title on class list
                     </label>
                 </div>
             </li>

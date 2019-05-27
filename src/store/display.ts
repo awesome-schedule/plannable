@@ -10,18 +10,28 @@ import { toJSON, StoreModule } from '.';
 
 export interface DisplayState {
     [x: string]: any;
+    // course block options
     showTime: boolean;
     showRoom: boolean;
     showInstructor: boolean;
     showClasslistTitle: boolean;
+
+    // grid schedule options
     fullHeight: number;
     partialHeight: number;
     earliest: string;
     latest: string;
     standard: boolean;
+
+    // schedule compute options
     multiSelect: boolean;
     combineSections: boolean;
+
     maxNumSchedules: number;
+
+    // search options
+    expandOnEntering: boolean;
+    numSearchResults: number;
 }
 
 class Display implements StoreModule<DisplayState, DisplayState> {
@@ -38,6 +48,8 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     public multiSelect = true;
     public combineSections = true;
     public maxNumSchedules = 200000;
+    public expandOnEntering = false;
+    public numSearchResults = 6;
 
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();
@@ -69,7 +81,9 @@ class Display implements StoreModule<DisplayState, DisplayState> {
             standard: false,
             multiSelect: true,
             combineSections: true,
-            maxNumSchedules: 200000
+            maxNumSchedules: 200000,
+            expandOnEntering: false,
+            numSearchResults: 6
         };
     }
 }

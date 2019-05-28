@@ -6,15 +6,24 @@ When contributing to this repository, please first discuss the change you wish t
 
 Also, please note we have a [code of conduct](./CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
+## Current List of Things You Can Do
+
+-   Better mobile support
+-   Efficient fuzzy search (should be implemented in [Catalog.ts](/src/models/Catalog.ts))
+    -   We currently only supports exact search because fuzzy search is too slow
+-   Better unit tests and unit tests for components (if possible)
+    -   Current unit tests are not robust. Unit tests for Vue components are completely missing
+-   More filters and sort options (should be implemented in [ScheduleEvaluator.ts](/src/algorithm/ScheduleEvaluator.ts) and/or [ScheduleGenerator.ts](/src/algorithm/ScheduleGenerator.ts))
+
 ## Pull Request Process :yum:
 
 1. Make sure that your changes are made on the dev branch or a new branch.
 2. Test extensively on your local host to make sure that you didn't screw up anything.
 3. In writing a pull request message,
-    1. Point out which part of the code you have changed, e.g. view, model, or algorithm.
-    2. Make clear that what type of changes that you have made, e.g., fixed a bug, improved performance, changed/added functionality, updated documentation, etc.
-    3. Summarize what does this pull request do and why this is worth doing. Include any of your design decisions and alternatives that you considered.
-    4. (Optional) Explicitly point out the part that you may want a more thoughtful review.
+    1. Be clear that what type of changes you have made, e.g., fixed a bug, improved performance, changed/added functionality, updated documentation, etc.
+    2. Summarize what does this pull request do and why this is worth doing.
+    3. (Optional) Include any of your design decisions and alternatives that you considered.
+    4. (Optional) Point out the part that you may want a more thorough review.
     5. (Optional) Add any questions, comments, or concerns that you have, including those about your changes and those about the rest of this project.
 4. New pull request!
 

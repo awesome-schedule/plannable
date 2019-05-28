@@ -40,13 +40,22 @@ export default class FilterView extends Store {
         this.filter.timeSlots.splice(n, 1);
     }
 
+    /**
+     * get called when the sort mode changed or sort option at `optIdx` changed.
+     * call [[ScheduleEvaluator.changeSort]]
+     *
+     * if a sort option changed, also disable options that are mutually exclusive to that one.
+     *
+     * if the sort mode changed, do nothing
+     *
+     * @param optIdx c
+     */
     changeSorting(optIdx?: number) {
         if (!this.validateSortOptions()) return;
         if (optIdx !== undefined) {
             const option = this.filter.sortOptions.sortBy[optIdx];
 
             if (option.enabled) {
-                // disable options that are mutually exclusive to this one
                 for (const key of option.exclusive) {
                     for (const opt of this.filter.sortOptions.sortBy) {
                         if (opt.name === key) opt.enabled = false;

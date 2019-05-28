@@ -34,6 +34,10 @@ describe('section test', () => {
         expect(Object.values(time).reduce((acc, block) => acc + block!.length, 0)).toEqual(
             Object.values(room).reduce((acc, block) => acc + block!.length, 0) * 2
         );
+
+        const s2: Section = catalog.getSection('cs99993', 0);
+        expect(s2.getTimeRoom()).toBe(null);
+        expect(s2.sameTimeAs(sec)).toBe(false);
     });
 
     it('fake', () => {

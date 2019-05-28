@@ -15,6 +15,9 @@ describe('catalog test', () => {
         expect(catalog.search('aaron bloomf').length).toBeGreaterThan(2);
         expect(catalog.search('theory').length).toBeGreaterThan(1);
         expect(catalog.search('quantum').length).toBeGreaterThan(1);
+
+        expect(catalog.search(':desc a').length).toBeGreaterThan(1);
+        expect(catalog.search(':prof asdasdasdasdasdasdsad').length).toBe(0);
     });
 
     it('convert key', () => {

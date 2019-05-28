@@ -43,6 +43,7 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[0].enabled = true;
         sort.sortBy[1].enabled = true;
         sort.sortBy[2].enabled = true;
+        sort.sortBy[2].reverse = true;
         sort.sortBy[3].enabled = true;
         sort.sortBy[4].enabled = true;
         const result = generator.getSchedules(schedule);
@@ -66,6 +67,16 @@ describe('ScheduleGenerator Test', () => {
 
         sort.mode = 0;
         result4.changeSort(sort, true);
+        expect(result4.getSchedule(0)).toBeInstanceOf(Schedule);
         result4.clear();
+
+        sort.mode = 1;
+        // only one sort func
+        for (const sb of sort.sortBy) {
+            sb.enabled = false;
+        }
+        sort.sortBy[0].enabled = true;
+        sort.sortBy[0].reverse = true;
+        result4.changeSort(sort, true);
     });
 });

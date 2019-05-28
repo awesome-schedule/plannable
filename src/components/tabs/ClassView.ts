@@ -47,7 +47,11 @@ export default class ClassView extends Store {
         if (this.schedule.generated) {
             this.schedule.switchSchedule(false);
         }
+
+        console.time('query');
         this.inputCourses = window.catalog.search(query, this.display.numSearchResults);
+        console.timeEnd('query');
+
         this.isEntering = true;
     }
 

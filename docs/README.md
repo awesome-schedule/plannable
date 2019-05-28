@@ -70,6 +70,17 @@ class Store extends Vue {
 }
 ```
 
+### Global Variables
+
+We use a number of global variables to share large and non-reactive data, because for those large objects, the reactive observers may slow down execution significantly. More specifically, we have the following variables declared and assigned on the `window` object.
+
+-   catalog
+-   scheduleEvaluator
+-   timeMatrix
+-   buildingList
+
+The `catalog` variable is an instance of the `Catalog` class and is used to store the course data of the current semester. `scheduleEvaluator` is an instance of the `ScheduleEvaluator` class that is used to store the generated schedules. Both instances have instance properties that contain more than a thousand keys/values. The othter two variables store the data needed by the `Walking Distance` sort option.
+
 ## Model and Algorithm
 
 Although used everywhere, the model and algorithm layer is meant to be separated from the view layer. The view layer uses models and algorithms by instantiating objects defined by model/algorithm and pass any required parameters into the constructors/methods/functions of the models or algorithms used. It is forbidden to import components/classes directly into the view layer, because circular dependency issues may arise.

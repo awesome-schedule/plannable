@@ -73,7 +73,7 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);
-    const catalog = new Catalog(semester, parsed, new Date().toString());
+    const catalog = new Catalog(semester, parsed, new Date().toJSON());
     saveCatalog(catalog);
     return catalog;
 }

@@ -6,7 +6,7 @@
         <form class="mx-2">
             <div
                 class="form-group row no-gutters mt-2 mb-1"
-                title="Schedule grid earlier than this time won't be displayed if you don't have any class"
+                title="Schedule grid earlier than this time won't be displayed if you don't have any class before that time"
             >
                 <label for="schedule-start" class="col-lg-6 col-form-label">
                     Schedule Start
@@ -22,7 +22,7 @@
             </div>
             <div
                 class="form-group row no-gutters mb-1"
-                title="Schedule grid later than this time won't be displayed if you don't have any class"
+                title="Schedule grid later than this time won't be displayed if you don't have any class before that time"
             >
                 <label for="schedule-end" class="col-lg-6 col-form-label">Schedule End</label>
                 <div class="col-lg-6">

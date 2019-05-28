@@ -119,10 +119,11 @@ export default class Course implements CourseFields, Hashable {
             this.hasFakeSections = this.sections.some(s => s.isFake);
             this.isFake = false;
         } else {
+            // try to convert the key to a more readable format
             const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
-            const match = key.match(regex);
-            if (match) {
-                const [_, dept, num, type] = match;
+            const parts = key.match(regex);
+            if (parts) {
+                const [_, dept, num, type] = parts;
                 this.department = dept.toUpperCase();
                 this.number = +num;
                 this.type = Meta.TYPES[+type];

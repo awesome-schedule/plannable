@@ -354,16 +354,19 @@ export default class Schedule {
         const catalog = window.catalog;
         if (!catalog) return;
 
-        // console.time('compute schedule');
         this.cleanSchedule();
 
         for (const key in this.All) {
             const sections = this.All[key];
             /**
-             * the full course record of key `key`
+             * we need a full course record of key `key`
+             */
+            this.currentCourses.push(catalog.getCourse(key));
+
+            /**
+             * a "partial" course with only selected sections
              */
             const course = catalog.getCourse(key, sections);
-            this.currentCourses.push(course);
 
             // skip placing empty/faked courses
             if (!course.sections.length) continue;
@@ -435,7 +438,6 @@ export default class Schedule {
 
         // this.computeConflict();
         this.constructAdjList();
-        // console.timeEnd('compute schedule');
     }
 
     /**
@@ -443,6 +445,7 @@ export default class Schedule {
      * Perform DFS on that graph to determine the
      * maximum number of conflicting schedules that need to be rendered "in parallel".
      *
+     * @deprecated
      * @param countEvent whether to include events in this graph
      */
     public computeConflict(countEvent = true) {
@@ -578,7 +581,7 @@ export default class Schedule {
         }
     }
 
-    public placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
+    private placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
         const [days, start, , end] = dayTimes.split(' ');
         if (days && start && end) {
             const startMin = Utils.to24hr(start);

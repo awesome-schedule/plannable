@@ -183,20 +183,20 @@ class ScheduleGenerator {
                         const rooms = roomDict[i];
                         for (const room of rooms) {
                             const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
-                            // we set the match threshold to 0.5
-                            if (roomMatch.bestMatch.rating >= 0.5) {
+                            // we set the match threshold to 0.4
+                            if (roomMatch.bestMatch.rating >= 0.4) {
                                 numberList.push(roomMatch.bestMatchIndex);
                             } else {
                                 // mismatch!
-                                console.warn(room, roomMatch);
+                                console.warn(room, 'match not found!');
                                 numberList.push(-1);
                             }
                         }
                     }
                 } else {
-                    // for (const day in roomDict) {
-                    //     roomNumberDict[day] = (roomDict[day] as string[]).map(x => -1);
-                    // }
+                    for (let i = 0; i < roomDict.length; i++) {
+                        roomNumberDict[i] = (roomDict[i] as string[]).map(() => -1);
+                    }
                 }
 
                 if (sectionIndices.length !== 0)

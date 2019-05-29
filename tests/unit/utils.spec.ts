@@ -12,6 +12,7 @@ describe('Utility Tests', () => {
     it('parse time', () => {
         expect(Utils.parseTimeAsInt('11:00AM', '1:30PM')).toEqual([11 * 60, 13 * 60 + 30]);
         expect(Utils.parseTimeAsInt('12:15AM', '1:15AM')).toEqual([15, 75]);
+        expect(Utils.parseTimeAsInt('12:15AM', '12:55AM')).toEqual([15, 55]);
         expect(Utils.parseTimeAll('MoWeFr 11:00AM - 1:50PM')).toEqual([
             ['Mo', 'We', 'Fr'],
             [11 * 60, 13 * 60 + 50]

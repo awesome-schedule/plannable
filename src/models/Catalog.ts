@@ -1,6 +1,6 @@
 /**
  * @author Hanzhi Zhou
- * @see [[Catalog]]
+ * @module models
  */
 
 /**

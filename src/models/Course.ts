@@ -1,6 +1,6 @@
 /**
- * the model of a Course that has multiple sections
  * @author Hanzhi Zhou
+ * @module models
  */
 
 /**

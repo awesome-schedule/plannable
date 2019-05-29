@@ -1,7 +1,5 @@
 /**
- * The goal of the schedule evaluator is to efficiently sort the generated schedules
- * according to the set of the rules defined by the user
- *
+ * @module algorithm
  * @author Hanzhi Zhou
  */
 
@@ -62,6 +60,10 @@ export interface EvaluatorOptions {
     mode: SortMode;
 }
 
+/**
+ * The goal of the schedule evaluator is to efficiently sort the generated schedules
+ * according to the set of the rules defined by the user
+ */
 class ScheduleEvaluator {
     /**
      * defines a number of sorting functions. Note that by default, schedules are sorted in

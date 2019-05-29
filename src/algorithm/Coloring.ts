@@ -1,6 +1,7 @@
 /**
  * Utilities for graph coloring, used for rendering conflicting courses/events
  * @author Hanzhi Zhou
+ * @module algorithm
  */
 
 /**

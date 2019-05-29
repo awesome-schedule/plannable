@@ -1,7 +1,5 @@
 /**
- * The schedule generator generates all possible schedules satisfying the given constraints (filters)
- * out of the courses/sections that the user has selected
- *
+ * @module algorithm
  * @author Hanzhi Zhou, Zichao Hu
  */
 
@@ -14,6 +12,7 @@ import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { checkTimeConflict } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
+import { CourseStatus } from '@/models/Meta';
 
 /**
  * A `TimeBlock` defines the start and end time of a 'Block'
@@ -108,12 +107,16 @@ export type RawAlgoSchedule = RawAlgoCourse[];
 export interface GeneratorOptions {
     [x: string]: any;
     timeSlots: Event[];
-    status: string[];
+    status: CourseStatus[];
     sortOptions: EvaluatorOptions;
     combineSections: boolean;
     maxNumSchedules: number;
 }
 
+/**
+ * The schedule generator generates all possible schedules satisfying the given constraints (filters)
+ * out of the courses/sections that the user has selected
+ */
 class ScheduleGenerator {
     public catalog: Catalog;
     public options: GeneratorOptions;

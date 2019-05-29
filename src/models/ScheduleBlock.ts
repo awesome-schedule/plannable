@@ -1,6 +1,6 @@
 /**
  * @author Hanzhi Zhou
- * @see [[ScheduleBlock]]
+ * @module models
  */
 
 /**

@@ -1,17 +1,17 @@
 /**
  * @author Hanzhi Zhou
- * @see [[Section]]
+ * @module models
  */
 
 /**
  *
  */
+import { RoomDict, TimeDict } from '../algorithm';
+import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
-import Meta, { RawSection, CourseStatus } from './Meta';
-import Meeting from './Meeting';
 import Hashable from './Hashable';
-import { TimeDict, RoomDict } from '../algorithm/ScheduleGenerator';
-import { parseTimeAll, hashCode } from '../utils';
+import Meeting from './Meeting';
+import Meta, { CourseStatus, RawSection } from './Meta';
 
 export type SectionMatch = Match<'topic' | 'instructors'>;
 

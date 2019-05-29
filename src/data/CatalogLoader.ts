@@ -10,7 +10,7 @@ import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
 import Catalog, { CatalogJSON, SemesterJSON } from '../models/Catalog';
-import Meta, { RawCatalog, RawMeeting, RawSection } from '../models/Meta';
+import Meta, { RawCatalog, RawMeeting, RawSection, CourseStatus } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
 
@@ -121,10 +121,10 @@ export function parseSemesterData(csv_string: string) {
             parseInt(data[0]),
             data[3],
             data[23],
-            STATUSES[data[24]],
-            parseInt(data[25]),
-            parseInt(data[26]),
-            parseInt(data[27]),
+            STATUSES[data[24] as CourseStatus],
+            +data[25],
+            +data[26],
+            +data[27],
             meetings
         ];
 

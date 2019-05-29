@@ -1,6 +1,7 @@
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
- * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
+ * It gathers all children modules and store their references in a single store class,
+ * which is provided as a Mixin
  * @module store
  * @preferred
  */
@@ -14,7 +15,7 @@ import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import Event from '../models/Event';
-import Meta from '../models/Meta';
+import Meta, { CourseStatus } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import { to12hr } from '../utils';
 import display, { DisplayState } from './display';
@@ -273,7 +274,7 @@ class Store extends Vue {
     }
 
     getGeneratorOptions(): GeneratorOptions | undefined {
-        const filteredStatus: string[] = [];
+        const filteredStatus: CourseStatus[] = [];
         if (!this.filter.allowWaitlist) filteredStatus.push('Wait List');
         if (!this.filter.allowClosed) filteredStatus.push('Closed');
 

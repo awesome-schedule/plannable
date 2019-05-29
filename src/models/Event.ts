@@ -1,5 +1,5 @@
 /**
- * @see [[Event]]
+ * @module models
  * @author Kaiying Shan
  */
 
@@ -7,7 +7,7 @@
  *
  */
 import * as Utils from '../utils';
-import { TimeDict } from '../algorithm/ScheduleGenerator';
+import { TimeDict } from '../algorithm';
 import Hashable from './Hashable';
 
 /**

@@ -1,6 +1,7 @@
 /**
  * the graph model and algorithm used primarily for schedule rendering
  * @author Hanzhi Zhou
+ * @module algorithm
  */
 
 /**

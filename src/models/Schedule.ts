@@ -1,13 +1,13 @@
 /**
- * Schedule handles the storage, access, mutation and render of courses and events.
  * @author Hanzhi Zhou, Kaiying Shan
+ * @module models
  */
 // tslint:disable: member-ordering
 
 /**
  *
  */
-import { colorDepthSearch, graphColoringExact } from '../algorithm/Coloring';
+import { colorDepthSearch, graphColoringExact } from '../algorithm';
 import { depthFirstSearch, Graph, Vertex } from '../algorithm/Graph';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
@@ -31,7 +31,7 @@ export interface ScheduleOptions {
 }
 
 /**
- * A schedule is a list of courses with computed properties that aid rendering
+ * Schedule handles the storage, access, mutation and render of courses and events.
  *
  * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
  */

@@ -6,7 +6,7 @@
 /**
  *
  */
-import { TimeDict, TimeBlock } from '../algorithm/ScheduleGenerator';
+import { TimeDict, TimeBlock } from '../algorithm';
 /**
  * @author Hanzhi Zhou
  * @param time

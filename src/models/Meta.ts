@@ -1,7 +1,7 @@
 /**
  * Meta stores some constants and type definitions
  * @author Hanzhi Zhou
- * @see [[Meta]]
+ * @module models
  */
 
 /**
@@ -120,11 +120,12 @@ export default class Meta {
         Workshop: 9
     });
 
-    public static readonly STATUSES_PARSE: { [x: string]: number } = Object.freeze({
+    public static readonly STATUSES_PARSE = Object.freeze({
         Open: 1,
         Closed: 0,
-        'Wait List': 2
-    });
+        'Wait List': 2,
+        TBA: -1
+    }) as { [x in CourseStatus]: number };
 
     public static readonly storageVersion = 2;
     public static readonly semesterListExpirationTime = 86400 * 1000; // one day

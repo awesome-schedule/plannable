@@ -15,7 +15,7 @@ import { toJSON, StoreModule } from '.';
 
 interface FilterStateBase {
     [x: string]: any;
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    readonly timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;
 }
@@ -43,18 +43,6 @@ interface DetailedSortMode {
  */
 interface DetailedSortOption extends SortOption {
     /**
-     * name of this sorting option
-     */
-    readonly name: string;
-    /**
-     * whether or not this option is enabled
-     */
-    enabled: boolean;
-    /**
-     * whether to sort in reverse
-     */
-    reverse: boolean;
-    /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
     readonly exclusive: ReadonlyArray<string>;
@@ -73,7 +61,6 @@ interface DetailedSortOption extends SortOption {
  */
 interface DetailedEvaluatorOptions extends EvaluatorOptions {
     sortBy: ReadonlyArray<DetailedSortOption>;
-    mode: SortMode;
     toJSON: () => EvaluatorOptions;
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
 }
@@ -164,7 +151,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
  * get a copy of the default options
  */
 function getDefaultOptions() {
-    const options: DetailedEvaluatorOptions = Object.assign({}, defaultOptions);
+    const options = Object.assign({}, defaultOptions);
     options.sortBy = options.sortBy.map(x => Object.assign({}, x));
     return options;
 }

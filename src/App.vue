@@ -137,7 +137,7 @@
                 'margin-right': mobile ? '1vw' : 0
             }"
         >
-            <div class="container-fluid my-3">
+            <div class="w-100 my-3">
                 <div class="row justify-content-center">
                     <div class="col">
                         <Pagination></Pagination>

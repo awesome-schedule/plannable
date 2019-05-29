@@ -26,21 +26,23 @@ export interface CmpSchedule {
     coeff: number;
 }
 
-export interface SortFunctions {
-    [x: string]: (a: CmpSchedule) => number;
-    readonly variance: (a: CmpSchedule) => number;
-    readonly compactness: (a: CmpSchedule) => number;
-    readonly noEarly: (a: CmpSchedule) => number;
-    readonly lunchTime: (a: CmpSchedule) => number;
-    readonly IamFeelingLucky: (a: CmpSchedule) => number;
-}
+export type SortFunctions = typeof ScheduleEvaluator.sortFunctions;
 
 /**
  * representation of a single sort option
  */
 export interface SortOption {
-    readonly name: string;
+    /**
+     * name of this sorting option
+     */
+    readonly name: keyof SortFunctions;
+    /**
+     * whether or not this option is enabled
+     */
     enabled: boolean;
+    /**
+     * whether to sort in reverse
+     */
     reverse: boolean;
 }
 
@@ -65,7 +67,7 @@ class ScheduleEvaluator {
      * defines a number of sorting functions. Note that by default, schedules are sorted in
      * **ascending** order according to the coefficient computed by one or a combination of sorting functions.
      */
-    public static sortFunctions: SortFunctions = {
+    public static readonly sortFunctions = {
         /**
          * compute the variance of class times during the week
          *
@@ -265,7 +267,7 @@ class ScheduleEvaluator {
      * @param assign whether assign to the `coeff` field of each `CmpSchedule`
      * @returns the computed/cached array of coefficients
      */
-    public computeCoeffFor(funcName: string, assign: boolean): Float32Array {
+    public computeCoeffFor(funcName: keyof SortFunctions, assign: boolean): Float32Array {
         const schedules = this._schedules;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {
@@ -499,7 +501,10 @@ class ScheduleEvaluator {
     }
 
     public clear() {
-        this._schedules = this.schedules = [];
+        this.schedules = [];
+        this._schedules = [];
+        this.sortCoeffCache = {};
+        this.events = [];
     }
 
     /**

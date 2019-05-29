@@ -318,12 +318,9 @@ class Store extends Vue {
     }
 
     /**
-     * Select a semester and fetch all its associated data.
-     *
-     * This method will assign a correct Catalog object to `window.catalog`
-     *
-     * Then, schedules and settings will be parsed from `localStorage`
-     * and assigned to relevant fields of `this`.
+     * Select a semester and fetch all its associated data,
+     * assign a correct Catalog object to `window.catalog`,
+     * parse schedules and settings from `localStorage` and re-initialize global states
      *
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
@@ -344,6 +341,7 @@ class Store extends Vue {
         this.status.loading = false;
     }
 
+    // -------- watchers for store states that have side-effects
     @Watch('status.loading')
     @delay(10)
     loadingWatch() {
@@ -379,6 +377,8 @@ class Store extends Vue {
         this.schedule.currentSchedule.computeSchedule();
     }
 
+    // --------- watchers for states that need to be automatically saved ---------
+    // cannot watch schedules: it has circular dependencies
     // @Watch('schedule', { deep: true })
     // @delay(10)
     // private w1() {

@@ -37,6 +37,7 @@ import Store from './store';
         GridSchedule,
         SectionModal,
         CourseModal,
+        // use dynamic component for this one because it is relatively large in size
         Information: () => import('./components/tabs/Information.vue'),
         External,
         LogView

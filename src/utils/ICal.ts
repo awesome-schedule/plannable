@@ -11,7 +11,7 @@
 import * as Utils from '.';
 import Course from '../models/Course';
 import Event from '../models/Event';
-import Meta from '../models/Meta';
+import { DAYS } from '../models/Meta';
 import Schedule from '../models/Schedule';
 import Section from '../models/Section';
 
@@ -54,7 +54,7 @@ export function toICal(schedule: Schedule) {
                 }
                 for (const m of section.meetings) {
                     if (m.days === 'TBD' || m.days === 'TBA') continue;
-                    if (m.days.indexOf(Meta.days[d]) === -1) continue;
+                    if (m.days.indexOf(DAYS[d]) === -1) continue;
                     const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
                     const [, start, , end] = m.days.split(' ');
                     const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
@@ -68,7 +68,7 @@ export function toICal(schedule: Schedule) {
                     ical += 'DTSTART:' + dateToICalString(startTime) + '\r\n';
                     ical +=
                         'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-                        Meta.days[d].toUpperCase() +
+                        DAYS[d].toUpperCase() +
                         ';BYHOUR=' +
                         startTime.getHours() +
                         ';BYMINUTE=' +
@@ -104,7 +104,7 @@ export function toICal(schedule: Schedule) {
                 ical += 'DTSTART:' + dateToICalString(startTime) + '\r\n';
                 ical +=
                     'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-                    Meta.days[d].toUpperCase() +
+                    DAYS[d].toUpperCase() +
                     ';BYHOUR=' +
                     startTime.getHours() +
                     ';BYMINUTE=' +

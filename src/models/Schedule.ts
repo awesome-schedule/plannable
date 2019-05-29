@@ -286,7 +286,7 @@ export default class Schedule {
     ) {
         const newEvent = new Event(days, display, title, description, room);
         for (const e of this.events) {
-            if (e.days === days || Utils.checkTimeConflict(newEvent.toTimeDict(), e.toTimeDict())) {
+            if (e.days === days || Utils.checkTimeConflict(newEvent.toTimeArray(), e.toTimeArray())) {
                 throw new Error(`Your new event conflicts with ${e.title}`);
             }
         }

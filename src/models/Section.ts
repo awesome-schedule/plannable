@@ -6,12 +6,12 @@
 /**
  *
  */
-import { RoomDict, TimeDict } from '../algorithm';
+import { RoomArray, TimeArray } from '../algorithm';
 import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import Meta, { CourseStatus, RawSection } from './Meta';
+import { STATUSES, dayToInt, CourseStatus, RawSection } from './Meta';
 
 export type SectionMatch = Match<'topic' | 'instructors'>;
 
@@ -88,7 +88,7 @@ export default class Section implements CourseFields, Hashable {
             this.id = raw[0];
             this.section = raw[1];
             this.topic = raw[2];
-            this.status = Meta.STATUSES[raw[3]];
+            this.status = STATUSES[raw[3]];
             this.enrollment = raw[4];
             this.enrollment_limit = raw[5];
             this.wait_list = raw[6];
@@ -131,11 +131,11 @@ export default class Section implements CourseFields, Hashable {
     }
 
     /**
-     * get the time and room of this section's meetings as [[TimeDict]] and [[RoomDict]]
+     * get the time and room of this section's meetings as [[TimeArray]] and [[RoomArray]]
      */
-    public getTimeRoom(): [TimeDict, RoomDict] | null {
-        const timeDict: TimeDict = {};
-        const roomDict: RoomDict = {};
+    public getTimeRoom(): [TimeArray, RoomArray] | null {
+        const timeDict: TimeArray = [[], [], [], [], []];
+        const roomDict: RoomArray = [[], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them and add to tmp_dict
         for (const meeting of this.meetings) {
@@ -152,16 +152,17 @@ export default class Section implements CourseFields, Hashable {
 
             // for each day
             for (const day of date) {
-                const dayBlock = timeDict[day];
-                const roomBlock = roomDict[day];
+                const d = dayToInt[day];
+                const dayBlock = timeDict[d];
+                const roomBlock = roomDict[d];
                 // the timeBlock is flattened
                 if (dayBlock) {
                     dayBlock.push(...timeBlock);
                     roomBlock!.push(meeting.room);
                 } else {
                     // copy
-                    timeDict[day] = timeBlock.concat();
-                    roomDict[day] = [meeting.room];
+                    timeDict[d].push(...timeBlock);
+                    roomDict[d].push(meeting.room);
                 }
             }
         }

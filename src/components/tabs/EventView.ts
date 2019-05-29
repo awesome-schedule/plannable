@@ -7,9 +7,8 @@
  *
  */
 import { Component, Watch } from 'vue-property-decorator';
-import App from '@/App';
 import Event from '@/models/Event';
-import Meta from '@/models/Meta';
+import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 import { to12hr, to24hr } from '@/utils';
 @Component
@@ -26,9 +25,9 @@ export default class EventView extends Store {
     eventRoom? = '';
     eventDescription? = '';
     isEditingEvent = false;
-    days = Meta.days;
+
+    readonly days = DAYS;
     toBeModifiedDays = '';
-    $parent!: App;
 
     @Watch('event', { immediate: true })
     eventWatch() {
@@ -42,7 +41,7 @@ export default class EventView extends Store {
         this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
     }
     getEventDays() {
-        let days = this.eventWeek.reduce((acc, x, i) => acc + (x ? Meta.days[i] : ''), '');
+        let days = this.eventWeek.reduce((acc, x, i) => acc + (x ? this.days[i] : ''), '');
         days += ` ${to12hr(this.eventTimeFrom)} - ${to12hr(this.eventTimeTo)}`;
         return days;
     }
@@ -79,8 +78,8 @@ export default class EventView extends Store {
             ? event.description.split('<br />').join('\n')
             : '';
         const [week, start, , end] = event.days.split(' ');
-        for (let i = 0; i < Meta.days.length; i++) {
-            if (week.indexOf(Meta.days[i]) !== -1) {
+        for (let i = 0; i < this.days.length; i++) {
+            if (week.indexOf(this.days[i]) !== -1) {
                 this.$set(this.eventWeek, i, true);
             } else {
                 this.$set(this.eventWeek, i, false);

@@ -8,7 +8,6 @@
  */
 import quickselect from 'quickselect';
 import Event from '../models/Event';
-import Meta from '../models/Meta';
 import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoSchedule } from './ScheduleGenerator';
@@ -212,8 +211,6 @@ class ScheduleEvaluator {
      * @remarks This method has a high performance overhead.
      */
     public add(schedule: RawAlgoSchedule) {
-        const days = Meta.days;
-
         // sort time blocks of courses according to its schedule
         const blocks: OrderedBlocks = [[], [], [], [], []];
         const rooms: OrderedRooms = [[], [], [], [], []];
@@ -222,17 +219,16 @@ class ScheduleEvaluator {
             const roomDict = course[3];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
-                const day = days[k];
-                const timeBlock = timeDict[day];
-                const roomBlock = roomDict[day]!;
-                if (!timeBlock) continue;
+                const timeBlock = timeDict[k];
+                if (!timeBlock.length) continue;
+                const roomBlock = roomDict[k];
 
                 // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
                 const block: number[] = blocks[k];
                 const room: number[] = rooms[k];
-
+                const len = timeBlock.length;
                 // hi = half of i
-                for (let i = 0, hi = 0; i < timeBlock.length; i += 2, hi += 1) {
+                for (let i = 0, hi = 0; i < len; i += 2, hi += 1) {
                     // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
                     const ele = timeBlock[i];
                     let j = 0,

@@ -6,8 +6,8 @@
 /**
  *
  */
-import * as Utils from '../utils';
-import { TimeDict } from '../algorithm';
+import { hashCode, parseTimeAsTimeArray } from '../utils';
+import { TimeArray } from '../algorithm';
 import Hashable from './Hashable';
 
 /**
@@ -38,14 +38,14 @@ export default class Event implements Hashable {
     }
 
     public hash() {
-        return Utils.hashCode(this.days);
+        return hashCode(this.days);
     }
 
     public copy() {
         return new Event(this.days, this.display, this.title, this.description, this.room);
     }
 
-    public toTimeDict(): TimeDict {
-        return Utils.parseTimeAllAsDict(this.days)!;
+    public toTimeArray(): TimeArray {
+        return parseTimeAsTimeArray(this.days)!;
     }
 }

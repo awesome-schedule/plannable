@@ -12,7 +12,7 @@ import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { checkTimeConflict } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
-import { CourseStatus } from '@/models/Meta';
+import { CourseStatus, Week } from '@/models/Meta';
 
 /**
  * A `TimeBlock` defines the start and end time of a 'Block'
@@ -26,24 +26,10 @@ import { CourseStatus } from '@/models/Meta';
 export type TimeBlock = [number, number];
 
 /**
- * The generic type used to store some information about each day within a week
- *
- * @todo decide whether it is better to state the index signature as
- * `[x: string]: T[]` or `[x: string]: T[] | undefined`
- */
-export interface WeekDict<T> {
-    [x: string]: T[] | undefined;
-    Mo?: T[];
-    Tu?: T[];
-    We?: T[];
-    Th?: T[];
-    Fr?: T[];
-}
-
-/**
- * `TimeDict` is a data structure used to store the time blocks in a week
+ * `TimeArray` is a data structure used to store the time blocks in a week
  * that a certain `Section` or `Event` will take place.
- * The keys of a `TimeDict` are abbreviated day strings like `Mo` or `Tu`.
+ *
+ * Index from 0 to 4 represent days from Monday to Friday.
  * The values are **flattened** arrays of `TimeBlock`s, e.g. `[100, 200, 300, 400]`.
  *
  * @remarks The values are not simply `TimeBlock`s
@@ -51,53 +37,53 @@ export interface WeekDict<T> {
  *
  * Example:
  * ```js
- * const timeDict = {Mo: [600, 660, 900, 960], Fr: [1200, 1260]}
+ * const timeDict = [ [600, 660, 900, 960], [], [], [],  [1200, 1260] ]
  * ```
  * represents that this `Section` or `Event` will take place
  * every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
  *
  * @see [[TimeBlock]]
  */
-export interface TimeDict extends WeekDict<number> {}
+export interface TimeArray extends Week<number> {}
 /**
- * key: same as TimeDict
+ * index: same as TimeArray
  *
  * value: the name of the building
  *
- * if `timeDict[key]` exists, then `roomDict[key][i]` corresponds the room of the time block
- * `[timeDict[key][i * 2], timeDict[key][i * 2 + 1]]`. For example,
+ * if `timeDict[i]` is not empty, then `roomDict[i][j]` corresponds the room of the time block
+ * `[timeDict[i][j * 2], timeDict[i][j * 2 + 1]]`. The following assertion will always be true:
  * ```js
- * if (timeDict[key])
- *     expect(timeDict[key].length).toBe(roomDict[key].length / 2);
+ * if (timeDict[i].length)
+ *     expect(timeDict[i].length).toBe(roomDict[i].length / 2);
  * ```
  */
-export interface RoomDict extends WeekDict<string> {}
+export interface RoomArray extends Week<string> {}
 
 /**
- * key: same as TimeDict
+ * index: same as TimeArray
  *
- * value: the index of the building in the building list
+ * values: the index of the building in the building list
  *
  * @see https://github.com/awesome-schedule/data/blob/master/Distance/Building_Array.json
  */
-export interface RoomNumberDict extends WeekDict<number> {}
+export interface RoomNumberArray extends Week<number> {}
 
 /**
  * The data structure used in the algorithm to represent a Course that
  * possibly has multiple sections combined (occurring at the same time)
  *
  * @property 0: key of this course
- * @property 1: TimeDict
+ * @property 1: TimeArray
  * @property 2: an array of section indices
  *
  * Example:
  * ```js
- * ["span20205",{"Mo":[600,650],"Tu":[600,650]},[0, 1, 2]]
+ * ["span20205",[[600,650], [600,650], [], [], []], [0, 1, 2]]
  * ```
  *
- * @see [[TimeDict]]
+ * @see [[TimeArray]]
  */
-export type RawAlgoCourse = [string, TimeDict, number[], RoomNumberDict];
+export type RawAlgoCourse = [string, TimeArray, number[], RoomNumberArray];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -141,9 +127,9 @@ class ScheduleGenerator {
         console.time('algorithm bootstrapping');
         const buildingList: string[] = this.buildingList;
 
-        // convert events to TimeDicts so that we can easily check for time conflict
-        const timeSlots: TimeDict[] = schedule.events.map(e => e.toTimeDict());
-        for (const event of this.options.timeSlots) timeSlots.push(event.toTimeDict());
+        // convert events to TimeArrays so that we can easily check for time conflict
+        const timeSlots: TimeArray[] = schedule.events.map(e => e.toTimeArray());
+        for (const event of this.options.timeSlots) timeSlots.push(event.toTimeArray());
 
         const classList: RawAlgoCourse[][] = [];
         const courses = schedule.All;
@@ -190,11 +176,11 @@ class ScheduleGenerator {
                 }
 
                 // Map the room to a number
-                const roomNumberDict: RoomNumberDict = {};
+                const roomNumberDict: RoomNumberArray = [[], [], [], [], []];
                 if (buildingList && buildingList.length) {
-                    for (const day in roomDict) {
-                        const numberList: number[] = [];
-                        const rooms = roomDict[day] as string[];
+                    for (let i = 0; i < roomNumberDict.length; i++) {
+                        const numberList = roomNumberDict[i];
+                        const rooms = roomDict[i];
                         for (const room of rooms) {
                             const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
                             // we set the match threshold to 0.5
@@ -206,12 +192,11 @@ class ScheduleGenerator {
                                 numberList.push(-1);
                             }
                         }
-                        roomNumberDict[day] = numberList;
                     }
                 } else {
-                    for (const day in roomDict) {
-                        roomNumberDict[day] = (roomDict[day] as string[]).map(x => -1);
-                    }
+                    // for (const day in roomDict) {
+                    //     roomNumberDict[day] = (roomDict[day] as string[]).map(x => -1);
+                    // }
                 }
 
                 if (sectionIndices.length !== 0)

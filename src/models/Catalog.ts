@@ -7,7 +7,7 @@
  *
  */
 import Course, { Match } from './Course';
-import Meta, { RawCatalog, RawCourse } from './Meta';
+import { RawCatalog, RawCourse, TYPES } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 import Meeting from './Meeting';
@@ -102,7 +102,7 @@ export default class Catalog {
      */
     convertKey(key: string, schedule?: Schedule) {
         const raw = this.raw_data[key];
-        if (raw) return `${raw[0]} ${raw[1]} ${Meta.TYPES[raw[2]]}`;
+        if (raw) return `${raw[0]} ${raw[1]} ${TYPES[raw[2]]}`;
         else if (schedule) {
             for (const event of schedule.events) {
                 if (event.key === key) {

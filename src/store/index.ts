@@ -15,7 +15,7 @@ import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import Event from '../models/Event';
-import Meta, { CourseStatus } from '../models/Meta';
+import { CourseStatus, DAYS } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import { to12hr } from '../utils';
 import display, { DisplayState } from './display';
@@ -251,7 +251,7 @@ class Store extends Vue {
         for (const time of this.filter.timeSlots) {
             let days = '';
             for (let j = 0; j < 5; j++) {
-                if (time[j]) days += Meta.days[j];
+                if (time[j]) days += DAYS[j];
             }
 
             if (!days) continue;

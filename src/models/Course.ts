@@ -7,7 +7,7 @@
  *
  */
 import Section, { SectionMatch } from './Section';
-import Meta, { RawCourse, CourseType } from './Meta';
+import { RawCourse, CourseType, TYPES } from './Meta';
 import Hashable from './Hashable';
 import { hashCode } from '../utils';
 
@@ -103,7 +103,7 @@ export default class Course implements CourseFields, Hashable {
         if (raw) {
             this.department = raw[0];
             this.number = raw[1];
-            this.type = Meta.TYPES[raw[2]];
+            this.type = TYPES[raw[2]];
             this.units = raw[3];
             this.title = raw[4];
             this.description = raw[5];
@@ -126,7 +126,7 @@ export default class Course implements CourseFields, Hashable {
                 const [_, dept, num, type] = parts;
                 this.department = dept.toUpperCase();
                 this.number = +num;
-                this.type = Meta.TYPES[+type];
+                this.type = TYPES[+type];
             } else {
                 this.department = '?';
                 this.number = 0;

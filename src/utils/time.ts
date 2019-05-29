@@ -6,7 +6,8 @@
 /**
  *
  */
-import { TimeDict, TimeBlock } from '../algorithm';
+import { TimeArray, TimeBlock } from '../algorithm';
+import { Day, dayToInt } from '@/models/Meta';
 /**
  * @author Hanzhi Zhou
  * @param time
@@ -17,12 +18,12 @@ import { TimeDict, TimeBlock } from '../algorithm';
  * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
  * ```
  */
-export function parseTimeAll(time: string): [string[], TimeBlock] | null {
+export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
-        const dayList = [];
+        const dayList: Day[] = [];
         for (let i = 0; i < days.length; i += 2) {
-            dayList.push(days.substr(i, 2));
+            dayList.push(days.substr(i, 2) as Day);
         }
         return [dayList, parseTimeAsInt(start, end)];
     }
@@ -43,13 +44,13 @@ export function parseTimeAll(time: string): [string[], TimeBlock] | null {
  * })
  * ```
  */
-export function parseTimeAllAsDict(time: string): TimeDict | null {
+export function parseTimeAsTimeArray(time: string): TimeArray | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
-        const timeDict: TimeDict = {};
+        const timeDict: TimeArray = [[], [], [], [], []];
         const block = parseTimeAsInt(start, end);
         for (let i = 0; i < days.length; i += 2) {
-            timeDict[days.substr(i, 2)] = block;
+            timeDict[dayToInt[days.substr(i, 2) as Day]].push(...block);
         }
         return timeDict;
     }
@@ -95,27 +96,26 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
 }
 
 /**
- * return true of two `TimeDict` objects have overlapping time blocks, false otherwise
+ * return true of two `TimeArray` objects have overlapping time blocks, false otherwise
  *
  * @author Zichao Hu, Hanzhi Zhou
  * @param timeDict1
  * @param timeDict2
  */
-export function checkTimeConflict(timeDict1: TimeDict, timeDict2: TimeDict) {
-    for (const dayBlock in timeDict1) {
-        const timeBlocks2 = timeDict2[dayBlock];
-        if (!timeBlocks2) {
-            continue;
-        }
-        // if the key exists, it cannot be undefined.
-        const timeBlocks1 = timeDict1[dayBlock] as number[];
+export function checkTimeConflict(timeDict1: TimeArray, timeDict2: TimeArray) {
+    for (let i = 0; i < 5; i++) {
+        const timeBlocks2 = timeDict2[i];
+        if (!timeBlocks2.length) continue;
 
-        for (let i = 0; i < timeBlocks1.length; i += 2) {
-            const begin = timeBlocks1[i] + 1;
-            const end = timeBlocks1[i + 1] - 1;
-            for (let j = 0; j < timeBlocks2.length; j += 2) {
-                const beginTime = timeBlocks2[j];
-                const endTime = timeBlocks2[j + 1];
+        const timeBlocks1 = timeDict1[i];
+        if (!timeBlocks1.length) continue;
+
+        for (let j = 0; j < timeBlocks1.length; j += 2) {
+            const begin = timeBlocks1[j] + 1;
+            const end = timeBlocks1[j + 1] - 1;
+            for (let k = 0; k < timeBlocks2.length; k += 2) {
+                const beginTime = timeBlocks2[k];
+                const endTime = timeBlocks2[k + 1];
                 if (
                     (begin <= beginTime && beginTime <= end) ||
                     (begin <= endTime && endTime <= end) ||

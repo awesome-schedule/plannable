@@ -8,7 +8,7 @@
  */
 import axios from 'axios';
 import { SemesterJSON } from '../models/Catalog';
-import Meta from '../models/Meta';
+import { semesterListExpirationTime } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
@@ -33,7 +33,7 @@ export async function loadSemesterList(count = 5): Promise<NotiMsg<SemesterJSON[
             infoMsg: 'Semester list loaded',
             errMsg: x => `Failed to fetch semester list: ${x}`,
             warnMsg: x => `Failed to fetch semester list: ${x}. Old data is used`,
-            expireTime: Meta.semesterListExpirationTime,
+            expireTime: semesterListExpirationTime,
             timeoutTime: 10000
         }
     );

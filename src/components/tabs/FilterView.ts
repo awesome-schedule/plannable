@@ -8,7 +8,7 @@
  */
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import Meta from '@/models/Meta';
+import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 
 @Component({
@@ -18,7 +18,7 @@ import Store from '@/store';
 })
 export default class FilterView extends Store {
     get days() {
-        return Meta.days;
+        return DAYS;
     }
     dragEnd() {
         if (this.filter.sortOptions.mode === 0) this.changeSorting(undefined);

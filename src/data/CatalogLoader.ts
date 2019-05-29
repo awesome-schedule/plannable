@@ -10,7 +10,15 @@ import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
 import Catalog, { CatalogJSON, SemesterJSON } from '../models/Catalog';
-import Meta, { RawCatalog, RawMeeting, RawSection, CourseStatus } from '../models/Meta';
+import {
+    RawCatalog,
+    RawMeeting,
+    RawSection,
+    CourseStatus,
+    semesterDataExpirationTime,
+    TYPES_PARSE,
+    STATUSES_PARSE
+} from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
 
@@ -35,7 +43,7 @@ export async function loadSemesterData(
             errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
             warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
             infoMsg: `Successfully loaded ${semester.name} data!`,
-            expireTime: Meta.semesterDataExpirationTime,
+            expireTime: semesterDataExpirationTime,
             timeoutTime: 15000,
             force
         }
@@ -79,8 +87,8 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
 }
 
 export function parseSemesterData(csv_string: string) {
-    const CLASS_TYPES = Meta.TYPES_PARSE;
-    const STATUSES = Meta.STATUSES_PARSE;
+    const CLASS_TYPES = TYPES_PARSE;
+    const STATUSES = STATUSES_PARSE;
     console.time('parsing csv');
     const raw_data: string[][] = parse(csv_string, {
         skipEmptyLines: true,

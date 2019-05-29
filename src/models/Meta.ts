@@ -79,58 +79,66 @@ export type RawMeeting = [string, string, string, string];
 
 export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr';
 
+/**
+ * The generic type used to store some information about each day within a week
+ */
 export type Week<T> = [T[], T[], T[], T[], T[]];
 
-export default class Meta {
-    public static readonly days: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
-    /**
-     * lecture type number => meaning
-     */
-    public static readonly TYPES: { [x: number]: CourseType } = Object.freeze({
-        '-1': '',
-        0: 'Clinical',
-        1: 'Discussion',
-        2: 'Drill',
-        3: 'Independent Study',
-        4: 'Laboratory',
-        5: 'Lecture',
-        6: 'Practicum',
-        7: 'Seminar',
-        8: 'Studio',
-        9: 'Workshop'
-    }) as { [x: number]: CourseType };
+export const dayToInt = Object.freeze({
+    Mo: 0,
+    Tu: 1,
+    We: 2,
+    Th: 3,
+    Fr: 4
+}) as { readonly [key in Day]: number };
 
-    /**
-     * status number => meaning
-     */
-    public static readonly STATUSES: { [x: number]: CourseStatus } = Object.freeze({
-        '-1': 'TBA',
-        1: 'Open',
-        0: 'Closed',
-        2: 'Wait List'
-    }) as { [x: number]: CourseStatus };
+export const DAYS: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+/**
+ * lecture type number => meaning
+ */
+export const TYPES: { [x: number]: CourseType } = Object.freeze({
+    '-1': '',
+    0: 'Clinical',
+    1: 'Discussion',
+    2: 'Drill',
+    3: 'Independent Study',
+    4: 'Laboratory',
+    5: 'Lecture',
+    6: 'Practicum',
+    7: 'Seminar',
+    8: 'Studio',
+    9: 'Workshop'
+}) as { [x: number]: CourseType };
 
-    public static readonly TYPES_PARSE: { [x: string]: number } = Object.freeze({
-        Clinical: 0,
-        Discussion: 1,
-        Drill: 2,
-        'Independent Study': 3,
-        Laboratory: 4,
-        Lecture: 5,
-        Practicum: 6,
-        Seminar: 7,
-        Studio: 8,
-        Workshop: 9
-    });
+/**
+ * status number => meaning
+ */
+export const STATUSES: { [x: number]: CourseStatus } = Object.freeze({
+    '-1': 'TBA',
+    1: 'Open',
+    0: 'Closed',
+    2: 'Wait List'
+}) as { [x: number]: CourseStatus };
 
-    public static readonly STATUSES_PARSE = Object.freeze({
-        Open: 1,
-        Closed: 0,
-        'Wait List': 2,
-        TBA: -1
-    }) as { [x in CourseStatus]: number };
+export const TYPES_PARSE: { [x: string]: number } = Object.freeze({
+    Clinical: 0,
+    Discussion: 1,
+    Drill: 2,
+    'Independent Study': 3,
+    Laboratory: 4,
+    Lecture: 5,
+    Practicum: 6,
+    Seminar: 7,
+    Studio: 8,
+    Workshop: 9
+});
 
-    public static readonly storageVersion = 2;
-    public static readonly semesterListExpirationTime = 86400 * 1000; // one day
-    public static readonly semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
-}
+export const STATUSES_PARSE = Object.freeze({
+    Open: 1,
+    Closed: 0,
+    'Wait List': 2,
+    TBA: -1
+}) as { [x in CourseStatus]: number };
+
+export const semesterListExpirationTime = 86400 * 1000; // one day
+export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours

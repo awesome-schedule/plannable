@@ -32,7 +32,7 @@
     \begin{center}
         \vspace*{1cm}
  
-        \LARGE\textbf{Near-Optimal Schedule Rendering by Graph Coloring}
+        \LARGE\textbf{Near-Optimal Concurrent Events Rendering by Graph Coloring and DFS}
    
         \vspace{1.5cm}
  
@@ -151,6 +151,6 @@ After the coloring is obtained, a naive approach to turn colors into left and wi
 However, this method does not give a satisfying result. Figure~\ref{fig:pos-naive} demonstrates its problem: Some events are not `aware' of the fact that there is no event of greater color after it and that it can have `extended' width. For example, `APMA 3110' has color 1, but there is no node that has color 2 adajcent to it, so it can actually have twice the width as `COMM 3010' which has color 0. To solve this problem, we developed a method explained in the next section. 
 
 \subsection{Color DFS}
-
+To deal with the problem of the naive approach, we developed a DFS-based method to discover the maximum depth of the path that each node is on. Our algorithm is slightly different from the conventional DFS due to the fact that the depth of all nodes are known beforehand. 
 
 \end{document}

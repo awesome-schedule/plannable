@@ -176,9 +176,12 @@
             <p>
                 Keywords that match these fields will be highlighted. If none of the
                 courses/sections have highlights at the first glance, it usually because it is a
-                description, which can be shown in the modal by clicking the
+                description match, which can be shown by clicking the
                 <i class="fas fa-info-circle"></i> icon.
             </p>
+            <v-card class="mt-3 mb-5 mx-auto gif-center">
+                <v-img :src="imgPath('match-desc.png')"></v-img>
+            </v-card>
 
             <h5 id="item-2-1">Schedule Manipulation</h5>
             <v-layout class="mb-4">

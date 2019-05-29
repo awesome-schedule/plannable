@@ -1,7 +1,8 @@
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
- * @author Hanzhi Zhou
+ * @module store
+ * @preferred
  */
 
 /**
@@ -128,7 +129,7 @@ export function saveStatus() {
 const jobs: { [x: string]: string } = {};
 
 /**
- * delay the execution of a **method** and store the handler in `jobs`,
+ * a decorator that delays the execution of a **method** and store the handler in [[jobs]],
  * cancel all subsequent calls in the meantime
  * @param timeout delay in millisecond
  */
@@ -153,6 +154,10 @@ function delay(timeout: number) {
     };
 }
 
+/**
+ * The Store module provides methods to save, retrieve and manipulate store.
+ * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
+ */
 @Component
 class Store extends Vue {
     filter = filter;

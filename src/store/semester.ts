@@ -1,6 +1,5 @@
 /**
- * the semester module handles semester switching and data retrieval
- * @author Hanzhi Zhou
+ * @module store
  */
 
 /**
@@ -16,6 +15,10 @@ export interface SemesterState {
     lastUpdate: string;
 }
 
+/**
+ * the semester module handles semester switching and data retrieval
+ * @author Hanzhi Zhou
+ */
 class Semesters implements SemesterState {
     [x: string]: any;
     semesters: SemesterJSON[] = [];

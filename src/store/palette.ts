@@ -1,6 +1,5 @@
 /**
- * the palette module handles the customization of colors of courses and events
- * @author Hanzhi Zhou
+ * @module store
  */
 
 /**
@@ -12,6 +11,10 @@ export interface PaletteState {
     savedColors: { [x: string]: string };
 }
 
+/**
+ * the palette module handles the customization of colors of courses and events
+ * @author Hanzhi Zhou
+ */
 class Palette implements StoreModule<PaletteState, PaletteState> {
     public savedColors: { [x: string]: string } = {};
 

@@ -1,6 +1,5 @@
 /**
- * the status module stores the temporary statuses of the webpage. We do not save these statuses to localStorage
- * @author Hanzhi Zhou
+ * @module store
  */
 
 /**
@@ -24,6 +23,10 @@ interface SidebarStatus extends Sidebars {
     [key: string]: boolean;
 }
 
+/**
+ * the status module stores the temporary statuses of the webpage. We do not save these statuses to localStorage
+ * @author Hanzhi Zhou
+ */
 class Status {
     /**
      * sidebar display status

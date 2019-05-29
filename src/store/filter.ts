@@ -1,5 +1,5 @@
 /**
- * the filter module handles manipulation of filters
+ * @module store
  * @author Hanzhi Zhou
  */
 
@@ -160,6 +160,9 @@ function getDefaultOptions() {
 // otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions());
 
+/**
+ * the filter module handles the manipulation of filters
+ */
 class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     [x: string]: any;
     /**

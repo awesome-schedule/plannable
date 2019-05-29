@@ -1,5 +1,7 @@
 /**
- * utils module, the module containing utilities classes and functions
+ * the module containing utilities functions used across the whole project
+ * @module utils
+ * @preferred
  */
 
 /**

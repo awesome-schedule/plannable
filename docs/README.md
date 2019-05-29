@@ -79,7 +79,7 @@ We use a number of global variables to share large and non-reactive data, becaus
 -   timeMatrix
 -   buildingList
 
-The `catalog` variable is an instance of the `Catalog` class and is used to store the course data of the current semester. `scheduleEvaluator` is an instance of the `ScheduleEvaluator` class that is used to store the generated schedules. Both instances have instance properties that contain more than a thousand keys/values. The othter two variables store the data needed by the `Walking Distance` sort option.
+The `catalog` variable is an instance of the `Catalog` class and is used to store the course data of the current semester. `scheduleEvaluator` is an instance of the `ScheduleEvaluator` class that is used to store the generated schedules. Both instances have instance properties that contain more than a thousand keys/values. The other two variables store the data needed by the `Walking Distance` sort option.
 
 ## Model and Algorithm
 

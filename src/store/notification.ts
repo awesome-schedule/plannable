@@ -1,5 +1,5 @@
 /**
- * the notification module encapsulates common functions used to inform user about the results of certain actions
+ * @module store
  * @author Hanzhi Zhou
  */
 
@@ -77,6 +77,9 @@ const LEVELS: { [x in NotiClass]: number } = Object.freeze({
     danger: 3
 });
 
+/**
+ * the notification module encapsulates common functions used to inform user about the results of certain actions
+ */
 class Notification implements NotiState {
     public msg: string = '';
     public cls: NotiClass | '' = '';

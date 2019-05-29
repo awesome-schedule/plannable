@@ -1,6 +1,7 @@
 # Plannable
 
 > Previously known as Awesome-Schedule
+
 > Note: the credit of both the old and the new name goes to [OAHC2022](https://github.com/OAHC2022)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b323d65880a148aa85e5a811e4791d53)](https://app.codacy.com/app/hanzhi713/Awesome-SchedulAR?utm_source=github.com&utm_medium=referral&utm_content=awesome-schedule/Awesome-SchedulAR&utm_campaign=Badge_Grade_Dashboard)

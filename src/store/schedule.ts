@@ -1,6 +1,5 @@
 /**
- * the schedule module provides methods to manipulate schedules
- * @author Hanzhi Zhou
+ * @module store
  */
 
 /**
@@ -27,6 +26,10 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
+/**
+ * the schedule module provides methods to manipulate schedules
+ * @author Hanzhi Zhou
+ */
 class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     /**
      * total number of generated schedules, has the same value as

@@ -1,5 +1,6 @@
 /**
  * utilities for converting a schedule to a corresponding iCalendar file
+ * @module utils
  * @todo need testing
  * @author Kaiying Shan
  */

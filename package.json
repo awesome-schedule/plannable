@@ -9,7 +9,7 @@
         "test:unit": "vue-cli-service test:unit",
         "test": "vue-cli-service test:unit",
         "update:force": "rm -rf node_modules && rm -f package-lock.json && npm install",
-        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
+        "tsdoc": "typedoc --plugin typedoc-plugin-external-module-name --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
         "exec": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"}",
         "postinstall": "patch-package"
     },

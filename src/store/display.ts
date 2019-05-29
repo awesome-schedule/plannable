@@ -1,6 +1,5 @@
 /**
- * the display module handles global display options
- * @author Hanzhi Zhou
+ * @module store
  */
 
 /**
@@ -34,6 +33,10 @@ export interface DisplayState {
     numSearchResults: number;
 }
 
+/**
+ * the display module handles global display options
+ * @author Hanzhi Zhou
+ */
 class Display implements StoreModule<DisplayState, DisplayState> {
     [x: string]: any;
     public showTime = false;

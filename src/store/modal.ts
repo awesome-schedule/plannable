@@ -1,6 +1,6 @@
 /**
- * the modal module handles modal triggering
- * @author Hanzhi Zhou
+ * @module store
+ * @author Hanzhi Zhu
  */
 
 /**
@@ -16,6 +16,9 @@ export interface ModalState {
     course: Course | null;
 }
 
+/**
+ * the modal module handles modal triggering
+ */
 class Modal implements ModalState {
     section: Section | null = null;
     course: Course | null = null;

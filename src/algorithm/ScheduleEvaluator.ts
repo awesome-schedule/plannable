@@ -6,14 +6,15 @@
 /**
  *
  */
+import { Week } from '@/models/Meta';
 import quickselect from 'quickselect';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoSchedule } from './ScheduleGenerator';
 
-type OrderedBlocks = [number[], number[], number[], number[], number[]];
-type OrderedRooms = [number[], number[], number[], number[], number[]];
+type OrderedBlocks = Week<number>;
+type OrderedRooms = Week<number>;
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;

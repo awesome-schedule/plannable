@@ -5,8 +5,8 @@
         </div>
         <ul class="list-group list-group-flush mx-1">
             <li
-                v-for="item in noti.history"
-                :key="item.stamp + item.msg"
+                v-for="(item, idx) in noti.history"
+                :key="idx"
                 class="list-group-item pt-1 pb-2 px-2 my-0"
             >
                 <span :class="`text-${item.cls}`">{{ item.msg }}</span> <br />

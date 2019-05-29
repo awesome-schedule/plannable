@@ -54,7 +54,7 @@ export interface TimeArray extends Week<number> {}
  * `[timeDict[i][j * 2], timeDict[i][j * 2 + 1]]`. The following assertion will always be true:
  * ```js
  * if (timeDict[i].length)
- *     expect(timeDict[i].length).toBe(roomDict[i].length / 2);
+ *     expect(timeDict[i].length).toBe(roomDict[i].length * 2);
  * ```
  */
 export interface RoomArray extends Week<string> {}
@@ -72,9 +72,10 @@ export interface RoomNumberArray extends Week<number> {}
  * The data structure used in the algorithm to represent a Course that
  * possibly has multiple sections combined (occurring at the same time)
  *
- * @property 0: key of this course
- * @property 1: TimeArray
- * @property 2: an array of section indices
+ * 0: key of this course
+ * 1: TimeArray
+ * 2: an array of section indices
+ * 3: RoomNumberArray
  *
  * Example:
  * ```js

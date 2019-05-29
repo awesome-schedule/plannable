@@ -13,6 +13,7 @@
                     <i class="far fa-calendar-alt"></i> Basic Operations</a
                 >
                 <nav class="nav nav-pills flex-column">
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-2-0">Course Searching</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-1">Schedule Manipulation</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Schedule Rendering</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-3">Enroll in SIS</a>
@@ -150,7 +151,36 @@
 
             <h3 id="item-2"><i class="far fa-calendar-alt"></i> Basic Operations</h3>
             <hr />
-            <div id="item-2-1" style="width:100%;height:2px"></div>
+
+            <h5 id="item-2-0">Course Searching</h5>
+            <p>
+                We provide an all-in-one search box that generates realtime feedback. It is
+                case-insensitve and do partial matching (e.g. "linear alg" for "linear algebra").
+                However, advance fuzzy search, such as "info tech" for "information technology"is
+                not supported, because it is too slow to provide realtime results. It is able to
+                search the following fields of each course and section.
+            </p>
+            <ol>
+                <li>Course number: econ 2020, 2102, with or without spaces</li>
+                <li>Course title: microecon, discrete, etc.</li>
+                <li>Topic of a section*: computational</li>
+                <li>Professor name*: bloomfield</li>
+                <li>Description: heap, fourier transform, etc.</li>
+            </ol>
+            <p>
+                Starred fields are fields of sections, not courses. While other fields filter out
+                courses, they filter out sections. Our algorithm matches the fields in the order
+                given by the list above, which means a course that has a title "linear algebra" will
+                come before a section that has topic "linear algebra" in the results.
+            </p>
+            <p>
+                Keywords that match these fields will be highlighted. If none of the
+                courses/sections have highlights at the first glance, it usually because it is a
+                description, which can be shown in the modal by clicking the
+                <i class="fas fa-info-circle"></i> icon.
+            </p>
+
+            <h5 id="item-2-1">Schedule Manipulation</h5>
             <v-layout class="mb-4">
                 <v-flex xs8 sm4 class="mr-4">
                     <v-card>
@@ -408,7 +438,7 @@
                 <li>I'm Feeling Lucky: Sort Randomly</li>
             </ol>
             <p>
-                Note that it is possible to reverse one of more of the sort options provided above:
+                Note that it is possible to reverse one or more of the sort options provided above:
                 just click the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want
                 your schedule to be very compact (i.e. you want to have some time to rest between
                 classes), you can enable "Vertical compactness" and click the

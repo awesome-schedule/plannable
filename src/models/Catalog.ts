@@ -196,7 +196,7 @@ export default class Catalog {
     private searchTitle(key: string, query: string, course: RawCourse, results: Course[]) {
         const title = course[4].toLowerCase();
         const titleIdx = title.indexOf(query);
-        if (titleIdx !== -1) {
+        if (titleIdx !== -1 && !results.find(x => x.key === key)) {
             results.push(
                 new Course(course, key, [], {
                     match: 'title',
@@ -224,7 +224,7 @@ export default class Catalog {
                 });
             }
         }
-        if (topicMatchIdx.length)
+        if (topicMatchIdx.length && !results.find(x => x.key === key))
             results.push(new Course(course, key, topicMatchIdx, undefined, topicMatches));
     }
 
@@ -247,7 +247,7 @@ export default class Catalog {
                 });
             }
         }
-        if (profMatchIdx.length)
+        if (profMatchIdx.length && !results.find(x => x.key === key))
             results.push(new Course(course, key, profMatchIdx, undefined, profMatches));
     }
 
@@ -255,7 +255,7 @@ export default class Catalog {
         const desc = course[5].toLowerCase();
         const descIdx = desc.indexOf(query);
         // lastly, check description match
-        if (descIdx !== -1) {
+        if (descIdx !== -1 && !results.find(x => x.key === key)) {
             results.push(
                 new Course(course, key, [], {
                     match: 'description',

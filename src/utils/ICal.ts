@@ -28,8 +28,8 @@ export function toICal(schedule: Schedule) {
     let startDate: Date = new Date(2019, 7, 27, 0, 0, 0),
         endDate: Date = new Date(2019, 11, 6, 0, 0, 0);
 
-    for (const day of Meta.days) {
-        for (const sb of schedule.days[day]) {
+    for (const blocks of schedule.days) {
+        for (const sb of blocks) {
             if (sb.section instanceof Section) {
                 for (const m of sb.section.meetings) {
                     if (!m.dates || m.dates === 'TBD' || m.dates === 'TBA') continue;
@@ -46,7 +46,7 @@ export function toICal(schedule: Schedule) {
     }
 
     for (let d = 0; d < 5; d++) {
-        for (const sb of schedule.days[Meta.days[d]]) {
+        for (const sb of schedule.days[d]) {
             if (sb.section instanceof Section || sb.section instanceof Course) {
                 let section = sb.section;
                 if (section instanceof Course) {

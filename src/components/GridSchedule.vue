@@ -49,13 +49,13 @@
                     <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
                     <template v-for="(day, idx) in days">
                         <course-block
-                            v-for="(scheduleBlock, _) in schedule.currentSchedule.days[day]"
+                            v-for="(scheduleBlock, _) in schedule.currentSchedule.days[+idx]"
                             :key="day + _"
                             :schedule-block="scheduleBlock"
                             :height-info="heightInfo"
                             :absolute-earliest="absoluteEarliest"
                             :style="{
-                                left: (idx + scheduleBlock.left) * 20 + '%',
+                                left: (+idx + scheduleBlock.left) * 20 + '%',
                                 width: 20 * scheduleBlock.width + '%'
                             }"
                             :day="day"

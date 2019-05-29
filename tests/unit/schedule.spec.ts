@@ -86,9 +86,7 @@ describe('Schedule Test', () => {
         schedule.update('cs11105', 0);
         schedule.addEvent('MoTu 12:00AM - 3:00AM', true, 'title1');
         schedule.computeSchedule();
-        expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
-            3
-        );
+        expect(schedule.days.reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(3);
         try {
             schedule.addEvent('MoTu 12:15AM - 2:00AM', true);
         } catch (err) {
@@ -118,8 +116,7 @@ describe('Schedule Test', () => {
 
         schedule.hover('cs21105', true);
         schedule.hover('cs21504', true);
-        for (const day in schedule.days) {
-            const blocks = schedule.days[day];
+        for (const blocks of schedule.days) {
             for (const block of blocks) {
                 if (block.section instanceof Section) {
                     if (block.section.key === 'cs21105') {

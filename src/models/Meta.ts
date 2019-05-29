@@ -77,8 +77,12 @@ export type RawSection = [number, string, string, number, number, number, number
  */
 export type RawMeeting = [string, string, string, string];
 
+export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr';
+
+export type Week<T> = [T[], T[], T[], T[], T[]];
+
 export default class Meta {
-    public static readonly days: ReadonlyArray<string> = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+    public static readonly days: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
     /**
      * lecture type number => meaning
      */
@@ -106,7 +110,6 @@ export default class Meta {
         2: 'Wait List'
     }) as { [x: number]: CourseStatus };
 
-    // maybe do this using enum?
     public static readonly TYPES_PARSE: { [x: string]: number } = Object.freeze({
         Clinical: 0,
         Discussion: 1,

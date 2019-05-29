@@ -17,6 +17,7 @@ import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
+import { Day, Week } from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: Array<{ id: number; section: string }> | number[] | -1 };
@@ -40,6 +41,14 @@ export default class Schedule {
         combineSections: true,
         multiSelect: true
     });
+
+    public static readonly dayToInt = Object.freeze({
+        Mo: 0,
+        Tu: 1,
+        We: 2,
+        Th: 3,
+        Fr: 4
+    }) as { readonly [key in Day]: number };
 
     public static readonly bgColors: ReadonlyArray<string> = [
         '#f7867e',
@@ -151,14 +160,7 @@ export default class Schedule {
     /**
      * computed based on `this.All` by `computeSchedule`
      */
-    public days: {
-        [x: string]: ScheduleBlock[];
-        Mo: ScheduleBlock[];
-        Tu: ScheduleBlock[];
-        We: ScheduleBlock[];
-        Th: ScheduleBlock[];
-        Fr: ScheduleBlock[];
-    };
+    public days: Week<ScheduleBlock>;
     /**
      * total credits stored in this schedule, computed based on `this.All`
      */
@@ -202,13 +204,7 @@ export default class Schedule {
         events: Event[] = []
     ) {
         this.All = {};
-        this.days = {
-            Mo: [],
-            Tu: [],
-            We: [],
-            Th: [],
-            Fr: []
-        };
+        this.days = [[], [], [], [], []];
         this._preview = null;
         this.title = title;
         this.id = id;
@@ -418,8 +414,7 @@ export default class Schedule {
             // do not place into the schedule if the section is already rendered
             // instead, we highlight the schedule
             let found = false;
-            for (const day in this.days) {
-                const blocks = this.days[day];
+            for (const blocks of this.days) {
                 for (const block of blocks) {
                     if (!(block.section instanceof Event) && block.section.has(section)) {
                         found = block.strong = true;
@@ -452,10 +447,8 @@ export default class Schedule {
         const graph: Graph<number> = new Map();
 
         // construct conflict graph for each column
-        for (const day in this.days) {
-            const blocks = countEvent
-                ? this.days[day]
-                : this.days[day].filter(block => !(block.section instanceof Event));
+        for (let blocks of this.days) {
+            if (countEvent) blocks = blocks.filter(block => !(block.section instanceof Event));
 
             // instantiate all the nodes
             const nodes: Vertex<number>[] = [];
@@ -516,8 +509,8 @@ export default class Schedule {
     }
 
     public constructAdjList() {
-        for (const day in this.days) {
-            const blocks = this.days[day].sort((a, b) => +b - +a);
+        for (const blocks of this.days) {
+            blocks.sort((a, b) => +b - +a);
             const graph: number[][] = blocks.map(() => []);
 
             // construct an undirected graph
@@ -593,7 +586,7 @@ export default class Schedule {
             }
             for (let i = 0; i < days.length; i += 2) {
                 const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
-                this.days[days.substr(i, 2)].push(scheduleBlock);
+                this.days[Schedule.dayToInt[days.substr(i, 2) as Day]].push(scheduleBlock);
             }
         }
     }
@@ -607,9 +600,7 @@ export default class Schedule {
     }
 
     public cleanSchedule() {
-        for (const key in this.days) {
-            this.days[key] = [];
-        }
+        this.days = [[], [], [], [], []];
         this.colorSlots.forEach(x => x.clear());
         this.totalCredit = 0;
         this.currentCourses = [];

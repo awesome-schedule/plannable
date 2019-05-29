@@ -44,7 +44,9 @@
                 </li>
             </template>
             <li v-else class="list-group-item">
-                Select your class first. Then come back to change the color for display.
+                You can only customize colors of things displayed in your schedule. Please select
+                your classes and generate your schedules, then come back to change the color for
+                them.
             </li>
         </ul>
     </nav>

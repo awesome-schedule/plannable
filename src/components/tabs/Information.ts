@@ -7,9 +7,39 @@ import { VueMathjax } from 'vue-mathjax';
 import 'bootstrap';
 import $ from 'jquery';
 
+import {
+    // used in information.vue
+    VDivider,
+    VBtn,
+    VImg,
+    VLayout,
+    VProgressCircular,
+
+    // steppers
+    VStepper,
+    VStepperHeader,
+    VStepperStep,
+    VStepperContent,
+    VStepperItems
+} from 'vuetify/lib';
+
 @Component({
     components: {
-        VueMathjax
+        VueMathjax,
+
+        // used in information.vue
+        VDivider,
+        VBtn,
+        VImg,
+        VLayout,
+        VProgressCircular,
+
+        // steppers
+        VStepper,
+        VStepperHeader,
+        VStepperStep,
+        VStepperContent,
+        VStepperItems
     }
 })
 export default class Information extends Vue {

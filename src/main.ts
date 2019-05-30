@@ -9,16 +9,35 @@
 import axios from 'axios';
 import querystring from 'querystring';
 import Vue from 'vue';
-import Vuetify from 'vuetify';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch, openLousList, openVAGrade } from './utils';
+import 'vuetify/src/stylus/app.styl';
+
+import Vuetify, {
+    VApp, // required
+    VFooter,
+    VCard,
+    VCardTitle,
+    VCardText,
+    VCardActions,
+    VIcon
+} from 'vuetify/lib';
 
 Vue.use(Vuetify, {
     iconfont: 'fa',
     icons: {
         complete: 'fas fa-check'
+    },
+    components: {
+        VApp, // required
+        VFooter,
+        VCard,
+        VCardTitle,
+        VCardText,
+        VCardActions,
+        VIcon
     }
 });
 

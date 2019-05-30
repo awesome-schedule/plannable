@@ -1,6 +1,7 @@
 /**
- * Script for loading and parsing the list of semesters from Lou's list
+ * @module data
  * @author Hanzhi Zhou
+ * Script for loading and parsing the list of semesters from Lou's list
  */
 
 /**

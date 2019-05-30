@@ -1,3 +1,10 @@
+// note: this is the description for the entire module.
+/**
+ * The data module contains functions for loading data from localStorage or remote
+ * @module data
+ * @preferred
+ */
+
 /**
  * Script for loading building list and distance (time) matrix
  * @author Hanzhi Zhou
@@ -73,6 +80,9 @@ export async function loadBuildingList(force = false): Promise<NotiMsg<string[]>
     return data;
 }
 
+/**
+ * request from remote and store in localStorage
+ */
 async function requestTimeMatrix(): Promise<Int32Array> {
     const res = await axios.get(`${api}/data/Distance/Time_Matrix.json`);
     const data: number[][] = res.data;
@@ -96,6 +106,9 @@ async function requestTimeMatrix(): Promise<Int32Array> {
     }
 }
 
+/**
+ * request from remote and store in localStorage
+ */
 async function requestBuildingList(): Promise<string[]> {
     const res = await axios.get(`${api}/data/Distance/Building_Array.json`);
     const data = res.data;

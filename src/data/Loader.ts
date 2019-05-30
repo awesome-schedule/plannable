@@ -1,12 +1,6 @@
 /**
- * contains the template function that helps to load data from cache/remote
+ * @module data
  * @author Hanzhi Zhou
- *
- * For example usage
- * @see [[loadTimeMatrix]]
- * @see [[loadBuildingList]]
- * @see [[loadSemesterList]]
- * @see [[loadSemesterData]]
  */
 
 /**
@@ -17,7 +11,10 @@ import { NotiMsg } from '../store/notification';
 import { errToStr, timeout } from '../utils';
 
 /**
- * Examples, see [[loadBuildingList]] and [[loadSemesterData]]
+ * The template function that helps to load data from cache/remote
+ *
+ * Example usage:
+ * @see [[loadTimeMatrix]],[[loadBuildingList]],[[loadSemesterList]],[[loadSemesterData]]
  *
  * @typeparam T the type of the object to construct
  * @typeparam T_JSON the JSON representation of the object T

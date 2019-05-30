@@ -1,6 +1,7 @@
 /**
- * Script for loading the catalog for a given semester
+ * @module data
  * @author Hanzhi Zhou, Kaiying Shan
+ * Script for loading the catalog for a given semester
  */
 
 /**

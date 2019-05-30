@@ -1,6 +1,12 @@
+// note: this is the description for the entire module.
+/**
+ * models and data structures used across the website
+ * @module models
+ * @preferred
+ */
+
 /**
  * @author Hanzhi Zhou
- * @module models
  */
 
 /**

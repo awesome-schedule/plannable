@@ -1,5 +1,5 @@
 <template>
-    <nav class="d-block bg-light sidebar">
+    <nav class="bg-light sidebar">
         <div class="btn bg-info nav-btn">
             Import/Export Schedule
         </div>

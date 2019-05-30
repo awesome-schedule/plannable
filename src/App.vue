@@ -6,9 +6,8 @@
             :section="modal.section"
         ></section-modal>
 
-        <!-- Tab Icons Start (Leftmost bar) -->
         <nav
-            class="d-block bg-light tab-bar"
+            class="tab-bar bg-light"
             :style="{
                 width: sideBarWidth + 'vw'
             }"
@@ -77,16 +76,15 @@
             >
                 <i class="fas fa-info-circle"></i>
             </div>
-            <!-- <div
-                title="What's happening"
+            <div
+                title="Blank Page"
                 :class="{ 'tab-icon-active': sideBar.showExternal }"
                 class="tab-icon mb-4"
-                @click="switchSideBar('showExternal')"
+                @click="status.switchSideBar('showExternal')"
             >
                 <i class="fas fa-bullhorn"></i>
-            </div> -->
+            </div>
         </nav>
-        <!-- Tab Icons End (Leftmost bar) -->
 
         <class-view v-if="sideBar.showSelectClass"></class-view>
 
@@ -128,6 +126,7 @@
                 </button>
             </div>
         </transition>
+
         <div
             v-if="!sideBar.showInfo && !sideBar.showExternal"
             class="schedule"
@@ -144,9 +143,10 @@
                 </div>
             </div>
             <grid-schedule></grid-schedule>
-            <v-footer dark height="auto" class="w-100">
-                <v-card class="flex" flat tile>
-                    <v-card-title class="teal py-4">
+
+            <v-footer id="app-footer" dark height="auto" class="w-100">
+                <v-card class="flex w-100" flat tile>
+                    <v-card-title class="teal py-3">
                         <strong class="subheading mr-auto"
                             >Get connected with us and let us hear your voice!
                         </strong>
@@ -198,7 +198,7 @@
                         </a>
                     </v-card-title>
 
-                    <v-card-actions class="grey darken-3 justify-center">
+                    <v-card-actions class="grey darken-3 justify-content-center">
                         &copy;2019 —&nbsp;<strong>Plannable</strong>
                     </v-card-actions>
                 </v-card>
@@ -288,10 +288,6 @@
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-    .sidebar,
-    .sidebar-nocol {
-        display: none !important;
-    }
     nav {
         display: none !important;
     }
@@ -347,5 +343,10 @@
 .btn-days .btn {
     border-radius: 0;
     padding: 0.25rem 0.25rem;
+}
+
+/* Vuetify has overriden this, which is very annoying */
+[type='number'] {
+    width: inherit !important;
 }
 </style>

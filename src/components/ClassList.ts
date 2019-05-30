@@ -1,10 +1,7 @@
 /**
- * A **pure** component for
- *
- * 1. displaying the list of courses that are match the query string when searching
- * 2. displaying the list of courses currently selected
- *
- * @author Hanzhi Zhou
+ * Miscellaneous components used in tabs and App.vue
+ * @module components
+ * @preferred
  */
 
 /**
@@ -13,8 +10,16 @@
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-import Course, { Match } from '../models/Course';
+import Course from '../models/Course';
 
+/**
+ * A **pure** component for
+ *
+ * 1. displaying the list of courses that are match the query string when searching
+ * 2. displaying the list of courses currently selected
+ *
+ * @author Hanzhi Zhou
+ */
 @Component({
     components: {
         Expand

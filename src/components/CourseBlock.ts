@@ -1,10 +1,5 @@
 /**
- * the component for rendering a course on GridSchedule
- * @author Kaiying Shan, Hanzhi Zhou
- */
-
-/**
- *
+ * @module components
  */
 import { Component, Prop } from 'vue-property-decorator';
 import Course from '../models/Course';
@@ -14,6 +9,10 @@ import Section from '../models/Section';
 import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 
+/**
+ * the component for rendering a course on GridSchedule
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
 @Component
 export default class CourseBlock extends Store {
     @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;

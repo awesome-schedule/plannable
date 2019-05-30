@@ -1,16 +1,15 @@
 /**
- * the component for customizing colors of classes and events
- * @author Hanzhi Zhou
- */
-
-/**
- *
+ * @module components/tabs
  */
 import randomColor from 'randomcolor';
 import { Component } from 'vue-property-decorator';
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
 
+/**
+ * the component for customizing colors of classes and events
+ * @author Hanzhi Zhou
+ */
 @Component
 export default class Palette extends Store {
     set(key: string, color: string) {

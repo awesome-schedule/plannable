@@ -1,5 +1,6 @@
 /**
  * the entry point of our project
+ * @author Hanzhi Zhou
  */
 
 /**

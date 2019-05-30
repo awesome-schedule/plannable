@@ -1,15 +1,14 @@
 /**
- * component for import/export/print schedules
- * @author Kaiying Shan, Hanzhi Zhou
- */
-
-/**
- *
+ * @module components/tabs
  */
 import { Component } from 'vue-property-decorator';
 import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 
+/**
+ * component for import/export/print schedules
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
 @Component
 export default class ExportView extends Store {
     exportJson: string = 'schedule';

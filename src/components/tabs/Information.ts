@@ -1,3 +1,6 @@
+/**
+ * @module components/tabs
+ */
 // tslint:disable:max-line-length
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import { VueMathjax } from 'vue-mathjax';

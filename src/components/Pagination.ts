@@ -1,14 +1,13 @@
 /**
- * The component for showing a list of pages, used for switching between generated schedules
- * @author Kaiying Shan, Hanzhi Zhou
- */
-
-/**
- *
+ * @module components
  */
 import { Component, Watch } from 'vue-property-decorator';
 import Store from '../store';
 
+/**
+ * The component for showing a list of pages, used for switching between generated schedules
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
 @Component
 export default class Pagination extends Store {
     get curIdx() {

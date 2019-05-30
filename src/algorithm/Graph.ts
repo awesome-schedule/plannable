@@ -43,6 +43,10 @@ export class Vertex<T> {
      * the value contained in this vertex
      */
     public readonly val: T;
+
+    /**
+     * @param t the value contained in this node
+     */
     constructor(t: T) {
         this.val = t;
     }
@@ -65,6 +69,9 @@ export class Vertex<T> {
     }
 }
 
+/**
+ * adjacency list representation of a graph
+ */
 export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
 
 /**

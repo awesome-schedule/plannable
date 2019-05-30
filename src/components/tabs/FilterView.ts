@@ -1,16 +1,15 @@
 /**
- * the component for editing and applying filters
- * @author Hanzhi Zhou, Kaiying Shan
- */
-
-/**
- *
+ * @module components/tabs
  */
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 
+/**
+ * the component for editing and applying filters
+ * @author Hanzhi Zhou, Kaiying Shan
+ */
 @Component({
     components: {
         draggable

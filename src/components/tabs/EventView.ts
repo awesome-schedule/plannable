@@ -1,16 +1,16 @@
 /**
- * the component for adding and editing events
- * @author Kaiying Shan, Hanzhi Zhou
- */
-
-/**
- *
+ * @module components/tabs
  */
 import { Component, Watch } from 'vue-property-decorator';
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 import { to12hr, to24hr } from '@/utils';
+
+/**
+ * the component for adding and editing events
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
 @Component
 export default class EventView extends Store {
     get event() {

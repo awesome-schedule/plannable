@@ -1,6 +1,7 @@
 /**
- * component for editing classes and manipulating schedules
- * @author Hanzhi Zhou
+ * Tabs components, shown when their corresponding tabs are active
+ * @module components/tabs
+ * @preferred
  */
 
 /**
@@ -11,6 +12,10 @@ import Course from '@/models/Course';
 import Store from '@/store';
 import ClassList from '../ClassList.vue';
 
+/**
+ * component for editing classes and manipulating schedules
+ * @author Hanzhi Zhou
+ */
 @Component({
     components: {
         ClassList

@@ -176,8 +176,8 @@
             </p>
             <p>
                 Keywords that match these fields will be highlighted. If none of the
-                courses/sections is highlighted at the first glance, it is likely that your input is
-                a description match, which can be shown by clicking the
+                courses/sections are highlighted at the first glance, it is likely that your input
+                is a description match, which can be shown by clicking the
                 <i class="fas fa-info-circle"></i> icon.
             </p>
             <v-card class="mt-3 mb-5 mx-auto gif-center">
@@ -364,8 +364,8 @@
                 <v-img :src="imgPath('enroll-sis.png')"></v-img>
             </v-card>
             <p>
-                If some of the IDs are missing, it may because you are in "Edit class" mode and you
-                selected "Any section" for that course. If there is a "+1" (or a higher number)
+                If some of the IDs are missing, it is likely that you are in "Edit class" mode and
+                you selected "Any section" for that course. If there is a "+1" (or a higher number)
                 after an ID, it means that course has more than one sections available at the given
                 time shown in your schedule. To view the list of sections, click the corresponding
                 course block rendered in the grid. For example, in the schedule shown below, there
@@ -379,7 +379,7 @@
             <hr />
             <p>
                 You can add your weekly commitments on the schedule, such as club meetings, office
-                hours, etc. You can edit an existed event by clicking it on the schedule. The
+                hours, etc. You can edit an existing event by clicking it on the schedule. The
                 schedule generator will generate schedules that do not conflict with your events.
                 However, if it is not possible to find such a schedule, an error will be thrown.
             </p>

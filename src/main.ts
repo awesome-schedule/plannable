@@ -8,7 +8,6 @@
 import axios from 'axios';
 import querystring from 'querystring';
 import Vue from 'vue';
-// import Vuetify from 'vuetify';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
@@ -22,20 +21,7 @@ import Vuetify, {
     VCardTitle,
     VCardText,
     VCardActions,
-    VFlex,
-    VImg,
-    VBtn,
-    VIcon,
-    VDivider,
-    VLayout,
-    VProgressCircular,
-
-    // steppers
-    VStepper,
-    VStepperHeader,
-    VStepperStep,
-    VStepperContent,
-    VStepperItems
+    VIcon
 } from 'vuetify/lib';
 
 Vue.use(Vuetify, {
@@ -50,19 +36,7 @@ Vue.use(Vuetify, {
         VCardTitle,
         VCardText,
         VCardActions,
-        VBtn,
-        VImg,
-        VIcon,
-        VDivider,
-        VLayout,
-        VProgressCircular,
-
-        // steppers
-        VStepper,
-        VStepperHeader,
-        VStepperStep,
-        VStepperContent,
-        VStepperItems
+        VIcon
     }
 });
 

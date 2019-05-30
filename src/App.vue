@@ -133,8 +133,7 @@
             class="schedule"
             :style="{
                 width: mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
-                'margin-left': (mobile ? 11 : scheduleLeft) + 'vw',
-                'margin-right': mobile ? '1vw' : 0
+                'margin-left': (mobile ? 11 : scheduleLeft) + 'vw'
             }"
         >
             <div class="w-100 my-3">
@@ -145,13 +144,12 @@
                 </div>
             </div>
             <grid-schedule></grid-schedule>
-            <v-footer id="app-footer" dark height="auto">
+            <v-footer dark height="auto" class="w-100">
                 <v-card class="flex" flat tile>
-                    <v-card-title class="teal">
+                    <v-card-title class="teal py-4">
                         <strong class="subheading mr-auto"
                             >Get connected with us and let us hear your voice!
                         </strong>
-
                         <a
                             style="color:inherit;text-decoration: none;"
                             target="_blank"
@@ -201,7 +199,7 @@
                     </v-card-title>
 
                     <v-card-actions class="grey darken-3 justify-center">
-                        &copy;2019&nbsp;—&nbsp;<strong>Plannable</strong>
+                        &copy;2019 —&nbsp;<strong>Plannable</strong>
                     </v-card-actions>
                 </v-card>
             </v-footer>

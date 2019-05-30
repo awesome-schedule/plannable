@@ -22,7 +22,8 @@ import Vuetify, {
     VCardTitle,
     VCardText,
     VCardActions,
-    VIcon
+    VIcon,
+    VBtn
 } from 'vuetify/lib';
 
 Vue.use(Vuetify, {
@@ -37,7 +38,8 @@ Vue.use(Vuetify, {
         VCardTitle,
         VCardText,
         VCardActions,
-        VIcon
+        VIcon,
+        VBtn
     }
 });
 

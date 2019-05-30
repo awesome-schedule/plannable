@@ -10,7 +10,6 @@ import $ from 'jquery';
 import {
     // used in information.vue
     VDivider,
-    VBtn,
     VImg,
     VLayout,
     VProgressCircular,
@@ -29,7 +28,6 @@ import {
 
         // used in information.vue
         VDivider,
-        VBtn,
         VImg,
         VLayout,
         VProgressCircular,

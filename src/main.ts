@@ -8,16 +8,61 @@
 import axios from 'axios';
 import querystring from 'querystring';
 import Vue from 'vue';
-import Vuetify from 'vuetify';
+// import Vuetify from 'vuetify';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch, openLousList, openVAGrade } from './utils';
+import 'vuetify/src/stylus/app.styl';
+
+import Vuetify, {
+    VApp, // required
+    VFooter,
+    VCard,
+    VCardTitle,
+    VCardText,
+    VCardActions,
+    VFlex,
+    VImg,
+    VBtn,
+    VIcon,
+    VDivider,
+    VLayout,
+    VProgressCircular,
+
+    // steppers
+    VStepper,
+    VStepperHeader,
+    VStepperStep,
+    VStepperContent,
+    VStepperItems
+} from 'vuetify/lib';
 
 Vue.use(Vuetify, {
     iconfont: 'fa',
     icons: {
         complete: 'fas fa-check'
+    },
+    components: {
+        VApp, // required
+        VFooter,
+        VCard,
+        VCardTitle,
+        VCardText,
+        VCardActions,
+        VBtn,
+        VImg,
+        VIcon,
+        VDivider,
+        VLayout,
+        VProgressCircular,
+
+        // steppers
+        VStepper,
+        VStepperHeader,
+        VStepperStep,
+        VStepperContent,
+        VStepperItems
     }
 });
 

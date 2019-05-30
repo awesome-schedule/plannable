@@ -185,8 +185,9 @@
             </v-card>
 
             <h5 id="item-2-1">Schedule Manipulation</h5>
-            <v-layout class="mb-4">
-                <v-flex xs8 sm4 class="mr-4">
+
+            <div class="row mt-3 mb-5">
+                <div class="col-sm">
                     <v-card>
                         <v-img :src="imgPath('search_class.png')" aspect-ratio="1.6"></v-img>
 
@@ -208,8 +209,8 @@
                             </div>
                         </v-card-title>
                     </v-card>
-                </v-flex>
-                <v-flex xs8 sm4 class="mr-4">
+                </div>
+                <div class="col-sm">
                     <v-card>
                         <v-img :src="imgPath('generate_schedule.png')" aspect-ratio="1.6"></v-img>
 
@@ -229,8 +230,8 @@
                             </div>
                         </v-card-title>
                     </v-card>
-                </v-flex>
-                <v-flex xs8 sm4>
+                </div>
+                <div class="col-sm">
                     <v-card>
                         <v-img :src="imgPath('multiple_schedule.png')" aspect-ratio="1.6"></v-img>
 
@@ -253,8 +254,9 @@
                             </div>
                         </v-card-title>
                     </v-card>
-                </v-flex>
-            </v-layout>
+                </div>
+            </div>
+
             <p class="lead px-4 py-2 border-left border-info" style="background-color: #eeeeee">
                 Tip: It is recommeded that you prepare "backup" schedules using the "Multiple
                 Schedule" function provided, especially if you are trying to enroll in some popular

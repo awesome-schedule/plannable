@@ -148,11 +148,10 @@
             <v-footer id="app-footer" dark height="auto">
                 <v-card class="flex" flat tile>
                     <v-card-title class="teal">
-                        <strong class="subheading"
+                        <strong class="subheading mr-auto"
                             >Get connected with us and let us hear your voice!
                         </strong>
 
-                        <v-spacer></v-spacer>
                         <a
                             style="color:inherit;text-decoration: none;"
                             target="_blank"

@@ -73,7 +73,7 @@
                 <strong
                     >Important note: It is recommended that you save the schedule after you finish
                     (see <a href="#item-7-2">Export to JSON</a>, or
-                    <a href="#item-7-1">Export to iCalender</a>), because our website uses your
+                    <a href="#item-7-1">Export to iCalendar</a>), because our website uses your
                     browser cache to store data, which could be lost if it expires or the cache is
                     cleared. If you find any problem when using our website, please first check
                     whether you are using a compatible browser (see
@@ -83,7 +83,7 @@
             </p>
             <p>
                 <strong>TL; DR</strong><br />
-                We provide tooltips providing brief descriptions for most buttons and icons (place
+                We provide tooltips containing brief descriptions for most buttons and icons (place
                 your mouse over them for a while and you will see). You are welcome to skip this
                 guide 😏
             </p>
@@ -91,14 +91,14 @@
             <h4 id="item-1-1">Introduction to Auto-Scheduling</h4>
             <!-- <hr /> -->
             <p>
-                Before the invention of auto-scheduling, we have the pick the sections of the
-                courses that we want to take and come up with a schedule. Due to the availability of
-                multiple sections, there may exist up to millions of possible schedules (e.g. 10
-                sections per course and 7 courses in total, considering conflict). It is difficult
-                to both enumerate schedules by hand and come up with an optimal schedule. There is
-                where auto-scheduling comes in. It basically allows you to just provide a list of
-                courses with undetermined or pratially determined sections, and it will do the rest
-                of the hard work for you.
+                Before the invention of auto-scheduling, we have to pick course sections that we
+                want to take and come up with a schedule. Due to the availability of multiple
+                sections, there may exist up to millions of possible schedules (e.g. 10 sections per
+                course and 7 courses in total, considering conflict). It is difficult to both
+                enumerate schedules by hand and come up with an optimal schedule. This is where
+                auto-scheduling comes in. It basically allows you to just provide a list of courses
+                with undetermined or partially determined sections, and it will do the rest of the
+                hard work for you.
             </p>
 
             <h4 id="item-1-2">Planned vs. Generated Schedules</h4>
@@ -119,13 +119,13 @@
                         schedules on the same interface: Planned schedules (sometimes also referred
                         as proposed schedules) and generated schedules. Planned schedules are what
                         you provide to the auto-scheduler as input. Generated schedules are the
-                        output of the scheduler.
+                        outputs of the scheduler.
                     </p>
                     <p>
                         To differentiate these two sets of schedules, we provide two edit modes:
                         Edit Class mode and View Schedule mode. View Schedule mode is not available
                         until you have clicked the "Generate" button. After you have generated some
-                        schedules, you can switch between your planned schedule and generated
+                        schedules, you can switch between your planned schedules and generated
                         schedules by clicking the button below the searching bar. You should not
                         modify a generated schedule. Although doing so will not break anything, it
                         will trigger a warning because it is a common mistake 🤔. What you should do
@@ -143,7 +143,7 @@
                     href="https://cn.plannable.org"
                     >https://cn.plannable.org</a
                 >) whose content is synchronized with the primary website once per hour. However,
-                your data is not synchronized (and its techniqually impossible to do so). If you
+                your data is not synchronized (and it is techniqually impossible to do so). If you
                 want to transfer your data between them, you need to use the
                 <a href="#item-7-2">Export to JSON</a> function provided.
             </p>
@@ -155,10 +155,11 @@
             <h5 id="item-2-0">Course Searching</h5>
             <p>
                 We provide an all-in-one search box that generates realtime feedback. It is
-                case-insensitve and do partial matching (e.g. "linear alg" for "linear algebra").
-                However, advance fuzzy search, such as "info tech" for "information technology"is
-                not supported, because it is too slow to provide realtime results. It is able to
-                search the following fields of each course and section.
+                case-insensitve and can do partial matching (e.g. "linear alg" for "linear
+                algebra"). However, advance fuzzy search, such as "info tech" for "information
+                technology" is not supported, because it is too slow to provide realtime results.
+                The searching engine is able to search the following fields of each course and
+                section.
             </p>
             <ol>
                 <li>Course number: econ 2020, 2102, with or without spaces</li>
@@ -169,14 +170,14 @@
             </ol>
             <p>
                 Starred fields are fields of sections, not courses. While other fields filter out
-                courses, they filter out sections. Our algorithm matches the fields in the order
+                courses, these filter out sections. Our algorithm matches the fields in the order
                 given by the list above, which means a course that has a title "linear algebra" will
                 come before a section that has topic "linear algebra" in the results.
             </p>
             <p>
                 Keywords that match these fields will be highlighted. If none of the
-                courses/sections have highlights at the first glance, it usually because it is a
-                description match, which can be shown by clicking the
+                courses/sections is highlighted at the first glance, it is likely that your input is
+                a description match, which can be shown by clicking the
                 <i class="fas fa-info-circle"></i> icon.
             </p>
             <v-card class="mt-3 mb-5 mx-auto gif-center">
@@ -368,7 +369,7 @@
                 after an ID, it means that course has more than one sections available at the given
                 time shown in your schedule. To view the list of sections, click the corresponding
                 course block rendered in the grid. For example, in the schedule shown below, there
-                are five available ENWR 1510 at Monday and Wednesday 5:00 to 6:15PM.
+                are five available ENWR 1510 on Monday and Wednesday from 5:00 to 6:15PM.
             </p>
             <v-card class="mt-3 mb-5 mx-auto gif-center">
                 <v-img :src="imgPath('multi-section.png')"></v-img>
@@ -378,8 +379,8 @@
             <hr />
             <p>
                 You can add your weekly commitments on the schedule, such as club meetings, office
-                hours, etc. You can edit an existing event by clicking it the event on the schedule.
-                The schedule generator will generate schedules that do not conflict with your event.
+                hours, etc. You can edit an existed event by clicking it on the schedule. The
+                schedule generator will generate schedules that do not conflict with your events.
                 However, if it is not possible to find such a schedule, an error will be thrown.
             </p>
             <p>
@@ -496,7 +497,7 @@
             <hr />
             <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
-                ICalendar is a standard file format used to represent information in a calednar.
+                ICalendar is a standard file format used to represent information in a calendar.
                 Apple and Google calendar both support importing from iCalendar files. Note that we
                 currently do NOT support importing from iCalendar files. If you want to re-import
                 your schedule sometime later, you must use <a href="#item-7-2">export to JSON</a>.
@@ -564,7 +565,7 @@
             <h3 id="item-9">Contributing</h3>
             <hr />
             <p>
-                Our website is completely free and open course under the GPL-v3 license. Our source
+                Our website is completely free and open sourse under the GPL-v3 license. Our source
                 code is
                 <a href="https://github.com/awesome-schedule/Awesome-SchedulAR" target="_blank">
                     available at GitHub </a

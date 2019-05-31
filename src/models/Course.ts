@@ -64,6 +64,7 @@ export default class Course implements CourseFields, Hashable {
      * @see [[Meta.TYPES_PARSE]]
      */
     public readonly key: string;
+
     public readonly department: string;
     public readonly number: number;
     public readonly type: CourseType;
@@ -76,12 +77,12 @@ export default class Course implements CourseFields, Hashable {
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: number[];
-    public readonly sections: Section[];
+    public readonly sids: ReadonlyArray<number>;
+    public readonly sections: ReadonlyArray<Section>;
 
     public readonly isFake: boolean;
     public readonly hasFakeSections: boolean;
-    public readonly matches?: CourseMatch[];
+    public readonly matches?: ReadonlyArray<CourseMatch>;
 
     /**
      * @param raw the raw representation of this course
@@ -91,7 +92,7 @@ export default class Course implements CourseFields, Hashable {
     constructor(
         raw: RawCourse | undefined,
         key: string,
-        sids: number[] = [],
+        sids: ReadonlyArray<number> = [],
         matches?: CourseMatch[],
         secMatches: SectionMatch[][] = []
     ) {
@@ -99,7 +100,7 @@ export default class Course implements CourseFields, Hashable {
         this.raw = raw;
 
         if (sids.length) {
-            this.sids = sids.sort();
+            this.sids = sids.slice().sort();
         } else {
             this.sids = raw ? Array.from({ length: raw[6].length }, (_, i) => i) : [];
         }

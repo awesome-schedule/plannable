@@ -22,6 +22,14 @@
             </div>
             <div
                 class="tab-icon mt-0 mb-4"
+                :class="{ 'tab-icon-active': sideBar.showFuzzy }"
+                title="Edit Events"
+                @click="status.switchSideBar('showFuzzy')"
+            >
+                <i class="fab fa-elementor"></i>
+            </div>
+            <div
+                class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showEvent }"
                 title="Edit Events"
                 @click="status.switchSideBar('showEvent')"
@@ -87,6 +95,8 @@
         </nav>
 
         <class-view v-if="sideBar.showSelectClass"></class-view>
+
+        <fuzzy-view v-else-if="sideBar.showFuzzy"> </fuzzy-view>
 
         <event-view v-else-if="sideBar.showEvent"> </event-view>
 

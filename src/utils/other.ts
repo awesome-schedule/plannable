@@ -47,8 +47,7 @@ export function highlightMatch<T extends string>(str: string, expMatch: T, match
     if (!matches || !matches.length) return str;
     let result = '';
     let lastEnd = 0;
-    for (const m of matches) {
-        const { match, start, end } = m;
+    for (const { match, start, end } of matches) {
         if (match === expMatch) {
             result += `${str.substring(lastEnd, start)}<span class="bg-warning">${str.substring(
                 start,

@@ -17,6 +17,7 @@ interface Sidebars {
     showInfo: boolean;
     showExternal: boolean;
     showLog: boolean;
+    showFuzzy: boolean;
 }
 
 interface SidebarStatus extends Sidebars {
@@ -34,6 +35,7 @@ class Status {
      */
     sideBar: SidebarStatus = {
         showSelectClass: window.screen.width / window.screen.height > 1 ? true : false,
+        showFuzzy: false,
         showEvent: false,
         showFilter: false,
         showSetting: false,

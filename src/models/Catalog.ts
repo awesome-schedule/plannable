@@ -13,10 +13,12 @@
  *
  */
 import Course, { Match } from './Course';
-import { RawCatalog, RawCourse, TYPES } from './Meta';
+import { RawCatalog, RawCourse, TYPES, TYPES_PARSE } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 import Meeting from './Meeting';
+import Fuse from 'fuse.js';
+// import Worker from 'worker-loader!./SearchWorker.ts';
 
 /**
  * represents a semester
@@ -60,6 +62,7 @@ export default class Catalog {
 
     private keys: string[];
     private values: RawCourse[];
+    // private worker: Worker;
 
     constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
@@ -68,6 +71,8 @@ export default class Catalog {
 
         this.keys = Object.keys(this.raw_data);
         this.values = Object.values(this.raw_data);
+        // console.log('worker created');
+        // this.worker = new Worker(require('./SearchWorker.ts'));
     }
 
     public fromJSON(data: CatalogJSON) {
@@ -117,6 +122,61 @@ export default class Catalog {
             }
         }
         return key;
+    }
+
+    public fuzzySearch(query: string) {
+        const fuse = new Fuse(this.values, {
+            shouldSort: true,
+            includeMatches: true,
+            threshold: 0.5,
+            location: 0,
+            distance: 100,
+            maxPatternLength: 32,
+            minMatchCharLength: 2,
+            keys: [0, 4, 5] // '6.2', '6.7'
+        });
+        const results = fuse.search(query).slice(0, 10);
+        interface FuseMatch {
+            indices: [number, number][];
+            value: string;
+            key: string;
+            arrayIndex: number;
+        }
+        const courses = [];
+        for (const result of results) {
+            const { item, matches } = result;
+            const courseMatches: Match<any>[] = [];
+            for (const match of matches as FuseMatch[]) {
+                let matchKey;
+                if (match.arrayIndex === 0) {
+                    matchKey = 'key';
+                } else if (match.arrayIndex === 4) {
+                    matchKey = 'title';
+                } else if (match.arrayIndex === 5) {
+                    matchKey = 'description';
+                }
+                console.log(match);
+                for (const indices of match.indices) {
+                    const m = {
+                        match: matchKey,
+                        start: indices[0],
+                        end: indices[1]
+                    };
+                    if (
+                        !courseMatches.find(
+                            x => x.match === m.match && x.start === m.start && x.end === m.end
+                        )
+                    )
+                        courseMatches.push(m);
+                }
+            }
+            console.log(item, courseMatches);
+            courses.push(
+                new Course(item, (item[0] + item[1] + item[2]).toLowerCase(), [], courseMatches)
+            );
+            if (courses.length > 10) break;
+        }
+        return courses;
     }
 
     /**

@@ -11,6 +11,7 @@ import { Component } from 'vue-property-decorator';
 import ClassView from './components/tabs/ClassView.vue';
 import DisplayView from './components/tabs/DisplayView.vue';
 import EventView from './components/tabs/EventView.vue';
+import FuzzyView from './components/tabs/FuzzyView.vue';
 import ExportView from './components/tabs/ExportView.vue';
 import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
@@ -28,6 +29,7 @@ import Store from './store';
 @Component({
     components: {
         ClassView,
+        FuzzyView,
         EventView,
         DisplayView,
         FilterView,

@@ -20,15 +20,6 @@ export type SectionMatch = Match<'topic' | 'instructors'>;
  * and it holds additional information specific to that section.
  */
 export default class Section implements CourseFields, Hashable {
-    /**
-     * convert a section array to a course holding the section array
-     * @param sections
-     */
-    public static sectionsToCourse(sections: Section[]) {
-        const course = sections[0].course;
-        return new Course(course.raw, course.key, sections.map(x => x.sid));
-    }
-
     public readonly department: string;
     public readonly number: number;
     public readonly type: string;

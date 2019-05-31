@@ -286,7 +286,10 @@ export default class Schedule {
     ) {
         const newEvent = new Event(days, display, title, description, room);
         for (const e of this.events) {
-            if (e.days === days || Utils.checkTimeConflict(newEvent.toTimeArray(), e.toTimeArray())) {
+            if (
+                e.days === days ||
+                Utils.checkTimeConflict(newEvent.toTimeArray(), e.toTimeArray())
+            ) {
                 throw new Error(`Your new event conflicts with ${e.title}`);
             }
         }
@@ -386,7 +389,7 @@ export default class Schedule {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
-                            Section.sectionsToCourse(secs)
+                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.sid)))
                         );
                         const id = combined[0].getFirstSection().id;
 

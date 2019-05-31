@@ -190,11 +190,18 @@ export default class Catalog {
             const deptLen = course[0].length;
             const end = keyIdx + queryNoSp.length;
             results.push(
-                new Course(course, key, [], {
-                    match: 'key',
-                    start: keyIdx + +(keyIdx >= deptLen),
-                    end: end + +(end > deptLen)
-                })
+                new Course(
+                    course,
+                    key,
+                    [],
+                    [
+                        {
+                            match: 'key',
+                            start: keyIdx + +(keyIdx >= deptLen),
+                            end: end + +(end > deptLen)
+                        }
+                    ]
+                )
             );
         }
     }
@@ -204,11 +211,18 @@ export default class Catalog {
         const titleIdx = title.indexOf(query);
         if (titleIdx !== -1 && !results.find(x => x.key === key)) {
             results.push(
-                new Course(course, key, [], {
-                    match: 'title',
-                    start: titleIdx,
-                    end: titleIdx + query.length
-                })
+                new Course(
+                    course,
+                    key,
+                    [],
+                    [
+                        {
+                            match: 'title',
+                            start: titleIdx,
+                            end: titleIdx + query.length
+                        }
+                    ]
+                )
             );
         }
     }
@@ -216,18 +230,20 @@ export default class Catalog {
     private searchTopic(key: string, query: string, course: RawCourse, results: Course[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatchIdx = [];
-        const topicMatches: Match<'topic'>[] = [];
+        const topicMatches: [Match<'topic'>][] = [];
         const sections = course[6];
         for (let i = 0; i < sections.length; i++) {
             const topic = sections[i][2];
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
                 topicMatchIdx.push(i);
-                topicMatches.push({
-                    match: 'topic',
-                    start: topicIdx,
-                    end: topicIdx + query.length
-                });
+                topicMatches.push([
+                    {
+                        match: 'topic',
+                        start: topicIdx,
+                        end: topicIdx + query.length
+                    }
+                ]);
             }
         }
         if (topicMatchIdx.length && !results.find(x => x.key === key))
@@ -237,7 +253,7 @@ export default class Catalog {
     private searchProf(key: string, query: string, course: RawCourse, results: Course[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatchIdx = [];
-        const profMatches: Match<'instructors'>[] = [];
+        const profMatches: [Match<'instructors'>][] = [];
         const sections = course[6];
         for (let i = 0; i < sections.length; i++) {
             const profs = Meeting.getInstructors(sections[i][7])
@@ -246,11 +262,13 @@ export default class Catalog {
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
                 profMatchIdx.push(i);
-                profMatches.push({
-                    match: 'instructors',
-                    start: profIdx,
-                    end: profIdx + query.length
-                });
+                profMatches.push([
+                    {
+                        match: 'instructors',
+                        start: profIdx,
+                        end: profIdx + query.length
+                    }
+                ]);
             }
         }
         if (profMatchIdx.length && !results.find(x => x.key === key))
@@ -263,11 +281,18 @@ export default class Catalog {
         // lastly, check description match
         if (descIdx !== -1 && !results.find(x => x.key === key)) {
             results.push(
-                new Course(course, key, [], {
-                    match: 'description',
-                    start: descIdx,
-                    end: descIdx + query.length
-                })
+                new Course(
+                    course,
+                    key,
+                    [],
+                    [
+                        {
+                            match: 'description',
+                            start: descIdx,
+                            end: descIdx + query.length
+                        }
+                    ]
+                )
             );
         }
     }

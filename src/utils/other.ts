@@ -41,15 +41,24 @@ export function openVAGrade(course: CourseFields) {
  * @author Hanzhi Zhou
  * @param str the string to inject highlight
  * @param expMatch the expected matched field in match.match
- * @param match the match object
+ * @param matches the match object
  */
-export function highlightMatch<T extends string>(str: string, expMatch: T, match?: Match<T>) {
-    if (!match || match.match !== expMatch) return str;
-    const { start, end } = match;
-    return `${str.substring(0, start)}<span class="bg-warning">${str.substring(
-        start,
-        end
-    )}</span>${str.substring(end)}`;
+export function highlightMatch<T extends string>(str: string, expMatch: T, matches?: Match<T>[]) {
+    if (!matches || !matches.length) return str;
+    let result = '';
+    let lastEnd = 0;
+    for (const m of matches) {
+        const { match, start, end } = m;
+        if (match === expMatch) {
+            result += `${str.substring(lastEnd, start)}<span class="bg-warning">${str.substring(
+                start,
+                end
+            )}</span>`;
+            lastEnd = end;
+        }
+        // console.log(match, start, end);
+    }
+    return result + str.substring(lastEnd);
 }
 
 /**

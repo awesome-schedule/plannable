@@ -67,11 +67,13 @@ describe('Utility Tests', () => {
 
         expect(Utils.highlightMatch('asd', 'asd')).toBe('asd');
         expect(
-            Utils.highlightMatch('01234567890', 'topic', {
-                match: 'topic',
-                start: 4,
-                end: 7
-            })
+            Utils.highlightMatch('01234567890', 'topic', [
+                {
+                    match: 'topic',
+                    start: 4,
+                    end: 7
+                }
+            ])
         ).toBe('0123<span class="bg-warning">456</span>7890');
 
         try {

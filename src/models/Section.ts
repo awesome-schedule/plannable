@@ -69,9 +69,14 @@ export default class Section implements CourseFields, Hashable {
     public readonly meetings: Meeting[];
 
     public readonly isFake: boolean;
-    public readonly match?: SectionMatch;
+    public readonly matches?: SectionMatch[];
 
-    constructor(course: Course, raw: RawSection | undefined, sid: number, match?: SectionMatch) {
+    constructor(
+        course: Course,
+        raw: RawSection | undefined,
+        sid: number,
+        matches?: SectionMatch[]
+    ) {
         this.course = course;
         this.sid = sid;
         this.key = course.key;
@@ -82,7 +87,7 @@ export default class Section implements CourseFields, Hashable {
         this.units = course.units;
         this.title = course.title;
         this.description = course.description;
-        this.match = match;
+        this.matches = matches;
 
         if (raw) {
             this.id = raw[0];

@@ -40,6 +40,10 @@ export interface CourseFields {
     readonly description: string;
 }
 
+export interface Matchable<T extends string> {
+    matches: Match<T>[];
+}
+
 export interface Match<T extends string> {
     match: T;
     start: number;
@@ -77,7 +81,7 @@ export default class Course implements CourseFields, Hashable {
 
     public readonly isFake: boolean;
     public readonly hasFakeSections: boolean;
-    public readonly match?: CourseMatch;
+    public readonly matches?: CourseMatch[];
 
     /**
      * @param raw the raw representation of this course
@@ -88,8 +92,8 @@ export default class Course implements CourseFields, Hashable {
         raw: RawCourse | undefined,
         key: string,
         sids: number[] = [],
-        match?: CourseMatch,
-        secMatches: SectionMatch[] = []
+        matches?: CourseMatch[],
+        secMatches: SectionMatch[][] = []
     ) {
         this.key = key;
         this.raw = raw;
@@ -139,7 +143,7 @@ export default class Course implements CourseFields, Hashable {
             this.hasFakeSections = false;
             this.isFake = true;
         }
-        this.match = match;
+        this.matches = matches;
     }
 
     /**

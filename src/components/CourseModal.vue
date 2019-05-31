@@ -9,7 +9,7 @@
                             highlightMatch(
                                 course.department + ' ' + course.number + ' ' + course.type,
                                 'key',
-                                course.match
+                                course.matches
                             )
                         "
                     ></h5>
@@ -18,7 +18,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h6 v-html="highlightMatch(course.title, 'title', course.match)"></h6>
+                    <h6 v-html="highlightMatch(course.title, 'title', course.matches)"></h6>
                     <div style="width: 100%; overflow-x: auto;">
                         <table style="color:#808080; font-size:0.75rem;">
                             <tr v-for="(section, i) in course.sections" :key="section.key + i">
@@ -26,7 +26,7 @@
                                 <td class="info">ID:&nbsp;{{ section.id }}</td>
                                 <td
                                     class="info"
-                                    v-html="highlightMatch(section.topic, 'topic', section.match)"
+                                    v-html="highlightMatch(section.topic, 'topic', section.matches)"
                                 ></td>
                                 <td
                                     class="info"
@@ -34,7 +34,7 @@
                                         highlightMatch(
                                             section.instructors.join(', '),
                                             'instructors',
-                                            section.match
+                                            section.matches
                                         )
                                     "
                                 ></td>
@@ -58,7 +58,7 @@
 
                     <p
                         class="mt-2"
-                        v-html="highlightMatch(course.description, 'description', course.match)"
+                        v-html="highlightMatch(course.description, 'description', course.matches)"
                     ></p>
 
                     <button class="btn btn-outline-info" @click="openVAGrade(course)">

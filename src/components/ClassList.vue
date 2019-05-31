@@ -24,18 +24,14 @@
                         >
                             <h6 class="mb-1">
                                 <span
-                                    v-if="crs.match && crs.match.match === 'key'"
                                     v-html="
                                         highlightMatch(
                                             crs.department + ' ' + crs.number + ' ' + crs.type,
                                             'key',
-                                            crs.match
+                                            crs.matches
                                         )
                                     "
                                 >
-                                </span>
-                                <span v-else>
-                                    {{ crs.department }} {{ crs.number }} {{ crs.type }}
                                 </span>
                                 <span
                                     v-if="emptyCourse(crs)"
@@ -65,7 +61,7 @@
                                 v-if="showClasslistTitle || isEntering"
                                 style="font-size: 0.85rem; margin: 0;"
                                 :class="{ 'text-danger': crs.isFake }"
-                                v-html="highlightMatch(crs.title, 'title', crs.match)"
+                                v-html="highlightMatch(crs.title, 'title', crs.matches)"
                             ></p>
                         </div>
                         <div
@@ -155,7 +151,7 @@
                                                         highlightMatch(
                                                             sec.topic,
                                                             'topic',
-                                                            sec.match
+                                                            sec.matches
                                                         )
                                                     "
                                                 ></span>
@@ -170,7 +166,7 @@
                                                     highlightMatch(
                                                         sec.instructors.join(', '),
                                                         'instructors',
-                                                        sec.match
+                                                        sec.matches
                                                     )
                                                 "
                                             ></li>

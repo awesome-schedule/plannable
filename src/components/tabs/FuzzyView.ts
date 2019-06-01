@@ -39,7 +39,7 @@ export default class FuzzyView extends Store {
         }
 
         console.time('query');
-        this.inputCourses = window.catalog.fuzzySearch(query); // this.display.numSearchResults
+        this.inputCourses = window.catalog.fuzzySearch2(query); // this.display.numSearchResults
         console.timeEnd('query');
 
         this.isEntering = true;

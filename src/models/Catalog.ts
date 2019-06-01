@@ -17,7 +17,8 @@ import { RawCatalog, RawCourse, TYPES } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 import Meeting from './Meeting';
-import Fuse from 'fuse.js';
+import { Searcher, SearchResult } from 'fast-fuzzy';
+import Section from './Section';
 
 interface FuseMatch {
     indices: [number, number][];
@@ -70,21 +71,8 @@ export default class Catalog {
     private keys: string[];
     private values: RawCourse[];
     private courseDict: { [x: string]: Course } = {};
-    private courses: Course[];
-    private fuse: Fuse<
-        Course,
-        {
-            shouldSort: true;
-            includeMatches: true;
-            threshold: number;
-            location: number;
-            distance: number;
-            maxPatternLength: number;
-            minMatchCharLength: number;
-            keys: string[];
-        }
-    >;
-    private searcher: any;
+    private courseSearcher: Searcher<Course>;
+    private sectionSearcher: Searcher<Section>;
 
     constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
@@ -113,25 +101,28 @@ export default class Catalog {
         const keys = Object.keys(this.raw_data);
         const values = Object.values(this.raw_data);
         const len = keys.length;
-        const courses = [];
+        const courses: Course[] = [];
+        const sections: Section[] = [];
         for (let i = 0; i < len; i++) {
             const key = keys[i];
             const c = new Course(values[i], key);
             courses.push((this.courseDict[key] = c));
+            sections.push(...c.sections);
         }
-        this.courses = courses;
         this.keys = keys;
         this.values = values;
 
-        this.fuse = new Fuse(this.courses, {
-            shouldSort: true,
-            includeMatches: true,
-            threshold: 0.5,
-            location: 0,
-            distance: 100,
-            maxPatternLength: 32,
-            minMatchCharLength: 3,
-            keys: ['title', 'description', 'sections.topic', 'sections.instructors']
+        this.sectionSearcher = new Searcher(sections, {
+            returnMatchData: true,
+            ignoreCase: true,
+            normalizeWhitespace: true,
+            keySelector: obj => [obj.topic, obj.instructors.join(', ')]
+        });
+        this.courseSearcher = new Searcher(courses, {
+            returnMatchData: true,
+            ignoreCase: true,
+            normalizeWhitespace: true,
+            keySelector: obj => [obj.title, obj.description]
         });
         console.timeEnd('catalog prep data');
     }
@@ -187,52 +178,80 @@ export default class Catalog {
         return key;
     }
 
-    public fuzzySearch(query: string) {
-        const results = this.fuse.search(query).slice(0, 10);
-        const courses = [];
-        for (const result of results) {
-            const { item, matches } = result;
-            const courseMatches: Match<any>[] = [];
-            const sectionMatches: { [x: number]: Match<any>[] } = [];
-            for (const match of matches as FuseMatch[]) {
-                const idx = match.key.indexOf('.');
-                for (const indices of match.indices) {
-                    if (idx === -1) {
-                        courseMatches.push({
-                            match: match.key,
-                            start: indices[0],
-                            end: indices[1] + 1
-                        });
-                    } else {
-                        const arrIdx = match.arrayIndex;
-                        const obj = {
-                            match: match.key.substring(idx + 1),
-                            start: indices[0],
-                            end: indices[1] + 1
-                        };
-                        if (sectionMatches[arrIdx]) {
-                            sectionMatches[arrIdx].push(obj);
-                        } else {
-                            sectionMatches[arrIdx] = [obj];
-                        }
-                    }
-                }
-            }
-            console.log(result);
-
-            const secEntries = Object.entries(sectionMatches).sort((a, b) => +a[0] - +b[0]);
-            courses.push(
-                new Course(
-                    item.raw,
-                    item.key,
-                    secEntries.map(x => +x[0]),
-                    courseMatches,
-                    secEntries.map(x => x[1])
-                )
-            );
-            if (courses.length > 10) break;
+    public fuzzySearch2(query: string) {
+        const courseResults = this.courseSearcher.search(query);
+        const courseScores: { [x: string]: number } = Object.create(null);
+        const courseMap: { [x: string]: SearchResult<Course> } = Object.create(null);
+        for (const result of courseResults) {
+            const key = result.item.key;
+            courseScores[key] = result.score;
+            courseMap[key] = result;
         }
-        return courses;
+        const sectionResults = this.sectionSearcher.search(query);
+        const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
+
+        for (const result of sectionResults) {
+            const key = result.item.key;
+            if (courseScores[key]) {
+                courseScores[key] += result.score;
+            } else {
+                courseScores[key] = result.score;
+            }
+            if (sectionMap[key]) {
+                sectionMap[key].push(result);
+            } else {
+                sectionMap[key] = [result];
+            }
+        }
+
+        const scoreEntries = Object.entries(courseScores)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10);
+
+        const finalResults: Course[] = [];
+        for (const [key] of scoreEntries) {
+            const courseMatch = courseMap[key];
+            let course: Course;
+            if (courseMatch) {
+                course = courseMatch.item;
+                const { match, original } = courseMatch;
+                course.matches.push({
+                    match: original === course.title ? 'title' : 'description',
+                    start: match.index,
+                    end: match.index + match.length
+                });
+                const s = sectionMap[key];
+                if (s) {
+                    course.addSectionMatches(
+                        s.map(x => x.item.sid),
+                        s.map(x => [
+                            {
+                                match: x.original === x.item.topic ? 'topic' : 'instructors',
+                                start: x.match.index,
+                                end: x.match.index + x.match.length
+                            }
+                        ])
+                    );
+                }
+            } else {
+                const s = sectionMap[key];
+                course = new Course(
+                    s[0].item.course.raw,
+                    key,
+                    s.map(x => x.item.sid),
+                    [],
+                    s.map(x => [
+                        {
+                            match: x.original === x.item.topic ? 'topic' : 'instructors',
+                            start: x.match.index,
+                            end: x.match.index + x.match.length
+                        }
+                    ])
+                );
+            }
+            finalResults.push(course);
+        }
+        return finalResults;
     }
 
     /**

@@ -77,8 +77,8 @@ export default class Course implements CourseFields, Hashable {
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: ReadonlyArray<number>;
-    public readonly sections: ReadonlyArray<Section>;
+    public readonly sids: number[];
+    public readonly sections: Section[];
 
     public readonly isFake: boolean;
     public readonly hasFakeSections: boolean;
@@ -166,6 +166,26 @@ export default class Course implements CourseFields, Hashable {
      */
     public getFirstSection() {
         return this.getSection(0, true);
+    }
+
+    public addSectionMatches(sids: number[], secMatches: SectionMatch[][]) {
+        sids = sids.filter((sid, idx) => {
+            const exIdx = this.sids.findIndex(s => s === sid);
+            if (exIdx === -1) return true;
+            else {
+                this.sections[exIdx].matches.push(...secMatches[idx]);
+                secMatches.splice(idx, 1);
+                return false;
+            }
+        });
+        if (sids.length !== secMatches.length) throw new Error('inconsistent length');
+        if (!this.raw) throw new Error('!!');
+        this.sections.push(
+            ...sids.map((i, idx) => new Section(this, this.raw![6][i], i, secMatches[idx]))
+        );
+        this.sections.sort((a, b) => a.sid - b.sid);
+        this.sids.push(...sids);
+        this.sids.sort();
     }
 
     /**

@@ -84,11 +84,30 @@ export default class Catalog {
             keys: string[];
         }
     >;
+    private searcher: any;
 
     constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
         this.raw_data = raw_data;
         this.modified = modified;
+
+        // this.raw_data.cs45015[6].push([
+        //     19281,
+        //     '001',
+        //     'zxczxc',
+        //     2,
+        //     93,
+        //     91,
+        //     52,
+        //     [
+        //         [
+        //             'Comp. Vision',
+        //             'MoWe 5:00PM - 6:15PM',
+        //             'Thornton Hall E316',
+        //             '08/27/2019 - 12/06/2019'
+        //         ]
+        //     ]
+        // ]);
 
         console.time('catalog prep data');
         const keys = Object.keys(this.raw_data);
@@ -178,7 +197,6 @@ export default class Catalog {
             for (const match of matches as FuseMatch[]) {
                 const idx = match.key.indexOf('.');
                 for (const indices of match.indices) {
-                    console.assert(indices[1] > indices[0]);
                     if (idx === -1) {
                         courseMatches.push({
                             match: match.key,
@@ -340,8 +358,14 @@ export default class Catalog {
                 ]);
             }
         }
-        if (topicMatchIdx.length && !results.find(x => x.key === key))
-            results.push(new Course(course, key, topicMatchIdx, [], topicMatches));
+        if (topicMatchIdx.length) {
+            const prev = results.find(x => x.key === key);
+            if (prev) {
+                prev.addSectionMatches(topicMatchIdx, topicMatches);
+            } else {
+                results.push(new Course(course, key, topicMatchIdx, [], topicMatches));
+            }
+        }
     }
 
     private searchProf(key: string, query: string, course: RawCourse, results: Course[]) {
@@ -365,8 +389,14 @@ export default class Catalog {
                 ]);
             }
         }
-        if (profMatchIdx.length && !results.find(x => x.key === key))
-            results.push(new Course(course, key, profMatchIdx, [], profMatches));
+        if (profMatchIdx.length) {
+            const prev = results.find(x => x.key === key);
+            if (prev) {
+                prev.addSectionMatches(profMatchIdx, profMatches);
+            } else {
+                results.push(new Course(course, key, profMatchIdx, [], profMatches));
+            }
+        }
     }
 
     private searchDesc(key: string, query: string, course: RawCourse, results: Course[]) {

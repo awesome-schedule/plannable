@@ -60,13 +60,13 @@ export default class Section implements CourseFields, Hashable {
     public readonly meetings: ReadonlyArray<Meeting>;
 
     public readonly isFake: boolean;
-    public readonly matches?: ReadonlyArray<SectionMatch>;
+    public readonly matches: SectionMatch[];
 
     constructor(
         course: Course,
         raw: RawSection | undefined,
         sid: number,
-        matches?: ReadonlyArray<SectionMatch>
+        matches: SectionMatch[] = []
     ) {
         this.course = course;
         this.sid = sid;

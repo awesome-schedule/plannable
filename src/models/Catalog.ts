@@ -12,21 +12,14 @@
 /**
  *
  */
-import Course, { Match } from './Course';
+import Course, { Match, CourseMatch } from './Course';
 import { RawCatalog, RawCourse, TYPES } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 import Meeting from './Meeting';
 import { Searcher, SearchResult } from 'fast-fuzzy';
 import Section from './Section';
-
-interface FuseMatch {
-    indices: [number, number][];
-    value: string;
-    key: string;
-    arrayIndex: number;
-}
-// import Worker from 'worker-loader!./SearchWorker.ts';
+import Worker from 'worker-loader!./SearchWorker';
 
 /**
  * represents a semester
@@ -45,6 +38,40 @@ export interface SemesterJSON {
 export interface CatalogJSON extends Expirable {
     semester: SemesterJSON;
     raw_data: RawCatalog;
+}
+
+interface SCourse {
+    /**
+     * key
+     */
+    0: string;
+    /**
+     * title
+     */
+    1: string;
+    /**
+     * description
+     */
+    2: string;
+}
+
+interface SSection {
+    /**
+     * sid
+     */
+    0: number;
+    /**
+     * key
+     */
+    1: string;
+    /**
+     * topic
+     */
+    2: string;
+    /**
+     * instructor
+     */
+    3: string;
 }
 
 /**
@@ -73,11 +100,14 @@ export default class Catalog {
     private courseDict: { [x: string]: Course } = {};
     private courseSearcher: Searcher<Course>;
     private sectionSearcher: Searcher<Section>;
+    private courses: Course[];
+    private worker: Worker;
 
     constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
         this.raw_data = raw_data;
         this.modified = modified;
+        this.worker = new Worker();
 
         // this.raw_data.cs45015[6].push([
         //     19281,
@@ -111,6 +141,7 @@ export default class Catalog {
         }
         this.keys = keys;
         this.values = values;
+        this.courses = courses;
 
         this.sectionSearcher = new Searcher(sections, {
             returnMatchData: true,
@@ -281,52 +312,51 @@ export default class Catalog {
         }
 
         const matches: Course[] = [];
-
-        const keys = this.keys;
-        const len = keys.length;
-        const values = this.values;
+        const courses = this.courses;
+        const len = courses.length;
 
         if (!spec || field === 'num' || field === 'key')
             for (let i = 0; i < len; i++) {
-                this.searchKey(keys[i], queryNoSp, values[i], matches);
+                this.searchKey(queryNoSp, courses[i], matches);
                 if (matches.length >= max_results) return matches;
             }
 
         if (!spec || field === 'title')
             for (let i = 0; i < len; i++) {
-                this.searchTitle(keys[i], query, values[i], matches);
+                this.searchField(query, 'title', courses[i], matches);
                 if (matches.length >= max_results) return matches;
             }
 
         if (!spec || field === 'topic')
             for (let i = 0; i < len; i++) {
-                this.searchTopic(keys[i], query, values[i], matches);
+                this.searchTopic(query, courses[i], matches);
                 if (matches.length >= max_results) return matches;
             }
 
         if (!spec || field === 'prof')
             for (let i = 0; i < len; i++) {
-                this.searchProf(keys[i], query, values[i], matches);
+                this.searchProf(query, courses[i], matches);
                 if (matches.length >= max_results) return matches;
             }
 
         if (!spec || field === 'desc')
             for (let i = 0; i < len; i++) {
-                this.searchDesc(keys[i], query, values[i], matches);
+                this.searchField(query, 'description', courses[i], matches);
                 if (matches.length >= max_results) return matches;
             }
         return matches;
     }
 
-    private searchKey(key: string, queryNoSp: string, course: RawCourse, results: Course[]) {
+    private searchKey(queryNoSp: string, course: Course, results: Course[]) {
+        const key = course.key;
         const keyIdx = key.indexOf(queryNoSp);
         // match with the course number
         if (keyIdx !== -1) {
-            const deptLen = course[0].length;
+            const deptLen = course.department.length;
             const end = keyIdx + queryNoSp.length;
             results.push(
                 new Course(
-                    course,
+                    course.raw,
                     key,
                     [],
                     [
@@ -341,31 +371,38 @@ export default class Catalog {
         }
     }
 
-    private searchTitle(key: string, query: string, course: RawCourse, results: Course[]) {
-        const title = course[4].toLowerCase();
-        const titleIdx = title.indexOf(query);
-        if (titleIdx !== -1) {
+    private searchField(
+        query: string,
+        field: 'title' | 'description',
+        course: Course,
+        results: Course[]
+    ) {
+        const target = course[field].toLowerCase();
+        const key = course.key;
+        const targetIdx = target.indexOf(query);
+        // lastly, check description match
+        if (targetIdx !== -1) {
             const prev = results.find(x => x.key === key);
-            const match: Match<'title'> = {
-                match: 'title',
-                start: titleIdx,
-                end: titleIdx + query.length
+            const match: CourseMatch = {
+                match: field,
+                start: targetIdx,
+                end: targetIdx + query.length
             };
             if (prev) {
                 prev.matches.push(match);
             } else {
-                results.push(new Course(course, key, [], [match]));
+                results.push(new Course(course.raw, key, [], [match]));
             }
         }
     }
 
-    private searchTopic(key: string, query: string, course: RawCourse, results: Course[]) {
+    private searchTopic(query: string, course: Course, results: Course[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatchIdx = [];
         const topicMatches: [Match<'topic'>][] = [];
-        const sections = course[6];
+        const sections = course.sections;
         for (let i = 0; i < sections.length; i++) {
-            const topic = sections[i][2];
+            const topic = sections[i].topic;
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
                 topicMatchIdx.push(i);
@@ -379,24 +416,22 @@ export default class Catalog {
             }
         }
         if (topicMatchIdx.length) {
-            const prev = results.find(x => x.key === key);
+            const prev = results.find(x => x.key === course.key);
             if (prev) {
                 prev.addSectionMatches(topicMatchIdx, topicMatches);
             } else {
-                results.push(new Course(course, key, topicMatchIdx, [], topicMatches));
+                results.push(new Course(course.raw, course.key, topicMatchIdx, [], topicMatches));
             }
         }
     }
 
-    private searchProf(key: string, query: string, course: RawCourse, results: Course[]) {
+    private searchProf(query: string, course: Course, results: Course[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatchIdx = [];
         const profMatches: [Match<'instructors'>][] = [];
-        const sections = course[6];
+        const sections = course.sections;
         for (let i = 0; i < sections.length; i++) {
-            const profs = Meeting.getInstructors(sections[i][7])
-                .join(', ')
-                .toLowerCase();
+            const profs = sections[i].instructors.join(', ').toLowerCase();
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
                 profMatchIdx.push(i);
@@ -410,30 +445,11 @@ export default class Catalog {
             }
         }
         if (profMatchIdx.length) {
-            const prev = results.find(x => x.key === key);
+            const prev = results.find(x => x.key === course.key);
             if (prev) {
                 prev.addSectionMatches(profMatchIdx, profMatches);
             } else {
-                results.push(new Course(course, key, profMatchIdx, [], profMatches));
-            }
-        }
-    }
-
-    private searchDesc(key: string, query: string, course: RawCourse, results: Course[]) {
-        const desc = course[5].toLowerCase();
-        const descIdx = desc.indexOf(query);
-        // lastly, check description match
-        if (descIdx !== -1) {
-            const prev = results.find(x => x.key === key);
-            const match: Match<'description'> = {
-                match: 'description',
-                start: descIdx,
-                end: descIdx + query.length
-            };
-            if (prev) {
-                prev.matches.push(match);
-            } else {
-                results.push(new Course(course, key, [], [match]));
+                results.push(new Course(course.raw, course.key, profMatchIdx, [], profMatches));
             }
         }
     }

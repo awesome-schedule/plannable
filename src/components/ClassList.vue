@@ -124,18 +124,18 @@
                             <div
                                 class="list-group-item list-group-item-action container-fluid class-section"
                                 :class="{
-                                    active: isActive(crs.key, crs.sids[idx]) && !sec.isFake,
+                                    active: isActive(crs.key, sec.sid) && !sec.isFake,
                                     'not-exist': sec.isFake
                                 }"
                                 :title="
                                     sec.isFake
                                         ? `You've selected a non-existent section! Maybe this section used to exist, but not it has been removed!`
-                                        : isActive(crs.key, crs.sids[idx])
+                                        : isActive(crs.key, sec.sid)
                                         ? 'click to unselect'
                                         : 'click to select'
                                 "
-                                @click="select(crs.key, crs.sids[idx])"
-                                @mouseenter="schedule.preview(crs.sections[idx])"
+                                @click="select(crs.key, sec.sid)"
+                                @mouseenter="schedule.preview(sec)"
                                 @mouseleave="schedule.removePreview()"
                             >
                                 <div class="row no-gutters justify-content-between">
@@ -174,7 +174,7 @@
                                     </div>
                                     <div class="col col-sm-1 align-self-center">
                                         <i
-                                            v-if="isActive(crs.key, crs.sids[idx])"
+                                            v-if="isActive(crs.key, sec.sid)"
                                             class="far fa-check-square"
                                         ></i>
                                         <i v-else class="far fa-square"></i>

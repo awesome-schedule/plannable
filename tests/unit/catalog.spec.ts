@@ -30,8 +30,8 @@ describe('catalog test', () => {
         // expect(catalog.convertKey(schedule)).toBe();
     });
 
-    it('json', () => {
-        const catalog: Catalog = window.catalog;
-        expect(catalog.fromJSON(catalog.toJSON())).toEqual(catalog);
-    });
+    // it('json', () => {
+    //     const catalog: Catalog = window.catalog;
+    //     expect(catalog.fromJSON(catalog.toJSON())).toEqual(catalog);
+    // });
 });

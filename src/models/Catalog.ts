@@ -163,9 +163,9 @@ export default class Catalog {
     /**
      * Get a Course associated with the given key and section index
      */
-    public getSection(key: string, section = 0) {
+    public getSection(key: string, idx = 0) {
         const course = this.courseDict[key];
-        if (course) return course.getSection(section);
+        if (course) return course.sections[idx];
         else throw new Error('non-existent key ' + key);
     }
 
@@ -219,6 +219,7 @@ export default class Catalog {
                 }
             }
             console.log(result);
+
             const secEntries = Object.entries(sectionMatches).sort((a, b) => +a[0] - +b[0]);
             courses.push(
                 new Course(

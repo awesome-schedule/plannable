@@ -148,24 +148,10 @@ export default class Course implements CourseFields, Hashable {
     }
 
     /**
-     * Get the course of a given section.
-     * @param contained By letting contained = false, **it will be possible** to get a Course whose section index
-     * is not in the subset of sections contained in this instance
-     */
-    public getSection(sid: number, contained = false): Section {
-        if (contained) {
-            return this.sections[sid];
-        } else {
-            if (!this.raw) throw new Error(this.key + ' is a dummy course!');
-            return new Section(this, this.raw[6][sid], sid);
-        }
-    }
-
-    /**
      * get the first section **contained** in this course
      */
     public getFirstSection() {
-        return this.getSection(0, true);
+        return this.sections[0];
     }
 
     public addSectionMatches(sids: number[], secMatches: SectionMatch[][]) {

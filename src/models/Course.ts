@@ -57,7 +57,6 @@ export type CourseMatch = Match<'title' | 'description' | 'key'>;
  * depending on the array of section indices passed to its constructor.
  */
 export default class Course implements CourseFields, Hashable {
-    [x: string]: any;
     /**
      * key of this in Catalog, equal to (department + number + `Meta.TYPES_PARSE`\[type\])
      *

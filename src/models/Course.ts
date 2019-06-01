@@ -82,7 +82,7 @@ export default class Course implements CourseFields, Hashable {
 
     public readonly isFake: boolean;
     public readonly hasFakeSections: boolean;
-    public readonly matches?: ReadonlyArray<CourseMatch>;
+    public readonly matches: CourseMatch[];
 
     /**
      * @param raw the raw representation of this course
@@ -93,7 +93,7 @@ export default class Course implements CourseFields, Hashable {
         raw: RawCourse | undefined,
         key: string,
         sids: ReadonlyArray<number> = [],
-        matches?: CourseMatch[],
+        matches: CourseMatch[] = [],
         secMatches: SectionMatch[][] = []
     ) {
         this.key = key;

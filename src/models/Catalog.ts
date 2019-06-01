@@ -306,21 +306,18 @@ export default class Catalog {
     private searchTitle(key: string, query: string, course: RawCourse, results: Course[]) {
         const title = course[4].toLowerCase();
         const titleIdx = title.indexOf(query);
-        if (titleIdx !== -1 && !results.find(x => x.key === key)) {
-            results.push(
-                new Course(
-                    course,
-                    key,
-                    [],
-                    [
-                        {
-                            match: 'title',
-                            start: titleIdx,
-                            end: titleIdx + query.length
-                        }
-                    ]
-                )
-            );
+        if (titleIdx !== -1) {
+            const prev = results.find(x => x.key === key);
+            const match: Match<'title'> = {
+                match: 'title',
+                start: titleIdx,
+                end: titleIdx + query.length
+            };
+            if (prev) {
+                prev.matches.push(match);
+            } else {
+                results.push(new Course(course, key, [], [match]));
+            }
         }
     }
 
@@ -344,7 +341,7 @@ export default class Catalog {
             }
         }
         if (topicMatchIdx.length && !results.find(x => x.key === key))
-            results.push(new Course(course, key, topicMatchIdx, undefined, topicMatches));
+            results.push(new Course(course, key, topicMatchIdx, [], topicMatches));
     }
 
     private searchProf(key: string, query: string, course: RawCourse, results: Course[]) {
@@ -369,28 +366,25 @@ export default class Catalog {
             }
         }
         if (profMatchIdx.length && !results.find(x => x.key === key))
-            results.push(new Course(course, key, profMatchIdx, undefined, profMatches));
+            results.push(new Course(course, key, profMatchIdx, [], profMatches));
     }
 
     private searchDesc(key: string, query: string, course: RawCourse, results: Course[]) {
         const desc = course[5].toLowerCase();
         const descIdx = desc.indexOf(query);
         // lastly, check description match
-        if (descIdx !== -1 && !results.find(x => x.key === key)) {
-            results.push(
-                new Course(
-                    course,
-                    key,
-                    [],
-                    [
-                        {
-                            match: 'description',
-                            start: descIdx,
-                            end: descIdx + query.length
-                        }
-                    ]
-                )
-            );
+        if (descIdx !== -1) {
+            const prev = results.find(x => x.key === key);
+            const match: Match<'description'> = {
+                match: 'description',
+                start: descIdx,
+                end: descIdx + query.length
+            };
+            if (prev) {
+                prev.matches.push(match);
+            } else {
+                results.push(new Course(course, key, [], [match]));
+            }
         }
     }
 }

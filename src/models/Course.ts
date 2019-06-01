@@ -159,12 +159,11 @@ export default class Course implements CourseFields, Hashable {
             if (exIdx === -1) return true;
             else {
                 this.sections[exIdx].matches.push(...secMatches[idx]);
-                secMatches.splice(idx, 1);
+                (secMatches[idx] as any) = null;
                 return false;
             }
         });
-        if (sids.length !== secMatches.length) throw new Error('inconsistent length');
-        if (!this.raw) throw new Error('!!');
+        secMatches = secMatches.filter(x => x);
         this.sections.push(
             ...sids.map((i, idx) => new Section(this, this.raw![6][i], i, secMatches[idx]))
         );

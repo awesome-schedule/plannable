@@ -18,6 +18,7 @@ import ClassList from '../ClassList.vue';
 export default class FuzzyView extends Store {
     isEntering = false;
     inputCourses: Course[] | null = null;
+    loading = false;
 
     /**
      * get classes that match the input query.
@@ -34,6 +35,7 @@ export default class FuzzyView extends Store {
             this.inputCourses = null;
             return;
         }
+        this.loading = true;
         if (this.schedule.generated) {
             this.schedule.switchSchedule(false);
         }
@@ -43,6 +45,7 @@ export default class FuzzyView extends Store {
         console.timeEnd('query');
 
         this.isEntering = true;
+        this.loading = false;
     }
 
     closeClassList() {

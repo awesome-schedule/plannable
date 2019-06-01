@@ -23,10 +23,11 @@
             <div
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showFuzzy }"
-                title="Edit Events"
+                title="Fuzzy Search"
                 @click="status.switchSideBar('showFuzzy')"
             >
-                <i class="fab fa-elementor"></i>
+                <span style="font-size: 10px;" class="badge badge-info">Beta</span>
+                <i class="fas fa-search"></i>
             </div>
             <div
                 class="tab-icon mt-0 mb-4"
@@ -228,8 +229,8 @@
     opacity: 0;
 }
 .tab-icon {
+    text-align: center;
     font-size: 1.8vw;
-    margin-left: 20%;
     color: #888888;
 }
 .tab-icon:hover {

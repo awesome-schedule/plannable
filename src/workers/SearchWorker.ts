@@ -77,7 +77,7 @@ onmessage = (msg: MessageEvent) => {
 
         const scoreEntries = Object.entries(courseScores)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
+            .slice(0, 12);
 
         const finalResults: Course[] = [];
         for (const [key] of scoreEntries) {
@@ -124,7 +124,21 @@ onmessage = (msg: MessageEvent) => {
             finalResults.push(course);
         }
         postMessage(
-            finalResults.map(c => [c.raw, c.key, c.sids, c.matches, c.sections.map(x => x.matches)])
+            finalResults.map(c => {
+                const matches = c.matches.concat();
+                c.matches.length = 0;
+                return [
+                    c.raw,
+                    c.key,
+                    c.sids,
+                    matches,
+                    c.sections.map(x => {
+                        const ms = x.matches.concat();
+                        x.matches.length = 0;
+                        return ms;
+                    })
+                ];
+            })
         );
     }
     count++;

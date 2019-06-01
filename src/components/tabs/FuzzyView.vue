@@ -5,12 +5,22 @@
                 ref="classSearch"
                 type="text"
                 class="form-control form-control-sm"
-                placeholder="Title/Number/Topic/Prof./Desc."
+                placeholder="Title/Topic/Prof./Desc."
+                @input="$event.target.value ? '' : getClass('')"
                 @keydown.enter="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"
             />
             <div class="input-group-append">
+                <div
+                    v-if="loading"
+                    class="spinner-border my-auto text-primary mx-1"
+                    style="width: 1.4rem; height: 1.4rem"
+                    role="status"
+                >
+                    <span class="sr-only">Loading...</span>
+                </div>
                 <span
+                    v-else
                     class="input-group-text px-2"
                     :class="{ 'click-icon': isEntering }"
                     @click="closeClassList"
@@ -31,6 +41,11 @@
                 @course_modal="modal.showCourseModal($event)"
                 @close="closeClassList()"
             ></ClassList>
+        </div>
+        <div v-else class="mx-3 my-4">
+            Fuzzy search: Enter your search query and press ENTER to get results. Because fuzzy
+            search is slow, we cannot provide real-time results. Please do not search for course
+            number (e.g. 2102) here. It is not supported.
         </div>
     </nav>
 </template>

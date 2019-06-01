@@ -41,6 +41,18 @@ describe('Utility Tests', () => {
         expect(Utils.calcOverlap(100, 200, 150, 250)).toBe(50);
         expect(Utils.calcOverlap(150, 250, 100, 200)).toBe(50);
         expect(Utils.calcOverlap(100, 300, 100, 200)).toBe(100);
+        expect(Utils.calcOverlap(100, 200, 100, 300)).toBe(100);
+        expect(Utils.calcOverlap(100, 200, 300, 400)).toBe(0);
+    });
+
+    it('merge test', () => {
+        expect(Utils.blockUnion(100, 200, 150, 250)).toEqual([100, 250]);
+        expect(Utils.blockUnion(150, 250, 100, 200)).toEqual([100, 250]);
+        expect(Utils.blockUnion(100, 300, 100, 200)).toEqual([100, 300]);
+        expect(Utils.blockUnion(100, 200, 100, 300)).toEqual([100, 300]);
+        expect(Utils.blockUnion(100, 200, 100, 200)).toEqual([100, 200]);
+        expect(Utils.blockUnion(18, 19, 18, 19)).toEqual([18, 19]);
+        expect(Utils.blockUnion(100, 200, 300, 400)).toBe(undefined);
     });
 
     it('err test', async () => {

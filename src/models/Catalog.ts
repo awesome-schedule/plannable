@@ -13,11 +13,18 @@
  *
  */
 import Course, { Match } from './Course';
-import { RawCatalog, RawCourse, TYPES, TYPES_PARSE } from './Meta';
+import { RawCatalog, RawCourse, TYPES } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 import Meeting from './Meeting';
 import Fuse from 'fuse.js';
+
+interface FuseMatch {
+    indices: [number, number][];
+    value: string;
+    key: string;
+    arrayIndex: number;
+}
 // import Worker from 'worker-loader!./SearchWorker.ts';
 
 /**
@@ -62,17 +69,52 @@ export default class Catalog {
 
     private keys: string[];
     private values: RawCourse[];
-    // private worker: Worker;
+    private courseDict: { [x: string]: Course } = {};
+    private courses: Course[];
+    private fuse: Fuse<
+        Course,
+        {
+            shouldSort: true;
+            includeMatches: true;
+            threshold: number;
+            location: number;
+            distance: number;
+            maxPatternLength: number;
+            minMatchCharLength: number;
+            keys: string[];
+        }
+    >;
 
     constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
         this.semester = semester;
         this.raw_data = raw_data;
         this.modified = modified;
 
-        this.keys = Object.keys(this.raw_data);
-        this.values = Object.values(this.raw_data);
-        // console.log('worker created');
-        // this.worker = new Worker(require('./SearchWorker.ts'));
+        console.time('catalog prep data');
+        const keys = Object.keys(this.raw_data);
+        const values = Object.values(this.raw_data);
+        const len = keys.length;
+        const courses = [];
+        for (let i = 0; i < len; i++) {
+            const key = keys[i];
+            const c = new Course(values[i], key);
+            courses.push((this.courseDict[key] = c));
+        }
+        this.courses = courses;
+        this.keys = keys;
+        this.values = values;
+
+        this.fuse = new Fuse(this.courses, {
+            shouldSort: true,
+            includeMatches: true,
+            threshold: 0.5,
+            location: 0,
+            distance: 100,
+            maxPatternLength: 32,
+            minMatchCharLength: 3,
+            keys: ['title', 'description', 'sections.topic', 'sections.instructors']
+        });
+        console.timeEnd('catalog prep data');
     }
 
     public fromJSON(data: CatalogJSON) {
@@ -94,16 +136,18 @@ export default class Catalog {
      * only obtain a subset of the original course sections
      */
     public getCourse(key: string, sections?: Set<number> | -1) {
-        if (!sections) return new Course(this.raw_data[key], key);
-        else if (sections === -1) return new Course(this.raw_data[key], key);
-        else return new Course(this.raw_data[key], key, [...sections.values()]);
+        const course = this.courseDict[key] || new Course(undefined, key);
+        if (!sections || sections === -1) return course;
+        else return course.getCourse([...sections.values()]);
     }
 
     /**
      * Get a Course associated with the given key and section index
      */
     public getSection(key: string, section = 0) {
-        return new Course(this.raw_data[key], key).getSection(section);
+        const course = this.courseDict[key];
+        if (course) return course.getSection(section);
+        else throw new Error('non-existent key ' + key);
     }
 
     /**
@@ -125,54 +169,47 @@ export default class Catalog {
     }
 
     public fuzzySearch(query: string) {
-        const fuse = new Fuse(this.values, {
-            shouldSort: true,
-            includeMatches: true,
-            threshold: 0.5,
-            location: 0,
-            distance: 100,
-            maxPatternLength: 32,
-            minMatchCharLength: 2,
-            keys: [0, 4, 5] // '6.2', '6.7'
-        });
-        const results = fuse.search(query).slice(0, 10);
-        interface FuseMatch {
-            indices: [number, number][];
-            value: string;
-            key: string;
-            arrayIndex: number;
-        }
+        const results = this.fuse.search(query).slice(0, 10);
         const courses = [];
         for (const result of results) {
             const { item, matches } = result;
             const courseMatches: Match<any>[] = [];
+            const sectionMatches: { [x: number]: Match<any>[] } = [];
             for (const match of matches as FuseMatch[]) {
-                let matchKey;
-                if (match.arrayIndex === 0) {
-                    matchKey = 'key';
-                } else if (match.arrayIndex === 4) {
-                    matchKey = 'title';
-                } else if (match.arrayIndex === 5) {
-                    matchKey = 'description';
-                }
-                console.log(match);
+                const idx = match.key.indexOf('.');
                 for (const indices of match.indices) {
-                    const m = {
-                        match: matchKey,
-                        start: indices[0],
-                        end: indices[1]
-                    };
-                    if (
-                        !courseMatches.find(
-                            x => x.match === m.match && x.start === m.start && x.end === m.end
-                        )
-                    )
-                        courseMatches.push(m);
+                    console.assert(indices[1] > indices[0]);
+                    if (idx === -1) {
+                        courseMatches.push({
+                            match: match.key,
+                            start: indices[0],
+                            end: indices[1] + 1
+                        });
+                    } else {
+                        const arrIdx = match.arrayIndex;
+                        const obj = {
+                            match: match.key.substring(idx + 1),
+                            start: indices[0],
+                            end: indices[1] + 1
+                        };
+                        if (sectionMatches[arrIdx]) {
+                            sectionMatches[arrIdx].push(obj);
+                        } else {
+                            sectionMatches[arrIdx] = [obj];
+                        }
+                    }
                 }
             }
-            console.log(item, courseMatches);
+            console.log(result);
+            const secEntries = Object.entries(sectionMatches).sort((a, b) => +a[0] - +b[0]);
             courses.push(
-                new Course(item, (item[0] + item[1] + item[2]).toLowerCase(), [], courseMatches)
+                new Course(
+                    item.raw,
+                    item.key,
+                    secEntries.map(x => +x[0]),
+                    courseMatches,
+                    secEntries.map(x => x[1])
+                )
             );
             if (courses.length > 10) break;
         }

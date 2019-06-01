@@ -169,10 +169,23 @@ export function checkTimeBlockConflict(
  */
 export function calcOverlap(a: number, b: number, c: number, d: number) {
     if (a <= c && d <= b) return d - c;
-    if (a <= c && c <= b) return b - c;
+    else if (c <= a && b <= d) return b - a;
+    else if (a <= c && c <= b) return b - c;
     else if (a <= d && d <= b) return d - a;
-    else if (a >= c && b <= d) return b - a;
     else return 0;
+}
+
+export function blockUnion(
+    a: number,
+    b: number,
+    c: number,
+    d: number
+): [number, number] | undefined {
+    if (a <= c && d <= b) return [a, b];
+    else if (c <= a && b <= d) return [c, d];
+    else if (a <= c && c <= b) return [a, d];
+    else if (a <= d && d <= b) return [c, b];
+    return;
 }
 
 /**

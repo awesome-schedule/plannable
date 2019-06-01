@@ -13,13 +13,11 @@
  *
  */
 import Course, { Match, CourseMatch } from './Course';
-import { RawCatalog, RawCourse, TYPES } from './Meta';
+import { RawCatalog, TYPES } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
-import Meeting from './Meeting';
-import { Searcher, SearchResult } from 'fast-fuzzy';
 import Section from './Section';
-import Worker from 'worker-loader!./SearchWorker';
+import Worker from 'worker-loader!../workers/SearchWorker';
 
 /**
  * represents a semester
@@ -95,11 +93,7 @@ export default class Catalog {
     public raw_data: RawCatalog;
     public modified: string;
 
-    private keys: string[];
-    private values: RawCourse[];
     private courseDict: { [x: string]: Course } = {};
-    private courseSearcher: Searcher<Course>;
-    private sectionSearcher: Searcher<Section>;
     private courses: Course[];
     private worker: Worker;
 
@@ -128,33 +122,16 @@ export default class Catalog {
         // ]);
 
         console.time('catalog prep data');
-        const keys = Object.keys(this.raw_data);
-        const values = Object.values(this.raw_data);
-        const len = keys.length;
-        const courses: Course[] = [];
-        const sections: Section[] = [];
-        for (let i = 0; i < len; i++) {
-            const key = keys[i];
-            const c = new Course(values[i], key);
-            courses.push((this.courseDict[key] = c));
-            sections.push(...c.sections);
-        }
-        this.keys = keys;
-        this.values = values;
-        this.courses = courses;
 
-        this.sectionSearcher = new Searcher(sections, {
-            returnMatchData: true,
-            ignoreCase: true,
-            normalizeWhitespace: true,
-            keySelector: obj => [obj.topic, obj.instructors.join(', ')]
+        const courses: Course[] = [];
+        for (const key in raw_data)
+            courses.push((this.courseDict[key] = new Course(raw_data[key], key)));
+
+        this.courses = courses;
+        this.worker.postMessage({
+            courses
         });
-        this.courseSearcher = new Searcher(courses, {
-            returnMatchData: true,
-            ignoreCase: true,
-            normalizeWhitespace: true,
-            keySelector: obj => [obj.title, obj.description]
-        });
+
         console.timeEnd('catalog prep data');
     }
 
@@ -209,80 +186,14 @@ export default class Catalog {
         return key;
     }
 
-    public fuzzySearch2(query: string) {
-        const courseResults = this.courseSearcher.search(query);
-        const courseScores: { [x: string]: number } = Object.create(null);
-        const courseMap: { [x: string]: SearchResult<Course> } = Object.create(null);
-        for (const result of courseResults) {
-            const key = result.item.key;
-            courseScores[key] = result.score;
-            courseMap[key] = result;
-        }
-        const sectionResults = this.sectionSearcher.search(query);
-        const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
-
-        for (const result of sectionResults) {
-            const key = result.item.key;
-            if (courseScores[key]) {
-                courseScores[key] += result.score;
-            } else {
-                courseScores[key] = result.score;
-            }
-            if (sectionMap[key]) {
-                sectionMap[key].push(result);
-            } else {
-                sectionMap[key] = [result];
-            }
-        }
-
-        const scoreEntries = Object.entries(courseScores)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10);
-
-        const finalResults: Course[] = [];
-        for (const [key] of scoreEntries) {
-            const courseMatch = courseMap[key];
-            let course: Course;
-            if (courseMatch) {
-                course = courseMatch.item;
-                const { match, original } = courseMatch;
-                course.matches.push({
-                    match: original === course.title ? 'title' : 'description',
-                    start: match.index,
-                    end: match.index + match.length
-                });
-                const s = sectionMap[key];
-                if (s) {
-                    course.addSectionMatches(
-                        s.map(x => x.item.sid),
-                        s.map(x => [
-                            {
-                                match: x.original === x.item.topic ? 'topic' : 'instructors',
-                                start: x.match.index,
-                                end: x.match.index + x.match.length
-                            }
-                        ])
-                    );
-                }
-            } else {
-                const s = sectionMap[key];
-                course = new Course(
-                    s[0].item.course.raw,
-                    key,
-                    s.map(x => x.item.sid),
-                    [],
-                    s.map(x => [
-                        {
-                            match: x.original === x.item.topic ? 'topic' : 'instructors',
-                            start: x.match.index,
-                            end: x.match.index + x.match.length
-                        }
-                    ])
-                );
-            }
-            finalResults.push(course);
-        }
-        return finalResults;
+    public fuzzySearch(query: string) {
+        const promise = new Promise(resolve => {
+            this.worker.onmessage = ({ data }: { data: any[] }) => {
+                resolve(data.map(x => new (Course as any)(...x)));
+            };
+        });
+        this.worker.postMessage(query);
+        return promise as Promise<Course[]>;
     }
 
     /**

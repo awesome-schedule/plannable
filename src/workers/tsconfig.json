@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "es6",
+        "strict": true,
+        "importHelpers": true,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "lib": ["esnext", "scripthost", "webworker"]
+    },
+    "include": ["*.ts"],
+    "exclude": ["node_modules"]
+}

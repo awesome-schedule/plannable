@@ -28,7 +28,7 @@ export default class FuzzyView extends Store {
      *
      * @see Catalog.search
      */
-    getClass(query: string) {
+    async getClass(query: string) {
         if (!query) {
             this.isEntering = false;
             this.inputCourses = null;
@@ -39,7 +39,7 @@ export default class FuzzyView extends Store {
         }
 
         console.time('query');
-        this.inputCourses = window.catalog.fuzzySearch2(query); // this.display.numSearchResults
+        this.inputCourses = await window.catalog.fuzzySearch(query); // this.display.numSearchResults
         console.timeEnd('query');
 
         this.isEntering = true;

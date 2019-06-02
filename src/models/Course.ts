@@ -98,14 +98,6 @@ export default class Course implements CourseFields, Hashable {
             this.units = raw[3];
             this.title = raw[4];
             this.description = raw[5];
-
-            if (secMatches.length === this.sids.length) {
-                this.sections = this.sids.map((i, idx) => new Section(this, i, secMatches[idx]));
-            } else {
-                this.sections = this.sids.map(i => new Section(this, i));
-            }
-
-            this.hasFakeSections = this.sections.some(s => s.isFake);
             this.isFake = false;
         } else {
             // try to convert the key to a more readable format
@@ -124,11 +116,16 @@ export default class Course implements CourseFields, Hashable {
             this.units = '';
             this.title = 'NOT EXIST!';
             this.description = '';
-            this.sections = [];
-            this.hasFakeSections = false;
             this.isFake = true;
         }
         this.matches = matches;
+
+        if (secMatches.length === this.sids.length) {
+            this.sections = this.sids.map((sid, idx) => new Section(this, sid, secMatches[idx]));
+        } else {
+            this.sections = this.sids.map(sid => new Section(this, sid));
+        }
+        this.hasFakeSections = this.sections.some(s => s.isFake);
     }
 
     get displayName() {

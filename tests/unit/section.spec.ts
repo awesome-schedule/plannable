@@ -38,6 +38,7 @@ describe('section test', () => {
         const s2: Section = catalog.getSection('cs99993', 0);
         expect(s2.getTimeRoom()).toBe(null);
         expect(s2.sameTimeAs(sec)).toBe(false);
+        expect(s2.displayName).toBeTruthy();
     });
 
     it('fake', () => {

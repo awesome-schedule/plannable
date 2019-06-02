@@ -147,14 +147,9 @@ export default class Section implements CourseFields, Hashable {
                 const dayBlock = timeDict[d];
                 const roomBlock = roomDict[d];
                 // the timeBlock is flattened
-                if (dayBlock) {
-                    dayBlock.push(...timeBlock);
-                    roomBlock!.push(meeting.room);
-                } else {
-                    // copy
-                    timeDict[d].push(...timeBlock);
-                    roomDict[d].push(meeting.room);
-                }
+
+                dayBlock.push(...timeBlock);
+                roomBlock.push(meeting.room);
             }
         }
 

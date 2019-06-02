@@ -13,7 +13,7 @@
  *
  */
 import Course, { Match, CourseMatch } from './Course';
-import { RawCatalog, TYPES } from './Meta';
+import { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
 
@@ -47,9 +47,9 @@ export default class Catalog {
         return new Catalog(data.semester, data.raw_data, data.modified);
     }
 
+    public worker?: Worker;
     private readonly courseDict: { [x: string]: Course } = {};
     private readonly courses: Course[];
-    private worker?: Worker;
 
     /**
      * @param semester the semester corresponding to the catalog stored in this object
@@ -62,44 +62,32 @@ export default class Catalog {
         public readonly raw_data: RawCatalog,
         public readonly modified: string
     ) {
-        // this.worker = new Worker();
-
-        // this.raw_data.cs45015[6].push([
-        //     19281,
-        //     '001',
-        //     'zxczxc',
-        //     2,
-        //     93,
-        //     91,
-        //     52,
-        //     [
-        //         [
-        //             'Comp. Vision',
-        //             'MoWe 5:00PM - 6:15PM',
-        //             'Thornton Hall E316',
-        //             '08/27/2019 - 12/06/2019'
-        //         ]
-        //     ]
-        // ]);
-
         console.time('catalog prep data');
-
         const courses: Course[] = [];
         for (const key in raw_data)
             courses.push((this.courseDict[key] = new Course(raw_data[key], key)));
 
         this.courses = courses;
-        // this.initWorker();
-
         console.timeEnd('catalog prep data');
     }
 
-    public initWorker() {
+    /**
+     * initialize the web worker for searching
+     */
+    public initWorker(): Promise<'ready'> {
         if (!this.worker) {
             const Worker = require('worker-loader!../workers/SearchWorker');
-            const worker = (this.worker = new Worker());
+            const worker: Worker = new Worker();
+            const prom = new Promise(resolve => {
+                worker.onmessage = msg => {
+                    resolve(msg.data);
+                };
+            }) as Promise<'ready'>;
             worker.postMessage(this.courses);
+            this.worker = worker;
+            return prom;
         }
+        return Promise.resolve('ready') as Promise<'ready'>;
     }
 
     public fromJSON(data: CatalogJSON) {
@@ -121,7 +109,7 @@ export default class Catalog {
      * only obtain a subset of the original course sections
      */
     public getCourse(key: string, sections?: Set<number> | -1) {
-        const course = this.courseDict[key] || new Course(undefined, key);
+        const course = this.courseDict[key];
         if (!sections || sections === -1) return course;
         else return course.getCourse([...sections.values()]);
     }
@@ -130,9 +118,7 @@ export default class Catalog {
      * Get a Course associated with the given key and section index
      */
     public getSection(key: string, idx = 0) {
-        const course = this.courseDict[key];
-        if (course) return course.sections[idx];
-        else throw new Error('non-existent key ' + key);
+        return this.courseDict[key].sections[idx];
     }
 
     /**
@@ -144,13 +130,10 @@ export default class Catalog {
         const course = this.courseDict[key];
         if (course) return course.displayName;
         else if (schedule) {
-            for (const event of schedule.events) {
-                if (event.key === key) {
-                    return event.title === '' ? key : event.title;
-                }
-            }
+            const event = schedule.events.find(e => e.key === key);
+            if (event) return event.title === '' ? key : event.title;
+            else return key;
         }
-        return key;
     }
 
     public fuzzySearch(query: string) {

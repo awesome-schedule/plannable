@@ -13,7 +13,7 @@
             }"
         >
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon mt-0 mb-1"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
                 title="Select Classes"
                 @click="status.switchSideBar('showSelectClass')"

@@ -8,23 +8,6 @@ let courseSearcher: Searcher<Course>;
 let sectionSearcher: Searcher<Section>;
 let count = 0;
 
-function addSectionMatches(course: Course, sids: number[], secMatches: SectionMatch[][]) {
-    sids = sids.filter((sid, idx) => {
-        const exIdx = course.sids.findIndex(s => s === sid);
-        if (exIdx === -1) return true;
-        else {
-            course.sections[exIdx].matches.push(...secMatches[idx]);
-            (secMatches[idx] as any) = null;
-            return false;
-        }
-    });
-    secMatches = secMatches.filter(x => x);
-    course.sections.push(...sids.map((i, idx) => new Section(course, i, secMatches[idx])));
-    course.sections.sort((a, b) => a.sid - b.sid);
-    course.sids.push(...sids);
-    course.sids.sort();
-}
-
 onmessage = (msg: MessageEvent) => {
     if (count === 0) {
         console.time('worker prep');
@@ -85,16 +68,17 @@ onmessage = (msg: MessageEvent) => {
             const courseMatch = courseMap[key];
             let course: Course;
             if (courseMatch) {
-                course = courseMatch.item;
-                const { match, original } = courseMatch;
-                course.matches.push({
-                    match: original === course.title ? 'title' : 'description',
-                    start: match.index,
-                    end: match.index + match.length
-                });
+                const { match, original, item } = courseMatch;
+                course = new Course(item.raw, key, item.sids, [
+                    {
+                        match: original === item.title ? 'title' : 'description',
+                        start: match.index,
+                        end: match.index + match.length
+                    }
+                ]);
                 const s = sectionMap[key];
                 if (s) {
-                    addSectionMatches(
+                    Course.prototype.addSectionMatches.call(
                         course,
                         s.map(x => x.item.sid),
                         s.map(x => [
@@ -125,21 +109,7 @@ onmessage = (msg: MessageEvent) => {
             finalResults.push(course);
         }
         postMessage(
-            finalResults.map(c => {
-                const matches = c.matches.concat();
-                c.matches.length = 0;
-                return [
-                    c.raw,
-                    c.key,
-                    c.sids,
-                    matches,
-                    c.sections.map(x => {
-                        const ms = x.matches.concat();
-                        x.matches.length = 0;
-                        return ms;
-                    })
-                ];
-            })
+            finalResults.map(c => [c.raw, c.key, c.sids, c.matches, c.sections.map(x => x.matches)])
         );
     }
     count++;

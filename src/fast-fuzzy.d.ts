@@ -11,10 +11,13 @@ declare module 'fast-fuzzy' {
     }
 
     export interface SearchOptions<T> {
-        returnMatchData?: boolean;
+        threshold?: number;
         ignoreCase?: boolean;
+        ignoreSymbols?: boolean;
         normalizeWhitespace?: boolean;
-        keySelector?: (obj: T) => (T[keyof T])[] | keyof T;
+        returnMatchData?: boolean;
+        useDamerau?: boolean;
+        keySelector?(obj: T): (T[keyof T])[] | keyof T;
     }
 
     export class Searcher<T> {

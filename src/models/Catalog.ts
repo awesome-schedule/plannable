@@ -49,7 +49,7 @@ export default class Catalog {
 
     public worker?: Worker;
     public readonly courses: Course[];
-    private readonly courseDict: { [x: string]: Course } = {};
+    public readonly courseDict: { [x: string]: Course } = {};
 
     /**
      * @param semester the semester corresponding to the catalog stored in this object
@@ -83,7 +83,7 @@ export default class Catalog {
                     resolve(msg.data);
                 };
             }) as Promise<'ready'>;
-            worker.postMessage(this.courses);
+            worker.postMessage(this.courseDict);
             this.worker = worker;
             return prom;
         }
@@ -155,7 +155,11 @@ export default class Catalog {
      * @param max_results
      */
     public search(query: string, max_results = 6) {
-        query = query.trim().toLowerCase();
+        query = query
+            .trim()
+            .toLowerCase()
+            .split(/ +/) // remove redundant spaces
+            .join(' ');
         const temp = query.split(' ');
         /**
          * is special search

@@ -6,12 +6,14 @@ declare var postMessage: any;
 
 let courseSearcher: Searcher<Course>;
 let sectionSearcher: Searcher<Section>;
+let courseDict: { [x: string]: Course };
 let count = 0;
 
 onmessage = (msg: MessageEvent) => {
     if (count === 0) {
         console.time('worker prep');
-        const courses: Course[] = msg.data;
+        courseDict = msg.data;
+        const courses = Object.values(courseDict);
         const sections: Section[] = [];
         for (const { sections: secs } of courses) sections.push(...secs);
 
@@ -40,17 +42,22 @@ onmessage = (msg: MessageEvent) => {
         const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
 
         for (const result of courseResults) {
-            const key = result.item.key;
-            courseScores[key] = result.score;
+            const item = result.item;
+            const key = item.key;
+            courseScores[key] = result.score * (result.original === item.title ? 1 : 0.5);
             courseMap[key] = result;
         }
 
         for (const result of sectionResults) {
-            const key = result.item.key;
+            const item = result.item;
+            const key = item.key;
+            const score =
+                (result.score * (result.original === item.topic ? 0.8 : 0.5)) /
+                courseDict[key].sections.length;
             if (courseScores[key]) {
-                courseScores[key] += result.score;
+                courseScores[key] += score;
             } else {
-                courseScores[key] = result.score;
+                courseScores[key] = score;
             }
             if (sectionMap[key]) {
                 sectionMap[key].push(result);
@@ -62,6 +69,8 @@ onmessage = (msg: MessageEvent) => {
         const scoreEntries = Object.entries(courseScores)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12);
+
+        console.log(scoreEntries);
 
         const finalResults: Course[] = [];
         for (const [key] of scoreEntries) {

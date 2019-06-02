@@ -1,9 +1,4 @@
-import data from './data';
 import modal from '@/store/modal';
-
-beforeAll(async () => {
-    window.catalog = await data;
-});
 
 describe('modal', () => {
     it('basic', () => {

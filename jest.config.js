@@ -32,9 +32,6 @@ module.exports = {
         // this is too expensive to test (requesting a lot of data)
         // and is already used in other tests (a lot of other tests rely on its data)
         '!**/CatalogLoader.ts',
-
-        // worker tests are not supported
-        '!**/SearchWorker.ts',
         '!**/tests/**',
         '!**/tests/unit/*.ts',
         '!**/tests/unit/*.js'

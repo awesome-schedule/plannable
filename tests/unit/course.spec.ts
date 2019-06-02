@@ -1,10 +1,3 @@
-import data from './data';
-import Course from '@/models/Course';
-
-beforeAll(async () => {
-    window.catalog = await data;
-});
-
 describe('course test', () => {
     it('basic', () => {
         const catalog = window.catalog;

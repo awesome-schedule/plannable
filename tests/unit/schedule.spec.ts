@@ -1,11 +1,6 @@
 import Schedule from '@/models/Schedule';
 import Section from '@/models/Section';
 import * as Utils from '@/utils';
-import data from './data';
-
-beforeAll(async () => {
-    window.catalog = await data;
-});
 
 describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {

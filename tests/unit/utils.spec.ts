@@ -1,10 +1,7 @@
 import * as Utils from '@/utils';
-import 'jest';
 import axios from 'axios';
-import data from './data';
 
 beforeAll(async () => {
-    window.catalog = await data;
     window.open = jest.fn();
 });
 

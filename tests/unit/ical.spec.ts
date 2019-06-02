@@ -1,10 +1,5 @@
 import Schedule from '@/models/Schedule';
 import { toICal } from '@/utils';
-import data from './data';
-
-beforeAll(async () => {
-    window.catalog = await data;
-});
 
 describe('ical test', () => {
     /**

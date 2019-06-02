@@ -48,8 +48,8 @@ export default class Catalog {
     }
 
     public worker?: Worker;
+    public readonly courses: Course[];
     private readonly courseDict: { [x: string]: Course } = {};
-    private readonly courses: Course[];
 
     /**
      * @param semester the semester corresponding to the catalog stored in this object

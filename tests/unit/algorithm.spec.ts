@@ -7,7 +7,6 @@ import data from './data';
 const store = new Store();
 
 beforeAll(async () => {
-    window.catalog = await data;
     window.timeMatrix = (await loadTimeMatrix()).payload!;
     window.buildingList = (await loadBuildingList()).payload!;
 });

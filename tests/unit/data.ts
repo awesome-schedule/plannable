@@ -2,15 +2,6 @@
  * This file prepares data for unit testing
  */
 
-declare global {
-    interface Window {
-        catalog: Catalog;
-        timeMatrix: Int32Array;
-        buildingList: string[];
-        semesters: SemesterJSON[];
-    }
-}
-
 /**
  *
  */
@@ -18,6 +9,16 @@ import { requestSemesterData } from '@/data/CatalogLoader';
 import path from 'path';
 import fs from 'fs';
 import Catalog, { SemesterJSON } from '@/models/Catalog';
+
+declare global {
+    namespace NodeJS {
+        interface Global {
+            queue: any[];
+            postMessage: (msg: any) => void;
+            msgHandler(msg: any): void;
+        }
+    }
+}
 
 const datadir = path.join(__dirname, 'data');
 

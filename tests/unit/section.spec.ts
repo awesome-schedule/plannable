@@ -1,10 +1,4 @@
 import Section from '@/models/Section';
-import data from './data';
-import Course from '@/models/Course';
-
-beforeAll(async () => {
-    window.catalog = await data;
-});
 
 describe('section test', () => {
     it('basic', () => {

@@ -51,9 +51,7 @@ onmessage = (msg: MessageEvent) => {
         for (const result of sectionResults) {
             const item = result.item;
             const key = item.key;
-            const score =
-                (result.score * (result.original === item.topic ? 0.8 : 0.5)) /
-                courseDict[key].sections.length;
+            const score = result.score * (result.original === item.topic ? 0.8 : 0.4);
             if (courseScores[key]) {
                 courseScores[key] += score;
             } else {

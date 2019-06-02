@@ -3,7 +3,7 @@ import '../../src/workers/SearchWorker';
 describe('worker', () => {
     it('test', async () => {
         global.msgHandler({
-            data: window.catalog.courses.map(x => x.copy())
+            data: window.catalog.courseDict
         });
 
         expect(global.queue.pop()).toBe('ready');

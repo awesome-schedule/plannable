@@ -38,6 +38,11 @@ export interface CourseFields {
     readonly units: string;
     readonly title: string;
     readonly description: string;
+
+    /**
+     * display name, e.g. ECON 2010 Lecture for courses and ECON 2010-001 Lecture for sections
+     */
+    readonly displayName: string;
 }
 
 export interface Match<T extends string> {
@@ -67,9 +72,6 @@ export default class Course implements CourseFields, Hashable {
     public readonly sids: number[];
     public readonly sections: Section[];
 
-    public readonly isFake: boolean;
-    public readonly hasFakeSections: boolean;
-
     /**
      * @param raw the raw representation of this course
      * @param key the key of this course, e.g. cs11105
@@ -79,7 +81,7 @@ export default class Course implements CourseFields, Hashable {
      * @param secMatches matches for the sections contained in this course
      */
     constructor(
-        public readonly raw: RawCourse | undefined,
+        public readonly raw: RawCourse,
         public readonly key: string,
         sids: ReadonlyArray<number> = [],
         public readonly matches: CourseMatch[] = [],
@@ -88,36 +90,15 @@ export default class Course implements CourseFields, Hashable {
         if (sids.length) {
             this.sids = sids.slice().sort();
         } else {
-            this.sids = raw ? Array.from({ length: raw[6].length }, (_, i) => i) : [];
+            this.sids = Array.from({ length: raw[6].length }, (_, i) => i);
         }
 
-        if (raw) {
-            this.department = raw[0];
-            this.number = raw[1];
-            this.type = TYPES[raw[2]];
-            this.units = raw[3];
-            this.title = raw[4];
-            this.description = raw[5];
-            this.isFake = false;
-        } else {
-            // try to convert the key to a more readable format
-            const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
-            const parts = key.match(regex);
-            if (parts) {
-                const [_, dept, num, type] = parts;
-                this.department = dept.toUpperCase();
-                this.number = +num;
-                this.type = TYPES[+type];
-            } else {
-                this.department = '?';
-                this.number = 0;
-                this.type = '';
-            }
-            this.units = '';
-            this.title = 'NOT EXIST!';
-            this.description = '';
-            this.isFake = true;
-        }
+        this.department = raw[0];
+        this.number = raw[1];
+        this.type = TYPES[raw[2]];
+        this.units = raw[3];
+        this.title = raw[4];
+        this.description = raw[5];
         this.matches = matches;
 
         if (secMatches.length === this.sids.length) {
@@ -125,7 +106,6 @@ export default class Course implements CourseFields, Hashable {
         } else {
             this.sections = this.sids.map(sid => new Section(this, sid));
         }
-        this.hasFakeSections = this.sections.some(s => s.isFake);
     }
 
     get displayName() {
@@ -200,6 +180,9 @@ export default class Course implements CourseFields, Hashable {
         return hashCode(this.key);
     }
 
+    /**
+     * get copy of this course, with no match contained
+     */
     public copy() {
         return new Course(this.raw, this.key, this.sids);
     }

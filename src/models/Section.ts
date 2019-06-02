@@ -49,8 +49,6 @@ export default class Section implements CourseFields, Hashable {
     public readonly wait_list: number;
     public readonly instructors: string[];
     public readonly meetings: ReadonlyArray<Meeting>;
-
-    public readonly isFake: boolean;
     /**
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
@@ -69,31 +67,16 @@ export default class Section implements CourseFields, Hashable {
         this.title = course.title;
         this.description = course.description;
 
-        const raw: RawSection | undefined = course.raw ? course.raw[6][sid] : undefined;
-
-        if (raw) {
-            this.id = raw[0];
-            this.section = raw[1];
-            this.topic = raw[2];
-            this.status = STATUSES[raw[3]];
-            this.enrollment = raw[4];
-            this.enrollment_limit = raw[5];
-            this.wait_list = raw[6];
-            this.meetings = raw[7].map(x => new Meeting(this, x));
-            this.instructors = Meeting.getInstructors(raw[7]);
-            this.isFake = false;
-        } else {
-            this.id = -1;
-            this.section = 'NOT EXIST!';
-            this.topic = '';
-            this.status = 'TBA';
-            this.enrollment = -1;
-            this.enrollment_limit = -1;
-            this.wait_list = -1;
-            this.meetings = [];
-            this.instructors = [];
-            this.isFake = true;
-        }
+        const raw = course.raw[6][sid];
+        this.id = raw[0];
+        this.section = raw[1];
+        this.topic = raw[2];
+        this.status = STATUSES[raw[3]];
+        this.enrollment = raw[4];
+        this.enrollment_limit = raw[5];
+        this.wait_list = raw[6];
+        this.meetings = raw[7].map(x => new Meeting(this, x));
+        this.instructors = Meeting.getInstructors(raw[7]);
     }
 
     public get displayName() {

@@ -20,13 +20,15 @@ beforeAll(async () => {
 describe('catalog test', () => {
     it('search', () => {
         const catalog: Catalog = window.catalog;
+        console.info(catalog.raw_data.cs45015);
+        expect(catalog.search('comp. visio').length).toBeGreaterThanOrEqual(1);
         expect(catalog.search('cs', 6).length).toBe(6);
         expect(catalog.search('asdasdasajkgwuoeisd').length).toBe(0);
         expect(catalog.search('john').length).toBeGreaterThan(2);
         expect(catalog.search('aaron bloomf').length).toBeGreaterThan(2);
         expect(catalog.search('discre').length).toBeGreaterThan(1);
         expect(catalog.search('quantum').length).toBeGreaterThan(1);
-        expect(catalog.search('comp. visio').length).toBeGreaterThanOrEqual(1);
+
         console.info(catalog.search('comp. visio'));
 
         expect(catalog.search(':desc a').length).toBeGreaterThan(1);

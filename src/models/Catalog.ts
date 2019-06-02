@@ -243,7 +243,6 @@ export default class Catalog {
         const target = course[field].toLowerCase();
         const key = course.key;
         const targetIdx = target.indexOf(query);
-        // lastly, check description match
         if (targetIdx !== -1) {
             const prev = results.find(x => x.key === key);
             const match: CourseMatch = {

@@ -40,9 +40,4 @@ describe('section test', () => {
         expect(s2.sameTimeAs(sec)).toBe(false);
         expect(s2.displayName).toBeTruthy();
     });
-
-    it('fake', () => {
-        const section = new Section(new Course(undefined, 'cs11105', []), 0);
-        expect(section.isFake).toBe(true);
-    });
 });

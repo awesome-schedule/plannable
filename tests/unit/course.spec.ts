@@ -25,14 +25,4 @@ describe('course test', () => {
             true
         );
     });
-
-    it('fake', () => {
-        let course = new Course(undefined, 'cs11105');
-        expect(course.isFake).toBe(true);
-        course = new Course(undefined, 'asdasd');
-        expect(course.isFake).toBe(true);
-
-        const c = window.catalog.getCourse('cs11105').getCourse([100, 200]);
-        expect(c.hasFakeSections).toBe(true);
-    });
 });

@@ -17,7 +17,7 @@ import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
-import { Day, Week } from './Meta';
+import { Day, Week, TYPES } from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: Array<{ id: number; section: string }> | number[] | -1 };
@@ -85,18 +85,22 @@ export default class Schedule {
         if (keys.length === 0) return schedule;
 
         const catalog = window.catalog;
+        const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
         // convert array to set
         for (const key of keys) {
             const sections = obj.All[key];
             const course = catalog.getCourse(key);
-            const convKey = [course.department, course.number, course.type].join(' ');
+            const parts = key.match(regex);
+
+            // converted key
+            let convKey = key;
+            if (parts && parts.length === 4) {
+                parts[3] = TYPES[+parts[3]];
+                convKey = parts.slice(1).join(' ');
+            }
             // non existent course
-            if (course.isFake) {
-                noti.warn(
-                    `${
-                        course.number ? convKey : key
-                    } does not exist anymore! It probably has been removed!`
-                );
+            if (!course) {
+                noti.warn(`${convKey} does not exist anymore! It probably has been removed!`);
                 continue;
             }
             const allSections = course.sections;
@@ -109,8 +113,7 @@ export default class Schedule {
                         schedule.All[key] = new Set(
                             sections.filter(sid => {
                                 // sid >= length possibly implies that section is removed from SIS
-                                const isValid = sid < allSections.length;
-                                if (!isValid) {
+                                if (sid >= allSections.length) {
                                     noti.warn(
                                         `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
                                     );
@@ -360,7 +363,7 @@ export default class Schedule {
              */
             const course = catalog.getCourse(key, sections);
 
-            // skip placing empty/faked courses
+            // skip placing empty courses
             if (!course.sections.length) continue;
 
             const credit = parseFloat(course.units);

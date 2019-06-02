@@ -23,15 +23,7 @@
                             @click="collapse(crs.key)"
                         >
                             <h6 class="mb-1">
-                                <span
-                                    v-html="
-                                        highlightMatch(
-                                            crs.department + ' ' + crs.number + ' ' + crs.type,
-                                            'key',
-                                            crs.matches
-                                        )
-                                    "
-                                >
+                                <span v-html="highlightMatch(crs.displayName, 'key', crs.matches)">
                                 </span>
                                 <span
                                     v-if="emptyCourse(crs)"

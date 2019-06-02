@@ -12,8 +12,7 @@
         <div v-if="!mobile">
             <div v-if="isSection">
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
-                    {{ firstSec.department }} {{ firstSec.number }}-{{ firstSec.section }}
-                    {{ firstSec.type }}
+                    {{ firstSec.displayName }}
                 </div>
                 <div v-if="display.showInstructor" class="ml-2 crs-info">
                     {{ firstSec.instructors.join(', ') }}

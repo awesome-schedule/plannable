@@ -5,13 +5,7 @@
                 <div class="modal-header">
                     <h5
                         class="modal-title"
-                        v-html="
-                            highlightMatch(
-                                course.department + ' ' + course.number + ' ' + course.type,
-                                'key',
-                                course.matches
-                            )
-                        "
+                        v-html="highlightMatch(course.displayName, 'key', course.matches)"
                     ></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>

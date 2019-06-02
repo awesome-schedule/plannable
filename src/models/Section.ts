@@ -51,7 +51,6 @@ export default class Section implements CourseFields, Hashable {
     public readonly meetings: ReadonlyArray<Meeting>;
 
     public readonly isFake: boolean;
-    public readonly matches: SectionMatch[];
     /**
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
@@ -59,7 +58,7 @@ export default class Section implements CourseFields, Hashable {
     constructor(
         public readonly course: Course,
         public readonly sid: number,
-        matches: SectionMatch[] = []
+        public readonly matches: SectionMatch[] = []
     ) {
         this.key = course.key;
 
@@ -69,9 +68,8 @@ export default class Section implements CourseFields, Hashable {
         this.units = course.units;
         this.title = course.title;
         this.description = course.description;
-        this.matches = matches;
 
-        const raw: RawSection | undefined = course.raw![6][sid];
+        const raw: RawSection | undefined = course.raw ? course.raw[6][sid] : undefined;
 
         if (raw) {
             this.id = raw[0];
@@ -96,6 +94,10 @@ export default class Section implements CourseFields, Hashable {
             this.instructors = [];
             this.isFake = true;
         }
+    }
+
+    public get displayName() {
+        return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
 
     public sameTimeAs(other: Section) {

@@ -16,8 +16,6 @@ import Course, { Match, CourseMatch } from './Course';
 import { RawCatalog, TYPES } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
-import Section from './Section';
-import Worker from 'worker-loader!../workers/SearchWorker';
 
 /**
  * represents a semester
@@ -34,42 +32,8 @@ export interface SemesterJSON {
 }
 
 export interface CatalogJSON extends Expirable {
-    semester: SemesterJSON;
-    raw_data: RawCatalog;
-}
-
-interface SCourse {
-    /**
-     * key
-     */
-    0: string;
-    /**
-     * title
-     */
-    1: string;
-    /**
-     * description
-     */
-    2: string;
-}
-
-interface SSection {
-    /**
-     * sid
-     */
-    0: number;
-    /**
-     * key
-     */
-    1: string;
-    /**
-     * topic
-     */
-    2: string;
-    /**
-     * instructor
-     */
-    3: string;
+    readonly semester: SemesterJSON;
+    readonly raw_data: RawCatalog;
 }
 
 /**
@@ -83,9 +47,9 @@ export default class Catalog {
         return new Catalog(data.semester, data.raw_data, data.modified);
     }
 
-    private courseDict: { [x: string]: Course } = {};
-    private courses: Course[];
-    private worker: Worker;
+    private readonly courseDict: { [x: string]: Course } = {};
+    private readonly courses: Course[];
+    private worker?: Worker;
 
     /**
      * @param semester the semester corresponding to the catalog stored in this object
@@ -98,7 +62,7 @@ export default class Catalog {
         public readonly raw_data: RawCatalog,
         public readonly modified: string
     ) {
-        this.worker = new Worker();
+        // this.worker = new Worker();
 
         // this.raw_data.cs45015[6].push([
         //     19281,
@@ -125,11 +89,17 @@ export default class Catalog {
             courses.push((this.courseDict[key] = new Course(raw_data[key], key)));
 
         this.courses = courses;
-        this.worker.postMessage({
-            courses
-        });
+        // this.initWorker();
 
         console.timeEnd('catalog prep data');
+    }
+
+    public initWorker() {
+        if (!this.worker) {
+            const Worker = require('worker-loader!../workers/SearchWorker');
+            const worker = (this.worker = new Worker());
+            worker.postMessage(this.courses);
+        }
     }
 
     public fromJSON(data: CatalogJSON) {
@@ -171,8 +141,8 @@ export default class Catalog {
      * convert key of an event (e.g. `MoFr 1:00PM - 2:00PM`) to its title
      */
     convertKey(key: string, schedule?: Schedule) {
-        const raw = this.raw_data[key];
-        if (raw) return `${raw[0]} ${raw[1]} ${TYPES[raw[2]]}`;
+        const course = this.courseDict[key];
+        if (course) return course.displayName;
         else if (schedule) {
             for (const event of schedule.events) {
                 if (event.key === key) {
@@ -184,12 +154,14 @@ export default class Catalog {
     }
 
     public fuzzySearch(query: string) {
+        const worker = this.worker;
+        if (!worker) return Promise.reject('Worker not initialized!');
         const promise = new Promise(resolve => {
-            this.worker.onmessage = ({ data }: { data: any[] }) => {
+            worker.onmessage = ({ data }: { data: any[] }) => {
                 resolve(data.map(x => new (Course as any)(...x)));
             };
         });
-        this.worker.postMessage(query);
+        worker.postMessage(query);
         return promise as Promise<Course[]>;
     }
 

@@ -28,7 +28,7 @@ function addSectionMatches(course: Course, sids: number[], secMatches: SectionMa
 onmessage = (msg: MessageEvent) => {
     if (count === 0) {
         console.time('worker prep');
-        const { courses } = msg.data;
+        const courses: Course[] = msg.data;
         const sections: Section[] = [];
         for (const { sections: secs } of courses) sections.push(...secs);
 
@@ -44,14 +44,13 @@ onmessage = (msg: MessageEvent) => {
             normalizeWhitespace: true,
             keySelector: obj => [obj.title, obj.description]
         });
+        postMessage('ready');
         console.timeEnd('worker prep');
     } else {
-        const query = msg.data;
+        const query: string = msg.data;
 
-        console.time('search');
         const courseResults = courseSearcher.search(query);
         const sectionResults = sectionSearcher.search(query);
-        console.timeEnd('search');
 
         const courseScores: { [x: string]: number } = Object.create(null);
         const courseMap: { [x: string]: SearchResult<Course> } = Object.create(null);

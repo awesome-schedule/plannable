@@ -20,13 +20,21 @@ module.exports = {
         '!**/node_modules/**',
         '!**/*.d.ts',
         '!**/tests/temp/*.*',
+
+        // don't know how to test components
         '!**/components/**/*.ts',
+
+        // no need to test the entry point
         '!**/App.ts',
         '!**/main.ts',
         '!**/store/*.ts',
+
         // this is too expensive to test (requesting a lot of data)
         // and is already used in other tests (a lot of other tests rely on its data)
         '!**/CatalogLoader.ts',
+
+        // worker tests are not supported
+        '!**/SearchWorker.ts',
         '!**/tests/**',
         '!**/tests/unit/*.ts',
         '!**/tests/unit/*.js'

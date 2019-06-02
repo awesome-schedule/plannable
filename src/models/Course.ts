@@ -131,6 +131,10 @@ export default class Course implements CourseFields, Hashable {
         this.matches = matches;
     }
 
+    get displayName() {
+        return this.department + ' ' + this.number + ' ' + this.type;
+    }
+
     /**
      * get the first section **contained** in this course
      */

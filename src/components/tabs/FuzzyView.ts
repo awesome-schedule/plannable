@@ -20,6 +20,16 @@ export default class FuzzyView extends Store {
     inputCourses: Course[] | null = null;
     loading = false;
 
+    async created() {
+        if (!window.catalog.worker) {
+            this.loading = true;
+            this.noti.info('Gathering data for fuzzy search...');
+            await window.catalog.initWorker();
+            this.noti.success('Success!', 2.5);
+            this.loading = false;
+        }
+    }
+
     /**
      * get classes that match the input query.
      * Exit "entering" mode on falsy parameter (set `isEntering` to false)
@@ -41,7 +51,7 @@ export default class FuzzyView extends Store {
         }
 
         console.time('query');
-        this.inputCourses = await window.catalog.fuzzySearch(query); // this.display.numSearchResults
+        this.inputCourses = await window.catalog.fuzzySearch(query);
         console.log(this.inputCourses);
         console.timeEnd('query');
 

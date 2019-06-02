@@ -6,6 +6,7 @@
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Title/Topic/Prof./Desc."
+                :disabled="loading"
                 @input="$event.target.value ? '' : getClass('')"
                 @keydown.enter="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"

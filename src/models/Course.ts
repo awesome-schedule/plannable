@@ -40,14 +40,10 @@ export interface CourseFields {
     readonly description: string;
 }
 
-export interface Matchable<T extends string> {
-    matches: Match<T>[];
-}
-
 export interface Match<T extends string> {
-    match: T;
-    start: number;
-    end: number;
+    readonly match: T;
+    readonly start: number;
+    readonly end: number;
 }
 
 export type CourseMatch = Match<'title' | 'description' | 'key'>;
@@ -73,19 +69,20 @@ export default class Course implements CourseFields, Hashable {
 
     public readonly isFake: boolean;
     public readonly hasFakeSections: boolean;
-    public readonly matches: CourseMatch[];
 
     /**
      * @param raw the raw representation of this course
      * @param key the key of this course, e.g. cs11105
      * equal to (department + number + `Meta.TYPES_PARSE`\[type\]). see [[Meta.TYPES_PARSE]]
      * @param sids A list of section indices
+     * @param matches matches for this course
+     * @param secMatches matches for the sections contained in this course
      */
     constructor(
         public readonly raw: RawCourse | undefined,
         public readonly key: string,
         sids: ReadonlyArray<number> = [],
-        matches: CourseMatch[] = [],
+        public readonly matches: CourseMatch[] = [],
         secMatches: SectionMatch[][] = []
     ) {
         if (sids.length) {

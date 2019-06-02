@@ -177,12 +177,6 @@ class ScheduleEvaluator {
             return Math.random();
         }
     };
-
-    public options: EvaluatorOptions;
-    /**
-     * the array of events kept, use to construct generated schedules
-     */
-    public events: Event[];
     /**
      * _schedules keeps the schedules in insertion order,
      * so that we can cache the sorting coefficient of each schedule
@@ -199,7 +193,11 @@ class ScheduleEvaluator {
      */
     private sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
 
-    constructor(options: EvaluatorOptions, events: Event[] = []) {
+    /**
+     * @param options
+     * @param events the array of events kept, use to construct generated schedules
+     */
+    constructor(public options: EvaluatorOptions, public events: Event[] = []) {
         this.options = options;
         this.events = events;
     }

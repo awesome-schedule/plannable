@@ -40,16 +40,9 @@ export class Vertex<T> {
      */
     public readonly path: Vertex<T>[][] = [];
     /**
-     * the value contained in this vertex
+     * @param val the value contained in this node
      */
-    public readonly val: T;
-
-    /**
-     * @param t the value contained in this node
-     */
-    constructor(t: T) {
-        this.val = t;
-    }
+    constructor(public readonly val: T) {}
 
     /**
      * represent this node without creating cyclic reference

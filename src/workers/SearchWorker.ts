@@ -1,5 +1,5 @@
 import { Searcher, SearchResult } from 'fast-fuzzy';
-import Course, { CourseMatch, Match } from '../models/Course';
+import Course from '../models/Course';
 import Section, { SectionMatch } from '../models/Section';
 
 declare var postMessage: any;
@@ -98,17 +98,13 @@ onmessage = (msg: MessageEvent) => {
                     addSectionMatches(
                         course,
                         s.map(x => x.item.sid),
-                        s.map(
-                            x =>
-                                [
-                                    {
-                                        match:
-                                            x.original === x.item.topic ? 'topic' : 'instructors',
-                                        start: x.match.index,
-                                        end: x.match.index + x.match.length
-                                    }
-                                ] as SectionMatch[]
-                        )
+                        s.map(x => [
+                            {
+                                match: x.original === x.item.topic ? 'topic' : 'instructors',
+                                start: x.match.index,
+                                end: x.match.index + x.match.length
+                            } as SectionMatch
+                        ])
                     );
                 }
             } else {
@@ -118,16 +114,13 @@ onmessage = (msg: MessageEvent) => {
                     key,
                     s.map(x => x.item.sid),
                     [],
-                    s.map(
-                        x =>
-                            [
-                                {
-                                    match: x.original === x.item.topic ? 'topic' : 'instructors',
-                                    start: x.match.index,
-                                    end: x.match.index + x.match.length
-                                }
-                            ] as SectionMatch[]
-                    )
+                    s.map(x => [
+                        {
+                            match: x.original === x.item.topic ? 'topic' : 'instructors',
+                            start: x.match.index,
+                            end: x.match.index + x.match.length
+                        } as SectionMatch
+                    ])
                 );
             }
             finalResults.push(course);

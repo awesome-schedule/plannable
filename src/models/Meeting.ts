@@ -25,13 +25,11 @@ export default class Meeting {
         }
         return profs;
     }
-    public readonly section: Section;
     public readonly instructor: string;
     public readonly days: string;
     public readonly dates: string;
     public readonly room: string;
-    constructor(section: Section, raw: RawMeeting) {
-        this.section = section;
+    constructor(public readonly section: Section, raw: RawMeeting) {
         this.instructor = raw[0];
         this.days = raw[1];
         this.room = raw[2];

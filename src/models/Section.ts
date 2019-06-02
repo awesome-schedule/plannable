@@ -28,18 +28,9 @@ export default class Section implements CourseFields, Hashable {
     public readonly description: string;
 
     /**
-     * the index of the section
-     */
-    public readonly sid: number;
-    /**
      * Key of the course that this section belongs to; same for all sections.
      */
     public readonly key: string;
-
-    /**
-     * a reference to the course that this section belongs to
-     */
-    public readonly course: Course;
     /**
      * the id of the section recorded in sis
      */
@@ -61,15 +52,15 @@ export default class Section implements CourseFields, Hashable {
 
     public readonly isFake: boolean;
     public readonly matches: SectionMatch[];
-
+    /**
+     * @param course a reference to the course that this section belongs to
+     * @param sid the index of the section
+     */
     constructor(
-        course: Course,
-        raw: RawSection | undefined,
-        sid: number,
+        public readonly course: Course,
+        public readonly sid: number,
         matches: SectionMatch[] = []
     ) {
-        this.course = course;
-        this.sid = sid;
         this.key = course.key;
 
         this.department = course.department;
@@ -79,6 +70,8 @@ export default class Section implements CourseFields, Hashable {
         this.title = course.title;
         this.description = course.description;
         this.matches = matches;
+
+        const raw: RawSection | undefined = course.raw![6][sid];
 
         if (raw) {
             this.id = raw[0];

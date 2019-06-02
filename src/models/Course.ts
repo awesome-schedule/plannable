@@ -57,13 +57,6 @@ export type CourseMatch = Match<'title' | 'description' | 'key'>;
  * depending on the array of section indices passed to its constructor.
  */
 export default class Course implements CourseFields, Hashable {
-    /**
-     * key of this in Catalog, equal to (department + number + `Meta.TYPES_PARSE`\[type\])
-     *
-     * @see [[Meta.TYPES_PARSE]]
-     */
-    public readonly key: string;
-
     public readonly department: string;
     public readonly number: number;
     public readonly type: CourseType;
@@ -71,7 +64,6 @@ export default class Course implements CourseFields, Hashable {
     public readonly title: string;
     public readonly description: string;
 
-    public readonly raw: RawCourse | undefined;
     /**
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
@@ -86,18 +78,16 @@ export default class Course implements CourseFields, Hashable {
     /**
      * @param raw the raw representation of this course
      * @param key the key of this course, e.g. cs11105
+     * equal to (department + number + `Meta.TYPES_PARSE`\[type\]). see [[Meta.TYPES_PARSE]]
      * @param sids A list of section indices
      */
     constructor(
-        raw: RawCourse | undefined,
-        key: string,
+        public readonly raw: RawCourse | undefined,
+        public readonly key: string,
         sids: ReadonlyArray<number> = [],
         matches: CourseMatch[] = [],
         secMatches: SectionMatch[][] = []
     ) {
-        this.key = key;
-        this.raw = raw;
-
         if (sids.length) {
             this.sids = sids.slice().sort();
         } else {
@@ -113,11 +103,9 @@ export default class Course implements CourseFields, Hashable {
             this.description = raw[5];
 
             if (secMatches.length === this.sids.length) {
-                this.sections = this.sids.map(
-                    (i, idx) => new Section(this, raw[6][i], i, secMatches[idx])
-                );
+                this.sections = this.sids.map((i, idx) => new Section(this, i, secMatches[idx]));
             } else {
-                this.sections = this.sids.map(i => new Section(this, raw[6][i], i));
+                this.sections = this.sids.map(i => new Section(this, i));
             }
 
             this.hasFakeSections = this.sections.some(s => s.isFake);
@@ -164,9 +152,7 @@ export default class Course implements CourseFields, Hashable {
             }
         });
         secMatches = secMatches.filter(x => x);
-        this.sections.push(
-            ...sids.map((i, idx) => new Section(this, this.raw![6][i], i, secMatches[idx]))
-        );
+        this.sections.push(...sids.map((i, idx) => new Section(this, i, secMatches[idx])));
         this.sections.sort((a, b) => a.sid - b.sid);
         this.sids.push(...sids);
         this.sids.sort();

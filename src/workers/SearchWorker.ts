@@ -1,5 +1,5 @@
 import { Searcher, SearchResult } from 'fast-fuzzy';
-import Course from '../models/Course';
+import Course, { CourseMatch, Match } from '../models/Course';
 import Section, { SectionMatch } from '../models/Section';
 
 declare var postMessage: any;
@@ -19,9 +19,7 @@ function addSectionMatches(course: Course, sids: number[], secMatches: SectionMa
         }
     });
     secMatches = secMatches.filter(x => x);
-    course.sections.push(
-        ...sids.map((i, idx) => new Section(course, course.raw![6][i], i, secMatches[idx]))
-    );
+    course.sections.push(...sids.map((i, idx) => new Section(course, i, secMatches[idx])));
     course.sections.sort((a, b) => a.sid - b.sid);
     course.sids.push(...sids);
     course.sids.sort();
@@ -32,9 +30,8 @@ onmessage = (msg: MessageEvent) => {
         console.time('worker prep');
         const { courses } = msg.data;
         const sections: Section[] = [];
-        for (const { sections: secs } of courses) {
-            sections.push(...secs);
-        }
+        for (const { sections: secs } of courses) sections.push(...secs);
+
         sectionSearcher = new Searcher(sections, {
             returnMatchData: true,
             ignoreCase: true,
@@ -50,16 +47,21 @@ onmessage = (msg: MessageEvent) => {
         console.timeEnd('worker prep');
     } else {
         const query = msg.data;
+
+        console.time('search');
         const courseResults = courseSearcher.search(query);
+        const sectionResults = sectionSearcher.search(query);
+        console.timeEnd('search');
+
         const courseScores: { [x: string]: number } = Object.create(null);
         const courseMap: { [x: string]: SearchResult<Course> } = Object.create(null);
+        const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
+
         for (const result of courseResults) {
             const key = result.item.key;
             courseScores[key] = result.score;
             courseMap[key] = result;
         }
-        const sectionResults = sectionSearcher.search(query);
-        const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
 
         for (const result of sectionResults) {
             const key = result.item.key;
@@ -96,13 +98,17 @@ onmessage = (msg: MessageEvent) => {
                     addSectionMatches(
                         course,
                         s.map(x => x.item.sid),
-                        s.map(x => [
-                            {
-                                match: x.original === x.item.topic ? 'topic' : 'instructors',
-                                start: x.match.index,
-                                end: x.match.index + x.match.length
-                            }
-                        ])
+                        s.map(
+                            x =>
+                                [
+                                    {
+                                        match:
+                                            x.original === x.item.topic ? 'topic' : 'instructors',
+                                        start: x.match.index,
+                                        end: x.match.index + x.match.length
+                                    }
+                                ] as SectionMatch[]
+                        )
                     );
                 }
             } else {
@@ -112,13 +118,16 @@ onmessage = (msg: MessageEvent) => {
                     key,
                     s.map(x => x.item.sid),
                     [],
-                    s.map(x => [
-                        {
-                            match: x.original === x.item.topic ? 'topic' : 'instructors',
-                            start: x.match.index,
-                            end: x.match.index + x.match.length
-                        }
-                    ])
+                    s.map(
+                        x =>
+                            [
+                                {
+                                    match: x.original === x.item.topic ? 'topic' : 'instructors',
+                                    start: x.match.index,
+                                    end: x.match.index + x.match.length
+                                }
+                            ] as SectionMatch[]
+                    )
                 );
             }
             finalResults.push(course);

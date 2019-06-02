@@ -82,25 +82,22 @@ export default class Catalog {
     public static fromJSON(data: CatalogJSON) {
         return new Catalog(data.semester, data.raw_data, data.modified);
     }
-    /**
-     * the semester corresponding to the catalog stored in this object
-     */
-    public semester: SemesterJSON;
-    /**
-     * the raw representation of the course catalog
-     * @borrows python's snake_case (not changed due to backward compatibility issues)
-     */
-    public raw_data: RawCatalog;
-    public modified: string;
 
     private courseDict: { [x: string]: Course } = {};
     private courses: Course[];
     private worker: Worker;
 
-    constructor(semester: SemesterJSON, raw_data: RawCatalog, modified: string) {
-        this.semester = semester;
-        this.raw_data = raw_data;
-        this.modified = modified;
+    /**
+     * @param semester the semester corresponding to the catalog stored in this object
+     * @param raw_data the raw representation of the course catalog,
+     * borrowing python's snake_case (not changed due to backward compatibility issues)
+     * @param modified
+     */
+    constructor(
+        public readonly semester: SemesterJSON,
+        public readonly raw_data: RawCatalog,
+        public readonly modified: string
+    ) {
         this.worker = new Worker();
 
         // this.raw_data.cs45015[6].push([

@@ -32,6 +32,7 @@
 
         <div v-if="isEntering" ref="classList" class="card card-body p-1">
             <ClassList
+                ref="enteringClassList"
                 :courses="inputCourses"
                 :schedule="schedule.currentSchedule"
                 :is-entering="isEntering"

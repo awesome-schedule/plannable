@@ -41,7 +41,7 @@ describe('section test', () => {
     });
 
     it('fake', () => {
-        const section = new Section(new Course(undefined, 'cs11105', []), undefined, 0);
+        const section = new Section(new Course(undefined, 'cs11105', []), 0);
         expect(section.isFake).toBe(true);
     });
 });

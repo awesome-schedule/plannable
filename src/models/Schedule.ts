@@ -155,8 +155,6 @@ export default class Schedule {
      * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
      */
     public All: { [x: string]: Set<number> | -1 };
-    public title: string;
-    public id: number;
     /**
      * computed based on `this.All` by `computeSchedule`
      */
@@ -181,8 +179,6 @@ export default class Schedule {
      */
     public currentIds: { [x: string]: string };
 
-    public events: Event[];
-
     /**
      * keep track of used colors to avoid color collision
      */
@@ -199,20 +195,17 @@ export default class Schedule {
      */
     constructor(
         raw_schedule: RawAlgoSchedule = [],
-        title = 'Schedule',
-        id = 0,
-        events: Event[] = []
+        public title = 'Schedule',
+        public id = 0,
+        public events: Event[] = []
     ) {
         this.All = {};
         this.days = [[], [], [], [], []];
         this._preview = null;
-        this.title = title;
-        this.id = id;
         this.colorSlots = Array.from({ length: Schedule.bgColors.length }, () => new Set<string>());
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
-        this.events = events;
 
         for (const [key, , sections] of raw_schedule) {
             this.All[key] = new Set(sections);

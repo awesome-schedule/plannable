@@ -1,7 +1,7 @@
 /**
  * @module components/tabs
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import Store from '@/store';
 import Course from '@/models/Course';
 import ClassList from '../ClassList.vue';
@@ -42,6 +42,7 @@ export default class FuzzyView extends Store {
 
         console.time('query');
         this.inputCourses = await window.catalog.fuzzySearch(query); // this.display.numSearchResults
+        console.log(this.inputCourses);
         console.timeEnd('query');
 
         this.isEntering = true;
@@ -62,7 +63,8 @@ export default class FuzzyView extends Store {
 
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to re-render component
-        this.$forceUpdate();
+        const classList = this.$refs.enteringClassList;
+        if (classList instanceof Vue) (classList as Vue).$forceUpdate();
         this.saveStatus();
     }
 }

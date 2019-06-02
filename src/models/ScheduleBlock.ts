@@ -19,25 +19,9 @@ import Course from './Course';
  */
 export default class ScheduleBlock {
     /**
-     * background color in hex, e.g. `#ffffff`
-     */
-    public backgroundColor: string;
-    /**
-     * start time in 24hr format: `13:00`
-     */
-    public start: string;
-    /**
-     * end time in 24hr format: `15:00`
-     */
-    public end: string;
-    /**
      * duration of the block, in minutes
      */
-    public duration: number = 0;
-    /**
-     * the stuff contained in this block
-     */
-    public section: Section | Course | Event;
+    public readonly duration: number = 0;
     /**
      * the left of the block relative to the column, a decimal between 0 and 1
      */
@@ -51,20 +35,21 @@ export default class ScheduleBlock {
      */
     public strong = false;
 
-    private startMin: number;
-    private endMin: number;
+    private readonly startMin: number;
+    private readonly endMin: number;
 
+    /**
+     * @param backgroundColor background color in hex, e.g. `#ffffff`
+     * @param start start time in 24hr format: `13:00`
+     * @param end end time in 24hr format: `15:00`
+     * @param section the stuff contained in this block
+     */
     constructor(
-        backgroundColor: string,
-        start: string,
-        end: string,
-        section: Section | Course | Event
+        public readonly backgroundColor: string,
+        public readonly start: string,
+        public readonly end: string,
+        public readonly section: Section | Course | Event
     ) {
-        this.backgroundColor = backgroundColor;
-        this.start = start;
-        this.end = end;
-        this.section = section;
-
         [this.startMin, this.endMin] = this.timeAsInt();
         this.duration = this.endMin - this.startMin;
     }

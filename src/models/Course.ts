@@ -134,24 +134,25 @@ export default class Course implements CourseFields, Hashable {
 
     public addSectionMatches(sids: number[], secMatches: SectionMatch[][]) {
         const newSecMatches = this.secMatches.map(x => x.concat());
-        sids = sids.filter((sid, idx) => {
-            const exIdx = this.sids.findIndex(s => s === sid);
-            if (exIdx === -1) return true;
-            else {
-                newSecMatches[exIdx].push(...secMatches[idx]);
-                (secMatches[idx] as any) = null;
-                return false;
-            }
-        });
-        secMatches = secMatches.filter(x => x);
         const newSids = this.sids.concat();
-        for (let i = 0; i < sids.length; i++) {
+
+        const zipped = sids
+            .map((x, i) => [x, secMatches[i]] as [number, Match<'topic' | 'instructors'>[]])
+            .filter(([sid, matches]) => {
+                const exIdx = newSids.findIndex(s => s === sid);
+                if (exIdx === -1) return true;
+                else {
+                    newSecMatches[exIdx].push(...matches);
+                    return false;
+                }
+            });
+
+        for (const [sid, matches] of zipped) {
             let j = 0;
-            for (; j < newSids.length; j++) {
-                if (sids[j] > newSids[j]) break;
-            }
-            newSids.splice(j, 0, sids[i]);
-            newSecMatches.splice(j, 0, newSecMatches[i]);
+            for (; j < newSids.length; j++) if (sid < newSids[j]) break;
+
+            newSids.splice(j, 0, sid);
+            newSecMatches.splice(j, 0, matches);
         }
         return new Course(this.raw, this.key, newSids, this.matches, newSecMatches);
     }

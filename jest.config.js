@@ -10,7 +10,7 @@ module.exports = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },
-    setupTestFrameworkScriptFile: '<rootDir>/tests/unit/setup.js',
+    setupTestFrameworkScriptFile: '<rootDir>/tests/unit/setup.ts',
     snapshotSerializers: ['jest-serializer-vue'],
     testMatch: ['**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
     testURL: 'http://localhost/',

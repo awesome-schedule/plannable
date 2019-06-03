@@ -7,7 +7,6 @@ const externals = {
     vuedraggable: 'vuedraggable'
 };
 module.exports = {
-    parallel: false,
     chainWebpack: config => {
         config.externals(externals);
     }

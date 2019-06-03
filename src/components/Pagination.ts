@@ -46,7 +46,9 @@ export default class Pagination extends Store {
         } else if (this.idx >= this.start + this.length) {
             this.start = this.idx - this.length + 1;
         }
+        if (this.start < 0) this.start = 0;
     }
+
     switchPage(idx: number) {
         idx = isNaN(idx) ? 0 : +idx;
         if (idx >= this.scheduleLength) {
@@ -56,12 +58,12 @@ export default class Pagination extends Store {
         } else {
             this.idx = idx;
         }
+        this.updateStart();
         this.schedule.switchPage(this.idx);
     }
 
     @Watch('curIdx')
     autoSwitch() {
         this.switchPage(this.curIdx);
-        this.updateStart();
     }
 }

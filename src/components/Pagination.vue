@@ -8,22 +8,11 @@
                     placeholder="Go to"
                     class="form-control"
                     style="border-radius: 4px 0px 0px 4px !important"
-                    @input="
-                        switchPage(goto - 1);
-                        updateStart();
-                    "
+                    @input="switchPage(goto - 1)"
                 />
             </li>
             <li class="page-item" :class="{ disabled: start <= 0 && idx <= start }">
-                <a
-                    class="page-link"
-                    href="#"
-                    @click="
-                        switchPage(idx - 1);
-                        updateStart();
-                    "
-                    >&laquo;</a
-                >
+                <a class="page-link" href="#" @click="switchPage(idx - 1)">&laquo;</a>
             </li>
             <!-- Note: v-for in number gives 1 to number inclusive -->
             <li
@@ -32,27 +21,12 @@
                 class="page-item"
                 :class="{ active: idx === index + start - 1 }"
             >
-                <a
-                    class="page-link"
-                    href="#"
-                    @click="
-                        switchPage(index + start - 1);
-                        updateStart();
-                    "
-                >
+                <a class="page-link" href="#" @click="switchPage(index + start - 1)">
                     {{ index + start }}
                 </a>
             </li>
             <li class="page-item" :class="{ disabled: idx >= scheduleLength - 1 }">
-                <a
-                    class="page-link"
-                    href="#"
-                    @click="
-                        switchPage(idx + 1);
-                        updateStart();
-                    "
-                    >&raquo;</a
-                >
+                <a class="page-link" href="#" @click="switchPage(idx + 1)">&raquo;</a>
             </li>
         </ul>
     </nav>

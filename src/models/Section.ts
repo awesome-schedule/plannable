@@ -47,7 +47,7 @@ export default class Section implements CourseFields, Hashable {
     public readonly enrollment: number;
     public readonly enrollment_limit: number;
     public readonly wait_list: number;
-    public readonly instructors: string[];
+    public readonly instructors: ReadonlyArray<string>;
     public readonly meetings: ReadonlyArray<Meeting>;
     /**
      * @param course a reference to the course that this section belongs to
@@ -56,7 +56,7 @@ export default class Section implements CourseFields, Hashable {
     constructor(
         public readonly course: Course,
         public readonly sid: number,
-        public readonly matches: SectionMatch[] = []
+        public readonly matches: ReadonlyArray<SectionMatch> = []
     ) {
         this.key = course.key;
 

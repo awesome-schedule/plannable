@@ -76,8 +76,8 @@ export default class Course implements CourseFields, Hashable {
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: number[];
-    public readonly sections: Section[];
+    public readonly sids: ReadonlyArray<number>;
+    public readonly sections: ReadonlyArray<Section>;
 
     /**
      * @param raw the raw representation of this course
@@ -91,8 +91,8 @@ export default class Course implements CourseFields, Hashable {
         public readonly raw: RawCourse,
         public readonly key: string,
         sids: ReadonlyArray<number> = [],
-        public readonly matches: CourseMatch[] = [],
-        secMatches: SectionMatch[][] = []
+        public readonly matches: ReadonlyArray<CourseMatch> = [],
+        public readonly secMatches: ReadonlyArray<ReadonlyArray<SectionMatch>> = []
     ) {
         if (sids.length) {
             this.sids = sids.slice().sort();
@@ -126,21 +126,34 @@ export default class Course implements CourseFields, Hashable {
         return this.sections[0];
     }
 
+    public addMatch(match: CourseMatch) {
+        const matches = this.matches.concat();
+        matches.push(match);
+        return new Course(this.raw, this.key, this.sids, matches, this.secMatches);
+    }
+
     public addSectionMatches(sids: number[], secMatches: SectionMatch[][]) {
+        const newSecMatches = this.secMatches.map(x => x.concat());
         sids = sids.filter((sid, idx) => {
             const exIdx = this.sids.findIndex(s => s === sid);
             if (exIdx === -1) return true;
             else {
-                this.sections[exIdx].matches.push(...secMatches[idx]);
+                newSecMatches[exIdx].push(...secMatches[idx]);
                 (secMatches[idx] as any) = null;
                 return false;
             }
         });
         secMatches = secMatches.filter(x => x);
-        this.sections.push(...sids.map((i, idx) => new Section(this, i, secMatches[idx])));
-        this.sections.sort((a, b) => a.sid - b.sid);
-        this.sids.push(...sids);
-        this.sids.sort();
+        const newSids = this.sids.concat();
+        for (let i = 0; i < sids.length; i++) {
+            let j = 0;
+            for (; j < newSids.length; j++) {
+                if (sids[j] > newSids[j]) break;
+            }
+            newSids.splice(j, 0, sids[i]);
+            newSecMatches.splice(j, 0, newSecMatches[i]);
+        }
+        return new Course(this.raw, this.key, newSids, this.matches, newSecMatches);
     }
 
     /**

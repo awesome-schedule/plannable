@@ -256,14 +256,14 @@ export default class Catalog {
         const key = course.key;
         const targetIdx = target.indexOf(query);
         if (targetIdx !== -1) {
-            const prev = results.find(x => x.key === key);
+            const prev = results.findIndex(x => x.key === key);
             const match: CourseMatch = {
                 match: field,
                 start: targetIdx,
                 end: targetIdx + query.length
             };
-            if (prev) {
-                prev.matches.push(match);
+            if (prev !== -1) {
+                results[prev] = results[prev].addMatch(match);
             } else {
                 results.push(new Course(course.raw, key, [], [match]));
             }
@@ -290,9 +290,9 @@ export default class Catalog {
             }
         }
         if (topicMatchIdx.length) {
-            const prev = results.find(x => x.key === course.key);
-            if (prev) {
-                prev.addSectionMatches(topicMatchIdx, topicMatches);
+            const prev = results.findIndex(x => x.key === course.key);
+            if (prev !== -1) {
+                results[prev] = results[prev].addSectionMatches(topicMatchIdx, topicMatches);
             } else {
                 results.push(new Course(course.raw, course.key, topicMatchIdx, [], topicMatches));
             }
@@ -319,9 +319,9 @@ export default class Catalog {
             }
         }
         if (profMatchIdx.length) {
-            const prev = results.find(x => x.key === course.key);
-            if (prev) {
-                prev.addSectionMatches(profMatchIdx, profMatches);
+            const prev = results.findIndex(x => x.key === course.key);
+            if (prev !== -1) {
+                results[prev] = results[prev].addSectionMatches(profMatchIdx, profMatches);
             } else {
                 results.push(new Course(course.raw, course.key, profMatchIdx, [], profMatches));
             }

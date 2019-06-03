@@ -52,6 +52,13 @@ export interface Match<T extends string> {
 }
 
 export type CourseMatch = Match<'title' | 'description' | 'key'>;
+export type CourseConstructorArguments = [
+    RawCourse,
+    string,
+    ReadonlyArray<number>,
+    CourseMatch[],
+    SectionMatch[][]
+];
 
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,

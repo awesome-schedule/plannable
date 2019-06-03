@@ -9,6 +9,13 @@ let sectionSearcher: Searcher<Section>;
 let courseDict: { [x: string]: Course };
 let count = 0;
 
+/**
+ * initialize the worker using `msg.data` which is assumed to be a `courseDict` on the first message,
+ * posting the string literal 'ready' as the response
+ *
+ * start fuzzy search using `msg.data` which is assumed to be a string for the following messages,
+ * posting the array of tuples (used to construct [[Course]] instances) as the response
+ */
 onmessage = (msg: MessageEvent) => {
     if (count === 0) {
         console.time('worker prep');
@@ -67,8 +74,6 @@ onmessage = (msg: MessageEvent) => {
         const scoreEntries = Object.entries(courseScores)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12);
-
-        console.log(scoreEntries);
 
         const finalResults: Course[] = [];
         for (const [key] of scoreEntries) {

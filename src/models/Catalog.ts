@@ -12,11 +12,10 @@
 /**
  *
  */
-import Course, { Match, CourseMatch } from './Course';
+import Course, { Match, CourseMatch, CourseConstructorArguments } from './Course';
 import { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
-
 /**
  * represents a semester
  */
@@ -36,6 +35,15 @@ export interface CatalogJSON extends Expirable {
     readonly raw_data: RawCatalog;
 }
 
+interface SearchWorkerOnMessage extends MessageEvent {
+    data: 'ready' | CourseConstructorArguments[];
+}
+
+interface SearchWorker extends Worker {
+    onmessage(x: SearchWorkerOnMessage): void;
+    postMessage(x: string | typeof window.catalog.courseDict): void;
+}
+
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
  */
@@ -47,7 +55,7 @@ export default class Catalog {
         return new Catalog(data.semester, data.raw_data, data.modified);
     }
 
-    public worker?: Worker;
+    public worker?: SearchWorker;
     public readonly courses: Course[];
     public readonly courseDict: { [x: string]: Course } = {};
 
@@ -77,10 +85,10 @@ export default class Catalog {
     public initWorker(): Promise<'ready'> {
         if (!this.worker) {
             const Worker = require('worker-loader!../workers/SearchWorker');
-            const worker: Worker = new Worker();
+            const worker: SearchWorker = new Worker();
             const prom = new Promise(resolve => {
                 worker.onmessage = msg => {
-                    resolve(msg.data);
+                    resolve(msg.data as 'ready');
                 };
             }) as Promise<'ready'>;
             worker.postMessage(this.courseDict);
@@ -140,8 +148,8 @@ export default class Catalog {
         const worker = this.worker;
         if (!worker) return Promise.reject('Worker not initialized!');
         const promise = new Promise(resolve => {
-            worker.onmessage = ({ data }: { data: any[] }) => {
-                resolve(data.map(x => new (Course as any)(...x)));
+            worker.onmessage = ({ data }) => {
+                resolve((data as CourseConstructorArguments[]).map(x => new Course(...x)));
             };
         });
         worker.postMessage(query);

@@ -11,7 +11,7 @@ import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { STATUSES, dayToInt, CourseStatus, RawSection } from './Meta';
+import { STATUSES, dayToInt, CourseStatus } from './Meta';
 
 export type SectionMatch = Match<'topic' | 'instructors'>;
 

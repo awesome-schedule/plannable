@@ -1,5 +1,5 @@
 import { Searcher, SearchResult } from 'fast-fuzzy';
-import Course from '../models/Course';
+import Course, { CourseConstructorArguments } from '../models/Course';
 import Section, { SectionMatch } from '../models/Section';
 
 declare var postMessage: any;
@@ -75,36 +75,48 @@ onmessage = (msg: MessageEvent) => {
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12);
 
-        const finalResults: Course[] = [];
+        const finalResults: CourseConstructorArguments[] = [];
         for (const [key] of scoreEntries) {
             const courseMatch = courseMap[key];
-            let course: Course;
+            let course: CourseConstructorArguments;
             if (courseMatch) {
                 const { match, original, item } = courseMatch;
-                course = new Course(item.raw, key, item.sids, [
-                    {
-                        match: original === item.title ? 'title' : 'description',
-                        start: match.index,
-                        end: match.index + match.length
-                    }
-                ]);
+                const combSecMatches: SectionMatch[][] = [];
                 const s = sectionMap[key];
                 if (s) {
-                    Course.prototype.addSectionMatches.call(
-                        course,
-                        s.map(x => x.item.sid),
-                        s.map(x => [
-                            {
-                                match: x.original === x.item.topic ? 'topic' : 'instructors',
-                                start: x.match.index,
-                                end: x.match.index + x.match.length
-                            } as SectionMatch
-                        ])
-                    );
+                    const matchedSecIdx = s.map(x => x.item.sid);
+                    const secMatches = s.map(x => [
+                        {
+                            match: x.original === x.item.topic ? 'topic' : 'instructors',
+                            start: x.match.index,
+                            end: x.match.index + x.match.length
+                        } as SectionMatch
+                    ]);
+                    for (const sid of item.sids) {
+                        const idx = matchedSecIdx.findIndex(x => x === sid);
+                        if (idx === -1) {
+                            combSecMatches.push([]);
+                        } else {
+                            combSecMatches.push(secMatches[idx]);
+                        }
+                    }
                 }
+                course = [
+                    item.raw,
+                    key,
+                    item.sids,
+                    [
+                        {
+                            match: original === item.title ? 'title' : 'description',
+                            start: match.index,
+                            end: match.index + match.length
+                        }
+                    ],
+                    combSecMatches
+                ];
             } else {
                 const s = sectionMap[key];
-                course = new Course(
+                course = [
                     s[0].item.course.raw,
                     key,
                     s.map(x => x.item.sid),
@@ -116,13 +128,11 @@ onmessage = (msg: MessageEvent) => {
                             end: x.match.index + x.match.length
                         } as SectionMatch
                     ])
-                );
+                ];
             }
             finalResults.push(course);
         }
-        postMessage(
-            finalResults.map(c => [c.raw, c.key, c.sids, c.matches, c.sections.map(x => x.matches)])
-        );
+        postMessage(finalResults);
     }
     count++;
 };

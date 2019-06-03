@@ -10,6 +10,5 @@ module.exports = {
     parallel: false,
     chainWebpack: config => {
         config.externals(externals);
-        config.output.globalObject('this');
     }
 };

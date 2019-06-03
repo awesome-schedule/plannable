@@ -11,7 +11,7 @@ import ScheduleEvaluator, {
     EvaluatorOptions,
     SortOption
 } from '../algorithm/ScheduleEvaluator';
-import { toJSON, StoreModule } from '.';
+import { StoreModule } from '.';
 
 interface FilterStateBase {
     [x: string]: any;
@@ -203,7 +203,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     }
 
     toJSON(): FilterStateJSON {
-        return toJSON<FilterState, FilterStateJSON>(this);
+        return Object.assign({}, this.getDefault(), this);
     }
 
     getDefault(): FilterState {

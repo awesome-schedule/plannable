@@ -6,7 +6,7 @@
  *
  */
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { toJSON, StoreModule, saveStatus } from '.';
+import { StoreModule, saveStatus } from '.';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -216,8 +216,8 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         this.numGenerated = 0;
     }
 
-    toJSON(): ScheduleStateJSON {
-        return toJSON<ScheduleState, ScheduleStateJSON>(this);
+    toJSON() {
+        return Object.assign({}, this.getDefault(), this) as ScheduleStateJSON;
     }
 
     getDefault(): ScheduleState {

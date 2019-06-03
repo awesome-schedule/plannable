@@ -5,7 +5,7 @@
 /**
  *
  */
-import { toJSON, StoreModule } from '.';
+import { StoreModule } from '.';
 
 export interface DisplayState {
     [x: string]: any;
@@ -67,8 +67,8 @@ class Display implements StoreModule<DisplayState, DisplayState> {
         }
     }
 
-    toJSON(): DisplayState {
-        return toJSON<DisplayState, DisplayState>(this);
+    toJSON() {
+        return Object.assign({}, this.getDefault(), this);
     }
 
     getDefault(): DisplayState {

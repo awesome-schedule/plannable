@@ -101,17 +101,6 @@ interface StorageItem<State, JSONState> {
 export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState>;
 
 /**
- * convert a store module to its JSON representation
- */
-export function toJSON<State, JSONState>(thisArg: StoreModule<State, JSONState>): JSONState {
-    const result = {} as JSONState;
-    const defaultObj = thisArg.getDefault();
-    for (const key in defaultObj) {
-        (result as any)[key] = thisArg[key];
-    }
-    return result;
-}
-/**
  * save all store modules to localStorage
  */
 export function saveStatus() {

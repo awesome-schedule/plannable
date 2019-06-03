@@ -7,7 +7,7 @@ import Course from '@/models/Course';
 import ClassList from '../ClassList.vue';
 
 /**
- * component for editing classes and manipulating schedules
+ * component for performing fuzzy-search against the catalog of courses
  * @author Hanzhi Zhou
  */
 @Component({
@@ -18,8 +18,17 @@ import ClassList from '../ClassList.vue';
 export default class FuzzyView extends Store {
     isEntering = false;
     inputCourses: Course[] | null = null;
+
+    /**
+     * represent the current state of the fuzzy search component.
+     *
+     * disable the input box if true
+     */
     loading = false;
 
+    /**
+     * initialize catalog's search worker if it is not yet initialized
+     */
     async created() {
         if (!window.catalog.worker) {
             this.loading = true;
@@ -68,7 +77,6 @@ export default class FuzzyView extends Store {
      */
     updateCourse(key: string, section: number, remove: boolean = false) {
         this.schedule.currentSchedule.update(key, section, remove);
-        if (this.schedule.generated) this.noti.warn(`You're editing the generated schedule!`);
 
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to re-render component

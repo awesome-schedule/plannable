@@ -15,7 +15,7 @@ type TypedIntArray = Int8Array | Int16Array | Int32Array;
  * An exact graph coloring algorithm using backtracking
  *
  * @remark It will give up if the number of function calls exceed 200000
- *
+ * @requires optimization
  * @param graph
  * @param colors array of colors of the vertices
  * @param colorOrder A good initial ordering of vertices, probably given by some heuristic.
@@ -162,6 +162,11 @@ export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors
     return numColors;
 }
 
+/**
+ * @requires optimization
+ * @param adjList
+ * @param colors
+ */
 export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph<number> {
     const graph: Graph<number> = new Map();
     const vertices: Vertex<number>[] = [];
@@ -191,6 +196,7 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
  * used to find the maximum depth of the path that the current node is on.
  *
  * The depth of all nodes are known beforehand.
+ * @requires optimization
  */
 function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     const neighbors = graph.get(start)!;

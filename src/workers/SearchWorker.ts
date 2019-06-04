@@ -1,8 +1,20 @@
+/**
+ * Search worker is used to perform fuzzy search (which is very expensive)
+ * in a separate, non-blocking process.
+ * @author Hanzhi Zhou
+ * @requires optimization
+ * @requires fast-fuzzy
+ * @see https://github.com/EthanRutherford/fast-fuzzy
+ */
+
+/**
+ *
+ */
 import { Searcher, SearchResult } from 'fast-fuzzy';
 import Course, { CourseConstructorArguments } from '../models/Course';
 import Section, { SectionMatch } from '../models/Section';
 
-declare var postMessage: any;
+declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
 
 let courseSearcher: Searcher<Course>;
 let sectionSearcher: Searcher<Section>;
@@ -24,6 +36,11 @@ onmessage = (msg: MessageEvent) => {
         const sections: Section[] = [];
         for (const { sections: secs } of courses) sections.push(...secs);
 
+        // create searcher objects for later use
+        // they'll cache normalization and tries
+        // so future searches won't need to re-calculate them on the fly
+
+        // fast-fuzzy does not support nested data, so we search for sections and courses separately.
         sectionSearcher = new Searcher(sections, {
             returnMatchData: true,
             ignoreCase: true,
@@ -51,6 +68,8 @@ onmessage = (msg: MessageEvent) => {
         for (const result of courseResults) {
             const item = result.item;
             const key = item.key;
+
+            // penalize desc. match more
             courseScores[key] = result.score * (result.original === item.title ? 1 : 0.5);
             courseMap[key] = result;
         }
@@ -58,6 +77,8 @@ onmessage = (msg: MessageEvent) => {
         for (const result of sectionResults) {
             const item = result.item;
             const key = item.key;
+
+            // penalize instructors match more
             const score = result.score * (result.original === item.topic ? 0.8 : 0.4);
             if (courseScores[key]) {
                 courseScores[key] += score;
@@ -71,11 +92,14 @@ onmessage = (msg: MessageEvent) => {
             }
         }
 
+        // sort by scores, descending order
         const scoreEntries = Object.entries(courseScores)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12);
 
         const finalResults: CourseConstructorArguments[] = [];
+
+        // merge course and section matches
         for (const [key] of scoreEntries) {
             const courseMatch = courseMap[key];
             let course: CourseConstructorArguments;
@@ -83,6 +107,8 @@ onmessage = (msg: MessageEvent) => {
                 const { match, original, item } = courseMatch;
                 const combSecMatches: SectionMatch[][] = [];
                 const s = sectionMap[key];
+
+                // both course and section matches exist for this key
                 if (s) {
                     const matchedSecIdx = s.map(x => x.item.sid);
                     const secMatches = s.map(x => [
@@ -114,6 +140,8 @@ onmessage = (msg: MessageEvent) => {
                     ],
                     combSecMatches
                 ];
+
+                // only section match exists
             } else {
                 const s = sectionMap[key];
                 course = [

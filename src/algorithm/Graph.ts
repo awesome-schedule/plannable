@@ -93,7 +93,6 @@ function sortFunc<T>(graph: Graph<T>) {
  * perform depth first search on a graph that has multiple connected components
  *
  * @param graph the graph represented as an adjacency list
- *
  * @see [[Vertex]]
  */
 export function depthFirstSearch<T>(graph: Graph<T>) {

@@ -47,7 +47,13 @@ export interface CourseFields {
 
 export interface Match<T extends string> {
     readonly match: T;
+    /**
+     * start index of the match
+     */
     readonly start: number;
+    /**
+     * end index + 1 of the match
+     */
     readonly end: number;
 }
 

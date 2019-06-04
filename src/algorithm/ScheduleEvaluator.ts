@@ -31,7 +31,7 @@ export type SortFunctions = typeof ScheduleEvaluator.sortFunctions;
  */
 export interface SortOption {
     /**
-     * name of this sorting option
+     * name of this sort option
      */
     readonly name: keyof SortFunctions;
     /**
@@ -197,17 +197,14 @@ class ScheduleEvaluator {
      * @param options
      * @param events the array of events kept, use to construct generated schedules
      */
-    constructor(public options: EvaluatorOptions, public events: Event[] = []) {
-        this.options = options;
-        this.events = events;
-    }
+    constructor(public options: EvaluatorOptions, public events: Event[] = []) {}
 
     /**
      * Add a schedule to the collection of results.
      * Group the time blocks and sort them in order.
      *
+     * @requires optimization
      * @remarks insertion sort is used as there are not many elements in each day array.
-     * @remarks This method has a high performance overhead.
      */
     public add(schedule: RawAlgoSchedule) {
         // sort time blocks of courses according to its schedule
@@ -260,6 +257,7 @@ class ScheduleEvaluator {
      * compute the coefficient array for a specific sorting option.
      * if it exists, don't do anything
      *
+     * @requires optimization
      * @param funcName the name of the sorting option
      * @param assign whether assign to the `coeff` field of each `CmpSchedule`
      * @returns the computed/cached array of coefficients
@@ -297,6 +295,7 @@ class ScheduleEvaluator {
     /**
      * pre-compute the coefficient for each schedule using each enabled sorting function
      * so that they don't need to be computed on the fly when sorting
+     * @requires optimization
      */
     public computeCoeff() {
         if (this.isRandom()) return;
@@ -368,7 +367,6 @@ class ScheduleEvaluator {
 
     /**
      * count the number of sort options enabled.
-     *
      * @returns [number of sort options enabled, the index of the last enabled sort option]
      */
     public countSortOpt() {
@@ -391,7 +389,7 @@ class ScheduleEvaluator {
      * @param quick quick mode: use Floyd–Rivest algorithm to select first
      * 100 elements and then sort only these elements.
      * @param quickThresh Automatically enable quick mode if the length of schedules is greater than `quickThresh`
-     *
+     * @requires optimization
      * @see {@link https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm}
      */
     public sort(quick = false, quickThresh = 50000) {

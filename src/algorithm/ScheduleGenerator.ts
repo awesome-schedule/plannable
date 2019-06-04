@@ -120,7 +120,7 @@ class ScheduleGenerator {
      * The entrance of the schedule generator
      * returns a sorted `ScheduleEvaluator` Object
      *
-     * Note that this method does not need to run very fast. It only preprocess the select
+     * Note that this method does not need to run very fast. It only preprocess the selected
      * courses so that they are stored in a desirable format.
      *
      * @see [[ScheduleEvaluator]]
@@ -243,11 +243,13 @@ class ScheduleGenerator {
     }
 
     /**
-     * @param classList a tuple of sections of courses, whose length is the number of distinct courses chosen
+     * @param classList a tuple of sections of courses,
+     * whose length is the number of distinct courses chosen
      *
      * ```js
      * classList[i][j] // represents the jth section of the ith class
      * ```
+     * @requires optimization
      */
     public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
         /**

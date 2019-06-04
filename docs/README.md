@@ -83,7 +83,23 @@ The `catalog` variable is an instance of the `Catalog` class and is used to stor
 
 ## Model and Algorithm
 
-Although used everywhere, the model and algorithm layer is meant to be separated from the view layer. The view layer uses models and algorithms by instantiating objects defined by model/algorithm and pass any required parameters into the constructors/methods/functions of the models or algorithms used. It is forbidden to import components/classes directly into the view layer, because circular dependency issues may arise.
+Although used everywhere, the model and algorithm layer is meant to be separated from the view layer. The view layer uses models and algorithms by instantiating objects defined by model/algorithm and pass any required parameters into the constructors/methods/functions of the models or algorithms used. It is not recommended to import components/store classes directly into the model/algorithm layer, because circular dependency issues may arise.
+
+For example, if the `schedule` store class imports the `Schedule` model and instantiates `Schedule` instances inside the module, and the `Schedule` imports a `schedule` store instance and use it inside the `Schedule` class, then there is going to be a big issue, e.g. the `Schedule` class is undefined!
+
+## Optimizations
+
+We made a lot of efforts to optimize our code so our website runs fast. However, it must be noted that we DO NOT optimize prematurely! We only optimize those that need to run really fast. There is little need to optimize a function that completes within a matter of milliseconds and is only called once per lifetime.
+Examples of things that need to run fast include, but not limited to,
+
+-   ScheduleGenerator.ts, as the number of possible schedules is exponential in the number of courses chosen
+-   ScheduleEvaluator.ts, as it is evaluating all the schedules given by the ScheduleGenerator
+-   Coloring.ts, as graph coloring is an NP-complete problem, implying that the best-known exact algorithms run in exponential time.
+
+Examples of things that do not need to run that fast include, but not limited to,
+
+-   computeSchedule method in Schedule.ts, as it runs on small inputs and produces small outputs. There exists slow functional code and deep-nested for loops, but (excluding the Coloring part) it completes within 5ms!
+-   most of the methods provided by Course.ts and Section.ts, as they are not invoked very frequently, i.e. not thousand times in a row.
 
 ## Do you know?
 

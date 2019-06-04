@@ -77,7 +77,7 @@ export default class App extends Store {
             if (pay2.payload) window.buildingList = pay2.payload;
 
             this.noti.notify(pay3);
-            if (pay3) await this.selectSemester(this.semester.semesters[0]);
+            if (pay3.payload) await this.selectSemester(this.semester.semesters[0]);
             this.status.loading = false;
         })();
     }

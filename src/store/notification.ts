@@ -9,7 +9,7 @@
  * @see console.warn
  * @see console.error
  */
-type NotiLevel = 'info' | 'error' | 'warn';
+type ConsoleLevel = 'info' | 'error' | 'warn';
 /**
  * the noti class type corresponds to the bootstrap color classes
  */
@@ -19,7 +19,7 @@ type NotiClass = 'info' | 'danger' | 'success' | 'warning';
  * @typeparam T the type of the payload
  */
 export interface NotiMsg<T> {
-    level: NotiLevel;
+    level: ConsoleLevel | 'success';
     msg: string;
     payload?: T;
 }
@@ -52,13 +52,13 @@ interface NotiItem extends NotiState {
 }
 
 /**
- * map notification types to bootstrap css classes
+ * map console types to bootstrap css classes
  */
 const CLAS = Object.freeze({
     info: 'info',
     error: 'danger',
     warn: 'warning'
-}) as { [x in NotiLevel]: NotiClass };
+}) as { [x in ConsoleLevel]: NotiClass };
 
 /**
  * map bootstrap css classes to notification type
@@ -68,7 +68,7 @@ const CONS = Object.freeze({
     danger: 'error',
     success: 'info',
     warning: 'warn'
-}) as { [x in NotiClass]: NotiLevel };
+}) as { [x in NotiClass]: ConsoleLevel };
 
 const LEVELS: { [x in NotiClass]: number } = Object.freeze({
     info: 0,
@@ -104,7 +104,8 @@ class Notification implements NotiState {
         override = false
     ) {
         if (typeof msg !== 'string') {
-            cls = CLAS[msg.level];
+            if (msg.level === 'success') cls = 'success';
+            else cls = CLAS[msg.level];
             msg = msg.msg;
         }
         this.history.unshift({

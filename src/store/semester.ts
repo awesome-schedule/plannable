@@ -31,9 +31,6 @@ class Semesters implements SemesterState {
     async loadSemesters() {
         const result = await loadSemesterList();
         const semesters = result.payload;
-
-        console[result.level](result.msg);
-
         if (semesters) {
             this.semesters = semesters;
         } else {

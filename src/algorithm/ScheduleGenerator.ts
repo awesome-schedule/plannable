@@ -13,6 +13,7 @@ import Schedule from '../models/Schedule';
 import { checkTimeConflict } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 import { CourseStatus, Week } from '@/models/Meta';
+import { NotiMsg } from '@/store/notification';
 
 /**
  * A `TimeBlock` defines the start and end time of a 'Block'
@@ -124,7 +125,7 @@ class ScheduleGenerator {
      *
      * @see [[ScheduleEvaluator]]
      */
-    public getSchedules(schedule: Schedule): ScheduleEvaluator {
+    public getSchedules(schedule: Schedule): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
         const buildingList: string[] = this.buildingList;
 
@@ -206,11 +207,12 @@ class ScheduleGenerator {
 
             // throw an error of none of the sections pass the filter
             if (classes.length === 0) {
-                throw new Error(
-                    `No sections of ${courseRec.department} ${courseRec.number} ${
+                return {
+                    level: 'error',
+                    msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
                     } do not conflict your events and satisfy your filters`
-                );
+                };
             }
             classList.push(classes);
         }
@@ -224,14 +226,20 @@ class ScheduleGenerator {
         this.createSchedule(classList, evaluator);
         console.timeEnd('running algorithm:');
 
-        if (evaluator.size() > 0) {
+        const size = evaluator.size();
+        if (size > 0) {
             evaluator.computeCoeff();
             evaluator.sort();
-            return evaluator;
+            return {
+                level: 'success',
+                msg: `${size} Schedules Generated!`,
+                payload: evaluator
+            };
         } else
-            throw new Error(
-                'Given your filter, we cannot generate schedules without overlapping classes'
-            );
+            return {
+                level: 'error',
+                msg: 'Given your filter, we cannot generate schedules without overlapping classes'
+            };
     }
 
     /**

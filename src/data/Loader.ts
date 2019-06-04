@@ -42,7 +42,7 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
     {
         warnMsg = x => x,
         errMsg = x => x,
-        infoMsg = 'Success',
+        succMsg = 'Success',
         expireTime = Infinity,
         timeoutTime = -1,
         parse = x => (x ? JSON.parse(x) : null),
@@ -51,7 +51,7 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
     }: {
         warnMsg?: (err: string) => string;
         errMsg?: (err: string) => string;
-        infoMsg?: string;
+        succMsg?: string;
         expireTime?: number;
         timeoutTime?: number;
         parse?: (x: string | null) => T_JSON | null;
@@ -67,8 +67,8 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
             try {
                 return {
                     payload: await timeout(request(), timeoutTime),
-                    msg: infoMsg,
-                    level: 'info'
+                    msg: succMsg,
+                    level: 'success'
                 };
             } catch (err) {
                 // expired (or force update) but failed to request new data: use the old data and gives a warning
@@ -81,8 +81,8 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         } else {
             return {
                 payload: construct(data),
-                msg: infoMsg,
-                level: 'info'
+                msg: succMsg,
+                level: 'success'
             };
         }
         // data invalid or does not exist
@@ -90,8 +90,8 @@ export async function loadFromCache<T, T_JSON extends Expirable>(
         try {
             return {
                 payload: await timeout(request(), timeoutTime),
-                msg: infoMsg,
-                level: 'info'
+                msg: succMsg,
+                level: 'success'
             };
         } catch (err) {
             return {

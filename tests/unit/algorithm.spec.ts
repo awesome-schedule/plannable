@@ -46,24 +46,24 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[2].reverse = true;
         sort.sortBy[3].enabled = true;
         sort.sortBy[4].enabled = true;
-        const result = generator.getSchedules(schedule);
-        expect(result.empty()).toBeFalsy();
+        const { payload: result } = generator.getSchedules(schedule);
+        expect(result!.empty()).toBeFalsy();
 
         schedule.addEvent('MoFr 10:00AM - 10:15AM', false);
         schedule.addEvent('MoFr 21:00PM - 22:30PM', false);
 
         sort.mode = 0;
         options.combineSections = false;
-        const result2 = generator.getSchedules(schedule);
-        expect(result2.empty()).toBeFalsy();
+        const { payload: result2 } = generator.getSchedules(schedule);
+        expect(result2!.empty()).toBeFalsy();
 
         sort.sortBy[5].enabled = true;
-        const result3 = generator.getSchedules(schedule);
-        expect(result3.empty()).toBeFalsy();
+        const { payload: result3 } = generator.getSchedules(schedule);
+        expect(result3!.empty()).toBeFalsy();
 
         sort = store.filter.getDefault().sortOptions;
         sort.sortBy[1].enabled = false;
-        const result4 = generator.getSchedules(schedule);
+        const result4 = generator.getSchedules(schedule).payload!;
         expect(result4.empty()).toBeFalsy();
 
         sort.mode = 0;

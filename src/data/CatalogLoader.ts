@@ -43,7 +43,7 @@ export async function loadSemesterData(
         {
             errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
             warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
-            infoMsg: `Successfully loaded ${semester.name} data!`,
+            succMsg: `Successfully loaded ${semester.name} data!`,
             expireTime: semesterDataExpirationTime,
             timeoutTime: 15000,
             force

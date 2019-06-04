@@ -45,7 +45,7 @@ export async function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>
         requestTimeMatrix,
         x => Int32Array.from(x.timeMatrix),
         {
-            infoMsg: 'Walking distance matrix loaded',
+            succMsg: 'Walking distance matrix loaded',
             warnMsg: x => `Failed to load walking distance matrix: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load walking distance matrix: ${x}. `,
             expireTime: 1000 * 86400,
@@ -69,7 +69,7 @@ export async function loadBuildingList(force = false): Promise<NotiMsg<string[]>
         requestBuildingList,
         x => x.buildingList,
         {
-            infoMsg: 'Building list loaded',
+            succMsg: 'Building list loaded',
             warnMsg: x => `Failed to load building list: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load building list: ${x}. `,
             expireTime: 1000 * 86400,

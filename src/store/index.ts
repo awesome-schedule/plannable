@@ -235,9 +235,13 @@ class Store extends Vue {
      * Preprocess the time filters and convert them to an array of event.
      * returns null on parsing error
      */
-    computeFilter(): Event[] | null {
+    computeFilter(): Event[] | void {
+        const { timeSlots } = this.filter;
         const events: Event[] = [];
-        for (const time of this.filter.timeSlots) {
+
+        // no time slots => no time filter
+        if (!timeSlots.length) return events;
+        for (const time of timeSlots) {
             let days = '';
             for (let j = 0; j < 5; j++) {
                 if (time[j]) days += DAYS[j];
@@ -253,12 +257,13 @@ class Store extends Vue {
                 isNaN(+endTime[0]) ||
                 isNaN(+endTime[1])
             ) {
-                this.noti.error('Invalid time input.');
-                return null;
+                return this.noti.error('Invalid time input.');
             }
             days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
             events.push(new Event(days, false));
         }
+
+        if (!events.length) return this.noti.error('You need to select at least one day!');
         return events;
     }
 
@@ -269,7 +274,8 @@ class Store extends Vue {
 
         const timeSlots = this.computeFilter();
 
-        // null means there's an error processing time filters. Don't continue if that's the case
+        // falsy value implies that
+        // there's an error processing time filters. Don't continue if that's the case
         if (!timeSlots) {
             this.noti.error(`Invalid time filter`);
             return;
@@ -294,19 +300,19 @@ class Store extends Vue {
         if (!options) return;
 
         const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
-        try {
-            const evaluator = generator.getSchedules(this.schedule.proposedSchedule);
+        const msg = generator.getSchedules(this.schedule.proposedSchedule);
+        this.noti.notify(msg);
+        const evaluator = msg.payload;
+        if (evaluator) {
             window.scheduleEvaluator = evaluator;
             const num = evaluator.size();
             this.noti.success(`${num} Schedules Generated!`, 3);
             this.schedule.numGenerated = num;
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
-        } catch (err) {
-            console.error(err);
+        } else {
             this.schedule.generated = false;
             window.scheduleEvaluator.clear();
-            this.noti.error(err.message);
             this.schedule.cpIndex = -1;
             this.schedule.numGenerated = 0;
         }

@@ -31,7 +31,7 @@ export async function loadSemesterList(count = 5): Promise<NotiMsg<SemesterJSON[
         () => requestSemesterList(count),
         x => x.semesterList,
         {
-            infoMsg: 'Semester list loaded',
+            succMsg: 'Semester list loaded',
             errMsg: x => `Failed to fetch semester list: ${x}`,
             warnMsg: x => `Failed to fetch semester list: ${x}. Old data is used`,
             expireTime: semesterListExpirationTime,

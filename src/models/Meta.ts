@@ -113,14 +113,15 @@ export const TYPES: { [x: number]: CourseType } = Object.freeze({
 /**
  * status number => meaning
  */
-export const STATUSES: { [x: number]: CourseStatus } = Object.freeze({
+export const STATUSES = Object.freeze({
     '-1': 'TBA',
     1: 'Open',
     0: 'Closed',
     2: 'Wait List'
 }) as { [x: number]: CourseStatus };
 
-export const TYPES_PARSE: { [x: string]: number } = Object.freeze({
+export const TYPES_PARSE: { readonly [x in CourseType]: number } = Object.freeze({
+    '': -1,
     Clinical: 0,
     Discussion: 1,
     Drill: 2,
@@ -133,12 +134,12 @@ export const TYPES_PARSE: { [x: string]: number } = Object.freeze({
     Workshop: 9
 });
 
-export const STATUSES_PARSE = Object.freeze({
+export const STATUSES_PARSE: { readonly [x in CourseStatus]: number } = Object.freeze({
     Open: 1,
     Closed: 0,
     'Wait List': 2,
     TBA: -1
-}) as { [x in CourseStatus]: number };
+});
 
 export const semesterListExpirationTime = 86400 * 1000; // one day
 export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours

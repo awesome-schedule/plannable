@@ -18,7 +18,8 @@ import {
     CourseStatus,
     semesterDataExpirationTime,
     TYPES_PARSE,
-    STATUSES_PARSE
+    STATUSES_PARSE,
+    CourseType
 } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
@@ -102,15 +103,18 @@ export function parseSemesterData(csv_string: string) {
 
     for (let j = 1; j < raw_data.length; j++) {
         const data = raw_data[j];
-        const key = (data[1] + data[2] + CLASS_TYPES[data[4]]).toLowerCase();
+
+        // todo: robust data validation
+        const type = CLASS_TYPES[data[4] as CourseType];
+        const key = (data[1] + data[2] + type).toLowerCase();
         const meetings: RawMeeting[] = [];
         const s = new Set<string>();
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
             if (data[start]) {
-                if (s.has(data[start + 1])) {
-                    continue;
-                }
+                // remove duplicated course meeting time
+                // but what does that even exist in the first place?
+                if (s.has(data[start + 1])) continue;
 
                 s.add(data[start + 1]);
 
@@ -140,15 +144,7 @@ export function parseSemesterData(csv_string: string) {
         if (rawCatalog[key]) {
             rawCatalog[key][6].push(tempSection);
         } else {
-            rawCatalog[key] = [
-                data[1],
-                parseInt(data[2]),
-                CLASS_TYPES[data[4]],
-                data[5],
-                data[22],
-                data[28],
-                [tempSection]
-            ];
+            rawCatalog[key] = [data[1], +data[2], type, data[5], data[22], data[28], [tempSection]];
         }
     }
 

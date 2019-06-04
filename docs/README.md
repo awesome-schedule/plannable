@@ -98,7 +98,7 @@ Examples of things that need to run fast include, but not limited to,
 
 Examples of things that do not need to run that fast include, but not limited to,
 
--   computeSchedule method in Schedule.ts, as it runs on small inputs and produces small outputs. There exists slow functional code and deep-nested for loops, but (excluding the Coloring part) it completes within 5ms!
+-   computeSchedule method in Schedule.ts, as it runs on small inputs and produces small outputs. There exists slow functional code and deeply nested for loops, but (excluding the Coloring part) it completes within 5ms!
 -   most of the methods provided by Course.ts and Section.ts, as they are not invoked very frequently, i.e. not thousand times in a row.
 
 ## Do you know?

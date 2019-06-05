@@ -65,12 +65,12 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host.indexOf('localhost') !== -1 ||
+    const res = await (window.location.host.indexOf('localhost') !== -1 || // local dev?
     window.location.host.indexOf('127.0.0.1') !== -1
-        ? axios.get(`http://localhost:8000/data/Semester%20Data/CS${semester.id}Data.csv`) // local dev
-        : window.location.host.indexOf('cn.plannable.org') === -1 // Running in China?
+        ? axios.get(`http://localhost:8000/data/Semester%20Data/CS${semester.id}Data.csv`) // use the 8000 port
+        : window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
         ? axios.post(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // nope
+              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
               stringify({
                   Semester: semester.id,
                   Group: 'CS',
@@ -79,7 +79,11 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
                   Extended: 'Yes'
               })
           )
-        : axios.get(`https://cn.plannable.org/data/Semester%20Data/CS${semester.id}Data.csv`)); // use the mirror
+        : axios.get(
+              `${window.location.protocol}//${window.location.host}/data/Semester%20Data/CS${
+                  semester.id
+              }Data.csv`
+          )); // use the mirror
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);

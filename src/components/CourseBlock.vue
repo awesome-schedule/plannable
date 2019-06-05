@@ -21,10 +21,12 @@
                     {{ room }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
-                        <div v-if="display.showTime" class="ml-2 crs-info">
-                            {{ meeting.days }}
-                        </div>
+                    <div
+                        v-for="meeting in firstSec.meetings"
+                        :key="meeting.days"
+                        class="ml-2 crs-info"
+                    >
+                        {{ meeting.days }}
                     </div>
                 </template>
             </div>
@@ -37,10 +39,12 @@
                     {{ firstSec.type }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="(meeting, idx) in firstSec.meetings" :key="idx">
-                        <div v-if="display.showTime" class="ml-2 crs-info">
-                            {{ meeting.days }}
-                        </div>
+                    <div
+                        v-for="meeting in firstSec.meetings"
+                        :key="meeting.days"
+                        class="ml-2 crs-info"
+                    >
+                        {{ meeting.days }}
                     </div>
                 </template>
                 <div v-if="display.showInstructor" class="ml-2 crs-info">

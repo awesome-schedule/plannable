@@ -289,14 +289,7 @@ export default class Catalog {
                 ]);
             }
         }
-        if (topicMatchIdx.length) {
-            const prev = results.findIndex(x => x.key === course.key);
-            if (prev !== -1) {
-                results[prev] = results[prev].addSectionMatches(topicMatchIdx, topicMatches);
-            } else {
-                results.push(new Course(course.raw, course.key, topicMatchIdx, [], topicMatches));
-            }
-        }
+        if (topicMatchIdx.length) this.appendToResult(course, topicMatchIdx, topicMatches, results);
     }
 
     private searchProf(query: string, course: Course, results: Course[]) {
@@ -318,13 +311,20 @@ export default class Catalog {
                 ]);
             }
         }
-        if (profMatchIdx.length) {
-            const prev = results.findIndex(x => x.key === course.key);
-            if (prev !== -1) {
-                results[prev] = results[prev].addSectionMatches(profMatchIdx, profMatches);
-            } else {
-                results.push(new Course(course.raw, course.key, profMatchIdx, [], profMatches));
-            }
+        if (profMatchIdx.length) this.appendToResult(course, profMatchIdx, profMatches, results);
+    }
+
+    private appendToResult(
+        course: Course,
+        sids: number[],
+        matches: Match<'topic' | 'instructors'>[][],
+        results: Course[]
+    ) {
+        const prev = results.findIndex(x => x.key === course.key);
+        if (prev !== -1) {
+            results[prev] = results[prev].addSectionMatches(sids, matches);
+        } else {
+            results.push(new Course(course.raw, course.key, sids, [], matches));
         }
     }
 }

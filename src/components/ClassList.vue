@@ -70,11 +70,11 @@
                     <div v-if="expanded(crs.key)" :id="`${crs.key}trans`" class="trans">
                         <div
                             v-for="(sec, idx) in crs.sections"
-                            :key="idx"
+                            :key="sec.section"
                             :class="{ show: isEntering && expandOnEntering }"
                         >
                             <a
-                                v-if="showAny && idx === 0"
+                                v-if="showAny && +idx === 0"
                                 style="font-size: 1rem; padding: 0.5rem 0 0.5rem 1rem"
                                 class="list-group-item list-group-item-action class-section"
                                 :class="{ active: schedule.All[crs.key] === -1 }"
@@ -129,8 +129,8 @@
                                                     "
                                                 ></span>
                                             </li>
-                                            <template v-for="(meeting, j) in sec.meetings">
-                                                <li :key="j">
+                                            <template v-for="meeting in sec.meetings">
+                                                <li :key="meeting.days">
                                                     {{ meeting.days }}
                                                 </li>
                                             </template>

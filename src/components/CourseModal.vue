@@ -15,7 +15,7 @@
                     <h6 v-html="highlightMatch(course.title, 'title', course.matches)"></h6>
                     <div style="width: 100%; overflow-x: auto;">
                         <table style="color:#808080; font-size:0.75rem;">
-                            <tr v-for="(section, i) in course.sections" :key="section.key + i">
+                            <tr v-for="section in course.sections" :key="section.section">
                                 <td class="info">Section:&nbsp;{{ section.section }}</td>
                                 <td class="info">ID:&nbsp;{{ section.id }}</td>
                                 <td
@@ -33,13 +33,13 @@
                                     "
                                 ></td>
                                 <td class="info">
-                                    <template v-for="(meeting, j) in section.meetings"
-                                        >{{ meeting.days }} <br :key="j" />
+                                    <template v-for="meeting in section.meetings"
+                                        >{{ meeting.days }} <br :key="meeting.days" />
                                     </template>
                                 </td>
                                 <td class="info">
-                                    <template v-for="(meeting, j) in section.meetings"
-                                        >{{ meeting.room }} <br :key="j" />
+                                    <template v-for="meeting in section.meetings"
+                                        >{{ meeting.room }} <br :key="meeting.days" />
                                     </template>
                                 </td>
                                 <td class="info">{{ section.status }}</td>

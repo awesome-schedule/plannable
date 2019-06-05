@@ -13,8 +13,8 @@
                     <div style="color:#a0a0a0">{{ section.type }} | {{ section.units }} units</div>
                     <div style="color:#a0a0a0">{{ section.instructors.join(', ') }}</div>
                     <div
-                        v-for="(meeting, idx) in section.meetings"
-                        :key="idx"
+                        v-for="meeting in section.meetings"
+                        :key="meeting.days"
                         style="color:#a0a0a0"
                     >
                         {{ meeting.days }} {{ meeting.room }}

@@ -15,7 +15,7 @@
                     }"
                 >
                     <div></div>
-                    <div v-for="(hour, i) in hours" :key="i">{{ hour }}</div>
+                    <div v-for="hour in hours" :key="hour">{{ hour }}</div>
                 </div>
             </td>
             <td>
@@ -41,8 +41,8 @@
                         </div>
                     </template>
                     <div
-                        v-for="(item, i) in items"
-                        :key="i"
+                        v-for="item in items"
+                        :key="item"
                         class="placeholder"
                         style="z-index:1"
                     ></div>

@@ -42,7 +42,7 @@ export default class Palette extends Store {
         return this.colorEntries()
             .concat(
                 this.schedule.currentSchedule.colorSlots.reduce(
-                    (arr: Array<[string, string]>, bucket, i) =>
+                    (arr: [string, string][], bucket, i) =>
                         arr.concat(
                             [...bucket]
                                 .filter(

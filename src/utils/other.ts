@@ -43,7 +43,11 @@ export function openVAGrade(course: CourseFields) {
  * @param expMatch the expected matched field in match.match
  * @param matches the match object
  */
-export function highlightMatch<T extends string>(str: string, expMatch: T, matches?: Match<T>[]) {
+export function highlightMatch<T extends string>(
+    str: string,
+    expMatch: T,
+    matches?: ReadonlyArray<Match<T>>
+) {
     if (!matches || !matches.length) return str;
     let result = '';
     let lastEnd = 0;

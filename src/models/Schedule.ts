@@ -20,7 +20,7 @@ import noti from '@/store/notification';
 import { Day, Week, TYPES } from './Meta';
 
 export interface ScheduleJSON {
-    All: { [x: string]: Array<{ id: number; section: string }> | number[] | -1 };
+    All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
     title: string;
     id: number;
     events: Event[];
@@ -66,7 +66,7 @@ export default class Schedule {
 
     public static savedColors: { [x: string]: string } = {};
 
-    public static isNumberArray(x: Array<any>): x is number[] {
+    public static isNumberArray(x: any[]): x is number[] {
         return typeof x[0] === 'number';
     }
 
@@ -185,7 +185,7 @@ export default class Schedule {
     /**
      * keep track of used colors to avoid color collision
      */
-    public colorSlots: Array<Set<string>>;
+    public colorSlots: Set<string>[];
     public pendingCompute = 0;
 
     /**

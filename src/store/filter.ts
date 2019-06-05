@@ -172,7 +172,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
      *
      * 7: end time, of 24 hour format
      */
-    timeSlots: Array<[boolean, boolean, boolean, boolean, boolean, string, string]> = [];
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][] = [];
     allowWaitlist = true;
     allowClosed = true;
     sortOptions = getDefaultOptions();
@@ -208,7 +208,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
     getDefault(): FilterState {
         return {
-            timeSlots: [] as Array<[boolean, boolean, boolean, boolean, boolean, string, string]>,
+            timeSlots: [] as [boolean, boolean, boolean, boolean, boolean, string, string][],
             allowWaitlist: true,
             allowClosed: true,
             sortOptions: getDefaultOptions()

@@ -1,4 +1,8 @@
 // vue.config.js
+
+/**
+ * we don't bundle these. Instead, we load them from CDN.
+ */
 const externals = {
     jquery: 'jQuery',
     bootstrap: 'bootstrap',
@@ -9,5 +13,7 @@ const externals = {
 module.exports = {
     chainWebpack: config => {
         config.externals(externals);
-    }
+    },
+    // transpile dependencies that do not provide pre-built modules
+    transpileDependencies: ['fast-fuzzy', 'string-similarity']
 };

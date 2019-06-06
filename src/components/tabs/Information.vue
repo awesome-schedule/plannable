@@ -7,7 +7,7 @@
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-1-1">Intro to Auto-Scheduling</a>
                     <a class="nav-link ml-3 my-1 py-1" href="#item-1-2">Planned vs. Generated</a>
-                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-3">Website Address</a>
+                    <a class="nav-link ml-3 my-1 py-1" href="#item-1-3">Website Info</a>
                 </nav>
                 <a class="nav-link" href="#item-2">
                     <i class="far fa-calendar-alt"></i> Basic Operations</a
@@ -134,20 +134,44 @@
                 </div>
             </div>
 
-            <h4 id="item-1-3">Website Address</h4>
+            <h4 id="item-1-3">Website Info</h4>
+            <h5>Website Address</h5>
             <p>
                 The primary address of our website is
-                <a href="https://plannable.org">https://plannable.org</a>. It is hosted by GitHub
-                pages. Since we load content from many sources, it may take a while for first-time
-                loading. For users in China, we provide a <strong>mirror</strong> (<a
+                <a href="https://plannable.org">https://plannable.org</a>. It is hosted on GitHub.
+                Since we load content from many sources, it may take a while for first-time loading.
+                For users in China, we provide a <strong>mirror</strong> (<a
                     href="https://cn.plannable.org"
                     >https://cn.plannable.org</a
-                >) whose content is synchronized with the primary website once per hour. However,
-                your data is not synchronized (and it is techniqually impossible to do so). If you
-                want to transfer your data between them, you need to use the
-                <a href="#item-7-2">Export to JSON</a> function provided.
+                >) whose content is synchronized with the primary website once per hour. Note that
+                it automatically redirects to
+                <a href="https://plannable.gitee.io">https://plannable.gitee.io</a>, because to host
+                websites in China, one need to register at ICP (ICP备案), which somehow complicated.
+                To avoid such a burden, we hosted our website on gitee.io, a top level domain
+                operated by a Chinese company. However, your data is not synchronized (and it is
+                techniqually impossible to do so). If you want to transfer your data between them,
+                you need to use the <a href="#item-7-2">Export to JSON</a> function provided.
             </p>
-            <p></p>
+
+            <h5>Privacy</h5>
+            <p>
+                Our website contains no server-side code, which means when the web page and the
+                course data is fully loaded, it operates on your browser, locally, and it will still
+                be functional even if you are offline. By this means, we can host our website on
+                free platforms that provide no server-side functionality like GitHub pages,
+                eliminating most of the costs.
+            </p>
+            <p>
+                Moreover, your privacy gets protected. All your data, including courses, filters,
+                events and settings, are stored in your computer, becaue we do not have a server
+                that can store such data. We will never retrieve these data without prior
+                notification.
+            </p>
+            <p>
+                Like most of the websites out there, we use Google analytics to analyze the number
+                and the distribution of users across the globe. The data collected do not contain
+                identifying information.
+            </p>
 
             <h3 id="item-2"><i class="far fa-calendar-alt"></i> Basic Operations</h3>
             <hr />

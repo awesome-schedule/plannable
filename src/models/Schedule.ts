@@ -8,7 +8,7 @@
  *
  */
 import { colorDepthSearch, graphColoringExact } from '../algorithm';
-import { depthFirstSearch, Graph, Vertex } from '../algorithm/Graph';
+import { Graph } from '../algorithm/Graph';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -429,51 +429,7 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-        // this.computeConflict();
         this.constructAdjList();
-    }
-
-    /**
-     * Construct an undirected graph for the scheduleBlocks in each day.
-     * Perform DFS on that graph to determine the
-     * maximum number of conflicting schedules that need to be rendered "in parallel".
-     *
-     * @deprecated
-     * @param countEvent whether to include events in this graph
-     */
-    public computeConflict(countEvent = true) {
-        const graph: Graph<number> = new Map();
-
-        // construct conflict graph for each column
-        for (let blocks of this.days) {
-            if (countEvent) blocks = blocks.filter(block => !(block.section instanceof Event));
-
-            // instantiate all the nodes
-            const nodes: Vertex<number>[] = [];
-
-            for (let i = 0; i < blocks.length; i++) {
-                const v = new Vertex(i);
-                nodes.push(v);
-                graph.set(v, []);
-            }
-
-            // construct an undirected graph for all scheduleBlocks.
-            // the edge from node i to node j exists iff block[i] conflicts with block[j]
-            for (let i = 0; i < blocks.length; i++) {
-                for (let j = i + 1; j < blocks.length; j++) {
-                    if (blocks[i].conflict(blocks[j])) {
-                        graph.get(nodes[i])!.push(nodes[j]);
-                        graph.get(nodes[j])!.push(nodes[i]);
-                    }
-                }
-            }
-
-            // perform a depth-first search
-            depthFirstSearch(graph);
-            this.calculateWidth(graph, blocks);
-
-            graph.clear();
-        }
     }
 
     public calculateWidth(graph: Graph<number>, blocks: ScheduleBlock[]) {

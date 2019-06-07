@@ -104,7 +104,6 @@ describe('Schedule Test', () => {
         Schedule.options.combineSections = false;
         schedule.computeSchedule();
         schedule.computeSchedule(false);
-        schedule.computeConflict();
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
             3
         );

@@ -171,9 +171,8 @@ export default class Schedule {
      */
     public currentCourses: Course[];
     /**
-     * a computed dictionary that's updated by the `computeSchedule` method
-     *
-     * @remarks If a Course has multiple sections selected, a `+x` will be appended
+     * a computed dictionary that's updated by the `computeSchedule` method.
+     * If a Course has multiple sections selected, a `+x` will be appended.
      *
      * Example:
      * ```js
@@ -233,7 +232,7 @@ export default class Schedule {
     }
 
     /**
-     * Update a course in the schedule
+     * Update a section in the schedule
      * - If the section is **already in** the schedule, delete it from the schedule
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty

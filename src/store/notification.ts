@@ -57,8 +57,9 @@ interface NotiItem extends NotiState {
 const CLAS = Object.freeze({
     info: 'info',
     error: 'danger',
-    warn: 'warning'
-}) as { [x in ConsoleLevel]: NotiClass };
+    warn: 'warning',
+    success: 'success'
+}) as { [x in ConsoleLevel | 'success']: NotiClass };
 
 /**
  * map bootstrap css classes to notification type
@@ -78,7 +79,8 @@ const LEVELS: { [x in NotiClass]: number } = Object.freeze({
 });
 
 /**
- * the notification module encapsulates common functions used to inform user about the results of certain actions
+ * the notification module encapsulates common functions used to
+ * inform user about the results of certain actions
  */
 class Notification implements NotiState {
     public msg: string = '';
@@ -86,7 +88,7 @@ class Notification implements NotiState {
     /**
      * history of the notification states. index 0 corresponds to the most recent one
      */
-    public history: NotiItem[] = [];
+    public history: Readonly<NotiItem>[] = [];
     private job: number | null = null;
 
     /**
@@ -104,16 +106,17 @@ class Notification implements NotiState {
         override = false
     ) {
         if (typeof msg !== 'string') {
-            if (msg.level === 'success') cls = 'success';
-            else cls = CLAS[msg.level];
+            cls = CLAS[msg.level];
             msg = msg.msg;
         }
+        // new notification comes first
         this.history.unshift({
             msg,
             cls,
             stamp: new Date().toLocaleTimeString()
         });
         console[CONS[cls]](msg);
+
         if (!this.cls || LEVELS[cls] >= LEVELS[this.cls] || override) {
             if (this.job) window.clearTimeout(this.job);
             this.msg = msg;

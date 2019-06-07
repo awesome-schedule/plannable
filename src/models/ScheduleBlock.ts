@@ -69,13 +69,6 @@ export default class ScheduleBlock {
         );
     }
 
-    public [Symbol.toPrimitive](hint: any) {
-        if (hint === 'number') {
-            return this.duration;
-        }
-        return null;
-    }
-
     private timeAsInt(): [number, number] {
         const [a, b] = this.start.split(':');
         const [c, d] = this.end.split(':');

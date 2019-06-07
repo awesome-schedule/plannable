@@ -508,7 +508,7 @@ export default class Schedule {
 
     public constructAdjList() {
         for (const blocks of this.days) {
-            blocks.sort((a, b) => +b - +a);
+            blocks.sort((a, b) => b.duration - a.duration);
             const graph: number[][] = blocks.map(() => []);
 
             // construct an undirected graph

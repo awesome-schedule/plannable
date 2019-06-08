@@ -6,7 +6,7 @@ module.exports = {
         '^.+\\.jsx?$': 'babel-jest',
         '^.+\\.tsx?$': 'ts-jest'
     },
-    transformIgnorePatterns: ['/node_modules/'],
+    transformIgnorePatterns: ['node_modules/(?!(string-similarity)/)'],
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },

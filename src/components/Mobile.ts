@@ -5,10 +5,10 @@ import status from '../store/status';
 
 const isMobile = window.screen.width < 900;
 
-const classMobile = !isMobile ? 'Mobile' : '';
-
+const classMobile = isMobile ? 'Mobile' : '';
+console.log('ismobile',isMobile);
 const foldView = () => {
-    if (!isMobile) status.offAllSideBar();
+    if (isMobile) status.offAllSideBar();
 };
 
 export default {

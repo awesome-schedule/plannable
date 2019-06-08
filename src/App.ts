@@ -60,6 +60,7 @@ export default class App extends Store {
     sideBarWidth = mobile.isMobile ? 10 : 3;
     scrollable = false;
     classMobile = mobile.classMobile;
+    mobile = mobile.isMobile;
 
     created() {
         this.status.loading = true;

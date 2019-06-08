@@ -69,7 +69,7 @@ class Status {
         this.sideBar[key] = !this.sideBar[key];
     }
 
-    offAllSideBar(){
+    offAllSideBar() {
         for (const bar in this.sideBar) {
             this.sideBar[bar] = false;
         }

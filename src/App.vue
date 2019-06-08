@@ -95,19 +95,55 @@
             </div>
         </nav>
 
-        <class-view v-if="sideBar.showSelectClass"></class-view>
+        <class-view
+            v-if="sideBar.showSelectClass"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        ></class-view>
 
-        <fuzzy-view v-else-if="sideBar.showFuzzy"> </fuzzy-view>
+        <fuzzy-view
+            v-else-if="sideBar.showFuzzy"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        >
+        </fuzzy-view>
 
-        <event-view v-else-if="sideBar.showEvent"> </event-view>
+        <event-view
+            v-else-if="sideBar.showEvent"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        >
+        </event-view>
 
-        <filter-view v-else-if="sideBar.showFilter"></filter-view>
+        <filter-view
+            v-else-if="sideBar.showFilter"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        ></filter-view>
 
-        <display-view v-else-if="sideBar.showSetting"></display-view>
+        <display-view
+            v-else-if="sideBar.showSetting"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        ></display-view>
 
-        <export-view v-else-if="sideBar.showExport"></export-view>
+        <export-view
+            v-else-if="sideBar.showExport"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        ></export-view>
 
-        <palette-view v-else-if="sideBar.showSelectColor"></palette-view>
+        <palette-view
+            v-else-if="sideBar.showSelectColor"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        ></palette-view>
+
+        <log-view
+            v-else-if="sideBar.showLog"
+            class="bg-light"
+            :class="'sidebar-nocol' + classMobile"
+        ></log-view>
 
         <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 
@@ -115,8 +151,6 @@
             v-else-if="sideBar.showExternal"
             :style="{ 'margin-left': sideBarWidth + 1 + 'vw' }"
         ></external>
-
-        <log-view v-else-if="sideBar.showLog"></log-view>
 
         <transition name="fade">
             <div

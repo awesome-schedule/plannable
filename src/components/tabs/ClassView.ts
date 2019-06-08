@@ -11,7 +11,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Course from '@/models/Course';
 import Store from '@/store';
 import ClassList from '../ClassList.vue';
-import {mobile} from '../Mobile';
+
 /**
  * component for editing classes and manipulating schedules
  * @author Hanzhi Zhou
@@ -86,8 +86,4 @@ export default class ClassView extends Store {
         this.saveStatus();
     }
 
-    classObject = {
-        'bg-light sidebar-nocol' : !mobile,
-        'bg-light sidebar-nocolMobile' : mobile,
-    }
 }

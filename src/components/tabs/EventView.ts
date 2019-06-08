@@ -6,6 +6,7 @@ import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 import { to12hr, to24hr } from '@/utils';
+import mobile from '../Mobile';
 
 /**
  * the component for adding and editing events
@@ -46,6 +47,7 @@ export default class EventView extends Store {
         return days;
     }
     addEvent() {
+        mobile.foldView();
         try {
             const days = this.getEventDays();
 

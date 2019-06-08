@@ -68,6 +68,12 @@ class Status {
         }
         this.sideBar[key] = !this.sideBar[key];
     }
+
+    offAllSideBar(){
+        for (const bar in this.sideBar) {
+            this.sideBar[bar] = false;
+        }
+    }
 }
 
 export const status = new Status();

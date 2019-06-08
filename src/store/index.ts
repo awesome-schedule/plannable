@@ -26,6 +26,7 @@ import palette, { PaletteState } from './palette';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester from './semester';
 import status from './status';
+import mobile from '../components/Mobile';
 
 export interface SemesterStorage {
     currentSemester: SemesterJSON;
@@ -293,6 +294,9 @@ class Store extends Vue {
     }
 
     generateSchedules() {
+        // determine if the user is on mobile
+        mobile.foldView();
+
         if (this.schedule.proposedSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
 

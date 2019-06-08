@@ -256,6 +256,17 @@
     color: #999999;
 }
 
+.sidebar-nocolMobile {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    z-index: 100; /* Behind the navbar */
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    left: 3vw !important;
+    width: 100% !important;
+    scrollbar-width: thin !important;
+}
 .sidebar-nocol,
 .sidebar {
     position: fixed;

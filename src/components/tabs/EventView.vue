@@ -89,6 +89,22 @@
                 Delete
             </button>
         </div>
+        <div id="semester" class="btn bg-info nav-btn mt-0">
+            <div>Event List</div>
+        </div>
+        <ul class="list-group list-group-flush" style="width:99%">
+            <li class="list-group-item">
+                Total Events: {{ schedule.currentSchedule.events.length }}
+            </li>
+            <li class="list-group-item pr-0">
+                <table style="width:100%;font-size:14px">
+                    <tr v-for="event in schedule.currentSchedule.events" :key="event.key">
+                        <td>{{ event.title }}</td>
+                        <td>{{ event.days }}</td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
     </nav>
 </template>
 

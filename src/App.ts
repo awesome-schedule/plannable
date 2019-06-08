@@ -27,6 +27,8 @@ import SectionModal from './components/SectionModal.vue';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 
+import param from './AppConfig.json';
+
 @Component({
     components: {
         ClassView,
@@ -51,13 +53,17 @@ export default class App extends Store {
         return this.status.sideBar;
     }
     get scheduleWidth() {
-        return this.status.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
+        return this.status.sideBarActive
+            ? 100 - param.sideBarWidth - param.tabBarWidth - param.sideMargin
+            : 100 - param.tabBarWidth - param.sideMargin;
     }
     get scheduleLeft() {
-        return this.status.sideBarActive ? 23 : 3;
+        return this.status.sideBarActive
+            ? param.sideBarWidth + param.tabBarWidth + 1
+            : param.tabBarWidth;
     }
 
-    sideBarWidth = mobile.isMobile ? 10 : 3;
+    tabBarWidth = mobile.isMobile ? param.tabBarWidthMobile : param.tabBarWidth;
     scrollable = false;
     classMobile = mobile.classMobile;
     mobile = mobile.isMobile;

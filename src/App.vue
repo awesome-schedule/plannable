@@ -9,7 +9,7 @@
         <nav
             class="tab-bar bg-light"
             :style="{
-                width: sideBarWidth + 'vw'
+                width: tabBarWidth + 'vw'
             }"
         >
             <div
@@ -149,7 +149,7 @@
 
         <external
             v-else-if="sideBar.showExternal"
-            :style="{ 'margin-left': sideBarWidth + 1 + 'vw' }"
+            :style="{ 'margin-left': tabBarWidth + 1 + 'vw' }"
         ></external>
 
         <transition name="fade">

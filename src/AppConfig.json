@@ -1,6 +1,6 @@
 {
-    "sideBarWidth" : 19,
-    "sideMargin" : 3,
-    "tabBar" : 3,
-    ""
+    "sideBarWidth": 19,
+    "sideMargin": 3,
+    "tabBarWidthMobile": 10,
+    "tabBarWidth": 3
 }

@@ -45,16 +45,14 @@ cd ..
 Install Vue cli and other dependencies. Then, launch the development server
 
 ```bash
-npm install -g @vue/cli
+npm install -g @vue/cli http-server
 npm install
 npm run serve
 ```
 
-Then you can view the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
+You need to serve the static files in backend/data. To do so, you can run `sh run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
 
-You probably need to serve the static files in backend/data. To do so, we recommend using `http-server`. If it is not installed, you can run `npm install -g http-server`
-
-Then, you can run `sh run.sh` in the project root to launch the static file server.
+Then you can visit the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
 
 ## Built With
 

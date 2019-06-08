@@ -6,7 +6,7 @@ module.exports = {
         '^.+\\.jsx?$': 'babel-jest',
         '^.+\\.tsx?$': 'ts-jest'
     },
-    transformIgnorePatterns: ['node_modules/(?!(string-similarity)/)'],
+    transformIgnorePatterns: ['/node_modules/(?!(string-similarity)/)'],
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },
@@ -16,7 +16,7 @@ module.exports = {
     testURL: 'http://localhost/',
     collectCoverage: true,
     collectCoverageFrom: [
-        '**/*.{ts}',
+        '**/*.ts',
         '!**/node_modules/**',
         '!**/*.d.ts',
         '!**/tests/temp/*.*',

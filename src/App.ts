@@ -17,7 +17,7 @@ import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
 import LogView from './components/tabs/LogView.vue';
-import {mobile} from './components/Mobile';
+import mobile from './components/Mobile';
 
 import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
@@ -57,8 +57,9 @@ export default class App extends Store {
         return this.status.sideBarActive ? 23 : 3;
     }
 
-    sideBarWidth = mobile ? 10 : 3;
+    sideBarWidth = mobile.isMobile ? 10 : 3;
     scrollable = false;
+    classMobile = mobile.classMobile;
 
     created() {
         this.status.loading = true;

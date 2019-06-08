@@ -15,5 +15,5 @@ module.exports = {
         config.externals(externals);
     },
     // transpile dependencies that do not provide pre-built modules
-    transpileDependencies: ['fast-fuzzy', 'string-similarity']
+    transpileDependencies: ['string-similarity']
 };

@@ -47,7 +47,6 @@ Install Vue cli and other dependencies. Then, launch the development server
 ```bash
 npm install -g @vue/cli
 npm install
-patch-package # for better type safety, we need to patch some type definitions
 npm run serve
 ```
 

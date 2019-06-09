@@ -327,7 +327,6 @@
 
     .tab-icon {
         font-size: 6vw;
-        margin-left: 20%;
         color: #5e5e5e;
     }
 

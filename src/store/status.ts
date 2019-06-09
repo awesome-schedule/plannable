@@ -64,7 +64,7 @@ class Status {
     // Mobile Param
     isMobile = window.screen.width < 900;
     foldView() {
-        if (this.isMobile) status.offAllSideBar();
+        if (this.isMobile) status.foldAllSideBar();
     }
     
     switchSideBar(key: keyof Sidebars) {
@@ -74,7 +74,7 @@ class Status {
         this.sideBar[key] = !this.sideBar[key];
     }
 
-    offAllSideBar() {
+    foldAllSideBar() {
         for (const bar in this.sideBar) {
             this.sideBar[bar] = false;
         }

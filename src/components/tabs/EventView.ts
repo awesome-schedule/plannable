@@ -15,11 +15,7 @@ import { to12hr, to24hr } from '@/utils';
 export default class EventView extends Store {
     get event() {
         // reset event.selected to false if it is not editing
-        if (!this.isEditingEvent) {
-            for (const ev of this.schedule.currentSchedule.events) {
-                ev.selected = false;
-            }
-        }
+        this.currentSelectedEvent = new Event("",false);
         return this.status.eventToEdit;
     }
 
@@ -31,6 +27,9 @@ export default class EventView extends Store {
     eventRoom? = '';
     eventDescription? = '';
     isEditingEvent = false;
+
+    // rendering selected event
+    currentSelectedEvent = new Event("",false);
 
     readonly days = DAYS;
     toBeModifiedDays = '';
@@ -80,9 +79,8 @@ export default class EventView extends Store {
     }
     editEvent(event: Event) {
         // enable the editing event to be selected for rendering
-        for (const ev of this.schedule.currentSchedule.events) {
-            ev.selected = ev.hash() === event.hash() ? true : false;
-        }
+        this.currentSelectedEvent = event;
+        
 
         this.isEditingEvent = true;
         this.eventTitle = event.title;

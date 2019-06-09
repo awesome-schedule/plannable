@@ -105,7 +105,7 @@
                     v-for="event in schedule.currentSchedule.events"
                     :key="event.key"
                     class="mx-3 align-items-center justify-content-between "
-                    :class="event.selected && 'table-primary'"
+                    :class="event == currentSelectedEvent && 'table-primary'"
                     @click="
                         {
                             isEditingEvent = true;
@@ -116,7 +116,11 @@
                     <td>{{ event.title }}</td>
                     <td>
                         <i
-                            :class="event.selected ? 'far fa-check-square' : 'far fa-square'"
+                            :class="
+                                event == currentSelectedEvent
+                                    ? 'far fa-check-square'
+                                    : 'far fa-square'
+                            "
                             style="font-size: 20px"
                         ></i>
                     </td>

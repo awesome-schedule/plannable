@@ -1,5 +1,5 @@
 <template>
-    <nav>
+    <nav class="bg-light sidebar">
         <div class="btn bg-info nav-btn">
             Filters
         </div>

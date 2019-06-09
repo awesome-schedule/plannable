@@ -1,5 +1,5 @@
 <template>
-    <nav>
+    <nav class="bg-light sidebar-nocol">
         <div class="input-group mt-2">
             <input
                 ref="classSearch"

@@ -126,8 +126,8 @@
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.cls}`"
                 :style="
-                    `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
-                        mobile ? '11' : scheduleLeft + 5
+                    `width:${status.isMobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
+                        status.isMobile ? '11' : scheduleLeft + 5
                     }vw;`
                 "
             >
@@ -142,8 +142,8 @@
             v-if="!sideBar.showInfo && !sideBar.showExternal"
             class="schedule"
             :style="{
-                width: mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
-                'margin-left': (mobile ? 11 : scheduleLeft) + 'vw'
+                width: status.isMobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
+                'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
             }"
         >
             <div class="w-100 my-3">

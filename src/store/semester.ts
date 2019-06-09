@@ -8,6 +8,8 @@
 import { loadSemesterData } from '../data/CatalogLoader';
 import { loadSemesterList } from '../data/SemesterListLoader';
 import { SemesterJSON } from '../models/Catalog';
+import status from './status';
+
 export interface SemesterState {
     [x: string]: any;
     semesters: SemesterJSON[];
@@ -44,6 +46,9 @@ class Semesters implements SemesterState {
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
+        // determine if the user is on mobile
+        status.foldView();
+
         const result = await loadSemesterData(currentSemester, force);
 
         //  if the a catalog object is returned

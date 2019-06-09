@@ -29,6 +29,12 @@ interface SidebarStatus extends Sidebars {
  * @author Hanzhi Zhou, Zichao Hu
  */
 class Status {
+    get sideBarActive() {
+        for (const key in this.sideBar) {
+            if (this.sideBar[key]) return true;
+        }
+        return false;
+    }
     /**
      * sidebar display status
      * show the specific sidebar when true, and hide when all false
@@ -55,13 +61,12 @@ class Status {
 
     eventToEdit: Event | null = null;
 
-    get sideBarActive() {
-        for (const key in this.sideBar) {
-            if (this.sideBar[key]) return true;
-        }
-        return false;
+    // Mobile Param
+    isMobile = window.screen.width < 900;
+    foldView() {
+        if (this.isMobile) status.offAllSideBar();
     }
-
+    
     switchSideBar(key: keyof Sidebars) {
         for (const other in this.sideBar) {
             if (other !== key) this.sideBar[other] = false;

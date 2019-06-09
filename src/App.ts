@@ -63,10 +63,8 @@ export default class App extends Store {
             : param.tabBarWidth;
     }
 
-    tabBarWidth = mobile.isMobile ? param.tabBarWidthMobile : param.tabBarWidth;
+    tabBarWidth = window.screen.width < 900 ? param.tabBarWidthMobile : param.tabBarWidth;
     scrollable = false;
-    classMobile = mobile.classMobile;
-    mobile = mobile.isMobile;
 
     created() {
         this.status.loading = true;

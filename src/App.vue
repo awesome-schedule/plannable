@@ -95,55 +95,19 @@
             </div>
         </nav>
 
-        <class-view
-            v-if="sideBar.showSelectClass"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        ></class-view>
+        <class-view v-if="sideBar.showSelectClass"></class-view>
 
-        <fuzzy-view
-            v-else-if="sideBar.showFuzzy"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        >
-        </fuzzy-view>
+        <fuzzy-view v-else-if="sideBar.showFuzzy"> </fuzzy-view>
 
-        <event-view
-            v-else-if="sideBar.showEvent"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        >
-        </event-view>
+        <event-view v-else-if="sideBar.showEvent"> </event-view>
 
-        <filter-view
-            v-else-if="sideBar.showFilter"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        ></filter-view>
+        <filter-view v-else-if="sideBar.showFilter"></filter-view>
 
-        <display-view
-            v-else-if="sideBar.showSetting"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        ></display-view>
+        <display-view v-else-if="sideBar.showSetting"></display-view>
 
-        <export-view
-            v-else-if="sideBar.showExport"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        ></export-view>
+        <export-view v-else-if="sideBar.showExport"></export-view>
 
-        <palette-view
-            v-else-if="sideBar.showSelectColor"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        ></palette-view>
-
-        <log-view
-            v-else-if="sideBar.showLog"
-            class="bg-light"
-            :class="'sidebar-nocol' + classMobile"
-        ></log-view>
+        <palette-view v-else-if="sideBar.showSelectColor"></palette-view>
 
         <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 
@@ -151,6 +115,8 @@
             v-else-if="sideBar.showExternal"
             :style="{ 'margin-left': tabBarWidth + 1 + 'vw' }"
         ></external>
+
+        <log-view v-else-if="sideBar.showLog"></log-view>
 
         <transition name="fade">
             <div
@@ -276,7 +242,6 @@
 .tab-icon-active {
     color: black;
 }
-
 .click-icon {
     cursor: pointer;
 }
@@ -289,19 +254,6 @@
 .icon-disabled {
     color: #999999;
 }
-
-.sidebar-nocolMobile {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    z-index: 100; /* Behind the navbar */
-    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    left: 10vw !important;
-    width: 90% !important;
-    scrollbar-width: thin !important;
-}
-
 .sidebar-nocol,
 .sidebar {
     position: fixed;
@@ -314,11 +266,9 @@
     width: 19vw !important;
     scrollbar-width: thin !important;
 }
-
 .sidebar .list-group-item {
     background-color: #f8f8f8;
 }
-
 .tab-bar {
     position: fixed;
     top: 0;
@@ -328,17 +278,14 @@
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
-
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
     color: white !important;
 }
-
 .sort-option {
     cursor: pointer;
 }
-
 @media print {
     @page {
         size: A4 portrait;
@@ -363,45 +310,37 @@
         display: none !important;
     }
 }
-
 @media (max-width: 600px) {
     .sidebar,
     .sidebar-nocol {
         left: 10vw !important;
-        width: 75vw !important;
+        width: 90vw !important;
     }
-
     .tab-icon {
         font-size: 6vw;
         margin-left: 20%;
         color: #5e5e5e;
     }
-
     .tab-icon-active {
         color: #1f1f1f;
     }
 }
-
 .sidebar::-webkit-scrollbar,
 .sidebar-nocol::-webkit-scrollbar {
     width: 5px;
 }
-
 .sidebar::-webkit-scrollbar-thumb,
 .sidebar-nocol::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
 }
-
 .btn-days {
     width: 100%;
 }
-
 .btn-days .btn {
     border-radius: 0;
     padding: 0.25rem 0.25rem;
 }
-
 /* Vuetify has overriden this, which is very annoying */
 [type='number'] {
     width: inherit !important;

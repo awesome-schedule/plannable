@@ -301,10 +301,6 @@
     width: 90% !important;
     scrollbar-width: thin !important;
 }
-.sidebar-nocolMobile .list-group-item,
-.sidebar-nocol .list-group-item {
-    background-color: #f8f8f8;
-}
 
 .sidebar-nocol,
 .sidebar {

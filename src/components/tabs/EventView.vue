@@ -80,7 +80,7 @@
         </button>
         <div v-if="isEditingEvent" class="btn-group" role="group" style="width:100%">
             <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
-                Edit
+                Update
             </button>
             <button type="button" class="btn btn-outline-info" @click="cancelEvent()">
                 Cancel
@@ -92,23 +92,53 @@
         <div id="semester" class="btn bg-info nav-btn mt-0">
             <div>Event List</div>
         </div>
-        <ul class="list-group list-group-flush" style="width:99%">
+
+        <ul class="list-group">
             <li class="list-group-item">
                 Total Events: {{ schedule.currentSchedule.events.length }}
             </li>
-            <li class="list-group-item pr-0">
-                <table style="width:100%;font-size:14px">
-                    <tr
-                        v-for="event in schedule.currentSchedule.events"
-                        :key="event.key"
-                        @click="endEditEvent()"
-                    >
-                        <td>{{ event.title }}</td>
-                        <td>{{ event.days }}</td>
-                    </tr>
-                </table>
+            <li
+                v-for="event in schedule.currentSchedule.events"
+                :key="event.hash()"
+                classs="list-group-item"
+                @click="
+                    {
+                        isEditingEvent = true;
+                        editEvent(event);
+                    }
+                "
+                :class="active"
+            >
+                <div v-if="event.selected === key">
+                    {{ event.title }}
+                    <i class="far fa-square" style="font-size: 20px"></i>
+                </div>
             </li>
         </ul>
+        <table style="width:100%;font-size:14px" class="table table-hover">
+            <thead>
+                <th>
+                    Total Events:
+                    {{ schedule.currentSchedule.events.length }}
+                </th>
+            </thead>
+            <tbody>
+                <tr
+                    v-for="event in schedule.currentSchedule.events"
+                    :key="event.key"
+                    class="mx-3 align-items-center justify-content-between"
+                    @click="
+                        {
+                            isEditingEvent = true;
+                            editEvent(event);
+                        }
+                    "
+                >
+                    <td>{{ event.title }}</td>
+                    <td><i class="far fa-square" style="font-size: 20px"></i></td>
+                </tr>
+            </tbody>
+        </table>
     </nav>
 </template>
 

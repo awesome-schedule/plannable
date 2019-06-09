@@ -98,7 +98,11 @@
             </li>
             <li class="list-group-item pr-0">
                 <table style="width:100%;font-size:14px">
-                    <tr v-for="event in schedule.currentSchedule.events" :key="event.key">
+                    <tr
+                        v-for="event in schedule.currentSchedule.events"
+                        :key="event.key"
+                        @click="endEditEvent()"
+                    >
                         <td>{{ event.title }}</td>
                         <td>{{ event.days }}</td>
                     </tr>

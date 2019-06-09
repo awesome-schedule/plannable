@@ -53,6 +53,7 @@ export default class EventView extends Store {
         return days;
     }
     addEvent() {
+        // fold sidebar on mobile
         mobile.foldView();
         try {
             const days = this.getEventDays();
@@ -119,6 +120,9 @@ export default class EventView extends Store {
      * @param regenerate re-run algorithm if true
      */
     cancelEvent(regenerate = false) {
+        // fold sidebar on mobile
+        mobile.foldView();
+
         this.eventTitle = '';
         this.eventRoom = '';
         this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));

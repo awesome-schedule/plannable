@@ -4,12 +4,12 @@ This folder contains the documentation of the project. It is currently working i
 
 Our website is a single-page application (SPA). Our source code is intended to be modular. We have a number of directories and files that play separate roles.
 
--   [App.vue](/src/App.vue) : the root component
--   [components](/src/components) : all components
--   [algorithm](/src/algorithm) : algorithm for schedule building and rendering
--   [models](/src/models) : models and data structures used to store and manipulate data
--   [store](/src/store) : the state management module
--   [data](/src/data) : data loaders
+-   [App.vue](/src/App.vue): the root component
+-   [components](/src/components): all Vue components
+-   [algorithm](/src/algorithm): algorithm for schedule building and rendering
+-   [models](/src/models): models and data structures used to store and manipulate data
+-   [store](/src/store): the state management module
+-   [data](/src/data): data loaders
 -   [utils](/src/utils): utilities used across the whole project
 
 <!-- <img src="components.png"
@@ -44,7 +44,7 @@ Because the aforementioned benefits (and many others), we strive to make everyth
 
 ## View Layer
 
-The view layer mainly consists of Vue components and the state management modules. We separate the TypeScript part from each Vue component and use a file of the same name as the component to store them. The justification for this separation is that the TypeScript language service can know which modules are used by these components. For example, if we use "Find All References" of a class exported by one of our model files, we are able to know this class is used in which component. This is particularly useful if we want to change some of our models' APIs.
+The view layer mainly consists of Vue components and the state management modules. We separate the TypeScript part from each Vue component and use a file of the same name to store them. The justification for this separation is that the TypeScript language service can know which modules are used by these components. For example, if we use "Find All References" of a class exported by one of our model files, we are able to the usage of this class in all components. This is particularly useful if we want to change some of our models' APIs.
 
 Some components are pure and some are not. Pure components refer to those whose states only depend on the props passed into them. Non-pure components, on the other hand, depend on the global Store module, which means they usually `extends Store`.
 

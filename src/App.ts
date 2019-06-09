@@ -1,7 +1,7 @@
 /**
  * the "view" of this project; the root Vue component that contains almost all of the child components and DOM
  * elements of the main webpage.
- * @author Hanzhi Zhou, Kaiying Shan, Elena Long
+ * @author Hanzhi Zhou, Kaiying Shan, Elena Long, Zichao Hu
  */
 
 /**

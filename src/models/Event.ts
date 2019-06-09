@@ -1,6 +1,6 @@
 /**
  * @module models
- * @author Kaiying Shan
+ * @author Kaiying Shan, Zichao Hu
  */
 
 /**
@@ -36,7 +36,7 @@ export default class Event implements Hashable {
         this.title = title;
         this.description = description;
         this.room = room;
-        this.selected = false;
+        this.selected = false; // selected for rendering
     }
 
     public hash() {

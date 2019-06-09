@@ -26,7 +26,7 @@ interface SidebarStatus extends Sidebars {
 
 /**
  * the status module stores the temporary statuses of the webpage. We do not save these statuses to localStorage
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Zichao Hu
  */
 class Status {
     /**

@@ -10,11 +10,17 @@ import mobile from '../Mobile';
 
 /**
  * the component for adding and editing events
- * @author Kaiying Shan, Hanzhi Zhou
+ * @author Kaiying Shan, Hanzhi Zhou, Zichao Hu
  */
 @Component
 export default class EventView extends Store {
     get event() {
+        // reset event.selected to false if it is not editing
+        if (!this.isEditingEvent) {
+            for (const ev of this.schedule.currentSchedule.events) {
+                ev.selected = false;
+            }
+        }
         return this.status.eventToEdit;
     }
 
@@ -73,8 +79,9 @@ export default class EventView extends Store {
         }
     }
     editEvent(event: Event) {
+        // enable the editing event to be selected for rendering
         for (const ev of this.schedule.currentSchedule.events) {
-            ev.selected = ev.hash() === event.hash() && this.isEditingEvent ? true : false;
+            ev.selected = ev.hash() === event.hash() ? true : false;
         }
 
         this.isEditingEvent = true;

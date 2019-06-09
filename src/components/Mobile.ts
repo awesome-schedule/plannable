@@ -1,3 +1,8 @@
+/**
+ * the methods associated when the user is on mobile
+ * @author Zichao Hu
+ */
+
 // make this a separate component
 // if the user in on mobile, then the class view extends fully
 // if the user clicks on the generate btn, then the view retrieve

@@ -22,6 +22,7 @@ export default class Event implements Hashable {
     public title?: string;
     public room?: string;
     public description?: string;
+    public selected: boolean;
 
     constructor(
         days: string,
@@ -35,6 +36,7 @@ export default class Event implements Hashable {
         this.title = title;
         this.description = description;
         this.room = room;
+        this.selected = false;
     }
 
     public hash() {

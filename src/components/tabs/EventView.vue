@@ -93,28 +93,6 @@
             <div>Event List</div>
         </div>
 
-        <ul class="list-group">
-            <li class="list-group-item">
-                Total Events: {{ schedule.currentSchedule.events.length }}
-            </li>
-            <li
-                v-for="event in schedule.currentSchedule.events"
-                :key="event.hash()"
-                classs="list-group-item"
-                @click="
-                    {
-                        isEditingEvent = true;
-                        editEvent(event);
-                    }
-                "
-                :class="active"
-            >
-                <div v-if="event.selected === key">
-                    {{ event.title }}
-                    <i class="far fa-square" style="font-size: 20px"></i>
-                </div>
-            </li>
-        </ul>
         <table style="width:100%;font-size:14px" class="table table-hover">
             <thead>
                 <th>
@@ -126,7 +104,8 @@
                 <tr
                     v-for="event in schedule.currentSchedule.events"
                     :key="event.key"
-                    class="mx-3 align-items-center justify-content-between"
+                    class="mx-3 align-items-center justify-content-between "
+                    :class="event.selected && 'table-primary'"
                     @click="
                         {
                             isEditingEvent = true;
@@ -135,7 +114,12 @@
                     "
                 >
                     <td>{{ event.title }}</td>
-                    <td><i class="far fa-square" style="font-size: 20px"></i></td>
+                    <td>
+                        <i
+                            :class="event.selected ? 'far fa-check-square' : 'far fa-square'"
+                            style="font-size: 20px"
+                        ></i>
+                    </td>
                 </tr>
             </tbody>
         </table>

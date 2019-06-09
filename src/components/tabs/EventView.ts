@@ -73,7 +73,10 @@ export default class EventView extends Store {
         }
     }
     editEvent(event: Event) {
-        this.schedule.currentSchedule.events.map(e => console.log(e));
+        for (const ev of this.schedule.currentSchedule.events) {
+            ev.selected = ev.hash() === event.hash() && this.isEditingEvent ? true : false;
+        }
+
         this.isEditingEvent = true;
         this.eventTitle = event.title;
         this.eventRoom = event.room;

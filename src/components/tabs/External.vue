@@ -11,8 +11,13 @@ export default Vue.extend({});
 
 <style scoped>
 #external-bar {
-    margin-left: 5vw;
+    margin-left: 3vw;
     width: 100%;
     text-align: center;
+}
+@media (max-width: 600px) {
+    #external-bar {
+        margin-left: 10vw;
+    }
 }
 </style>

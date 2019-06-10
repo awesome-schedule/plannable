@@ -26,7 +26,7 @@ import SectionModal from './components/SectionModal.vue';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 
-import param from './AppConfig.json';
+import param from './config';
 
 @Component({
     components: {
@@ -62,7 +62,6 @@ export default class App extends Store {
             : param.tabBarWidth;
     }
 
-    tabBarWidth = window.screen.width < 900 ? param.tabBarWidthMobile : param.tabBarWidth;
     scrollable = false;
 
     created() {

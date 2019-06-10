@@ -47,7 +47,7 @@
                     class="btn btn-outline-secondary"
                     :class="{ active: eventWeek[idx] }"
                     type="button"
-                    @click="updateDay(idx)"
+                    @click="updateDay(+idx)"
                 >
                     {{ day }}
                 </button>
@@ -105,7 +105,7 @@
                     v-for="event in schedule.currentSchedule.events"
                     :key="event.key"
                     class="mx-3 align-items-center justify-content-between "
-                    :class="{'table-primary':event === currentSelectedEvent}"
+                    :class="{ 'table-primary': event === currentSelectedEvent }"
                     @click="
                         {
                             isEditingEvent = true;

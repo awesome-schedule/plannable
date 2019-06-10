@@ -6,12 +6,7 @@
             :section="modal.section"
         ></section-modal>
 
-        <nav
-            class="tab-bar bg-light"
-            :style="{
-                width: tabBarWidth + 'vw'
-            }"
-        >
+        <nav class="tab-bar bg-light">
             <div
                 class="tab-icon mt-0 mb-1"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
@@ -111,10 +106,7 @@
 
         <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 
-        <external
-            v-else-if="sideBar.showExternal"
-            :style="{ 'margin-left': tabBarWidth + 1 + 'vw' }"
-        ></external>
+        <external v-else-if="sideBar.showExternal"></external>
 
         <log-view v-else-if="sideBar.showLog"></log-view>
 
@@ -143,7 +135,7 @@
             class="schedule"
             :style="{
                 width: status.isMobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
-                'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
+                'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw' // fixed margin for mobile
             }"
         >
             <div class="w-100 my-3">
@@ -277,6 +269,7 @@
     z-index: 100; /* Behind the navbar */
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+    width: 3vw;
 }
 .nav-btn {
     border-radius: 0 !important;
@@ -311,6 +304,9 @@
     }
 }
 @media (max-width: 600px) {
+    .tab-bar {
+        width: 10vw;
+    }
     .sidebar,
     .sidebar-nocol {
         left: 10vw !important;

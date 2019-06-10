@@ -1,7 +1,7 @@
 <template>
     <nav class="bg-light sidebar">
         <div id="semester" class="btn bg-info nav-btn mt-0">
-            <div v-if="isEditingEvent">Edit Event</div>
+            <div v-if="currentSelectedEvent">Edit Event</div>
             <div v-else>Add Event</div>
         </div>
         <form class="mt-2 mx-2">
@@ -70,15 +70,7 @@
             style="width: 98%"
             placeholder="Description"
         ></textarea>
-        <button
-            v-if="!isEditingEvent"
-            class="btn btn-outline-secondary ml-1"
-            style="width:98%"
-            @click="addEvent()"
-        >
-            Add
-        </button>
-        <div v-if="isEditingEvent" class="btn-group" role="group" style="width:100%">
+        <div v-if="currentSelectedEvent" class="btn-group" role="group" style="width:100%">
             <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
                 Update
             </button>
@@ -89,14 +81,17 @@
                 Delete
             </button>
         </div>
-        <div id="semester" class="btn bg-info nav-btn mt-0">
+        <button v-else class="btn btn-outline-secondary ml-1" style="width:98%" @click="addEvent()">
+            Add
+        </button>
+        <div id="semester" class="btn bg-info nav-btn mt-3">
             <div>Event List</div>
         </div>
 
-        <table style="width:100%;font-size:14px" class="table table-hover">
+        <table style="font-size:14px" class="table table-hover w-100">
             <thead>
                 <th>
-                    Total Events:
+                    Number of events:
                     {{ schedule.currentSchedule.events.length }}
                 </th>
             </thead>
@@ -104,14 +99,8 @@
                 <tr
                     v-for="event in schedule.currentSchedule.events"
                     :key="event.key"
-                    class="mx-3 align-items-center justify-content-between "
                     :class="{ 'table-primary': event === currentSelectedEvent }"
-                    @click="
-                        {
-                            isEditingEvent = true;
-                            editEvent(event);
-                        }
-                    "
+                    @click="editEvent(event)"
                 >
                     <td>{{ event.title }}</td>
                     <td>

@@ -62,7 +62,10 @@ class Status {
     eventToEdit: Event | null = null;
 
     // Mobile Param
-    isMobile = window.screen.width < 900;
+    isMobile = window.screen.width < 600;
+    /**
+     * fold sidebar if on mobile
+     */
     foldView() {
         if (this.isMobile) this.foldAllSideBar();
     }

@@ -7,7 +7,6 @@
  */
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import { StoreModule, saveStatus } from '.';
-import { status } from './status';
 
 interface ScheduleStateBase {
     [x: string]: any;
@@ -165,9 +164,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
      * clear the currently active schedules and generated schedules
      */
     clear() {
-        // fold sidebar on mobile
-        status.foldView();
-
         this.currentSchedule.clean();
         this.proposedSchedule.clean();
         this.generated = false;

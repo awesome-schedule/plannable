@@ -254,8 +254,8 @@
     z-index: 100; /* Behind the navbar */
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     overflow-y: auto;
-    left: 3vw !important;
-    width: 19vw !important;
+    left: 3vw;
+    width: 19vw;
     scrollbar-width: thin !important;
 }
 .sidebar .list-group-item {
@@ -309,8 +309,8 @@
     }
     .sidebar,
     .sidebar-nocol {
-        left: 10vw !important;
-        width: 90vw !important;
+        left: 10vw;
+        width: 90vw;
     }
     .tab-icon {
         font-size: 6vw;

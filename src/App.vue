@@ -9,7 +9,7 @@
         <nav
             class="tab-bar bg-light"
             :style="{
-                width: sideBarWidth + 'vw'
+                width: tabBarWidth + 'vw'
             }"
         >
             <div
@@ -113,7 +113,7 @@
 
         <external
             v-else-if="sideBar.showExternal"
-            :style="{ 'margin-left': sideBarWidth + 1 + 'vw' }"
+            :style="{ 'margin-left': tabBarWidth + 1 + 'vw' }"
         ></external>
 
         <log-view v-else-if="sideBar.showLog"></log-view>
@@ -126,8 +126,8 @@
                 class="alert mt-1 mb-0"
                 :class="`alert-${noti.cls}`"
                 :style="
-                    `width:${mobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
-                        mobile ? '11' : scheduleLeft + 5
+                    `width:${status.isMobile ? 'auto' : scheduleWidth - 10 + 'vw'}; margin-left:${
+                        status.isMobile ? '11' : scheduleLeft + 5
                     }vw;`
                 "
             >
@@ -142,8 +142,8 @@
             v-if="!sideBar.showInfo && !sideBar.showExternal"
             class="schedule"
             :style="{
-                width: mobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
-                'margin-left': (mobile ? 11 : scheduleLeft) + 'vw'
+                width: status.isMobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
+                'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
             }"
         >
             <div class="w-100 my-3">
@@ -242,7 +242,6 @@
 .tab-icon-active {
     color: black;
 }
-
 .click-icon {
     cursor: pointer;
 }
@@ -255,7 +254,6 @@
 .icon-disabled {
     color: #999999;
 }
-
 .sidebar-nocol,
 .sidebar {
     position: fixed;
@@ -268,11 +266,9 @@
     width: 19vw !important;
     scrollbar-width: thin !important;
 }
-
 .sidebar .list-group-item {
     background-color: #f8f8f8;
 }
-
 .tab-bar {
     position: fixed;
     top: 0;
@@ -282,17 +278,14 @@
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
 }
-
 .nav-btn {
     border-radius: 0 !important;
     width: 100%;
     color: white !important;
 }
-
 .sort-option {
     cursor: pointer;
 }
-
 @media print {
     @page {
         size: A4 portrait;
@@ -317,44 +310,36 @@
         display: none !important;
     }
 }
-
 @media (max-width: 600px) {
     .sidebar,
     .sidebar-nocol {
         left: 10vw !important;
-        width: 75vw !important;
+        width: 90vw !important;
     }
-
     .tab-icon {
         font-size: 6vw;
         color: #5e5e5e;
     }
-
     .tab-icon-active {
         color: #1f1f1f;
     }
 }
-
 .sidebar::-webkit-scrollbar,
 .sidebar-nocol::-webkit-scrollbar {
     width: 5px;
 }
-
 .sidebar::-webkit-scrollbar-thumb,
 .sidebar-nocol::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
 }
-
 .btn-days {
     width: 100%;
 }
-
 .btn-days .btn {
     border-radius: 0;
     padding: 0.25rem 0.25rem;
 }
-
 /* Vuetify has overriden this, which is very annoying */
 [type='number'] {
     width: inherit !important;

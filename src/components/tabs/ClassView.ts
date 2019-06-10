@@ -14,7 +14,7 @@ import ClassList from '../ClassList.vue';
 
 /**
  * component for editing classes and manipulating schedules
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Zichao Hu
  */
 @Component({
     components: {
@@ -85,4 +85,5 @@ export default class ClassView extends Store {
         this.schedule.currentSchedule.remove(key);
         this.saveStatus();
     }
+
 }

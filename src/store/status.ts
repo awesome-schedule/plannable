@@ -26,9 +26,15 @@ interface SidebarStatus extends Sidebars {
 
 /**
  * the status module stores the temporary statuses of the webpage. We do not save these statuses to localStorage
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Zichao Hu
  */
 class Status {
+    get sideBarActive() {
+        for (const key in this.sideBar) {
+            if (this.sideBar[key]) return true;
+        }
+        return false;
+    }
     /**
      * sidebar display status
      * show the specific sidebar when true, and hide when all false
@@ -55,18 +61,23 @@ class Status {
 
     eventToEdit: Event | null = null;
 
-    get sideBarActive() {
-        for (const key in this.sideBar) {
-            if (this.sideBar[key]) return true;
-        }
-        return false;
+    // Mobile Param
+    isMobile = window.screen.width < 900;
+    foldView() {
+        if (this.isMobile) status.foldAllSideBar();
     }
-
+    
     switchSideBar(key: keyof Sidebars) {
         for (const other in this.sideBar) {
             if (other !== key) this.sideBar[other] = false;
         }
         this.sideBar[key] = !this.sideBar[key];
+    }
+
+    foldAllSideBar() {
+        for (const bar in this.sideBar) {
+            this.sideBar[bar] = false;
+        }
     }
 }
 

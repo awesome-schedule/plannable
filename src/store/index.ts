@@ -293,6 +293,9 @@ class Store extends Vue {
     }
 
     generateSchedules() {
+        // determine if the user is on mobile
+        status.foldView();
+
         if (this.schedule.proposedSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
 

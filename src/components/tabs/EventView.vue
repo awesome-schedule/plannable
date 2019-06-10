@@ -80,7 +80,7 @@
         </button>
         <div v-if="isEditingEvent" class="btn-group" role="group" style="width:100%">
             <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
-                Edit
+                Update
             </button>
             <button type="button" class="btn btn-outline-info" @click="cancelEvent()">
                 Cancel
@@ -89,6 +89,44 @@
                 Delete
             </button>
         </div>
+        <div id="semester" class="btn bg-info nav-btn mt-0">
+            <div>Event List</div>
+        </div>
+
+        <table style="width:100%;font-size:14px" class="table table-hover">
+            <thead>
+                <th>
+                    Total Events:
+                    {{ schedule.currentSchedule.events.length }}
+                </th>
+            </thead>
+            <tbody>
+                <tr
+                    v-for="event in schedule.currentSchedule.events"
+                    :key="event.key"
+                    class="mx-3 align-items-center justify-content-between "
+                    :class="{'table-primary':event === currentSelectedEvent}"
+                    @click="
+                        {
+                            isEditingEvent = true;
+                            editEvent(event);
+                        }
+                    "
+                >
+                    <td>{{ event.title }}</td>
+                    <td>
+                        <i
+                            :class="
+                                event === currentSelectedEvent
+                                    ? 'far fa-check-square'
+                                    : 'far fa-square'
+                            "
+                            style="font-size: 20px"
+                        ></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </nav>
 </template>
 

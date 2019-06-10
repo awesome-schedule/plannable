@@ -9,11 +9,13 @@ import { to12hr, to24hr } from '@/utils';
 
 /**
  * the component for adding and editing events
- * @author Kaiying Shan, Hanzhi Zhou
+ * @author Kaiying Shan, Hanzhi Zhou, Zichao Hu
  */
 @Component
 export default class EventView extends Store {
     get event() {
+        // reset event.selected to false if it is not editing
+        this.currentSelectedEvent = null;
         return this.status.eventToEdit;
     }
 
@@ -25,6 +27,9 @@ export default class EventView extends Store {
     eventRoom? = '';
     eventDescription? = '';
     isEditingEvent = false;
+
+    // rendering selected event
+    currentSelectedEvent: Event | null = null;
 
     readonly days = DAYS;
     toBeModifiedDays = '';
@@ -46,6 +51,8 @@ export default class EventView extends Store {
         return days;
     }
     addEvent() {
+        // fold sidebar on mobile
+        this.status.foldView();
         try {
             const days = this.getEventDays();
 
@@ -71,6 +78,9 @@ export default class EventView extends Store {
         }
     }
     editEvent(event: Event) {
+        // enable the editing event to be selected for rendering
+        this.currentSelectedEvent = event;
+
         this.isEditingEvent = true;
         this.eventTitle = event.title;
         this.eventRoom = event.room;
@@ -106,6 +116,9 @@ export default class EventView extends Store {
      * @param regenerate re-run algorithm if true
      */
     cancelEvent(regenerate = false) {
+        // fold sidebar on mobile
+        this.status.foldView();
+
         this.eventTitle = '';
         this.eventRoom = '';
         this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));

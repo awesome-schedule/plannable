@@ -1,7 +1,7 @@
 /**
  * the "view" of this project; the root Vue component that contains almost all of the child components and DOM
  * elements of the main webpage.
- * @author Hanzhi Zhou, Kaiying Shan, Elena Long
+ * @author Hanzhi Zhou, Kaiying Shan, Elena Long, Zichao Hu
  */
 
 /**
@@ -25,6 +25,8 @@ import SectionModal from './components/SectionModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
+
+import param from './AppConfig.json';
 
 @Component({
     components: {
@@ -50,14 +52,17 @@ export default class App extends Store {
         return this.status.sideBar;
     }
     get scheduleWidth() {
-        return this.status.sideBarActive ? 100 - 19 - 3 - 3 : 100 - 3 - 3;
+        return this.status.sideBarActive
+            ? 100 - param.sideBarWidth - param.tabBarWidth - param.sideMargin
+            : 100 - param.tabBarWidth - param.sideMargin;
     }
     get scheduleLeft() {
-        return this.status.sideBarActive ? 23 : 3;
+        return this.status.sideBarActive
+            ? param.sideBarWidth + param.tabBarWidth + 1
+            : param.tabBarWidth;
     }
 
-    mobile = window.screen.width < 900;
-    sideBarWidth = this.mobile ? 10 : 3;
+    tabBarWidth = window.screen.width < 900 ? param.tabBarWidthMobile : param.tabBarWidth;
     scrollable = false;
 
     created() {

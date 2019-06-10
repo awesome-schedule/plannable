@@ -17,7 +17,6 @@ import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
 import LogView from './components/tabs/LogView.vue';
-import mobile from './components/Mobile';
 
 import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';

@@ -15,7 +15,7 @@ import { to12hr, to24hr } from '@/utils';
 export default class EventView extends Store {
     get event() {
         // reset event.selected to false if it is not editing
-        this.currentSelectedEvent = new Event("",false);
+        this.currentSelectedEvent = null;
         return this.status.eventToEdit;
     }
 
@@ -29,7 +29,7 @@ export default class EventView extends Store {
     isEditingEvent = false;
 
     // rendering selected event
-    currentSelectedEvent = new Event("",false);
+    currentSelectedEvent: Event | null = null;
 
     readonly days = DAYS;
     toBeModifiedDays = '';
@@ -80,7 +80,6 @@ export default class EventView extends Store {
     editEvent(event: Event) {
         // enable the editing event to be selected for rendering
         this.currentSelectedEvent = event;
-        
 
         this.isEditingEvent = true;
         this.eventTitle = event.title;

@@ -13,6 +13,7 @@ import { semesterListExpirationTime } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
+import { getApi } from '.';
 
 interface SemesterListJSON extends Expirable {
     semesterList: SemesterJSON[];
@@ -45,7 +46,9 @@ export async function loadSemesterList(count = 5): Promise<NotiMsg<SemesterJSON[
  */
 export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
     console.time('get semester list');
-    const response = await axios.get(`https://rabi.phys.virginia.edu/mySIS/CS2/index.php`);
+    const response = await (window.location.host === 'plannable.org'
+        ? axios.get(`https://rabi.phys.virginia.edu/mySIS/CS2/index.php`)
+        : axios.get(`${getApi()}/data/Semester Data/index.html`));
     console.timeEnd('get semester list');
 
     const element = document.createElement('html');

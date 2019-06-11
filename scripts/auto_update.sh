@@ -26,6 +26,7 @@ mkdir -p deploy
 cp -rf data deploy/
 cp -rf awesome-schedule.github.io/. deploy/
 cd deploy
+rm -rf data/.git
 clear_and_commit
 git remote add origin https://gitee.com/plannable/plannable
 git push -f -u origin master

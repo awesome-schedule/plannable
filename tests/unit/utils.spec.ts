@@ -1,5 +1,6 @@
 import * as Utils from '@/utils';
 import axios from 'axios';
+import config from '@/config';
 
 beforeAll(async () => {
     window.open = jest.fn();
@@ -90,6 +91,8 @@ describe('Utility Tests', () => {
             Utils.savePlain('sav', 'asv');
             // tslint:disable-next-line: no-empty
         } catch (err) {}
+
+        expect(config).toBeInstanceOf(Object);
     });
 
     it('timeout', async () => {

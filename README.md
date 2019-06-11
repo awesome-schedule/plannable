@@ -35,9 +35,7 @@ Clone the repository and data
 
 ```bash
 git clone https://github.com/awesome-schedule/Awesome-SchedulAR
-cd Awesome-SchedulAR
-mkdir -p backend
-cd backend
+cd Awesome-SchedulAR/scripts
 git clone https://github.com/awesome-schedule/data
 cd ..
 ```
@@ -50,7 +48,7 @@ npm install
 npm run serve
 ```
 
-You need to serve the static files in backend/data. To do so, you can run `sh run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
+You need to serve the static files in scripts/data. To do so, you can run `sh run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
 
 Then you can visit the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
 

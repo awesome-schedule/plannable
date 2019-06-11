@@ -29,6 +29,7 @@
     "devDependencies": {
         "@babel/preset-typescript": "^7.3.3",
         "@types/bootstrap": "^4.3.0",
+        "@types/cheerio": "^0.22.11",
         "@types/file-saver": "^2.0.1",
         "@types/jest": "^24.0.13",
         "@types/jquery": "^3.3.29",
@@ -48,6 +49,7 @@
         "babel-eslint": "^10.0.1",
         "babel-jest": "^23.6.0",
         "babel-plugin-transform-remove-console": "^6.9.4",
+        "cheerio": "^1.0.0-rc.3",
         "css-loader": "^2.1.1",
         "eslint": "^5.16.0",
         "eslint-plugin-vue": "^5.0.0",

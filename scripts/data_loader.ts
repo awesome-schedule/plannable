@@ -3,10 +3,17 @@ import { stringify } from 'querystring';
 import axios from 'axios';
 import { SemesterJSON } from '../src/models/Catalog';
 import fs from 'fs';
+import { spawn } from 'child_process';
+
+const dataDir = './data/Semester Data/';
+function cb(err: NodeJS.ErrnoException | null) {
+    if (err) console.error(err);
+}
 
 async function loadSemesterList(count = 5) {
     const { data } = await axios.get('https://rabi.phys.virginia.edu/mySIS/CS2/index.php');
     const $ = cheerio.load(data);
+    fs.writeFile(dataDir + 'index.html', data, cb);
     const records: SemesterJSON[] = [];
     const options = $('option').slice(0, count);
     options.each((i, element) => {
@@ -35,7 +42,7 @@ async function loadSemesterData(semester: SemesterJSON) {
             Extended: 'Yes'
         })
     );
-    fs.writeFileSync(`./data/Semester Data/CS${semester.id}Data.csv`, data);
+    fs.writeFile(`./data/Semester Data/CS${semester.id}Data.csv`, data, cb);
 }
 
 async function main() {
@@ -45,6 +52,21 @@ async function main() {
         console.info('Loading', semester.name, 'data...');
         await loadSemesterData(semester);
     }
+
+    const update = spawn('bash', ['./auto_update.sh']);
+    update.stdout.on('data', data => {
+        console.log(data.toString());
+    });
+    update.stderr.on('data', data => {
+        console.warn(data.toString());
+    });
+    update.on('exit', code => {
+        console.log('child process exited with code ' + code);
+    });
 }
 
 main();
+
+// hourly update
+const updateInterval = 1000 * 3600;
+setInterval(main, updateInterval);

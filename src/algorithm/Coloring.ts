@@ -1,6 +1,6 @@
 /**
  * Utilities for graph coloring, used for rendering conflicting courses/events
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou (sucks), Kaiying Cat (very cute) 
  * @module algorithm
  */
 
@@ -189,6 +189,27 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
         });
 
     return graph;
+}
+
+export function recursiveLargestFirst<T extends TypedIntArray>(adjList: T[], colors: T): number {
+    colors.fill(-1);
+    const notColored = new Set(colors.map((x: number, i: number) => i));
+    let color = 0;
+    while (notColored.size != 0) {
+        const remained = new Set(notColored);
+        while (remained.size != 0) {
+            let v = remained.values().next().value;
+            const adj = adjList[v];
+            remained.delete(v);
+            notColored.delete(v);
+            colors[v] = color;
+            for (const ad of adj) {
+                remained.delete(ad);
+            }
+        }
+        color++;
+    }
+    return color;
 }
 
 /**

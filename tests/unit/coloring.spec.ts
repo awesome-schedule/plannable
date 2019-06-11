@@ -22,7 +22,6 @@ const graph = [
     [0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0],
     [0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0]
 ];
-
 const adjList: Int8Array[] = [];
 // tslint:disable-next-line: prefer-for-of
 for (let i = 0; i < graph.length; i++) {
@@ -44,4 +43,26 @@ describe('graph coloring test', () => {
         // we expect the dsatur to be exact for this graph
         expect(dsaturColor).toEqual(exactColors);
     });
+});
+
+describe('graph verifier', () => {
+    it('basic', () => {
+        const colors = new Int8Array(adjList.length);
+        Coloring.recursiveLargestFirst(adjList, colors);
+        let flag = true;
+        for (let i = 0; i < adjList.length; i++) {
+            const curCol = colors[i];
+            for (const adj of adjList[i]) {
+                if (curCol === colors[adj]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (!flag) {
+                break;
+            }
+        }
+        expect(flag).toBeTruthy();
+    });
+
 });

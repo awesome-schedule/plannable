@@ -1,6 +1,6 @@
 /**
  * Utilities for graph coloring, used for rendering conflicting courses/events
- * @author Hanzhi Zhou (sucks), Kaiying Cat (very cute) 
+ * @author Hanzhi Zhou, Kaiying Cat
  * @module algorithm
  */
 
@@ -194,17 +194,26 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
 export function recursiveLargestFirst<T extends TypedIntArray>(adjList: T[], colors: T): number {
     colors.fill(-1);
     const notColored = new Set(colors.map((x: number, i: number) => i));
+    const degrees = adjList.map((x, i) => x.length);
     let color = 0;
     while (notColored.size != 0) {
         const remained = new Set(notColored);
         while (remained.size != 0) {
-            let v = remained.values().next().value;
+            let itr = remained.values();
+            let v = itr.next().value;
+            for (let i = 1; i < remained.size; i++) {
+                const tempV = itr.next().value;
+                if (degrees[tempV] > degrees[v]) {
+                    v = tempV;
+                }
+            }
             const adj = adjList[v];
             remained.delete(v);
             notColored.delete(v);
             colors[v] = color;
-            for (const ad of adj) {
-                remained.delete(ad);
+            for (const a of adj) {
+                remained.delete(a);
+                degrees[a] -= 1;
             }
         }
         color++;

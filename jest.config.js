@@ -10,16 +10,15 @@ module.exports = {
     moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
     },
-    setupTestFrameworkScriptFile: '<rootDir>/tests/unit/setup.ts',
+    setupFilesAfterEnv: ['<rootDir>/tests/unit/setup.ts'],
     snapshotSerializers: ['jest-serializer-vue'],
     testMatch: ['**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
     testURL: 'http://localhost/',
     collectCoverage: true,
     collectCoverageFrom: [
-        '**/*.ts',
-        '!**/node_modules/**',
+        '<rootDir>/src/**/*.ts',
+
         '!**/*.d.ts',
-        '!**/tests/temp/*.*',
 
         // don't know how to test components
         '!**/components/**/*.ts',
@@ -27,13 +26,11 @@ module.exports = {
         // no need to test the entry point
         '!**/App.ts',
         '!**/main.ts',
+
+        // todo
         '!**/store/*.ts',
 
-        // this is too expensive to test (requesting a lot of data)
-        // and is already used in other tests (a lot of other tests rely on its data)
-        '!**/CatalogLoader.ts',
-        '!**/tests/**',
-        '!**/tests/unit/*.ts',
-        '!**/tests/unit/*.js'
+        // this is already used in other tests (a lot of other tests rely on its data)
+        '!**/CatalogLoader.ts'
     ]
 };

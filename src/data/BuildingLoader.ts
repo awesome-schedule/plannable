@@ -1,10 +1,3 @@
-// note: this is the description for the entire module.
-/**
- * The data module contains functions for loading data from localStorage or remote
- * @module data
- * @preferred
- */
-
 /**
  * Script for loading building list and distance (time) matrix
  * @author Hanzhi Zhou
@@ -17,12 +10,7 @@ import axios from 'axios';
 import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
 import { loadFromCache } from './Loader';
-
-const api =
-    window.location.host.indexOf('localhost') === -1 &&
-    window.location.host.indexOf('127.0.0.1') === -1
-        ? `${window.location.protocol}//${window.location.host}/`
-        : 'http://localhost:8000/';
+import { getApi } from '.';
 
 export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
@@ -84,7 +72,7 @@ export async function loadBuildingList(force = false): Promise<NotiMsg<string[]>
  * request from remote and store in localStorage
  */
 async function requestTimeMatrix(): Promise<Int32Array> {
-    const res = await axios.get(`${api}/data/Distance/Time_Matrix.json`);
+    const res = await axios.get(`${getApi()}/data/Distance/Time_Matrix.json`);
     const data: number[][] = res.data;
 
     if (data instanceof Array && data.length) {
@@ -110,7 +98,7 @@ async function requestTimeMatrix(): Promise<Int32Array> {
  * request from remote and store in localStorage
  */
 async function requestBuildingList(): Promise<string[]> {
-    const res = await axios.get(`${api}/data/Distance/Building_Array.json`);
+    const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {
         localStorage.setItem(

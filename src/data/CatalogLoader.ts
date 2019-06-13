@@ -23,6 +23,7 @@ import {
 } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
+import { getApi } from '.';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -65,10 +66,7 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host.indexOf('localhost') !== -1 || // local dev?
-    window.location.host.indexOf('127.0.0.1') !== -1
-        ? axios.get(`http://localhost:8000/data/Semester%20Data/CS${semester.id}Data.csv`) // use the 8000 port
-        : window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
+    const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
         ? axios.post(
               `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
               stringify({
@@ -78,12 +76,8 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
                   submit: 'Submit Data Request',
                   Extended: 'Yes'
               })
-          )
-        : axios.get(
-              `${window.location.protocol}//${window.location.host}/data/Semester%20Data/CS${
-                  semester.id
-              }Data.csv`
-          )); // use the mirror
+          ) // use the mirror/local dev server
+        : axios.get(`${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv`));
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);

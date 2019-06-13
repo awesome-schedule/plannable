@@ -9,17 +9,19 @@ Also, please note we have a [code of conduct](./CODE_OF_CONDUCT.md), please foll
 ## Current List of Things You Can Do
 
 -   Better mobile support
--   Efficient fuzzy search (should be implemented in [Catalog.ts](/src/models/Catalog.ts))
-    -   We currently only supports exact search because fuzzy search is too slow
+-   Better and more efficient fuzzy search (should be implemented in [SearchWorker.ts](/src/workers/SearchWorker.ts))
 -   Better unit tests and unit tests for components (if possible)
     -   Current unit tests are not robust. Unit tests for Vue components are completely missing
 -   More filters and sort options (should be implemented in [ScheduleEvaluator.ts](/src/algorithm/ScheduleEvaluator.ts) and/or [ScheduleGenerator.ts](/src/algorithm/ScheduleGenerator.ts))
+-   Interface for schedule comparison and difference
+-   Support other colleges!
+-   Any other amazing things you want to add!
 
 ## Pull Request Process :yum:
 
 1. Make sure that your changes are made on the dev branch or a new branch.
 2. Test extensively on your local host to make sure that you didn't screw up anything.
-3. In writing a pull request message,
+3. When writing a pull request message, please
     1. Be clear that what type of changes you have made, e.g., fixed a bug, improved performance, changed/added functionality, updated documentation, etc.
     2. Summarize what does this pull request do and why this is worth doing.
     3. (Optional) Include any of your design decisions and alternatives that you considered.

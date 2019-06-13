@@ -1,3 +1,3 @@
 #!/bin/bash
-cd backend
+cd scripts
 http-server --cors -p 8000

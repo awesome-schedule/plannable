@@ -5,8 +5,7 @@ SOURCE_BRANCH="master"
 TARGET_BRANCH="master"
 
 function doCompile {
-    mkdir -p backend
-    cd backend
+    cd scripts
     git clone https://github.com/awesome-schedule/data # clone and serve our data
     http-server -p 8000 --cors --slient &
     cd ..

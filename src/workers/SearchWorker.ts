@@ -10,7 +10,7 @@
 /**
  *
  */
-import { Searcher, SearchResult } from 'fast-fuzzy';
+import { Searcher, SearchResult, ReturnMatchData, SearchOptions } from 'fast-fuzzy';
 import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
 
@@ -31,8 +31,8 @@ type Section = NonFunctionProperties<Mutable<_Section, 'topic' | 'instructors'>>
 
 declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
 
-let courseSearcher: Searcher<Course>;
-let sectionSearcher: Searcher<Section>;
+let courseSearcher: Searcher<Course, SearchOptions<Course> & ReturnMatchData>;
+let sectionSearcher: Searcher<Section, SearchOptions<Section> & ReturnMatchData>;
 let courseDict: { [x: string]: Course };
 let count = 0;
 

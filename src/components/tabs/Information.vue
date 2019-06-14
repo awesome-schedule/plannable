@@ -610,7 +610,7 @@
                     <a href="mailto:hz2zz@virginia.edu"> hz2zz@virginia.edu</a>
                 </li>
                 <li>
-                    Kaiying Shan <s>(non-human; cat)</s>&nbsp;&nbsp;
+                    Kaiying "Cat" Shan &nbsp;&nbsp;
                     <i class="fab fa-github"></i>
                     <a href="https://github.com/kaiyingshan"> https://github.com/kaiyingshan </a>
                     &nbsp;<i class="fas fa-envelope"></i>

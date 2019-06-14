@@ -1,7 +1,7 @@
 /**
  * Search worker is used to perform fuzzy search (which is very expensive)
  * in a separate, non-blocking process.
- * @author Hanzhi Zhou, Kaiying Shan (non-human, cat)
+ * @author Hanzhi Zhou, Kaiying Cat
  * @requires optimization
  * @requires fast-fuzzy
  * @see https://github.com/EthanRutherford/fast-fuzzy

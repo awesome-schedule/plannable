@@ -17,7 +17,7 @@ declare module 'fast-fuzzy' {
         normalizeWhitespace?: boolean;
         returnMatchData?: boolean;
         useDamerau?: boolean;
-        keySelector?(obj: T): (T[keyof T])[] | keyof T;
+        keySelector?(obj: T): (T[keyof T])[] | T[keyof T];
     }
 
     export class Searcher<T> {

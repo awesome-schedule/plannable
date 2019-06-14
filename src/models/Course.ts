@@ -58,13 +58,7 @@ export interface Match<T extends string> {
 }
 
 export type CourseMatch = Match<'title' | 'description' | 'key'>;
-export type CourseConstructorArguments = [
-    RawCourse,
-    string,
-    ReadonlyArray<number>,
-    CourseMatch[],
-    SectionMatch[][]
-];
+export type CourseConstructorArguments = ConstructorParameters<typeof Course>;
 
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
@@ -166,14 +160,14 @@ export default class Course implements CourseFields, Hashable {
     /**
      * Get the CourseRecord at a given range of sections
      */
-    public getCourse(sids: number[]): Course {
+    public getCourse(sids: number[]) {
         return new Course(this.raw, this.key, sids);
     }
 
     /**
      * whether all sections of this Course occur at the same time
      */
-    public allSameTime(): boolean {
+    public allSameTime() {
         const sections = this.sections;
         for (let i = 0; i < sections.length - 1; i++) {
             if (!sections[i].sameTimeAs(sections[i + 1])) return false;
@@ -189,7 +183,7 @@ export default class Course implements CourseFields, Hashable {
      * {"MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [1,2,3,7,9]}
      * ```
      */
-    public getCombined(): { [x: string]: Section[] } {
+    public getCombined() {
         const combined: { [x: string]: Section[] } = {};
         for (const section of this.sections) {
             const day = section.combinedTime();
@@ -214,7 +208,7 @@ export default class Course implements CourseFields, Hashable {
         return new Course(this.raw, this.key, this.sids);
     }
 
-    public equals(object: object): boolean {
+    public equals(object: object) {
         if (object instanceof Course) {
             return this.key === object.key && this.sids.toString() === object.sids.toString();
         }

@@ -11,7 +11,7 @@
  *
  */
 import { Searcher, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
+import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
 
 // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html

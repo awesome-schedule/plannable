@@ -13,6 +13,7 @@
 import { Searcher, SearchResult } from 'fast-fuzzy';
 import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
+import Course from '../models/Course';
 
 // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
 type NonFunctionPropertyNames<T> = {
@@ -31,8 +32,14 @@ type Section = NonFunctionProperties<Mutable<_Section, 'topic' | 'instructors'>>
 
 declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
 
-let courseSearcher: Searcher<Course>;
-let sectionSearcher: Searcher<Section>;
+// let courseSearcher: Searcher<Course>;
+// let sectionSearcher: Searcher<Section>;
+
+let titleSearcher: Searcher<Course>;
+let descripSearcher: Searcher<Course>;
+let topicSearcher: Searcher<Section>;
+let instrSearcher: Searcher<Section>;
+
 let courseDict: { [x: string]: Course };
 let count = 0;
 
@@ -57,76 +64,169 @@ onmessage = (msg: MessageEvent) => {
 
         // fast-fuzzy does not support nested data, so we search for sections and courses separately.
 
-        sectionSearcher = new Searcher(sections, {
+        // sectionSearcher = new Searcher(sections, {
+        //     returnMatchData: true,
+        //     ignoreCase: true,
+        //     ignoreSymbols: true,
+        //     normalizeWhitespace: true,
+        //     keySelector: obj => [obj.topic, obj.instructors.join(', ')]
+        // });
+        // courseSearcher = new Searcher(courses, {
+        //     returnMatchData: true,
+        //     ignoreCase: true,
+        //     ignoreSymbols: true,
+        //     normalizeWhitespace: true,
+        //     keySelector: obj => [obj.title, obj.description]
+        // });
+
+        titleSearcher = new Searcher(courses, {
             returnMatchData: true,
             ignoreCase: true,
             ignoreSymbols: true,
             normalizeWhitespace: true,
-            keySelector: obj => [obj.topic, obj.instructors.join(', ')]
+            keySelector: obj => obj.title
         });
-        courseSearcher = new Searcher(courses, {
+
+        descripSearcher = new Searcher(courses, {
             returnMatchData: true,
             ignoreCase: true,
             ignoreSymbols: true,
             normalizeWhitespace: true,
-            keySelector: obj => [obj.title, obj.description]
+            keySelector: obj => obj.description
         });
+
+        topicSearcher = new Searcher(sections, {
+            returnMatchData: true,
+            ignoreCase: true,
+            ignoreSymbols: true,
+            normalizeWhitespace: true,
+            keySelector: obj => obj.topic
+        });
+
+        instrSearcher = new Searcher(sections, {
+            returnMatchData: true,
+            ignoreCase: true,
+            ignoreSymbols: true,
+            normalizeWhitespace: true,
+            keySelector: obj => obj.instructors.join(' ')
+        });
+
         postMessage('ready');
         console.timeEnd('worker prep');
     } else {
         const query: string = msg.data;
         const querySeg: string[] = query.split(' ').filter(x => x.length >= 3);
-
-        let courseResults;
-        let sectionResults;
+        querySeg.push(query);
 
         const courseScores: { [x: string]: [number, number, number] } = Object.create(null);
         const courseMap: { [x: string]: SearchResult<Course>[] } = Object.create(null);
         const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
         const sectionRecorder: Set<string> = new Set();
 
-        for (const q of querySeg) {
-            courseResults = courseSearcher.search(q);
-            sectionResults = sectionSearcher.search(q);
+        for (let j = 0; j < querySeg.length; j++) {
+            const q = querySeg[j];
+            const last = j === querySeg.length - 1;
+            // courseResults = courseSearcher.search(q);
+            // sectionResults = sectionSearcher.search(q);
 
-            for (const result of courseResults) {
-                const item = result.item;
-                const key = item.key;
-                const score = result.score * (result.original === item.title ? 1 : 0.5);
-                if (courseMap[key]) {
-                    courseScores[key][0] += score;
-                    courseMap[key].push(result);
-                } else {
-                    courseScores[key] = [score, 0, 0];
-                    courseMap[key] = [result];
+            // titleResult = titleSearcher.search(q);
+            // descripResult = descripSearcher.search(q);
+            // topicResult = topicSearcher.search(q);
+
+            const coursesResults = [titleSearcher.search(q), descripSearcher.search(q),];
+            const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
+
+            for (let i = 0; i < 2; i++) {
+                const r = coursesResults[i];
+                for (const result of r) {
+                    const item = result.item;
+                    const key = item.key;
+                    const score = (result.score ** 3) * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
+                    if (courseMap[key]) {
+                        courseScores[key][0] += score;
+                        if (!last) courseMap[key].push(result);
+                    } else {
+                        courseScores[key] = [score, 0, 0];
+                        if (!last) courseMap[key] = [result];
+                    }
                 }
             }
 
-            for (const result of sectionResults) {
-                const item = result.item;
-                const key = item.key;
-                const score = result.score * (result.original === item.topic ? 0.8 : 0.4);
+            for (let i = 0; i < 2; i++) {
+                const r = sectionsResults[i];
+                for (const result of r) {
+                    const item = result.item;
+                    const key = item.key;
+                    const score = (result.score ** 3) * (i === 0 ? 0.8 : 0.6) * (last ? 2 : 1);
 
-                if (courseScores[key]) {
-                    courseScores[key][1] += score;
-                } else {
-                    courseScores[key] = [0, score, 0];
-                }
+                    if (courseScores[key]) {
+                        courseScores[key][1] += score;
+                    } else {
+                        courseScores[key] = [0, score, 0];
+                    }
 
-                if (sectionMap[key]) {
-                    sectionMap[key].push(result);
-                } else {
-                    sectionMap[key] = [result];
-                }
+                    if (sectionMap[key]) {
+                        if (!last) sectionMap[key].push(result);
+                    } else {
+                        if (!last) sectionMap[key] = [result];
+                    }
 
-                const secKey = `${item.key} ${item.sid}`;
+                    const secKey = `${item.key} ${item.sid}`;
 
-                if (!sectionRecorder.has(secKey)) {
-                    courseScores[key][2] += 1;
-                    sectionRecorder.add(secKey);
+                    if (!sectionRecorder.has(secKey) && !last) {
+                        courseScores[key][2] += 1;
+                        sectionRecorder.add(secKey);
+                    }
                 }
             }
+            // for (const result of courseResults) {
+            //     const item = result.item;
+            //     const key = item.key;
+            //     const score = result.score * (result.original === item.title ? 1 : 0.5);
+            //     if (courseMap[key]) {
+            //         courseScores[key][0] += score;
+            //         courseMap[key].push(result);
+            //     } else {
+            //         courseScores[key] = [score, 0, 0];
+            //         courseMap[key] = [result];
+            //     }
+            // }
+
+            // for (const result of sectionResults) {
+            //     const item = result.item;
+            //     const key = item.key;
+            //     const score = result.score * (result.original === item.topic ? 0.8 : 0.4);
+
+            //     if (courseScores[key]) {
+            //         courseScores[key][1] += score;
+            //     } else {
+            //         courseScores[key] = [0, score, 0];
+            //     }
+
+            //     if (sectionMap[key]) {
+            //         sectionMap[key].push(result);
+            //     } else {
+            //         sectionMap[key] = [result];
+            //     }
+
+            //     const secKey = `${item.key} ${item.sid}`;
+
+            //     if (!sectionRecorder.has(secKey)) {
+            //         courseScores[key][2] += 1;
+            //         sectionRecorder.add(secKey);
+            //     }
+            // }
         }
+
+        // sort courses in descending order; section score is normalized before added to course score
+        Object.entries(courseScores)
+            .sort(
+                (a, b) =>
+                    b[1][0] +
+                    (b[1][2] === 0 ? 0 : b[1][1] / b[1][2]) -
+                    (a[1][0] + (a[1][2] === 0 ? 0 : a[1][1] / a[1][2]))
+            )
+            .filter(x => x[0].indexOf('cs') !== -1).map(x => console.log(x));
 
         const scoreEntries = Object.entries(courseScores)
             .sort(

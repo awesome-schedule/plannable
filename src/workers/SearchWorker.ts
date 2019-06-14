@@ -58,27 +58,6 @@ onmessage = (msg: MessageEvent) => {
         const sections: Section[] = [];
         for (const { sections: secs } of courses) sections.push(...secs);
 
-        // create searcher objects for later use
-        // they'll cache normalization and tries
-        // so future searches won't need to re-calculate them on the fly
-
-        // fast-fuzzy does not support nested data, so we search for sections and courses separately.
-
-        // sectionSearcher = new Searcher(sections, {
-        //     returnMatchData: true,
-        //     ignoreCase: true,
-        //     ignoreSymbols: true,
-        //     normalizeWhitespace: true,
-        //     keySelector: obj => [obj.topic, obj.instructors.join(', ')]
-        // });
-        // courseSearcher = new Searcher(courses, {
-        //     returnMatchData: true,
-        //     ignoreCase: true,
-        //     ignoreSymbols: true,
-        //     normalizeWhitespace: true,
-        //     keySelector: obj => [obj.title, obj.description]
-        // });
-
         titleSearcher = new Searcher(courses, {
             returnMatchData: true,
             ignoreCase: true,
@@ -179,43 +158,6 @@ onmessage = (msg: MessageEvent) => {
                     }
                 }
             }
-            // for (const result of courseResults) {
-            //     const item = result.item;
-            //     const key = item.key;
-            //     const score = result.score * (result.original === item.title ? 1 : 0.5);
-            //     if (courseMap[key]) {
-            //         courseScores[key][0] += score;
-            //         courseMap[key].push(result);
-            //     } else {
-            //         courseScores[key] = [score, 0, 0];
-            //         courseMap[key] = [result];
-            //     }
-            // }
-
-            // for (const result of sectionResults) {
-            //     const item = result.item;
-            //     const key = item.key;
-            //     const score = result.score * (result.original === item.topic ? 0.8 : 0.4);
-
-            //     if (courseScores[key]) {
-            //         courseScores[key][1] += score;
-            //     } else {
-            //         courseScores[key] = [0, score, 0];
-            //     }
-
-            //     if (sectionMap[key]) {
-            //         sectionMap[key].push(result);
-            //     } else {
-            //         sectionMap[key] = [result];
-            //     }
-
-            //     const secKey = `${item.key} ${item.sid}`;
-
-            //     if (!sectionRecorder.has(secKey)) {
-            //         courseScores[key][2] += 1;
-            //         sectionRecorder.add(secKey);
-            //     }
-            // }
         }
 
         // sort courses in descending order; section score is normalized before added to course score

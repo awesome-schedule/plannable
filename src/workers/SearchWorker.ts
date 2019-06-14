@@ -11,8 +11,23 @@
  *
  */
 import { Searcher, SearchResult } from 'fast-fuzzy';
-import Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
-import Section, { SectionMatch } from '../models/Section';
+import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
+import _Section, { SectionMatch } from '../models/Section';
+
+// copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
+type NonFunctionPropertyNames<T> = {
+    [K in keyof T]: T[K] extends (...x: any[]) => any ? never : K
+}[keyof T];
+type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+
+// modified from
+// https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#improved-control-over-mapped-type-modifiers
+type Mutable<T, F extends keyof T> = { -readonly [P in F]: T[P] } &
+    { [P in keyof Omit<T, F>]: T[P] };
+
+type Course = NonFunctionProperties<Mutable<_Course, 'title' | 'description'>>;
+type Section = NonFunctionProperties<Mutable<_Section, 'topic' | 'instructors'>>;
 
 declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
 

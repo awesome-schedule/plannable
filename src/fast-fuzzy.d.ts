@@ -42,9 +42,6 @@ declare module 'fast-fuzzy' {
 
     /**
      * fuzzy ranking algorithm; returns match strength
-     * @param x
-     * @param y
-     * @param opt
      */
     export function fuzzy(x: string, y: string, opt?: FuzzyOptions): number;
 
@@ -81,8 +78,19 @@ declare module 'fast-fuzzy' {
      * for searching the same set of candidates multiple times; caches the constructed trie
      */
     export class Searcher<T, Options extends SearchOptions<T>> {
+        /**
+         * supply the options and initial list of candidates
+         */
         constructor(list: T[], options?: Options);
 
+        /**
+         * add new candidates to the list
+         */
+        add(...candidates: T[]): void;
+
+        /**
+         * perform a search against the instance's candidates
+         */
         search<Opt extends SearchOptions<T>>(
             query: string,
             options?: Opt

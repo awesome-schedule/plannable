@@ -2,8 +2,6 @@
 
 > Previously known as Awesome-Schedule
 
-> Note: the credit of both the old and the new name goes to [OAHC2022](https://github.com/OAHC2022)
-
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b323d65880a148aa85e5a811e4791d53)](https://app.codacy.com/app/hanzhi713/Awesome-SchedulAR?utm_source=github.com&utm_medium=referral&utm_content=awesome-schedule/Awesome-SchedulAR&utm_campaign=Badge_Grade_Dashboard)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Build Status](https://travis-ci.org/awesome-schedule/Awesome-SchedulAR.svg?branch=master)](https://travis-ci.org/awesome-schedule/)
@@ -48,7 +46,7 @@ npm install
 npm run serve
 ```
 
-You need to serve the static files in scripts/data. To do so, you can run `sh run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
+You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, you can run `sh run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
 
 Then you can visit the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
 

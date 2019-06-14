@@ -9,7 +9,7 @@
  */
 import { Vertex, Graph } from './Graph';
 
-type TypedIntArray = Int8Array | Int16Array | Int32Array;
+export type TypedIntArray = Int8Array | Int16Array | Int32Array;
 
 /**
  * An exact graph coloring algorithm using backtracking
@@ -199,7 +199,7 @@ export function recursiveLargestFirst<T extends TypedIntArray>(adjList: T[], col
     while (notColored.size != 0) {
         const remained = new Set(notColored);
         while (remained.size != 0) {
-            let itr = remained.values();
+            const itr = remained.values();
             let v = itr.next().value;
             for (let i = 1; i < remained.size; i++) {
                 const tempV = itr.next().value;

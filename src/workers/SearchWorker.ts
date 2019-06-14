@@ -11,7 +11,7 @@
  *
  */
 import { Searcher, SearchResult } from 'fast-fuzzy';
-import Course, { CourseConstructorArguments, Match } from '../models/Course';
+import Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
 import Section, { SectionMatch } from '../models/Section';
 
 declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
@@ -87,8 +87,6 @@ onmessage = (msg: MessageEvent) => {
                 }
             }
 
-
-
             for (const result of sectionResults) {
                 const item = result.item;
                 const key = item.key;
@@ -116,8 +114,12 @@ onmessage = (msg: MessageEvent) => {
         }
 
         const scoreEntries = Object.entries(courseScores)
-            .sort((a, b) => (b[1][0] + (b[1][2] === 0 ? 0 : (b[1][1] / b[1][2])))
-                - (a[1][0] + (a[1][2] === 0 ? 0 : (a[1][1] / a[1][2]))))
+            .sort(
+                (a, b) =>
+                    b[1][0] +
+                    (b[1][2] === 0 ? 0 : b[1][1] / b[1][2]) -
+                    (a[1][0] + (a[1][2] === 0 ? 0 : a[1][1] / a[1][2]))
+            )
             .slice(0, 12);
 
         const finalResults: CourseConstructorArguments[] = [];
@@ -129,21 +131,15 @@ onmessage = (msg: MessageEvent) => {
             if (courseMatch) {
                 const { match, original, item } = courseMatch[0];
 
-                const mats: Match<'title' | 'description' | 'key'>[] = courseMatch.map(x => [{
-                    match: x.original === x.item.title ? 'title' : 'description' as 'title' | 'description' | 'key',
-                    start: x.match.index,
-                    end: x.match.index + x.match.length
-                }]).map(x => x[0]);
-
-                // const mats : Match<'title' | 'description' | 'key'>[] = [];
-
-                // for(const cm_i of courseMatch){
-
-                //     for(const cm_j of courseMatch){
-                //         if(cm_i === cm_j) continue;
-
-                //     }
-                // }
+                const mats: CourseMatch[] = courseMatch
+                    .map(x => [
+                        {
+                            match: x.original === x.item.title ? 'title' : 'description',
+                            start: x.match.index,
+                            end: x.match.index + x.match.length
+                        } as CourseMatch
+                    ])
+                    .map(x => x[0]);
 
                 const combSecMatches: SectionMatch[][] = [];
                 const s = sectionMap[key];
@@ -167,13 +163,7 @@ onmessage = (msg: MessageEvent) => {
                         }
                     }
                 }
-                course = [
-                    item.raw,
-                    key,
-                    item.sids,
-                    mats,
-                    combSecMatches
-                ];
+                course = [item.raw, key, item.sids, mats, combSecMatches];
                 // only section match exists
             } else {
                 const s = sectionMap[key];

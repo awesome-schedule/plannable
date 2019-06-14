@@ -193,12 +193,12 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
 
 export function recursiveLargestFirst<T extends TypedIntArray>(adjList: T[], colors: T): number {
     colors.fill(-1);
-    const notColored = new Set(colors.map((x: number, i: number) => i));
+    const notColored = new Set(colors.keys());
     const degrees = adjList.map((x, i) => x.length);
     let color = 0;
-    while (notColored.size != 0) {
+    while (notColored.size) {
         const remained = new Set(notColored);
-        while (remained.size != 0) {
+        while (remained.size) {
             const itr = remained.values();
             let v = itr.next().value;
             for (let i = 1; i < remained.size; i++) {

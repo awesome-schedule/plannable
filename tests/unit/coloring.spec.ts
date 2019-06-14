@@ -52,8 +52,24 @@ describe('graph verifier', () => {
                 const dColors = Coloring.dsatur(adjList, colors2, colors2.slice());
                 expect(verifyColoring(adjList, colors2)).toBe(true);
 
-                console.info('rlf colors:', rlfColors, 'dsatur colors:', dColors);
-                // expect(rlfColors).toBeLessThanOrEqual(dColors);
+                let bColors = -1;
+                if (numN <= 40) {
+                    const colors3 = new Int8Array(adjList.length);
+                    bColors = Coloring.graphColoringExact(adjList, colors3);
+                    expect(verifyColoring(adjList, colors3)).toBe(true);
+                    expect(bColors).toBeLessThanOrEqual(dColors);
+                } else {
+                    console.info('Skipped backtrack test: too many nodes');
+                }
+
+                console.info(
+                    'rlf colors:',
+                    rlfColors,
+                    'dsatur colors:',
+                    dColors,
+                    'backtrack colors:',
+                    bColors
+                );
             }
         }
     });

@@ -80,7 +80,7 @@ export interface RoomNumberArray extends Week<number> {}
  *
  * Example:
  * ```js
- * ["span20205",[[600,650], [600,650], [], [], []], [0, 1, 2]]
+ * ["span20205",[[600,650], [600,650], [], [], []], [0, 1, 2], [[1], [3], [], [], []]]
  * ```
  *
  * @see [[TimeArray]]

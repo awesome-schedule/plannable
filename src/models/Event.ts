@@ -17,18 +17,13 @@ import Hashable from './Hashable';
  */
 export default class Event implements Hashable {
     public key: string;
-    public days: string;
-    public display: boolean;
-    public title?: string;
-    public room?: string;
-    public description?: string;
 
     constructor(
-        days: string,
-        display: boolean,
-        title?: string,
-        description?: string,
-        room?: string
+        public days: string,
+        public display: boolean,
+        public title?: string,
+        public description?: string,
+        public room?: string
     ) {
         this.key = this.days = days;
         this.display = display;

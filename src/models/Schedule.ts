@@ -17,7 +17,7 @@ import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
-import { Day, Week, TYPES } from './Meta';
+import { Day, Week, TYPES, dayToInt } from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
@@ -41,14 +41,6 @@ export default class Schedule {
         combineSections: true,
         multiSelect: true
     });
-
-    public static readonly dayToInt = Object.freeze({
-        Mo: 0,
-        Tu: 1,
-        We: 2,
-        Th: 3,
-        Fr: 4
-    }) as { readonly [key in Day]: number };
 
     public static readonly bgColors: ReadonlyArray<string> = [
         '#f7867e',
@@ -540,7 +532,7 @@ export default class Schedule {
             }
             for (let i = 0; i < days.length; i += 2) {
                 const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
-                this.days[Schedule.dayToInt[days.substr(i, 2) as Day]].push(scheduleBlock);
+                this.days[dayToInt[days.substr(i, 2) as Day]].push(scheduleBlock);
             }
         }
     }

@@ -105,7 +105,7 @@ onmessage = (msg: MessageEvent) => {
         const sectionMap: {
             [x: string]: {
                 result: SearchResult<Section>,
-                class: 'topic' | 'instructor'
+                class: 'topic' | 'instructors'
             }[]
         } = Object.create(null);
 
@@ -150,7 +150,7 @@ onmessage = (msg: MessageEvent) => {
                         courseScores[key] = [0, score, 0];
                     }
 
-                    const tempObj = { result, class: i === 0 ? 'topic' : 'instructor' as 'topic' | 'instructor' };
+                    const tempObj = { result, class: i === 0 ? 'topic' : 'instructors' as 'topic' | 'instructors' };
 
                     if (sectionMap[key]) {
 
@@ -228,9 +228,9 @@ onmessage = (msg: MessageEvent) => {
                 course = [
                     s[0].result.item.course.raw,
                     key,
-                    s.map(x => x.result.item.sid),
+                    s.sort((a, b) => a.result.item.sid - b.result.item.sid).map(x => x.result.item.sid),
                     [],
-                    s.map(x => [
+                    s.sort((a, b) => a.result.item.sid - b.result.item.sid).map(x => [
                         {
                             match: x.class,
                             start: x.result.match.index,

@@ -47,6 +47,7 @@ let count = 0;
  * posting the array of tuples (used to construct [[Course]] instances) as the response
  */
 onmessage = (msg: MessageEvent) => {
+    // initialize the searchers and store them
     if (count === 0) {
         console.time('worker prep');
         courseDict = msg.data;
@@ -93,6 +94,7 @@ onmessage = (msg: MessageEvent) => {
         const querySeg: string[] = query.split(' ').filter(x => x.length >= 3);
         querySeg.push(query);
 
+        // elements in array: 1. score for courses, 2. score for sections, 2. number of distinct sections
         const courseScores: { [x: string]: [number, number, number] } = Object.create(null);
 
         const courseMap: {
@@ -105,7 +107,7 @@ onmessage = (msg: MessageEvent) => {
         const sectionMap: {
             [x: string]: {
                 result: SearchResult<Section>,
-                class: 'topic' | 'instructor'
+                class: 'topic' | 'instructors'
             }[]
         } = Object.create(null);
 
@@ -118,11 +120,15 @@ onmessage = (msg: MessageEvent) => {
             const coursesResults = [titleSearcher.search(q), descripSearcher.search(q),];
             const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
 
+            // map search result to course (or section) and record the match score
             for (let i = 0; i < 2; i++) {
                 const r = coursesResults[i];
                 for (const result of r) {
                     const item = result.item;
                     const key = item.key;
+
+                    // calculate score based on search result
+                    // matching the whole query sentence would result in a higher score
                     const score = (result.score ** 3) * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
 
                     const tempObj = { result, class: i === 0 ? 'title' : 'description' as 'title' | 'description' };
@@ -131,6 +137,7 @@ onmessage = (msg: MessageEvent) => {
                         courseScores[key][0] += score;
                         if (!last) courseMap[key].push(tempObj);
                     } else {
+                        // if encounter this course for the first time
                         courseScores[key] = [score, 0, 0];
                         if (!last) courseMap[key] = [tempObj];
                     }
@@ -150,7 +157,7 @@ onmessage = (msg: MessageEvent) => {
                         courseScores[key] = [0, score, 0];
                     }
 
-                    const tempObj = { result, class: i === 0 ? 'topic' : 'instructor' as 'topic' | 'instructor' };
+                    const tempObj = { result, class: i === 0 ? 'topic' : 'instructors' as 'topic' | 'instructors' };
 
                     if (sectionMap[key]) {
 
@@ -161,6 +168,7 @@ onmessage = (msg: MessageEvent) => {
 
                     const secKey = `${item.key} ${item.sid}`;
 
+                    // if encounter a new section of a course, increment the number of section recorded
                     if (!sectionRecorder.has(secKey) && !last) {
                         courseScores[key][2] += 1;
                         sectionRecorder.add(secKey);
@@ -170,7 +178,6 @@ onmessage = (msg: MessageEvent) => {
         }
 
         // sort courses in descending order; section score is normalized before added to course score
-
         const scoreEntries = Object.entries(courseScores)
             .sort(
                 (a, b) =>
@@ -228,9 +235,9 @@ onmessage = (msg: MessageEvent) => {
                 course = [
                     s[0].result.item.course.raw,
                     key,
-                    s.map(x => x.result.item.sid),
+                    s.sort((a, b) => a.result.item.sid - b.result.item.sid).map(x => x.result.item.sid),
                     [],
-                    s.map(x => [
+                    s.sort((a, b) => a.result.item.sid - b.result.item.sid).map(x => [
                         {
                             match: x.class,
                             start: x.result.match.index,

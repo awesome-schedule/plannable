@@ -96,7 +96,7 @@ export default class Course implements CourseFields, Hashable {
         public readonly secMatches: ReadonlyArray<ReadonlyArray<SectionMatch>> = []
     ) {
         if (sids.length) {
-            this.sids = sids.slice().sort();
+            this.sids = sids.slice().sort((a, b) => a - b);
         } else {
             this.sids = Array.from({ length: raw[6].length }, (_, i) => i);
         }

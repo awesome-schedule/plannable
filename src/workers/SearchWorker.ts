@@ -94,19 +94,26 @@ onmessage = (msg: MessageEvent) => {
         querySeg.push(query);
 
         const courseScores: { [x: string]: [number, number, number] } = Object.create(null);
-        const courseMap: { [x: string]: SearchResult<Course>[] } = Object.create(null);
-        const sectionMap: { [x: string]: SearchResult<Section>[] } = Object.create(null);
+
+        const courseMap: {
+            [x: string]: {
+                result: SearchResult<Course>,
+                class: 'title' | 'description'
+            }[]
+        } = Object.create(null);
+
+        const sectionMap: {
+            [x: string]: {
+                result: SearchResult<Section>,
+                class: 'topic' | 'instructor'
+            }[]
+        } = Object.create(null);
+
         const sectionRecorder: Set<string> = new Set();
 
         for (let j = 0; j < querySeg.length; j++) {
             const q = querySeg[j];
             const last = j === querySeg.length - 1;
-            // courseResults = courseSearcher.search(q);
-            // sectionResults = sectionSearcher.search(q);
-
-            // titleResult = titleSearcher.search(q);
-            // descripResult = descripSearcher.search(q);
-            // topicResult = topicSearcher.search(q);
 
             const coursesResults = [titleSearcher.search(q), descripSearcher.search(q),];
             const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
@@ -117,12 +124,15 @@ onmessage = (msg: MessageEvent) => {
                     const item = result.item;
                     const key = item.key;
                     const score = (result.score ** 3) * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
+
+                    const tempObj = { result, class: i === 0 ? 'title' : 'description' as 'title' | 'description' };
+
                     if (courseMap[key]) {
                         courseScores[key][0] += score;
-                        if (!last) courseMap[key].push(result);
+                        if (!last) courseMap[key].push(tempObj);
                     } else {
                         courseScores[key] = [score, 0, 0];
-                        if (!last) courseMap[key] = [result];
+                        if (!last) courseMap[key] = [tempObj];
                     }
                 }
             }
@@ -140,10 +150,13 @@ onmessage = (msg: MessageEvent) => {
                         courseScores[key] = [0, score, 0];
                     }
 
+                    const tempObj = { result, class: i === 0 ? 'topic' : 'instructor' as 'topic' | 'instructor' };
+
                     if (sectionMap[key]) {
-                        if (!last) sectionMap[key].push(result);
+
+                        if (!last) sectionMap[key].push(tempObj);
                     } else {
-                        if (!last) sectionMap[key] = [result];
+                        if (!last) sectionMap[key] = [tempObj];
                     }
 
                     const secKey = `${item.key} ${item.sid}`;
@@ -157,14 +170,6 @@ onmessage = (msg: MessageEvent) => {
         }
 
         // sort courses in descending order; section score is normalized before added to course score
-        Object.entries(courseScores)
-            .sort(
-                (a, b) =>
-                    b[1][0] +
-                    (b[1][2] === 0 ? 0 : b[1][1] / b[1][2]) -
-                    (a[1][0] + (a[1][2] === 0 ? 0 : a[1][1] / a[1][2]))
-            )
-            .filter(x => x[0].indexOf('cs') !== -1).map(x => console.log(x));
 
         const scoreEntries = Object.entries(courseScores)
             .sort(
@@ -182,14 +187,14 @@ onmessage = (msg: MessageEvent) => {
             const courseMatch = courseMap[key];
             let course: CourseConstructorArguments;
             if (courseMatch) {
-                const { match, original, item } = courseMatch[0];
+                const { match, original, item } = courseMatch[0].result;
 
                 const mats: CourseMatch[] = courseMatch
                     .map(x => [
                         {
-                            match: x.original === x.item.title ? 'title' : 'description',
-                            start: x.match.index,
-                            end: x.match.index + x.match.length
+                            match: x.class,
+                            start: x.result.match.index,
+                            end: x.result.match.index + x.result.match.length
                         } as CourseMatch
                     ])
                     .map(x => x[0]);
@@ -199,12 +204,12 @@ onmessage = (msg: MessageEvent) => {
 
                 // both course and section matches exist for this key
                 if (s) {
-                    const matchedSecIdx = s.map(x => x.item.sid);
+                    const matchedSecIdx = s.map(x => x.result.item.sid);
                     const secMatches = s.map(x => [
                         {
-                            match: x.original === x.item.topic ? 'topic' : 'instructors',
-                            start: x.match.index,
-                            end: x.match.index + x.match.length
+                            match: x.class,
+                            start: x.result.match.index,
+                            end: x.result.match.index + x.result.match.length
                         } as SectionMatch
                     ]);
                     for (const sid of item.sids) {
@@ -221,15 +226,15 @@ onmessage = (msg: MessageEvent) => {
             } else {
                 const s = sectionMap[key];
                 course = [
-                    s[0].item.course.raw,
+                    s[0].result.item.course.raw,
                     key,
-                    s.map(x => x.item.sid),
+                    s.map(x => x.result.item.sid),
                     [],
                     s.map(x => [
                         {
-                            match: x.original === x.item.topic ? 'topic' : 'instructors',
-                            start: x.match.index,
-                            end: x.match.index + x.match.length
+                            match: x.class,
+                            start: x.result.match.index,
+                            end: x.result.match.index + x.result.match.length
                         } as SectionMatch
                     ])
                 ];

@@ -61,6 +61,8 @@ type CourseMatchField = 'title' | 'description' | 'key';
 export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T>;
 export type CourseConstructorArguments = ConstructorParameters<typeof Course>;
 
+const matchSortFunc = (a: Match<any>, b: Match<any>) => a.start - b.start;
+
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
  * depending on the array of section indices passed to its constructor.
@@ -79,6 +81,7 @@ export default class Course implements CourseFields, Hashable {
      */
     public readonly sids: ReadonlyArray<number>;
     public readonly sections: ReadonlyArray<Section>;
+    public readonly matches: ReadonlyArray<CourseMatch>;
 
     /**
      * @param raw the raw representation of this course
@@ -92,7 +95,7 @@ export default class Course implements CourseFields, Hashable {
         public readonly raw: RawCourse,
         public readonly key: string,
         sids: ReadonlyArray<number> = [],
-        public readonly matches: ReadonlyArray<CourseMatch> = [],
+        matches: ReadonlyArray<CourseMatch> = [],
         public readonly secMatches: ReadonlyArray<ReadonlyArray<SectionMatch>> = []
     ) {
         if (sids.length) {
@@ -107,10 +110,12 @@ export default class Course implements CourseFields, Hashable {
         this.units = raw[3];
         this.title = raw[4];
         this.description = raw[5];
-        this.matches = matches;
+        this.matches = matches.concat().sort(matchSortFunc);
 
         if (secMatches.length === this.sids.length) {
-            this.sections = this.sids.map((sid, idx) => new Section(this, sid, secMatches[idx]));
+            this.sections = this.sids.map(
+                (sid, idx) => new Section(this, sid, secMatches[idx].concat().sort(matchSortFunc))
+            );
         } else {
             this.sections = this.sids.map(sid => new Section(this, sid));
         }

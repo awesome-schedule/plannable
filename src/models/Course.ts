@@ -57,7 +57,8 @@ export interface Match<T extends string> {
     readonly end: number;
 }
 
-export type CourseMatch = Match<'title' | 'description' | 'key'>;
+type CourseMatchField = 'title' | 'description' | 'key';
+export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T>;
 export type CourseConstructorArguments = ConstructorParameters<typeof Course>;
 
 /**
@@ -137,7 +138,7 @@ export default class Course implements CourseFields, Hashable {
         const newSids = this.sids.concat();
 
         const zipped = sids
-            .map((x, i) => [x, secMatches[i]] as [number, Match<'topic' | 'instructors'>[]])
+            .map((x, i) => [x, secMatches[i]] as [number, SectionMatch[]])
             .filter(([sid, matches]) => {
                 const exIdx = newSids.findIndex(s => s === sid);
                 if (exIdx === -1) return true;

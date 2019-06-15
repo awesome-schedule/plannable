@@ -16,6 +16,7 @@ import Course, { Match, CourseMatch, CourseConstructorArguments } from './Course
 import { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';
+import { SectionMatch } from './Section';
 /**
  * represents a semester
  */
@@ -273,7 +274,7 @@ export default class Catalog {
     private searchTopic(query: string, course: Course, results: Course[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatchIdx = [];
-        const topicMatches: [Match<'topic'>][] = [];
+        const topicMatches: [SectionMatch][] = [];
         const sections = course.sections;
         for (let i = 0; i < sections.length; i++) {
             const topic = sections[i].topic;
@@ -295,7 +296,7 @@ export default class Catalog {
     private searchProf(query: string, course: Course, results: Course[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatchIdx = [];
-        const profMatches: [Match<'instructors'>][] = [];
+        const profMatches: [SectionMatch][] = [];
         const sections = course.sections;
         for (let i = 0; i < sections.length; i++) {
             const profs = sections[i].instructors.join(', ').toLowerCase();
@@ -317,7 +318,7 @@ export default class Catalog {
     private appendToResult(
         course: Course,
         sids: number[],
-        matches: Match<'topic' | 'instructors'>[][],
+        matches: SectionMatch[][],
         results: Course[]
     ) {
         const prev = results.findIndex(x => x.key === course.key);

@@ -112,6 +112,15 @@ onmessage = (msg: MessageEvent) => {
             }[]
         } = Object.create(null);
 
+        const newSectionMap: {
+            [x: string]: {
+                [y: string]: {
+                    result: SearchResult<Section>,
+                    class: 'topic' | 'instructors'
+                }[]
+            }
+        } = Object.create(null);
+
         const sectionRecorder: Set<string> = new Set();
 
         for (let j = 0; j < querySeg.length; j++) {
@@ -160,11 +169,15 @@ onmessage = (msg: MessageEvent) => {
 
                     const tempObj = { result, class: i === 0 ? 'topic' : 'instructors' as 'topic' | 'instructors' };
 
-                    if (sectionMap[key]) {
-
-                        sectionMap[key].push(tempObj);
+                    if (newSectionMap[key]) {
+                        if (newSectionMap[key][result.item.sid]) {
+                            newSectionMap[key][result.item.sid].push(tempObj);
+                        } else {
+                            newSectionMap[key][result.item.sid] = [tempObj];
+                        }
                     } else {
-                        sectionMap[key] = [tempObj];
+                        newSectionMap[key] = Object.create(null);
+                        newSectionMap[key][result.item.sid.toString()] = [tempObj];
                     }
 
                     const secKey = `${item.key} ${item.sid}`;
@@ -188,7 +201,7 @@ onmessage = (msg: MessageEvent) => {
             )
             .slice(0, 12);
 
-        for (const key of Object.keys(courseScores)) {
+        for (const [key] of scoreEntries) {
             if (courseMap[key]) {
                 let len = courseMap[key].length;
                 for (let i = 0; i < len; i++) {
@@ -213,25 +226,39 @@ onmessage = (msg: MessageEvent) => {
 
             }
 
-            if (sectionMap[key]) {
-                let len = sectionMap[key].length;
-                for (let i = 0; i < len; i++) {
-                    for (let j = 0; j < len; j++) {
-                        if (i >= len || j >= len) break;
-                        if (i === j) continue;
-                        const a = sectionMap[key][i];
-                        const b = sectionMap[key][j];
-                        if (a.class !== b.class || a.result.item.sid !== b.result.item.sid) continue;
-                        const ovlp = calcOverlap(a.result.match.index,
-                            a.result.match.index + a.result.match.length,
-                            b.result.match.index,
-                            b.result.match.index + b.result.match.length);
-                        if (ovlp > 0) {
-                            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
-                            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
-                            sectionMap[key].splice(j, 1);
-                            len--;
+            if (newSectionMap[key]) {
+
+                for (const sid of Object.keys(newSectionMap[key])) {
+                    if (key.indexOf('enwr') !== -1) {
+                        console.log('before');
+                        console.log(newSectionMap[key][sid]);
+                    }
+                    let len = newSectionMap[key][sid].length;
+                    for (let i = 0; i < len; i++) {
+                        for (let j = 0; j < len; j++) {
+                            if (i >= len) break;
+                            if (i === j) continue;
+                            const a = newSectionMap[key][sid][i];
+                            const b = newSectionMap[key][sid][j];
+
+                            if (a.class !== b.class) continue;
+                            const ovlp = calcOverlap(a.result.match.index,
+                                a.result.match.index + a.result.match.length,
+                                b.result.match.index,
+                                b.result.match.index + b.result.match.length);
+                            if (ovlp > 0) {
+                                a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
+                                a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
+                                newSectionMap[key][sid].splice(j, 1);
+                                len--;
+                                if (i > j) i--;
+                                j--;
+                            }
                         }
+                    }
+                    if (key.indexOf('enwr') !== -1) {
+                        console.log('after');
+                        console.log(newSectionMap[key][sid]);
                     }
                 }
             }
@@ -257,47 +284,48 @@ onmessage = (msg: MessageEvent) => {
                     .map(x => x[0]);
 
                 const combSecMatches: SectionMatch[][] = [];
-                const s = sectionMap[key];
+                const newS = newSectionMap[key];
 
-                // both course and section matches exist for this key
-                if (s) {
-                    const matchedSecIdx = s.map(x => x.result.item.sid);
-                    const secMatches = s.map(x => [
-                        {
+                if (newS) {
+                    const matchedSecIdx = Object.keys(newS);
+                    const secMatches: { [sid: string]: SectionMatch[] } = Object.create(null);
+
+                    for (const sid of Object.keys(newS)) {
+                        secMatches[sid] = newS[sid].map(x => [{
                             match: x.class,
                             start: x.result.match.index,
                             end: x.result.match.index + x.result.match.length
-                        } as SectionMatch
-                    ]);
+                        }]).map(x => x[0]);
+                    }
+
                     for (const sid of item.sids) {
-                        const idx = matchedSecIdx.findIndex(x => x === sid);
-                        if (idx === -1) {
+                        if (matchedSecIdx.indexOf(sid.toString()) === -1) {
                             combSecMatches.push([]);
                         } else {
-                            combSecMatches.push(secMatches[idx]);
+                            combSecMatches.push(secMatches[sid]);
                         }
                     }
                 }
                 course = [item.raw, key, item.sids, mats, combSecMatches];
                 // only section match exists
             } else {
-                const s = sectionMap[key];
-                course = [
-                    s[0].result.item.course.raw,
-                    key,
-                    s.sort((a, b) => a.result.item.sid - b.result.item.sid).map(x => x.result.item.sid),
-                    [],
-                    s.sort((a, b) => a.result.item.sid - b.result.item.sid).map(x => [
-                        {
+                const newS = newSectionMap[key];
+                const sidKeys = Object.keys(newSectionMap[key]).sort((a, b) => parseInt(a) - parseInt(b));
+                let item = newSectionMap[key][sidKeys[0]][0].result.item.course;
+
+                const combSecMatches: SectionMatch[] = [];
+                const matchedSids = sidKeys.map(x => parseInt(x));
+
+                if (newS) {
+                    for (const sid of sidKeys) {
+                        combSecMatches.push(newS[sid].map(x => [{
                             match: x.class,
                             start: x.result.match.index,
                             end: x.result.match.index + x.result.match.length
-                        } as SectionMatch
-                    ])
-                ];
-            }
-            if (course[0].indexOf('enwr') !== -1) {
-                console.log(course);
+                        }]).map(x => x[0]));
+                    }
+                }
+                course = [item.raw, key, matchedSids, [], combSecMatches];
             }
             finalResults.push(course);
         }

@@ -13,6 +13,7 @@
 import { Searcher, SearchResult, ReturnMatchData, SearchOptions } from 'fast-fuzzy';
 import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
+import { calcOverlap } from '../utils/time';
 
 // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
 type NonFunctionPropertyNames<T> = {
@@ -84,7 +85,7 @@ onmessage = (msg: MessageEvent) => {
             ignoreCase: true,
             ignoreSymbols: true,
             normalizeWhitespace: true,
-            keySelector: obj => obj.instructors.join(' ')
+            keySelector: obj => obj.instructors.join(', ')
         });
 
         postMessage('ready');
@@ -135,11 +136,11 @@ onmessage = (msg: MessageEvent) => {
 
                     if (courseMap[key]) {
                         courseScores[key][0] += score;
-                        if (!last) courseMap[key].push(tempObj);
+                        courseMap[key].push(tempObj);
                     } else {
                         // if encounter this course for the first time
                         courseScores[key] = [score, 0, 0];
-                        if (!last) courseMap[key] = [tempObj];
+                        courseMap[key] = [tempObj];
                     }
                 }
             }
@@ -161,9 +162,9 @@ onmessage = (msg: MessageEvent) => {
 
                     if (sectionMap[key]) {
 
-                        if (!last) sectionMap[key].push(tempObj);
+                        sectionMap[key].push(tempObj);
                     } else {
-                        if (!last) sectionMap[key] = [tempObj];
+                        sectionMap[key] = [tempObj];
                     }
 
                     const secKey = `${item.key} ${item.sid}`;
@@ -186,6 +187,55 @@ onmessage = (msg: MessageEvent) => {
                     (a[1][0] + (a[1][2] === 0 ? 0 : a[1][1] / a[1][2]))
             )
             .slice(0, 12);
+
+        for (const key of Object.keys(courseScores)) {
+            if (courseMap[key]) {
+                let len = courseMap[key].length;
+                for (let i = 0; i < len; i++) {
+                    for (let j = 0; j < len; j++) {
+                        if (i >= len || j >= len) break;
+                        if (i === j) continue;
+                        const a = courseMap[key][i];
+                        const b = courseMap[key][j];
+                        if (a.class !== b.class) continue;
+                        const ovlp = calcOverlap(a.result.match.index,
+                            a.result.match.index + a.result.match.length,
+                            b.result.match.index,
+                            b.result.match.index + b.result.match.length);
+                        if (ovlp > 0) {
+                            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
+                            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
+                            courseMap[key].splice(j, 1);
+                            len--;
+                        }
+                    }
+                }
+
+            }
+
+            if (sectionMap[key]) {
+                let len = sectionMap[key].length;
+                for (let i = 0; i < len; i++) {
+                    for (let j = 0; j < len; j++) {
+                        if (i >= len || j >= len) break;
+                        if (i === j) continue;
+                        const a = sectionMap[key][i];
+                        const b = sectionMap[key][j];
+                        if (a.class !== b.class || a.result.item.sid !== b.result.item.sid) continue;
+                        const ovlp = calcOverlap(a.result.match.index,
+                            a.result.match.index + a.result.match.length,
+                            b.result.match.index,
+                            b.result.match.index + b.result.match.length);
+                        if (ovlp > 0) {
+                            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
+                            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
+                            sectionMap[key].splice(j, 1);
+                            len--;
+                        }
+                    }
+                }
+            }
+        }
 
         const finalResults: CourseConstructorArguments[] = [];
 
@@ -245,6 +295,9 @@ onmessage = (msg: MessageEvent) => {
                         } as SectionMatch
                     ])
                 ];
+            }
+            if (course[0].indexOf('enwr') !== -1) {
+                console.log(course);
             }
             finalResults.push(course);
         }

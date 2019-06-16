@@ -468,9 +468,9 @@
                 <li>I'm Feeling Lucky: Sort Randomly</li>
             </ol>
             <p>
-                Note that it is possible to reverse one or more of the sort options provided above:
-                just click the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want
-                your schedule to be very compact (i.e. you want to have some time to rest between
+                It is possible to reverse one or more of the sort options provided above: just click
+                the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want your
+                schedule to be very compact (i.e. you want to have some time to rest between
                 classes), you can enable "Vertical compactness" and click the
                 <i class="fas fa-arrow-up"></i> icon so it becomes
                 <i class="fas fa-arrow-down"></i>.
@@ -524,7 +524,7 @@
             <h5 id="item-7-1">Export to iCalendar</h5>
             <p>
                 ICalendar is a standard file format used to represent information in a calendar.
-                Apple and Google calendar both support importing from iCalendar files. Note that we
+                Apple and Google calendar both support importing from iCalendar files. However, we
                 currently do NOT support importing from iCalendar files. If you want to re-import
                 your schedule sometime later, you must use <a href="#item-7-2">export to JSON</a>.
             </p>

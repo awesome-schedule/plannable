@@ -33,8 +33,7 @@ export interface ScheduleOptions {
 
 /**
  * Schedule handles the storage, access, mutation and render of courses and events.
- *
- * Note that `window.catalog` must be initialized before calling any instance method of the Schedule class
+ * @requires window.catalog
  */
 export default class Schedule {
     public static readonly options: ScheduleOptions = Object.seal({

@@ -53,22 +53,54 @@
 \end{titlepage}
 
 \section{Introduction}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=.8\columnwidth]{example-event.png}
+    \caption{Example events}
+    \label{fig:ev-exp-1}
+\end{figure}
+
+\begin{definition}
+    \textbf{Time period} of an event is defined as the (\textbf{start time}, \textbf{end time}), where \textbf{start time} and \textbf{end time} are measured in terms of the number of minutes after 0:00.
+\end{definition}
+
+\begin{definition}
+    \textbf{width} of an event is defined as the width of the rectangle block containing the event divided by the width of the column. 
+\end{definition}
+
+\begin{definition}
+    \textbf{left} of an event is defined as the distance between the left border of the event and the left border of the column divided by the width of the column.
+\end{definition}
+
+As an example, the time periods, width and left of the two events shown in Figure~\ref{fig:ev-exp-1} are listed in Table~\ref{tab:ev-param}.
+\begin{table}[H]
+    \centering
+    \caption{Event rendering parameters}\label{tab:ev-param}
+    \begin{tabular}{cccc}
+        \toprule
+        Event Name & Time Period & Width & Left \\
+        \midrule
+        CS 2102 & (480, 555) & 0.5 & 0 \\
+        Example Event & (480, 555) & 0.5 & 0.5 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \begin{lemma}
-    The \textbf{time period}, \textbf{width} and \textbf{left} of an event are sufficient to render an event
+    An event can be rendered by knowing the \textbf{time period}, \textbf{width} and \textbf{left}.
 \end{lemma}
 \begin{proof}
-    An event on a schedule is nothing more than a rectangle on a grid. One way to draw such a rectangle is tu use its width, height and the coordinate of one of its corner. Top minus bottom gives the height, and top and left give the coordinate of the upper left corner. Time period defines the start and the end of an event. A schedule has a start time and end time, so the time period defines the position of the event relative to the schedule grid, namely the top and bottom. 
+    An event on a schedule is nothing more than a rectangle on a grid. Time periods define the start and end of the event, which can be converted to top and height. With width and left also defined, such rectangle is unique.
 \end{proof}
 
-The time period is a known parameter for each event. Therefore, the focus is the calculation of width and left.
+The time period is a known parameter for each event. Therefore, the main focus is the calculation of width and left.
 
 \section{Graph Representation}
 \begin{figure}[H]
     \centering
     \begin{subfigure}{.4\textwidth}
         \centering
-        \includegraphics[width=.8\columnwidth]{example1}
+        \includegraphics[width=.9\columnwidth]{example1}
         \caption{A Simple Schedule}
         \label{fig:exp1}
     \end{subfigure}%
@@ -113,10 +145,10 @@ The time period is a known parameter for each event. Therefore, the focus is the
 \end{definition}
 
 \begin{definition}
-    Slots are positions in a column that contain events. They are uniquely identified by their \textbf{left}.
+    Slots are positions in a column that contain events. They are uniquely identified by their \textbf{left}. All slots have equal width. An event occupies at least one slot. 
 \end{definition}
 
-The main principle behind schedule rendering is that two conflicting events cannot have the same left, otherwise there must be a part where they appear to overlap with one another.
+The main principle behind schedule rendering is that two conflicting events cannot share the same slot, otherwise there must be a part where they appear to overlap with one another.
 The k-colorability problem asks whether it is possible to color the vertices of a graph using k colors, subject to the condition that no two adjacent nodes have the same color. We can slightly modify the problem statement so its applicable to our problem: given a set of events, some of which may have conflicts, is it possible to allocate k \textbf{slots} such that no two adjacent (conflicting) events occupy the same \textbf{slot}.
 
 From our new problem statement, we arrive at the graph representation of the set of events that we want to render.

@@ -66,7 +66,7 @@ export interface EvaluatorOptions {
  */
 class ScheduleEvaluator {
     /**
-     * defines a number of sorting functions. Note that by default, schedules are sorted in
+     * defines a number of sorting functions. By default, schedules are sorted in
      * **ascending** order according to the coefficient computed by one or a combination of sorting functions.
      */
     public static readonly sortFunctions = {
@@ -173,6 +173,9 @@ class ScheduleEvaluator {
             return dist;
         },
 
+        /**
+         * the return value is not used. if this sort option is enabled, `shuffle` is called.
+         */
         IamFeelingLucky() {
             return Math.random();
         }
@@ -219,7 +222,8 @@ class ScheduleEvaluator {
                 if (!timeBlock.length) continue;
                 const roomBlock = roomDict[k];
 
-                // note that a block is a flattened array of TimeBlocks. Flattened only for performance reason
+                // note that a block is a flattened array of TimeBlocks.
+                // Flattened only for performance reason
                 const block: number[] = blocks[k];
                 const room: number[] = rooms[k];
                 const len = timeBlock.length;

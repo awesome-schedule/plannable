@@ -120,7 +120,7 @@ class ScheduleGenerator {
      * The entrance of the schedule generator
      * returns a sorted `ScheduleEvaluator` Object
      *
-     * Note that this method does not need to run very fast. It only preprocess the selected
+     * This method does not need to run very fast. It only preprocess the selected
      * courses so that they are stored in a desirable format.
      *
      * @see [[ScheduleEvaluator]]
@@ -273,7 +273,6 @@ class ScheduleGenerator {
         const maxNumSchedules = this.options.maxNumSchedules;
 
         let exhausted = false;
-        // eslint-disable-next-line
         while (true) {
             if (classNum >= classList.length) {
                 evaluator.add(timeTable);

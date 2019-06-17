@@ -32,10 +32,17 @@ type Section = NonFunctionProperties<Mutable<_Section, 'topic' | 'instructors'>>
 
 declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
 
-let titleSearcher: Searcher<Course, SearchOptions<Course> & ReturnMatchData>;
-let descripSearcher: Searcher<Course, SearchOptions<Course> & ReturnMatchData>;
-let topicSearcher: Searcher<Section, SearchOptions<Section> & ReturnMatchData>;
-let instrSearcher: Searcher<Section, SearchOptions<Section> & ReturnMatchData>;
+type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
+let titleSearcher: _Searcher<Course>;
+let descripSearcher: _Searcher<Course>;
+let topicSearcher: _Searcher<Section>;
+let instrSearcher: _Searcher<Section>;
+const searcherOpts = {
+    returnMatchData: true as true,
+    ignoreCase: true,
+    ignoreSymbols: true,
+    normalizeWhitespace: true
+};
 
 let courseDict: { [x: string]: Course };
 let count = 0;
@@ -49,7 +56,8 @@ let count = 0;
  */
 onmessage = (msg: MessageEvent) => {
     // initialize the searchers and store them
-    if (count === 0) {
+    const { data } = msg;
+    if (typeof data !== 'string') {
         console.time('worker prep');
         courseDict = msg.data;
         const courses = Object.values(courseDict);
@@ -57,41 +65,29 @@ onmessage = (msg: MessageEvent) => {
         for (const { sections: secs } of courses) sections.push(...secs);
 
         titleSearcher = new Searcher(courses, {
-            returnMatchData: true,
-            ignoreCase: true,
-            ignoreSymbols: true,
-            normalizeWhitespace: true,
+            ...searcherOpts,
             keySelector: obj => obj.title
         });
 
         descripSearcher = new Searcher(courses, {
-            returnMatchData: true,
-            ignoreCase: true,
-            ignoreSymbols: true,
-            normalizeWhitespace: true,
+            ...searcherOpts,
             keySelector: obj => obj.description
         });
 
         topicSearcher = new Searcher(sections, {
-            returnMatchData: true,
-            ignoreCase: true,
-            ignoreSymbols: true,
-            normalizeWhitespace: true,
+            ...searcherOpts,
             keySelector: obj => obj.topic
         });
 
         instrSearcher = new Searcher(sections, {
-            returnMatchData: true,
-            ignoreCase: true,
-            ignoreSymbols: true,
-            normalizeWhitespace: true,
+            ...searcherOpts,
             keySelector: obj => obj.instructors.join(', ')
         });
 
         postMessage('ready');
         console.timeEnd('worker prep');
     } else {
-        const query: string = msg.data;
+        const query = data;
         const querySeg: string[] = query.split(' ').filter(x => x.length >= 3);
         querySeg.push(query);
 
@@ -100,25 +96,25 @@ onmessage = (msg: MessageEvent) => {
 
         const courseMap: {
             [x: string]: {
-                result: SearchResult<Course>,
-                class: 'title' | 'description'
-            }[]
+                result: SearchResult<Course>;
+                class: 'title' | 'description';
+            }[];
         } = Object.create(null);
 
         const sectionMap: {
             [x: string]: {
-                result: SearchResult<Section>,
-                class: 'topic' | 'instructors'
-            }[]
+                result: SearchResult<Section>;
+                class: 'topic' | 'instructors';
+            }[];
         } = Object.create(null);
 
         const newSectionMap: {
             [x: string]: {
                 [y: string]: {
-                    result: SearchResult<Section>,
-                    class: 'topic' | 'instructors'
-                }[]
-            }
+                    result: SearchResult<Section>;
+                    class: 'topic' | 'instructors';
+                }[];
+            };
         } = Object.create(null);
 
         const sectionRecorder: Set<string> = new Set();
@@ -127,7 +123,7 @@ onmessage = (msg: MessageEvent) => {
             const q = querySeg[j];
             const last = j === querySeg.length - 1;
 
-            const coursesResults = [titleSearcher.search(q), descripSearcher.search(q),];
+            const coursesResults = [titleSearcher.search(q), descripSearcher.search(q)];
             const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
 
             // map search result to course (or section) and record the match score
@@ -139,9 +135,12 @@ onmessage = (msg: MessageEvent) => {
 
                     // calculate score based on search result
                     // matching the whole query sentence would result in a higher score
-                    const score = (result.score ** 3) * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
+                    const score = result.score ** 3 * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
 
-                    const tempObj = { result, class: i === 0 ? 'title' : 'description' as 'title' | 'description' };
+                    const tempObj = {
+                        result,
+                        class: i === 0 ? 'title' : ('description' as 'title' | 'description')
+                    };
 
                     if (courseMap[key]) {
                         courseScores[key][0] += score;
@@ -159,7 +158,7 @@ onmessage = (msg: MessageEvent) => {
                 for (const result of r) {
                     const item = result.item;
                     const key = item.key;
-                    const score = (result.score ** 3) * (i === 0 ? 0.8 : 0.6) * (last ? 2 : 1);
+                    const score = result.score ** 3 * (i === 0 ? 0.8 : 0.6) * (last ? 2 : 1);
 
                     if (courseScores[key]) {
                         courseScores[key][1] += score;
@@ -167,7 +166,10 @@ onmessage = (msg: MessageEvent) => {
                         courseScores[key] = [0, score, 0];
                     }
 
-                    const tempObj = { result, class: i === 0 ? 'topic' : 'instructors' as 'topic' | 'instructors' };
+                    const tempObj = {
+                        result,
+                        class: i === 0 ? 'topic' : ('instructors' as 'topic' | 'instructors')
+                    };
 
                     if (newSectionMap[key]) {
                         if (newSectionMap[key][result.item.sid]) {
@@ -224,16 +226,10 @@ onmessage = (msg: MessageEvent) => {
                         i--;
                     }
                 }
-
             }
 
             if (newSectionMap[key]) {
-
                 for (const sid of Object.keys(newSectionMap[key])) {
-                    if (key.indexOf('enwr') !== -1) {
-                        console.log('before');
-                        console.log(newSectionMap[key][sid]);
-                    }
                     newSectionMap[key][sid].sort((a, b) => a.result.match.index - b.result.match.index);
                     let len = newSectionMap[key][sid].length;
 
@@ -253,10 +249,6 @@ onmessage = (msg: MessageEvent) => {
                             len--;
                             i--;
                         }
-                    }
-                    if (key.indexOf('enwr') !== -1) {
-                        console.log('after');
-                        console.log(newSectionMap[key][sid]);
                     }
                 }
             }
@@ -289,11 +281,15 @@ onmessage = (msg: MessageEvent) => {
                     const secMatches: { [sid: string]: SectionMatch[] } = Object.create(null);
 
                     for (const sid of Object.keys(newS)) {
-                        secMatches[sid] = newS[sid].map(x => [{
-                            match: x.class,
-                            start: x.result.match.index,
-                            end: x.result.match.index + x.result.match.length
-                        }]).map(x => x[0]);
+                        secMatches[sid] = newS[sid]
+                            .map(x => [
+                                {
+                                    match: x.class,
+                                    start: x.result.match.index,
+                                    end: x.result.match.index + x.result.match.length
+                                }
+                            ])
+                            .map(x => x[0]);
                     }
 
                     for (const sid of item.sids) {
@@ -308,19 +304,27 @@ onmessage = (msg: MessageEvent) => {
                 // only section match exists
             } else {
                 const newS = newSectionMap[key];
-                const sidKeys = Object.keys(newSectionMap[key]).sort((a, b) => parseInt(a) - parseInt(b));
-                let item = newSectionMap[key][sidKeys[0]][0].result.item.course;
+                const sidKeys = Object.keys(newSectionMap[key]).sort(
+                    (a, b) => parseInt(a) - parseInt(b)
+                );
+                const item = newSectionMap[key][sidKeys[0]][0].result.item.course;
 
-                const combSecMatches: SectionMatch[] = [];
+                const combSecMatches: SectionMatch[][] = [];
                 const matchedSids = sidKeys.map(x => parseInt(x));
 
                 if (newS) {
                     for (const sid of sidKeys) {
-                        combSecMatches.push(newS[sid].map(x => [{
-                            match: x.class,
-                            start: x.result.match.index,
-                            end: x.result.match.index + x.result.match.length
-                        }]).map(x => x[0]));
+                        combSecMatches.push(
+                            newS[sid]
+                                .map(x => [
+                                    {
+                                        match: x.class,
+                                        start: x.result.match.index,
+                                        end: x.result.match.index + x.result.match.length
+                                    }
+                                ])
+                                .map(x => x[0])
+                        );
                     }
                 }
                 course = [item.raw, key, matchedSids, [], combSecMatches];

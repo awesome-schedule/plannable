@@ -90,10 +90,11 @@
 
         <table style="font-size:14px" class="table table-hover w-100">
             <thead>
-                <th>
+                <th style="width:100%">
                     Number of events:
                     {{ schedule.currentSchedule.events.length }}
                 </th>
+                <th></th>
             </thead>
             <tbody>
                 <tr

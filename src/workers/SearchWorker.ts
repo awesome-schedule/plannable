@@ -47,6 +47,33 @@ const searcherOpts = {
 let courseDict: { [x: string]: Course };
 let count = 0;
 
+function resolveOverlap<T>(arr: { result: SearchResult<T>, class: string }[]) {
+    let len = arr.length;
+    arr.sort((a, b) => a.result.match.index - b.result.match.index);
+    for (let i = 0; i < len - 1; i++) {
+        let j = i + 1;
+        const a = arr[i];
+        let b = arr[j];
+
+        while (a.class !== b.class && j + 1 < len) {
+            b = arr[++j];
+        }
+
+        if (a.class !== b.class) continue;
+        const ovlp = calcOverlap(a.result.match.index,
+            a.result.match.index + a.result.match.length,
+            b.result.match.index,
+            b.result.match.index + b.result.match.length);
+        if (ovlp > 0) {
+            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
+            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
+            arr.splice(j, 1);
+            len--;
+            i--;
+        }
+    }
+}
+
 /**
  * initialize the worker using `msg.data` which is assumed to be a `courseDict` on the first message,
  * posting the string literal 'ready' as the response
@@ -102,13 +129,6 @@ onmessage = (msg: MessageEvent) => {
         } = Object.create(null);
 
         const sectionMap: {
-            [x: string]: {
-                result: SearchResult<Section>;
-                class: 'topic' | 'instructors';
-            }[];
-        } = Object.create(null);
-
-        const newSectionMap: {
             [x: string]: {
                 [y: string]: {
                     result: SearchResult<Section>;
@@ -171,15 +191,15 @@ onmessage = (msg: MessageEvent) => {
                         class: i === 0 ? 'topic' : ('instructors' as 'topic' | 'instructors')
                     };
 
-                    if (newSectionMap[key]) {
-                        if (newSectionMap[key][result.item.sid]) {
-                            newSectionMap[key][result.item.sid].push(tempObj);
+                    if (sectionMap[key]) {
+                        if (sectionMap[key][result.item.sid]) {
+                            sectionMap[key][result.item.sid].push(tempObj);
                         } else {
-                            newSectionMap[key][result.item.sid] = [tempObj];
+                            sectionMap[key][result.item.sid] = [tempObj];
                         }
                     } else {
-                        newSectionMap[key] = Object.create(null);
-                        newSectionMap[key][result.item.sid.toString()] = [tempObj];
+                        sectionMap[key] = Object.create(null);
+                        sectionMap[key][result.item.sid.toString()] = [tempObj];
                     }
 
                     const secKey = `${item.key} ${item.sid}`;
@@ -205,51 +225,12 @@ onmessage = (msg: MessageEvent) => {
 
         for (const [key] of scoreEntries) {
             if (courseMap[key]) {
-                let len = courseMap[key].length;
-
-                courseMap[key].sort((a, b) => a.result.match.index - b.result.match.index);
-
-                for (let i = 0; i < len - 1; i++) {
-                    const a = courseMap[key][i];
-                    const b = courseMap[key][i + 1];
-
-                    if (a.class !== b.class) continue;
-                    const ovlp = calcOverlap(a.result.match.index,
-                        a.result.match.index + a.result.match.length,
-                        b.result.match.index,
-                        b.result.match.index + b.result.match.length);
-                    if (ovlp > 0) {
-                        a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
-                        a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
-                        courseMap[key].splice(i + 1, 1);
-                        len--;
-                        i--;
-                    }
-                }
+                resolveOverlap(courseMap[key]);
             }
 
-            if (newSectionMap[key]) {
-                for (const sid of Object.keys(newSectionMap[key])) {
-                    newSectionMap[key][sid].sort((a, b) => a.result.match.index - b.result.match.index);
-                    let len = newSectionMap[key][sid].length;
-
-                    for (let i = 0; i < len - 1; i++) {
-                        const a = newSectionMap[key][sid][i];
-                        const b = newSectionMap[key][sid][i + 1];
-
-                        if (a.class !== b.class) continue;
-                        const ovlp = calcOverlap(a.result.match.index,
-                            a.result.match.index + a.result.match.length,
-                            b.result.match.index,
-                            b.result.match.index + b.result.match.length);
-                        if (ovlp > 0) {
-                            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
-                            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
-                            newSectionMap[key][sid].splice(i + 1, 1);
-                            len--;
-                            i--;
-                        }
-                    }
+            if (sectionMap[key]) {
+                for (const sid of Object.keys(sectionMap[key])) {
+                    resolveOverlap(sectionMap[key][sid]);
                 }
             }
         }
@@ -274,14 +255,14 @@ onmessage = (msg: MessageEvent) => {
                     .map(x => x[0]);
 
                 const combSecMatches: SectionMatch[][] = [];
-                const newS = newSectionMap[key];
+                const s = sectionMap[key];
 
-                if (newS) {
-                    const matchedSecIdx = Object.keys(newS);
+                if (s) {
+                    const matchedSecIdx = Object.keys(s);
                     const secMatches: { [sid: string]: SectionMatch[] } = Object.create(null);
 
-                    for (const sid of Object.keys(newS)) {
-                        secMatches[sid] = newS[sid]
+                    for (const sid of Object.keys(s)) {
+                        secMatches[sid] = s[sid]
                             .map(x => [
                                 {
                                     match: x.class,
@@ -303,19 +284,19 @@ onmessage = (msg: MessageEvent) => {
                 course = [item.raw, key, item.sids, mats, combSecMatches];
                 // only section match exists
             } else {
-                const newS = newSectionMap[key];
-                const sidKeys = Object.keys(newSectionMap[key]).sort(
+                const s = sectionMap[key];
+                const sidKeys = Object.keys(sectionMap[key]).sort(
                     (a, b) => parseInt(a) - parseInt(b)
                 );
-                const item = newSectionMap[key][sidKeys[0]][0].result.item.course;
+                const item = sectionMap[key][sidKeys[0]][0].result.item.course;
 
                 const combSecMatches: SectionMatch[][] = [];
                 const matchedSids = sidKeys.map(x => parseInt(x));
 
-                if (newS) {
+                if (s) {
                     for (const sid of sidKeys) {
                         combSecMatches.push(
-                            newS[sid]
+                            s[sid]
                                 .map(x => [
                                     {
                                         match: x.class,

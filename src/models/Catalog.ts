@@ -12,7 +12,7 @@
 /**
  *
  */
-import Course, { Match, CourseMatch, CourseConstructorArguments } from './Course';
+import Course, { CourseMatch, CourseConstructorArguments } from './Course';
 import { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
 import Schedule from './Schedule';

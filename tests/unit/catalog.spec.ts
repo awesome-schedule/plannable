@@ -1,4 +1,3 @@
-import Catalog from '@/models/Catalog';
 import Schedule from '@/models/Schedule';
 
 describe('catalog test', () => {

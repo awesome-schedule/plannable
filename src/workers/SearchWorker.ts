@@ -46,12 +46,12 @@ const searcherOpts = {
 
 let courseDict: { [x: string]: Course };
 
-interface ResultEntry<T, K> {
+interface ResultEntry<T, K extends keyof SearchResult<T>['item']> {
     result: SearchResult<T>;
     match: K;
 }
 
-function resolveOverlap<T>(arr: ResultEntry<T, string>[]) {
+function resolveOverlap<T, K extends keyof SearchResult<T>['item']>(arr: ResultEntry<T, K>[]) {
     let len = arr.length;
     arr.sort((a, b) => a.result.match.index - b.result.match.index);
     for (let i = 0; i < len - 1; i++) {

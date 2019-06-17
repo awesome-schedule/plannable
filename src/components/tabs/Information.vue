@@ -10,7 +10,7 @@
                     <a class="nav-link ml-3 my-1 py-1" href="#item-1-3">Website Info</a>
                 </nav>
                 <a class="nav-link" href="#item-2">
-                    <i class="far fa-calendar-alt"></i> Basic Operations</a
+                    <i class="far fa-calendar-alt"></i> A Quick Start</a
                 >
                 <nav class="nav nav-pills flex-column">
                     <a class="nav-link ml-3 my-1 py-1" href="#item-2-0">Course Searching</a>
@@ -173,10 +173,13 @@
                 identifying information.
             </p>
 
-            <h3 id="item-2"><i class="far fa-calendar-alt"></i> Basic Operations</h3>
+            <h3 id="item-2"><i class="far fa-calendar-alt"></i> A Quick Start</h3>
             <hr />
 
-            <h5 id="item-2-0">Course Searching</h5>
+            <h5 id="item-2-0" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Course Searching</strong>
+            </h5>
             <p>
                 We provide an all-in-one search box that generates realtime feedback. It is
                 case-insensitve and can do partial matching (e.g. "linear alg" for "linear
@@ -185,13 +188,16 @@
                 The searching engine is able to search the following fields of each course and
                 section.
             </p>
-            <ol>
-                <li>Course number: econ 2020, 2102, with or without spaces</li>
-                <li>Course title: microecon, discrete, etc.</li>
-                <li>Topic of a section*: computational</li>
-                <li>Professor name*: bloomfield</li>
-                <li>Description: heap, fourier transform, etc.</li>
-            </ol>
+
+            <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                <ol>
+                    <li>Course number: econ 2020, 2102, with or without spaces</li>
+                    <li>Course title: microecon, discrete, etc.</li>
+                    <li>Topic of a section*: yoga, computation, design, etc</li>
+                    <li>Professor name*: bloomfield, elzinga, etc</li>
+                    <li>Description: video, fourier transform, etc.</li>
+                </ol>
+            </div>
             <p>
                 Starred fields are fields of sections, not courses. While other fields filter out
                 courses, these filter out sections. Our algorithm matches the fields in the order
@@ -208,7 +214,10 @@
                 <v-img :src="imgPath('match-desc.png')"></v-img>
             </v-card>
 
-            <h5 id="item-2-1">Schedule Manipulation</h5>
+            <h5 id="item-2-1" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Schedule Manipulation</strong>
+            </h5>
 
             <div class="row mt-3 mb-5">
                 <div class="col-sm">
@@ -354,7 +363,10 @@
                 </v-stepper-items>
             </v-stepper>
 
-            <h5 id="item-2-2">Schedule Rendering</h5>
+            <h5 id="item-2-2" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Schedule Rendering</strong>
+            </h5>
             <p class="mb-1">
                 It is better for you to know under what conditions are courses rendered on the
                 schedule. In Edit Class mode, only the following type of courses are rendered on the
@@ -380,7 +392,9 @@
                 "Any Section" for it will result in the "only one" being rendered.
             </p>
 
-            <h5 id="item-2-3">Enroll in SIS</h5>
+            <h5 id="item-2-3" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i><strong> Enroll in SIS</strong>
+            </h5>
             <p>
                 For convenience, we provide a list of course IDs for your currently active schedule
                 at the bottom left corner under "Schedule Overview". These IDs can be direcly
@@ -429,7 +443,9 @@
                 Filters allow you to set parameters to eliminate unwanted or redundant generated
                 schedules. They also help to find the optimal schedule in your definition.
             </p>
-            <h5 id="item-4-1">No Class Time</h5>
+            <h5 id="item-4-1" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i><strong> No Class Time</strong>
+            </h5>
             <p>
                 You can select time and day at which you do not wish to have class.
             </p>
@@ -442,12 +458,17 @@
                     </template>
                 </v-img>
             </v-card>
-            <h5 id="item-4-2">Allow Waitlist/Closed</h5>
+            <h5 id="item-4-2" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Allow Waitlist/Closed</strong>
+            </h5>
             <p>
                 You can choose to include or exclude wait list or closed sections by ticking these
                 two checkboxes.
             </p>
-            <h5 id="item-4-3">Sort Schedules</h5>
+            <h5 id="item-4-3" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i><strong> Sort Schedules</strong>
+            </h5>
             <p>
                 One powerful feature comes with auto-scheduling is that the generated schedules can
                 be sorted based on one or a combination of options. You can select multiple sort
@@ -459,14 +480,16 @@
             <h6>Sort Options</h6>
             Currently, we provide the following list of sort options. If you prefer a mathematical
             description on how they are computed, see <a href="#item-11-1">Appendix</a>.
-            <ol>
-                <li>Variance: Balance the class time each day</li>
-                <li>Vertical compactness: Make classes back-to-back</li>
-                <li>Lunch Time: Leave spaces for lunch</li>
-                <li>No Early: Start the day as late as possible</li>
-                <li>Walking Distance: Avoid long distance walking between classes</li>
-                <li>I'm Feeling Lucky: Sort Randomly</li>
-            </ol>
+            <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                <ol>
+                    <li>Variance: Balance the class time each day</li>
+                    <li>Vertical compactness: Make classes back-to-back</li>
+                    <li>Lunch Time: Leave spaces for lunch</li>
+                    <li>No Early: Start the day as late as possible</li>
+                    <li>Walking Distance: Avoid long distance walking between classes</li>
+                    <li>I'm Feeling Lucky: Sort Randomly</li>
+                </ol>
+            </div>
             <p>
                 It is possible to reverse one or more of the sort options provided above: just click
                 the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want your
@@ -478,13 +501,17 @@
 
             <h6>Sort Modes</h6>
             And there are two avaiable sort modes.
-            <ol>
-                <li>Combined: Combine all sorting options enabled and give them equal weight</li>
-                <li>
-                    Fallback: Sort using the options on top first. If two schedules are compared
-                    equal using that option, sort using the next option.
-                </li>
-            </ol>
+            <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                <ol>
+                    <li>
+                        Combined: Combine all sorting options enabled and give them equal weight
+                    </li>
+                    <li>
+                        Fallback: Sort using the options on top first. If two schedules are compared
+                        equal using that option, sort using the next option.
+                    </li>
+                </ol>
+            </div>
             <h6>Tips on chosing sort modes</h6>
             If you want to balance between multiple sort options, try "combined". On the other hand,
             if you want to prioritize a single sort option (such as No Early), then try "fallback",
@@ -521,7 +548,10 @@
             </p>
             <h3 id="item-7"><i class="fas fa-download"></i> Import and Export</h3>
             <hr />
-            <h5 id="item-7-1">Export to iCalendar</h5>
+            <h5 id="item-7-1" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Export to iCalendar</strong>
+            </h5>
             <p>
                 ICalendar is a standard file format used to represent information in a calendar.
                 Apple and Google calendar both support importing from iCalendar files. However, we
@@ -569,7 +599,10 @@
                 </v-stepper-items>
             </v-stepper>
 
-            <h5 id="item-7-2">Export to/Import From JSON</h5>
+            <h5 id="item-7-2" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Export to/Import From JSON</strong>
+            </h5>
             <div class="row">
                 <div class="col col-7">
                     <p>
@@ -599,7 +632,9 @@
                 requests through issue, and you can directly contribute to our codebase via pull
                 requests!
             </p>
-            <h5 id="item-9-1">Contact Authors</h5>
+            <h5 id="item-9-1" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i><strong> Contact Authors</strong>
+            </h5>
 
             <p>The primiary contributors of this website are</p>
             <ol>
@@ -633,7 +668,9 @@
                 >.
             </p>
 
-            <h5 id="item-9-2">Bug Reports</h5>
+            <h5 id="item-9-2" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i><strong> Bug Reports</strong>
+            </h5>
             <p>
                 We track issues and bug reports on GitHub. If you find any problem that appears to
                 be a bug of our website, please submit a bug report by
@@ -666,7 +703,10 @@
 
             <h3 id="item-11">Appendix</h3>
             <hr />
-            <h5 id="item-11-1">Calculation of Sort Options</h5>
+            <h5 id="item-11-1" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Calculation of Sort Options</strong>
+            </h5>
             <div class="mt-2 mb-4">
                 For each schedule, a single/array of coefficients are calculated, depending on the
                 sort options enabled. The generated schedules then are sorted in ascending order.
@@ -681,7 +721,10 @@
             </div>
             <vue-mathjax :formula="formula"></vue-mathjax>
 
-            <h5 id="item-11-2" class="mt-4">Browser Compactibility</h5>
+            <h5 id="item-11-2" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i
+                ><strong> Browser Compactibility</strong>
+            </h5>
             <p>
                 Our website should run without problem on mainstream browsers of the latest version
                 (except IE). Due to the fact that our website leverages new CSS3 features (e.g. grid
@@ -689,7 +732,9 @@
                 Safari &ge; 10.3.
             </p>
 
-            <h5 id="item-11-3">Source of Data</h5>
+            <h5 id="item-11-3" class="mt-4 ml-4">
+                <i class="fa fa-university" aria-hidden="true"></i><strong> Source of Data</strong>
+            </h5>
             <p>
                 Our website fetches course data from
                 <a target="_blank" href="https://rabi.phys.virginia.edu/mySIS/CS2/">Lou's list</a>

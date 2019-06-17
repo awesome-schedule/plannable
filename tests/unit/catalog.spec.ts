@@ -3,7 +3,7 @@ import Schedule from '@/models/Schedule';
 
 describe('catalog test', () => {
     it('search', () => {
-        const catalog: Catalog = window.catalog;
+        const catalog = window.catalog;
         expect(catalog.search('comp. visio').length).toBeGreaterThanOrEqual(1);
         expect(catalog.search('cs', 6).length).toBe(6);
         expect(catalog.search('asdasdasajkgwuoeisd').length).toBe(0);
@@ -17,7 +17,7 @@ describe('catalog test', () => {
     });
 
     it('convert key', () => {
-        const catalog: Catalog = window.catalog;
+        const catalog = window.catalog;
         const schedule = new Schedule();
         schedule.addEvent('MoFr 10:00AM - 11:30AM', true, 'title asd');
         expect(catalog.convertKey('cs11105', schedule)).toBe('CS 1110 Lecture');
@@ -26,7 +26,7 @@ describe('catalog test', () => {
     });
 
     it('json', () => {
-        const catalog: Catalog = window.catalog;
+        const catalog = window.catalog;
         expect(catalog.fromJSON(catalog.toJSON()).raw_data).toEqual(catalog.raw_data);
     });
 

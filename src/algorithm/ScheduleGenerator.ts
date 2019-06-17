@@ -106,15 +106,11 @@ export interface GeneratorOptions {
  * out of the courses/sections that the user has selected
  */
 class ScheduleGenerator {
-    public catalog: Catalog;
-    public options: GeneratorOptions;
-    public buildingList: string[];
-
-    constructor(catalog: Catalog, buildingList: string[], options: GeneratorOptions) {
-        this.catalog = catalog;
-        this.options = options;
-        this.buildingList = buildingList;
-    }
+    constructor(
+        public readonly catalog: Readonly<Catalog>,
+        public readonly buildingList: ReadonlyArray<string>,
+        public readonly options: GeneratorOptions
+    ) {}
 
     /**
      * The entrance of the schedule generator
@@ -127,7 +123,7 @@ class ScheduleGenerator {
      */
     public getSchedules(schedule: Schedule): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
-        const buildingList: string[] = this.buildingList;
+        const buildingList = this.buildingList;
 
         // convert events to TimeArrays so that we can easily check for time conflict
         const timeSlots: TimeArray[] = schedule.events.map(e => e.toTimeArray());
@@ -184,7 +180,10 @@ class ScheduleGenerator {
                         const numberList = roomNumberDict[i];
                         const rooms = roomDict[i];
                         for (const room of rooms) {
-                            const roomMatch = findBestMatch(room.toLowerCase(), buildingList);
+                            const roomMatch = findBestMatch(
+                                room.toLowerCase(),
+                                buildingList as string[]
+                            );
                             // we set the match threshold to 0.4
                             if (roomMatch.bestMatch.rating >= 0.4) {
                                 numberList.push(roomMatch.bestMatchIndex);

@@ -48,9 +48,9 @@ declare global {
         axios: typeof axios;
         querystring: typeof querystring;
         scheduleEvaluator: ScheduleEvaluator;
-        catalog: Catalog;
-        timeMatrix: Int32Array;
-        buildingList: string[];
+        catalog: Readonly<Catalog>;
+        timeMatrix: Readonly<Int32Array>;
+        buildingList: ReadonlyArray<string>;
     }
 }
 

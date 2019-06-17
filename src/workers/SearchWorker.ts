@@ -1,7 +1,7 @@
 /**
  * Search worker is used to perform fuzzy search (which is very expensive)
  * in a separate, non-blocking process.
- * @author Hanzhi Zhou, Kaiying Cat
+ * @author Kaiying Cat, Hanzhi Zhou
  * @requires optimization
  * @requires fast-fuzzy
  * @see https://github.com/EthanRutherford/fast-fuzzy
@@ -27,8 +27,8 @@ type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 type Mutable<T, F extends keyof T> = { -readonly [P in F]: T[P] } &
     { [P in keyof Omit<T, F>]: T[P] };
 
-type Course = NonFunctionProperties<Mutable<_Course, 'title' | 'description'>>;
-type Section = NonFunctionProperties<Mutable<_Section, 'topic' | 'instructors'>>;
+type Course = NonFunctionProperties<_Course>;
+type Section = NonFunctionProperties<_Section>;
 
 declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
 
@@ -45,9 +45,13 @@ const searcherOpts = {
 };
 
 let courseDict: { [x: string]: Course };
-let count = 0;
 
-function resolveOverlap<T>(arr: { result: SearchResult<T>, class: string }[]) {
+interface ResultEntry<T, K> {
+    result: SearchResult<T>;
+    match: K;
+}
+
+function resolveOverlap<T>(arr: ResultEntry<T, string>[]) {
     let len = arr.length;
     arr.sort((a, b) => a.result.match.index - b.result.match.index);
     for (let i = 0; i < len - 1; i++) {
@@ -55,15 +59,17 @@ function resolveOverlap<T>(arr: { result: SearchResult<T>, class: string }[]) {
         const a = arr[i];
         let b = arr[j];
 
-        while (a.class !== b.class && j + 1 < len) {
+        while (a.match !== b.match && j + 1 < len) {
             b = arr[++j];
         }
 
-        if (a.class !== b.class) continue;
-        const ovlp = calcOverlap(a.result.match.index,
+        if (a.match !== b.match) continue;
+        const ovlp = calcOverlap(
+            a.result.match.index,
             a.result.match.index + a.result.match.length,
             b.result.match.index,
-            b.result.match.index + b.result.match.length);
+            b.result.match.index + b.result.match.length
+        );
         if (ovlp > 0) {
             a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
             a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
@@ -81,12 +87,11 @@ function resolveOverlap<T>(arr: { result: SearchResult<T>, class: string }[]) {
  * start fuzzy search using `msg.data` which is assumed to be a string for the following messages,
  * posting the array of tuples (used to construct [[Course]] instances) as the response
  */
-onmessage = (msg: MessageEvent) => {
+onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
     // initialize the searchers and store them
-    const { data } = msg;
     if (typeof data !== 'string') {
         console.time('worker prep');
-        courseDict = msg.data;
+        courseDict = data;
         const courses = Object.values(courseDict);
         const sections: Section[] = [];
         for (const { sections: secs } of courses) sections.push(...secs);
@@ -95,17 +100,14 @@ onmessage = (msg: MessageEvent) => {
             ...searcherOpts,
             keySelector: obj => obj.title
         });
-
         descripSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.description
         });
-
         topicSearcher = new Searcher(sections, {
             ...searcherOpts,
             keySelector: obj => obj.topic
         });
-
         instrSearcher = new Searcher(sections, {
             ...searcherOpts,
             keySelector: obj => obj.instructors.join(', ')
@@ -115,25 +117,19 @@ onmessage = (msg: MessageEvent) => {
         console.timeEnd('worker prep');
     } else {
         const query = data;
-        const querySeg: string[] = query.split(' ').filter(x => x.length >= 3);
+        const querySeg: string[] = query.split(/ +/).filter(x => x.length >= 3);
         querySeg.push(query);
 
         // elements in array: 1. score for courses, 2. score for sections, 2. number of distinct sections
         const courseScores: { [x: string]: [number, number, number] } = Object.create(null);
 
         const courseMap: {
-            [x: string]: {
-                result: SearchResult<Course>;
-                class: 'title' | 'description';
-            }[];
+            [x: string]: ResultEntry<Course, 'title' | 'description'>[];
         } = Object.create(null);
 
         const sectionMap: {
             [x: string]: {
-                [y: string]: {
-                    result: SearchResult<Section>;
-                    class: 'topic' | 'instructors';
-                }[];
+                [y: string]: ResultEntry<Section, 'topic' | 'instructors'>[];
             };
         } = Object.create(null);
 
@@ -150,7 +146,7 @@ onmessage = (msg: MessageEvent) => {
             for (let i = 0; i < 2; i++) {
                 const r = coursesResults[i];
                 for (const result of r) {
-                    const item = result.item;
+                    const { item } = result;
                     const key = item.key;
 
                     // calculate score based on search result
@@ -159,7 +155,7 @@ onmessage = (msg: MessageEvent) => {
 
                     const tempObj = {
                         result,
-                        class: i === 0 ? 'title' : ('description' as 'title' | 'description')
+                        match: i === 0 ? 'title' : ('description' as 'title' | 'description')
                     };
 
                     if (courseMap[key]) {
@@ -176,7 +172,7 @@ onmessage = (msg: MessageEvent) => {
             for (let i = 0; i < 2; i++) {
                 const r = sectionsResults[i];
                 for (const result of r) {
-                    const item = result.item;
+                    const { item } = result;
                     const key = item.key;
                     const score = result.score ** 3 * (i === 0 ? 0.8 : 0.6) * (last ? 2 : 1);
 
@@ -188,18 +184,18 @@ onmessage = (msg: MessageEvent) => {
 
                     const tempObj = {
                         result,
-                        class: i === 0 ? 'topic' : ('instructors' as 'topic' | 'instructors')
+                        match: i === 0 ? 'topic' : ('instructors' as 'topic' | 'instructors')
                     };
 
                     if (sectionMap[key]) {
-                        if (sectionMap[key][result.item.sid]) {
-                            sectionMap[key][result.item.sid].push(tempObj);
+                        if (sectionMap[key][item.sid]) {
+                            sectionMap[key][item.sid].push(tempObj);
                         } else {
-                            sectionMap[key][result.item.sid] = [tempObj];
+                            sectionMap[key][item.sid] = [tempObj];
                         }
                     } else {
                         sectionMap[key] = Object.create(null);
-                        sectionMap[key][result.item.sid.toString()] = [tempObj];
+                        sectionMap[key][item.sid.toString()] = [tempObj];
                     }
 
                     const secKey = `${item.key} ${item.sid}`;
@@ -217,9 +213,10 @@ onmessage = (msg: MessageEvent) => {
         const scoreEntries = Object.entries(courseScores)
             .sort(
                 (a, b) =>
-                    b[1][0] +
-                    (b[1][2] === 0 ? 0 : b[1][1] / b[1][2]) -
-                    (a[1][0] + (a[1][2] === 0 ? 0 : a[1][1] / a[1][2]))
+                    b[1][0] -
+                    a[1][0] +
+                    (b[1][2] && b[1][1] / b[1][2]) -
+                    (a[1][2] && a[1][1] / a[1][2])
             )
             .slice(0, 12);
 
@@ -229,8 +226,8 @@ onmessage = (msg: MessageEvent) => {
             }
 
             if (sectionMap[key]) {
-                for (const sid of Object.keys(sectionMap[key])) {
-                    resolveOverlap(sectionMap[key][sid]);
+                for (const matches of Object.values(sectionMap[key])) {
+                    resolveOverlap(matches);
                 }
             }
         }
@@ -242,17 +239,13 @@ onmessage = (msg: MessageEvent) => {
             const courseMatch = courseMap[key];
             let course: CourseConstructorArguments;
             if (courseMatch) {
-                const { match, original, item } = courseMatch[0].result;
+                const { item } = courseMatch[0].result;
 
-                const mats: CourseMatch[] = courseMatch
-                    .map(x => [
-                        {
-                            match: x.class,
-                            start: x.result.match.index,
-                            end: x.result.match.index + x.result.match.length
-                        } as CourseMatch
-                    ])
-                    .map(x => x[0]);
+                const mats: CourseMatch[] = courseMatch.map(({ match, result }) => ({
+                    match,
+                    start: result.match.index,
+                    end: result.match.index + result.match.length
+                }));
 
                 const combSecMatches: SectionMatch[][] = [];
                 const s = sectionMap[key];
@@ -262,15 +255,11 @@ onmessage = (msg: MessageEvent) => {
                     const secMatches: { [sid: string]: SectionMatch[] } = Object.create(null);
 
                     for (const sid of Object.keys(s)) {
-                        secMatches[sid] = s[sid]
-                            .map(x => [
-                                {
-                                    match: x.class,
-                                    start: x.result.match.index,
-                                    end: x.result.match.index + x.result.match.length
-                                }
-                            ])
-                            .map(x => x[0]);
+                        secMatches[sid] = s[sid].map(({ match, result }) => ({
+                            match,
+                            start: result.match.index,
+                            end: result.match.index + result.match.length
+                        }));
                     }
 
                     for (const sid of item.sids) {
@@ -296,15 +285,11 @@ onmessage = (msg: MessageEvent) => {
                 if (s) {
                     for (const sid of sidKeys) {
                         combSecMatches.push(
-                            s[sid]
-                                .map(x => [
-                                    {
-                                        match: x.class,
-                                        start: x.result.match.index,
-                                        end: x.result.match.index + x.result.match.length
-                                    }
-                                ])
-                                .map(x => x[0])
+                            s[sid].map(({ match, result }) => ({
+                                match,
+                                start: result.match.index,
+                                end: result.match.index + result.match.length
+                            }))
                         );
                     }
                 }
@@ -314,5 +299,4 @@ onmessage = (msg: MessageEvent) => {
         }
         postMessage(finalResults);
     }
-    count++;
 };

@@ -11,8 +11,12 @@ const externals = {
     vuedraggable: 'vuedraggable'
 };
 module.exports = {
-    chainWebpack: config => {
-        config.externals(externals);
+    configureWebpack: {
+        externals
+        // worker loader requires Buffer from nodejs
+        // node: {
+        //     Buffer: false
+        // }
     },
     // transpile dependencies that do not provide pre-built modules
     transpileDependencies: ['string-similarity']

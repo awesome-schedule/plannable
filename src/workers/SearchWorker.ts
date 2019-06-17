@@ -204,23 +204,24 @@ onmessage = (msg: MessageEvent) => {
         for (const [key] of scoreEntries) {
             if (courseMap[key]) {
                 let len = courseMap[key].length;
-                for (let i = 0; i < len; i++) {
-                    for (let j = 0; j < len; j++) {
-                        if (i >= len || j >= len) break;
-                        if (i === j) continue;
-                        const a = courseMap[key][i];
-                        const b = courseMap[key][j];
-                        if (a.class !== b.class) continue;
-                        const ovlp = calcOverlap(a.result.match.index,
-                            a.result.match.index + a.result.match.length,
-                            b.result.match.index,
-                            b.result.match.index + b.result.match.length);
-                        if (ovlp > 0) {
-                            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
-                            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
-                            courseMap[key].splice(j, 1);
-                            len--;
-                        }
+
+                courseMap[key].sort((a, b) => a.result.match.index - b.result.match.index);
+
+                for (let i = 0; i < len - 1; i++) {
+                    const a = courseMap[key][i];
+                    const b = courseMap[key][i + 1];
+
+                    if (a.class !== b.class) continue;
+                    const ovlp = calcOverlap(a.result.match.index,
+                        a.result.match.index + a.result.match.length,
+                        b.result.match.index,
+                        b.result.match.index + b.result.match.length);
+                    if (ovlp > 0) {
+                        a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
+                        a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
+                        courseMap[key].splice(i + 1, 1);
+                        len--;
+                        i--;
                     }
                 }
 
@@ -233,27 +234,24 @@ onmessage = (msg: MessageEvent) => {
                         console.log('before');
                         console.log(newSectionMap[key][sid]);
                     }
+                    newSectionMap[key][sid].sort((a, b) => a.result.match.index - b.result.match.index);
                     let len = newSectionMap[key][sid].length;
-                    for (let i = 0; i < len; i++) {
-                        for (let j = 0; j < len; j++) {
-                            if (i >= len) break;
-                            if (i === j) continue;
-                            const a = newSectionMap[key][sid][i];
-                            const b = newSectionMap[key][sid][j];
 
-                            if (a.class !== b.class) continue;
-                            const ovlp = calcOverlap(a.result.match.index,
-                                a.result.match.index + a.result.match.length,
-                                b.result.match.index,
-                                b.result.match.index + b.result.match.length);
-                            if (ovlp > 0) {
-                                a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
-                                a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
-                                newSectionMap[key][sid].splice(j, 1);
-                                len--;
-                                if (i > j) i--;
-                                j--;
-                            }
+                    for (let i = 0; i < len - 1; i++) {
+                        const a = newSectionMap[key][sid][i];
+                        const b = newSectionMap[key][sid][i + 1];
+
+                        if (a.class !== b.class) continue;
+                        const ovlp = calcOverlap(a.result.match.index,
+                            a.result.match.index + a.result.match.length,
+                            b.result.match.index,
+                            b.result.match.index + b.result.match.length);
+                        if (ovlp > 0) {
+                            a.result.match.index = Math.min(a.result.match.index, b.result.match.index);
+                            a.result.match.length = a.result.match.length + b.result.match.length - ovlp;
+                            newSectionMap[key][sid].splice(i + 1, 1);
+                            len--;
+                            i--;
                         }
                     }
                     if (key.indexOf('enwr') !== -1) {

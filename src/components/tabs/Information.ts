@@ -59,6 +59,19 @@ export default class Information extends Vue {
     $$
 `;
 
+    selected = 1;
+
+    showGuide(num:number){
+        this.selected = num;
+        this.goTop();
+    }
+
+    goTop() {
+        this.$nextTick(() => {
+         document.documentElement.scrollTop = 0;
+        });
+    }
+        
     readonly icalSteps = [
         {
             title: 'Make Your Schedule and Export',

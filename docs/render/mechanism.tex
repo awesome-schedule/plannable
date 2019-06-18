@@ -162,7 +162,7 @@ Using definition~\ref{def:3}, we can construct a graph for the set of events sho
 \section{Graph Coloring Algorithm}
 Graph coloring is an NP-complete problem, which means there is no known algorithm that can solve it in polynomial time. The exact algorithm (algorithm that is able to find the optimal solution) using the backtrack approach still takes exponential time. 
 
-Nevertheless, approximation algorithms such as Degree of Saturation (DSATUR) can find a reasonably good solution for our problem. DSATUR can also provide a good initial ordering of the vertices to be colored for the backtrack algorithm. There are better graph coloring approximation algorithm such as the recursive largest first (RLF) algorithm, but for small graphs, DSATUR plays almost equally well. For simplicity, we used DSATUR to provide the initial vertex ordering for the backtrack algorithm, with forced-breaking when the number of recursive calls exceeds $10^6$.
+Nevertheless, approximation algorithms such as Degree of Saturation (DSATUR) can find a reasonably good solution for our problem. DSATUR can also provide a good initial ordering of the vertices to be colored for the backtrack algorithm. There are better graph coloring approximation algorithm such as the recursive largest first (RLF) algorithm, but for small graphs, DSATUR plays almost equally well. For simplicity, we used DSATUR to provide the initial vertex ordering for the backtrack algorithm, with forced-breaking when the number of recursive calls exceeds $10^6$. For small graphs, this 0method provides almost exact solutions.
 
 \section{Position Calculation}
 Even if the coloring of our graph is obtained, there is some extra work involved in turning the colors to positions.

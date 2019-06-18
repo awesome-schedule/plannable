@@ -41,7 +41,7 @@ export function openVAGrade(course: CourseFields) {
  * @author Hanzhi Zhou
  * @param str the string to inject highlight
  * @param expMatch the expected matched field in match.match
- * @param matches the match object
+ * @param matches an array of match objects, sorted in numeric order of their `start` property
  */
 export function highlightMatch<T extends string>(
     str: string,

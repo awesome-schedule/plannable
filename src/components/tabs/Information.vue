@@ -18,7 +18,7 @@
                 </div>
                 <div @click="showGuide(2)">
                     <a class="nav-link" href="#item-2">
-                        <i class="far fa-calendar-alt"></i> A Quick Start</a
+                        <i class="far fa-calendar-alt"></i> Quick Start</a
                     >
                     <nav class="nav nav-pills flex-column">
                         <a class="nav-link ml-3 my-1 py-1" href="#item-2-0">Course Searching</a>
@@ -111,7 +111,8 @@
                         is cleared. If you find any problem when using our website, please first
                         check whether you are using a compatible browser (see
                         <a href="#item-11-2">browser compatibility</a>). If it is not a problem with
-                        your browser, please consider <a href="#item-9-2">submitting a bug report</a>.
+                        your browser, please consider
+                        <a href="#item-9-2">submitting a bug report</a>.
                     </strong>
                 </p>
                 <p>
@@ -122,7 +123,7 @@
                 </p>
 
                 <h4 id="item-1-1">Introduction to Auto-Scheduling</h4>
-                <!-- <hr /> -->
+                <hr />
                 <p>
                     Before the invention of auto-scheduling, we have to pick course sections that we
                     want to take and come up with a schedule. Due to the availability of multiple
@@ -135,6 +136,7 @@
                 </p>
 
                 <h4 id="item-1-2">Planned vs. Generated Schedules</h4>
+                <hr />
                 <div>
                     <div class="ml-2 float-right text-center">
                         <figure>
@@ -169,7 +171,8 @@
                 </div>
 
                 <h4 id="item-1-3">Website Info</h4>
-                <h5>Website Address</h5>
+                <hr />
+                <h5>Domain Name and Address</h5>
                 <p>
                     The primary address of our website is
                     <a href="https://plannable.org">https://plannable.org</a>. It is hosted on
@@ -207,9 +210,14 @@
                     number and the distribution of users across the globe. The data collected do not
                     contain identifying information.
                 </p>
-                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(2)">
-                    Next Page: A Quick Start
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(2)"
+                >
+                    Next Page: Quick Start
                 </button>
+                <div style="height: 250px"></div>
             </div>
 
             <div v-if="selected === 2 || !selected">
@@ -469,7 +477,11 @@
                 <v-card class="mt-3 mb-5 mx-auto gif-center">
                     <v-img :src="imgPath('multi-section.png')"></v-img>
                 </v-card>
-                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(3)">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(3)"
+                >
                     Next Page: Add Event
                 </button>
             </div>
@@ -501,7 +513,11 @@
                         </template>
                     </v-img>
                 </v-card>
-                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(4)">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(4)"
+                >
                     Next Page: Filters
                 </button>
             </div>
@@ -607,7 +623,11 @@
 
                 <!-- <h3 id="item-5">Display Settings</h3>
                 <hr /> -->
-                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(6)">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(6)"
+                >
                     Next Page: Customize Colors
                 </button>
             </div>
@@ -629,7 +649,11 @@
                     from the palette, it may because you selected "Any Section" for that course and
                     did not switch to "View Schedule" mode.
                 </p>
-                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(7)">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(7)"
+                >
                     Next Page: Import and Export
                 </button>
             </div>
@@ -714,7 +738,11 @@
                         <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(9)">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(9)"
+                >
                     Next Page: Contributing, Disclaimer, and Appendix
                 </button>
             </div>

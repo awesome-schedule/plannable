@@ -116,7 +116,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
         postMessage('ready');
         console.timeEnd('worker prep');
     } else {
-        const query = data;
+        const query = data.trim().toLowerCase();
         const querySeg: string[] = query.split(/ +/).filter(x => x.length >= 3);
         querySeg.push(query);
 

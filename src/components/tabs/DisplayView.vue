@@ -1,7 +1,7 @@
 <template>
     <nav class="bg-light sidebar">
         <div class="btn bg-info nav-btn">
-            Display Settings
+            Schedule Settings
         </div>
         <form class="mx-2">
             <div

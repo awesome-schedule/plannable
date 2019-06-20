@@ -208,9 +208,9 @@ class ScheduleGenerator {
             if (classes.length === 0) {
                 return {
                     level: 'error',
-                    msg: `No sections of ${courseRec.department} ${courseRec.number} ${
+                    msg: `The ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                    } do not conflict your events and satisfy your filters`
+                    } do not satisfy your filters or conflicts with your events`
                 };
             }
             classList.push(classes);

@@ -111,7 +111,7 @@
                         is cleared. If you find any problem when using our website, please first
                         check whether you are using a compatible browser (see
                         <a href="#item-11-2">browser compatibility</a>). If it is not a problem with
-                        your browser, please consider <a href="#item-9-2">submit a bug report</a>.
+                        your browser, please consider <a href="#item-9-2">submitting a bug report</a>.
                     </strong>
                 </p>
                 <p>
@@ -180,7 +180,7 @@
                     >) whose content is synchronized with the primary website once per hour. Note
                     that it automatically redirects to
                     <a href="https://plannable.gitee.io">https://plannable.gitee.io</a>, because to
-                    host websites in China, one need to register at ICP (ICP备案), which somehow
+                    host websites in China, one needs to register at ICP (ICP备案), which is somehow
                     complicated. To avoid such a burden, we hosted our website on gitee.io, a top
                     level domain operated by a Chinese company. However, your data is not
                     synchronized (and it is techniqually impossible to do so). If you want to
@@ -207,7 +207,7 @@
                     number and the distribution of users across the globe. The data collected do not
                     contain identifying information.
                 </p>
-                <button type="button" class="btn btn-primary btn-lg my-5" @click="showGuide(2)">
+                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(2)">
                     Next Page: A Quick Start
                 </button>
             </div>
@@ -469,7 +469,7 @@
                 <v-card class="mt-3 mb-5 mx-auto gif-center">
                     <v-img :src="imgPath('multi-section.png')"></v-img>
                 </v-card>
-                <button type="button" class="btn btn-primary btn-lg my-5" @click="showGuide(3)">
+                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(3)">
                     Next Page: Add Event
                 </button>
             </div>
@@ -501,7 +501,7 @@
                         </template>
                     </v-img>
                 </v-card>
-                <button type="button" class="btn btn-primary btn-lg my-5" @click="showGuide(4)">
+                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(4)">
                     Next Page: Filters
                 </button>
             </div>
@@ -587,7 +587,7 @@
                         </li>
                     </ol>
                 </div>
-                <h6>Tips on chosing sort modes</h6>
+                <h6>Tips on choosing sort modes</h6>
                 If you want to balance between multiple sort options, try "combined". On the other
                 hand, if you want to prioritize a single sort option (such as No Early), then try
                 "fallback", as it will sort using options on top first.
@@ -607,7 +607,7 @@
 
                 <!-- <h3 id="item-5">Display Settings</h3>
                 <hr /> -->
-                <button type="button" class="btn btn-primary btn-lg my-5" @click="showGuide(6)">
+                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(6)">
                     Next Page: Customize Colors
                 </button>
             </div>
@@ -629,7 +629,7 @@
                     from the palette, it may because you selected "Any Section" for that course and
                     did not switch to "View Schedule" mode.
                 </p>
-                <button type="button" class="btn btn-primary btn-lg my-5" @click="showGuide(7)">
+                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(7)">
                     Next Page: Import and Export
                 </button>
             </div>
@@ -714,7 +714,7 @@
                         <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary btn-lg my-5" @click="showGuide(9)">
+                <button type="button" class="btn btn-primary btn-lg my-5 float-right" @click="showGuide(9)">
                     Next Page: Contributing, Disclaimer, and Appendix
                 </button>
             </div>

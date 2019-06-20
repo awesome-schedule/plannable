@@ -59,6 +59,8 @@ export default class Information extends Vue {
     $$
 `;
 
+    selected = 1;
+
     readonly icalSteps = [
         {
             title: 'Make Your Schedule and Export',
@@ -97,6 +99,17 @@ export default class Information extends Vue {
             src: this.imgPath('export9.png')
         }
     ];
+
+    showGuide(num: number) {
+        this.selected = num;
+        this.goTop();
+    }
+
+    goTop() {
+        this.$nextTick(() => {
+            window.scrollTo(0, 0);
+        });
+    }
 
     mounted() {
         $('body').scrollspy({ target: '#navbar-scrollspy', offset: 50 });

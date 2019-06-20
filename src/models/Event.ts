@@ -25,11 +25,7 @@ export default class Event implements Hashable {
         public description?: string,
         public room?: string
     ) {
-        this.key = this.days = days;
-        this.display = display;
-        this.title = title;
-        this.description = description;
-        this.room = room;
+        this.key = days;
     }
 
     public hash() {

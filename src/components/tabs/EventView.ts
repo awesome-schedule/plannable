@@ -45,6 +45,27 @@ export default class EventView extends Store {
     }
     getEventDays() {
         let days = this.eventWeek.reduce((acc, x, i) => acc + (x ? this.days[i] : ''), '');
+
+        if (!days) {
+            this.noti.error('Please select at least one day');
+            return;
+        }
+        if (!this.eventTimeFrom || !this.eventTimeTo) {
+            this.noti.error('Please check your start/end time');
+            return;
+        }
+        const start = this.eventTimeFrom
+            .split(':')
+            .map(x => +x)
+            .reduce((acc, x) => x + acc, 0);
+        const end = this.eventTimeTo
+            .split(':')
+            .map(x => +x)
+            .reduce((acc, x) => x + acc, 0);
+        if (start >= end) {
+            this.noti.error('Start time must be earlier than end time');
+            return;
+        }
         days += ` ${to12hr(this.eventTimeFrom)} - ${to12hr(this.eventTimeTo)}`;
         return days;
     }
@@ -53,14 +74,7 @@ export default class EventView extends Store {
         this.status.foldView();
         try {
             const days = this.getEventDays();
-
-            if (days.startsWith(' ')) {
-                this.noti.error('Please select at least one day');
-                return;
-            } else if (days.indexOf('NaN') !== -1) {
-                this.noti.error('Please check your start/end time');
-                return;
-            }
+            if (!days) return;
 
             this.schedule.proposedSchedule.addEvent(
                 days,

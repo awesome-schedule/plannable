@@ -48,7 +48,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     /**
      * the array of proposed schedules
      */
-    proposedSchedules = [new Schedule()];
+    proposedSchedules = [this.currentSchedule];
     /**
      * the index of the active proposed
      */
@@ -133,7 +133,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         if (generated) {
             if (this.cpIndex === this.proposedScheduleIndex && this.numGenerated) {
                 this.generated = true;
-                this.switchPage(this.currentScheduleIndex === null ? 0 : this.currentScheduleIndex);
+                this.switchPage(this.currentScheduleIndex);
             }
         } else {
             this.generated = false;
@@ -221,10 +221,11 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     }
 
     getDefault(): ScheduleState {
+        const currentSchedule = new Schedule();
         return {
             currentScheduleIndex: 0,
-            currentSchedule: new Schedule(),
-            proposedSchedules: [new Schedule()],
+            currentSchedule,
+            proposedSchedules: [currentSchedule],
             proposedScheduleIndex: 0,
             cpIndex: -1,
             generated: false

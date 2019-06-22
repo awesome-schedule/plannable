@@ -313,8 +313,8 @@ class Store extends Vue {
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } else {
-            this.schedule.generated = false;
             window.scheduleEvaluator.clear();
+            this.schedule.switchSchedule(false);
             this.schedule.cpIndex = -1;
             this.schedule.numGenerated = 0;
         }

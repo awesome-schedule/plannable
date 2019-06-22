@@ -52,6 +52,12 @@ declare global {
         timeMatrix: Readonly<Int32Array>;
         buildingList: ReadonlyArray<string>;
     }
+
+    // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
+    type NonFunctionPropertyNames<T> = {
+        [K in keyof T]: T[K] extends (...x: any[]) => any ? never : K
+    }[keyof T];
+    type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
 }
 
 declare module 'vue/types/vue' {

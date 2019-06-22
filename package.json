@@ -17,6 +17,7 @@
         "fast-fuzzy": "^1.8.6",
         "file-saver": "^2.0.2",
         "jquery": "^3.4.1",
+        "lz-string": "^1.4.4",
         "papaparse": "^4.6.3",
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",

@@ -15,13 +15,7 @@ import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Cour
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-// copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
-type NonFunctionPropertyNames<T> = {
-    [K in keyof T]: T[K] extends (...x: any[]) => any ? never : K
-}[keyof T];
-type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
-
 // modified from
 // https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#improved-control-over-mapped-type-modifiers
 type Mutable<T, F extends keyof T> = { -readonly [P in F]: T[P] } &

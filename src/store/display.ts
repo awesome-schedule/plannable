@@ -68,7 +68,7 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     }
 
     toJSON() {
-        return Object.assign({}, this.getDefault(), this);
+        return { ...this };
     }
 
     getDefault(): DisplayState {

@@ -217,7 +217,9 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     }
 
     toJSON() {
-        return Object.assign({}, this.getDefault(), this) as ScheduleStateJSON;
+        // exclude numGenerated
+        const { numGenerated, ...others } = this as NonFunctionProperties<ScheduleStore>;
+        return others as ScheduleStateJSON;
     }
 
     getDefault(): ScheduleState {

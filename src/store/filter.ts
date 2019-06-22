@@ -164,7 +164,6 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions());
  * the filter module handles the manipulation of filters
  */
 class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
-    [x: string]: any;
     /**
      * index 0 - 4: whether Mo - Fr are selected
      *
@@ -202,8 +201,10 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
     }
 
-    toJSON(): FilterStateJSON {
-        return Object.assign({}, this.getDefault(), this);
+    toJSON() {
+        // exclude sort modes
+        const { sortModes, ...others } = this as NonFunctionProperties<FilterStore>;
+        return others;
     }
 
     getDefault(): FilterState {

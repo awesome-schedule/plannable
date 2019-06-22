@@ -35,6 +35,7 @@
                             min="8:00"
                             max="22:00"
                             class="form-control form-control-sm"
+                            :disabled="isAllDayArray[i]"
                         />
                     </div>
                     <div class="col col-1 align-self-center">-</div>
@@ -45,6 +46,7 @@
                             min="8:00"
                             max="22:00"
                             class="form-control form-control-sm"
+                            :disabled="isAllDayArray[i]"
                         />
                     </div>
                     <div class="col col-1 align-self-center">
@@ -54,6 +56,15 @@
                             @click="removeTimeSlot(i)"
                         ></i>
                     </div>
+                </div>
+                <div class="form-check ml-2">
+                    <input
+                        v-model="isAllDayArray[i]"
+                        type="checkbox"
+                        class="form-check-input"
+                        @click="toggleAllDay(value, i)"
+                    />
+                    <label class="form-check-label" for="exampleCheck1">No Class All Day</label>
                 </div>
             </li>
             <li class="list-group-item">

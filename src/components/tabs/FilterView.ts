@@ -8,7 +8,7 @@ import Store from '@/store';
 
 /**
  * the component for editing and applying filters
- * @author Hanzhi Zhou, Kaiying Shan
+ * @author Hanzhi Zhou, Kaiying Shan, Zichao Hu
  */
 @Component({
     components: {
@@ -19,6 +19,8 @@ export default class FilterView extends Store {
     get days() {
         return DAYS;
     }
+    isAllDayArray: boolean[] = [];
+
     dragEnd() {
         if (this.filter.sortOptions.mode === 0) this.changeSorting(undefined);
     }
@@ -34,9 +36,24 @@ export default class FilterView extends Store {
 
     addTimeSlot() {
         this.filter.timeSlots.push([false, false, false, false, false, '', '']);
+        this.isAllDayArray.push(false);
     }
+
     removeTimeSlot(n: number) {
         this.filter.timeSlots.splice(n, 1);
+        this.isAllDayArray.splice(n, 1);
+    }
+
+    // disable the input groups and set default value
+    toggleAllDay(
+        value: [boolean, boolean, boolean, boolean, boolean, string, string],
+        index: number
+    ) {
+        const currentBool = this.isAllDayArray[index];
+        this.isAllDayArray.splice(index, 1, currentBool === false ? true : false);
+        value[5] = '08:00';
+        value[6] = '22:00';
+        console.log(this.isAllDayArray);
     }
 
     /**

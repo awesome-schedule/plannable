@@ -84,5 +84,12 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;
         result4.changeSort(sort, true);
+
+        schedule.events.length = 0;
+        schedule.addEvent('MoTuWeThFr 8:00AM - 8:00PM', false);
+
+        const r = generator.getSchedules(schedule);
+        expect(r.payload).toBeFalsy();
+        expect(r.level).toBe('error');
     });
 });

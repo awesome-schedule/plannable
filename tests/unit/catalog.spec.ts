@@ -35,5 +35,11 @@ describe('catalog test', () => {
         } catch (e) {
             expect(e.message).toBeTruthy();
         }
+        try {
+            window.catalog.initWorker();
+        } catch (e) {
+            // module not found
+        }
+        window.catalog.disposeWorker();
     });
 });

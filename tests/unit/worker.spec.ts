@@ -20,6 +20,10 @@ describe('worker', () => {
 
         expect(global.queue.pop()).toBeInstanceOf(Array);
 
+        global.msgHandler({ data: 'Vicente Ordonez-Roman' });
+
+        expect(global.queue.pop()).toBeInstanceOf(Array);
+
         try {
             await window.catalog.fuzzySearch('asd');
         } catch (err) {

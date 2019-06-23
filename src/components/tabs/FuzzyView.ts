@@ -16,32 +16,38 @@ import ClassList from '../ClassList.vue';
     }
 })
 export default class FuzzyView extends Store {
-    isEntering = false;
-    inputCourses: Course[] | null = null;
+    inputCourses: Course[] = [];
 
     /**
      * represent the current state of the fuzzy search component.
-     *
      * disable the input box if true
      */
     loading = false;
 
+    workerLoaded = !!window.catalog.worker;
+
     /**
      * initialize catalog's search worker if it is not yet initialized
      */
-    async created() {
+    async initWorker() {
         if (!window.catalog.worker) {
             this.loading = true;
             this.noti.info('Gathering data for fuzzy search...');
             await window.catalog.initWorker();
             this.noti.success('Success!', 2.5);
             this.loading = false;
+            this.workerLoaded = true;
         }
+    }
+
+    disposeWorker() {
+        window.catalog.disposeWorker();
+        this.workerLoaded = false;
     }
 
     /**
      * get classes that match the input query.
-     * Exit "entering" mode on falsy parameter (set `isEntering` to false)
+     * clear search results on falsy parameter.
      *
      * if a generated schedule is displayed, switch to proposed schedule,
      * because we're adding stuff to the proposed schedule
@@ -50,8 +56,7 @@ export default class FuzzyView extends Store {
      */
     async getClass(query: string) {
         if (!query) {
-            this.isEntering = false;
-            this.inputCourses = null;
+            this.inputCourses = [];
             return;
         }
         this.loading = true;
@@ -59,12 +64,15 @@ export default class FuzzyView extends Store {
         window.catalog.initWorker();
 
         console.time('query');
-        this.inputCourses = await window.catalog.fuzzySearch(query);
-        console.log(this.inputCourses);
-        console.timeEnd('query');
-
-        this.isEntering = true;
-        this.loading = false;
+        try {
+            this.inputCourses = await window.catalog.fuzzySearch(query);
+        } catch (e) {
+            this.noti.error(e.message);
+            console.log(e);
+        } finally {
+            this.loading = false;
+            console.timeEnd('query');
+        }
     }
 
     closeClassList() {

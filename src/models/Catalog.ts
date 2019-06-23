@@ -99,6 +99,13 @@ export default class Catalog {
         return Promise.resolve('ready') as Promise<'ready'>;
     }
 
+    public disposeWorker() {
+        if (this.worker) {
+            this.worker.terminate();
+            delete this.worker;
+        }
+    }
+
     public fromJSON(data: CatalogJSON) {
         return Catalog.fromJSON(data);
     }

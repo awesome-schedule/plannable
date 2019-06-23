@@ -15,12 +15,6 @@ import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Cour
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
-// modified from
-// https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#improved-control-over-mapped-type-modifiers
-type Mutable<T, F extends keyof T> = { -readonly [P in F]: T[P] } &
-    { [P in keyof Omit<T, F>]: T[P] };
-
 type Course = NonFunctionProperties<_Course>;
 type Section = NonFunctionProperties<_Section>;
 
@@ -147,9 +141,9 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                     // matching the whole query sentence would result in a higher score
                     const score = result.score ** 3 * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
 
-                    const tempObj = {
+                    const tempObj: ResultEntry<Course, 'title' | 'description'> = {
                         result,
-                        match: i === 0 ? 'title' : ('description' as 'title' | 'description')
+                        match: i === 0 ? 'title' : 'description'
                     };
 
                     if (courseMap[key]) {
@@ -176,9 +170,9 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         courseScores[key] = [0, score, 0];
                     }
 
-                    const tempObj = {
+                    const tempObj: ResultEntry<Section, 'topic' | 'instructors'> = {
                         result,
-                        match: i === 0 ? 'topic' : ('instructors' as 'topic' | 'instructors')
+                        match: i === 0 ? 'topic' : 'instructors'
                     };
 
                     if (sectionMap[key]) {

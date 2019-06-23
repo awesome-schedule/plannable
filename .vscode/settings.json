@@ -3,6 +3,7 @@
     "eslint.autoFixOnSave": true,
     "vetur.format.defaultFormatter.html": "prettier",
     "vetur.format.options.tabSize": 4,
+    "vetur.experimental.templateInterpolationService": true,
     "eslint.options": { "extensions": [".html", ".js", ".vue", ".jsx"] },
     "eslint.validate": [
         "javascript",

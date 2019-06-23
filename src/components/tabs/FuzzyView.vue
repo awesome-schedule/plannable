@@ -44,7 +44,7 @@
             fuzzy search is slow, we cannot provide real-time results. Please do not search for
             course number (e.g. 2102) here. It is not supported. This feature is memory intensive,
             which will cause some browsers to crash. Before enabling this feature, please make sure
-            that your computer has at least 8GB RAM and you are using Chrome.
+            that your computer has at least 8GB RAM and you are using Chrome or FireFox.
 
             <button
                 v-if="!workerLoaded"

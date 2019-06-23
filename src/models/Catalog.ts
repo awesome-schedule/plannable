@@ -155,10 +155,11 @@ export default class Catalog {
     public fuzzySearch(query: string) {
         const worker = this.worker;
         if (!worker) return Promise.reject('Worker not initialized!');
-        const promise = new Promise(resolve => {
+        const promise = new Promise((resolve, reject) => {
             worker.onmessage = ({ data }) => {
                 resolve((data as CourseConstructorArguments[]).map(x => new Course(...x)));
             };
+            worker.onerror = err => reject(err);
         });
         worker.postMessage(query);
         return promise as Promise<Course[]>;

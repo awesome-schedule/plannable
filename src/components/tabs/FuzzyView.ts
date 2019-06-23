@@ -66,9 +66,10 @@ export default class FuzzyView extends Store {
         console.time('query');
         try {
             this.inputCourses = await window.catalog.fuzzySearch(query);
-        } catch (e) {
+        } catch (err) {
+            const e: Error | ErrorEvent = err;
             this.noti.error(e.message);
-            console.log(e);
+            console.error(e);
         } finally {
             this.loading = false;
             console.timeEnd('query');

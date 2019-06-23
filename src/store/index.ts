@@ -341,6 +341,7 @@ class Store extends Vue {
         this.noti.notify(result);
         if (result.payload) this.parseStatus(currentSemester.id);
 
+        localStorage.setItem('currentSemester', JSON.stringify(currentSemester));
         this.status.loading = false;
     }
 

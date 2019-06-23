@@ -1,9 +1,10 @@
 /**
  * @module components/tabs
  */
-import { Component } from 'vue-property-decorator';
 import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
+import lz from 'lz-string';
+import { Component } from 'vue-property-decorator';
 
 /**
  * component for import/export/print schedules
@@ -55,6 +56,11 @@ export default class ExportView extends Store {
             toICal(this.schedule.currentSchedule),
             (this.exportICal ? this.exportICal : 'schedule') + '.ical'
         );
+    }
+    exportToURL() {
+        if (!this.semester.currentSemester) return;
+        const json = localStorage.getItem(this.semester.currentSemester.id);
+        if (json) window.location.search = 'config=' + lz.compressToEncodedURIComponent(json);
     }
     print() {
         window.print();

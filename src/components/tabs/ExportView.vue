@@ -46,7 +46,7 @@
                         placeholder="filename"
                         type="text"
                     />
-                    <button class="btn btn-outline-dark col-5" @click="saveToIcal">
+                    <button class="btn btn-outline-dark col-5" @click="saveToIcal()">
                         Export iCal
                     </button>
                 </div>
@@ -54,8 +54,13 @@
                     Google/Apple calendar support iCal files
                 </small>
             </li>
+            <!-- <li class="list-group-item">
+                <button class="btn btn-outline-primary w-100" @click="exportToURL()">
+                    Export as URL
+                </button>
+            </li> -->
             <li class="list-group-item">
-                <button class="btn btn-outline-primary w-100" @click="print">
+                <button class="btn btn-outline-primary w-100" @click="print()">
                     Print
                 </button>
             </li>

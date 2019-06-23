@@ -8,7 +8,7 @@
 
         <nav class="tab-bar bg-light">
             <div
-                class="tab-icon mt-0 mb-1"
+                class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
                 title="Select Classes"
                 @click="status.switchSideBar('showSelectClass')"
@@ -16,12 +16,12 @@
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
+                v-if="display.enableFuzzy"
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showFuzzy }"
                 title="Fuzzy Search"
                 @click="status.switchSideBar('showFuzzy')"
             >
-                <span style="font-size: 10px;" class="badge badge-info">Beta</span>
                 <i class="fas fa-search"></i>
             </div>
             <div
@@ -65,6 +65,7 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
+                v-if="display.enableLog"
                 title="Show logs"
                 :class="{ 'tab-icon-active': sideBar.showLog }"
                 class="tab-icon mb-4"

@@ -182,6 +182,30 @@
         </div>
         <ul class="list-group list-group-flush mx-1">
             <li class="list-group-item">
+                <div class="custom-control custom-checkbox">
+                    <input
+                        id="enable-log"
+                        v-model="display.enableLog"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label for="enable-log" class="custom-control-label">
+                        Enable log history
+                    </label>
+                </div>
+                <div class="custom-control custom-checkbox">
+                    <input
+                        id="enable-fuzzy"
+                        v-model="display.enableFuzzy"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label for="enable-fuzzy" class="custom-control-label">
+                        Enable fuzzy search
+                    </label>
+                </div>
+            </li>
+            <li class="list-group-item">
                 <button
                     class="btn btn-outline-info mb-1 w-100"
                     @click="selectSemester(semester.currentSemester, true)"

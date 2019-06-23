@@ -25,7 +25,6 @@ export interface DisplayState {
     // schedule compute options
     multiSelect: boolean;
     combineSections: boolean;
-
     maxNumSchedules: number;
 
     // search options
@@ -48,11 +47,16 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     public earliest = '08:00:00';
     public latest = '19:00:00';
     public standard = false;
+
     public multiSelect = true;
     public combineSections = true;
-    public maxNumSchedules = 200000;
+    public maxNumSchedules = 100000;
+
     public expandOnEntering = false;
     public numSearchResults = 6;
+
+    public enableLog = false;
+    public enableFuzzy = false;
 
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();
@@ -84,9 +88,11 @@ class Display implements StoreModule<DisplayState, DisplayState> {
             standard: false,
             multiSelect: true,
             combineSections: true,
-            maxNumSchedules: 200000,
+            maxNumSchedules: 100000,
             expandOnEntering: false,
-            numSearchResults: 6
+            numSearchResults: 6,
+            enableLog: false,
+            enableFuzzy: false
         };
     }
 }

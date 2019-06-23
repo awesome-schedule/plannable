@@ -5,7 +5,7 @@
         </div>
         <form class="mx-2">
             <div
-                class="form-group row no-gutters mt-2 mb-1"
+                class="form-group row no-gutters mt-2 mb-0"
                 title="Schedule grid earlier than this time won't be displayed if you don't have any class before that time"
             >
                 <label for="schedule-start" class="col-lg-6 col-form-label">
@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div
-                class="form-group row no-gutters mb-1"
+                class="form-group row no-gutters mb-0"
                 title="Schedule grid later than this time won't be displayed if you don't have any class before that time"
             >
                 <label for="schedule-end" class="col-lg-6 col-form-label">Schedule End</label>
@@ -34,7 +34,7 @@
                     />
                 </div>
             </div>
-            <div class="form-group row no-gutters mb-1" title="height of a class on schedule">
+            <div class="form-group row no-gutters mb-0" title="height of a class on schedule">
                 <label for="class-height" class="col-lg-6 col-form-label">Class Height</label>
                 <div class="col-lg-6">
                     <input
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div
-                class="form-group row no-gutters mb-3"
+                class="form-group row no-gutters mb-0"
                 title="height of an empty cell. You can specify a smaller value to compress empty space"
             >
                 <label for="grid-height" class="col-lg-6 col-form-label">Grid Height</label>
@@ -57,6 +57,77 @@
                         type="number"
                         class="form-control form-control-sm"
                     />
+                </div>
+            </div>
+            <div class="form-group row no-gutters mt-0 mb-1">
+                <div class="col-lg-6"><label for="displayTime" class="m-0">Show Time</label></div>
+                <div class="col-lg-6">
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="displayTime"
+                            v-model="display.showTime"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayTime" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row no-gutters mt-0 mb-1">
+                <div class="col-lg-6"><label for="displayRoom" class="m-0">Show Room</label></div>
+                <div class="col-lg-6">
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="displayRoom"
+                            v-model="display.showRoom"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayRoom" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row no-gutters mt-0 mb-1">
+                <div class="col-lg-6">
+                    <label for="displayInstructor" class="m-0">Show Instructor</label>
+                </div>
+                <div class="col-lg-6">
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="displayInstructor"
+                            v-model="display.showInstructor"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayInstructor" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row no-gutters mt-0 mb-2">
+                <div class="col-lg-6">
+                    <label for="displayInstructor" class="m-0">Time Options</label>
+                </div>
+                <div class="col-lg-6">
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input
+                            id="hr12"
+                            v-model="display.standard"
+                            :value="true"
+                            type="radio"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="hr12">12</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input
+                            id="hr24"
+                            v-model="display.standard"
+                            :value="false"
+                            type="radio"
+                            class="custom-control-input"
+                        />
+                        <label class="custom-control-label" for="hr24">24</label>
+                    </div>
                 </div>
             </div>
         </form>
@@ -107,69 +178,9 @@
             </div>
         </li>
         <div class="btn bg-info nav-btn">
-            Course Display
-        </div>
-        <ul class="list-group list-group-flush mx-1 mb-0">
-            <li class="list-group-item">
-                <div class="custom-control custom-checkbox">
-                    <input
-                        id="displayTime"
-                        v-model="display.showTime"
-                        type="checkbox"
-                        class="custom-control-input"
-                    />
-                    <label for="displayTime" class="custom-control-label">
-                        Show Time
-                    </label>
-                </div>
-                <div class="custom-control custom-checkbox">
-                    <input
-                        id="displayRoom"
-                        v-model="display.showRoom"
-                        type="checkbox"
-                        class="custom-control-input"
-                    />
-                    <label for="displayRoom" class="custom-control-label">
-                        Show Room
-                    </label>
-                </div>
-                <div class="custom-control custom-checkbox">
-                    <input
-                        id="displayInstructor"
-                        v-model="display.showInstructor"
-                        type="checkbox"
-                        class="custom-control-input"
-                    />
-                    <label for="displayInstructor" class="custom-control-label">
-                        Show instructor
-                    </label>
-                </div>
-            </li>
-        </ul>
-        <div class="btn bg-info nav-btn">
-            Time Options
+            Advanced
         </div>
         <ul class="list-group list-group-flush mx-1">
-            <li>
-                <div class="btn-group my-3 w-100" role="group">
-                    <button
-                        class="btn btn-secondary"
-                        :class="{ active: display.standard }"
-                        type="button"
-                        @click="display.standard = true"
-                    >
-                        12 Hour
-                    </button>
-                    <button
-                        class="btn btn-secondary"
-                        :class="{ active: !display.standard }"
-                        type="button"
-                        @click="display.standard = false"
-                    >
-                        24 Hour
-                    </button>
-                </div>
-            </li>
             <li class="list-group-item">
                 <button
                     class="btn btn-outline-info mb-1 w-100"

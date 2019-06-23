@@ -618,9 +618,9 @@ export default class Schedule {
         if (rendered)
             return (
                 this.events.some(x => x.days === key) ||
-                Object.values(this.days)
-                    .flat(2)
-                    .find(x => x.section.key === key) !== undefined
+                Object.values(this.days).some(blocks =>
+                    blocks.some(block => block.section.key === key)
+                )
             );
         else return key in this.All || this.events.some(x => x.days === key);
     }

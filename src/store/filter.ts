@@ -203,8 +203,8 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
     toJSON() {
         // exclude sort modes
-        const { sortModes, ...others } = this as NonFunctionProperties<FilterStore>;
-        return others;
+        const { sortModes, ...others } = this;
+        return others as FilterStateJSON;
     }
 
     getDefault(): FilterState {

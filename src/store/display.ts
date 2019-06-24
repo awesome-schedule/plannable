@@ -32,31 +32,19 @@ export interface DisplayState {
     numSearchResults: number;
 }
 
+// use class-interface merging
+// tslint:disable-next-line: no-empty-interface
+interface Display extends DisplayState {}
 /**
  * the display module handles global display options
  * @author Hanzhi Zhou
  */
 class Display implements StoreModule<DisplayState, DisplayState> {
     [x: string]: any;
-    public showTime = false;
-    public showRoom = true;
-    public showInstructor = true;
-    public showClasslistTitle = true;
-    public fullHeight = 40;
-    public partialHeight = 25;
-    public earliest = '08:00:00';
-    public latest = '19:00:00';
-    public standard = false;
 
-    public multiSelect = true;
-    public combineSections = true;
-    public maxNumSchedules = 100000;
-
-    public expandOnEntering = false;
-    public numSearchResults = 6;
-
-    public enableLog = false;
-    public enableFuzzy = false;
+    constructor() {
+        Object.assign(this, this.getDefault());
+    }
 
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();

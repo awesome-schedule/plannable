@@ -209,7 +209,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
     getDefault(): FilterState {
         return {
-            timeSlots: [] as [boolean, boolean, boolean, boolean, boolean, string, string][],
+            timeSlots: [],
             allowWaitlist: true,
             allowClosed: true,
             sortOptions: getDefaultOptions()

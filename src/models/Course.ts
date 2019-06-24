@@ -24,14 +24,11 @@ export interface CourseFields {
      */
     readonly number: number;
     /**
-     * One of the keys of `Meta.TYPES_PARSE`
-     *
-     * @see [[Meta.TYPES_PARSE]]
+     * One of the keys of [[Meta.TYPES_PARSE]]
      */
     readonly type: string;
     /**
      * Units (credits), usually a number, but could be a range represented as a string like value
-     *
      * @example
      * "1", "3", "2.5", "1 - 12"
      */

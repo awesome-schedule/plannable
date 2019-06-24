@@ -9,59 +9,58 @@ import Schedule, { ScheduleJSON } from '../models/Schedule';
 import { StoreModule, saveStatus } from '.';
 
 interface ScheduleStateBase {
-    [x: string]: any;
+    /**
+     * the index of the current schedule in the scheduleEvaluator.schedules array,
+     * only applicable when generated=true
+     */
     currentScheduleIndex: number;
+    /**
+     * the index of the active proposed
+     */
     proposedScheduleIndex: number;
+    /**
+     * The index of the proposed schedule corresponding to the generated schedules contained in
+     * `window.scheduleEvaluator`
+     */
     cpIndex: number;
+    /**
+     * indicates whether the currently showing schedule is the generated schedule
+     */
     generated: boolean;
+    /**
+     * the array of proposed schedules
+     */
+    proposedSchedules: any[];
 }
 
 export interface ScheduleState extends ScheduleStateBase {
-    currentSchedule: Schedule;
     proposedSchedules: Schedule[];
+    /**
+     * currently rendered schedule
+     */
+    currentSchedule: Schedule;
+    /**
+     * total number of generated schedules, has the same value as
+     * `window.scheduleEvaluator.size()`
+     */
+    numGenerated: number;
 }
 
 export interface ScheduleStateJSON extends ScheduleStateBase {
-    currentSchedule: ScheduleJSON;
     proposedSchedules: ScheduleJSON[];
 }
+
+// tslint:disable-next-line: no-empty-interface
+interface ScheduleStore extends ScheduleState {}
 
 /**
  * the schedule module provides methods to manipulate schedules
  * @author Hanzhi Zhou
  */
 class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
-    /**
-     * total number of generated schedules, has the same value as
-     * `window.scheduleEvaluator.size()`
-     */
-    numGenerated = 0;
-    /**
-     * the index of the current schedule in the scheduleEvaluator.schedules array,
-     * only applicable when generated=true
-     */
-    currentScheduleIndex = 0;
-    /**
-     * currently rendered schedule
-     */
-    currentSchedule = new Schedule();
-    /**
-     * the array of proposed schedules
-     */
-    proposedSchedules = [this.currentSchedule];
-    /**
-     * the index of the active proposed
-     */
-    proposedScheduleIndex = 0;
-    /**
-     * The index of the proposed schedule corresponding to the generated schedules contained in
-     * `window.scheduleEvaluator`
-     */
-    cpIndex = -1;
-    /**
-     * indicates whether the currently showing schedule is the generated schedule
-     */
-    generated = false;
+    constructor() {
+        Object.assign(this, this.getDefault());
+    }
     /**
      * the proposed schedule that is currently active
      */
@@ -217,8 +216,8 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     }
 
     toJSON() {
-        // exclude numGenerated
-        const { numGenerated, ...others } = this;
+        // exclude numGenerated and currentSchedule
+        const { numGenerated, currentSchedule, ...others } = this as ScheduleStore;
         return others as ScheduleStateJSON;
     }
 
@@ -230,7 +229,8 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
             proposedSchedules: [currentSchedule],
             proposedScheduleIndex: 0,
             cpIndex: -1,
-            generated: false
+            generated: false,
+            numGenerated: 0
         };
     }
 }

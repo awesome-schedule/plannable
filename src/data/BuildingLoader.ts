@@ -27,8 +27,8 @@ export interface BuildingListJSON extends Expirable {
  *
  * storage key: "timeMatrix"
  */
-export async function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>> {
-    const data = await loadFromCache<Int32Array, TimeMatrixJSON>(
+export function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>> {
+    return loadFromCache<Int32Array, TimeMatrixJSON>(
         'timeMatrix',
         requestTimeMatrix,
         x => Int32Array.from(x.timeMatrix),
@@ -41,7 +41,6 @@ export async function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>
             force
         }
     );
-    return data;
 }
 
 /**
@@ -51,8 +50,8 @@ export async function loadTimeMatrix(force = false): Promise<NotiMsg<Int32Array>
  *
  * storage key: "buildingList"
  */
-export async function loadBuildingList(force = false): Promise<NotiMsg<string[]>> {
-    const data = await loadFromCache<string[], BuildingListJSON>(
+export function loadBuildingList(force = false): Promise<NotiMsg<string[]>> {
+    return loadFromCache<string[], BuildingListJSON>(
         'buildingList',
         requestBuildingList,
         x => x.buildingList,
@@ -65,7 +64,7 @@ export async function loadBuildingList(force = false): Promise<NotiMsg<string[]>
             force
         }
     );
-    return data;
+
 }
 
 /**

@@ -9,8 +9,6 @@
  */
 import { Vertex, Graph } from './Graph';
 
-export type TypedIntArray = Int8Array | Int16Array | Int32Array;
-
 /**
  * An exact graph coloring algorithm using backtracking
  *
@@ -23,10 +21,10 @@ export type TypedIntArray = Int8Array | Int16Array | Int32Array;
  * @param numColors number of colors
  * @param v the number of vertex already colored
  */
-function graphColorBackTrack<T extends TypedIntArray>(
-    graph: T[],
-    colors: T,
-    colorOrder: T,
+function graphColorBackTrack(
+    graph: Int16Array[],
+    colors: Int16Array,
+    colorOrder: Int16Array,
     opCount: Int32Array,
     numColors: number,
     v: number
@@ -67,7 +65,7 @@ function graphColorBackTrack<T extends TypedIntArray>(
  * length must equal to the length of adjList.
  * @param colorOrder an array used to record the order of coloring
  */
-export function dsatur<T extends TypedIntArray>(adjList: T[], colors: T, colorOrder: T): number {
+export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: Int16Array): number {
     colors.fill(-1);
     if (!adjList.length) return 0;
 
@@ -139,7 +137,7 @@ export function dsatur<T extends TypedIntArray>(adjList: T[], colors: T, colorOr
  * length must equal to the length of adjList.
  * @returns total number of colors
  */
-export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors: T): number {
+export function graphColoringExact(adjList: Int16Array[], colors: Int16Array): number {
     // get a good initial color order using the DSATUR algorithm
     const dsaturOrder = colors.slice();
     colors.fill(-1);
@@ -157,6 +155,7 @@ export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors
         totalCount += opCount[0];
         opCount[0] = 0;
     }
+    // colorSpread(adjList, colors);
     // console.log('op count', totalCount);
     // console.timeEnd('coloring');
     return numColors;
@@ -167,7 +166,7 @@ export function graphColoringExact<T extends TypedIntArray>(adjList: T[], colors
  * @param adjList
  * @param colors
  */
-export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph<number> {
+export function colorDepthSearch(adjList: Int16Array[], colors: Int16Array): Graph<number> {
     const graph: Graph<number> = new Map();
     const vertices: Vertex<number>[] = [];
 
@@ -191,7 +190,7 @@ export function colorDepthSearch(adjList: Int8Array[], colors: Int8Array): Graph
     return graph;
 }
 
-export function recursiveLargestFirst<T extends TypedIntArray>(adjList: T[], colors: T): number {
+export function recursiveLargestFirst(adjList: Int16Array[], colors: Int16Array): number {
     colors.fill(-1);
     const notColored = new Set(colors.keys());
     const degrees = adjList.map((x, i) => x.length);

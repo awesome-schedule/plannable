@@ -124,7 +124,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -468,8 +468,8 @@ export default class Schedule {
                 }
             }
             // convert to typed array so its much faster
-            const fastGraph = graph.map(x => Int8Array.from(x));
-            const colors = new Int8Array(fastGraph.length);
+            const fastGraph = graph.map(x => Int16Array.from(x));
+            const colors = new Int16Array(fastGraph.length);
             const _ = graphColoringExact(fastGraph, colors);
             // const [colors, _] = dsatur(fastGraph);
 

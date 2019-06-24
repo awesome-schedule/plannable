@@ -54,8 +54,8 @@ export default class EventView extends Store {
             this.noti.error('Please check your start/end time');
             return;
         }
-        const start = this.eventTimeFrom.split(':').reduce((s, x, i) => +x * 60 * (1 - i) + s, 0);
-        const end = this.eventTimeTo.split(':').reduce((s, x, i) => +x * 60 * (1 - i) + s, 0);
+        const start = this.eventTimeFrom.split(':').reduce((s, x, i) => +x * 60 ** (1 - i) + s, 0);
+        const end = this.eventTimeTo.split(':').reduce((s, x, i) => +x * 60 ** (1 - i) + s, 0);
         if (start >= end) {
             this.noti.error('Start time must be earlier than end time');
             return;

@@ -113,7 +113,8 @@ export function saveStatus() {
         schedule: schedule.toJSON(),
         palette
     };
-    localStorage.setItem(currentSemester.id, JSON.stringify(obj));
+    const id = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : currentSemester.id;
+    localStorage.setItem(id as string, JSON.stringify(obj));
 }
 
 const jobs: { [x: string]: string } = {};
@@ -130,7 +131,7 @@ function delay(timeout: number) {
         descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
     ) => {
         const oldVal = descriptor.value!;
-        descriptor.value = function(...args: any[]) {
+        descriptor.value = function (...args: any[]) {
             if (jobs[propertyKey]) {
                 console.log('cancelled: ', propertyKey);
                 return;
@@ -174,7 +175,8 @@ class Store extends Vue {
      * @param semesterId
      */
     parseStatus(semesterId: string) {
-        const data = localStorage.getItem(semesterId);
+        const profId = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : semesterId;
+        const data = localStorage.getItem(profId as string);
         let parsed: any = {};
         if (data) {
             try {
@@ -328,7 +330,7 @@ class Store extends Vue {
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(currentSemester: SemesterJSON | null, force: boolean = false) {
+    async selectSemester(currentSemester: SemesterJSON | null, force: boolean = false, profId: string = '') {
         if (!currentSemester) {
             this.noti.error('No semester data! Please refresh this page');
             return;
@@ -337,9 +339,11 @@ class Store extends Vue {
         this.status.loading = true;
         window.scheduleEvaluator.clear();
 
+        const id = profId === '' ? currentSemester.id : profId;
+
         const result = await this.semester.selectSemester(currentSemester, force);
         this.noti.notify(result);
-        if (result.payload) this.parseStatus(currentSemester.id);
+        if (result.payload) this.parseStatus(id);
 
         localStorage.setItem('currentSemester', JSON.stringify(currentSemester));
         this.status.loading = false;

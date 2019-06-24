@@ -13,10 +13,10 @@ function randGraph(numNodes: number, probConn: number) {
             }
         }
     }
-    return graph.map(arr => new Int8Array(arr));
+    return graph.map(arr => new Int16Array(arr));
 }
 
-function verifyColoring<T extends Coloring.TypedIntArray>(adjList: T[], colors: T) {
+function verifyColoring(adjList: Int16Array[], colors: Int16Array) {
     let flag = true;
     for (let i = 0; i < adjList.length; i++) {
         const curCol = colors[i];
@@ -44,17 +44,17 @@ describe('graph verifier', () => {
                 const adjList = randGraph(numN, prob);
                 console.info('num nodes:', numN, 'prob conn:', prob);
 
-                const colors = new Int8Array(adjList.length);
+                const colors = new Int16Array(adjList.length);
                 const rlfColors = Coloring.recursiveLargestFirst(adjList, colors);
                 expect(verifyColoring(adjList, colors)).toBe(true);
 
-                const colors2 = new Int8Array(adjList.length);
+                const colors2 = new Int16Array(adjList.length);
                 const dColors = Coloring.dsatur(adjList, colors2, colors2.slice());
                 expect(verifyColoring(adjList, colors2)).toBe(true);
 
                 let bColors = -1;
                 if (numN <= 40) {
-                    const colors3 = new Int8Array(adjList.length);
+                    const colors3 = new Int16Array(adjList.length);
                     bColors = Coloring.graphColoringExact(adjList, colors3);
                     expect(verifyColoring(adjList, colors3)).toBe(true);
                     expect(bColors).toBeLessThanOrEqual(dColors);

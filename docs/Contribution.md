@@ -33,17 +33,17 @@ Hanzhi Zhou, Kaiying Shan, Elena Long
 
 The state management module handles global states and storage. See [src/store](/src/store)
 
-| Name         | Contributors |
-| ------------ | ------------ |
-| display      | Hanzhi Zhou  |
-| filter       | Hanzhi Zhou  |
-| index        | Hanzhi Zhou  |
-| modal        | Hanzhi Zhou  |
-| notification | Hanzhi Zhou  |
-| palette      | Hanzhi Zhou  |
-| schedule     | Hanzhi Zhou  |
-| semester     | Hanzhi Zhou  |
-| status       | Hanzhi Zhou  |
+| Name         | Contributors           |
+| ------------ | ---------------------- |
+| display      | Hanzhi Zhou            |
+| filter       | Hanzhi Zhou            |
+| index        | Hanzhi Zhou            |
+| modal        | Hanzhi Zhou            |
+| notification | Hanzhi Zhou            |
+| palette      | Hanzhi Zhou            |
+| schedule     | Hanzhi Zhou            |
+| semester     | Hanzhi Zhou            |
+| status       | Hanzhi Zhou, Zichao Hu |
 
 ### Child Components
 
@@ -54,7 +54,7 @@ Tabs are components holding the corresponding tab triggered when one clicks the 
 | Name        | Contributors                                     |
 | ----------- | ------------------------------------------------ |
 | ClassView   | Hanzhi Zhou                                      |
-| EventView   | Kaiying Shan                                     |
+| EventView   | Kaiying Shan, Hanzhi Zhou, Zichao Hu             |
 | DisplayView | Kaiying Shan, Hanzhi Zhou                        |
 | FilterView  | Hanzhi Zhou, Kaiying Shan                        |
 | PaletteView | Hanzhi Zhou                                      |
@@ -103,16 +103,24 @@ The underlying models and data structures are the core of our website. These are
 | ScheduleBlock | Hanzhi Zhou               |
 | Section       | Hanzhi Zhou               |
 
+### Workers
+
+Web workers are used to execute performance-expensive operations in dedicated process. See [src/workers](/src/workers)
+
+| Name         | Contributors              |
+| ------------ | ------------------------- |
+| SearchWorker | Kaiying Shan, Hanzhi Zhou |
+
 ### Utilities
 
 Commonly used utility functions, found in [src/utils](/src/utils)
 
-| Name         | Contributors              |
-| ------------ | ------------------------- |
-| ICal         | Kaiying Shan              |
-| Notification | Hanzhi Zhou               |
-| time         | Hanzhi Zhou, Kaiying Shan |
-| other        | Hanzhi Zhou, Kaiying Shan |
+| Name         | Contributors                         |
+| ------------ | ------------------------------------ |
+| ICal         | Kaiying Shan                         |
+| Notification | Hanzhi Zhou                          |
+| time         | Hanzhi Zhou, Kaiying Shan, Zichao Hu |
+| other        | Hanzhi Zhou, Kaiying Shan            |
 
 ### Data Fetching and Caching
 

@@ -34,7 +34,7 @@ import { getApi } from '.';
  * @param semester the semester to load data
  * @param force force update
  */
-export async function loadSemesterData(
+export function loadSemesterData(
     semester: SemesterJSON,
     force = false
 ): Promise<NotiMsg<Catalog>> {
@@ -68,15 +68,15 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
         ? axios.post(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
-              stringify({
-                  Semester: semester.id,
-                  Group: 'CS',
-                  Description: 'Yes',
-                  submit: 'Submit Data Request',
-                  Extended: 'Yes'
-              })
-          ) // use the mirror/local dev server
+            `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
+            stringify({
+                Semester: semester.id,
+                Group: 'CS',
+                Description: 'Yes',
+                submit: 'Submit Data Request',
+                Extended: 'Yes'
+            })
+        ) // use the mirror/local dev server
         : axios.get(`${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv`));
     console.timeEnd(`request semester ${semester.name} data`);
 

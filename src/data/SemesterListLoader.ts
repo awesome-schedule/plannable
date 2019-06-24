@@ -25,7 +25,7 @@ interface SemesterListJSON extends Expirable {
  *
  * storage key: "semesters"
  */
-export async function loadSemesterList(count = 5): Promise<NotiMsg<SemesterJSON[]>> {
+export function loadSemesterList(count = 5): Promise<NotiMsg<SemesterJSON[]>> {
     // load the cached list of semesters, if it exists
     return loadFromCache<SemesterJSON[], SemesterListJSON>(
         'semesters',

@@ -64,7 +64,19 @@
                     Print
                 </button>
             </li>
-            <li class="list-group-item"></li>
+            <li class="list-group-item" v-for="(id, idx) in profiles" v-bind:key="id">
+                {{ idx === 0 ? 'my schedules' : id }}
+                <button class="btn btn-outline-info" @click="selectProfile(id)">
+                    {{ id === (curId === '' ? compareId : curId) ? 'selected' : 'select' }}
+                </button>
+                <button
+                    v-if="idx !== 0"
+                    class="btn btn-outline-danger"
+                    @click="deleteProfile(id, idx)"
+                >
+                    delete
+                </button>
+            </li>
         </ul>
     </nav>
 </template>

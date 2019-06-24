@@ -113,7 +113,9 @@ export function saveStatus() {
         schedule: schedule.toJSON(),
         palette
     };
-    const id = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : currentSemester.id;
+    const id = localStorage.getItem('curProfileId')
+        ? localStorage.getItem('curProfileId')
+        : currentSemester.id;
     localStorage.setItem(id as string, JSON.stringify(obj));
 }
 
@@ -131,7 +133,7 @@ function delay(timeout: number) {
         descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
     ) => {
         const oldVal = descriptor.value!;
-        descriptor.value = function (...args: any[]) {
+        descriptor.value = function(...args: any[]) {
             if (jobs[propertyKey]) {
                 console.log('cancelled: ', propertyKey);
                 return;
@@ -175,8 +177,8 @@ class Store extends Vue {
      * @param semesterId
      */
     parseStatus(semesterId: string) {
-        const profId = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : semesterId;
-        const data = localStorage.getItem(profId as string);
+        const profId = localStorage.getItem('curProfileId') || semesterId;
+        const data = localStorage.getItem(profId);
         let parsed: any = {};
         if (data) {
             try {
@@ -330,7 +332,11 @@ class Store extends Vue {
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(currentSemester: SemesterJSON | null, force: boolean = false, profId: string = '') {
+    async selectSemester(
+        currentSemester: SemesterJSON | null,
+        force: boolean = false,
+        profId: string = ''
+    ) {
         if (!currentSemester) {
             this.noti.error('No semester data! Please refresh this page');
             return;

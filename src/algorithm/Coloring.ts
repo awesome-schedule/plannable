@@ -7,8 +7,7 @@
 /**
  *
  */
-import { Vertex, Graph, getConnectedComponents } from './Graph';
-import { calcOverlap } from '@/utils';
+import { Vertex, Graph } from './Graph';
 
 /**
  * An exact graph coloring algorithm using backtracking
@@ -160,49 +159,6 @@ export function graphColoringExact(adjList: Int16Array[], colors: Int16Array): n
     // console.log('op count', totalCount);
     // console.timeEnd('coloring');
     return numColors;
-}
-
-function colorSpread(_adjList: Int16Array[], colors: Int16Array) {
-    const components = getConnectedComponents(_adjList);
-    console.log(components);
-    for (const adjList of components) {
-        const sortedList = adjList
-            .map((list, i) => ({ i, list }))
-            .filter(({ list }) => list.length > 0)
-            .sort((a, b) => a.list.length - b.list.length);
-        const len = Math.max(...sortedList.map(({ i }) => colors[i]));
-        const occupied = new Map<number, [number, number]>();
-        for (const { i, list } of sortedList) {
-            const neighborColors = new Set(list.map(node => colors[node]));
-            let maxStart = 0,
-                maxEnd = 0;
-            let start = 0,
-                end = 0;
-
-            for (let j = 0; j < len; j++) {
-                if (
-                    neighborColors.has(j) ||
-                    list.some(node => {
-                        const a = occupied.get(node);
-                        return !!a && calcOverlap(start, end, ...a) > 0;
-                    })
-                ) {
-                    start = j + 1;
-                    end = j + 1;
-                } else {
-                    end += 1;
-                }
-                if (end - start > maxEnd - maxStart) {
-                    maxEnd = end;
-                    maxStart = start;
-                }
-            }
-            if (maxEnd - maxStart > 0 && maxStart < len && !neighborColors.has(maxStart)) {
-                occupied.set(i, [maxStart, maxEnd]);
-                colors[i] = maxStart;
-            }
-        }
-    }
 }
 
 /**

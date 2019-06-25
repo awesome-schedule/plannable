@@ -37,7 +37,8 @@ export default class ExportView extends Store {
     profileName(id: string) {
         const pf = localStorage.getItem(id);
         if (!pf) return '';
-        const name = JSON.parse(pf).name;
+        const parsed = JSON.parse(pf) as SemesterStorage;
+        const name = parsed.name;
         return name || id;
     }
 
@@ -136,12 +137,14 @@ export default class ExportView extends Store {
         this.edit[idx] = true;
     }
     finishEdit(id: string, idx: number) {
+        this.edit[idx] = false;
+        if (this.newName[idx] === '') return;
         const raw = localStorage.getItem(id);
         if (!raw) return;
         const parsed = JSON.parse(raw);
         parsed.name = this.newName[idx];
         localStorage.setItem(id, JSON.stringify(parsed));
-        this.edit[idx] = false;
+        this.newName[idx] === '';
     }
     print() {
         window.print();

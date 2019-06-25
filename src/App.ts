@@ -91,8 +91,32 @@ export default class App extends Store {
         }
     }
 
+    /**
+     * initialize profile storage if it does not exist already
+     */
     initProfiles() {
-        const profileName = localStorage.getItem('curProfileId');
+        const { semesters } = this.semester;
+        if (!semesters.length) return;
+
+        const name = localStorage.getItem('currentProfile');
+        const profiles = [];
+        if (!name) {
+            for (const sem of semesters.concat().reverse()) {
+                const oldData = localStorage.getItem(sem.id);
+                if (oldData) {
+                    localStorage.setItem(sem.name, oldData);
+                    localStorage.removeItem(sem.id);
+                    profiles.push(sem.name);
+                }
+            }
+
+            // latest semester
+            const latest = semesters[0].name;
+            localStorage.setItem('currentProfile', latest);
+            if (!profiles.includes(latest)) profiles.push(latest);
+
+            localStorage.setItem('profiles', JSON.stringify(profiles));
+        }
     }
 
     async created() {
@@ -111,7 +135,10 @@ export default class App extends Store {
         if (pay2.payload) window.buildingList = pay2.payload;
 
         this.noti.notify(pay3);
-        if (pay3.payload) await this.loadProfile(localStorage.getItem('curProfileId') || '');
+        if (pay3.payload) {
+            this.initProfiles();
+            await this.loadProfile(localStorage.getItem('currentProfile') || '');
+        }
 
         this.status.loading = false;
     }

@@ -91,6 +91,10 @@ export default class App extends Store {
         }
     }
 
+    initProfiles() {
+        const profileName = localStorage.getItem('curProfileId');
+    }
+
     async created() {
         this.status.loading = true;
 
@@ -107,7 +111,7 @@ export default class App extends Store {
         if (pay2.payload) window.buildingList = pay2.payload;
 
         this.noti.notify(pay3);
-        if (pay3.payload) await this.selectSemester();
+        if (pay3.payload) await this.loadProfile(localStorage.getItem('curProfileId') || '');
 
         this.status.loading = false;
     }

@@ -24,7 +24,7 @@ import modal from './modal';
 import noti from './notification';
 import palette, { PaletteState } from './palette';
 import schedule, { ScheduleStateJSON } from './schedule';
-import semester from './semester';
+import semester, { SemesterState } from './semester';
 import status from './status';
 
 export interface SemesterStorage {
@@ -107,17 +107,10 @@ export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState
 export function saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
-    const id = localStorage.getItem('curProfileId')
-        ? localStorage.getItem('curProfileId')
-        : currentSemester.id;
-    let name = currentSemester.name;
-    const raw = localStorage.getItem(id as string);
-    if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.name) {
-            name = parsed.name;
-        }
-    }
+
+    const name = localStorage.getItem('curProfileId');
+    if (!name) return;
+
     const obj: SemesterStorage = {
         name,
         currentSemester,
@@ -127,7 +120,7 @@ export function saveStatus() {
         palette
     };
 
-    localStorage.setItem(id as string, JSON.stringify(obj));
+    localStorage.setItem(name, JSON.stringify(obj));
 }
 
 const jobs: { [x: string]: string } = {};
@@ -158,6 +151,14 @@ function delay(timeout: number) {
     };
 }
 
+function isAncient(parsed: any): parsed is AncientStorage {
+    return !!parsed.currentSchedule && !!parsed.proposedSchedule;
+}
+
+function isLegacy(parsed: any): parsed is LegacyStorage {
+    return !!parsed.currentSchedule && !!parsed.proposedSchedules;
+}
+
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
@@ -185,21 +186,45 @@ class Store extends Vue {
      *
      * If no local data is present, default values will be assigned.
      *
-     * @param semesterId
+     * @param profId
      */
-    parseStatus(semesterId: string) {
-        const profId = localStorage.getItem('curProfileId') || semesterId;
-        const data = localStorage.getItem(profId);
-        let parsed: any = {};
-        if (data) {
-            try {
-                parsed = JSON.parse(data);
-            } catch (e) {
-                console.error(e);
+    async loadProfile(profId: string | SemesterJSON) {
+        if (!this.semester.semesters.length) {
+            this.noti.error('No semester data! Please refresh this page');
+            return;
+        }
+
+        let parsed: Partial<AncientStorage> | Partial<LegacyStorage> | Partial<SemesterState> = {};
+        if (typeof profId === 'string') {
+            const data = localStorage.getItem(profId);
+            if (data) {
+                try {
+                    parsed = JSON.parse(data);
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        } else {
+            const rawProfs = localStorage.getItem('profiles');
+            if (rawProfs) {
+                const profiles = JSON.parse(rawProfs);
+                if (profiles instanceof Array) {
+                    for (const profileName of profiles) {
+                        const data = localStorage.getItem(profileName);
+                        if (data) {
+                            parsed = JSON.parse(data);
+                            const { currentSemester } = parsed;
+                            if (currentSemester && currentSemester.id === profId.id) break;
+                        }
+                    }
+                }
             }
         }
+
         window.scheduleEvaluator.clear();
-        if (parsed.currentSchedule && parsed.proposedSchedule) {
+        this.semester.selectSemester(parsed.currentSemester || this.semester.semesters[0]);
+
+        if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};
             const oldStore: Partial<LegacyStorage> & AncientStorage = ancient;
             oldStore.proposedScheduleIndex = 0;
@@ -208,14 +233,13 @@ class Store extends Vue {
             this.filter.fromJSON(oldStore);
             this.schedule.fromJSON(oldStore);
             this.palette.fromJSON(oldStore.currentSchedule || { savedColors: {} });
-        } else if (parsed.currentSchedule && parsed.proposedSchedules) {
-            const oldStore: LegacyStorage = parsed;
-            this.display.fromJSON(oldStore.display || {});
-            this.filter.fromJSON(oldStore);
-            this.schedule.fromJSON(oldStore);
-            this.palette.fromJSON(oldStore.currentSchedule || { savedColors: {} });
+        } else if (isLegacy(parsed)) {
+            this.display.fromJSON(parsed.display || {});
+            this.filter.fromJSON(parsed);
+            this.schedule.fromJSON(parsed);
+            this.palette.fromJSON(parsed.currentSchedule || { savedColors: {} });
         } else {
-            const newStore: SemesterStorage = parsed;
+            const newStore = parsed as SemesterStorage;
             this.display.fromJSON(newStore.display || {});
             this.filter.fromJSON(newStore.filter || {});
             this.schedule.fromJSON(newStore.schedule || {});
@@ -343,17 +367,13 @@ class Store extends Vue {
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(currentSemester?: SemesterJSON, force = false, profileName?: string) {
+    async selectSemester(currentSemester?: SemesterJSON, force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
+
         if (!currentSemester) currentSemester = this.semester.semesters[0];
-        if (!profileName) {
-            const temp = localStorage.getItem('curProfileId');
-            if (temp) profileName = temp;
-            else profileName = currentSemester.id;
-        }
         if (force) this.noti.info(`Updating ${currentSemester.name} data...`);
 
         this.status.loading = true;
@@ -361,9 +381,8 @@ class Store extends Vue {
 
         const result = await this.semester.selectSemester(currentSemester, force);
         this.noti.notify(result);
-        if (result.payload) this.parseStatus(profileName);
+        if (result.payload) this.loadProfile(currentSemester);
 
-        localStorage.setItem('currentSemester', JSON.stringify(currentSemester));
         this.status.loading = false;
     }
 

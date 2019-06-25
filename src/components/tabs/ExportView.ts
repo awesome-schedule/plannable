@@ -16,15 +16,19 @@ export default class ExportView extends Store {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
 
-    curProfileName =
-        localStorage.getItem('curProfileId') ||
-        (this.semester.currentSemester && this.semester.currentSemester.id) ||
-        '';
+    curProfileName = '';
 
     count = 0;
     profiles: string[] = JSON.parse(localStorage.getItem('profiles') || '[]');
     edit: boolean[] = [];
     newName: string[] = [];
+
+    created() {
+        this.curProfileName =
+            localStorage.getItem('curProfileId') ||
+            (this.semester.currentSemester && this.semester.currentSemester.id) ||
+            '';
+    }
 
     get compareId() {
         const id = localStorage.getItem('curProfileId')
@@ -43,7 +47,6 @@ export default class ExportView extends Store {
 
     onUploadJson(event: { target: EventTarget | null }) {
         const { files } = event.target as HTMLInputElement;
-
         if (!files) return;
 
         const reader = new FileReader();
@@ -59,15 +62,14 @@ export default class ExportView extends Store {
                     return;
                 }
 
-                if (
-                    this.semester.currentSemester &&
-                    this.profiles.indexOf(this.semester.currentSemester.id) === -1
-                ) {
-                    this.profiles.push(this.semester.currentSemester.id);
-                    this.edit.push(false);
-                    this.newName.push('');
-                    // this.edit[this.semester.currentSemester.id] = false;
-                }
+                // if (
+                //     this.semester.currentSemester &&
+                //     this.profiles.indexOf(this.semester.currentSemester.id) === -1
+                // ) {
+                //     this.profiles.push(this.semester.currentSemester.id);
+                //     this.edit.push(false);
+                //     this.newName.push('');
+                // }
 
                 const profileName = raw_data.name || files[0].name;
                 this.profiles.push(profileName);
@@ -77,15 +79,16 @@ export default class ExportView extends Store {
                 this.curProfileName = profileName;
                 localStorage.setItem('curProfileId', profileName);
 
+                // backward compatibility
                 if (!raw_data.name) {
                     raw_data.name = profileName;
                     result = JSON.stringify(raw_data);
                 }
 
                 localStorage.setItem(profileName, result);
-
-                this.selectSemester(raw_data.currentSemester, false, profileName);
                 localStorage.setItem('profiles', JSON.stringify(this.profiles));
+
+                this.loadProfile(profileName);
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -117,7 +120,7 @@ export default class ExportView extends Store {
         const item = localStorage.getItem(profileName);
         if (!item) return;
         const raw = JSON.parse(item);
-        this.selectSemester(raw.currentSemester, false, profileName);
+        this.loadProfile(profileName);
         this.curProfileName = profileName;
         localStorage.setItem('curProfileId', profileName);
     }

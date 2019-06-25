@@ -182,51 +182,54 @@ class Store extends Vue {
     }
 
     /**
-     * recover all store modules' states from the localStorage, given the semester id
-     *
-     * If no local data is present, default values will be assigned.
-     *
-     * @param profId
+     * recover all store modules' states from the localStorage, given the target.
+     *  - If target is a string, it will be treated as a profile name
+     *  - If target is a `SemesterJSON`, the first profile corresponding to that semester will be loaded.
+     * @param target
      */
-    async loadProfile(profId: string | SemesterJSON) {
+    async loadProfile(target: string | SemesterJSON) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
 
+        window.scheduleEvaluator.clear();
+
         let parsed: Partial<AncientStorage> | Partial<LegacyStorage> | Partial<SemesterState> = {};
-        if (typeof profId === 'string') {
-            const data = localStorage.getItem(profId);
+        if (typeof target === 'string') {
+            const data = localStorage.getItem(target);
             if (data) {
                 try {
                     parsed = JSON.parse(data);
                 } catch (e) {
                     console.error(e);
                 }
-                localStorage.setItem('currentProfile', profId);
+                localStorage.setItem('currentProfile', target);
             }
+            await this.semester.selectSemester(
+                parsed.currentSemester || this.semester.semesters[0]
+            );
         } else {
-            const rawProfs = localStorage.getItem('profiles');
-            if (rawProfs) {
-                const profiles = JSON.parse(rawProfs);
-                if (profiles instanceof Array) {
-                    for (const profileName of profiles) {
-                        const data = localStorage.getItem(profileName);
-                        if (data) {
-                            parsed = JSON.parse(data);
-                            const { currentSemester } = parsed;
-                            if (currentSemester && currentSemester.id === profId.id) break;
-                        }
+            const profiles: string[] = JSON.parse(localStorage.getItem('profiles') || '[]') || [];
+            for (const profileName of profiles) {
+                const data = localStorage.getItem(profileName);
+                if (data) {
+                    const temp = JSON.parse(data);
+                    const { currentSemester } = parsed;
+                    if (currentSemester && currentSemester.id === target.id) {
+                        parsed = temp;
+                        break;
                     }
                 }
-                if (parsed.currentSemester) {
-                    localStorage.setItem('currentProfile', parsed.currentSemester.name);
-                }
             }
+            if (!parsed.currentSemester) {
+                // todo: name clashing
+                profiles.push(target.name);
+                localStorage.setItem('profiles', JSON.stringify(profiles));
+            }
+            localStorage.setItem('currentProfile', target.name);
+            await this.semester.selectSemester(target);
         }
-
-        window.scheduleEvaluator.clear();
-        await this.semester.selectSemester(parsed.currentSemester || this.semester.semesters[0]);
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};

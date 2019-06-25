@@ -53,6 +53,7 @@ export default class ExportView extends Store {
                     localStorage.setItem(profileName, result);
                 }
 
+                // todo: name clashing
                 this.profiles.push(profileName);
                 this.newName.push(null);
                 this.currentProfile = profileName;

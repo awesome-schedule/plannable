@@ -107,19 +107,8 @@ export default class App extends Store {
         if (pay2.payload) window.buildingList = pay2.payload;
 
         this.noti.notify(pay3);
-        if (pay3.payload) {
-            const str = localStorage.getItem('currentSemester');
-            if (str) {
-                const currentSemester: SemesterJSON = JSON.parse(str);
-                if (this.semester.semesters.some(s => s.id === currentSemester.id)) {
-                    await this.selectSemester(currentSemester);
-                } else {
-                    await this.selectSemester(this.semester.semesters[0]);
-                }
-            } else {
-                await this.selectSemester(this.semester.semesters[0]);
-            }
-        }
+        if (pay3.payload) await this.selectSemester();
+
         this.status.loading = false;
     }
 }

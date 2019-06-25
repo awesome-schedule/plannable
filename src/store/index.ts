@@ -28,7 +28,7 @@ import semester from './semester';
 import status from './status';
 
 export interface SemesterStorage {
-    name: string,
+    name: string;
     currentSemester: SemesterJSON;
     display: DisplayState;
     filter: FilterStateJSON;
@@ -144,7 +144,7 @@ function delay(timeout: number) {
         descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
     ) => {
         const oldVal = descriptor.value!;
-        descriptor.value = function (...args: any[]) {
+        descriptor.value = function(...args: any[]) {
             if (jobs[propertyKey]) {
                 console.log('cancelled: ', propertyKey);
                 return;
@@ -343,24 +343,25 @@ class Store extends Vue {
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(
-        currentSemester: SemesterJSON | null,
-        force: boolean = false,
-        profId: string = ''
-    ) {
-        if (!currentSemester) {
+    async selectSemester(currentSemester?: SemesterJSON, force = false, profileName?: string) {
+        if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
+        if (!currentSemester) currentSemester = this.semester.semesters[0];
+        if (!profileName) {
+            const temp = localStorage.getItem('curProfileId');
+            if (temp) profileName = temp;
+            else profileName = currentSemester.id;
+        }
         if (force) this.noti.info(`Updating ${currentSemester.name} data...`);
+
         this.status.loading = true;
         window.scheduleEvaluator.clear();
 
-        const id = profId === '' ? currentSemester.id : profId;
-
         const result = await this.semester.selectSemester(currentSemester, force);
         this.noti.notify(result);
-        if (result.payload) this.parseStatus(id);
+        if (result.payload) this.parseStatus(profileName);
 
         localStorage.setItem('currentSemester', JSON.stringify(currentSemester));
         this.status.loading = false;

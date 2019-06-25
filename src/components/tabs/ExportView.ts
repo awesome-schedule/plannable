@@ -16,21 +16,20 @@ export default class ExportView extends Store {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
 
-    curId =
+    curProfileName =
         localStorage.getItem('curProfileId') ||
         (this.semester.currentSemester && this.semester.currentSemester.id) ||
         '';
 
-    // curId = '';
     count = 0;
     profiles: string[] = JSON.parse(localStorage.getItem('profiles') || '[]');
-    edit: boolean[] = new Array(this.profiles.length);
-    newName: string[] = new Array(this.profiles.length);
+    edit: boolean[] = [];
+    newName: string[] = [];
 
     get compareId() {
         const id = localStorage.getItem('curProfileId')
             ? localStorage.getItem('curProfileId')
-            : this.curId;
+            : this.curProfileName;
         return id;
     }
 
@@ -42,14 +41,14 @@ export default class ExportView extends Store {
     }
 
     onUploadJson(event: { target: EventTarget | null }) {
-        const input = event.target as HTMLInputElement;
+        const { files } = event.target as HTMLInputElement;
 
-        if (!input.files) return;
+        if (!files) return;
 
         const reader = new FileReader();
         reader.onload = () => {
             if (reader.result) {
-                let raw_data: SemesterStorage, result;
+                let raw_data: SemesterStorage, result: string;
                 try {
                     result = reader.result.toString();
                     raw_data = JSON.parse(result);
@@ -69,22 +68,22 @@ export default class ExportView extends Store {
                     // this.edit[this.semester.currentSemester.id] = false;
                 }
 
-                const id = input.files ? input.files[0].name : 'profile' + this.count++;
-                this.profiles.push(id);
+                const profileName = raw_data.name || files[0].name;
+                this.profiles.push(profileName);
                 this.edit.push(false);
                 this.newName.push('');
-                // this.edit[id] = false;
-                this.curId = id;
-                localStorage.setItem('curProfileId', id);
+
+                this.curProfileName = profileName;
+                localStorage.setItem('curProfileId', profileName);
 
                 if (!raw_data.name) {
-                    raw_data.name = id;
+                    raw_data.name = profileName;
                     result = JSON.stringify(raw_data);
                 }
 
-                localStorage.setItem(id, result);
+                localStorage.setItem(profileName, result);
 
-                this.selectSemester(raw_data.currentSemester, false, id);
+                this.selectSemester(raw_data.currentSemester, false, profileName);
                 localStorage.setItem('profiles', JSON.stringify(this.profiles));
             } else {
                 this.noti.warn('File is empty!');
@@ -92,7 +91,7 @@ export default class ExportView extends Store {
         };
 
         try {
-            reader.readAsText(input.files[0]);
+            reader.readAsText(files[0]);
         } catch (error) {
             console.error(error);
             this.noti.error(error.message);
@@ -101,7 +100,7 @@ export default class ExportView extends Store {
     saveToJson() {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(
-            this.curId ? this.curId : this.semester.currentSemester.id
+            this.curProfileName ? this.curProfileName : this.semester.currentSemester.id
         );
         if (json) savePlain(json, (this.exportJson || 'schedule') + '.json');
     }
@@ -110,19 +109,19 @@ export default class ExportView extends Store {
     }
     exportToURL() {
         if (!this.semester.currentSemester) return;
-        const json = localStorage.getItem(this.curId || this.semester.currentSemester.id);
+        const json = localStorage.getItem(this.curProfileName || this.semester.currentSemester.id);
         if (json) window.location.search = 'config=' + lz.compressToEncodedURIComponent(json);
     }
-    selectProfile(id: string) {
-        const item = localStorage.getItem(id);
+    selectProfile(profileName: string) {
+        const item = localStorage.getItem(profileName);
         if (!item) return;
         const raw = JSON.parse(item);
-        this.selectSemester(raw.currentSemester, false, id);
-        this.curId = id;
-        localStorage.setItem('curProfileId', id);
+        this.selectSemester(raw.currentSemester, false, profileName);
+        this.curProfileName = profileName;
+        localStorage.setItem('curProfileId', profileName);
     }
     deleteProfile(id: string, idx: number) {
-        if (this.curId === id) {
+        if (this.curProfileName === id) {
             this.selectProfile(this.profiles[idx - 1]);
         }
         localStorage.removeItem(id);

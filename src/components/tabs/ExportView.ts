@@ -44,10 +44,6 @@ export default class ExportView extends Store {
                 }
 
                 const profileName = raw_data.name || files[0].name;
-                this.profiles.push(profileName);
-                this.newName.push(null);
-
-                this.currentProfile = profileName;
 
                 // backward compatibility
                 if (!raw_data.name) {
@@ -57,6 +53,9 @@ export default class ExportView extends Store {
                     localStorage.setItem(profileName, result);
                 }
 
+                this.profiles.push(profileName);
+                this.newName.push(null);
+                this.currentProfile = profileName;
                 this.loadProfile(profileName);
             } else {
                 this.noti.warn('File is empty!');
@@ -88,16 +87,18 @@ export default class ExportView extends Store {
     selectProfile(profileName: string) {
         const item = localStorage.getItem(profileName);
         if (!item) return;
-        this.loadProfile(profileName);
         this.currentProfile = profileName;
+        this.loadProfile(profileName);
     }
-    deleteProfile(id: string, idx: number) {
-        if (this.currentProfile === id) {
-            this.selectProfile(this.profiles[idx - 1]);
-        }
-        localStorage.removeItem(id);
+    deleteProfile(name: string, idx: number) {
         this.profiles.splice(idx, 1);
         this.newName.splice(idx, 1);
+        if (idx === this.profiles.length) {
+            this.selectProfile(this.profiles[idx - 1]);
+        } else {
+            this.selectProfile(this.profiles[idx]);
+        }
+        localStorage.removeItem(name);
     }
     finishEdit(oldName: string, idx: number) {
         if (!this.newName[idx]) return;

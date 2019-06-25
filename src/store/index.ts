@@ -203,6 +203,7 @@ class Store extends Vue {
                 } catch (e) {
                     console.error(e);
                 }
+                localStorage.setItem('currentProfile', profId);
             }
         } else {
             const rawProfs = localStorage.getItem('profiles');
@@ -218,11 +219,14 @@ class Store extends Vue {
                         }
                     }
                 }
+                if (parsed.currentSemester) {
+                    localStorage.setItem('currentProfile', parsed.currentSemester.name);
+                }
             }
         }
 
         window.scheduleEvaluator.clear();
-        this.semester.selectSemester(parsed.currentSemester || this.semester.semesters[0]);
+        await this.semester.selectSemester(parsed.currentSemester || this.semester.semesters[0]);
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};

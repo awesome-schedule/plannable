@@ -65,7 +65,34 @@
                 </button>
             </li>
             <li class="list-group-item" v-for="(id, idx) in profiles" v-bind:key="id">
-                {{ idx === 0 ? 'my schedules' : id }}
+                <p>{{ profileName(id) }}</p>
+                <input
+                    :id="'name' + idx"
+                    v-if="edit[idx]"
+                    v-model="newName[idx]"
+                    type="text"
+                    style="background-color:red"
+                />
+                <button
+                    @click="
+                        enableEdit(idx);
+                        $forceUpdate();
+                    "
+                    v-if="!edit[idx]"
+                    class="btn btn-primary"
+                >
+                    edit name
+                </button>
+                <button
+                    @click="
+                        finishEdit(id, idx);
+                        $forceUpdate();
+                    "
+                    v-if="edit[idx]"
+                    class="btn btn-secondary"
+                >
+                    edit
+                </button>
                 <button class="btn btn-outline-info" @click="selectProfile(id)">
                     {{ id === (curId === '' ? compareId : curId) ? 'selected' : 'select' }}
                 </button>

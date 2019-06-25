@@ -28,6 +28,7 @@ import semester from './semester';
 import status from './status';
 
 export interface SemesterStorage {
+    name: string,
     currentSemester: SemesterJSON;
     display: DisplayState;
     filter: FilterStateJSON;
@@ -106,14 +107,23 @@ export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState
 export function saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
+    const id = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : currentSemester.id;
+    let name = currentSemester.name;
+    const raw = localStorage.getItem(id as string);
+    if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.name) {
+            name = parsed.name;
+        }
+    }
     const obj: SemesterStorage = {
+        name,
         currentSemester,
         display,
         filter,
         schedule: schedule.toJSON(),
         palette
     };
-    const id = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : currentSemester.id;
     localStorage.setItem(id as string, JSON.stringify(obj));
 }
 

@@ -5,6 +5,7 @@ import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
+import { parse } from 'path';
 
 /**
  * component for import/export/print schedules
@@ -20,10 +21,19 @@ export default class ExportView extends Store {
     // curId = '';
     count = 0;
     profiles: string[] = localStorage.getItem('profiles') ? JSON.parse(localStorage.getItem('profiles') as string) : [];
+    edit: boolean[] = new Array(this.profiles.length);
+    newName: string[] = new Array(this.profiles.length);
 
     get compareId() {
         const id = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : this.curId;
         return id;
+    }
+
+    profileName(id: string) {
+        const pf = localStorage.getItem(id);
+        if (!pf) return '';
+        const name = JSON.parse(pf).name;
+        return name || id;
     }
 
     onUploadJson(event: { target: EventTarget | null }) {
@@ -46,12 +56,24 @@ export default class ExportView extends Store {
 
                 if (this.semester.currentSemester && this.profiles.indexOf(this.semester.currentSemester.id) === -1) {
                     this.profiles.push(this.semester.currentSemester.id);
+                    this.edit.push(false);
+                    this.newName.push('');
+                    // this.edit[this.semester.currentSemester.id] = false;
                 }
 
                 const id = input.files ? input.files[0].name : 'profile' + this.count++;
                 this.profiles.push(id);
+                this.edit.push(false);
+                this.newName.push('');
+                // this.edit[id] = false;
                 this.curId = id;
                 localStorage.setItem('curProfileId', id);
+
+                if (!raw_data.name) {
+                    raw_data.name = id;
+                    result = JSON.stringify(raw_data);
+                }
+
                 localStorage.setItem(id, result);
                 this.selectSemester(raw_data.currentSemester, false, id);
                 localStorage.setItem('profiles', JSON.stringify(this.profiles));
@@ -97,7 +119,21 @@ export default class ExportView extends Store {
         }
         localStorage.removeItem(id);
         this.profiles.splice(idx, 1);
+        this.edit.splice(idx, 1);
+        this.newName.splice(idx, 1);
+        // delete property
         localStorage.setItem('profiles', JSON.stringify(this.profiles));
+    }
+    enableEdit(idx: number) {
+        this.edit[idx] = true;
+    }
+    finishEdit(id: string, idx: number) {
+        const raw = localStorage.getItem(id);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        parsed.name = this.newName[idx];
+        localStorage.setItem(id, JSON.stringify(parsed));
+        this.edit[idx] = false;
     }
     print() {
         window.print();

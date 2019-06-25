@@ -4,8 +4,7 @@
 import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
-import { Component } from 'vue-property-decorator';
-import { parse } from 'path';
+import { Component, Watch } from 'vue-property-decorator';
 
 /**
  * component for import/export/print schedules
@@ -16,33 +15,15 @@ export default class ExportView extends Store {
     exportJson: string = 'schedule';
     exportICal: string = 'schedule';
 
-    curProfileName = '';
-
+    currentProfile: string = '';
     count = 0;
-    profiles: string[] = JSON.parse(localStorage.getItem('profiles') || '[]');
-    edit: boolean[] = [];
-    newName: string[] = [];
+    profiles: string[] = [];
+    newName: (string | null)[] = [];
 
     created() {
-        this.curProfileName =
-            localStorage.getItem('curProfileId') ||
-            (this.semester.currentSemester && this.semester.currentSemester.id) ||
-            '';
-    }
-
-    get compareId() {
-        const id = localStorage.getItem('curProfileId')
-            ? localStorage.getItem('curProfileId')
-            : this.curProfileName;
-        return id;
-    }
-
-    profileName(id: string) {
-        const pf = localStorage.getItem(id);
-        if (!pf) return '';
-        const parsed = JSON.parse(pf) as SemesterStorage;
-        const name = parsed.name;
-        return name || id;
+        this.currentProfile = localStorage.getItem('currentProfile') || '';
+        this.profiles = JSON.parse(localStorage.getItem('profiles') || '[]');
+        this.newName = this.profiles.map(() => null);
     }
 
     onUploadJson(event: { target: EventTarget | null }) {
@@ -62,31 +43,19 @@ export default class ExportView extends Store {
                     return;
                 }
 
-                // if (
-                //     this.semester.currentSemester &&
-                //     this.profiles.indexOf(this.semester.currentSemester.id) === -1
-                // ) {
-                //     this.profiles.push(this.semester.currentSemester.id);
-                //     this.edit.push(false);
-                //     this.newName.push('');
-                // }
-
                 const profileName = raw_data.name || files[0].name;
                 this.profiles.push(profileName);
-                this.edit.push(false);
-                this.newName.push('');
+                this.newName.push(null);
 
-                this.curProfileName = profileName;
-                localStorage.setItem('curProfileId', profileName);
+                this.currentProfile = profileName;
 
                 // backward compatibility
                 if (!raw_data.name) {
                     raw_data.name = profileName;
-                    result = JSON.stringify(raw_data);
+                    localStorage.setItem(profileName, JSON.stringify(raw_data));
+                } else {
+                    localStorage.setItem(profileName, result);
                 }
-
-                localStorage.setItem(profileName, result);
-                localStorage.setItem('profiles', JSON.stringify(this.profiles));
 
                 this.loadProfile(profileName);
             } else {
@@ -104,7 +73,7 @@ export default class ExportView extends Store {
     saveToJson() {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(
-            this.curProfileName ? this.curProfileName : this.semester.currentSemester.id
+            this.currentProfile ? this.currentProfile : this.semester.currentSemester.id
         );
         if (json) savePlain(json, (this.exportJson || 'schedule') + '.json');
     }
@@ -113,42 +82,56 @@ export default class ExportView extends Store {
     }
     exportToURL() {
         if (!this.semester.currentSemester) return;
-        const json = localStorage.getItem(this.curProfileName || this.semester.currentSemester.id);
+        const json = localStorage.getItem(this.currentProfile || this.semester.currentSemester.id);
         if (json) window.location.search = 'config=' + lz.compressToEncodedURIComponent(json);
     }
     selectProfile(profileName: string) {
         const item = localStorage.getItem(profileName);
         if (!item) return;
-        const raw = JSON.parse(item);
         this.loadProfile(profileName);
-        this.curProfileName = profileName;
-        localStorage.setItem('curProfileId', profileName);
+        this.currentProfile = profileName;
     }
     deleteProfile(id: string, idx: number) {
-        if (this.curProfileName === id) {
+        if (this.currentProfile === id) {
             this.selectProfile(this.profiles[idx - 1]);
         }
         localStorage.removeItem(id);
         this.profiles.splice(idx, 1);
-        this.edit.splice(idx, 1);
         this.newName.splice(idx, 1);
-        // delete property
-        localStorage.setItem('profiles', JSON.stringify(this.profiles));
     }
-    enableEdit(idx: number) {
-        this.edit[idx] = true;
-    }
-    finishEdit(id: string, idx: number) {
-        this.edit[idx] = false;
-        if (this.newName[idx] === '') return;
-        const raw = localStorage.getItem(id);
+    finishEdit(oldName: string, idx: number) {
+        if (!this.newName[idx]) return;
+
+        const raw = localStorage.getItem(oldName);
         if (!raw) return;
+
+        const newName = this.newName[idx];
+        if (!newName) return this.noti.error('Name cannot be empty!');
+
+        const prevIdx = this.profiles.findIndex(n => n === newName);
+        if (prevIdx !== -1 && prevIdx !== idx) return this.noti.error('Duplicated name!');
+
+        if (oldName === this.currentProfile) this.currentProfile = newName;
+
         const parsed = JSON.parse(raw);
-        parsed.name = this.newName[idx];
-        localStorage.setItem(id, JSON.stringify(parsed));
-        this.newName[idx] === '';
+        parsed.name = newName;
+        localStorage.setItem(newName, JSON.stringify(parsed));
+        localStorage.removeItem(oldName);
+
+        this.$set(this.profiles, idx, newName);
+        this.$set(this.newName, idx, null);
     }
     print() {
         window.print();
+    }
+
+    @Watch('currentProfile')
+    private curProfWatch() {
+        localStorage.setItem('currentProfile', this.currentProfile);
+    }
+
+    @Watch('profiles', { deep: true })
+    private profsWatch() {
+        localStorage.setItem('profiles', JSON.stringify(this.profiles));
     }
 }

@@ -67,47 +67,37 @@
             <div class="btn bg-info nav-btn">
                 Different Configurations
             </div>
-            <li class="list-group-item" v-for="(id, idx) in profiles" v-bind:key="id">
-                <p>{{ profileName(id) }}</p>
+            <li v-for="(name, idx) in profiles" :key="name" class="list-group-item">
+                <p>{{ name }}</p>
 
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <button
-                            @click="
-                                enableEdit(idx);
-                                $forceUpdate();
-                            "
-                            v-if="!edit[idx]"
+                            v-if="newName[idx] === null"
                             class="btn btn-outline-secondary"
+                            @click="$set(newName, idx, name)"
                         >
                             edit name
                         </button>
-                        <button
-                            @click="
-                                finishEdit(id, idx);
-                                $forceUpdate();
-                            "
-                            v-if="edit[idx]"
-                            class="btn btn-secondary"
-                        >
+                        <button v-else class="btn btn-secondary" @click="finishEdit(name, idx)">
                             edit
                         </button>
                     </div>
                     <input
-                        class="form-control"
-                        v-if="edit[idx]"
+                        v-if="newName[idx] !== null"
                         v-model="newName[idx]"
+                        class="form-control"
                         type="text"
-                        :placeholder="profileName(id)"
+                        :placeholder="name"
                     />
                     <div class="input-group-append">
-                        <button class="btn btn-outline-info" @click="selectProfile(id)">
-                            {{ id === (curId === '' ? compareId : curId) ? 'selected' : 'select' }}
+                        <button class="btn btn-outline-info" @click="selectProfile(name)">
+                            {{ name === currentProfile ? 'selected' : 'select' }}
                         </button>
                         <button
-                            v-if="idx !== 0"
+                            v-if="profiles.length !== 1"
                             class="btn btn-outline-danger"
-                            @click="deleteProfile(id, idx)"
+                            @click="deleteProfile(name, idx)"
                         >
                             delete
                         </button>

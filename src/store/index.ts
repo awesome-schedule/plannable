@@ -108,7 +108,7 @@ export function saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
 
-    const name = localStorage.getItem('curProfileId');
+    const name = localStorage.getItem('currentProfile');
     if (!name) return;
 
     const obj: SemesterStorage = {

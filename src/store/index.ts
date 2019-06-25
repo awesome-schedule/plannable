@@ -107,7 +107,9 @@ export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState
 export function saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
-    const id = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : currentSemester.id;
+    const id = localStorage.getItem('curProfileId')
+        ? localStorage.getItem('curProfileId')
+        : currentSemester.id;
     let name = currentSemester.name;
     const raw = localStorage.getItem(id as string);
     if (raw) {
@@ -124,6 +126,7 @@ export function saveStatus() {
         schedule: schedule.toJSON(),
         palette
     };
+
     localStorage.setItem(id as string, JSON.stringify(obj));
 }
 
@@ -185,8 +188,8 @@ class Store extends Vue {
      * @param semesterId
      */
     parseStatus(semesterId: string) {
-        const profId = localStorage.getItem('curProfileId') ? localStorage.getItem('curProfileId') : semesterId;
-        const data = localStorage.getItem(profId as string);
+        const profId = localStorage.getItem('curProfileId') || semesterId;
+        const data = localStorage.getItem(profId);
         let parsed: any = {};
         if (data) {
             try {
@@ -340,7 +343,11 @@ class Store extends Vue {
      * @param currentSemester the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(currentSemester: SemesterJSON | null, force: boolean = false, profId: string = '') {
+    async selectSemester(
+        currentSemester: SemesterJSON | null,
+        force: boolean = false,
+        profId: string = ''
+    ) {
         if (!currentSemester) {
             this.noti.error('No semester data! Please refresh this page');
             return;

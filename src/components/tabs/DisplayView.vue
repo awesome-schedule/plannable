@@ -60,8 +60,8 @@
                 </div>
             </div>
             <div class="form-group row no-gutters mt-0 mb-1">
-                <div class="col-lg-6"><label for="displayTime" class="m-0">Show Time</label></div>
-                <div class="col-lg-6">
+                <div class="col-md-6"><label for="displayTime" class="m-0">Show Time</label></div>
+                <div class="col-md-6">
                     <div class="custom-control custom-checkbox ml-1">
                         <input
                             id="displayTime"
@@ -74,8 +74,8 @@
                 </div>
             </div>
             <div class="form-group row no-gutters mt-0 mb-1">
-                <div class="col-lg-6"><label for="displayRoom" class="m-0">Show Room</label></div>
-                <div class="col-lg-6">
+                <div class="col-md-6"><label for="displayRoom" class="m-0">Show Room</label></div>
+                <div class="col-md-6">
                     <div class="custom-control custom-checkbox ml-1">
                         <input
                             id="displayRoom"
@@ -88,10 +88,10 @@
                 </div>
             </div>
             <div class="form-group row no-gutters mt-0 mb-1">
-                <div class="col-lg-6">
+                <div class="col-md-6">
                     <label for="displayInstructor" class="m-0">Show Instructor</label>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-md-6">
                     <div class="custom-control custom-checkbox ml-1">
                         <input
                             id="displayInstructor"
@@ -178,7 +178,7 @@
             </div>
         </li>
         <div class="btn bg-info nav-btn">
-            Advanced
+            Advanced Features
         </div>
         <ul class="list-group list-group-flush mx-1">
             <li class="list-group-item">

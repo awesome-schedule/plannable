@@ -53,13 +53,19 @@ class Profile {
         this.profiles.splice(idx, 1, newName);
     }
 
+    /**
+     * delete a profile
+     * @param name
+     * @param idx
+     * @returns the name of the previous profile if the deleted profile is selected
+     */
     deleteProfile(name: string, idx: number) {
         this.profiles.splice(idx, 1);
         if (name === this.current) {
             if (idx === this.profiles.length) {
-                return this.profiles[idx - 1];
+                return (this.current = this.profiles[idx - 1]);
             } else {
-                return this.profiles[idx];
+                return (this.current = this.profiles[idx]);
             }
         }
         localStorage.removeItem(name);

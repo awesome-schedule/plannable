@@ -1,7 +1,7 @@
 /**
  * @module components/tabs
  */
-import Store, { SemesterStorage } from '@/store';
+import Store from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
@@ -30,6 +30,7 @@ export default class ExportView extends Store {
             if (reader.result) {
                 const msg = this.profile.addProfile(reader.result.toString(), files[0].name);
                 if (msg.level === 'success' && !msg.payload) this.loadProfile();
+                else if (msg.level === 'error') this.noti.notify(msg);
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -60,9 +61,11 @@ export default class ExportView extends Store {
         }
     }
     deleteProfile(name: string, idx: number) {
-        this.newName.splice(idx, 1);
-        const prof = this.profile.deleteProfile(name, idx);
-        if (prof) return;
+        if (confirm(`Are you sure to delete ${name}?`)) {
+            this.newName.splice(idx, 1);
+            const prof = this.profile.deleteProfile(name, idx);
+            if (prof) this.loadProfile();
+        }
     }
     selectProfile(profileName: string) {
         const item = localStorage.getItem(profileName);

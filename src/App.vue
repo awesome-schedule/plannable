@@ -248,7 +248,6 @@
 .icon-disabled {
     color: #999999;
 }
-.sidebar-nocol,
 .sidebar {
     position: fixed;
     top: 0;
@@ -260,7 +259,7 @@
     width: 19vw;
     scrollbar-width: thin !important;
 }
-.sidebar .list-group-item {
+.sidebar .list-group-item:not(.list-group-item-action) {
     background-color: #f8f8f8;
 }
 .tab-bar {
@@ -309,8 +308,7 @@
     .tab-bar {
         width: 10vw;
     }
-    .sidebar,
-    .sidebar-nocol {
+    .sidebar {
         left: 10vw;
         width: 90vw;
     }
@@ -322,12 +320,10 @@
         color: #1f1f1f;
     }
 }
-.sidebar::-webkit-scrollbar,
-.sidebar-nocol::-webkit-scrollbar {
+.sidebar::-webkit-scrollbar {
     width: 5px;
 }
-.sidebar::-webkit-scrollbar-thumb,
-.sidebar-nocol::-webkit-scrollbar-thumb {
+.sidebar::-webkit-scrollbar-thumb {
     width: 5px;
     background-color: #ccc;
 }

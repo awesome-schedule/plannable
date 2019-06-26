@@ -64,43 +64,56 @@
                     Print
                 </button>
             </li>
-            <div class="btn bg-info nav-btn">
-                Different Configurations
-            </div>
-            <li v-for="(name, idx) in profile.profiles" :key="name" class="list-group-item">
-                <p>{{ name }}</p>
-
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button
-                            v-if="newName[idx] === null"
-                            class="btn btn-outline-secondary"
-                            @click="$set(newName, idx, name)"
-                        >
-                            edit name
-                        </button>
-                        <button v-else class="btn btn-secondary" @click="finishEdit(name, idx)">
-                            edit
-                        </button>
+        </ul>
+        <div class="btn bg-info nav-btn mt-2">
+            Profile Management
+        </div>
+        <ul class="list-group list-group-flush" style="font-size: 14px">
+            <li
+                v-for="(name, idx) in profile.profiles"
+                :key="name"
+                class="list-group-item list-group-item-action pl-3 pr-2"
+                :class="{ sel: name === profile.current }"
+            >
+                <div class="form-row no-gutters justify-content-between">
+                    <div class="col-8">
+                        <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
+                            {{ name }}
+                        </span>
+                        <input
+                            v-else
+                            v-model="newName[idx]"
+                            class="form-control form-control-sm"
+                            type="text"
+                            @key.enter="finishEdit(name, idx)"
+                        />
                     </div>
-                    <input
-                        v-if="newName[idx] !== null"
-                        v-model="newName[idx]"
-                        class="form-control"
-                        type="text"
-                        :placeholder="name"
-                    />
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-info" @click="selectProfile(name)">
-                            {{ name === profile.current ? 'selected' : 'select' }}
-                        </button>
-                        <button
-                            v-if="profile.profiles.length !== 1"
-                            class="btn btn-outline-danger"
+                    <div class="col-4 text-right" style="font-size: 16px">
+                        <i
+                            class="click-icon mr-2"
+                            :class="
+                                name === profile.current ? 'far fa-check-square' : 'far fa-square'
+                            "
+                            @click="selectProfile(name)"
+                        ></i>
+                        <i
+                            v-if="newName[idx] === null"
+                            class="fas fa-edit mr-2 click-icon"
+                            title="rename this profile"
+                            @click="$set(newName, idx, name)"
+                        ></i>
+                        <i
+                            v-else
+                            class="fas fa-check mr-2 click-icon"
+                            title="confirm renaming"
+                            @click="finishEdit(name, idx)"
+                        ></i>
+                        <i
+                            v-if="profile.profiles.length > 1"
+                            class="fa fa-times click-icon"
+                            title="delete this profile"
                             @click="deleteProfile(name, idx)"
-                        >
-                            delete
-                        </button>
+                        ></i>
                     </div>
                 </div>
             </li>
@@ -109,3 +122,9 @@
 </template>
 
 <script lang="ts" src="./ExportView.ts"></script>
+
+<style scoped>
+.sel {
+    background-color: #b8daff;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-    <nav class="bg-light sidebar-nocol">
+    <nav class="bg-light sidebar">
         <div class="btn bg-info nav-btn">
             Log History
         </div>

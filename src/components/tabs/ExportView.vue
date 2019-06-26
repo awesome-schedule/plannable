@@ -68,7 +68,7 @@
         <div class="btn bg-info nav-btn mt-2">
             Profile Management
         </div>
-        <ul class="list-group list-group-flush" style="font-size: 14px">
+        <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
             <li
                 v-for="(name, idx) in profile.profiles"
                 :key="name"
@@ -102,19 +102,19 @@
                         ></i>
                         <i
                             v-if="newName[idx] === null"
-                            class="fas fa-edit mr-2 click-icon"
+                            class="fas fa-edit click-icon"
                             title="rename this profile"
                             @click="$set(newName, idx, name)"
                         ></i>
                         <i
                             v-else
-                            class="fas fa-check mr-2 click-icon"
+                            class="fas fa-check ml-1 click-icon"
                             title="confirm renaming"
                             @click="finishEdit(name, idx)"
                         ></i>
                         <i
                             v-if="profile.profiles.length > 1"
-                            class="fa fa-times click-icon"
+                            class="fa fa-times ml-1 click-icon"
                             title="delete this profile"
                             @click="deleteProfile(name, idx)"
                         ></i>

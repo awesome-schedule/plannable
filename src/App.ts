@@ -77,19 +77,23 @@ export default class App extends Store {
         const config = new URLSearchParams(window.location.search).get('config');
 
         if (config) {
-            let raw_data: SemesterStorage, result;
             try {
-                result = lz.decompressFromEncodedURIComponent(config);
-                raw_data = JSON.parse(result);
-            } catch (error) {
-                console.error(error);
-                this.noti.error(error.message + ': File Format Error');
-                return;
+                const msg = this.profile.addProfile(
+                    lz.decompressFromEncodedURIComponent(config),
+                    'url loaded'
+                );
+                if (msg.level === 'error') this.noti.notify(msg);
+                else {
+                    this.noti.success('Configuration loaded from URL!', 3, true);
+                    await this.loadProfile();
+                    return true;
+                }
+            } catch (err) {
+                console.error(err);
+                this.noti.notify(err.message);
             }
-            localStorage.setItem(raw_data.currentSemester.id, result);
-            await this.selectSemester(raw_data.currentSemester);
-            this.noti.success('Configuration loaded from URL!', 3, true);
         }
+        return false;
     }
 
     async created() {
@@ -109,8 +113,13 @@ export default class App extends Store {
 
         this.noti.notify(pay3);
         if (pay3.payload) {
-            this.profile.initProfiles(this.semester.semesters);
-            await this.loadProfile(this.profile.current);
+            const urlResult = await this.loadConfigFromURL();
+            if (!urlResult) {
+                this.profile.initProfiles(this.semester.semesters);
+                await this.loadProfile(this.profile.current);
+            } else {
+                // window.location.search = '';
+            }
         }
 
         this.status.loading = false;

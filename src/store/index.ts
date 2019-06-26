@@ -14,19 +14,17 @@ import { Component, Watch } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
-import Event from '../models/Event';
-import { CourseStatus, DAYS } from '../models/Meta';
+import { CourseStatus } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { to12hr } from '../utils';
 import display, { DisplayState } from './display';
 import filter, { FilterStateJSON } from './filter';
 import modal from './modal';
 import noti from './notification';
 import palette, { PaletteState } from './palette';
+import profile from './profile';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
-import profile from './profile';
 
 export interface SemesterStorage {
     name: string;

@@ -51,10 +51,12 @@ class Profile {
 
     deleteProfile(name: string, idx: number) {
         this.profiles.splice(idx, 1);
-        if (idx === this.profiles.length) {
-            this.selectProfile(this.profiles[idx - 1 < 0 ? 0 : idx - 1]);
-        } else {
-            this.selectProfile(this.profiles[idx]);
+        if (name === this.current) {
+            if (idx === this.profiles.length) {
+                this.selectProfile(this.profiles[idx - 1]);
+            } else {
+                this.selectProfile(this.profiles[idx]);
+            }
         }
         localStorage.removeItem(name);
     }

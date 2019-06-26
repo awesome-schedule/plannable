@@ -33,24 +33,29 @@ export default class ExportView extends Store {
                     raw_data = JSON.parse(result);
                 } catch (error) {
                     console.error(error);
-                    this.noti.error(error.message + ': File Format Error');
+                    this.noti.error(error.message + ': Format Error');
                     return;
                 }
 
                 const profileName = raw_data.name || files[0].name;
+                const prevIdx = this.profile.profiles.findIndex(p => p === profileName);
+                if (prevIdx !== -1) {
+                    if (!confirm(`A profile named ${profileName} already exists! Override it?`))
+                        return;
+                } else {
+                    this.profile.profiles.push(profileName);
+                    this.newName.push(null);
+                }
 
-                // backward compatibility
                 if (!raw_data.name) {
+                    // backward compatibility
                     raw_data.name = profileName;
                     localStorage.setItem(profileName, JSON.stringify(raw_data));
                 } else {
                     localStorage.setItem(profileName, result);
                 }
-
-                // todo: name clashing
-                this.profile.profiles.push(profileName);
-                this.newName.push(null);
                 this.profile.current = profileName;
+                if (prevIdx !== -1) this.loadProfile(this.profile.current);
             } else {
                 this.noti.warn('File is empty!');
             }

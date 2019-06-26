@@ -68,7 +68,14 @@
                 Different Configurations
             </div>
             <li v-for="(name, idx) in profile.profiles" :key="name" class="list-group-item">
-                <p>{{ name }}</p>
+                <input
+                    v-if="newName[idx] !== null"
+                    v-model="newName[idx]"
+                    class="form-control mb-3"
+                    type="text"
+                    :placeholder="name"
+                />
+                <p v-else>{{ name }}</p>
 
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -83,13 +90,7 @@
                             edit
                         </button>
                     </div>
-                    <input
-                        v-if="newName[idx] !== null"
-                        v-model="newName[idx]"
-                        class="form-control"
-                        type="text"
-                        :placeholder="name"
-                    />
+
                     <div class="input-group-append">
                         <button class="btn btn-outline-info" @click="profile.selectProfile(name)">
                             {{ name === profile.current ? 'selected' : 'select' }}

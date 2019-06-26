@@ -276,55 +276,14 @@ class Store extends Vue {
         return true;
     }
 
-    /**
-     * Preprocess the time filters and convert them to an array of event.
-     * returns null on parsing error
-     */
-    computeFilter(): Event[] | void {
-        const { timeSlots } = this.filter;
-        const events: Event[] = [];
-
-        // no time slots => no time filter
-        if (!timeSlots.length) return events;
-        for (const time of timeSlots) {
-            let days = '';
-            for (let j = 0; j < 5; j++) {
-                if (time[j]) days += DAYS[j];
-            }
-
-            if (!days) continue;
-
-            const startTime = time[5].split(':');
-            const endTime = time[6].split(':');
-            if (
-                isNaN(+startTime[0]) ||
-                isNaN(+startTime[1]) ||
-                isNaN(+endTime[0]) ||
-                isNaN(+endTime[1])
-            ) {
-                return this.noti.error('Invalid time input.');
-            }
-            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
-            events.push(new Event(days, false));
-        }
-
-        if (!events.length) return this.noti.error('You need to select at least one day!');
-        return events;
-    }
-
-    getGeneratorOptions(): GeneratorOptions | undefined {
+    getGeneratorOptions(): GeneratorOptions | void {
         const filteredStatus: CourseStatus[] = [];
         if (!this.filter.allowWaitlist) filteredStatus.push('Wait List');
         if (!this.filter.allowClosed) filteredStatus.push('Closed');
 
-        const timeSlots = this.computeFilter();
-
-        // falsy value implies that
-        // there's an error processing time filters. Don't continue if that's the case
-        if (!timeSlots) {
-            this.noti.error(`Invalid time filter`);
-            return;
-        }
+        const msg = this.filter.computeFilter();
+        const timeSlots = msg.payload;
+        if (!timeSlots) return this.noti.notify(msg);
 
         if (!this.validateSortOptions()) return;
 

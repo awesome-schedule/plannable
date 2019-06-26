@@ -12,6 +12,10 @@ import ScheduleEvaluator, {
     SortOption
 } from '../algorithm/ScheduleEvaluator';
 import { StoreModule } from '.';
+import { DAYS } from '@/models/Meta';
+import { NotiMsg } from './notification';
+import { to12hr } from '@/utils';
+import Event from '@/models/Event';
 
 interface FilterStateBase {
     [x: string]: any;
@@ -190,6 +194,59 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                 ' You can drag the sorting options to change their order.'
         }
     ];
+
+    /**
+     * Preprocess the time filters and convert them to an array of event.
+     * returns null on parsing error
+     */
+    computeFilter(): NotiMsg<Event[]> {
+        const events: Event[] = [];
+
+        // no time slots => no time filter
+        if (!this.timeSlots.length)
+            return {
+                msg: 'no filters',
+                level: 'success',
+                payload: events
+            };
+
+        for (const time of this.timeSlots) {
+            let days = '';
+            for (let j = 0; j < 5; j++) {
+                if (time[j]) days += DAYS[j];
+            }
+
+            if (!days) continue;
+
+            const startTime = time[5].split(':');
+            const endTime = time[6].split(':');
+            if (
+                isNaN(+startTime[0]) ||
+                isNaN(+startTime[1]) ||
+                isNaN(+endTime[0]) ||
+                isNaN(+endTime[1])
+            ) {
+                return {
+                    msg: 'Invalid time input!',
+                    level: 'error'
+                };
+            }
+            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
+            events.push(new Event(days, false));
+        }
+
+        if (!events.length)
+            return {
+                msg: 'You need to select at least one day!',
+                level: 'error'
+            };
+
+        return {
+            msg: 'success',
+            level: 'success',
+            payload: events
+        };
+    }
 
     fromJSON(obj: Partial<FilterStateJSON>) {
         const defaultVal = this.getDefault();

@@ -78,14 +78,18 @@
                 <div class="form-row no-gutters justify-content-between">
                     <div class="col-8">
                         <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
-                            {{ name }}
+                            <span>{{ name }}</span> <br />
+                            <small v-for="field in getMeta(name)" :key="field" class="text-muted"
+                                >{{ field }} <br />
+                            </small>
                         </span>
                         <input
                             v-else
                             v-model="newName[idx]"
                             class="form-control form-control-sm"
                             type="text"
-                            @key.enter="finishEdit(name, idx)"
+                            @keyup.enter="finishEdit(name, idx)"
+                            @keyup.esc="$set(newName, idx, null)"
                         />
                     </div>
                     <div class="col-4 text-right" style="font-size: 16px">

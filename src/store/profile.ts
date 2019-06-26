@@ -26,9 +26,16 @@ class Profile {
             for (const sem of semesters.concat().reverse()) {
                 const oldData = localStorage.getItem(sem.id);
                 if (oldData) {
-                    localStorage.removeItem(sem.id);
-                    localStorage.setItem(sem.name, oldData);
-                    profiles.push(sem.name);
+                    let parsed: Partial<SemesterStorage> | null = null;
+                    try {
+                        parsed = JSON.parse(oldData);
+                    } catch (e) {}
+                    if (parsed) {
+                        parsed.name = sem.name;
+                        localStorage.removeItem(sem.id);
+                        localStorage.setItem(sem.name, JSON.stringify(parsed));
+                        profiles.push(sem.name);
+                    }
                 }
             }
 

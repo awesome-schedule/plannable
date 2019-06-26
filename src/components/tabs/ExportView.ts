@@ -1,11 +1,10 @@
 /**
  * @module components/tabs
  */
-import Store from '@/store';
+import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
-import $ from 'jquery';
 
 /**
  * component for import/export/print schedules
@@ -20,6 +19,24 @@ export default class ExportView extends Store {
     created() {
         this.newName = this.profile.profiles.map(() => null);
     }
+    getMeta(name: string) {
+        const data = localStorage.getItem(name);
+        if (data) {
+            let parsed: Partial<SemesterStorage> | null = null;
+            try {
+                parsed = JSON.parse(data);
+            } catch (err) {
+                console.log(err);
+            }
+            if (parsed) {
+                const meta = [];
+                if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
+                if (parsed.currentSemester) meta.push(parsed.currentSemester.name);
+                return meta;
+            }
+        }
+        return ['Data corruption'];
+    }
 
     onUploadJson(event: { target: EventTarget | null }) {
         const { files } = event.target as HTMLInputElement;
@@ -29,8 +46,9 @@ export default class ExportView extends Store {
         reader.onload = () => {
             if (reader.result) {
                 const msg = this.profile.addProfile(reader.result.toString(), files[0].name);
-                if (msg.level === 'success' && !msg.payload) this.loadProfile();
-                else if (msg.level === 'error') this.noti.notify(msg);
+                if (msg.level === 'error') this.noti.notify(msg);
+                if (msg.payload) this.newName.push(null);
+                this.loadProfile();
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -78,7 +96,7 @@ export default class ExportView extends Store {
         if (!raw) return;
 
         const newName = this.newName[idx];
-        if (!newName) return this.noti.error('Name cannot be empty!');
+        if (!newName) return this.$set(this.newName, idx, null);
         if (newName !== oldName) {
             const prevIdx = this.profile.profiles.findIndex(n => n === newName);
             if (prevIdx !== -1) return this.noti.error('Duplicated name!');

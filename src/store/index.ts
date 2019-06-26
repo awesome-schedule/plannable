@@ -25,8 +25,9 @@ import profile from './profile';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
+import Expirable from '@/data/Expirable';
 
-export interface SemesterStorage {
+export interface SemesterStorage extends Expirable {
     name: string;
     currentSemester: SemesterJSON;
     display: DisplayState;
@@ -163,6 +164,7 @@ class Store extends Vue {
 
         const obj: SemesterStorage = {
             name,
+            modified: new Date().toJSON(),
             currentSemester,
             display,
             filter,
@@ -331,7 +333,7 @@ class Store extends Vue {
             }
         }
         // no profile for target semester exists. let's create one
-        if (!parsed.currentSemester) {
+        if (!parsed.name || !parsed.currentSemester) {
             if (profiles.includes(target.name)) {
                 if (
                     !confirm(
@@ -348,8 +350,12 @@ class Store extends Vue {
             }
             parsed.currentSemester = target;
             localStorage.setItem(target.name, JSON.stringify(parsed));
+            this.profile.current = target.name;
+        } else {
+            this.profile.current = parsed.name;
         }
-        await this.loadProfile(target.name);
+
+        await this.loadProfile();
         this.status.loading = false;
     }
 }

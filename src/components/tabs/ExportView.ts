@@ -27,35 +27,8 @@ export default class ExportView extends Store {
         const reader = new FileReader();
         reader.onload = () => {
             if (reader.result) {
-                let raw_data: SemesterStorage, result: string;
-                try {
-                    result = reader.result.toString();
-                    raw_data = JSON.parse(result);
-                } catch (error) {
-                    console.error(error);
-                    this.noti.error(error.message + ': Format Error');
-                    return;
-                }
-
-                const profileName = raw_data.name || files[0].name;
-                const prevIdx = this.profile.profiles.findIndex(p => p === profileName);
-                if (prevIdx !== -1) {
-                    if (!confirm(`A profile named ${profileName} already exists! Override it?`))
-                        return;
-                } else {
-                    this.profile.profiles.push(profileName);
-                    this.newName.push(null);
-                }
-
-                if (!raw_data.name) {
-                    // backward compatibility
-                    raw_data.name = profileName;
-                    localStorage.setItem(profileName, JSON.stringify(raw_data));
-                } else {
-                    localStorage.setItem(profileName, result);
-                }
-                this.profile.current = profileName;
-                if (prevIdx !== -1) this.loadProfile(this.profile.current);
+                const msg = this.profile.addProfile(reader.result.toString(), files[0].name);
+                if (msg.level === 'success' && !msg.payload) this.loadProfile(this.profile.current);
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -91,11 +64,11 @@ export default class ExportView extends Store {
 
         const newName = this.newName[idx];
         if (!newName) return this.noti.error('Name cannot be empty!');
-
-        const prevIdx = this.profile.profiles.findIndex(n => n === newName);
-        if (prevIdx !== -1 && prevIdx !== idx) return this.noti.error('Duplicated name!');
-
-        this.profile.renameProfile(idx, oldName, newName, raw);
+        if (newName !== oldName) {
+            const prevIdx = this.profile.profiles.findIndex(n => n === newName);
+            if (prevIdx !== -1) return this.noti.error('Duplicated name!');
+            this.profile.renameProfile(idx, oldName, newName, raw);
+        }
         this.$set(this.newName, idx, null);
     }
     print() {

@@ -121,34 +121,6 @@ export function saveStatus(name?: string) {
     localStorage.setItem(name, JSON.stringify(obj));
 }
 
-const jobs: { [x: string]: string } = {};
-
-/**
- * a decorator that delays the execution of a **method** and store the handler in [[jobs]],
- * cancel all subsequent calls in the meantime
- * @param timeout delay in millisecond
- */
-function delay(timeout: number) {
-    return (
-        target: any,
-        propertyKey: string,
-        descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
-    ) => {
-        const oldVal = descriptor.value!;
-        descriptor.value = function(...args: any[]) {
-            if (jobs[propertyKey]) {
-                console.log('cancelled: ', propertyKey);
-                return;
-            }
-            jobs[propertyKey] = propertyKey;
-            window.setTimeout(() => {
-                oldVal.apply(this, args);
-                delete jobs[propertyKey];
-            }, timeout);
-        };
-    };
-}
-
 function isAncient(parsed: any): parsed is AncientStorage {
     return !!parsed.currentSchedule && !!parsed.proposedSchedule;
 }
@@ -161,6 +133,7 @@ function isLegacy(parsed: any): parsed is LegacyStorage {
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
  */
+
 @Component
 class Store extends Vue {
     filter = filter;
@@ -348,10 +321,12 @@ class Store extends Vue {
 
         this.status.loading = false;
     }
+}
 
-    // -------- watchers for store states that have side-effects
+// tslint:disable-next-line: max-classes-per-file
+@Component
+class WatchFactory extends Store {
     @Watch('status.loading')
-    @delay(10)
     loadingWatch() {
         if (this.status.loading) {
             if (this.noti.empty()) {
@@ -365,31 +340,27 @@ class Store extends Vue {
     }
 
     @Watch('display.multiSelect')
-    @delay(10)
     private multiSelectWatch() {
         Schedule.options.multiSelect = this.display.multiSelect;
         this.schedule.currentSchedule.computeSchedule();
     }
 
     @Watch('display.combineSections')
-    @delay(10)
     private combineSectionsWatch() {
         Schedule.options.combineSections = this.display.combineSections;
         this.schedule.currentSchedule.computeSchedule();
     }
 
     @Watch('palette.savedColors', { deep: true })
-    @delay(10)
     private wat() {
         Schedule.savedColors = this.palette.savedColors;
         this.schedule.currentSchedule.computeSchedule();
     }
 
     @Watch('profile.current')
-    @delay(200)
-    private curProfWatch(oldVal: string, newVal: string) {
-        localStorage.setItem('currentProfile', this.profile.current);
+    private curProfWatch() {
         this.loadProfile(this.profile.current);
+        localStorage.setItem('currentProfile', this.profile.current);
     }
 
     @Watch('profile.profiles', { deep: true })
@@ -397,30 +368,31 @@ class Store extends Vue {
         localStorage.setItem('profiles', JSON.stringify(this.profile.profiles));
     }
 
-    // --------- watchers for states that need to be automatically saved ---------
-    // cannot watch schedules: it has circular dependencies
-    // @Watch('schedule', { deep: true })
-    // @delay(10)
-    // private w1() {
-    //     this.saveStatus();
-    // }
+    @Watch('schedule', { deep: true })
+    private w1() {
+        this.saveStatus();
+    }
 
     @Watch('display', { deep: true })
-    @delay(10)
     private w2() {
         this.saveStatus();
     }
 
     @Watch('filter', { deep: true })
-    @delay(10)
     private w3() {
         this.saveStatus();
     }
 
     @Watch('palette', { deep: true })
-    @delay(10)
     private w4() {
         this.saveStatus();
     }
 }
+
+declare global {
+    interface Window {
+        watchers: WatchFactory;
+    }
+}
+window.watchers = new WatchFactory();
 export default Store;

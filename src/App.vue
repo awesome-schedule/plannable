@@ -5,6 +5,7 @@
             :semester="semester.currentSemester"
             :section="modal.section"
         ></section-modal>
+        <URL-modal :url="modal.url"></URL-modal>
 
         <nav class="tab-bar bg-light">
             <div

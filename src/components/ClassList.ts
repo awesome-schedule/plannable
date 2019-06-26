@@ -57,7 +57,7 @@ export default class ClassList extends Vue {
     collapsed: { [x: string]: boolean } = {};
 
     select(key: string, idx: number) {
-        // need to pass this event to parent (App.vue) because the parent needs to update some other stuff
+        // need to pass this event to parent because the parent needs to update some other stuff
         this.$emit('update_course', key, idx, this.isEntering);
     }
 

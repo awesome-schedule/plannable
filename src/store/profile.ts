@@ -57,18 +57,12 @@ class Profile {
         this.profiles.splice(idx, 1);
         if (name === this.current) {
             if (idx === this.profiles.length) {
-                this.selectProfile(this.profiles[idx - 1]);
+                return this.profiles[idx - 1];
             } else {
-                this.selectProfile(this.profiles[idx]);
+                return this.profiles[idx];
             }
         }
         localStorage.removeItem(name);
-    }
-
-    selectProfile(profileName: string) {
-        const item = localStorage.getItem(profileName);
-        if (!item) return;
-        this.current = profileName;
     }
 
     addProfile(raw: string, fallbackName: string): NotiMsg<string> {

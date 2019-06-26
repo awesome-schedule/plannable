@@ -5,6 +5,7 @@ import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
+import $ from 'jquery';
 
 /**
  * component for import/export/print schedules
@@ -28,7 +29,7 @@ export default class ExportView extends Store {
         reader.onload = () => {
             if (reader.result) {
                 const msg = this.profile.addProfile(reader.result.toString(), files[0].name);
-                if (msg.level === 'success' && !msg.payload) this.loadProfile(this.profile.current);
+                if (msg.level === 'success' && !msg.payload) this.loadProfile();
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -52,11 +53,22 @@ export default class ExportView extends Store {
     exportToURL() {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(this.profile.current);
-        if (json) window.location.search = 'config=' + lz.compressToEncodedURIComponent(json);
+        if (json) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('config', lz.compressToEncodedURIComponent(json));
+            this.modal.showURLModal(url.href);
+        }
     }
     deleteProfile(name: string, idx: number) {
         this.newName.splice(idx, 1);
-        this.profile.deleteProfile(name, idx);
+        const prof = this.profile.deleteProfile(name, idx);
+        if (prof) return;
+    }
+    selectProfile(profileName: string) {
+        const item = localStorage.getItem(profileName);
+        if (!item) return;
+        this.profile.current = profileName;
+        this.loadProfile();
     }
     finishEdit(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);

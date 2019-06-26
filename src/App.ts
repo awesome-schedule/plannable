@@ -26,12 +26,12 @@ import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
 import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
+import URLModal from './components/URLModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { SemesterStorage } from './store';
 
 import param from './config';
-import { SemesterJSON } from './models/Catalog';
 
 @Component({
     components: {
@@ -46,6 +46,7 @@ import { SemesterJSON } from './models/Catalog';
         GridSchedule,
         SectionModal,
         CourseModal,
+        URLModal,
         // use dynamic component for this one because it is relatively large in size
         Information: () => import('./components/tabs/Information.vue'),
         External,

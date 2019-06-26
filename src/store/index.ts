@@ -181,11 +181,12 @@ class Store extends Vue {
      * parse schedules and settings from `localStorage` and re-initialize global states
      * @param name
      */
-    async loadProfile(name: string, force = false) {
+    async loadProfile(name?: string, force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
+        if (!name) name = this.profile.current;
 
         window.scheduleEvaluator.clear();
         let parsed: Partial<AncientStorage> | Partial<LegacyStorage> | Partial<SemesterState> = {};
@@ -348,11 +349,7 @@ class Store extends Vue {
             parsed.currentSemester = target;
             localStorage.setItem(target.name, JSON.stringify(parsed));
         }
-        // if override
-        if (target.name === this.profile.current) await this.loadProfile(target.name);
-        // else
-        else this.profile.current = target.name;
-
+        await this.loadProfile(target.name);
         this.status.loading = false;
     }
 }
@@ -393,9 +390,7 @@ class WatchFactory extends Store {
 
     @Watch('profile.current')
     private c() {
-        this.loadProfile(this.profile.current);
         localStorage.setItem('currentProfile', this.profile.current);
-        console.log('profile loaded: ', this.profile.current);
     }
 
     @Watch('profile.profiles', { deep: true })

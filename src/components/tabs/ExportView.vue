@@ -54,11 +54,11 @@
                     Google/Apple calendar support iCal files
                 </small>
             </li>
-            <!-- <li class="list-group-item">
+            <li class="list-group-item">
                 <button class="btn btn-outline-primary w-100" @click="exportToURL()">
                     Export as URL
                 </button>
-            </li> -->
+            </li>
             <li class="list-group-item">
                 <button class="btn btn-outline-primary w-100" @click="print()">
                     Print
@@ -91,7 +91,7 @@
                         :placeholder="name"
                     />
                     <div class="input-group-append">
-                        <button class="btn btn-outline-info" @click="profile.selectProfile(name)">
+                        <button class="btn btn-outline-info" @click="selectProfile(name)">
                             {{ name === profile.current ? 'selected' : 'select' }}
                         </button>
                         <button

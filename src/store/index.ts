@@ -26,6 +26,7 @@ import palette, { PaletteState } from './palette';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
+import profile from './profile';
 
 export interface SemesterStorage {
     name: string;
@@ -104,11 +105,10 @@ export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState
 /**
  * save all store modules to localStorage
  */
-export function saveStatus() {
+export function saveStatus(name?: string) {
     const { currentSemester } = semester;
     if (!currentSemester) return;
-
-    const name = localStorage.getItem('currentProfile');
+    if (!name) name = profile.current;
     if (!name) return;
 
     const obj: SemesterStorage = {
@@ -173,12 +173,13 @@ class Store extends Vue {
     semester = semester;
     palette = palette;
     noti = noti;
+    profile = profile;
 
     /**
      * save all store modules to localStorage
      */
     saveStatus() {
-        saveStatus();
+        saveStatus(this.profile.current);
     }
 
     /**
@@ -204,13 +205,12 @@ class Store extends Vue {
                 } catch (e) {
                     console.error(e);
                 }
-                localStorage.setItem('currentProfile', target);
             }
             await this.semester.selectSemester(
                 parsed.currentSemester || this.semester.semesters[0]
             );
         } else {
-            const profiles: string[] = JSON.parse(localStorage.getItem('profiles') || '[]') || [];
+            const { profiles } = this.profile;
             for (const profileName of profiles) {
                 const data = localStorage.getItem(profileName);
                 if (data) {
@@ -225,9 +225,8 @@ class Store extends Vue {
             if (!parsed.currentSemester) {
                 // todo: name clashing
                 profiles.push(target.name);
-                localStorage.setItem('profiles', JSON.stringify(profiles));
             }
-            localStorage.setItem('currentProfile', target.name);
+            this.profile.current = target.name;
             await this.semester.selectSemester(target);
         }
 
@@ -427,6 +426,18 @@ class Store extends Vue {
     private wat() {
         Schedule.savedColors = this.palette.savedColors;
         this.schedule.currentSchedule.computeSchedule();
+    }
+
+    @Watch('profile.current')
+    @delay(200)
+    private curProfWatch(oldVal: string, newVal: string) {
+        localStorage.setItem('currentProfile', this.profile.current);
+        this.loadProfile(this.profile.current);
+    }
+
+    @Watch('profile.profiles', { deep: true })
+    private profsWatch() {
+        localStorage.setItem('profiles', JSON.stringify(this.profile.profiles));
     }
 
     // --------- watchers for states that need to be automatically saved ---------

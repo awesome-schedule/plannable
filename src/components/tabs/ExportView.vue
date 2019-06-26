@@ -67,7 +67,7 @@
             <div class="btn bg-info nav-btn">
                 Different Configurations
             </div>
-            <li v-for="(name, idx) in profiles" :key="name" class="list-group-item">
+            <li v-for="(name, idx) in profile.profiles" :key="name" class="list-group-item">
                 <p>{{ name }}</p>
 
                 <div class="input-group">
@@ -91,11 +91,11 @@
                         :placeholder="name"
                     />
                     <div class="input-group-append">
-                        <button class="btn btn-outline-info" @click="selectProfile(name)">
-                            {{ name === currentProfile ? 'selected' : 'select' }}
+                        <button class="btn btn-outline-info" @click="profile.selectProfile(name)">
+                            {{ name === profile.current ? 'selected' : 'select' }}
                         </button>
                         <button
-                            v-if="profiles.length !== 1"
+                            v-if="profile.profiles.length !== 1"
                             class="btn btn-outline-danger"
                             @click="deleteProfile(name, idx)"
                         >

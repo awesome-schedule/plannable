@@ -6,7 +6,7 @@
  *
  */
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { StoreModule, saveStatus } from '.';
+import { StoreModule } from '.';
 
 interface ScheduleStateBase {
     /**
@@ -74,7 +74,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         if (index < this.proposedSchedules.length && index >= 0) {
             this.proposedScheduleIndex = index;
             this.switchSchedule(false);
-            saveStatus();
         }
     }
     /**
@@ -83,7 +82,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
     newProposed() {
         this.proposedSchedules.push(new Schedule());
         this.switchProposed(this.proposedSchedules.length - 1);
-        saveStatus();
     }
     /**
      * copy the current schedule and append to the `proposedSchedules` array.
@@ -93,7 +91,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         const len = this.proposedSchedules.length;
         this.proposedSchedules.push(this.proposedSchedule.copy());
         this.switchProposed(len);
-        saveStatus();
     }
     /**
      * delete the current proposed schedule, switch to the schedule after the deleted schedule.
@@ -118,7 +115,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         } else {
             this.switchProposed(idx);
         }
-        saveStatus();
     }
     /**
      * @param generated
@@ -138,7 +134,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
             this.generated = false;
             this.currentSchedule = this.proposedSchedule;
         }
-        saveStatus();
     }
 
     /**
@@ -156,7 +151,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
             this.currentScheduleIndex = idx;
         }
         this.currentSchedule = window.scheduleEvaluator.getSchedule(this.currentScheduleIndex);
-        saveStatus();
     }
 
     /**
@@ -171,7 +165,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
             window.scheduleEvaluator.clear();
             this.numGenerated = 0;
         }
-        saveStatus();
     }
 
     /**

@@ -121,34 +121,6 @@ export function saveStatus(name?: string) {
     localStorage.setItem(name, JSON.stringify(obj));
 }
 
-const jobs: { [x: string]: string } = {};
-
-/**
- * a decorator that delays the execution of a **method** and store the handler in [[jobs]],
- * cancel all subsequent calls in the meantime
- * @param timeout delay in millisecond
- */
-function delay(timeout: number) {
-    return (
-        target: any,
-        propertyKey: string,
-        descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
-    ) => {
-        const oldVal = descriptor.value!;
-        descriptor.value = function(...args: any[]) {
-            if (jobs[propertyKey]) {
-                console.log('cancelled: ', propertyKey);
-                return;
-            }
-            jobs[propertyKey] = propertyKey;
-            window.setTimeout(() => {
-                oldVal.apply(this, args);
-                delete jobs[propertyKey];
-            }, timeout);
-        };
-    };
-}
-
 function isAncient(parsed: any): parsed is AncientStorage {
     return !!parsed.currentSchedule && !!parsed.proposedSchedule;
 }
@@ -354,12 +326,7 @@ class Store extends Vue {
 // tslint:disable-next-line: max-classes-per-file
 @Component
 class WatchFactory extends Store {
-    created() {
-        console.log('created!!!!!!!!!!!!!!!!!!!!!');
-    }
-    // -------- watchers for store states that have side-effects
     @Watch('status.loading')
-    @delay(10)
     loadingWatch() {
         if (this.status.loading) {
             if (this.noti.empty()) {
@@ -393,7 +360,6 @@ class WatchFactory extends Store {
     @Watch('profile.current')
     private curProfWatch() {
         localStorage.setItem('currentProfile', this.profile.current);
-        this.loadProfile(this.profile.current);
     }
 
     @Watch('profile.profiles', { deep: true })
@@ -401,8 +367,6 @@ class WatchFactory extends Store {
         localStorage.setItem('profiles', JSON.stringify(this.profile.profiles));
     }
 
-    // --------- watchers for states that need to be automatically saved ---------
-    // cannot watch schedules: it has circular dependencies
     @Watch('schedule', { deep: true })
     private w1() {
         this.saveStatus();

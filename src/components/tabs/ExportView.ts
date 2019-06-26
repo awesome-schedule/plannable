@@ -51,7 +51,6 @@ export default class ExportView extends Store {
                 this.profile.profiles.push(profileName);
                 this.newName.push(null);
                 this.profile.current = profileName;
-                this.loadProfile(profileName);
             } else {
                 this.noti.warn('File is empty!');
             }

@@ -10,7 +10,7 @@
  *
  */
 import Vue from 'vue';
-import { Component, Watch, Mixins } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
@@ -359,6 +359,7 @@ class WatchFactory extends Store {
 
     @Watch('profile.current')
     private curProfWatch() {
+        this.loadProfile(this.profile.current);
         localStorage.setItem('currentProfile', this.profile.current);
     }
 

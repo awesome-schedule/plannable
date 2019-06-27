@@ -31,6 +31,7 @@ import URLModal from './components/URLModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
+import { SemesterJSON } from './models/Catalog';
 
 @Component({
     components: {
@@ -112,7 +113,14 @@ export default class App extends Store {
     }
 
     addToCompare() {
-        this.compare.push(this.schedule.currentSchedule);
-        // this.$forceUpdate();
+        const date = new Date();
+        const time = date.getFullYear() + '/' +
+            (date.getMonth() + 1) + '/' +
+            date.getDate() + ' ' +
+            date.getHours() + ':' +
+            date.getMinutes() + ':' +
+            date.getSeconds();
+        const obj = { schedule: this.schedule.currentSchedule, time, semester: (this.semester.currentSemester as SemesterJSON).name };
+        this.compare.push(obj);
     }
 }

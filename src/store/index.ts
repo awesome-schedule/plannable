@@ -129,7 +129,7 @@ export function saveStatus() {
     console.log('status saved');
 }
 
-const compare: Schedule[] = [];
+const compare: { schedule: Schedule, time: string, semester: string }[] = [];
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
@@ -327,9 +327,9 @@ class Store extends Vue {
                 if (
                     !confirm(
                         `You already have a profile named ${
-                            target.name
+                        target.name
                         }. However, it does not correspond to the ${
-                            target.name
+                        target.name
                         } semester. Override it?`
                     )
                 )

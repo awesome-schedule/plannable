@@ -7,12 +7,7 @@ import GridSchedule from '../GridSchedule.vue';
 import Schedule from '@/models/Schedule';
 import randomColor from 'randomcolor';
 import ScheduleBlock from '@/models/ScheduleBlock';
-import { constructAdjList } from '@/algorithm/Coloring';
 
-/**
- * component for import/export/print schedules
- * @author Kaiying Shan, Hanzhi Zhou
- */
 @Component({
     components: {
         GridSchedule
@@ -27,11 +22,20 @@ export default class CompareView extends Store {
     }
 
     created() {
-        for (const sche of this.compare) {
-            const color = randomColor({
+        this.createdHelper();
+    }
+
+    createdHelper() {
+        for (let i = 0; i < this.compare.length; i++) {
+            const sche = this.compare[i].schedule;
+            let color = randomColor({
                 luminosity: 'dark'
             }) as string;
-            this.colors.push(color);
+            if (this.colors.length <= i) {
+                this.colors.push(color);
+            } else {
+                color = this.colors[i];
+            }
             for (let i = 0; i < 5; i++) {
                 for (const sb of sche.days[i]) {
                     const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
@@ -39,7 +43,13 @@ export default class CompareView extends Store {
                 }
             }
         }
-        console.log(this.compare);
-        constructAdjList(this.compareSchedule);
+        this.compareSchedule.constructAdjList();
+    }
+
+    deleteCompare(idx: number) {
+        this.compare.splice(idx, 1);
+        this.colors.splice(idx, 1);
+        this.compareSchedule = new Schedule();
+        this.createdHelper();
     }
 }

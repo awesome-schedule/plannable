@@ -83,12 +83,7 @@
                 </div>
             </nav>
         </nav>
-        <div
-            id="info-content"
-            :style="{
-                'margin-left': scheduleLeft + 5 + 'vw'
-            }"
-        >
+        <div id="info-content">
             <div v-if="selected === 1 || !selected">
                 <h2 id="item-1">Welcome to our information page! Meow~</h2>
                 <hr />
@@ -916,6 +911,7 @@
 }
 
 #info-content {
+    margin-left: 26vw;
     margin-right: 5vw;
     margin-top: 5vh;
     font-size: 15px;

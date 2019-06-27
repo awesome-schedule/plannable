@@ -4,6 +4,7 @@
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import GridSchedule from '../GridSchedule.vue';
+import MainContent from '../MainContent.vue';
 import Schedule from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 
@@ -13,7 +14,8 @@ import ScheduleBlock from '@/models/ScheduleBlock';
  */
 @Component({
     components: {
-        GridSchedule
+        GridSchedule,
+        MainContent
     }
 })
 export default class CompareView extends Store {
@@ -53,8 +55,13 @@ export default class CompareView extends Store {
     }
     getTitle(idx: number) {
         const schedule = this.compare[idx].schedule;
-        return 'Total credits: ' + schedule.totalCredit + '\n' +
-            schedule.currentCourses.map(x => x.department + ' ' + x.number + ' ' + x.title)
-                .reduce((a, x) => a + '\n' + x);
+        return (
+            'Total credits: ' +
+            schedule.totalCredit +
+            '\n' +
+            schedule.currentCourses
+                .map(x => x.department + ' ' + x.number + ' ' + x.title)
+                .reduce((a, x) => a + '\n' + x)
+        );
     }
 }

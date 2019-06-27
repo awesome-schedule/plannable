@@ -10,6 +10,8 @@
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 
+import MainContent from './components/MainContent.vue';
+
 // tab components
 import ClassView from './components/tabs/ClassView.vue';
 import DisplayView from './components/tabs/DisplayView.vue';
@@ -35,6 +37,7 @@ import randomColor from 'randomcolor';
 
 @Component({
     components: {
+        MainContent,
         ClassView,
         FuzzyView,
         EventView,

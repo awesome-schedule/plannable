@@ -101,33 +101,6 @@ interface StorageItem<State, JSONState> {
  */
 export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState>;
 
-const jobs: { [x: string]: string } = {};
-/**
- * a decorator that delays the execution of a **method** and store the handler in [[jobs]],
- * cancel all subsequent calls in the meantime
- * @param timeout delay in millisecond
- */
-function delay(timeout: number) {
-    return (
-        target: any,
-        propertyKey: string,
-        descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
-    ) => {
-        const oldVal = descriptor.value!;
-        descriptor.value = function(...args: any[]) {
-            if (jobs[propertyKey]) {
-                console.log('cancelled: ', propertyKey);
-                return;
-            }
-            jobs[propertyKey] = propertyKey;
-            window.setTimeout(() => {
-                oldVal.apply(this, args);
-                delete jobs[propertyKey];
-            }, timeout);
-        };
-    };
-}
-
 function isAncient(parsed: any): parsed is AncientStorage {
     return !!parsed.currentSchedule && !!parsed.proposedSchedule;
 }
@@ -136,13 +109,30 @@ function isLegacy(parsed: any): parsed is LegacyStorage {
     return !!parsed.currentSchedule && !!parsed.proposedSchedules;
 }
 
-const compare: Schedule[] = [];
+export function saveStatus() {
+    const { currentSemester } = semester;
+    if (!currentSemester) return;
+    const name = profile.current;
 
+    const obj: SemesterStorage = {
+        name,
+        modified: new Date().toJSON(),
+        currentSemester,
+        display,
+        filter,
+        schedule: schedule.toJSON(),
+        palette
+    };
+
+    localStorage.setItem(name, JSON.stringify(obj));
+    console.log('status saved');
+}
+
+const compare: Schedule[] = [];
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
  */
-
 @Component
 class Store extends Vue {
     filter = filter;
@@ -159,24 +149,8 @@ class Store extends Vue {
     /**
      * save all store modules to localStorage
      */
-    @delay(20)
     saveStatus() {
-        const { currentSemester } = this.semester;
-        if (!currentSemester) return;
-        const name = this.profile.current;
-
-        const obj: SemesterStorage = {
-            name,
-            modified: new Date().toJSON(),
-            currentSemester,
-            display,
-            filter,
-            schedule: schedule.toJSON(),
-            palette
-        };
-
-        localStorage.setItem(name, JSON.stringify(obj));
-        console.log('status saved');
+        saveStatus();
     }
 
     /**
@@ -407,10 +381,10 @@ class WatchFactory extends Store {
         localStorage.setItem('profiles', JSON.stringify(this.profile.profiles));
     }
 
-    @Watch('schedule', { deep: true })
-    private w1() {
-        this.saveStatus();
-    }
+    // @Watch('schedule', { deep: true })
+    // private w1() {
+    //     this.saveStatus();
+    // }
 
     @Watch('display', { deep: true })
     private w2() {

@@ -19,6 +19,10 @@ export default class ExportView extends Store {
     created() {
         this.newName = this.profile.profiles.map(() => null);
     }
+    /**
+     * get the meta data of a profile in an array
+     * @param name
+     */
     getMeta(name: string) {
         const data = localStorage.getItem(name);
         if (data) {
@@ -45,9 +49,16 @@ export default class ExportView extends Store {
         const reader = new FileReader();
         reader.onload = () => {
             if (reader.result) {
-                const msg = this.profile.addProfile(reader.result.toString(), files[0].name);
-                if (msg.level === 'error') this.noti.notify(msg);
-                if (msg.payload) this.newName.push(null);
+                const { profiles } = this.profile;
+                const prevLen = profiles.length;
+                try {
+                    this.profile.addProfile(reader.result.toString(), files[0].name);
+                    // unequal length: new profile name added
+                    if (prevLen !== profiles.length) this.newName.push(null);
+                } catch (err) {
+                    console.error(err);
+                    this.noti.error(err.message + ': Parsing error');
+                }
                 this.loadProfile();
             } else {
                 this.noti.warn('File is empty!');

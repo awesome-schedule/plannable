@@ -1,6 +1,5 @@
 import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
-import { NotiMsg } from './notification';
 
 class Profile {
     /**
@@ -66,7 +65,8 @@ class Profile {
      * delete a profile
      * @param name
      * @param idx
-     * @returns the name of the previous profile if the deleted profile is selected
+     * @returns the name of the previous profile if the deleted profile is selected,
+     * returns undefined otherwise
      */
     deleteProfile(name: string, idx: number) {
         this.profiles.splice(idx, 1);
@@ -80,26 +80,28 @@ class Profile {
         localStorage.removeItem(name);
     }
 
-    addProfile(raw: string, fallbackName: string): NotiMsg<string> {
-        let raw_data: SemesterStorage;
-        try {
-            raw_data = JSON.parse(raw);
-        } catch (error) {
-            console.error(error);
-            return {
-                msg: error.message + ': Format Error',
-                level: 'error'
-            };
-        }
-
-        const profileName = raw_data.name || fallbackName;
+    /**
+     * parse a profile from string, and add it to the list of profiles and store it in localStorage
+     * @note you need to call loadProfile() manually
+     * @param raw
+     * @param fallbackName the fallback name if the raw does not contain the name of the profile
+     */
+    addProfile(raw: string, fallbackName: string) {
+        const raw_data: SemesterStorage = JSON.parse(raw);
+        let profileName = raw_data.name || fallbackName;
         const prevIdx = this.profiles.findIndex(p => p === profileName);
         if (prevIdx !== -1) {
-            if (!confirm(`A profile named ${profileName} already exists! Override it?`))
-                return {
-                    msg: 'cancelled',
-                    level: 'info'
-                };
+            if (
+                !confirm(
+                    // tslint:disable-next-line: max-line-length
+                    `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both`
+                )
+            ) {
+                profileName += ' (2)';
+                raw_data.name = profileName;
+                localStorage.setItem(profileName, JSON.stringify(raw_data));
+                this.profiles.push(profileName);
+            }
         } else {
             this.profiles.push(profileName);
         }
@@ -112,14 +114,6 @@ class Profile {
             localStorage.setItem(profileName, raw);
         }
         this.current = profileName;
-        const msg: NotiMsg<string> = {
-            msg: 'success',
-            level: 'success'
-        };
-        // override: need to reload current profile
-        if (prevIdx !== -1) return msg;
-        msg.payload = this.current;
-        return msg;
     }
 }
 

@@ -129,7 +129,7 @@ export function saveStatus() {
     console.log('status saved');
 }
 
-const compare: { schedule: Schedule; profileName: string; semester: string, color: string }[] = [];
+const compare: { schedule: Schedule; profileName: string; semester: string; color: string }[] = [];
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
@@ -188,10 +188,12 @@ class Store extends Vue {
                 console.error(e);
             }
         }
-        await this.semester.selectSemester(
+        const msg = await this.semester.selectSemester(
             parsed.currentSemester || this.semester.semesters[0],
             force
         );
+        this.noti.notify(msg);
+        if (!msg.payload) return;
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};
@@ -220,8 +222,6 @@ class Store extends Vue {
 
     /**
      * @returns true if the current combination of sort options is valid, false otherwise
-     *
-     * notifications will be given for invalid combination via [[noti]]
      */
     validateSortOptions() {
         if (!Object.values(this.filter.sortOptions.sortBy).some(x => x.enabled)) {
@@ -331,36 +331,37 @@ class Store extends Vue {
         }
         // no profile for target semester exists. let's create one
         if (!parsed.currentSemester) {
-            if (profiles.includes(target.name)) {
+            let { name } = target;
+            if (profiles.includes(name)) {
                 if (
                     !confirm(
-                        `You already have a profile named ${
-                        target.name
-                        }. However, it does not correspond to the ${
-                        target.name
-                        } semester. Override it?`
+                        // tslint:disable-next-line: max-line-length
+                        `You already have a profile named ${name}. However, it does not correspond to the ${name} semester. Click Ok to overwrite, click Cancel to keep both.`
                     )
-                )
-                    return;
+                ) {
+                    name += ' (2)';
+                    profiles.push(name);
+                }
             } else {
-                profiles.push(target.name);
+                profiles.push(name);
             }
             parsed.currentSemester = target;
-            localStorage.setItem(target.name, JSON.stringify(parsed));
-            this.profile.current = target.name;
-        } else if (!parsed.name) {
-            localStorage.setItem(target.name, JSON.stringify(parsed));
-            this.profile.current = parsed.name = target.name;
+            this.profile.current = parsed.name = name;
+            localStorage.setItem(name, JSON.stringify(parsed));
         } else {
-            this.profile.current = parsed.name;
+            this.profile.current = parsed.name!;
         }
         await this.loadProfile();
         this.status.loading = false;
     }
 }
 
-// tslint:disable-next-line: max-classes-per-file
+/**
+ * the watch factory defines some watchers on the members in `Store`.
+ * these watchers are defined outside of the `Store` class because they should only be registered once.
+ */
 @Component
+// tslint:disable-next-line: max-classes-per-file
 class WatchFactory extends Store {
     @Watch('status.loading')
     loadingWatch() {

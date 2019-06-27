@@ -9,12 +9,17 @@
                     You haven't selected any schedule to compare yet. Select one by clicking the
                     "add to compare" button at at the botton of the page.
                 </li>
-                <li v-for="(cur, idx) in compare" :key="cur" class="list-group-item">
+                <li
+                    v-for="(cur, idx) in compare"
+                    :key="cur"
+                    class="list-group-item"
+                    :title="getTitle(idx)"
+                >
                     <div class="row no-gutters justify-content-between">
                         <div class="col-xs-auto mr-auto">
                             Schedule {{ idx + 1 }}<br />
-                            <small class="text-muted">Profile: {{ cur.profileName }} </small><br />
-                            <small class="text-muted"> {{ cur.semester }} </small>
+                            <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
+                            <small class="text-muted">{{ cur.semester }}</small>
                         </div>
                         <div class="col-xs-auto text-right align-self-center">
                             <input

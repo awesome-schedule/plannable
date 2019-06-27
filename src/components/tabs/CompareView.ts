@@ -51,4 +51,10 @@ export default class CompareView extends Store {
         this.compareSchedule = new Schedule();
         this.createdHelper();
     }
+    getTitle(idx: number) {
+        const schedule = this.compare[idx].schedule;
+        return 'Total credits: ' + schedule.totalCredit + '\n' +
+            schedule.currentCourses.map(x => x.department + ' ' + x.number + ' ' + x.title)
+                .reduce((a, x) => a + '\n' + x);
+    }
 }

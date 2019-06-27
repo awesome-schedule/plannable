@@ -171,6 +171,7 @@
                     </div>
                 </div>
             </div>
+
             <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
 
             <v-footer id="app-footer" dark height="auto" class="w-100">

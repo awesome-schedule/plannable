@@ -152,16 +152,21 @@
         >
             <div class="w-100 my-3">
                 <div class="row justify-content-center">
-                    <div class="col">
+                    <div class="col-sm-auto">
                         <Pagination></Pagination>
                     </div>
-                    <div class="col-1">
+                    <div class="col-sm-auto">
                         <button
-                            v-if="schedule.generated"
-                            class="btn btn-primary"
+                            class="btn btn-outline-primary mb-3"
+                            :disabled="compare.find(x => x.schedule === schedule.currentSchedule)"
                             @click="addToCompare()"
                         >
-                            add to compare
+                            <i class="fas fa-balance-scale"></i>
+                            Compare
+                            <i
+                                v-if="compare.find(x => x.schedule === schedule.currentSchedule)"
+                                class="fas fa-check"
+                            ></i>
                         </button>
                     </div>
                 </div>

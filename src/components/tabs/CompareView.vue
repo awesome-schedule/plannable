@@ -18,12 +18,16 @@
                     <div class="row no-gutters justify-content-between">
                         <div class="col-xs-auto mr-auto">
                             Schedule {{ idx + 1 }}<br />
-                            <small class="text-muted"> Profile "{{ cur.profileName }}" </small
-                            ><br />
-                            <small class="text-muted"> {{ cur.semester }} </small>
+                            <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
+                            <small class="text-muted">{{ cur.semester }}</small>
                         </div>
                         <div class="col-xs-auto text-right align-self-center">
-                            <input v-model="cur.color" type="color" @change="changeColor()" />
+                            <input
+                                v-model="cur.color"
+                                style="width: 25px;"
+                                type="color"
+                                @change="changeColor()"
+                            />
                         </div>
                         <div class="col-xs-auto text-right align-self-center">
                             <i

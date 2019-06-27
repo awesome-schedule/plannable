@@ -5,9 +5,12 @@ import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import GridSchedule from '../GridSchedule.vue';
 import Schedule from '@/models/Schedule';
-import randomColor from 'randomcolor';
 import ScheduleBlock from '@/models/ScheduleBlock';
 
+/**
+ * component for comparing multiple schedules
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
 @Component({
     components: {
         GridSchedule

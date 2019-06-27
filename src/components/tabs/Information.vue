@@ -52,11 +52,12 @@
                 </div>
                 <div @click="showGuide(7)">
                     <a class="nav-link" href="#item-7">
-                        <i class="fas fa-download"></i> Import and Export</a
+                        <i class="fas fa-download"></i> Profile Management</a
                     >
                     <nav class="nav nav-pills flex-column">
                         <a class="nav-link ml-3 my-1 py-1" href="#item-7-1">Export to iCalendar</a>
                         <a class="nav-link ml-3 my-1 py-1" href="#item-7-2">JSON Import/Export</a>
+                        <a class="nav-link ml-3 my-1 py-1" href="#item-7-3">Multiple Profiles</a>
                     </nav>
                 </div>
                 <div @click="showGuide(9)">
@@ -658,8 +659,15 @@
                 </button>
             </div>
             <div v-if="selected === 7 || !selected">
-                <h3 id="item-7"><i class="fas fa-download"></i> Import and Export</h3>
+                <h3 id="item-7">
+                    <i class="fas fa-download"></i> Import, Export and Profile Management
+                </h3>
                 <hr />
+                <p>
+                    A profile contains all your schedules, filters, display settings, events and
+                    palette configuration for a given semester. We provide the following functions
+                    to help you manipulate and store your profile.
+                </p>
                 <h5 id="item-7-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Export to iCalendar</strong>
@@ -719,25 +727,41 @@
 
                 <h5 id="item-7-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
-                    ><strong> Export to/Import From JSON</strong>
+                    ><strong> Export to/Import From JSON/URL</strong>
                 </h5>
                 <div class="row">
                     <div class="col col-7">
                         <p>
-                            You can export your schedule to a JSON file (a file that ends with
-                            .json) so that it can be re-imported later. It is a dedicated file
-                            format that we use to store information in your schedule, so it could
-                            only be used on our website.
+                            You can export your profile to a JSON file (a file that ends with .json)
+                            so that it can be re-imported later. It is a dedicated file format that
+                            we use to store information in your schedule, so it could only be used
+                            on our website. To re-import a JSON file, simply click the file chooser,
+                            find the file and confirm.
                         </p>
                         <p>
-                            To re-import a JSON file, simply click the file chooser, find the file
-                            and confirm.
+                            Alternatively, you can export your profile to an URL. We will encode and
+                            compress all information contained in your current profile in the
+                            resulting URL, which will be quite long. Exporting your profile to an
+                            URL makes it more convenient to share your profile with your friends.
                         </p>
                     </div>
                     <div class="col col-md-auto">
                         <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
                     </div>
                 </div>
+                <h5 id="item-7-3" class="mt-4">Multiple Profiles</h5>
+                <p>
+                    By default, when you visit our website for the first time, a profile
+                    corresponding to the latest semester will be created. When you switch to a
+                    different semester, if no profile corresponding to that semester exists, a new
+                    profile will be created.
+                </p>
+                <p>
+                    Additionally, when you import a profile from either URL or a JSON file, a
+                    separate entry will be created for it if its name does not conflict with the
+                    existing profiles. If there is a conflict, you will be prompted to choose either
+                    overwriting the existing profile or keep both.
+                </p>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

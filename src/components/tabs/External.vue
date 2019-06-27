@@ -1,6 +1,9 @@
 <template>
     <nav id="external-bar">
         <h2 class="my-4">This page is intentionally left blank</h2>
+        <div class="w-100">
+            <img src="../../assets/placeholder.jpg" class="w-75" alt="" />
+        </div>
     </nav>
 </template>
 

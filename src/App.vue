@@ -71,7 +71,7 @@
                 class="tab-icon mb-4"
                 @click="status.switchSideBar('showCompare')"
             >
-                <i class="fas fa-bullhorn"></i>
+                <i class="fas fa-balance-scale"></i>
             </div>
             <div
                 v-if="display.enableLog"

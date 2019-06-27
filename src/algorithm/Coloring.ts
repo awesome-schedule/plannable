@@ -260,4 +260,3 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
         }
     }
 }
-

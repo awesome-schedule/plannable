@@ -124,7 +124,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -631,5 +631,37 @@ export default class Schedule {
 
     public empty() {
         return Object.keys(this.All).length === 0;
+    }
+
+    public equals(s: Schedule) {
+        const all = s.All;
+        if (Object.keys(this.All).length !== Object.keys(s.All).length) return false;
+        for (const c in this.All) {
+            if (!all[c]) {
+                return false;
+            } else {
+                if (all[c] === -1) {
+                    if (this.All[c] !== -1) {
+                        return false;
+                    }
+                } else {
+                    if ((this.All[c] as Set<number>).size !== (all[c] as Set<number>).size) {
+                        return false;
+                    } else {
+                        for (const sec of (this.All[c] as Set<number>)) {
+                            if (!(all[c] as Set<number>).has(sec)) return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        const events = s.events;
+        if (events.length !== this.events.length) return false;
+        const days = this.events.map(x => x.days);
+        for (const e of events) {
+            if (days.indexOf(e.days) === -1) return false;
+        }
+        return true;
     }
 }

@@ -129,17 +129,10 @@
                         <Pagination></Pagination>
                     </div>
                     <div class="col-sm-auto">
-                        <button
-                            class="btn btn-outline-primary mb-3"
-                            :disabled="compare.find(x => x.schedule === schedule.currentSchedule)"
-                            @click="addToCompare()"
-                        >
+                        <button class="btn btn-outline-primary mb-3" @click="addToCompare()">
                             <i class="fas fa-balance-scale"></i>
                             Compare
-                            <i
-                                v-if="compare.find(x => x.schedule === schedule.currentSchedule)"
-                                class="fas fa-check"
-                            ></i>
+                            <i v-if="indexOfCompare() !== -1" class="fas fa-check"></i>
                         </button>
                     </div>
                 </div>

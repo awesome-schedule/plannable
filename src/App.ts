@@ -109,15 +109,29 @@ export default class App extends Store {
         this.status.loading = false;
     }
 
+    indexOfCompare() {
+        for (let i = 0; i < this.compare.length; i++) {
+            if (this.compare[i].schedule.equals(this.schedule.currentSchedule)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     addToCompare() {
-        const color = randomColor({
-            luminosity: 'dark'
-        }) as string;
-        this.compare.push({
-            schedule: this.schedule.currentSchedule,
-            profileName: this.profile.current,
-            semester: this.semester.currentSemester!.name,
-            color
-        });
+        const idx = this.indexOfCompare();
+        if (idx !== -1) {
+            this.compare.splice(idx, 1);
+        } else {
+            const color = randomColor({
+                luminosity: 'dark'
+            }) as string;
+            this.compare.push({
+                schedule: this.schedule.currentSchedule,
+                profileName: this.profile.current,
+                semester: this.semester.currentSemester!.name,
+                color
+            });
+        }
     }
 }

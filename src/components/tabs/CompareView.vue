@@ -7,7 +7,7 @@
             <ul class="list-group list-group-flush mx-1">
                 <li v-if="number === 0" class="list-group-item">
                     You haven't selected any schedule to compare yet. Select one by clicking the
-                    "add to compare" button at at the botton of the page.
+                    "add to compare" button at the top of the page/on the right of pagination.
                 </li>
                 <li
                     v-for="(cur, idx) in compare"

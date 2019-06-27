@@ -31,7 +31,6 @@ import URLModal from './components/URLModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
-import { SemesterJSON } from './models/Catalog';
 import randomColor from 'randomcolor';
 
 @Component({

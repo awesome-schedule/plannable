@@ -152,15 +152,26 @@
         >
             <div class="w-100 my-3">
                 <div class="row justify-content-center">
-                    <div class="col">
+                    <div class="col-sm-auto">
                         <Pagination></Pagination>
+                    </div>
+                    <div class="col-sm-auto">
+                        <button
+                            class="btn btn-outline-primary mb-3"
+                            :disabled="compare.find(x => x.schedule === schedule.currentSchedule)"
+                            @click="addToCompare()"
+                        >
+                            <i class="fas fa-balance-scale"></i>
+                            Compare
+                            <i
+                                v-if="compare.find(x => x.schedule === schedule.currentSchedule)"
+                                class="fas fa-check"
+                            ></i>
+                        </button>
                     </div>
                 </div>
             </div>
             <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
-            <button v-if="schedule.generated" class="btn btn-primary mb-3" @click="addToCompare()">
-                add to compare
-            </button>
 
             <v-footer id="app-footer" dark height="auto" class="w-100">
                 <v-card class="flex w-100" flat tile>

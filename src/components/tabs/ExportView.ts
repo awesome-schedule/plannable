@@ -7,7 +7,7 @@ import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
 
 /**
- * component for import/export/print schedules
+ * component for import/export/print schedules and managing profiles
  * @author Kaiying Shan, Hanzhi Zhou
  */
 @Component

@@ -158,7 +158,9 @@
                 </div>
             </div>
             <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
-            <button class="btn btn-primary" @click="addToCompare()">add to compare</button>
+            <button v-if="schedule.generated" class="btn btn-primary mb-3" @click="addToCompare()">
+                add to compare
+            </button>
 
             <v-footer id="app-footer" dark height="auto" class="w-100">
                 <v-card class="flex w-100" flat tile>

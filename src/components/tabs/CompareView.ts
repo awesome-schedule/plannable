@@ -15,7 +15,6 @@ import ScheduleBlock from '@/models/ScheduleBlock';
 })
 export default class CompareView extends Store {
     compareSchedule: Schedule = new Schedule();
-    colors: string[] = [];
 
     get number() {
         return this.compare.length;
@@ -26,16 +25,9 @@ export default class CompareView extends Store {
     }
 
     createdHelper() {
-        for (let i = 0; i < this.compare.length; i++) {
-            const sche = this.compare[i].schedule;
-            let color = randomColor({
-                luminosity: 'dark'
-            }) as string;
-            if (this.colors.length <= i) {
-                this.colors.push(color);
-            } else {
-                color = this.colors[i];
-            }
+        for (const comp of this.compare) {
+            const sche = comp.schedule;
+            const color = comp.color;
             for (let i = 0; i < 5; i++) {
                 for (const sb of sche.days[i]) {
                     const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
@@ -46,9 +38,13 @@ export default class CompareView extends Store {
         this.compareSchedule.computeBlockPositions();
     }
 
+    changeColor() {
+        this.compareSchedule = new Schedule();
+        this.createdHelper();
+    }
+
     deleteCompare(idx: number) {
         this.compare.splice(idx, 1);
-        this.colors.splice(idx, 1);
         this.compareSchedule = new Schedule();
         this.createdHelper();
     }

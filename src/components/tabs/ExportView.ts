@@ -4,7 +4,7 @@
 import Store, { SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
-import { Component } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 
 /**
  * component for import/export/print schedules
@@ -117,5 +117,10 @@ export default class ExportView extends Store {
     }
     print() {
         window.print();
+    }
+
+    @Watch('profile.current', { immediate: true })
+    private w() {
+        this.exportICal = this.exportJson = this.profile.current;
     }
 }

@@ -41,15 +41,9 @@
                 </li>
             </ul>
         </nav>
-        <div
-            class="schedule mt-3"
-            :style="{
-                width: status.isMobile ? '85%' : scheduleWidth + 'vw',
-                'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw' // fixed margin for mobile
-            }"
-        >
+        <main-content>
             <grid-schedule :current-schedule="compareSchedule"></grid-schedule>
-        </div>
+        </main-content>
     </div>
 </template>
 <script lang="ts" src="./CompareView.ts"></script>

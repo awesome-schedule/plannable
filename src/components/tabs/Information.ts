@@ -2,7 +2,7 @@
  * @module components/tabs
  */
 // tslint:disable:max-line-length
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { Vue, Component } from 'vue-property-decorator';
 import { VueMathjax } from 'vue-mathjax';
 import 'bootstrap';
 import $ from 'jquery';
@@ -41,7 +41,6 @@ import {
     }
 })
 export default class Information extends Vue {
-    @Prop(Number) readonly scheduleLeft!: number;
     e1: number = 0;
     e2: number = 0;
     formula = `

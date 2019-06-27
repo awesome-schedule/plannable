@@ -147,17 +147,6 @@ class Store extends Vue {
     profile = profile;
     compare = compare;
 
-    get scheduleWidth() {
-        return this.status.sideBarActive
-            ? 100 - param.sideBarWidth - param.tabBarWidth - param.sideMargin
-            : 100 - param.tabBarWidth - param.sideMargin;
-    }
-    get scheduleLeft() {
-        return this.status.sideBarActive
-            ? param.sideBarWidth + param.tabBarWidth + 1
-            : param.tabBarWidth;
-    }
-
     /**
      * save all store modules to localStorage
      */

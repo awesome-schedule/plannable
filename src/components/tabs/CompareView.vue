@@ -13,7 +13,7 @@
                     <div class="row no-gutters justify-content-between">
                         <div class="col-xs-auto mr-auto">
                             Schedule {{ idx + 1 }}<br />
-                            <small class="text-muted"> From profile "{{ cur.profileName }}" </small
+                            <small class="text-muted"> Profile "{{ cur.profileName }}" </small
                             ><br />
                             <small class="text-muted"> {{ cur.semester }} </small>
                         </div>

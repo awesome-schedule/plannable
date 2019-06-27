@@ -155,12 +155,19 @@
                     <div class="col">
                         <Pagination></Pagination>
                     </div>
+                    <div class="col-1">
+                        <button
+                            v-if="schedule.generated"
+                            class="btn btn-primary"
+                            @click="addToCompare()"
+                        >
+                            add to compare
+                        </button>
+                    </div>
                 </div>
             </div>
+
             <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
-            <button v-if="schedule.generated" class="btn btn-primary mb-3" @click="addToCompare()">
-                add to compare
-            </button>
 
             <v-footer id="app-footer" dark height="auto" class="w-100">
                 <v-card class="flex w-100" flat tile>

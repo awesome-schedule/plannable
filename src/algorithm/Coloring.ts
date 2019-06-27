@@ -8,6 +8,7 @@
  *
  */
 import { Vertex, Graph } from './Graph';
+import Schedule from '@/models/Schedule';
 
 /**
  * An exact graph coloring algorithm using backtracking
@@ -257,5 +258,29 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
             }
             curParent = curParent.parent;
         }
+    }
+}
+
+export function constructAdjList(schedule: Schedule) {
+    for (const blocks of schedule.days) {
+        blocks.sort((a, b) => b.duration - a.duration);
+        const graph: number[][] = blocks.map(() => []);
+
+        // construct an undirected graph
+        for (let i = 0; i < blocks.length; i++) {
+            for (let j = i + 1; j < blocks.length; j++) {
+                if (blocks[i].conflict(blocks[j])) {
+                    graph[i].push(j);
+                    graph[j].push(i);
+                }
+            }
+        }
+        // convert to typed array so its much faster
+        const fastGraph = graph.map(x => Int16Array.from(x));
+        const colors = new Int16Array(fastGraph.length);
+        const _ = graphColoringExact(fastGraph, colors);
+        // const [colors, _] = dsatur(fastGraph);
+
+        schedule.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
     }
 }

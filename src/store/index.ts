@@ -129,6 +129,8 @@ function isLegacy(parsed: any): parsed is LegacyStorage {
     return !!parsed.currentSchedule && !!parsed.proposedSchedules;
 }
 
+const compare: Schedule[] = [];
+
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
@@ -145,6 +147,7 @@ class Store extends Vue {
     palette = palette;
     noti = noti;
     profile = profile;
+    compare: Schedule[] = compare;
 
     /**
      * save all store modules to localStorage

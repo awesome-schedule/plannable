@@ -108,7 +108,10 @@ export default class App extends Store {
 
         this.status.loading = false;
     }
-
+    /**
+     * @returns return the index of current schedule in compares array.
+     *          return -1 if current schedule is not in compares.
+     */
     indexOfCompare() {
         for (let i = 0; i < this.compare.length; i++) {
             if (this.compare[i].schedule.equals(this.schedule.currentSchedule)) {

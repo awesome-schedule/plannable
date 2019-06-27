@@ -1,16 +1,13 @@
 /**
  * @module components/tabs
  */
-import Store, { SemesterStorage } from '@/store';
-import { savePlain, toICal } from '@/utils';
-import lz from 'lz-string';
+import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import GridSchedule from '../GridSchedule.vue';
 import Schedule from '@/models/Schedule';
 import randomColor from 'randomcolor';
 import ScheduleBlock from '@/models/ScheduleBlock';
-import { constructAdjList } from '../../algorithm/Coloring';
-import param from '../../config';
+import { constructAdjList } from '@/algorithm/Coloring';
 
 /**
  * component for import/export/print schedules
@@ -22,20 +19,8 @@ import param from '../../config';
     }
 })
 export default class CompareView extends Store {
-
     compareSchedule: Schedule = new Schedule();
     colors: string[] = [];
-
-    get scheduleWidth() {
-        return this.status.sideBarActive
-            ? 100 - param.sideBarWidth - param.tabBarWidth - param.sideMargin
-            : 100 - param.tabBarWidth - param.sideMargin;
-    }
-    get scheduleLeft() {
-        return this.status.sideBarActive
-            ? param.sideBarWidth + param.tabBarWidth + 1
-            : param.tabBarWidth;
-    }
 
     get number() {
         return this.compare.length;

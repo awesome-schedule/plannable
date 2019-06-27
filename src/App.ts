@@ -32,8 +32,6 @@ import URLModal from './components/URLModal.vue';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 
-import param from './config';
-
 @Component({
     components: {
         ClassView,
@@ -59,17 +57,6 @@ export default class App extends Store {
     get sideBar() {
         return this.status.sideBar;
     }
-    get scheduleWidth() {
-        return this.status.sideBarActive
-            ? 100 - param.sideBarWidth - param.tabBarWidth - param.sideMargin
-            : 100 - param.tabBarWidth - param.sideMargin;
-    }
-    get scheduleLeft() {
-        return this.status.sideBarActive
-            ? param.sideBarWidth + param.tabBarWidth + 1
-            : param.tabBarWidth;
-    }
-
     scrollable = false;
 
     async loadConfigFromURL() {

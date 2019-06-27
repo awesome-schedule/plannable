@@ -26,6 +26,7 @@ import schedule, { ScheduleStateJSON } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
 import Expirable from '@/data/Expirable';
+import param from '../config';
 
 export interface SemesterStorage extends Expirable {
     name: string;
@@ -144,7 +145,18 @@ class Store extends Vue {
     palette = palette;
     noti = noti;
     profile = profile;
-    compare: Schedule[] = compare;
+    compare = compare;
+
+    get scheduleWidth() {
+        return this.status.sideBarActive
+            ? 100 - param.sideBarWidth - param.tabBarWidth - param.sideMargin
+            : 100 - param.tabBarWidth - param.sideMargin;
+    }
+    get scheduleLeft() {
+        return this.status.sideBarActive
+            ? param.sideBarWidth + param.tabBarWidth + 1
+            : param.tabBarWidth;
+    }
 
     /**
      * save all store modules to localStorage

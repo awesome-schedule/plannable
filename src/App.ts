@@ -66,19 +66,13 @@ export default class App extends Store {
 
         if (config) {
             try {
-                const msg = this.profile.addProfile(
-                    lz.decompressFromEncodedURIComponent(config),
-                    'url loaded'
-                );
-                if (msg.level === 'error') this.noti.notify(msg);
-                else {
-                    await this.loadProfile();
-                    this.noti.success('Configuration loaded from URL!', 3, true);
-                    return true;
-                }
+                this.profile.addProfile(lz.decompressFromEncodedURIComponent(config), 'url loaded');
+                await this.loadProfile();
+                this.noti.success('Configuration loaded from URL!', 3, true);
+                return true;
             } catch (err) {
                 console.error(err);
-                this.noti.notify(err.message);
+                this.noti.error(err.message + ': Parsing error');
             }
         }
         return false;

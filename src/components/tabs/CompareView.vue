@@ -9,19 +9,16 @@
                     You haven't selected any schedule to compare yet. Select one by clicking the
                     "add to compare" button at at the botton of the page.
                 </li>
-                <li v-for="(color, idx) in colors" :key="color" class="list-group-item">
+                <li v-for="(cur, idx) in compare" :key="cur" class="list-group-item">
                     <div class="row no-gutters justify-content-between">
                         <div class="col-xs-auto mr-auto">
                             Schedule {{ idx + 1 }}<br />
-                            <small class="text-muted">
-                                From profile "{{ compare[idx].profileName }}" </small
+                            <small class="text-muted"> From profile "{{ cur.profileName }}" </small
                             ><br />
-                            <small class="text-muted"> {{ compare[idx].semester }} </small>
+                            <small class="text-muted"> {{ cur.semester }} </small>
                         </div>
                         <div class="col-xs-auto text-right align-self-center">
-                            <div
-                                :style="'background-color:' + color + ';height:18px;width:18px'"
-                            ></div>
+                            <input v-model="cur.color" type="color" @change="changeColor()" />
                         </div>
                         <div class="col-xs-auto text-right align-self-center">
                             <i

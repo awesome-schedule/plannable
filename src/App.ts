@@ -113,14 +113,10 @@ export default class App extends Store {
     }
 
     addToCompare() {
-        const date = new Date();
-        const time = date.getFullYear() + '/' +
-            (date.getMonth() + 1) + '/' +
-            date.getDate() + ' ' +
-            date.getHours() + ':' +
-            date.getMinutes() + ':' +
-            date.getSeconds();
-        const obj = { schedule: this.schedule.currentSchedule, time, semester: (this.semester.currentSemester as SemesterJSON).name };
-        this.compare.push(obj);
+        this.compare.push({
+            schedule: this.schedule.currentSchedule,
+            profileName: this.profile.current,
+            semester: this.semester.currentSemester!.name
+        });
     }
 }

@@ -124,7 +124,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -359,7 +359,7 @@ export default class Schedule {
             const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
 
-            const currentIdKey = `${course.department} ${course.number} ${course.type}`;
+            const currentIdKey = course.displayName;
 
             // if any section
             if (sections === -1) {
@@ -420,61 +420,58 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-        this.constructAdjList();
+        this.computeBlockPositions();
     }
 
-    public calculateWidth(graph: Graph<number>, blocks: ScheduleBlock[]) {
-        for (const node of graph.keys()) {
-            // skip any non-root node in the depth-first trees
-            if (node.parent) continue;
-
-            // traverse all the paths starting from the root
-            const paths = node.path;
-            for (const path of paths) {
-                // compute the left and width of the root node if they're not computed
-                const firstBlock = blocks[path[0].val];
-                if (firstBlock.left === -1) {
-                    firstBlock.left = 0;
-                    firstBlock.width = 1 / (path[0].pathDepth + 1);
-                }
-
-                // computed the left and width of the remaining nodes based on
-                // the already computed information of the previous node
-                for (let i = 1; i < path.length; i++) {
-                    const block = blocks[path[i].val];
-                    const previousBlock = blocks[path[i - 1].val];
-
-                    block.left = Math.max(block.left, previousBlock.left + previousBlock.width);
-
-                    // remaining width / number of remaining path length
-                    block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
-                }
-            }
-        }
-    }
-
-
-    public constructAdjList() {
+    public computeBlockPositions() {
         for (const blocks of this.days) {
             blocks.sort((a, b) => b.duration - a.duration);
-            const graph: number[][] = blocks.map(() => []);
+            const adjList: number[][] = blocks.map(() => []);
 
             // construct an undirected graph
             for (let i = 0; i < blocks.length; i++) {
                 for (let j = i + 1; j < blocks.length; j++) {
                     if (blocks[i].conflict(blocks[j])) {
-                        graph[i].push(j);
-                        graph[j].push(i);
+                        adjList[i].push(j);
+                        adjList[j].push(i);
                     }
                 }
             }
             // convert to typed array so its much faster
-            const fastGraph = graph.map(x => Int16Array.from(x));
+            const fastGraph = adjList.map(x => Int16Array.from(x));
             const colors = new Int16Array(fastGraph.length);
             const _ = graphColoringExact(fastGraph, colors);
             // const [colors, _] = dsatur(fastGraph);
 
-            this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
+            const graph = colorDepthSearch(fastGraph, colors);
+            for (const node of graph.keys()) {
+                // skip any non-root node in the depth-first trees
+                if (node.parent) continue;
+
+                // traverse all the paths starting from the root
+                const paths = node.path;
+                for (const path of paths) {
+                    // compute the left and width of the root node if they're not computed
+                    const firstBlock = blocks[path[0].val];
+                    if (firstBlock.left === -1) {
+                        firstBlock.left = 0;
+                        firstBlock.width = 1 / (path[0].pathDepth + 1);
+                    }
+
+                    // computed the left and width of the remaining nodes based on
+                    // the already computed information of the previous node
+                    for (let i = 1; i < path.length; i++) {
+                        const block = blocks[path[i].val];
+                        const previousBlock = blocks[path[i - 1].val];
+
+                        block.left = Math.max(block.left, previousBlock.left + previousBlock.width);
+
+                        // remaining width / number of remaining path length
+                        block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
+                    }
+                }
+            }
+            graph.clear();
         }
     }
 

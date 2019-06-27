@@ -10,20 +10,21 @@
                     "add to compare" button at at the botton of the page.
                 </li>
                 <li v-for="(color, idx) in colors" :key="color" class="list-group-item">
-                    <div class="form-row no-gutters justify-content-between">
-                        <div class="col-10">
+                    <div class="row no-gutters justify-content-between">
+                        <div class="col-xs-auto mr-auto">
                             Schedule {{ idx + 1 }}<br />
-                            <small> {{ compare[idx].time }} </small><br />
-                            <small> {{ compare[idx].semester }} </small>
+                            <small class="text-muted"> {{ compare[idx].profileName }} </small><br />
+                            <small class="text-muted"> {{ compare[idx].semester }} </small>
                         </div>
-                        <div class="col-1">
+                        <div class="col-xs-auto text-right align-self-center">
                             <div
-                                :style="'background-color:' + color + ';height:20px;width:20px'"
+                                :style="'background-color:' + color + ';height:18px;width:18px'"
                             ></div>
                         </div>
-                        <div class="col-1">
+                        <div class="col-xs-auto text-right align-self-center">
                             <i
-                                class="fa fa-times ml-1 click-icon"
+                                class="fa fa-times ml-2 click-icon"
+                                style="font-size: 16px"
                                 title="delete this schedule"
                                 @click="deleteCompare(idx)"
                             ></i>

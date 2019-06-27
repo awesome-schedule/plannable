@@ -43,7 +43,7 @@ export default class CompareView extends Store {
                 }
             }
         }
-        this.compareSchedule.constructAdjList();
+        this.compareSchedule.computeBlockPositions();
     }
 
     deleteCompare(idx: number) {

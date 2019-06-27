@@ -76,7 +76,7 @@
                 :class="{ sel: name === profile.current }"
             >
                 <div class="form-row no-gutters justify-content-between">
-                    <div class="col-8">
+                    <div class="col-sm-auto mr-auto">
                         <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
                             <span>{{ name }}</span> <br />
                             <small v-for="field in getMeta(name)" :key="field" class="text-muted"
@@ -92,7 +92,7 @@
                             @keyup.esc="$set(newName, idx, null)"
                         />
                     </div>
-                    <div class="col-4 text-right" style="font-size: 16px">
+                    <div class="col-sm-auto text-right" style="font-size: 16px">
                         <i
                             class="click-icon mr-2"
                             :class="

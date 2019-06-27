@@ -29,7 +29,7 @@ import SectionModal from './components/SectionModal.vue';
 import URLModal from './components/URLModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
-import Store, { SemesterStorage } from './store';
+import Store from './store';
 
 import param from './config';
 
@@ -70,9 +70,6 @@ export default class App extends Store {
 
     scrollable = false;
 
-    /**
-     * @todo
-     */
     async loadConfigFromURL() {
         const config = new URLSearchParams(window.location.search).get('config');
 
@@ -84,8 +81,8 @@ export default class App extends Store {
                 );
                 if (msg.level === 'error') this.noti.notify(msg);
                 else {
-                    this.noti.success('Configuration loaded from URL!', 3, true);
                     await this.loadProfile();
+                    this.noti.success('Configuration loaded from URL!', 3, true);
                     return true;
                 }
             } catch (err) {
@@ -118,7 +115,7 @@ export default class App extends Store {
                 this.profile.initProfiles(this.semester.semesters);
                 await this.loadProfile(this.profile.current);
             } else {
-                // window.location.search = '';
+                history.replaceState(history.state, 'current', '/');
             }
         }
 

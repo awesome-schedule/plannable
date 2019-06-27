@@ -20,6 +20,7 @@ import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
 import LogView from './components/tabs/LogView.vue';
+import CompareView from './components/tabs/CompareView.vue';
 
 // other components
 import GridSchedule from './components/GridSchedule.vue';
@@ -42,6 +43,7 @@ import param from './config';
         FilterView,
         PaletteView,
         ExportView,
+        CompareView,
         Pagination,
         GridSchedule,
         SectionModal,
@@ -120,5 +122,10 @@ export default class App extends Store {
         }
 
         this.status.loading = false;
+    }
+
+    addToCompare() {
+        this.compare.push(this.schedule.currentSchedule);
+        // this.$forceUpdate();
     }
 }

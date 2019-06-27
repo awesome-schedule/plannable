@@ -29,7 +29,7 @@ class Profile {
                     let parsed: Partial<SemesterStorage> | null = null;
                     try {
                         parsed = JSON.parse(oldData);
-                    } catch (e) {}
+                    } catch (e) { }
                     if (parsed) {
                         parsed.name = sem.name;
                         localStorage.removeItem(sem.id);

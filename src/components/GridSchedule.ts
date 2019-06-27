@@ -1,11 +1,13 @@
 /**
  * @module components
  */
-import { Component } from 'vue-property-decorator';
+import { Component, Prop } from 'vue-property-decorator';
 import { DAYS } from '../models/Meta';
 import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
+import Schedule from '@/models/Schedule';
+import { read } from 'fs';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid
@@ -17,6 +19,9 @@ import CourseBlock from './CourseBlock.vue';
     }
 })
 export default class GridSchedule extends Store {
+
+    @Prop(Schedule) readonly currentSchedule!: Schedule;
+
     mobile = window.screen.width < 600;
     daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     // note: we need Schedule.days because it's an array that keeps the keys in order
@@ -28,7 +33,7 @@ export default class GridSchedule extends Store {
      */
     get earliestBlock() {
         let earliest = 817;
-        const schedule = this.schedule.currentSchedule;
+        const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
                 const temp = timeToNum(course.start);
@@ -44,7 +49,7 @@ export default class GridSchedule extends Store {
      */
     get latestBlock() {
         let latest = 0;
-        const schedule = this.schedule.currentSchedule;
+        const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
                 const temp = timeToNum(course.end);
@@ -121,7 +126,7 @@ export default class GridSchedule extends Store {
         const info: number[] = new Array(this.numRow);
         info.fill(this.display.partialHeight);
         const earliest = this.absoluteEarliest;
-        const schedule = this.schedule.currentSchedule;
+        const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
                 const startTime = timeToNum(course.start);

@@ -16,6 +16,7 @@ interface Sidebars {
     showSelectColor: boolean;
     showInfo: boolean;
     showExternal: boolean;
+    showCompare: boolean;
     showLog: boolean;
     showFuzzy: boolean;
 }
@@ -49,7 +50,8 @@ class Status {
         showSelectColor: false,
         showInfo: false,
         showExternal: false,
-        showLog: false
+        showLog: false,
+        showCompare: false,
     };
 
     /**

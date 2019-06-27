@@ -66,6 +66,14 @@
                 <i class="fas fa-download"></i>
             </div>
             <div
+                title="Compare"
+                :class="{ 'tab-icon-active': sideBar.showCompare }"
+                class="tab-icon mb-4"
+                @click="status.switchSideBar('showCompare')"
+            >
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            <div
                 v-if="display.enableLog"
                 title="Show logs"
                 :class="{ 'tab-icon-active': sideBar.showLog }"
@@ -106,6 +114,8 @@
 
         <palette-view v-else-if="sideBar.showSelectColor"></palette-view>
 
+        <compare-view v-else-if="sideBar.showCompare"></compare-view>
+
         <information v-else-if="sideBar.showInfo" :schedule-left="scheduleLeft"></information>
 
         <external v-else-if="sideBar.showExternal"></external>
@@ -133,7 +143,7 @@
         </transition>
 
         <div
-            v-if="!sideBar.showInfo && !sideBar.showExternal"
+            v-if="!sideBar.showInfo && !sideBar.showExternal && !sideBar.showCompare"
             class="schedule"
             :style="{
                 width: status.isMobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
@@ -147,7 +157,8 @@
                     </div>
                 </div>
             </div>
-            <grid-schedule></grid-schedule>
+            <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
+            <button class="btn btn-primary" @click="addToCompare()">add to compare</button>
 
             <v-footer id="app-footer" dark height="auto" class="w-100">
                 <v-card class="flex w-100" flat tile>

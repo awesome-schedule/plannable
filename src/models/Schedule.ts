@@ -18,6 +18,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
 import { Day, Week, TYPES, dayToInt } from './Meta';
+import { constructAdjList } from '../algorithm/Coloring';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
@@ -420,7 +421,7 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-        this.constructAdjList();
+        constructAdjList(this);
     }
 
     public calculateWidth(graph: Graph<number>, blocks: ScheduleBlock[]) {
@@ -450,30 +451,6 @@ export default class Schedule {
                     block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
                 }
             }
-        }
-    }
-
-    public constructAdjList() {
-        for (const blocks of this.days) {
-            blocks.sort((a, b) => b.duration - a.duration);
-            const graph: number[][] = blocks.map(() => []);
-
-            // construct an undirected graph
-            for (let i = 0; i < blocks.length; i++) {
-                for (let j = i + 1; j < blocks.length; j++) {
-                    if (blocks[i].conflict(blocks[j])) {
-                        graph[i].push(j);
-                        graph[j].push(i);
-                    }
-                }
-            }
-            // convert to typed array so its much faster
-            const fastGraph = graph.map(x => Int16Array.from(x));
-            const colors = new Int16Array(fastGraph.length);
-            const _ = graphColoringExact(fastGraph, colors);
-            // const [colors, _] = dsatur(fastGraph);
-
-            this.calculateWidth(colorDepthSearch(fastGraph, colors), blocks);
         }
     }
 

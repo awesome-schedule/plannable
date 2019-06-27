@@ -19,6 +19,24 @@ export default class ExportView extends Store {
     created() {
         this.newName = this.profile.profiles.map(() => null);
     }
+    getMeta(name: string) {
+        const data = localStorage.getItem(name);
+        if (data) {
+            let parsed: Partial<SemesterStorage> | null = null;
+            try {
+                parsed = JSON.parse(data);
+            } catch (err) {
+                console.log(err);
+            }
+            if (parsed) {
+                const meta = [];
+                if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
+                if (parsed.currentSemester) meta.push(parsed.currentSemester.name);
+                return meta;
+            }
+        }
+        return ['Data corruption'];
+    }
 
     onUploadJson(event: { target: EventTarget | null }) {
         const { files } = event.target as HTMLInputElement;
@@ -27,30 +45,10 @@ export default class ExportView extends Store {
         const reader = new FileReader();
         reader.onload = () => {
             if (reader.result) {
-                let raw_data: SemesterStorage, result: string;
-                try {
-                    result = reader.result.toString();
-                    raw_data = JSON.parse(result);
-                } catch (error) {
-                    console.error(error);
-                    this.noti.error(error.message + ': File Format Error');
-                    return;
-                }
-
-                const profileName = raw_data.name || files[0].name;
-
-                // backward compatibility
-                if (!raw_data.name) {
-                    raw_data.name = profileName;
-                    localStorage.setItem(profileName, JSON.stringify(raw_data));
-                } else {
-                    localStorage.setItem(profileName, result);
-                }
-
-                // todo: name clashing
-                this.profile.profiles.push(profileName);
-                this.newName.push(null);
-                this.profile.current = profileName;
+                const msg = this.profile.addProfile(reader.result.toString(), files[0].name);
+                if (msg.level === 'error') this.noti.notify(msg);
+                if (msg.payload) this.newName.push(null);
+                this.loadProfile();
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -74,23 +72,36 @@ export default class ExportView extends Store {
     exportToURL() {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(this.profile.current);
-        if (json) window.location.search = 'config=' + lz.compressToEncodedURIComponent(json);
+        if (json) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('config', lz.compressToEncodedURIComponent(json));
+            this.modal.showURLModal(url.href);
+        }
     }
     deleteProfile(name: string, idx: number) {
-        this.newName.splice(idx, 1);
-        this.profile.deleteProfile(name, idx);
+        if (confirm(`Are you sure to delete ${name}?`)) {
+            this.newName.splice(idx, 1);
+            const prof = this.profile.deleteProfile(name, idx);
+            if (prof) this.loadProfile();
+        }
+    }
+    selectProfile(profileName: string) {
+        const item = localStorage.getItem(profileName);
+        if (!item) return;
+        this.profile.current = profileName;
+        this.loadProfile();
     }
     finishEdit(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);
         if (!raw) return;
 
         const newName = this.newName[idx];
-        if (!newName) return this.noti.error('Name cannot be empty!');
-
-        const prevIdx = this.profile.profiles.findIndex(n => n === newName);
-        if (prevIdx !== -1 && prevIdx !== idx) return this.noti.error('Duplicated name!');
-
-        this.profile.renameProfile(idx, oldName, newName, raw);
+        if (!newName) return this.$set(this.newName, idx, null);
+        if (newName !== oldName) {
+            const prevIdx = this.profile.profiles.findIndex(n => n === newName);
+            if (prevIdx !== -1) return this.noti.error('Duplicated name!');
+            this.profile.renameProfile(idx, oldName, newName, raw);
+        }
         this.$set(this.newName, idx, null);
     }
     print() {

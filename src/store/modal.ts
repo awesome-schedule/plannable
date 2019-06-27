@@ -11,17 +11,13 @@ import Course from '../models/Course';
 import $ from 'jquery';
 import 'bootstrap';
 
-export interface ModalState {
-    section: Section | null;
-    course: Course | null;
-}
-
 /**
  * the modal module handles modal triggering
  */
-class Modal implements ModalState {
+class Modal {
     section: Section | null = null;
     course: Course | null = null;
+    url: string = '';
 
     showSectionModal(section: Section) {
         this.section = section;
@@ -31,6 +27,11 @@ class Modal implements ModalState {
     showCourseModal(course: Course) {
         this.course = course;
         $('#course-modal').modal();
+    }
+
+    showURLModal(url: string) {
+        this.url = url;
+        $('#url-modal').modal();
     }
 }
 

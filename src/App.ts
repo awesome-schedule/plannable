@@ -27,13 +27,12 @@ import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
 import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
+import URLModal from './components/URLModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { SemesterStorage } from './store';
 
 import param from './config';
-import { SemesterJSON } from './models/Catalog';
-import Section from './models/Section';
 
 @Component({
     components: {
@@ -49,6 +48,7 @@ import Section from './models/Section';
         GridSchedule,
         SectionModal,
         CourseModal,
+        URLModal,
         // use dynamic component for this one because it is relatively large in size
         Information: () => import('./components/tabs/Information.vue'),
         External,
@@ -79,19 +79,23 @@ export default class App extends Store {
         const config = new URLSearchParams(window.location.search).get('config');
 
         if (config) {
-            let raw_data: SemesterStorage, result;
             try {
-                result = lz.decompressFromEncodedURIComponent(config);
-                raw_data = JSON.parse(result);
-            } catch (error) {
-                console.error(error);
-                this.noti.error(error.message + ': File Format Error');
-                return;
+                const msg = this.profile.addProfile(
+                    lz.decompressFromEncodedURIComponent(config),
+                    'url loaded'
+                );
+                if (msg.level === 'error') this.noti.notify(msg);
+                else {
+                    this.noti.success('Configuration loaded from URL!', 3, true);
+                    await this.loadProfile();
+                    return true;
+                }
+            } catch (err) {
+                console.error(err);
+                this.noti.notify(err.message);
             }
-            localStorage.setItem(raw_data.currentSemester.id, result);
-            await this.selectSemester(raw_data.currentSemester);
-            this.noti.success('Configuration loaded from URL!', 3, true);
         }
+        return false;
     }
 
     async created() {
@@ -111,8 +115,13 @@ export default class App extends Store {
 
         this.noti.notify(pay3);
         if (pay3.payload) {
-            this.profile.initProfiles(this.semester.semesters);
-            await this.loadProfile(this.profile.current);
+            const urlResult = await this.loadConfigFromURL();
+            if (!urlResult) {
+                this.profile.initProfiles(this.semester.semesters);
+                await this.loadProfile(this.profile.current);
+            } else {
+                // window.location.search = '';
+            }
         }
 
         this.status.loading = false;

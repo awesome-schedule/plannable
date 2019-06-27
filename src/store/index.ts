@@ -25,8 +25,9 @@ import profile from './profile';
 import schedule, { ScheduleStateJSON } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
+import Expirable from '@/data/Expirable';
 
-export interface SemesterStorage {
+export interface SemesterStorage extends Expirable {
     name: string;
     currentSemester: SemesterJSON;
     display: DisplayState;
@@ -100,25 +101,31 @@ interface StorageItem<State, JSONState> {
  */
 export type StoreModule<State, JSONState> = State & StorageItem<State, JSONState>;
 
+const jobs: { [x: string]: string } = {};
 /**
- * save all store modules to localStorage
+ * a decorator that delays the execution of a **method** and store the handler in [[jobs]],
+ * cancel all subsequent calls in the meantime
+ * @param timeout delay in millisecond
  */
-export function saveStatus(name?: string) {
-    const { currentSemester } = semester;
-    if (!currentSemester) return;
-    if (!name) name = profile.current;
-    if (!name) return;
-
-    const obj: SemesterStorage = {
-        name,
-        currentSemester,
-        display,
-        filter,
-        schedule: schedule.toJSON(),
-        palette
+function delay(timeout: number) {
+    return (
+        target: any,
+        propertyKey: string,
+        descriptor: TypedPropertyDescriptor<(...args: any[]) => void>
+    ) => {
+        const oldVal = descriptor.value!;
+        descriptor.value = function(...args: any[]) {
+            if (jobs[propertyKey]) {
+                console.log('cancelled: ', propertyKey);
+                return;
+            }
+            jobs[propertyKey] = propertyKey;
+            window.setTimeout(() => {
+                oldVal.apply(this, args);
+                delete jobs[propertyKey];
+            }, timeout);
+        };
     };
-
-    localStorage.setItem(name, JSON.stringify(obj));
 }
 
 function isAncient(parsed: any): parsed is AncientStorage {
@@ -152,57 +159,54 @@ class Store extends Vue {
     /**
      * save all store modules to localStorage
      */
+    @delay(20)
     saveStatus() {
-        saveStatus(this.profile.current);
+        const { currentSemester } = this.semester;
+        if (!currentSemester) return;
+        const name = this.profile.current;
+
+        const obj: SemesterStorage = {
+            name,
+            modified: new Date().toJSON(),
+            currentSemester,
+            display,
+            filter,
+            schedule: schedule.toJSON(),
+            palette
+        };
+
+        localStorage.setItem(name, JSON.stringify(obj));
+        console.log('status saved');
     }
 
     /**
-     * recover all store modules' states from the localStorage, given the target.
-     *  - If target is a string, it will be treated as a profile name
-     *  - If target is a `SemesterJSON`, the first profile corresponding to that semester will be loaded.
-     * @param target
+     * recover all store modules' states from the localStorage, given the target name.
+     *
+     * assign a correct Catalog object to `window.catalog`,
+     * parse schedules and settings from `localStorage` and re-initialize global states
+     * @param name
      */
-    async loadProfile(target: string | SemesterJSON) {
+    async loadProfile(name?: string, force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
+        if (!name) name = this.profile.current;
 
         window.scheduleEvaluator.clear();
-
         let parsed: Partial<AncientStorage> | Partial<LegacyStorage> | Partial<SemesterState> = {};
-        if (typeof target === 'string') {
-            const data = localStorage.getItem(target);
-            if (data) {
-                try {
-                    parsed = JSON.parse(data);
-                } catch (e) {
-                    console.error(e);
-                }
+        const data = localStorage.getItem(name);
+        if (data) {
+            try {
+                parsed = JSON.parse(data);
+            } catch (e) {
+                console.error(e);
             }
-            await this.semester.selectSemester(
-                parsed.currentSemester || this.semester.semesters[0]
-            );
-        } else {
-            const { profiles } = this.profile;
-            for (const profileName of profiles) {
-                const data = localStorage.getItem(profileName);
-                if (data) {
-                    const temp = JSON.parse(data);
-                    const { currentSemester } = parsed;
-                    if (currentSemester && currentSemester.id === target.id) {
-                        parsed = temp;
-                        break;
-                    }
-                }
-            }
-            if (!parsed.currentSemester) {
-                // todo: name clashing
-                profiles.push(target.name);
-            }
-            this.profile.current = target.name;
-            await this.semester.selectSemester(target);
         }
+        await this.semester.selectSemester(
+            parsed.currentSemester || this.semester.semesters[0],
+            force
+        );
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};
@@ -285,9 +289,7 @@ class Store extends Vue {
         const evaluator = msg.payload;
         if (evaluator) {
             window.scheduleEvaluator = evaluator;
-            const num = evaluator.size();
-            this.noti.success(`${num} Schedules Generated!`, 3);
-            this.schedule.numGenerated = num;
+            this.schedule.numGenerated = evaluator.size();
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } else {
@@ -300,28 +302,63 @@ class Store extends Vue {
 
     /**
      * Select a semester and fetch all its associated data,
-     * assign a correct Catalog object to `window.catalog`,
-     * parse schedules and settings from `localStorage` and re-initialize global states
+     * note that the first profile corresponding to the target semester will be loaded.
      *
-     * @param currentSemester the semester to switch to
+     * @param target the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(currentSemester?: SemesterJSON, force = false) {
+    async selectSemester(target?: SemesterJSON, force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
-
-        if (!currentSemester) currentSemester = this.semester.semesters[0];
-        if (force) this.noti.info(`Updating ${currentSemester.name} data...`);
+        if (!target) target = this.semester.semesters[0];
+        if (force) {
+            this.noti.info(`Updating ${target.name} data...`);
+            await this.loadProfile(this.profile.current, force);
+            return;
+        } else if (this.semester.currentSemester && target.id === this.semester.currentSemester.id)
+            return;
 
         this.status.loading = true;
-        window.scheduleEvaluator.clear();
 
-        const result = await this.semester.selectSemester(currentSemester, force);
-        this.noti.notify(result);
-        if (result.payload) this.loadProfile(currentSemester);
+        const { profiles } = this.profile;
+        let parsed: Partial<SemesterStorage> = {};
+        for (const profileName of profiles) {
+            const data = localStorage.getItem(profileName);
+            if (data) {
+                const temp = JSON.parse(data);
+                const { currentSemester } = temp;
+                if (currentSemester && currentSemester.id === target.id) {
+                    parsed = temp;
+                    break;
+                }
+            }
+        }
+        // no profile for target semester exists. let's create one
+        if (!parsed.name || !parsed.currentSemester) {
+            if (profiles.includes(target.name)) {
+                if (
+                    !confirm(
+                        `You already have a profile named ${
+                            target.name
+                        }. However, it does not correspond to the ${
+                            target.name
+                        } semester. Override it?`
+                    )
+                )
+                    return;
+            } else {
+                profiles.push(target.name);
+            }
+            parsed.currentSemester = target;
+            localStorage.setItem(target.name, JSON.stringify(parsed));
+            this.profile.current = target.name;
+        } else {
+            this.profile.current = parsed.name;
+        }
 
+        await this.loadProfile();
         this.status.loading = false;
     }
 }
@@ -343,31 +380,30 @@ class WatchFactory extends Store {
     }
 
     @Watch('display.multiSelect')
-    private multiSelectWatch() {
+    private w0() {
         Schedule.options.multiSelect = this.display.multiSelect;
         this.schedule.currentSchedule.computeSchedule();
     }
 
     @Watch('display.combineSections')
-    private combineSectionsWatch() {
+    private a() {
         Schedule.options.combineSections = this.display.combineSections;
         this.schedule.currentSchedule.computeSchedule();
     }
 
     @Watch('palette.savedColors', { deep: true })
-    private wat() {
+    private b() {
         Schedule.savedColors = this.palette.savedColors;
         this.schedule.currentSchedule.computeSchedule();
     }
 
     @Watch('profile.current')
-    private curProfWatch() {
-        this.loadProfile(this.profile.current);
+    private c() {
         localStorage.setItem('currentProfile', this.profile.current);
     }
 
     @Watch('profile.profiles', { deep: true })
-    private profsWatch() {
+    private d() {
         localStorage.setItem('profiles', JSON.stringify(this.profile.profiles));
     }
 

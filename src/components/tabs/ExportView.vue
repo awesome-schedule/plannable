@@ -54,54 +54,70 @@
                     Google/Apple calendar support iCal files
                 </small>
             </li>
-            <!-- <li class="list-group-item">
+            <li class="list-group-item">
                 <button class="btn btn-outline-primary w-100" @click="exportToURL()">
                     Export as URL
                 </button>
-            </li> -->
+            </li>
             <li class="list-group-item">
                 <button class="btn btn-outline-primary w-100" @click="print()">
                     Print
                 </button>
             </li>
-            <div class="btn bg-info nav-btn">
-                Different Configurations
-            </div>
-            <li v-for="(name, idx) in profile.profiles" :key="name" class="list-group-item">
-                <input
-                    v-if="newName[idx] !== null"
-                    v-model="newName[idx]"
-                    class="form-control mb-3"
-                    type="text"
-                    :placeholder="name"
-                />
-                <p v-else>{{ name }}</p>
-
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <button
-                            v-if="newName[idx] === null"
-                            class="btn btn-outline-secondary"
-                            @click="$set(newName, idx, name)"
-                        >
-                            edit name
-                        </button>
-                        <button v-else class="btn btn-secondary" @click="finishEdit(name, idx)">
-                            edit
-                        </button>
+        </ul>
+        <div class="btn bg-info nav-btn mt-2">
+            Profile Management
+        </div>
+        <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
+            <li
+                v-for="(name, idx) in profile.profiles"
+                :key="name"
+                class="list-group-item list-group-item-action pl-3 pr-2"
+                :class="{ sel: name === profile.current }"
+            >
+                <div class="form-row no-gutters justify-content-between">
+                    <div class="col-8">
+                        <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
+                            <span>{{ name }}</span> <br />
+                            <small v-for="field in getMeta(name)" :key="field" class="text-muted"
+                                >{{ field }} <br />
+                            </small>
+                        </span>
+                        <input
+                            v-else
+                            v-model="newName[idx]"
+                            class="form-control form-control-sm"
+                            type="text"
+                            @keyup.enter="finishEdit(name, idx)"
+                            @keyup.esc="$set(newName, idx, null)"
+                        />
                     </div>
-
-                    <div class="input-group-append">
-                        <button class="btn btn-outline-info" @click="profile.selectProfile(name)">
-                            {{ name === profile.current ? 'selected' : 'select' }}
-                        </button>
-                        <button
-                            v-if="profile.profiles.length !== 1"
-                            class="btn btn-outline-danger"
+                    <div class="col-4 text-right" style="font-size: 16px">
+                        <i
+                            class="click-icon mr-2"
+                            :class="
+                                name === profile.current ? 'far fa-check-square' : 'far fa-square'
+                            "
+                            @click="selectProfile(name)"
+                        ></i>
+                        <i
+                            v-if="newName[idx] === null"
+                            class="fas fa-edit click-icon"
+                            title="rename this profile"
+                            @click="$set(newName, idx, name)"
+                        ></i>
+                        <i
+                            v-else
+                            class="fas fa-check ml-1 click-icon"
+                            title="confirm renaming"
+                            @click="finishEdit(name, idx)"
+                        ></i>
+                        <i
+                            v-if="profile.profiles.length > 1"
+                            class="fa fa-times ml-1 click-icon"
+                            title="delete this profile"
                             @click="deleteProfile(name, idx)"
-                        >
-                            delete
-                        </button>
+                        ></i>
                     </div>
                 </div>
             </li>
@@ -110,3 +126,9 @@
 </template>
 
 <script lang="ts" src="./ExportView.ts"></script>
+
+<style scoped>
+.sel {
+    background-color: #b8daff;
+}
+</style>

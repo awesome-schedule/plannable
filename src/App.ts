@@ -32,6 +32,7 @@ import URLModal from './components/URLModal.vue';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 import { SemesterJSON } from './models/Catalog';
+import randomColor from 'randomcolor';
 
 @Component({
     components: {
@@ -113,10 +114,14 @@ export default class App extends Store {
     }
 
     addToCompare() {
+        const color = randomColor({
+            luminosity: 'dark'
+        }) as string;
         this.compare.push({
             schedule: this.schedule.currentSchedule,
             profileName: this.profile.current,
-            semester: this.semester.currentSemester!.name
+            semester: this.semester.currentSemester!.name,
+            color
         });
     }
 }

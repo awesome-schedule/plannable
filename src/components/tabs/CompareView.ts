@@ -28,14 +28,8 @@ export default class CompareView extends Store {
     createdHelper() {
         for (let i = 0; i < this.compare.length; i++) {
             const sche = this.compare[i].schedule;
-            let color = randomColor({
-                luminosity: 'dark'
-            }) as string;
-            if (this.colors.length <= i) {
-                this.colors.push(color);
-            } else {
-                color = this.colors[i];
-            }
+            let color = this.compare[i].color;
+            this.colors.push(color);
             for (let i = 0; i < 5; i++) {
                 for (const sb of sche.days[i]) {
                     const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
@@ -50,6 +44,7 @@ export default class CompareView extends Store {
         this.compare.splice(idx, 1);
         this.colors.splice(idx, 1);
         this.compareSchedule = new Schedule();
+        this.colors = [];
         this.createdHelper();
     }
 }

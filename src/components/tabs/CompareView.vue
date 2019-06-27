@@ -13,7 +13,9 @@
                     <div class="row no-gutters justify-content-between">
                         <div class="col-xs-auto mr-auto">
                             Schedule {{ idx + 1 }}<br />
-                            <small class="text-muted"> {{ compare[idx].profileName }} </small><br />
+                            <small class="text-muted">
+                                From profile "{{ compare[idx].profileName }}" </small
+                            ><br />
                             <small class="text-muted"> {{ compare[idx].semester }} </small>
                         </div>
                         <div class="col-xs-auto text-right align-self-center">

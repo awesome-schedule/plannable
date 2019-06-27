@@ -11,7 +11,6 @@
                     v-for="sem in semester.semesters"
                     :key="sem.id"
                     class="dropdown-item w-100"
-                    href="#"
                     @click="selectSemester(sem)"
                     >{{ sem.name }}
                 </a>

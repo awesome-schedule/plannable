@@ -166,10 +166,9 @@ class Store extends Vue {
     }
 
     /**
-     * recover all store modules' states from the localStorage, given the target name.
-     *
-     * assign a correct Catalog object to `window.catalog`,
-     * parse schedules and settings from `localStorage` and re-initialize global states
+     * given the profile name, switch to the profile's semester.
+     * recover all store modules' states from the localStorage,
+     * and assign a correct Catalog object to `window.catalog`,
      * @param name
      */
     async loadProfile(name?: string, force = false) {
@@ -310,19 +309,28 @@ class Store extends Vue {
 
         const { profiles } = this.profile;
         let parsed: Partial<SemesterStorage> = {};
+        let parsedLatest = -Infinity;
         for (const profileName of profiles) {
             const data = localStorage.getItem(profileName);
             if (data) {
-                const temp = JSON.parse(data);
-                const { currentSemester } = temp;
+                const temp: Partial<SemesterStorage> = JSON.parse(data);
+                const { currentSemester, modified } = temp;
                 if (currentSemester && currentSemester.id === target.id) {
-                    parsed = temp;
+                    if (modified) {
+                        const time = new Date(modified).getTime();
+                        if (time > parsedLatest) {
+                            parsed = temp;
+                            parsedLatest = time;
+                        }
+                    } else {
+                        if (!parsed.currentSemester) parsed = temp;
+                    }
                     break;
                 }
             }
         }
         // no profile for target semester exists. let's create one
-        if (!parsed.name || !parsed.currentSemester) {
+        if (!parsed.currentSemester) {
             if (profiles.includes(target.name)) {
                 if (
                     !confirm(
@@ -340,10 +348,12 @@ class Store extends Vue {
             parsed.currentSemester = target;
             localStorage.setItem(target.name, JSON.stringify(parsed));
             this.profile.current = target.name;
+        } else if (!parsed.name) {
+            localStorage.setItem(target.name, JSON.stringify(parsed));
+            this.profile.current = parsed.name = target.name;
         } else {
             this.profile.current = parsed.name;
         }
-
         await this.loadProfile();
         this.status.loading = false;
     }

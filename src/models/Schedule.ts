@@ -124,7 +124,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -634,34 +634,30 @@ export default class Schedule {
     }
 
     public equals(s: Schedule) {
-        const all = s.All;
-        if (Object.keys(this.All).length !== Object.keys(s.All).length) return false;
-        for (const c in this.All) {
-            if (!all[c]) {
-                return false;
+        const keys1 = Object.keys(this.All).sort(),
+            keys2 = Object.keys(s.All).sort();
+        // unequal length
+        if (keys1.length !== keys2.length) return false;
+        for (let i = 0; i < keys1.length; i++) {
+            const key = keys1[i];
+            // unequal key
+            if (key !== keys2[i]) return false;
+            const val1 = this.All[key],
+                val2 = s.All[key];
+            // unequal value
+            if (val1 === -1 || val2 === -1) {
+                if (val1 !== val2) return false;
             } else {
-                if (all[c] === -1) {
-                    if (this.All[c] !== -1) {
-                        return false;
-                    }
-                } else {
-                    if ((this.All[c] as Set<number>).size !== (all[c] as Set<number>).size) {
-                        return false;
-                    } else {
-                        for (const sec of (this.All[c] as Set<number>)) {
-                            if (!(all[c] as Set<number>).has(sec)) return false;
-                        }
-                    }
-                }
+                for (const v of val1) if (!val2.has(v)) return false;
+                for (const v of val2) if (!val1.has(v)) return false;
             }
         }
 
-        const events = s.events;
-        if (events.length !== this.events.length) return false;
-        const days = this.events.map(x => x.days);
-        for (const e of events) {
-            if (days.indexOf(e.days) === -1) return false;
-        }
+        const days1 = this.events.map(x => x.days).sort();
+        const days2 = s.events.map(x => x.days).sort();
+        if (days1.length !== days2.length) return false;
+        for (let i = 0; i < days1.length; i++) if (days1[i] !== days2[i]) return false;
+
         return true;
     }
 }

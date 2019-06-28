@@ -17,9 +17,8 @@
                 >
                     <div class="row no-gutters justify-content-between">
                         <div class="col-xs-auto mr-auto">
-                            Schedule {{ idx + 1 }}<br />
+                            Schedule {{ cur.index + 1 }}<br />
                             <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
-                            <small class="text-muted">{{ cur.semester }}</small>
                         </div>
                         <div class="col-xs-auto text-right align-self-center">
                             <input

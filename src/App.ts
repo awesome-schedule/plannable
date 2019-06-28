@@ -113,12 +113,7 @@ export default class App extends Store {
      *          return -1 if current schedule is not in compares.
      */
     indexOfCompare() {
-        for (let i = 0; i < this.compare.length; i++) {
-            if (this.compare[i].schedule.equals(this.schedule.currentSchedule)) {
-                return i;
-            }
-        }
-        return -1;
+        return this.compare.findIndex(c => c.schedule.equals(this.schedule.currentSchedule));
     }
 
     addToCompare() {
@@ -132,7 +127,7 @@ export default class App extends Store {
             this.compare.push({
                 schedule: this.schedule.currentSchedule,
                 profileName: this.profile.current,
-                semester: this.semester.currentSemester!.name,
+                index: this.schedule.currentScheduleIndex,
                 color
             });
         }

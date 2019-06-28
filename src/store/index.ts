@@ -129,7 +129,7 @@ export function saveStatus() {
     console.log('status saved');
 }
 
-const compare: { schedule: Schedule; profileName: string; semester: string; color: string }[] = [];
+const compare: { schedule: Schedule; profileName: string; index: number; color: string }[] = [];
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin

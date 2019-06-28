@@ -634,22 +634,19 @@ export default class Schedule {
     }
 
     public equals(s: Schedule) {
-        const keys1 = Object.keys(this.All).sort(),
-            keys2 = Object.keys(s.All).sort();
+        const keys = Object.keys(this.All);
         // unequal length
-        if (keys1.length !== keys2.length) return false;
-        for (let i = 0; i < keys1.length; i++) {
-            const key = keys1[i];
-            // unequal key
-            if (key !== keys2[i]) return false;
+        if (keys.length !== Object.keys(s.All).length) return false;
+        for (const key of keys) {
             const val1 = this.All[key],
                 val2 = s.All[key];
+            if (!val2) return false;
             // unequal value
             if (val1 === -1 || val2 === -1) {
                 if (val1 !== val2) return false;
             } else {
+                if (val1.size !== val2.size) return false;
                 for (const v of val1) if (!val2.has(v)) return false;
-                for (const v of val2) if (!val1.has(v)) return false;
             }
         }
 

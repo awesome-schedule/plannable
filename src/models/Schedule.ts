@@ -8,7 +8,6 @@
  *
  */
 import { colorDepthSearch, graphColoringExact } from '../algorithm';
-import { Graph } from '../algorithm/Graph';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -314,9 +313,7 @@ export default class Schedule {
     /**
      * Compute the schedule view based on `this.All` and `this.preview`.
      * If there is a pending compute task, remove that pending task.
-     *
      * @param sync if true, synchronously execute this function, otherwise use setTimeout
-     *
      * @remarks this method has a very high time complexity.
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.

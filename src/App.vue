@@ -123,13 +123,13 @@
         <log-view v-else-if="sideBar.showLog"></log-view>
 
         <main-content v-if="!sideBar.showInfo && !sideBar.showExternal && !sideBar.showCompare">
-            <div class="w-100 my-3">
+            <div id="pagination-container" class="w-100 my-2">
                 <div class="row justify-content-center">
-                    <div class="col-sm-auto">
+                    <div class="col-sm-auto text-center my-1">
                         <Pagination></Pagination>
                     </div>
-                    <div class="col-sm-auto">
-                        <button class="btn btn-outline-primary mb-3" @click="addToCompare()">
+                    <div class="col-sm-auto text-center align-self-center">
+                        <button class="btn btn-outline-primary my-1" @click="addToCompare()">
                             <i class="fas fa-balance-scale"></i>
                             Compare
                             <i v-if="indexOfCompare() !== -1" class="fas fa-check"></i>
@@ -215,6 +215,9 @@
         size: A4 portrait;
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
+    }
+    #pagination-container {
+        display: none !important;
     }
     nav {
         display: none !important;

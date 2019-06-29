@@ -81,6 +81,7 @@ window.axios = axios;
 window.querystring = querystring;
 
 Vue.config.productionTip = false;
+Vue.config.devtools = true;
 Vue.prototype.openLousList = openLousList;
 Vue.prototype.openVAGrade = openVAGrade;
 Vue.prototype.highlightMatch = highlightMatch;

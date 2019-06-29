@@ -61,7 +61,6 @@ export default class App extends Store {
     get sideBar() {
         return this.status.sideBar;
     }
-    scrollable = false;
 
     async loadConfigFromURL() {
         const config = new URLSearchParams(window.location.search).get('config');

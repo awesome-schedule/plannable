@@ -8,7 +8,6 @@
  *
  */
 import { Vertex, Graph } from './Graph';
-import Schedule from '@/models/Schedule';
 
 /**
  * An exact graph coloring algorithm using backtracking

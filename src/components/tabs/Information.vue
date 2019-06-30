@@ -680,85 +680,34 @@
                             class
                         </li>
                         <li>Show title on class list: ???</li>
-                        
                     </ol>
                 </div>
                 <h5 id="item-4-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
-                    ><strong> Max Number of Schedules</strong>
+                    ><strong> Advanced Features</strong>
                 </h5>
-                <p>
-                    Given the variety of the sections offered for one course, sometimes there exist
-                    more than a million combinations of the courses.
-                </p>
-                <h5 id="item-4-3" class="mt-4">
-                    <i class="fa fa-university" aria-hidden="true"></i
-                    ><strong> Sort Schedules</strong>
-                </h5>
-                <p>
-                    One powerful feature comes with auto-scheduling is that the generated schedules
-                    can be sorted based on one or a combination of options. You can select multiple
-                    sort options to optimize your schedule, and drag sort options to change their
-                    priority in fallback mode. Note that all of the sort options are responsive,
-                    i.e. they will be applied instantly after your changes.
-                </p>
-
-                <h6>Sort Options</h6>
-                Currently, we provide the following list of sort options. If you prefer a
-                mathematical description on how they are computed, see
-                <a href="#item-11-1">Appendix</a>.
-                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
-                    <ol>
-                        <li>Variance: Balance the class time each day</li>
-                        <li>Vertical compactness: Make classes back-to-back</li>
-                        <li>Lunch Time: Leave spaces for lunch</li>
-                        <li>No Early: Start the day as late as possible</li>
-                        <li>Walking Distance: Avoid long distance walking between classes</li>
-                        <li>I'm Feeling Lucky: Sort Randomly</li>
-                    </ol>
-                </div>
-                <p>
-                    It is possible to reverse one or more of the sort options provided above: just
-                    click the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want
-                    your schedule to be very compact (i.e. you want to have some time to rest
-                    between classes), you can enable "Vertical compactness" and click the
-                    <i class="fas fa-arrow-up"></i> icon so it becomes
-                    <i class="fas fa-arrow-down"></i>.
-                </p>
-
-                <h6>Sort Modes</h6>
-                And there are two avaiable sort modes.
                 <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
-                            Combined: Combine all sorting options enabled and give them equal weight
+                            Max number of schedules: Given the variety of the sections offered for
+                            one course, sometimes there exist more than a million combinations of
+                            the courses.
                         </li>
                         <li>
-                            Fallback: Sort using the options on top first. If two schedules are
-                            compared equal using that option, sort using the next option.
+                            Combine Sections: For simplicity, sections under the same course are
+                            combined into one block for showing if they take place at the same time
+                        </li>
+                        <li>
+                            Enable Log History: You can view schedule logs here (such as the
+                            resquests, and errors)
+                        </li>
+                        <li>
+                            Enable Fuzzy Search: You can browse class using more advanced fuzzy
+                            search algorithm
                         </li>
                     </ol>
                 </div>
-                <h6>Tips on choosing sort modes</h6>
-                If you want to balance between multiple sort options, try "combined". On the other
-                hand, if you want to prioritize a single sort option (such as No Early), then try
-                "fallback", as it will sort using options on top first.
 
-                <v-card class="my-5 mx-auto gif-center">
-                    <v-img :src="imgPath('sort.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
-
-                <!-- <h3 id="item-5">Display Settings</h3>
-                <hr /> -->
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

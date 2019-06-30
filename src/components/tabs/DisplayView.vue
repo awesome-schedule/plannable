@@ -40,6 +40,9 @@
                     <input
                         id="class-height"
                         v-model.number="display.fullHeight"
+                        min="1"
+                        step="1"
+                        max="100"
                         type="number"
                         class="form-control form-control-sm"
                     />
@@ -54,6 +57,9 @@
                     <input
                         id="grid-height"
                         v-model.number="display.partialHeight"
+                        min="1"
+                        step="1"
+                        max="100"
                         type="number"
                         class="form-control form-control-sm"
                     />
@@ -152,6 +158,7 @@
                     type="number"
                     min="1"
                     step="1"
+                    max="50"
                 />
             </div>
             <div class="custom-control custom-checkbox">
@@ -188,6 +195,9 @@
                         id="num-schedule"
                         v-model.number="display.maxNumSchedules"
                         type="number"
+                        min="1000"
+                        step="1"
+                        max="500000"
                         class="form-control"
                     />
                     <small class="form-text text-muted">

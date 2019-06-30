@@ -3,8 +3,10 @@
         <ul class="pagination justify-content-center" style="margin-bottom: 0">
             <li class="input-group" style="width:80px">
                 <input
-                    v-model="goto"
+                    v-model.number="goto"
                     type="number"
+                    min="1"
+                    step="1"
                     placeholder="Go to"
                     class="form-control"
                     style="border-radius: 4px 0px 0px 4px !important"

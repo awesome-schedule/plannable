@@ -1,5 +1,5 @@
 <template>
-    <nav v-if="generated">
+    <nav>
         <ul class="pagination justify-content-center" style="margin-bottom: 0">
             <li class="input-group" style="width:80px">
                 <input

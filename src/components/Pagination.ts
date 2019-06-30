@@ -6,18 +6,13 @@ import Store from '../store';
 
 /**
  * The component for showing a list of pages, used for switching between generated schedules
- * @author Kaiying Shan, Hanzhi Zhou
+ * @author Kaiying Cat, Hanzhi Zhou
  */
 @Component
 export default class Pagination extends Store {
     get curIdx() {
         return this.schedule.currentScheduleIndex;
     }
-
-    get generated() {
-        return this.schedule.generated;
-    }
-
     get scheduleLength() {
         return this.schedule.numGenerated;
     }

@@ -124,7 +124,7 @@
 
         <main-content v-if="!sideBar.showInfo && !sideBar.showExternal && !sideBar.showCompare">
             <div id="pagination-container" class="w-100 my-2">
-                <div class="row justify-content-center">
+                <div v-if="schedule.generated" class="row justify-content-center">
                     <div class="col-sm-auto text-center my-1">
                         <Pagination></Pagination>
                     </div>

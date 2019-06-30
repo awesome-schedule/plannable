@@ -26,7 +26,6 @@ import schedule, { ScheduleStateJSON } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
 import Expirable from '@/data/Expirable';
-import param from '../config';
 
 export interface SemesterStorage extends Expirable {
     name: string;

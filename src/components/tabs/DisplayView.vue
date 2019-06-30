@@ -181,6 +181,41 @@
             Advanced Features
         </div>
         <ul class="list-group list-group-flush mx-1">
+            <li class="list-group-item pb-0">
+                <div class="form-group">
+                    <label for="num-schedule">Max number of schedules</label>
+                    <input
+                        id="num-schedule"
+                        v-model.number="display.maxNumSchedules"
+                        type="number"
+                        class="form-control"
+                    />
+                    <small class="form-text text-muted">
+                        May crash your browser if too big
+                    </small>
+                    <button
+                        type="button"
+                        class="btn btn-outline-info w-100"
+                        @click="generateSchedules()"
+                    >
+                        Apply
+                    </button>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <div
+                    class="custom-control custom-checkbox"
+                    title="Combine sections ocurring at the same time"
+                >
+                    <input
+                        id="comb-sec"
+                        v-model="display.combineSections"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label class="custom-control-label" for="comb-sec">Combine Sections</label>
+                </div>
+            </li>
             <li class="list-group-item">
                 <div class="custom-control custom-checkbox">
                     <input

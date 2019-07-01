@@ -263,10 +263,11 @@ class ScheduleGenerator {
          * the index of the section within the course indicated by `classNum`
          */
         let choiceNum = 0;
+        const numCourses = classList.length;
         /**
          * record the index of sections that are already tested
          */
-        const pathMemory = new Int32Array(classList.length);
+        const pathMemory = new Int32Array(numCourses);
         /**
          * The current schedule, build incrementally and in-place.
          * After one successful build, all elements are removed **in-place**
@@ -274,43 +275,36 @@ class ScheduleGenerator {
         const currentSchedule: RawAlgoSchedule = [];
 
         const maxNumSchedules = this.options.maxNumSchedules;
-
-        let exhausted = false;
         while (true) {
-            if (classNum >= classList.length) {
+            if (classNum >= numCourses) {
                 evaluator.add(currentSchedule.concat());
                 if (evaluator.size() >= maxNumSchedules) break;
-                classNum -= 1;
-                choiceNum = pathMemory[classNum];
+                choiceNum = pathMemory[--classNum];
                 currentSchedule.pop();
             }
 
             /**
-             * Algorithm Retract
              * when all possibilities in on class have exhausted, retract one class
              * explore the next possibilities in the nearest possible class
              * reset the memory path forward to zero
              */
+            let exhausted = false;
             while (choiceNum >= classList[classNum].length) {
-                classNum -= 1;
-                if (classNum < 0) {
+                if (--classNum < 0) {
                     exhausted = true;
                     break;
                 }
                 currentSchedule.pop();
                 choiceNum = pathMemory[classNum];
-                for (let i = classNum + 1; i < pathMemory.length; i++) {
-                    pathMemory[i] = 0;
-                }
+                pathMemory.fill(0, classNum + 1);
             }
 
             // if all possibilities are exhausted, then break out the loop
-            if (exhausted) {
-                break;
-            }
+            if (exhausted) break;
 
             // the time dict of the newly chosen class
-            const timeDict = classList[classNum][choiceNum][1];
+            const candidate = classList[classNum][choiceNum];
+            const timeDict = candidate[1];
             let conflict = false;
             for (const algoCourse of currentSchedule) {
                 if (checkTimeConflict(algoCourse[1], timeDict)) {
@@ -320,13 +314,12 @@ class ScheduleGenerator {
             }
 
             if (conflict) {
-                choiceNum += 1;
+                ++choiceNum;
             } else {
                 // if the schedule matches,
                 // record the next path memory and go to the next class, reset the choiceNum = 0
-                currentSchedule.push(classList[classNum][choiceNum]);
-                pathMemory[classNum] = choiceNum + 1;
-                classNum += 1;
+                currentSchedule.push(candidate);
+                pathMemory[classNum++] = choiceNum + 1;
                 choiceNum = 0;
             }
         }

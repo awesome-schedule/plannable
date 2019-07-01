@@ -160,16 +160,16 @@ class ScheduleEvaluator {
             for (let i = 0; i < 5; i++) {
                 const dayRooms = rooms[i],
                     dayBlocks = blocks[i];
-                for (let j = 0; i < dayRooms.length - 1; ++j) {
+                for (let j = 0; j < dayRooms.length - 1; ++j) {
                     // end of the first class
-                    const e1 = dayBlocks[i * 2 + 1],
+                    const e1 = dayBlocks[j * 2 + 1],
                         // start of the next class
-                        s2 = dayBlocks[i * 2 + 2];
+                        s2 = dayBlocks[j * 2 + 2];
 
                     // does not count the distance of the gap between two classes is greater than 45 minutes
                     if (s2 - e1 > 45) {
-                        const r1 = dayRooms[i],
-                            r2 = dayRooms[i + 1];
+                        const r1 = dayRooms[j],
+                            r2 = dayRooms[j + 1];
 
                         // skip unknown buildings
                         if (r1 !== -1 && r2 !== -1) dist += timeMatrix[r1 * len + r2];
@@ -406,18 +406,27 @@ class ScheduleEvaluator {
     }
 
     /**
-     * sort the array of schedules according to their quality coefficients, assuming they are already computed
-     * by `computeCoeff`
-     *
-     * @param quick quick mode: use Floyd–Rivest algorithm to select first
+     * sort the array of schedules according to their quality coefficients which will be computed by `computeCoeff`
+     * @param opt.newOptions: pass in new sort options to override the current options
+     * @param opt.quick quick mode: use Floyd–Rivest algorithm to select first
      * 100 elements and then sort only these elements.
-     * @param quickThresh Automatically enable quick mode if the length of schedules is greater than `quickThresh`
+     * @param opt.quickThresh Automatically enable quick mode if the length of schedules is greater than `quickThresh`
      * @requires optimization
      * @see {@link https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm}
      */
-    public sort(quick = false, quickThresh = 50000) {
-        console.time('sorting: ');
+    public sort({
+        newOptions,
+        quick = true,
+        quickThresh = 10000
+    }: {
+        newOptions?: EvaluatorOptions;
+        quick?: boolean;
+        quickThresh?: number;
+    } = {}) {
+        if (newOptions) this.options = newOptions;
+        this.computeCoeff();
 
+        console.time('sorting: ');
         const schedules = this._schedules.concat();
         this.schedules = schedules;
 
@@ -490,15 +499,6 @@ class ScheduleEvaluator {
         quickselect(arr, num, 0, arr.length - 1, compare);
         const slc = arr.slice(0, num).sort(compare);
         for (let i = 0; i < num; i++) arr[i] = slc[i];
-    }
-
-    /**
-     * change the sorting method and (optionally) do sorting
-     */
-    public changeSort(options: EvaluatorOptions, doSort = true) {
-        this.options = options;
-        this.computeCoeff();
-        if (doSort) this.sort();
     }
 
     public size() {

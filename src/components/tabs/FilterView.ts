@@ -63,7 +63,7 @@ export default class FilterView extends Store {
             }
         }
         if (!window.scheduleEvaluator.empty()) {
-            window.scheduleEvaluator.changeSort(this.filter.sortOptions, true);
+            window.scheduleEvaluator.sort({ newOptions: this.filter.sortOptions });
             if (!this.schedule.generated) {
                 this.schedule.switchSchedule(true);
             } else {

@@ -67,7 +67,7 @@ describe('ScheduleGenerator Test', () => {
         expect(result4.empty()).toBeFalsy();
 
         sort.mode = 0;
-        result4.changeSort(sort, true);
+        result4.sort({ newOptions: sort });
         expect(result4.getSchedule(0)).toBeInstanceOf(Schedule);
         result4.clear();
 
@@ -78,12 +78,12 @@ describe('ScheduleGenerator Test', () => {
         }
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;
-        result4.changeSort(sort, true);
+        result4.sort({ newOptions: sort });
         result4.partialSort(result4.schedules, (a, b) => a.coeff - b.coeff, 10);
 
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;
-        result4.changeSort(sort, true);
+        result4.sort({ newOptions: sort });
 
         schedule.events.length = 0;
         schedule.addEvent('MoTuWeThFr 8:00AM - 8:00PM', false);

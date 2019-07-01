@@ -226,11 +226,14 @@ class ScheduleGenerator {
             schedule.events
         );
         this.createSchedule(classList, evaluator);
+
+        // free a little memory by removing the time amd room info,
+        // which are no longer needed, from each section
+        classList.forEach(sections => sections.forEach(section => section.splice(2)));
         console.timeEnd('running algorithm:');
 
         const size = evaluator.size();
         if (size > 0) {
-            evaluator.computeCoeff();
             evaluator.sort();
             return {
                 level: 'success',
@@ -282,7 +285,7 @@ class ScheduleGenerator {
         const { maxNumSchedules } = this.options;
         while (true) {
             if (classNum >= numCourses) {
-                evaluator.add(currentSchedule);
+                evaluator.add(currentSchedule.concat());
                 if (++count >= maxNumSchedules) return;
                 choiceNum = pathMemory[--classNum];
             }

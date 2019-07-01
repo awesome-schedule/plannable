@@ -13,15 +13,15 @@ const schedules: RawAlgoSchedule = [
 
 describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
-        const evaluator = new ScheduleEvaluator(filter.sortOptions, []);
+        const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
         evaluator.add(schedules);
         const s = evaluator._schedules[0];
-        const func = ScheduleEvaluator.sortFunctions.compactness;
+        const func = evaluator.sortFunctions.compactness.bind(evaluator);
         expect(func(s)).toBe(35 + 20 + 150 + 50 + 0 + 150);
     });
 
     it('Insertion Test', () => {
-        const evaluator = new ScheduleEvaluator(filter.sortOptions, []);
+        const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
         evaluator.add(schedules);
         const s = evaluator._schedules[0];
         expect(s.blocks[0]).toEqual([10, 15, 50, 80, 100, 200, 350, 450]);

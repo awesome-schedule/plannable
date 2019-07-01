@@ -64,13 +64,12 @@ export function loadBuildingList(force = false): Promise<NotiMsg<string[]>> {
             force
         }
     );
-
 }
 
 /**
  * request from remote and store in localStorage
  */
-async function requestTimeMatrix(): Promise<Int32Array> {
+export async function requestTimeMatrix(): Promise<Int32Array> {
     const res = await axios.get(`${getApi()}/data/Distance/Time_Matrix.json`);
     const data: number[][] = res.data;
 
@@ -96,7 +95,7 @@ async function requestTimeMatrix(): Promise<Int32Array> {
 /**
  * request from remote and store in localStorage
  */
-async function requestBuildingList(): Promise<string[]> {
+export async function requestBuildingList(): Promise<string[]> {
     const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
     const data = res.data;
     if (data instanceof Array && typeof data[0] === 'string') {

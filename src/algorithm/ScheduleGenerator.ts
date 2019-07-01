@@ -221,7 +221,11 @@ class ScheduleGenerator {
 
         console.time('running algorithm:');
 
-        const evaluator = new ScheduleEvaluator(this.options.sortOptions, schedule.events);
+        const evaluator = new ScheduleEvaluator(
+            this.options.sortOptions,
+            window.timeMatrix,
+            schedule.events
+        );
         this.createSchedule(classList, evaluator);
         console.timeEnd('running algorithm:');
 
@@ -267,18 +271,18 @@ class ScheduleGenerator {
          * The current schedule, build incrementally and in-place.
          * After one successful build, all elements are removed **in-place**
          */
-        const timeTable: RawAlgoSchedule = [];
+        const currentSchedule: RawAlgoSchedule = [];
 
         const maxNumSchedules = this.options.maxNumSchedules;
 
         let exhausted = false;
         while (true) {
             if (classNum >= classList.length) {
-                evaluator.add(timeTable);
+                evaluator.add(currentSchedule.concat());
                 if (evaluator.size() >= maxNumSchedules) break;
                 classNum -= 1;
                 choiceNum = pathMemory[classNum];
-                timeTable.pop();
+                currentSchedule.pop();
             }
 
             /**
@@ -293,7 +297,7 @@ class ScheduleGenerator {
                     exhausted = true;
                     break;
                 }
-                timeTable.pop();
+                currentSchedule.pop();
                 choiceNum = pathMemory[classNum];
                 for (let i = classNum + 1; i < pathMemory.length; i++) {
                     pathMemory[i] = 0;
@@ -308,7 +312,7 @@ class ScheduleGenerator {
             // the time dict of the newly chosen class
             const timeDict = classList[classNum][choiceNum][1];
             let conflict = false;
-            for (const algoCourse of timeTable) {
+            for (const algoCourse of currentSchedule) {
                 if (checkTimeConflict(algoCourse[1], timeDict)) {
                     conflict = true;
                     break;
@@ -320,7 +324,7 @@ class ScheduleGenerator {
             } else {
                 // if the schedule matches,
                 // record the next path memory and go to the next class, reset the choiceNum = 0
-                timeTable.push(classList[classNum][choiceNum]);
+                currentSchedule.push(classList[classNum][choiceNum]);
                 pathMemory[classNum] = choiceNum + 1;
                 classNum += 1;
                 choiceNum = 0;

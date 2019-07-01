@@ -162,7 +162,7 @@ function getDefaultOptions() {
 
 // these two properties must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
-window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions());
+window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.timeMatrix);
 
 /**
  * the filter module handles the manipulation of filters

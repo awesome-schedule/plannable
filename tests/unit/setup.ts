@@ -1,5 +1,6 @@
 import Catalog from '@/models/Catalog';
-import data from './data';
+import { requestSemesterData } from '@/data/CatalogLoader';
+import { requestTimeMatrix } from '@/data/BuildingLoader';
 
 global.console.time = jest.fn();
 global.console.timeEnd = jest.fn();
@@ -21,7 +22,7 @@ global.queue = [];
 global.postMessage = msg => global.queue.push(msg);
 
 beforeAll(async () => {
-    const catalog = await data;
+    const catalog = await requestSemesterData({ name: '', id: '1198' });
     catalog.raw_data.cs45015[6].push([
         19281,
         '001',
@@ -33,4 +34,5 @@ beforeAll(async () => {
         [['Comp. Vision', 'MoWe 5:00PM - 6:15PM', 'Thornton Hall E316', '08/27/2019 - 12/06/2019']]
     ]);
     window.catalog = new Catalog(catalog.semester, catalog.raw_data, catalog.modified);
+    window.timeMatrix = await requestTimeMatrix();
 });

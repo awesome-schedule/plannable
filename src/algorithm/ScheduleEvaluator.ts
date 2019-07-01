@@ -75,7 +75,7 @@ class ScheduleEvaluator {
          *
          * returns a higher value when the class times are unbalanced
          */
-        variance(schedule: CmpSchedule) {
+        variance(this: ScheduleEvaluator, schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             let sum = 0;
             let sumSq = 0;
@@ -96,13 +96,12 @@ class ScheduleEvaluator {
          *
          * The greater the time gap between classes, the greater the return value will be
          */
-        compactness(schedule: CmpSchedule) {
+        compactness(this: ScheduleEvaluator, schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             let compact = 0;
             for (const dayBlock of blocks) {
-                for (let i = 0; i < dayBlock.length - 3; i += 2) {
+                for (let i = 0; i < dayBlock.length - 3; i += 2)
                     compact += dayBlock[i + 2] - dayBlock[i + 1];
-                }
             }
             return compact;
         },
@@ -113,20 +112,18 @@ class ScheduleEvaluator {
          *
          * The greater the overlap, the greater the return value will be
          */
-        lunchTime(schedule: CmpSchedule) {
+        lunchTime(this: ScheduleEvaluator, schedule: CmpSchedule) {
             // 11:00 to 14:00
-            const lunchStart = 11 * 60;
-            const lunchEnd = 14 * 60;
-            const lunchMinOverlap = 60;
             const blocks = schedule.blocks;
             let totalOverlap = 0;
             for (let i = 0; i < 5; i++) {
                 const day = blocks[i];
                 let dayOverlap = 0;
-                for (let j = 0; j < day.length; j += 2) {
-                    dayOverlap += calcOverlap(lunchStart, lunchEnd, day[j], day[j + 1]);
-                }
-                if (dayOverlap > lunchMinOverlap) totalOverlap += dayOverlap;
+                for (let j = 0; j < day.length; j += 2)
+                    // 11:00 to 14:00
+                    dayOverlap += calcOverlap(660, 840, day[j], day[j + 1]);
+
+                if (dayOverlap > 60) totalOverlap += dayOverlap;
             }
             return totalOverlap;
         },
@@ -136,7 +133,7 @@ class ScheduleEvaluator {
          *
          * For a schedule that has earlier classes, this method will return a higher number
          */
-        noEarly(schedule: CmpSchedule) {
+        noEarly(this: ScheduleEvaluator, schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             const refTime = 12 * 60;
             let total = 0;
@@ -153,21 +150,30 @@ class ScheduleEvaluator {
         /**
          * compute the sum of walking distances between each consecutive pair of classes
          */
-        distance(schedule: CmpSchedule) {
-            const timeMatrix = window.timeMatrix;
+        distance(this: ScheduleEvaluator, schedule: CmpSchedule) {
+            const timeMatrix = this.timeMatrix;
 
             // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5;
-            const rooms = schedule.rooms;
+            const { rooms, blocks } = schedule;
             let dist = 0;
-            for (const dayRooms of rooms) {
-                for (let i = 0; i < dayRooms.length - 1; i++) {
-                    const r1 = dayRooms[i];
-                    const r2 = dayRooms[i + 1];
+            for (let i = 0; i < 5; i++) {
+                const dayRooms = rooms[i],
+                    dayBlocks = blocks[i];
+                for (let j = 0; i < dayRooms.length - 1; ++j) {
+                    // end of the first class
+                    const e1 = dayBlocks[i * 2 + 1],
+                        // start of the next class
+                        s2 = dayBlocks[i * 2 + 2];
 
-                    // skip unknown buildings
-                    if (r1 === -1 || r2 === -1) continue;
-                    dist += timeMatrix[r1 * len + r2];
+                    // does not count the distance of the gap between two classes is greater than 45 minutes
+                    if (s2 - e1 > 45) {
+                        const r1 = dayRooms[i],
+                            r2 = dayRooms[i + 1];
+
+                        // skip unknown buildings
+                        if (r1 !== -1 && r2 !== -1) dist += timeMatrix[r1 * len + r2];
+                    }
                 }
             }
             return dist;
@@ -190,6 +196,10 @@ class ScheduleEvaluator {
      * this is the sorted array of schedules, created after the first invocation of `sort`
      */
     public schedules: CmpSchedule[] = [];
+    /**
+     * the array of sort functions with `this` bind to the evaluator instance
+     */
+    public sortFunctions: SortFunctions;
 
     /**
      * the cache of coefficient array for each evaluating function
@@ -200,7 +210,16 @@ class ScheduleEvaluator {
      * @param options
      * @param events the array of events kept, use to construct generated schedules
      */
-    constructor(public options: EvaluatorOptions, public events: Event[] = []) {}
+    constructor(
+        public options: EvaluatorOptions,
+        public timeMatrix: Readonly<Int32Array>,
+        public events: Event[] = []
+    ) {
+        const funcs: any = {};
+        for (const [key, func] of Object.entries(ScheduleEvaluator.sortFunctions))
+            funcs[key] = func.bind(this);
+        this.sortFunctions = funcs;
+    }
 
     /**
      * Add a schedule to the collection of results.
@@ -211,22 +230,22 @@ class ScheduleEvaluator {
      */
     public add(schedule: RawAlgoSchedule) {
         // sort time blocks of courses according to its schedule
-        const blocks: OrderedBlocks = [[], [], [], [], []];
-        const rooms: OrderedRooms = [[], [], [], [], []];
+        const blocks: OrderedBlocks = [[], [], [], [], []],
+            rooms: OrderedRooms = [[], [], [], [], []];
         for (const course of schedule) {
-            const timeDict = course[1];
-            const roomDict = course[3];
+            const timeDict = course[1],
+                roomDict = course[3];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
                 const timeBlock = timeDict[k];
-                if (!timeBlock.length) continue;
+                const len = timeBlock.length;
+                if (!len) continue;
                 const roomBlock = roomDict[k];
 
                 // note that a block is a flattened array of TimeBlocks.
                 // Flattened only for performance reason
-                const block: number[] = blocks[k];
-                const room: number[] = rooms[k];
-                const len = timeBlock.length;
+                const block: number[] = blocks[k],
+                    room: number[] = rooms[k];
                 // hi = half of i
                 for (let i = 0, hi = 0; i < len; i += 2, hi += 1) {
                     // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
@@ -242,7 +261,7 @@ class ScheduleEvaluator {
         }
 
         this._schedules.push({
-            schedule: schedule.concat(),
+            schedule,
             blocks,
             rooms,
             coeff: 0,
@@ -275,7 +294,7 @@ class ScheduleEvaluator {
         } else {
             console.time(funcName);
 
-            const evalFunc = ScheduleEvaluator.sortFunctions[funcName];
+            const evalFunc = this.sortFunctions[funcName];
             const newCache = new Float32Array(schedules.length);
             if (assign) {
                 for (let i = 0; i < schedules.length; i++) {

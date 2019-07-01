@@ -85,7 +85,7 @@ export interface RoomNumberArray extends Week<number> {}
  *
  * @see [[TimeArray]]
  */
-export type RawAlgoCourse = [string, TimeArray, number[], RoomNumberArray];
+export type RawAlgoCourse = [string, number[], TimeArray, RoomNumberArray];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -200,7 +200,7 @@ class ScheduleGenerator {
                 }
 
                 if (sectionIndices.length !== 0)
-                    classes.push([key, timeDict, sectionIndices, roomNumberDict]);
+                    classes.push([key, sectionIndices, timeDict, roomNumberDict]);
             }
 
             // throw an error of none of the sections pass the filter
@@ -302,10 +302,10 @@ class ScheduleGenerator {
 
             // the time dict of the newly chosen class
             const candidate = classList[classNum][choiceNum];
-            const timeDict = candidate[1];
+            const timeDict = candidate[2];
             let conflict = false;
             for (let i = 0; i < classNum; i++) {
-                if (checkTimeConflict(currentSchedule[i][1], timeDict)) {
+                if (checkTimeConflict(currentSchedule[i][2], timeDict)) {
                     conflict = true;
                     break;
                 }

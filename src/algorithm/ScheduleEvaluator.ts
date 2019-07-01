@@ -233,7 +233,7 @@ class ScheduleEvaluator {
         const blocks: OrderedBlocks = [[], [], [], [], []],
             rooms: OrderedRooms = [[], [], [], [], []];
         for (const course of schedule) {
-            const timeDict = course[1],
+            const timeDict = course[2],
                 roomDict = course[3];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k

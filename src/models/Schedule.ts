@@ -199,7 +199,7 @@ export default class Schedule {
         this.currentCourses = [];
         this.currentIds = {};
 
-        for (const [key, , sections] of raw_schedule) {
+        for (const [key, sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
         this.computeSchedule();

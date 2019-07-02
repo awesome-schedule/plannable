@@ -56,6 +56,16 @@ export interface EvaluatorOptions {
     mode: SortMode;
 }
 
+type DeepReadonly<T> = T extends (infer R)[]
+    ? DeepReadonlyArray<R>
+    : T extends object
+    ? DeepReadonlyObject<T>
+    : T;
+
+interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
+
+type DeepReadonlyObject<T> = { readonly [P in keyof T]: DeepReadonly<T[P]> };
+
 /**
  * The goal of the schedule evaluator is to efficiently sort the generated schedules
  * according to the set of the rules defined by the user
@@ -203,11 +213,12 @@ class ScheduleEvaluator {
      * @param events the array of events kept, use to construct generated schedules
      */
     constructor(
-        public options: EvaluatorOptions,
+        public options: DeepReadonly<EvaluatorOptions>,
         public timeMatrix: Readonly<Int32Array>,
         public events: Event[] = []
     ) {
         const funcs: any = {};
+
         for (const [key, func] of Object.entries(ScheduleEvaluator.sortFunctions))
             funcs[key] = func.bind(this);
         this.sortFunctions = funcs;
@@ -268,30 +279,29 @@ class ScheduleEvaluator {
      */
     public computeCoeffFor(funcName: keyof SortFunctions, assign: boolean): Float32Array {
         const schedules = this._schedules;
+        const len = schedules.length;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {
-            if (assign) for (let i = 0; i < schedules.length; i++) schedules[i].coeff = cache[i];
+            if (assign) for (let i = 0; i < len; i++) schedules[i].coeff = cache[i];
             return cache;
         } else {
             console.time(funcName);
 
             const evalFunc = this.sortFunctions[funcName];
-            const newCache = new Float32Array(schedules.length);
+            const newCache = new Float32Array(len);
             if (assign) {
-                for (let i = 0; i < schedules.length; i++) {
+                for (let i = 0; i < len; i++) {
                     const cmpSchedule = schedules[i];
                     const val = evalFunc(cmpSchedule);
                     newCache[i] = schedules[i].coeff = val;
                 }
             } else {
-                for (let i = 0; i < schedules.length; i++) {
+                for (let i = 0; i < len; i++) {
                     newCache[i] = evalFunc(schedules[i]);
                 }
             }
-
             this.sortCoeffCache[funcName] = newCache;
             console.timeEnd(funcName);
-
             return newCache;
         }
     }
@@ -321,7 +331,6 @@ class ScheduleEvaluator {
                 .forEach(x => {
                     this.computeCoeffFor(x.name, false);
                 });
-
             console.timeEnd('precomputing coefficients');
         } else {
             console.time('normalizing coefficients');
@@ -476,9 +485,16 @@ class ScheduleEvaluator {
      * @see https://github.com/mourner/quickselect
      */
     public partialSort<T>(arr: T[], compare: (x: T, y: T) => number, num: number) {
-        quickselect(arr, num, 0, arr.length - 1, compare);
-        const slc = arr.slice(0, num).sort(compare);
-        for (let i = 0; i < num; i++) arr[i] = slc[i];
+        const len = arr.length;
+
+        // no point to use quick sort if num of elements to be selected is greater than half of the length
+        if (num >= len / 2) {
+            arr.sort(compare);
+        } else {
+            quickselect(arr, num, 0, len - 1, compare);
+            const slc = arr.slice(0, num).sort(compare);
+            for (let i = 0; i < num; i++) arr[i] = slc[i];
+        }
     }
 
     public size() {

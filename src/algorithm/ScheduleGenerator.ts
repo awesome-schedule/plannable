@@ -123,22 +123,21 @@ class ScheduleGenerator {
 
             // for each combined section, form a RawAlgoCourse
             for (const sections of combined) {
-                let no_match = false;
-
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
-                const timeDict = sections[0].getTimeRoom();
-                if (!timeDict) continue;
+                const blocksArray = sections[0].getTimeRoom();
+                if (!blocksArray) continue;
 
-                // don't include this combined section if it conflicts with any time filter or event,.
+                // don't include this combined section if it conflicts with any time filter or event.
+                let conflict = false;
                 for (const td of timeSlots) {
-                    if (checkTimeConflict(td, timeDict, 3)) {
-                        no_match = true;
+                    if (checkTimeConflict(td, blocksArray, 2, 3)) {
+                        conflict = true;
                         break;
                     }
                 }
-                if (no_match) continue;
+                if (conflict) continue;
 
                 const sectionIndices: number[] = [];
                 for (const section of sections) {
@@ -148,7 +147,7 @@ class ScheduleGenerator {
                     sectionIndices.push(section.sid);
                 }
 
-                if (sectionIndices.length) classes.push([key, sectionIndices, timeDict]);
+                if (sectionIndices.length) classes.push([key, sectionIndices, blocksArray]);
             }
 
             // throw an error of none of the sections pass the filter
@@ -180,6 +179,7 @@ class ScheduleGenerator {
         console.timeEnd('running algorithm:');
 
         const size = evaluator.size();
+        console.log(evaluator);
         if (size > 0) {
             evaluator.sort();
             return {
@@ -255,7 +255,7 @@ class ScheduleGenerator {
             const timeDict = candidate[2];
             let conflict = false;
             for (let i = 0; i < classNum; i++) {
-                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3)) {
+                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3)) {
                     conflict = true;
                     break;
                 }

@@ -77,7 +77,7 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;
         result4.sort({ newOptions: sort });
-        // result4.partialSort(result4.schedules, (a, b) => a.coeff - b.coeff, 10);
+        result4.partialSort(result4.schedules, (a, b) => a.coeff - b.coeff, 10);
 
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;

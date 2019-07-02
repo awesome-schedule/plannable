@@ -37,11 +37,13 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
  *
  * Example:
  * ```js
- * expect(parseTimeAll('MoWeFr 10:00AM - 11:00AM')).toEqual({
- *     Mo: [600, 660],
- *     We: [600, 660],
- *     Fr: [600, 660],
- * })
+ * expect(parseTimeAsTimeArray('MoWeFr 10:00AM - 11:00AM')).toEqual([
+ *     [600, 660],
+ *     [],
+ *     [600, 660],
+ *     [],
+ *     [600, 660],
+ * ])
  * ```
  */
 export function parseTimeAsTimeArray(time: string): TimeArray | null {
@@ -99,29 +101,37 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
  * return true of two `TimeArray` objects have overlapping time blocks, false otherwise
  *
  * @author Zichao Hu, Hanzhi Zhou
- * @param timeDict1
- * @param timeDict2
+ * @param timeArray1
+ * @param timeArray2
+ * @param step1 the increment step for array 1
+ * @param step2 the increment step for array 2
+ * @note use step=2 for time only array, use step=3 for time-room combined array
  */
-export function checkTimeConflict(timeDict1: TimeArray, timeDict2: TimeArray, step = 2) {
+export function checkTimeConflict(
+    timeArray1: TimeArray,
+    timeArray2: TimeArray,
+    step1 = 2,
+    step2 = 2
+) {
     for (let i = 0; i < 5; i++) {
-        const timeBlocks1 = timeDict1[i];
+        const timeBlocks1 = timeArray1[i];
         const len1 = timeBlocks1.length;
         if (!len1) continue;
 
-        const timeBlocks2 = timeDict2[i];
+        const timeBlocks2 = timeArray2[i];
         const len2 = timeBlocks2.length;
         if (!len2) continue;
 
-        for (let j = 0; j < len1; j += step) {
-            const begin = timeBlocks1[j] + 1;
-            const end = timeBlocks1[j + 1] - 1;
-            for (let k = 0; k < len2; k += step) {
-                const beginTime = timeBlocks2[k];
-                const endTime = timeBlocks2[k + 1];
+        for (let j = 0; j < len1; j += step1) {
+            const begin1 = timeBlocks1[j] + 1;
+            const end1 = timeBlocks1[j + 1] - 1;
+            for (let k = 0; k < len2; k += step2) {
+                const begin2 = timeBlocks2[k];
+                const end2 = timeBlocks2[k + 1];
                 if (
-                    (begin <= beginTime && beginTime <= end) ||
-                    (begin <= endTime && endTime <= end) ||
-                    (begin >= beginTime && end <= endTime)
+                    (begin1 <= begin2 && begin2 <= end1) ||
+                    (begin1 <= end2 && end2 <= end1) ||
+                    (begin1 >= begin2 && end1 <= end2)
                 ) {
                     return true;
                 }

@@ -6,7 +6,6 @@
 /**
  *
  */
-import { findBestMatch } from 'string-similarity';
 import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
@@ -27,65 +26,44 @@ import { NotiMsg } from '@/store/notification';
 export type TimeBlock = [number, number];
 
 /**
- * `TimeArray` is a data structure used to store the time blocks in a week
- * that a certain `Section` or `Event` will take place.
- *
+ * The blocks is a iliffe vector storing the time and room information of the an entity at each day.
  * Index from 0 to 4 represent days from Monday to Friday.
- * The values are **flattened** arrays of `TimeBlock`s, e.g. `[100, 200, 300, 400]`.
- *
- * @remarks The values are not simply `TimeBlock`s
- * because it is possible for a single section to have multiple meetings in a day
- *
  * Example:
  * ```js
- * const timeDict = [ [600, 660, 900, 960], [], [], [],  [1200, 1260] ]
+ * const timeDict = [ [600, 660, 11, 900, 960, 2], [], [], [],  [1200, 1260, 12] ]
  * ```
- * represents that this `Section` or `Event` will take place
- * every Monday 10:00 to 11:00 and 15:00 to 16:00 and Friday 20:00 to 21:00
+ * represents that this entity will take place
+ * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
+ * and Friday 20:00 to 21:00 at room 12
  *
+ * a typical loop that visit these info are shown below
+ * ```js
+ * for (const day of blocks) {
+ *     for (let i = 0; i < day.length; i += 3) {
+ *         const start = day[i]; // start time of the `i / 3`th class
+ *         const end = day[i + 1]; // end time of the `i / 3`th class
+ *         const roomNumber = day[i + 2]; // room index of the `i / 3`th class
+ *     }
+ * }
+ * ```
  * @see [[TimeBlock]]
  */
 export interface TimeArray extends Week<number> {}
-/**
- * index: same as TimeArray
- *
- * value: the name of the building
- *
- * if `timeDict[i]` is not empty, then `roomDict[i][j]` corresponds the room of the time block
- * `[timeDict[i][j * 2], timeDict[i][j * 2 + 1]]`. The following assertion will always be true:
- * ```js
- * if (timeDict[i].length)
- *     expect(timeDict[i].length).toBe(roomDict[i].length * 2);
- * ```
- */
-export interface RoomArray extends Week<string> {}
-
-/**
- * index: same as TimeArray
- *
- * values: the index of the building in the building list
- *
- * @see https://github.com/awesome-schedule/data/blob/master/Distance/Building_Array.json
- */
-export interface RoomNumberArray extends Week<number> {}
 
 /**
  * The data structure used in the algorithm to represent a Course that
  * possibly has multiple sections combined (occurring at the same time)
  *
  * 0: key of this course
- * 1: TimeArray
- * 2: an array of section indices
- * 3: RoomNumberArray
+ * 1: an array of section indices
+ * 2: TimeArray
  *
  * Example:
  * ```js
- * ["span20205",[[600,650], [600,650], [], [], []], [0, 1, 2], [[1], [3], [], [], []]]
+ * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], []]]
  * ```
- *
- * @see [[TimeArray]]
  */
-export type RawAlgoCourse = [string, number[], TimeArray, RoomNumberArray];
+export type RawAlgoCourse = [string, number[], TimeArray];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -123,7 +101,6 @@ class ScheduleGenerator {
      */
     public getSchedules(schedule: Schedule): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
-        const buildingList = this.buildingList;
 
         // convert events to TimeArrays so that we can easily check for time conflict
         const timeSlots: TimeArray[] = schedule.events.map(e => e.toTimeArray());
@@ -151,10 +128,8 @@ class ScheduleGenerator {
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
-                const tmp = sections[0].getTimeRoom();
-                if (!tmp) continue;
-
-                const [timeDict, roomDict] = tmp;
+                const timeDict = sections[0].getTimeRoom();
+                if (!timeDict) continue;
 
                 // don't include this combined section if it conflicts with any time filter or event,.
                 for (const td of timeSlots) {
@@ -173,34 +148,7 @@ class ScheduleGenerator {
                     sectionIndices.push(section.sid);
                 }
 
-                // Map the room to a number
-                const roomNumberDict: RoomNumberArray = [[], [], [], [], []];
-                if (buildingList && buildingList.length) {
-                    for (let i = 0; i < roomNumberDict.length; i++) {
-                        const numberList = roomNumberDict[i];
-                        const rooms = roomDict[i];
-                        for (const room of rooms) {
-                            const roomMatch = findBestMatch(
-                                room.toLowerCase(),
-                                buildingList as string[]
-                            );
-                            // we set the match threshold to 0.4
-                            if (roomMatch.bestMatch.rating >= 0.4) {
-                                numberList.push(roomMatch.bestMatchIndex);
-                            } else {
-                                // mismatch!
-                                console.warn(room, 'match not found!');
-                                numberList.push(-1);
-                            }
-                        }
-                    }
-                } else {
-                    for (let i = 0; i < roomDict.length; i++)
-                        roomNumberDict[i] = roomDict[i].map(() => -1);
-                }
-
-                if (sectionIndices.length !== 0)
-                    classes.push([key, sectionIndices, timeDict, roomNumberDict]);
+                if (sectionIndices.length) classes.push([key, sectionIndices, timeDict]);
             }
 
             // throw an error of none of the sections pass the filter
@@ -308,7 +256,7 @@ class ScheduleGenerator {
             const timeDict = candidate[2];
             let conflict = false;
             for (let i = 0; i < classNum; i++) {
-                if (checkTimeConflict(currentSchedule[i][2], timeDict)) {
+                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3)) {
                     conflict = true;
                     break;
                 }

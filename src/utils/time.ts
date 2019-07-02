@@ -102,7 +102,7 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
  * @param timeDict1
  * @param timeDict2
  */
-export function checkTimeConflict(timeDict1: TimeArray, timeDict2: TimeArray) {
+export function checkTimeConflict(timeDict1: TimeArray, timeDict2: TimeArray, step = 2) {
     for (let i = 0; i < 5; i++) {
         const timeBlocks1 = timeDict1[i];
         const len1 = timeBlocks1.length;
@@ -112,10 +112,10 @@ export function checkTimeConflict(timeDict1: TimeArray, timeDict2: TimeArray) {
         const len2 = timeBlocks2.length;
         if (!len2) continue;
 
-        for (let j = 0; j < len1; j += 2) {
+        for (let j = 0; j < len1; j += step) {
             const begin = timeBlocks1[j] + 1;
             const end = timeBlocks1[j + 1] - 1;
-            for (let k = 0; k < len2; k += 2) {
+            for (let k = 0; k < len2; k += step) {
                 const beginTime = timeBlocks2[k];
                 const endTime = timeBlocks2[k + 1];
                 if (

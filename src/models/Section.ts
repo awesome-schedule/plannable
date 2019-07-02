@@ -6,9 +6,10 @@
 /**
  *
  */
-import { RoomArray, TimeArray } from '../algorithm';
+import { TimeArray } from '../algorithm';
 import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
+import { findBestMatch } from 'string-similarity';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
 import { STATUSES, dayToInt, CourseStatus } from './Meta';
@@ -108,11 +109,11 @@ export default class Section implements CourseFields, Hashable {
     /**
      * get the time and room of this section's meetings as [[TimeArray]] and [[RoomArray]]
      */
-    public getTimeRoom(): [TimeArray, RoomArray] | null {
+    public getTimeRoom(): TimeArray | null {
         const timeDict: TimeArray = [[], [], [], [], []];
-        const roomDict: RoomArray = [[], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them and add to tmp_dict
+        const buildingList = window.buildingList;
         for (const meeting of this.meetings) {
             const t = meeting.days;
             // skip empty string
@@ -129,15 +130,27 @@ export default class Section implements CourseFields, Hashable {
             for (const day of date) {
                 const d = dayToInt[day];
                 const dayBlock = timeDict[d];
-                const roomBlock = roomDict[d];
                 // the timeBlock is flattened
 
                 dayBlock.push(...timeBlock);
-                roomBlock.push(meeting.room);
+                if (buildingList && buildingList.length) {
+                    const { room } = meeting;
+                    const roomMatch = findBestMatch(room.toLowerCase(), buildingList as string[]);
+                    // we set the match threshold to 0.4
+                    if (roomMatch.bestMatch.rating >= 0.4) {
+                        dayBlock.push(roomMatch.bestMatchIndex);
+                    } else {
+                        // mismatch!
+                        console.warn(room, 'match not found!');
+                        dayBlock.push(-1);
+                    }
+                } else {
+                    dayBlock.push(-1);
+                }
             }
         }
 
-        return [timeDict, roomDict];
+        return timeDict;
     }
 
     public equals(sc: Section): boolean {

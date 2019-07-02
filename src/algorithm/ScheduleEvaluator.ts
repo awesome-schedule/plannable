@@ -10,25 +10,12 @@ import quickselect from 'quickselect';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
-import { RawAlgoSchedule } from './ScheduleGenerator';
+import { RawAlgoSchedule, TimeArray } from './ScheduleGenerator';
 import { Week } from '@/models/Meta';
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;
-    /**
-     * the blocks is a iliffe vector storing the time and room information of the schedule at each day.
-     * a typical loop that visit these info are shown below
-     * ```js
-     * for (const day of blocks) {
-     *     for (let i = 0; i < day.length; i+=3) {
-     *         const start = day[i]; // start time of the `i / 3`th class
-     *         const end = day[i + 1]; // end time of the `i / 3`th class
-     *         const roomNumber = day[i + 2]; // room index of the `i / 3`th class
-     *     }
-     * }
-     * ```
-     */
-    readonly blocks: Week<number>;
+    readonly blocks: TimeArray;
     readonly index: number;
     coeff: number;
 }
@@ -237,26 +224,24 @@ class ScheduleEvaluator {
         // sort time blocks of courses according to its schedule
         const blocks: Week<number> = [[], [], [], [], []];
         for (const course of schedule) {
-            const timeDict = course[2],
-                roomDict = course[3];
+            const blockArray = course[2];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
 
-                const roomBlock = roomDict[k];
-                const len = roomBlock.length;
+                const dayBlocks = blockArray[k];
+                const len = dayBlocks.length;
                 if (!len) continue;
-                const timeBlock = timeDict[k];
 
                 // note that a block is a flattened array of TimeBlocks.
                 // Flattened only for performance reason
-                const block = blocks[k];
+                const sortedBlocks = blocks[k];
                 // hi = half of i
-                for (let i = 0; i < len; i++) {
+                for (let i = 0; i < len; i += 3) {
                     // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
-                    const ele = timeBlock[i * 2];
+                    const ele = dayBlocks[i];
                     let j = 0;
-                    for (; j < block.length; j += 3) if (ele < block[j]) break;
-                    block.splice(j, 0, ele, timeBlock[i * 2 + 1], roomBlock[i]);
+                    for (; j < sortedBlocks.length; j += 3) if (ele < sortedBlocks[j]) break;
+                    sortedBlocks.splice(j, 0, ele, dayBlocks[i + 1], dayBlocks[i + 2]);
                 }
             }
         }
@@ -344,7 +329,6 @@ class ScheduleEvaluator {
             console.timeEnd('precomputing coefficients');
         } else {
             console.time('normalizing coefficients');
-
             const options = this.options.sortBy.filter(x => x.enabled);
             const len = schedules.length;
             const coeffs = new Float32Array(len);
@@ -427,7 +411,7 @@ class ScheduleEvaluator {
         this.computeCoeff();
 
         console.time('sorting: ');
-        const schedules = this._schedules.concat();
+        const schedules = this._schedules.slice();
         this.schedules = schedules;
 
         if (this.isRandom()) {

@@ -10,12 +10,9 @@ describe('section test', () => {
         expect(sec.equals(sec2)).toBe(true);
         expect(sec.hash()).toEqual(sec2.hash());
 
-        const [time, room] = sec.getTimeRoom()!;
-        expect(Object.keys(time)).toEqual(Object.keys(room));
-        expect(Object.values(time).reduce((acc, block) => acc + block!.length, 0)).toEqual(
-            Object.values(room).reduce((acc, block) => acc + block!.length, 0) * 2
-        );
-
+        const timeRoom = sec.getTimeRoom()!;
+        const num = Object.values(timeRoom).reduce((acc, block) => acc + block!.length, 0);
+        expect(num / 3).toBe(Math.floor(num / 3));
         expect(sec.has(sec2));
     });
 
@@ -23,11 +20,9 @@ describe('section test', () => {
         const catalog = window.catalog;
         const sec: Section = catalog.getSection('comm30105', 0);
 
-        const [time, room] = sec.getTimeRoom()!;
-        expect(Object.keys(time)).toEqual(Object.keys(room));
-        expect(Object.values(time).reduce((acc, block) => acc + block!.length, 0)).toEqual(
-            Object.values(room).reduce((acc, block) => acc + block!.length, 0) * 2
-        );
+        const timeRoom = sec.getTimeRoom()!;
+        const num = Object.values(timeRoom).reduce((acc, block) => acc + block!.length, 0);
+        expect(num / 3).toBe(Math.floor(num / 3));
 
         const s2: Section = catalog.getSection('cs99993', 0);
         expect(s2.getTimeRoom()).toBe(null);

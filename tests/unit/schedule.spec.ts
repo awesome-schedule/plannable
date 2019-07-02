@@ -13,7 +13,6 @@ describe('Schedule Test', () => {
         }
         const sum = frequencies.reduce((acc, x) => acc + x, 0);
         const prob = frequencies.map(x => (x * 100) / sum);
-        // console.log(prob);
         // we expect the hashes to be quite uniformly distributed
         expect(prob.some(x => x > 11)).toBe(false);
     });
@@ -36,8 +35,6 @@ describe('Schedule Test', () => {
             schedule
                 .fromJSON({
                     All: {},
-                    title: '',
-                    id: 0,
                     events: []
                 })!
                 .empty()
@@ -94,6 +91,9 @@ describe('Schedule Test', () => {
         schedule.computeSchedule();
         schedule.removePreview();
 
+        expect(schedule.equals(schedule)).toBe(true);
+        expect(schedule.equals(schedule.copy())).toBe(true);
+
         // preview an already present one
         schedule.preview(window.catalog.getSection('cs21504', 0));
         schedule.computeSchedule();
@@ -139,7 +139,6 @@ describe('Schedule Test', () => {
         expect(schedule.has('cs21105', false)).toBe(true);
         expect(schedule.has('cs21105', true)).toBe(false);
 
-        schedule.copy();
         schedule.toJSON();
         schedule.deleteEvent('MoTu 12:00AM - 3:00AM');
         schedule.remove('cs21105');

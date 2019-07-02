@@ -495,7 +495,7 @@ class ScheduleEvaluator {
      * Get a `Schedule` object at idx
      */
     public getSchedule(idx: number) {
-        return new Schedule(this.schedules[idx].schedule, 'Schedule', idx + 1, this.events);
+        return new Schedule(this.schedules[idx].schedule, this.events);
     }
     /**
      * whether this evaluator contains an empty array of schedules

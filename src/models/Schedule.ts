@@ -20,8 +20,6 @@ import { Day, Week, TYPES, dayToInt } from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
-    title: string;
-    id: number;
     events: Event[];
 }
 
@@ -67,8 +65,6 @@ export default class Schedule {
     public static fromJSON(obj?: ScheduleJSON): Schedule | null {
         if (!obj) return null;
         const schedule = new Schedule();
-        schedule.title = obj.title ? obj.title : 'schedule';
-        schedule.id = obj.id ? obj.id : 0;
         if (obj.events)
             schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
@@ -185,12 +181,7 @@ export default class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(
-        raw_schedule: RawAlgoSchedule = [],
-        public title = 'Schedule',
-        public id = 0,
-        public events: Event[] = []
-    ) {
+    constructor(raw_schedule: RawAlgoSchedule = [], public events: Event[] = []) {
         this.All = {};
         this.days = [[], [], [], [], []];
         this._preview = null;
@@ -560,8 +551,6 @@ export default class Schedule {
     public toJSON() {
         const obj: ScheduleJSON = {
             All: {},
-            id: this.id,
-            title: this.title,
             events: this.events
         };
         const catalog = window.catalog;
@@ -592,12 +581,7 @@ export default class Schedule {
             }
         }
         // note: is it desirable to deep-copy all the events?
-        const cpy = new Schedule(
-            [],
-            this.title,
-            this.id,
-            deepCopyEvent ? this.events.map(e => e.copy()) : this.events
-        );
+        const cpy = new Schedule([], deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
         cpy.All = AllCopy;
         cpy.computeSchedule();
         return cpy;

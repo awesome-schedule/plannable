@@ -69,13 +69,11 @@ describe('ScheduleGenerator Test', () => {
         sort.mode = 0;
         result4.sort({ newOptions: sort });
         expect(result4.getSchedule(0)).toBeInstanceOf(Schedule);
-        result4.clear();
 
         sort.mode = 1;
         // only one sort func
-        for (const sb of sort.sortBy) {
-            sb.enabled = false;
-        }
+        for (const sb of sort.sortBy) sb.enabled = false;
+
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;
         result4.sort({ newOptions: sort });

@@ -6,20 +6,29 @@
 /**
  *
  */
-import { Week } from '@/models/Meta';
 import quickselect from 'quickselect';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoSchedule } from './ScheduleGenerator';
-
-type OrderedBlocks = Week<number>;
-type OrderedRooms = Week<number>;
+import { Week } from '@/models/Meta';
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;
-    readonly blocks: OrderedBlocks;
-    readonly rooms: OrderedRooms;
+    /**
+     * the blocks is a iliffe vector storing the time and room information of the schedule at each day.
+     * a typical loop that visit these info are shown below
+     * ```js
+     * for (const day of blocks) {
+     *     for (let i = 0; i < day.length; i+=3) {
+     *         const start = day[i]; // start time of the `i / 3`th class
+     *         const end = day[i + 1]; // end time of the `i / 3`th class
+     *         const roomNumber = day[i + 2]; // room index of the `i / 3`th class
+     *     }
+     * }
+     * ```
+     */
+    readonly blocks: Week<number>;
     readonly index: number;
     coeff: number;
 }
@@ -81,9 +90,7 @@ class ScheduleEvaluator {
             let sumSq = 0;
             for (const day of blocks) {
                 let classTime = 0;
-                for (let j = 0; j < day.length; j += 2) {
-                    classTime += day[j + 1] - day[j];
-                }
+                for (let j = 0; j < day.length; j += 3) classTime += day[j + 1] - day[j];
                 sum += classTime;
                 sumSq += classTime ** 2;
             }
@@ -99,9 +106,9 @@ class ScheduleEvaluator {
         compactness(this: ScheduleEvaluator, schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             let compact = 0;
-            for (const dayBlock of blocks) {
-                for (let i = 0; i < dayBlock.length - 3; i += 2)
-                    compact += dayBlock[i + 2] - dayBlock[i + 1];
+            for (const day of blocks) {
+                const len = day.length - 5;
+                for (let j = 0; j < len; j += 3) compact += day[j + 3] - day[j + 1];
             }
             return compact;
         },
@@ -116,10 +123,9 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const blocks = schedule.blocks;
             let totalOverlap = 0;
-            for (let i = 0; i < 5; i++) {
-                const day = blocks[i];
+            for (const day of blocks) {
                 let dayOverlap = 0;
-                for (let j = 0; j < day.length; j += 2)
+                for (let j = 0; j < day.length; j += 3)
                     // 11:00 to 14:00
                     dayOverlap += calcOverlap(660, 840, day[j], day[j + 1]);
 
@@ -155,21 +161,20 @@ class ScheduleEvaluator {
 
             // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5;
-            const { rooms, blocks } = schedule;
+            const blocks = schedule.blocks;
             let dist = 0;
-            for (let i = 0; i < 5; i++) {
-                const dayRooms = rooms[i],
-                    dayBlocks = blocks[i];
-                for (let j = 0; j < dayRooms.length - 1; ++j) {
+            for (const day of blocks) {
+                const bl = day.length - 5;
+                for (let j = 0; j < bl; j += 3) {
                     // end of the first class
-                    const e1 = dayBlocks[j * 2 + 1],
+                    const e1 = day[j + 1],
                         // start of the next class
-                        s2 = dayBlocks[j * 2 + 2];
+                        s2 = day[j + 3];
 
                     // does not count the distance of the gap between two classes is greater than 45 minutes
                     if (s2 - e1 > 45) {
-                        const r1 = dayRooms[j],
-                            r2 = dayRooms[j + 1];
+                        const r1 = day[j + 2],
+                            r2 = day[j + 5];
 
                         // skip unknown buildings
                         if (r1 !== -1 && r2 !== -1) dist += timeMatrix[r1 * len + r2];
@@ -230,32 +235,28 @@ class ScheduleEvaluator {
      */
     public add(schedule: RawAlgoSchedule) {
         // sort time blocks of courses according to its schedule
-        const blocks: OrderedBlocks = [[], [], [], [], []],
-            rooms: OrderedRooms = [[], [], [], [], []];
+        const blocks: Week<number> = [[], [], [], [], []];
         for (const course of schedule) {
             const timeDict = course[2],
                 roomDict = course[3];
             for (let k = 0; k < 5; k++) {
                 // time blocks and rooms at day k
-                const timeBlock = timeDict[k];
-                const len = timeBlock.length;
-                if (!len) continue;
+
                 const roomBlock = roomDict[k];
+                const len = roomBlock.length;
+                if (!len) continue;
+                const timeBlock = timeDict[k];
 
                 // note that a block is a flattened array of TimeBlocks.
                 // Flattened only for performance reason
-                const block: number[] = blocks[k],
-                    room: number[] = rooms[k];
+                const block = blocks[k];
                 // hi = half of i
-                for (let i = 0, hi = 0; i < len; i += 2, hi += 1) {
+                for (let i = 0; i < len; i++) {
                     // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
-                    const ele = timeBlock[i];
-                    let j = 0,
-                        hj = 0;
-                    for (; j < block.length; j += 2, hj += 1) if (ele < block[j]) break;
-
-                    block.splice(j, 0, ele, timeBlock[i + 1]);
-                    room.splice(hj, 0, roomBlock[hi]);
+                    const ele = timeBlock[i * 2];
+                    let j = 0;
+                    for (; j < block.length; j += 3) if (ele < block[j]) break;
+                    block.splice(j, 0, ele, timeBlock[i * 2 + 1], roomBlock[i]);
                 }
             }
         }
@@ -263,7 +264,6 @@ class ScheduleEvaluator {
         this._schedules.push({
             schedule,
             blocks,
-            rooms,
             coeff: 0,
             index: this._schedules.length
         });

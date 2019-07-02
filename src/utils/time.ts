@@ -104,16 +104,18 @@ export function parseTimeAsInt(start: string, end: string): TimeBlock {
  */
 export function checkTimeConflict(timeDict1: TimeArray, timeDict2: TimeArray) {
     for (let i = 0; i < 5; i++) {
-        const timeBlocks2 = timeDict2[i];
-        if (!timeBlocks2.length) continue;
-
         const timeBlocks1 = timeDict1[i];
-        if (!timeBlocks1.length) continue;
+        const len1 = timeBlocks1.length;
+        if (!len1) continue;
 
-        for (let j = 0; j < timeBlocks1.length; j += 2) {
+        const timeBlocks2 = timeDict2[i];
+        const len2 = timeBlocks2.length;
+        if (!len2) continue;
+
+        for (let j = 0; j < len1; j += 2) {
             const begin = timeBlocks1[j] + 1;
             const end = timeBlocks1[j + 1] - 1;
-            for (let k = 0; k < timeBlocks2.length; k += 2) {
+            for (let k = 0; k < len2; k += 2) {
                 const beginTime = timeBlocks2[k];
                 const endTime = timeBlocks2[k + 1];
                 if (

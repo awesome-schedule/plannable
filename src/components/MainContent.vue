@@ -33,7 +33,7 @@
                     <a
                         style="color:inherit;text-decoration: none;"
                         target="_blank"
-                        href="https://github.com/awesome-schedule/Awesome-SchedulAR"
+                        href="https://github.com/awesome-schedule/plannable"
                     >
                         <v-btn
                             class="mx-3"
@@ -48,7 +48,7 @@
                     <a
                         style="color:inherit;text-decoration: none;"
                         target="_blank"
-                        href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                        href="https://github.com/awesome-schedule/plannable/issues"
                     >
                         <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
                             <v-icon size="24px">fas fa-exclamation-circle</v-icon>

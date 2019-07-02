@@ -179,7 +179,6 @@ class ScheduleGenerator {
         console.timeEnd('running algorithm:');
 
         const size = evaluator.size();
-        console.log(evaluator);
         if (size > 0) {
             evaluator.sort();
             return {

@@ -59,7 +59,6 @@ export function highlightMatch<T extends string>(
             )}</span>`;
             lastEnd = end;
         }
-        // console.log(match, start, end);
     }
     return result + str.substring(lastEnd);
 }

@@ -771,7 +771,7 @@
                 <p>
                     Our website is completely free and open sourse under the GPL-v3 license. Our
                     source code is
-                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR" target="_blank">
+                    <a href="https://github.com/awesome-schedule/plannable" target="_blank">
                         available at GitHub </a
                     >, and we welcome contribution of any kind. You can submit bug reports or
                     feature requests through issue, and you can directly contribute to our codebase
@@ -809,7 +809,7 @@
                 <p>
                     Our contribution log is available
                     <a
-                        href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/docs/Contribution.md"
+                        href="https://github.com/awesome-schedule/plannable/blob/master/docs/Contribution.md"
                         target="_blank"
                     >
                         here</a
@@ -822,7 +822,7 @@
                 <p>
                     We track issues and bug reports on GitHub. If you find any problem that appears
                     to be a bug of our website, please submit a bug report by
-                    <a href="https://github.com/awesome-schedule/Awesome-SchedulAR/issues"
+                    <a href="https://github.com/awesome-schedule/plannable/issues"
                         >opening an issue</a
                     >. Note that you will need a GitHub account.
                 </p>
@@ -835,7 +835,7 @@
                     website comes with no warranty and we do not hold any liability for any damages.
                     This is explicitly covered under the
                     <a
-                        href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/f56d510b09dbd8abd72314f4d4856f69658f5487/LICENSE#L589"
+                        href="https://github.com/awesome-schedule/plannable/blob/f56d510b09dbd8abd72314f4d4856f69658f5487/LICENSE#L589"
                         target="_blank"
                         >GPL license </a
                     >.
@@ -861,7 +861,7 @@
                     order. The following formulae provide an overview on how these coefficients are
                     calculated. To know exactly how they are implemented, please refer to
                     <a
-                        href="https://github.com/awesome-schedule/Awesome-SchedulAR/blob/master/src/algorithm/ScheduleEvaluator.ts"
+                        href="https://github.com/awesome-schedule/plannable/blob/master/src/algorithm/ScheduleEvaluator.ts"
                         target="_blank"
                     >
                         our code</a

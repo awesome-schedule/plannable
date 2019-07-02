@@ -30,7 +30,7 @@ export default class ExportView extends Store {
             try {
                 parsed = JSON.parse(data);
             } catch (err) {
-                console.log(err);
+                console.error(err);
             }
             if (parsed) {
                 const meta = [];

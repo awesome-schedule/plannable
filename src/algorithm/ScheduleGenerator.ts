@@ -133,7 +133,7 @@ class ScheduleGenerator {
 
                 // don't include this combined section if it conflicts with any time filter or event,.
                 for (const td of timeSlots) {
-                    if (checkTimeConflict(td, timeDict)) {
+                    if (checkTimeConflict(td, timeDict, 3)) {
                         no_match = true;
                         break;
                     }
@@ -167,7 +167,6 @@ class ScheduleGenerator {
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
-
         const evaluator = new ScheduleEvaluator(
             this.options.sortOptions,
             window.timeMatrix,

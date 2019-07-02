@@ -226,18 +226,14 @@ class ScheduleEvaluator {
         for (const course of schedule) {
             const blockArray = course[2];
             for (let k = 0; k < 5; k++) {
-                // time blocks and rooms at day k
-
+                // time and rooms at day k
                 const dayBlocks = blockArray[k];
                 const len = dayBlocks.length;
                 if (!len) continue;
 
-                // note that a block is a flattened array of TimeBlocks.
-                // Flattened only for performance reason
                 const sortedBlocks = blocks[k];
-                // hi = half of i
                 for (let i = 0; i < len; i += 3) {
-                    // insert timeBlock[i] and timeBlock[i+1] into the correct position in the block array
+                    // insert dayBlocks[i:i+3] into the correct position in the block array
                     const ele = dayBlocks[i];
                     let j = 0;
                     for (; j < sortedBlocks.length; j += 3) if (ele < sortedBlocks[j]) break;
@@ -367,7 +363,7 @@ class ScheduleEvaluator {
                 }
             }
 
-            for (let i = 0; i < schedules.length; i++) schedules[i].coeff = coeffs[i];
+            for (let i = 0; i < len; i++) schedules[i].coeff = coeffs[i];
             console.timeEnd('normalizing coefficients');
         }
     }

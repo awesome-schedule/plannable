@@ -56,16 +56,6 @@ export interface EvaluatorOptions {
     mode: SortMode;
 }
 
-type DeepReadonly<T> = T extends (infer R)[]
-    ? DeepReadonlyArray<R>
-    : T extends object
-    ? DeepReadonlyObject<T>
-    : T;
-
-interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
-
-type DeepReadonlyObject<T> = { readonly [P in keyof T]: DeepReadonly<T[P]> };
-
 /**
  * The goal of the schedule evaluator is to efficiently sort the generated schedules
  * according to the set of the rules defined by the user
@@ -213,7 +203,7 @@ class ScheduleEvaluator {
      * @param events the array of events kept, use to construct generated schedules
      */
     constructor(
-        public options: DeepReadonly<EvaluatorOptions>,
+        public options: Readonly<EvaluatorOptions>,
         public timeMatrix: Readonly<Int32Array>,
         public events: Event[] = []
     ) {

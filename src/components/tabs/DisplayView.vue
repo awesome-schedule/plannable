@@ -203,13 +203,13 @@
                     <small class="form-text text-muted">
                         May crash your browser if too big
                     </small>
-                    <button
+                    <!-- <button
                         type="button"
                         class="btn btn-outline-info w-100"
                         @click="generateSchedules()"
                     >
                         Apply
-                    </button>
+                    </button> -->
                 </div>
             </li>
             <li class="list-group-item">
@@ -225,8 +225,6 @@
                     />
                     <label class="custom-control-label" for="comb-sec">Combine Sections</label>
                 </div>
-            </li>
-            <li class="list-group-item">
                 <div class="custom-control custom-checkbox">
                     <input
                         id="enable-log"

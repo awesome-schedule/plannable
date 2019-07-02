@@ -57,7 +57,7 @@ export default class Pagination extends Store {
         this.schedule.switchPage(this.idx);
     }
 
-    @Watch('curIdx')
+    @Watch('curIdx', { immediate: true })
     autoSwitch() {
         this.switchPage(this.curIdx);
     }

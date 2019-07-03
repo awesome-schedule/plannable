@@ -636,13 +636,13 @@
             </div>
 
             <div v-if="selected === 5 || !selected">
-                <h3 id="item-4"><i class="fas fa-cog"></i> Display Settings</h3>
+                <h3 id="item-5"><i class="fas fa-cog"></i> Display Settings</h3>
                 <hr />
                 <p>
                     Settings enable you to customize the display of the scheduler so that it
                     provides you with more information and fits your need better.
                 </p>
-                <h5 id="item-4-1" class="mt-4">
+                <h5 id="item-5-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Schedule Settings</strong>
                 </h5>
@@ -666,7 +666,7 @@
                     </ol>
                 </div>
 
-                <h5 id="item-4-1" class="mt-4">
+                <h5 id="item-5-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Course Search</strong>
                 </h5>
@@ -691,7 +691,7 @@
                         </li>
                     </ol>
                 </div>
-                <h5 id="item-4-2" class="mt-4">
+                <h5 id="item-5-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Advanced Features</strong>
                 </h5>

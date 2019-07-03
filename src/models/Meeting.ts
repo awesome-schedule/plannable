@@ -7,7 +7,6 @@
  *
  */
 import { RawMeeting } from './Meta';
-import Section from './Section';
 
 /**
  * A meeting represents a specific meeting time \w information about the instructor and location
@@ -29,7 +28,7 @@ export default class Meeting {
     public readonly days: string;
     public readonly dates: string;
     public readonly room: string;
-    constructor(public readonly section: Section, raw: RawMeeting) {
+    constructor(raw: RawMeeting) {
         this.instructor = raw[0];
         this.days = raw[1];
         this.room = raw[2];

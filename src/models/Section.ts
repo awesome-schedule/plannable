@@ -77,7 +77,7 @@ export default class Section implements CourseFields, Hashable {
         this.enrollment = raw[4];
         this.enrollment_limit = raw[5];
         this.wait_list = raw[6];
-        this.meetings = raw[7].map(x => new Meeting(this, x));
+        this.meetings = raw[7].map(x => new Meeting(x));
         this.instructors = Meeting.getInstructors(raw[7]);
     }
 

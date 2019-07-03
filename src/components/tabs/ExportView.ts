@@ -12,8 +12,7 @@ import { Component, Watch } from 'vue-property-decorator';
  */
 @Component
 export default class ExportView extends Store {
-    exportJson: string = 'schedule';
-    exportICal: string = 'schedule';
+    fileName = 'schedule';
     newName: (string | null)[] = [];
 
     created() {
@@ -75,10 +74,10 @@ export default class ExportView extends Store {
     saveToJson() {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(this.profile.current);
-        if (json) savePlain(json, (this.exportJson || 'schedule') + '.json');
+        if (json) savePlain(json, (this.fileName || 'schedule') + '.json');
     }
     saveToIcal() {
-        savePlain(toICal(this.schedule.currentSchedule), (this.exportICal || 'schedule') + '.ical');
+        savePlain(toICal(this.schedule.currentSchedule), (this.fileName || 'schedule') + '.ical');
     }
     exportToURL() {
         if (!this.semester.currentSemester) return;
@@ -97,6 +96,7 @@ export default class ExportView extends Store {
         }
     }
     selectProfile(profileName: string) {
+        if (profileName === this.profile.current) return;
         const item = localStorage.getItem(profileName);
         if (!item) return;
         this.profile.current = profileName;
@@ -121,6 +121,6 @@ export default class ExportView extends Store {
 
     @Watch('profile.current', { immediate: true })
     private w() {
-        this.exportICal = this.exportJson = this.profile.current;
+        this.fileName = this.profile.current;
     }
 }

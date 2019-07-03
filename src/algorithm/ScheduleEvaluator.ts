@@ -112,7 +112,8 @@ class ScheduleEvaluator {
             let totalOverlap = 0;
             for (const day of blocks) {
                 let dayOverlap = 0;
-                for (let j = 0; j < day.length; j += 3)
+                const len = day.length;
+                for (let j = 0; j < len; j += 3)
                     // 11:00 to 14:00
                     dayOverlap += calcOverlap(660, 840, day[j], day[j + 1]);
 
@@ -153,13 +154,8 @@ class ScheduleEvaluator {
             for (const day of blocks) {
                 const bl = day.length - 5;
                 for (let j = 0; j < bl; j += 3) {
-                    // end of the first class
-                    const e1 = day[j + 1],
-                        // start of the next class
-                        s2 = day[j + 3];
-
                     // does not count the distance of the gap between two classes is greater than 45 minutes
-                    if (s2 - e1 > 45) {
+                    if (day[j + 3] - day[j + 1] > 45) {
                         const r1 = day[j + 2],
                             r2 = day[j + 5];
 

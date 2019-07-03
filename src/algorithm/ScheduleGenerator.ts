@@ -27,7 +27,7 @@ export type TimeBlock = [number, number];
 
 /**
  * The blocks is a iliffe vector storing the time and room information of the an entity at each day.
- * Index from 0 to 4 represent days from Monday to Friday.
+ * Index from 0 to 4 represents days from Monday to Friday.
  * Example:
  * ```js
  * const timeDict = [ [600, 660, 11, 900, 960, 2], [], [], [],  [1200, 1260, 12] ]
@@ -36,7 +36,7 @@ export type TimeBlock = [number, number];
  * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
  * and Friday 20:00 to 21:00 at room 12
  *
- * a typical loop that visit these info are shown below
+ * a typical loop that visits these info is shown below
  * ```js
  * for (const day of blocks) {
  *     for (let i = 0; i < day.length; i += 3) {
@@ -46,7 +46,6 @@ export type TimeBlock = [number, number];
  *     }
  * }
  * ```
- * @see [[TimeBlock]]
  */
 export interface TimeArray extends Week<number> {}
 

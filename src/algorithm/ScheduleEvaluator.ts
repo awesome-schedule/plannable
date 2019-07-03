@@ -113,9 +113,10 @@ class ScheduleEvaluator {
             for (const day of blocks) {
                 let dayOverlap = 0;
                 const len = day.length;
-                for (let j = 0; j < len; j += 3)
+                for (let j = 0; j < len; j += 3) {
                     // 11:00 to 14:00
-                    dayOverlap += calcOverlap(660, 840, day[j], day[j + 1]);
+                    dayOverlap += Math.max(calcOverlap(660, 840, day[j], day[j + 1]), 0);
+                }
 
                 if (dayOverlap > 60) totalOverlap += dayOverlap;
             }

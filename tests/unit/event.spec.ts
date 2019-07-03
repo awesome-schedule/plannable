@@ -2,7 +2,7 @@ import Event from '@/models/Event';
 
 describe('event test', () => {
     it('basic', () => {
-        const e = new Event('MoWeFr 12:00PM - 15:00PM', false);
+        const e = new Event('MoWeFr 12:00PM - 3:00PM', false);
         expect(e.toTimeArray()).toEqual([
             [12 * 60, 15 * 60],
             [],
@@ -10,6 +10,6 @@ describe('event test', () => {
             [],
             [12 * 60, 15 * 60]
         ]);
-        expect(e.hash()).toBe(837467497);
+        expect(e.hash()).toBe(4247944060);
     });
 });

@@ -57,7 +57,8 @@ export function toICal(schedule: Schedule) {
                     if (m.days.indexOf(DAYS[d]) === -1) continue;
                     const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
                     const [, start, , end] = m.days.split(' ');
-                    const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
+                    const startMin = Utils.hr12toInt(start),
+                        endMin = Utils.hr12toInt(end);
 
                     const startTime = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
@@ -93,7 +94,8 @@ export function toICal(schedule: Schedule) {
                 const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
 
                 const [, start, , end] = sb.section.days.split(' ');
-                const [startMin, endMin] = Utils.parseTimeAsInt(start, end);
+                const startMin = Utils.hr12toInt(start),
+                    endMin = Utils.hr12toInt(end);
 
                 const startTime = new Date(
                     startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000

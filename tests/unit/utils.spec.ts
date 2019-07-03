@@ -8,9 +8,6 @@ beforeAll(async () => {
 
 describe('Utility Tests', () => {
     it('parse time', () => {
-        expect(Utils.parseTimeAsInt('11:00AM', '1:30PM')).toEqual([11 * 60, 13 * 60 + 30]);
-        expect(Utils.parseTimeAsInt('12:15AM', '1:15AM')).toEqual([15, 75]);
-        expect(Utils.parseTimeAsInt('12:15AM', '12:55AM')).toEqual([15, 55]);
         expect(Utils.parseTimeAll('MoWeFr 11:00AM - 1:50PM')).toEqual([
             ['Mo', 'We', 'Fr'],
             [11 * 60, 13 * 60 + 50]
@@ -40,7 +37,8 @@ describe('Utility Tests', () => {
         expect(Utils.calcOverlap(150, 250, 100, 200)).toBe(50);
         expect(Utils.calcOverlap(100, 300, 100, 200)).toBe(100);
         expect(Utils.calcOverlap(100, 200, 100, 300)).toBe(100);
-        expect(Utils.calcOverlap(100, 200, 300, 400)).toBe(0);
+        expect(Utils.calcOverlap(100, 200, 200, 300)).toBe(0);
+        expect(Utils.calcOverlap(100, 200, 300, 400)).toBe(-1);
     });
 
     it('merge test', () => {

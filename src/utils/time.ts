@@ -25,7 +25,7 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
         for (let i = 0; i < days.length; i += 2) {
             dayList.push(days.substr(i, 2) as Day);
         }
-        return [dayList, parseTimeAsInt(start, end)];
+        return [dayList, [hr12toInt(start), hr12toInt(end)]];
     }
     return null;
 }
@@ -50,57 +50,28 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
         const timeDict: TimeArray = [[], [], [], [], []];
-        const block = parseTimeAsInt(start, end);
+        const s = hr12toInt(start),
+            e = hr12toInt(end);
         for (let i = 0; i < days.length; i += 2) {
-            timeDict[dayToInt[days.substr(i, 2) as Day]].push(...block);
+            timeDict[dayToInt[days.substr(i, 2) as Day]].push(s, e);
         }
         return timeDict;
     }
     return null;
 }
 
-/**
- * Parse time in 12h format to number of minutes from 0:00,
- * assuming that the start time is **always smaller (earlier)** than end time
- *
- * @author Hanzhi Zhou
- * @param start start time such as `10:00AM`
- * @param end  end time such as `11:00AM`
- *
- * Example usage:
- * ```js
- * parseTimeAsInt('10:00AM', '11:00AM') => [600, 660]
- * ```
- */
-export function parseTimeAsInt(start: string, end: string): TimeBlock {
-    let suffix = start.substr(start.length - 2, 2);
-    let start_time: number;
-    let end_time: number;
-    let hour: string, minute: string;
-    if (suffix === 'PM') {
-        [hour, minute] = start.substring(0, start.length - 2).split(':');
-        start_time = ((+hour % 12) + 12) * 60 + +minute;
+export function hr24toInt(time: string) {
+    const sep = time.split(':');
+    return +sep[0] * 60 + +sep[1];
+}
 
-        [hour, minute] = end.substring(0, end.length - 2).split(':');
-        end_time = ((+hour % 12) + 12) * 60 + +minute;
-    } else {
-        const t1 = start.substring(0, start.length - 2).split(':');
-        start_time = (+t1[0] % 12) * 60 + +t1[1];
-        suffix = end.substr(end.length - 2, 2);
-        [hour, minute] = end.substring(0, end.length - 2).split(':');
-        if (suffix === 'PM') {
-            end_time = ((+hour % 12) + 12) * 60 + +minute;
-        } else {
-            end_time = (+hour % 12) * 60 + +minute;
-        }
-    }
-    return [start_time, end_time];
+export function hr12toInt(time: string) {
+    return hr24toInt(to24hr(time));
 }
 
 /**
  * return true of two `TimeArray` objects have overlapping time blocks, false otherwise
- *
- * @author Zichao Hu, Hanzhi Zhou
+ * @author Hanzhi Zhou
  * @param timeArray1
  * @param timeArray2
  * @param step1 the increment step for array 1
@@ -142,49 +113,19 @@ export function checkTimeConflict(
 }
 
 /**
- * @author Hanzhi Zhou
- * @param start1
- * @param end1
- * @param start2
- * @param end2
- * @param includeEnd whether return `true` (conflict) if only the end points touch each other
- */
-export function checkTimeBlockConflict(
-    start1: number,
-    end1: number,
-    start2: number,
-    end2: number,
-    includeEnd: boolean = true
-) {
-    if (includeEnd) {
-        return (
-            (start1 <= start2 && start2 <= end1) ||
-            (start1 <= end2 && end2 <= end1) ||
-            (start1 >= start2 && end1 <= end2)
-        );
-    } else {
-        return !!calcOverlap(start1, end1, start2, end2);
-    }
-}
-
-/**
  * calculate the overlap between time block [a, b] and [c, d].
- *
- * Return 0 when no overlap or zero overlap.
- *
  * @author Hanzhi Zhou
- *
- * @param a
- * @param b
- * @param c
- * @param d
+ * @returns
+ *  - 0 if only end points touch
+ *  - -1 if no overlap
+ *  - the area of overlapping region if overlap
  */
 export function calcOverlap(a: number, b: number, c: number, d: number) {
     if (a <= c && d <= b) return d - c;
     else if (c <= a && b <= d) return b - a;
     else if (a <= c && c <= b) return b - c;
     else if (a <= d && d <= b) return d - a;
-    else return 0;
+    else return -1;
 }
 
 export function blockUnion(
@@ -212,7 +153,7 @@ export function blockUnion(
  */
 export function to12hr(time: string) {
     const sep = time.split(':');
-    const hr = parseInt(sep[0]);
+    const hr = +sep[0];
     if (hr === 12) {
         return time + 'PM';
     } else if (hr === 0) {
@@ -220,13 +161,13 @@ export function to12hr(time: string) {
     } else if (hr < 12) {
         return time + 'AM';
     } else {
-        return hr - 12 + ':' + sep[1] + 'PM';
+        return `${hr - 12}:${sep[1]}PM`;
     }
 }
 
 /**
  * convert 12 hr to 24 hr
- * @author Kaiying Shan
+ * @author Hanzhi Zhou
  * @param time
  * Example usage and return value:
  * ```js
@@ -234,17 +175,23 @@ export function to12hr(time: string) {
  * ```
  */
 export function to24hr(time: string) {
-    const [hour, minute] = time.substring(0, time.length - 2).split(':');
-    const numHour = parseInt(hour);
-    return (
-        (time.substring(time.length - 2) === 'AM'
-            ? numHour === 12
-                ? '00'
-                : hour
-            : '' + (numHour === 12 ? 12 : numHour + 12)) +
-        ':' +
-        minute
-    );
+    const len = time.length;
+    const pre = time.substring(0, len - 2);
+    const [hour, minute] = pre.split(':');
+    const numHour = +hour;
+    if (time.substring(len - 2) === 'AM') {
+        if (numHour === 12) {
+            return '00:' + minute;
+        } else {
+            return pre;
+        }
+    } else {
+        if (numHour === 12) {
+            return pre;
+        } else {
+            return `${numHour + 12}:${minute}`;
+        }
+    }
 }
 
 /**

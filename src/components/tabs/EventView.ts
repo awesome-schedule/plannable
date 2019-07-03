@@ -5,7 +5,7 @@ import { Component, Watch } from 'vue-property-decorator';
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
-import { to12hr, to24hr } from '@/utils';
+import { to12hr, to24hr, hr24toInt } from '@/utils';
 
 /**
  * the component for adding and editing events
@@ -54,8 +54,8 @@ export default class EventView extends Store {
             this.noti.error('Please check your start/end time');
             return;
         }
-        const start = this.eventTimeFrom.split(':').reduce((s, x, i) => +x * 60 ** (1 - i) + s, 0);
-        const end = this.eventTimeTo.split(':').reduce((s, x, i) => +x * 60 ** (1 - i) + s, 0);
+        const start = hr24toInt(this.eventTimeFrom),
+            end = hr24toInt(this.eventTimeTo);
         if (start >= end) {
             this.noti.error('Start time must be earlier than end time');
             return;

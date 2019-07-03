@@ -8,7 +8,7 @@
  */
 import Section from './Section';
 import Event from './Event';
-import { checkTimeBlockConflict } from '../utils';
+import { calcOverlap, hr24toInt } from '../utils';
 import Course from './Course';
 
 /**
@@ -50,7 +50,8 @@ export default class ScheduleBlock {
         public readonly end: string,
         public readonly section: Section | Course | Event
     ) {
-        [this.startMin, this.endMin] = this.timeAsInt();
+        this.startMin = hr24toInt(start);
+        this.endMin = hr24toInt(end);
         this.duration = this.endMin - this.startMin;
     }
 
@@ -60,18 +61,11 @@ export default class ScheduleBlock {
      * @param includeEnd whether to treat end-point touch as conflict
      */
     public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
-        return checkTimeBlockConflict(
-            this.startMin,
-            this.endMin,
-            other.startMin,
-            other.endMin,
-            includeEnd
-        );
-    }
-
-    private timeAsInt(): [number, number] {
-        const [a, b] = this.start.split(':');
-        const [c, d] = this.end.split(':');
-        return [+a * 60 + +b, +c * 60 + +d];
+        const olap = calcOverlap(this.startMin, this.endMin, other.startMin, other.endMin);
+        if (includeEnd) {
+            return olap >= 0;
+        } else {
+            return olap > 0;
+        }
     }
 }

@@ -34,10 +34,10 @@
                     type="text"
                 />
                 <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
-                    <button class="btn btn-outline-dark" @click="saveToJson()">
+                    <button class="btn btn-outline-dark px-0" @click="saveToJson()">
                         Export JSON
                     </button>
-                    <button class="btn btn-outline-dark" @click="saveToIcal()">
+                    <button class="btn btn-outline-dark px-0" @click="saveToIcal()">
                         Export iCal
                     </button>
                 </div>

@@ -180,7 +180,7 @@
                     class="custom-control-input"
                 />
                 <label for="displayClasslistTitle" class="custom-control-label">
-                    Show title on class list
+                    Show description on class list
                 </label>
             </div>
         </li>

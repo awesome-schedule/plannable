@@ -44,7 +44,9 @@
                         <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort Options</a>
                     </nav>
                 </div>
-                <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
+                <div @click="showGuide(5)">
+                    <a class="nav-link" href="#item-5">Display Settings</a>
+                </div>
                 <div @click="showGuide(6)">
                     <a class="nav-link" href="#item-6"
                         ><i class="fas fa-palette"></i> Customize Colors
@@ -622,11 +624,99 @@
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(5)"
+                >
+                    Next Page: Display Setting
+                </button>
+            </div>
+
+            <div v-if="selected === 5 || !selected">
+                <h3 id="item-4"><i class="fas fa-filter"></i> Display Settings</h3>
+                <hr />
+                <p>
+                    Settings enable you to customize the display of the scheduler so that it
+                    provides you with more information and fits your need better.
+                </p>
+                <h5 id="item-4-1" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong> Schedule Settings</strong>
+                </h5>
+                <p>
+                    You can change the grid size and the display information of the scheduler here:
+                </p>
+
+                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                    <ol>
+                        <li>
+                            Schedule Start/End: The display of the scheduler time range under
+                            <strong>View Schedule</strong> mode
+                            <strong>(Note: this is not a filter)</strong>
+                        </li>
+                        <li>Class Height: The height of the class block on the schedule grid</li>
+                        <li>Grid Height: The height of the schedule grid</li>
+                        <li>Show Time: Show the date and time which the class takes place</li>
+                        <li>Show Room: Show the building and room which the class takes place</li>
+                        <li>Show Instructor: Show the instructor of the class</li>
+                    </ol>
+                </div>
+
+                <h5 id="item-4-1" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong> Course Search</strong>
+                </h5>
+                <p>
+                    Here you can change the display settings of the <strong>Select Class </strong>
+                    <i class="far fa-calendar-alt"></i> tab
+                </p>
+                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                    <ol>
+                        <li>
+                            Max number of search results: The number of the relevant classes shown
+                            on the <strong>search field </strong> <i class="fas fa-search"></i> when
+                            you do a search
+                        </li>
+                        <li>
+                            Expand all when searching: Unfold all the sections under each relevant
+                            class
+                        </li>
+                        <li>Show title on class list: ???</li>
+                    </ol>
+                </div>
+                <h5 id="item-4-2" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong> Advanced Features</strong>
+                </h5>
+                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                    <ol>
+                        <li>
+                            Max number of schedules: Given the variety of the sections offered for
+                            one course, sometimes there exist more than a million combinations of
+                            the courses.
+                        </li>
+                        <li>
+                            Combine Sections: For simplicity, sections under the same course are
+                            combined into one block for showing if they take place at the same time
+                        </li>
+                        <li>
+                            Enable Log History: You can view schedule logs here (such as the
+                            resquests, and errors)
+                        </li>
+                        <li>
+                            Enable Fuzzy Search: You can browse class using more advanced fuzzy
+                            search algorithm
+                        </li>
+                    </ol>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
                     @click="showGuide(6)"
                 >
                     Next Page: Customize Colors
                 </button>
             </div>
+
             <div v-if="selected === 6 || !selected">
                 <h3 id="item-6"><i class="fas fa-palette"></i> Customize Colors</h3>
                 <hr />

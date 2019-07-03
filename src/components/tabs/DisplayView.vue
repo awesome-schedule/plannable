@@ -233,7 +233,7 @@
                         class="custom-control-input"
                     />
                     <label for="enable-log" class="custom-control-label">
-                        Enable log history
+                        Enable Log History
                     </label>
                 </div>
                 <div class="custom-control custom-checkbox">
@@ -244,7 +244,7 @@
                         class="custom-control-input"
                     />
                     <label for="enable-fuzzy" class="custom-control-label">
-                        Enable fuzzy search
+                        Enable Fuzzy Search
                     </label>
                 </div>
             </li>

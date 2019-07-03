@@ -81,7 +81,7 @@ class Profile {
     }
 
     /**
-     * parse a profile from string, and add it to the list of profiles and store it in localStorage
+     * parse a profile from string, add it to the list of profiles and store it in localStorage
      * @note you need to call loadProfile() manually
      * @param raw
      * @param fallbackName the fallback name if the raw does not contain the name of the profile

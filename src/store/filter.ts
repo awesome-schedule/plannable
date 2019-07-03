@@ -264,13 +264,8 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         return others as FilterStateJSON;
     }
 
-    getDefault(): FilterState {
-        return {
-            timeSlots: [],
-            allowWaitlist: true,
-            allowClosed: true,
-            sortOptions: getDefaultOptions()
-        };
+    getDefault() {
+        return new FilterStore();
     }
 }
 

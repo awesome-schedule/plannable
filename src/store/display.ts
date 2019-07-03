@@ -32,18 +32,58 @@ export interface DisplayState {
     numSearchResults: number;
 }
 
-// use class-interface merging
-// tslint:disable-next-line: no-empty-interface
-interface Display extends DisplayState {}
+function bound(num: number, low: number, high: number) {
+    return Math.min(Math.max(low, num), high);
+}
+
 /**
  * the display module handles global display options
  * @author Hanzhi Zhou
  */
+// @Component
 class Display implements StoreModule<DisplayState, DisplayState> {
     [x: string]: any;
+    showTime = false;
+    showRoom = true;
+    showInstructor = true;
+    showClasslistTitle = true;
+    earliest = '08:00';
+    latest = '19:00';
+    standard = false;
+    multiSelect = true;
+    combineSections = true;
+    expandOnEntering = false;
+    enableLog = false;
+    enableFuzzy = false;
 
-    constructor() {
-        Object.assign(this, this.getDefault());
+    private _fullHeight: number = 40;
+    private _partialHeight: number = 25;
+    private _maxNumSchedules: number = 100000;
+    private _numSearchResults: number = 6;
+
+    get fullHeight() {
+        return this._fullHeight;
+    }
+    set fullHeight(x) {
+        this._fullHeight = bound(x, 2, 100);
+    }
+    get partialHeight() {
+        return this._partialHeight;
+    }
+    set partialHeight(x) {
+        this._partialHeight = bound(x, 2, 100);
+    }
+    get numSearchResults() {
+        return this._numSearchResults;
+    }
+    set numSearchResults(x) {
+        this._numSearchResults = bound(x, 1, 50);
+    }
+    get maxNumSchedules() {
+        return this._maxNumSchedules;
+    }
+    set maxNumSchedules(x) {
+        this._maxNumSchedules = bound(x, 1000, 1000000);
     }
 
     fromJSON(obj: Partial<DisplayState>) {
@@ -60,28 +100,11 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     }
 
     toJSON() {
-        return { ...this };
+        return this;
     }
 
-    getDefault(): DisplayState {
-        return {
-            showTime: false,
-            showRoom: true,
-            showInstructor: true,
-            showClasslistTitle: true,
-            fullHeight: 40,
-            partialHeight: 25,
-            earliest: '08:00:00',
-            latest: '19:00:00',
-            standard: false,
-            multiSelect: true,
-            combineSections: true,
-            maxNumSchedules: 100000,
-            expandOnEntering: false,
-            numSearchResults: 6,
-            enableLog: false,
-            enableFuzzy: false
-        };
+    getDefault() {
+        return new Display();
     }
 }
 

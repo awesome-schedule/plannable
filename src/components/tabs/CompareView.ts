@@ -7,6 +7,7 @@ import GridSchedule from '../GridSchedule.vue';
 import MainContent from '../MainContent.vue';
 import Schedule from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
+import randomColor from 'randomcolor';
 
 /**
  * component for comparing multiple schedules
@@ -19,17 +20,15 @@ import ScheduleBlock from '@/models/ScheduleBlock';
     }
 })
 export default class CompareView extends Store {
-    compareSchedule: Schedule = new Schedule();
-
+    compareSchedule = new Schedule();
     get number() {
         return this.compare.length;
     }
-
     created() {
-        this.createdHelper();
+        this.renderSchedule();
     }
-
-    createdHelper() {
+    renderSchedule() {
+        this.compareSchedule = new Schedule();
         for (const comp of this.compare) {
             const sche = comp.schedule;
             const color = comp.color;
@@ -42,16 +41,15 @@ export default class CompareView extends Store {
         }
         this.compareSchedule.computeBlockPositions();
     }
-
-    changeColor() {
-        this.compareSchedule = new Schedule();
-        this.createdHelper();
+    randColor(idx: number) {
+        this.compare[idx].color = randomColor({
+            luminosity: 'dark'
+        }) as string;
+        this.renderSchedule();
     }
-
     deleteCompare(idx: number) {
         this.compare.splice(idx, 1);
-        this.compareSchedule = new Schedule();
-        this.createdHelper();
+        this.renderSchedule();
     }
     getTitle(idx: number) {
         const schedule = this.compare[idx].schedule;

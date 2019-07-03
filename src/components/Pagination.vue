@@ -10,7 +10,7 @@
                     placeholder="Go to"
                     class="form-control"
                     style="border-radius: 4px 0px 0px 4px !important"
-                    @input="switchPage(goto || 1 - 1)"
+                    @input="switchPage((goto || 1) - 1)"
                 />
             </li>
             <li class="page-item" :class="{ disabled: start <= 0 && idx <= start }">

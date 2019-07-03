@@ -636,7 +636,7 @@
             </div>
 
             <div v-if="selected === 5 || !selected">
-                <h3 id="item-4"><i class="fas fa-filter"></i> Display Settings</h3>
+                <h3 id="item-4"><i class="fas fa-cog"></i> Display Settings</h3>
                 <hr />
                 <p>
                     Settings enable you to customize the display of the scheduler so that it
@@ -854,7 +854,7 @@
                     <v-stepper-items>
                         <v-stepper-content v-for="(step, _) in jsonSteps" :key="_" :step="_ + 1">
                             <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="2.37"></v-img>
+                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
                             </v-card>
                             <v-card-title class="mb-2" primary-title>
                                 <div>
@@ -884,7 +884,47 @@
                     which will be quite long. Exporting your profile to an URL makes it more
                     convenient to share your profile with your friends.
                 </p>
+                <v-stepper v-model="e4" class="my-5 mx-auto" style="width:60vw;">
+                    <v-stepper-header>
+                        <v-stepper-step
+                            v-for="idx in urlSteps.length"
+                            :key="idx"
+                            :complete="e4 > idx"
+                            :step="idx"
+                            style="margin:auto auto;cursor:pointer"
+                            color="blue-grey"
+                            :complete-icon="`fas fa-check`"
+                            @click="e4 = idx"
+                        ></v-stepper-step>
+                    </v-stepper-header>
 
+                    <v-stepper-items>
+                        <v-stepper-content v-for="(step, _) in urlSteps" :key="_" :step="_ + 1">
+                            <v-card class="mb-2 mx-auto" width="54vw">
+                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
+                            </v-card>
+                            <v-card-title class="mb-2" primary-title>
+                                <div>
+                                    <div>{{ step.title }}</div>
+                                </div>
+                            </v-card-title>
+                            <v-btn
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e4 === urlSteps.length ? (e4 = 1) : e4++"
+                                >{{ e4 === urlSteps.length ? 'Play Again' : 'Continue' }}
+                            </v-btn>
+                            <v-btn
+                                v-if="e4 !== 1"
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e4--"
+                            >
+                                Back
+                            </v-btn>
+                        </v-stepper-content>
+                    </v-stepper-items>
+                </v-stepper>
                 <h5 id="item-7-3" class="mt-4">Multiple Profiles</h5>
                 <p>
                     By default, when you visit our website for the first time, a profile

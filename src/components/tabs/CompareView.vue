@@ -13,7 +13,7 @@
                 <li
                     v-for="(cur, idx) in compare"
                     :key="cur"
-                    class="list-group-item"
+                    class="list-group-item px-1"
                     :title="getTitle(idx)"
                 >
                     <div class="row no-gutters justify-content-between">
@@ -24,10 +24,16 @@
                         <div class="col-sm-auto text-right align-self-center">
                             <input
                                 v-model="cur.color"
-                                style="width: 25px;"
+                                style="width: 25px"
                                 type="color"
-                                @change="changeColor()"
+                                class="mr-1"
+                                @change="renderSchedule()"
                             />
+                            <i
+                                class="fas fa-sync-alt click-icon"
+                                title="get a random color"
+                                @click="randColor(idx)"
+                            ></i>
                             <i
                                 class="fa fa-times ml-2 click-icon"
                                 style="font-size: 16px"

@@ -44,6 +44,7 @@ export default class Information extends Vue {
     e1: number = 0;
     e2: number = 0;
     e3: number = 0;
+    e4: number = 0;
     formula = `
     $$
     \\begin{align*}
@@ -60,6 +61,29 @@ export default class Information extends Vue {
 `;
 
     selected = 1;
+
+    readonly urlSteps = [
+        {
+            title: "Save and share your schedules using URL",
+            src: this.imgPath('exportURL1.png')
+        },
+        {
+            title: "Copy the URL",
+            src: this.imgPath('exportURL2.png')
+        },
+        {
+            title: "Share the URL with others",
+            src: this.imgPath('exportURL3.png')
+        },
+        {
+            title: "Paste the URL here",
+            src: this.imgPath('exportURL4.png')
+        },
+        {
+            title: "There! Your schedule is loaded",
+            src: this.imgPath('exportURL5.png')
+        }
+    ]
 
     readonly jsonSteps = [
         {

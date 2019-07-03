@@ -10,33 +10,26 @@
                     :key="idx"
                     class="list-group-item py-1 px-2"
                 >
-                    <div class="row no-gutters justify-content-between w-100">
-                        <div class="col-xs-auto mr-auto" style="font-size: 14px">
-                            <label :for="`color-${pair[1]}`">
-                                {{ convertKey(pair[0]) }}
-                            </label>
+                    <div class="row no-gutters justify-content-between w-100 my-1">
+                        <div class="col-sm-auto mr-auto" style="font-size: 14px">
+                            {{ convertKey(pair[0]) }}
                         </div>
-                        <div class="col-xs-auto align-self-center">
+                        <div class="col-sm-auto align-self-center">
                             <i
                                 class="fas fa-times click-icon mr-2"
                                 style="font-size: 1.1rem"
                                 title="reset to default"
                                 @click="$delete(palette.savedColors, pair[0])"
                             ></i>
-                        </div>
-                        <div class="col-xs-auto align-self-center">
                             <i
                                 class="fas fa-sync-alt click-icon mr-1"
                                 title="get a random color"
                                 @click="randColor(pair[0])"
                             ></i>
-                        </div>
-                        <div class="col-xs-auto">
                             <input
-                                :id="`color-${pair[0]}`"
                                 type="color"
                                 :value="pair[1]"
-                                style="width: 35px; height: 95%"
+                                style="width: 30px"
                                 @change="set(pair[0], $event.target.value)"
                             />
                         </div>

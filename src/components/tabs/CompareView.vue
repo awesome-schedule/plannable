@@ -17,19 +17,17 @@
                     :title="getTitle(idx)"
                 >
                     <div class="row no-gutters justify-content-between">
-                        <div class="col-xs-auto mr-auto">
+                        <div class="col-sm-auto mr-auto">
                             Schedule {{ cur.index + 1 }}<br />
                             <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
                         </div>
-                        <div class="col-xs-auto text-right align-self-center">
+                        <div class="col-sm-auto text-right align-self-center">
                             <input
                                 v-model="cur.color"
                                 style="width: 25px;"
                                 type="color"
                                 @change="changeColor()"
                             />
-                        </div>
-                        <div class="col-xs-auto text-right align-self-center">
                             <i
                                 class="fa fa-times ml-2 click-icon"
                                 style="font-size: 16px"

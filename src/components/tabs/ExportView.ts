@@ -42,11 +42,12 @@ export default class ExportView extends Store {
     }
 
     onUploadJson(event: { target: EventTarget | null }) {
-        const { files } = event.target as HTMLInputElement;
+        const input = event.target as HTMLInputElement;
+        const { files } = input;
         if (!files) return;
 
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = async () => {
             if (reader.result) {
                 const { profiles } = this.profile;
                 const prevLen = profiles.length;
@@ -58,10 +59,11 @@ export default class ExportView extends Store {
                     console.error(err);
                     this.noti.error(err.message + ': Parsing error');
                 }
-                this.loadProfile();
+                await this.loadProfile();
             } else {
                 this.noti.warn('File is empty!');
             }
+            input.value = '';
         };
 
         try {

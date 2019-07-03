@@ -830,26 +830,61 @@
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Export to/Import From JSON/URL</strong>
                 </h5>
-                <div class="row">
-                    <div class="col col-7">
-                        <p>
-                            You can export your profile to a JSON file (a file that ends with .json)
-                            so that it can be re-imported later. It is a dedicated file format that
-                            we use to store information in your schedule, so it could only be used
-                            on our website. To re-import a JSON file, simply click the file chooser,
-                            find the file and confirm.
-                        </p>
-                        <p>
-                            Alternatively, you can export your profile to an URL. We will encode and
-                            compress all information contained in your current profile in the
-                            resulting URL, which will be quite long. Exporting your profile to an
-                            URL makes it more convenient to share your profile with your friends.
-                        </p>
-                    </div>
-                    <div class="col col-md-auto">
-                        <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
-                    </div>
-                </div>
+
+                <p>
+                    You can export your profile to a JSON file (a file that ends with .json) so that
+                    it can be re-imported later. It is a dedicated file format that we use to store
+                    information in your schedule, so it could only be used on our website. To
+                    re-import a JSON file, simply click the file chooser, find the file and confirm.
+                </p>
+                <v-stepper v-model="e3" class="my-5 mx-auto" style="width:60vw;">
+                    <v-stepper-header>
+                        <v-stepper-step
+                            v-for="idx in jsonSteps.length"
+                            :key="idx"
+                            :complete="e3 > idx"
+                            :step="idx"
+                            style="margin:auto auto;cursor:pointer"
+                            color="blue-grey"
+                            :complete-icon="`fas fa-check`"
+                            @click="e3 = idx"
+                        ></v-stepper-step>
+                    </v-stepper-header>
+
+                    <v-stepper-items>
+                        <v-stepper-content v-for="(step, _) in jsonSteps" :key="_" :step="_ + 1">
+                            <v-card class="mb-2 mx-auto" width="54vw">
+                                <v-img :src="step.src" aspect-ratio="2.37"></v-img>
+                            </v-card>
+                            <v-card-title class="mb-2" primary-title>
+                                <div>
+                                    <div>{{ step.title }}</div>
+                                </div>
+                            </v-card-title>
+                            <v-btn
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e3 === jsonSteps.length ? (e3 = 1) : e3++"
+                                >{{ e3 === jsonSteps.length ? 'Play Again' : 'Continue' }}
+                            </v-btn>
+                            <v-btn
+                                v-if="e3 !== 1"
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e3--"
+                            >
+                                Back
+                            </v-btn>
+                        </v-stepper-content>
+                    </v-stepper-items>
+                </v-stepper>
+                <p>
+                    Alternatively, you can export your profile to an URL. We will encode and
+                    compress all information contained in your current profile in the resulting URL,
+                    which will be quite long. Exporting your profile to an URL makes it more
+                    convenient to share your profile with your friends.
+                </p>
+
                 <h5 id="item-7-3" class="mt-4">Multiple Profiles</h5>
                 <p>
                     By default, when you visit our website for the first time, a profile

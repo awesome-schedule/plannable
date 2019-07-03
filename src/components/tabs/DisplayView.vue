@@ -16,6 +16,8 @@
                         id="schedule-start"
                         v-model="display.earliest"
                         type="time"
+                        min="0:00"
+                        max="12:00"
                         class="form-control form-control-sm"
                     />
                 </div>
@@ -30,6 +32,8 @@
                         id="schedule-end"
                         v-model="display.latest"
                         type="time"
+                        min="12:00"
+                        max="23:59"
                         class="form-control form-control-sm"
                     />
                 </div>
@@ -158,7 +162,7 @@
                     type="number"
                     min="1"
                     step="1"
-                    max="50"
+                    max="20"
                 />
             </div>
             <div class="custom-control custom-checkbox">
@@ -197,7 +201,7 @@
                         type="number"
                         min="1000"
                         step="1"
-                        max="500000"
+                        max="1000000"
                         class="form-control"
                     />
                     <small class="form-text text-muted">

@@ -52,9 +52,8 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
         const timeDict: TimeArray = [[], [], [], [], []];
         const s = hr12toInt(start),
             e = hr12toInt(end);
-        for (let i = 0; i < days.length; i += 2) {
+        for (let i = 0; i < days.length; i += 2)
             timeDict[dayToInt[days.substr(i, 2) as Day]].push(s, e);
-        }
         return timeDict;
     }
     return null;
@@ -189,7 +188,7 @@ export function to24hr(time: string) {
         if (numHour === 12) {
             return pre;
         } else {
-            return `${numHour + 12}:${minute}`;
+            return `${(numHour + 12).toString().padStart(2, '0')}:${minute}`;
         }
     }
 }

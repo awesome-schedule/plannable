@@ -6,6 +6,7 @@
  *
  */
 import { StoreModule } from '.';
+import { hr24toInt } from '@/utils';
 
 export interface DisplayState {
     [x: string]: any;
@@ -36,6 +37,12 @@ function bound(num: number, low: number, high: number) {
     return Math.min(Math.max(low, num), high);
 }
 
+function intTo24hr(num: number) {
+    return `${Math.floor(num / 60)
+        .toString()
+        .padStart(2, '0')}:${(num % 60).toString().padStart(2, '0')}`;
+}
+
 /**
  * the display module handles global display options
  * @author Hanzhi Zhou
@@ -47,8 +54,6 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     showRoom = true;
     showInstructor = true;
     showClasslistTitle = true;
-    earliest = '08:00';
-    latest = '19:00';
     standard = false;
     multiSelect = true;
     combineSections = true;
@@ -60,24 +65,27 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     private _partialHeight: number = 25;
     private _maxNumSchedules: number = 100000;
     private _numSearchResults: number = 6;
+    private _earliest = '08:00';
+    private _latest = '19:00';
 
+    // validators
     get fullHeight() {
         return this._fullHeight;
     }
     set fullHeight(x) {
-        this._fullHeight = bound(x, 2, 100);
+        this._fullHeight = bound(x, 1, 100);
     }
     get partialHeight() {
         return this._partialHeight;
     }
     set partialHeight(x) {
-        this._partialHeight = bound(x, 2, 100);
+        this._partialHeight = bound(x, 1, 100);
     }
     get numSearchResults() {
         return this._numSearchResults;
     }
     set numSearchResults(x) {
-        this._numSearchResults = bound(x, 1, 50);
+        this._numSearchResults = bound(x, 1, 20);
     }
     get maxNumSchedules() {
         return this._maxNumSchedules;
@@ -85,7 +93,20 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     set maxNumSchedules(x) {
         this._maxNumSchedules = bound(x, 1000, 1000000);
     }
+    get earliest() {
+        return this._earliest;
+    }
+    set earliest(e) {
+        this._earliest = intTo24hr(bound(hr24toInt(e), 0, 12 * 60 - 1));
+    }
+    get latest() {
+        return this._latest;
+    }
+    set latest(e) {
+        this._latest = intTo24hr(bound(hr24toInt(e), 12 * 60, 24 * 60 - 1));
+    }
 
+    // when doing serialization, we only record the enumerable properties
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();
         for (const key in defaultVal) {

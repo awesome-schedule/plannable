@@ -32,8 +32,6 @@
                         <input
                             v-model="value[5]"
                             type="time"
-                            min="8:00"
-                            max="22:00"
                             class="form-control form-control-sm"
                         />
                     </div>
@@ -42,8 +40,6 @@
                         <input
                             v-model="value[6]"
                             type="time"
-                            min="8:00"
-                            max="22:00"
                             class="form-control form-control-sm"
                         />
                     </div>

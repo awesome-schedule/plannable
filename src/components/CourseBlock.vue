@@ -9,7 +9,7 @@
         }"
         @click="showModal"
     >
-        <div v-if="!mobile">
+        <div v-if="!status.isMobile">
             <div v-if="isSection">
                 <div class="mt-2 ml-2" style="color:white; font-size:13px">
                     {{ firstSec.displayName }}

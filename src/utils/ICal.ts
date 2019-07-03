@@ -84,8 +84,8 @@ export function toICal(schedule: Schedule) {
                         ((endMin - startMin) % 60) +
                         'M' +
                         '\r\n';
-                    ical += 'SUMMARY:' + m.section.department + ' ' + m.section.number + '\r\n';
-                    ical += 'DESCRIPTION:' + m.section.title + '\r\n';
+                    ical += 'SUMMARY:' + section.department + ' ' + section.number + '\r\n';
+                    ical += 'DESCRIPTION:' + section.title + '\r\n';
                     ical += 'LOCATION:' + m.room + '\r\n';
                     ical += 'COLOR:' + sb.backgroundColor + '\r\n';
                     ical += 'END:VEVENT\r\n';

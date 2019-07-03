@@ -20,8 +20,6 @@ export default class CourseBlock extends Store {
     @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
 
-    mobile = window.screen.width < 450;
-
     get startPx() {
         return this.getPx(this.scheduleBlock.start);
     }

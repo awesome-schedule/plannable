@@ -67,6 +67,7 @@ export default class Schedule {
         const schedule = new Schedule();
         if (obj.events)
             schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
+
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
 

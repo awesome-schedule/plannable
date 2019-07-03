@@ -3,7 +3,8 @@ import { SemesterStorage } from '.';
 
 class Profile {
     /**
-     * a reactive property. whenever changed, load the profile with name being `current`
+     * a reactive property. whenever changed, the `currentProfile` in the `localStorage` will be updated
+     * @see [[Store.c]]
      */
     current: string;
     profiles: string[];

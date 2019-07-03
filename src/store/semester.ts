@@ -21,7 +21,6 @@ export interface SemesterState {
  * @author Hanzhi Zhou
  */
 class Semesters implements SemesterState {
-    [x: string]: any;
     semesters: SemesterJSON[] = [];
     currentSemester: SemesterJSON | null = null;
     lastUpdate: string = '';

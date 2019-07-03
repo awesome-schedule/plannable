@@ -67,7 +67,10 @@ export default class App extends Store {
 
         if (config) {
             try {
-                this.profile.addProfile(lz.decompressFromEncodedURIComponent(config), 'url loaded');
+                this.profile.addProfile(
+                    lz.decompressFromEncodedURIComponent(config.trim()),
+                    'url loaded'
+                );
                 await this.loadProfile();
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;

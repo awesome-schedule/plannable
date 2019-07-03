@@ -319,7 +319,7 @@ class Store extends Vue {
         }
         // no profile for target semester exists. let's create one
         if (!parsed.currentSemester) {
-            let { name } = target;
+            const { name } = target;
             if (profiles.includes(name)) {
                 if (
                     !confirm(
@@ -327,8 +327,9 @@ class Store extends Vue {
                         `You already have a profile named ${name}. However, it does not correspond to the ${name} semester. Click Ok to overwrite, click Cancel to keep both.`
                     )
                 ) {
-                    name += ' (2)';
-                    profiles.push(name);
+                    let idx = 2;
+                    while (profiles.includes(`${name} (${idx})`)) idx++;
+                    profiles.push(`${name} (${idx})`);
                 }
             } else {
                 profiles.push(name);

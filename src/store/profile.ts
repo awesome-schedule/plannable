@@ -97,7 +97,10 @@ class Profile {
                     `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both`
                 )
             ) {
-                profileName += ' (2)';
+                let idx = 2;
+                while (this.profiles.includes(`${profileName} (${idx})`)) idx++;
+                profileName = `${profileName} (${idx})`;
+
                 raw_data.name = profileName;
                 localStorage.setItem(profileName, JSON.stringify(raw_data));
                 this.profiles.push(profileName);

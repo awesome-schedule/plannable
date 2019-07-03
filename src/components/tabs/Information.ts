@@ -43,6 +43,7 @@ import {
 export default class Information extends Vue {
     e1: number = 0;
     e2: number = 0;
+    e3: number = 0;
     formula = `
     $$
     \\begin{align*}
@@ -59,6 +60,29 @@ export default class Information extends Vue {
 `;
 
     selected = 1;
+
+    readonly jsonSteps = [
+        {
+            title: "Download Json file",
+            src: this.imgPath('exportJson1.png')
+        },
+        {
+            title: "Save it somethere you can find",
+            src: this.imgPath('exportJson2.png')
+        },
+        {
+            title: "You can share it with your friends, or just load it on your computer",
+            src: this.imgPath('exportJson3.png')
+        },
+        {
+            title: "Load it!!!",
+            src: this.imgPath('exportJson4.png')
+        },
+        {
+            title: "Boom!! Your schedule is loaded",
+            src: this.imgPath('exportJson5.png')
+        },
+    ]
 
     readonly icalSteps = [
         {

@@ -44,7 +44,9 @@
                         <a class="nav-link ml-3 my-1 py-1" href="#item-4-3">Sort Options</a>
                     </nav>
                 </div>
-                <!-- <a class="nav-link" href="#item-5">Display Settings</a> -->
+                <div @click="showGuide(5)">
+                    <a class="nav-link" href="#item-5"><i class="fas fa-cog" /> Display Settings</a>
+                </div>
                 <div @click="showGuide(6)">
                     <a class="nav-link" href="#item-6"
                         ><i class="fas fa-palette"></i> Customize Colors
@@ -59,6 +61,11 @@
                         <a class="nav-link ml-3 my-1 py-1" href="#item-7-2">JSON Import/Export</a>
                         <a class="nav-link ml-3 my-1 py-1" href="#item-7-3">Multiple Profiles</a>
                     </nav>
+                </div>
+                <div @click="showGuide(8)">
+                    <a class="nav-link" href="#item-8">
+                        <i class="fas fa-balance-scale"></i> Compare Schedules</a
+                    >
                 </div>
                 <div @click="showGuide(9)">
                     <a class="nav-link" href="#item-9">Contributing</a>
@@ -233,7 +240,7 @@
                     course and section.
                 </p>
 
-                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>Course number: econ 2020, 2102, with or without spaces</li>
                         <li>Course title: microecon, discrete, etc.</li>
@@ -567,7 +574,7 @@
                 Currently, we provide the following list of sort options. If you prefer a
                 mathematical description on how they are computed, see
                 <a href="#item-11-1">Appendix</a>.
-                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>Variance: Balance the class time each day</li>
                         <li>Vertical compactness: Make classes back-to-back</li>
@@ -588,7 +595,7 @@
 
                 <h6>Sort Modes</h6>
                 And there are two avaiable sort modes.
-                <div class="border border-danger rounded p-2 mb-2 bg-light text-dark mx-5">
+                <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
                             Combined: Combine all sorting options enabled and give them equal weight
@@ -622,11 +629,110 @@
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(5)"
+                >
+                    Next Page: Display Setting
+                </button>
+            </div>
+
+            <div v-if="selected === 5 || !selected">
+                <h3 id="item-4"><i class="fas fa-filter"></i> Display Settings</h3>
+                <hr />
+                <p>
+                    Settings enable you to customize the display of the scheduler so that it
+                    provides you with more information and fits your need better.
+                </p>
+                <h5 id="item-4-1" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong> Schedule Settings</strong>
+                </h5>
+                <p>
+                    You can change the grid size and the display information of the scheduler here:
+                </p>
+
+                <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
+                    <ol>
+                        <li>
+                            Schedule Start/End: The display of the scheduler time range under
+                            <strong>View Schedule</strong> mode
+                            <strong>(Note: this is not a filter)</strong>
+                        </li>
+                        <li>Class Height: The height of the class block on the schedule grid</li>
+                        <li>Grid Height: The height of the schedule grid</li>
+                        <li>Show Time: Show the date and time which the class takes place</li>
+                        <li>Show Room: Show the building and room which the class takes place</li>
+                        <li>Show Instructor: Show the instructor of the class</li>
+                        <li>Time Options: Display can be either standard time or military time</li>
+                    </ol>
+                </div>
+
+                <h5 id="item-4-1" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong> Course Search</strong>
+                </h5>
+                <p>
+                    Here you can change the display settings of the <strong>Select Class </strong>
+                    <i class="far fa-calendar-alt"></i> tab
+                </p>
+                <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
+                    <ol>
+                        <li>
+                            Max number of search results: The number of the relevant classes shown
+                            on the <strong>search field </strong> <i class="fas fa-search"></i> when
+                            you do a search
+                        </li>
+                        <li>
+                            Expand all when searching: Unfold all the sections under each relevant
+                            class
+                        </li>
+                        <li>
+                            Show title on class list: Show the the description of each selected
+                            class under <strong>Edit Class/View Schedule</strong>
+                        </li>
+                    </ol>
+                </div>
+                <h5 id="item-4-2" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong> Advanced Features</strong>
+                </h5>
+                <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
+                    <ol>
+                        <li>
+                            Max number of schedules: This sets a cap for the numbers of schedules to
+                            be geneterated so that it is more memory friendly to your computer:)
+                        </li>
+                        <li>
+                            Combine Sections: For simplicity, same sections at the same time under
+                            the same course are combined into one block for showing
+                        </li>
+                        <li>
+                            Enable Log History: You can view schedule logs here (such as the
+                            resquests, and errors)
+                        </li>
+                        <li>
+                            Enable Fuzzy Search: You can browse class using more advanced fuzzy
+                            search algorithm
+                        </li>
+                        <li>
+                            Update Semester Data: manually request the class data from Lou's List
+                            (our website automatically updates class data every two hours)
+                        </li>
+                        <li>
+                            Reset All and Clean: This clears the cache of the website and reset all
+                            the modifcations of the website to its original state
+                        </li>
+                    </ol>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
                     @click="showGuide(6)"
                 >
                     Next Page: Customize Colors
                 </button>
             </div>
+
             <div v-if="selected === 6 || !selected">
                 <h3 id="item-6"><i class="fas fa-palette"></i> Customize Colors</h3>
                 <hr />
@@ -724,26 +830,61 @@
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Export to/Import From JSON/URL</strong>
                 </h5>
-                <div class="row">
-                    <div class="col col-7">
-                        <p>
-                            You can export your profile to a JSON file (a file that ends with .json)
-                            so that it can be re-imported later. It is a dedicated file format that
-                            we use to store information in your schedule, so it could only be used
-                            on our website. To re-import a JSON file, simply click the file chooser,
-                            find the file and confirm.
-                        </p>
-                        <p>
-                            Alternatively, you can export your profile to an URL. We will encode and
-                            compress all information contained in your current profile in the
-                            resulting URL, which will be quite long. Exporting your profile to an
-                            URL makes it more convenient to share your profile with your friends.
-                        </p>
-                    </div>
-                    <div class="col col-md-auto">
-                        <img :src="imgPath('export-json.png')" width="240px" alt="export to json" />
-                    </div>
-                </div>
+
+                <p>
+                    You can export your profile to a JSON file (a file that ends with .json) so that
+                    it can be re-imported later. It is a dedicated file format that we use to store
+                    information in your schedule, so it could only be used on our website. To
+                    re-import a JSON file, simply click the file chooser, find the file and confirm.
+                </p>
+                <v-stepper v-model="e3" class="my-5 mx-auto" style="width:60vw;">
+                    <v-stepper-header>
+                        <v-stepper-step
+                            v-for="idx in jsonSteps.length"
+                            :key="idx"
+                            :complete="e3 > idx"
+                            :step="idx"
+                            style="margin:auto auto;cursor:pointer"
+                            color="blue-grey"
+                            :complete-icon="`fas fa-check`"
+                            @click="e3 = idx"
+                        ></v-stepper-step>
+                    </v-stepper-header>
+
+                    <v-stepper-items>
+                        <v-stepper-content v-for="(step, _) in jsonSteps" :key="_" :step="_ + 1">
+                            <v-card class="mb-2 mx-auto" width="54vw">
+                                <v-img :src="step.src" aspect-ratio="2.37"></v-img>
+                            </v-card>
+                            <v-card-title class="mb-2" primary-title>
+                                <div>
+                                    <div>{{ step.title }}</div>
+                                </div>
+                            </v-card-title>
+                            <v-btn
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e3 === jsonSteps.length ? (e3 = 1) : e3++"
+                                >{{ e3 === jsonSteps.length ? 'Play Again' : 'Continue' }}
+                            </v-btn>
+                            <v-btn
+                                v-if="e3 !== 1"
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e3--"
+                            >
+                                Back
+                            </v-btn>
+                        </v-stepper-content>
+                    </v-stepper-items>
+                </v-stepper>
+                <p>
+                    Alternatively, you can export your profile to an URL. We will encode and
+                    compress all information contained in your current profile in the resulting URL,
+                    which will be quite long. Exporting your profile to an URL makes it more
+                    convenient to share your profile with your friends.
+                </p>
+
                 <h5 id="item-7-3" class="mt-4">Multiple Profiles</h5>
                 <p>
                     By default, when you visit our website for the first time, a profile
@@ -757,6 +898,16 @@
                     existing profiles. If there is a conflict, you will be prompted to choose either
                     overwriting the existing profile or keep both.
                 </p>
+                <button
+                    type="button"
+                    class="btn btn-primary btn-lg my-5 float-right"
+                    @click="showGuide(8)"
+                >
+                    Next Page: Compare Schedules
+                </button>
+            </div>
+            <div v-if="selected === 8 || !selected">
+                <h1>Write Something here</h1>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

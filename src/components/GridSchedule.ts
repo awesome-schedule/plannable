@@ -11,7 +11,7 @@ import { read } from 'fs';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid
- * @author Kaiying Shan
+ * @author Kaiying Cat
  */
 @Component({
     components: {
@@ -42,7 +42,7 @@ export default class GridSchedule extends Store {
                 }
             }
         }
-        return earliest === 817 ? 0 : earliest;
+        return earliest;
     }
     /**
      * return the block in which the latest class ends, the 8:00 block is zero
@@ -58,7 +58,7 @@ export default class GridSchedule extends Store {
                 }
             }
         }
-        return latest === 817 ? (19 - 8) * 2 : latest;
+        return latest;
     }
     /**
      * return the block in which the schedule starts with

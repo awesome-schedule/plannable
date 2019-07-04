@@ -267,7 +267,7 @@ export default class Store extends Vue {
 
         const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
         const msg = generator.getSchedules(this.schedule.proposedSchedule);
-        this.noti.notify(msg);
+        this.noti.notify(msg, 'info', 3, true);
         const evaluator = msg.payload;
         if (evaluator) {
             window.scheduleEvaluator = evaluator;

@@ -431,9 +431,8 @@
                     ><strong> Schedule Rendering</strong>
                 </h5>
                 <p class="mb-1">
-                    It is better for you to know under what conditions the courses are rendered on the
-                    schedule. In Edit Class mode, only the following type of courses are rendered on
-                    the grid.
+                    It is better for you to know under what conditions courses are rendered on the
+                    schedule. In Edit Class mode, only the following type of courses are rendered:
                 </p>
                 <ul>
                     <li>
@@ -942,10 +941,11 @@
                     By default, when you visit our website for the first time, a profile
                     corresponding to the latest semester will be created. When you switch to a
                     different semester, if no profile corresponding to that semester exists, a new
-                    profile will be created.
+                    profile will be created. For your existing profiles, you can easily rename,
+                    delete and switch between them.
                 </p>
                 <p>
-                    Additionally, when you import a profile from either URL or a JSON file, a
+                    Additionally, when you import a profile from either an URL or a JSON file, a
                     separate entry will be created if its name does not conflict with the existing
                     profiles. If there is a conflict, you will be prompted to choose either
                     overwriting the existing profile or keep both.

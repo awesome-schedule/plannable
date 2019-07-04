@@ -32,7 +32,7 @@
                         height: mainHeight
                     }"
                 >
-                    <template v-if="mobile">
+                    <template v-if="status.isMobile">
                         <div v-for="day in days" :key="day" class="placeholder day">{{ day }}</div>
                     </template>
                     <template v-else>

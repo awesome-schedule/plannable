@@ -7,7 +7,6 @@ import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
 import Schedule from '@/models/Schedule';
-import { read } from 'fs';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid
@@ -19,14 +18,14 @@ import { read } from 'fs';
     }
 })
 export default class GridSchedule extends Store {
-
     @Prop(Schedule) readonly currentSchedule!: Schedule;
 
-    mobile = window.screen.width < 600;
     daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-    // note: we need Schedule.days because it's an array that keeps the keys in order
-    days = DAYS;
 
+    // note: we need Schedule.days because it's an array that keeps the keys in order
+    get days() {
+        return DAYS;
+    }
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
      * return 0 if no class

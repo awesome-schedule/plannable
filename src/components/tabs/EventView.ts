@@ -14,7 +14,6 @@ import { to12hr, to24hr, hr24toInt } from '@/utils';
 @Component
 export default class EventView extends Store {
     get event() {
-        // reset event.selected to false if it is not editing
         return this.status.eventToEdit;
     }
 
@@ -28,9 +27,11 @@ export default class EventView extends Store {
 
     // rendering selected event
     currentSelectedEvent: Event | null = null;
-
-    readonly days = DAYS;
     toBeModifiedDays = '';
+
+    get days() {
+        return DAYS;
+    }
 
     @Watch('event', { immediate: true })
     eventWatch() {

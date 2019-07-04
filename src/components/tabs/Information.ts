@@ -45,6 +45,7 @@ export default class Information extends Vue {
     e2: number = 0;
     e3: number = 0;
     e4: number = 0;
+    e5: number = 0;
     formula = `
     $$
     \\begin{align*}
@@ -61,6 +62,21 @@ export default class Information extends Vue {
 `;
 
     selected = 1;
+
+    readonly compareSteps = [
+        {
+            title: '',
+            src: this.imgPath('compare1.png')
+        },
+        {
+            title: '',
+            src: this.imgPath('compare2.png')
+        },
+        {
+            title: '',
+            src: this.imgPath('compare3.png')
+        }
+    ];
 
     readonly urlSteps = [
         {

@@ -108,14 +108,14 @@
                 <p>
                     <strong
                         >Important note: It is recommended that you save the schedule after you
-                        finish (see <a href="#item-7-2" @click="showGuide(7)">Export to JSON</a>, or
-                        <a href="#item-7-1" @click="showGuide(7)">Export to iCalendar</a>), because
-                        our website uses your browser cache to store data, which could be lost if it
-                        expires or the cache is cleared. If you find any problem when using our
-                        website, please first check whether you are using a compatible browser (see
-                        <a href="#item-11-2" @click="showGuide(9)">browser compatibility</a>). If it
-                        is not a problem with your browser, please consider
-                        <a href="#item-9-2" @click="showGuide(9)">submitting a bug report</a>.
+                        finish (see <a href="#item-7-2">Export to JSON</a>, or
+                        <a href="#item-7-1">Export to iCalendar</a>), because our website uses your
+                        browser cache to store data, which could be lost if it expires or the cache
+                        is cleared. If you find any problem when using our website, please first
+                        check whether you are using a compatible browser (see
+                        <a href="#item-11-2">browser compatibility</a>). If it is not a problem with
+                        your browser, please consider
+                        <a href="#item-9-2">submitting a bug report</a>.
                     </strong>
                 </p>
                 <p>
@@ -191,7 +191,7 @@
                     level domain operated by a Chinese company. However, your data is not
                     synchronized (and it is techniqually impossible to do so). If you want to
                     transfer your data between them, you need to use the
-                    <a href="#item-7-2" @click="showGuide(7)">Export to JSON</a> function provided.
+                    <a href="#item-7-2">Export to JSON</a> function provided.
                 </p>
 
                 <h5>Privacy</h5>
@@ -925,7 +925,10 @@
                         </v-stepper-content>
                     </v-stepper-items>
                 </v-stepper>
-                <h5 id="item-7-3" class="mt-4">Multiple Profiles</h5>
+                <h5 id="item-7-3" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i>
+                    Multiple Profiles
+                </h5>
                 <p>
                     By default, when you visit our website for the first time, a profile
                     corresponding to the latest semester will be created. When you switch to a
@@ -947,7 +950,54 @@
                 </button>
             </div>
             <div v-if="selected === 8 || !selected">
-                <h1>Write Something here</h1>
+                <h3 id="item-8">
+                    <i class="fas fa-balance-scale"></i> Compare Schedules
+                </h3>
+                <p>Compare schedule feature enables you to compare mutitple different schedules and helps you identify 
+                    the differences and similarities between those schedules. This feature works well with the <a href="#item-7-3" @click="showGuide(7)">mutiple profiles </a>
+                    and <a href="#item-7" @click="showGuide(7)">export/import</a> features in the previous sections well as well
+                </p>
+                <v-stepper v-model="e5" class="my-5 mx-auto" style="width:60vw;">
+                    <v-stepper-header>
+                        <v-stepper-step
+                            v-for="idx in compareSteps.length"
+                            :key="idx"
+                            :complete="e5 > idx"
+                            :step="idx"
+                            style="margin:auto auto;cursor:pointer"
+                            color="blue-grey"
+                            :complete-icon="`fas fa-check`"
+                            @click="e5 = idx"
+                        ></v-stepper-step>
+                    </v-stepper-header>
+
+                    <v-stepper-items>
+                        <v-stepper-content v-for="(step, _) in compareSteps" :key="_" :step="_ + 1">
+                            <v-card class="mb-2 mx-auto" width="54vw">
+                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
+                            </v-card>
+                            <v-card-title class="mb-2" primary-title>
+                                <div>
+                                    <div>{{ step.title }}</div>
+                                </div>
+                            </v-card-title>
+                            <v-btn
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e5 === compareSteps.length ? (e5 = 1) : e5++"
+                                >{{ e5 === compareSteps.length ? 'Play Again' : 'Continue' }}
+                            </v-btn>
+                            <v-btn
+                                v-if="e5 !== 1"
+                                color="blue-grey"
+                                style="color:white"
+                                @click="e5--"
+                            >
+                                Back
+                            </v-btn>
+                        </v-stepper-content>
+                    </v-stepper-items>
+                </v-stepper>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

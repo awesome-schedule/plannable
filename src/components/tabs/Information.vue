@@ -96,7 +96,7 @@
                 <hr />
                 <p>
                     <small class="text-muted">
-                        Page layout by Kaiying Shan, text by Hanzhi Zhou, media by Zichao Hu
+                        Page layout by Kaiying Shan, text by Hanzhi Zhou, media/text by Zichao Hu
                     </small>
                 </p>
                 <p>
@@ -109,12 +109,12 @@
                     <strong
                         >Important note: It is recommended that you save the schedule after you
                         finish (see <a href="#item-7-2" @click="showGuide(7)">Export to JSON</a>, or
-                        <a href="#item-7-1" @click="showGuide(7)">Export to iCalendar</a>), because our website uses your
-                        browser cache to store data, which could be lost if it expires or the cache
-                        is cleared. If you find any problem when using our website, please first
-                        check whether you are using a compatible browser (see
-                        <a href="#item-11-2" @click="showGuide(9)">browser compatibility</a>). If it is not a problem with
-                        your browser, please consider
+                        <a href="#item-7-1" @click="showGuide(7)">Export to iCalendar</a>), because
+                        our website uses your browser cache to store data, which could be lost if it
+                        expires or the cache is cleared. If you find any problem when using our
+                        website, please first check whether you are using a compatible browser (see
+                        <a href="#item-11-2" @click="showGuide(9)">browser compatibility</a>). If it
+                        is not a problem with your browser, please consider
                         <a href="#item-9-2" @click="showGuide(9)">submitting a bug report</a>.
                     </strong>
                 </p>
@@ -937,10 +937,13 @@
                 </p>
                 <p>
                     Additionally, when you import a profile from either URL or a JSON file, a
-                    separate entry will be created for it if its name does not conflict with the
+                    separate entry will be created if its name does not conflict with the
                     existing profiles. If there is a conflict, you will be prompted to choose either
                     overwriting the existing profile or keep both.
                 </p>
+               <v-card class="mt-3 mb-5 mx-auto gif-center">
+                    <v-img :src="imgPath('multipleProfile.png')"></v-img>
+                </v-card>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -952,14 +955,15 @@
             <div v-if="selected === 8 || !selected">
                 <h3 id="item-8"><i class="fas fa-balance-scale"></i> Compare Schedules</h3>
                 <p>
-                    Compare schedule feature enables you to compare mutitple different schedules and
-                    helps you identify the differences and similarities between those schedules.
+                    Compare schedule feature enables you to identify the differences and similarities between different schedules.
                     This feature also works well with the
                     <strong>
-                    <a href="#item-7-3" @click="showGuide(7)">mutiple profiles </a></strong> and <strong>
-                    <a href="#item-7" @click="showGuide(7)">export/import</a> </strong>features in the
-                    previous sections. You can share shedules with other people using </strong>export/import </strong>,
-                    then compare the schedules here :)
+                        <a href="#item-7-3" @click="showGuide(7)">mutiple profiles </a></strong
+                    >
+                    and
+                    <strong> <a href="#item-7" @click="showGuide(7)">export/import</a> </strong>
+                    features in the previous sections. You can share shedules with other people
+                    using <strong> export/import </strong>, then compare the schedules here :)
                 </p>
                 <v-stepper v-model="e5" class="my-5 mx-auto" style="width:60vw;">
                     <v-stepper-header>

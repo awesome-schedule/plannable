@@ -950,12 +950,16 @@
                 </button>
             </div>
             <div v-if="selected === 8 || !selected">
-                <h3 id="item-8">
-                    <i class="fas fa-balance-scale"></i> Compare Schedules
-                </h3>
-                <p>Compare schedule feature enables you to compare mutitple different schedules and helps you identify 
-                    the differences and similarities between those schedules. This feature works well with the <a href="#item-7-3" @click="showGuide(7)">mutiple profiles </a>
-                    and <a href="#item-7" @click="showGuide(7)">export/import</a> features in the previous sections well as well
+                <h3 id="item-8"><i class="fas fa-balance-scale"></i> Compare Schedules</h3>
+                <p>
+                    Compare schedule feature enables you to compare mutitple different schedules and
+                    helps you identify the differences and similarities between those schedules.
+                    This feature also works well with the
+                    <strong>
+                    <a href="#item-7-3" @click="showGuide(7)">mutiple profiles </a></strong> and <strong>
+                    <a href="#item-7" @click="showGuide(7)">export/import</a> </strong>features in the
+                    previous sections. You can share shedules with other people using </strong>export/import </strong>,
+                    then compare the schedules here :)
                 </p>
                 <v-stepper v-model="e5" class="my-5 mx-auto" style="width:60vw;">
                     <v-stepper-header>

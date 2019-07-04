@@ -1,6 +1,6 @@
 /**
  * @module store
- * @author Hanzhi Zhu
+ * @author Hanzhi Zhou
  */
 
 /**

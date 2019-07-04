@@ -123,20 +123,19 @@
         <log-view v-else-if="sideBar.showLog"></log-view>
 
         <main-content v-if="!sideBar.showInfo && !sideBar.showExternal && !sideBar.showCompare">
-            <div id="pagination-container" class="w-100 my-2">
-                <div v-if="schedule.generated" class="row justify-content-center">
-                    <div class="col-sm-auto text-center my-1">
-                        <Pagination></Pagination>
-                    </div>
-                    <div class="col-sm-auto text-center align-self-center">
-                        <button class="btn btn-outline-primary my-1" @click="addToCompare()">
-                            <i class="fas fa-balance-scale"></i>
-                            Compare
-                            <i v-if="indexOfCompare() !== -1" class="fas fa-check"></i>
-                        </button>
-                    </div>
+            <div v-if="schedule.generated" id="pg" class="w-100 mb-2 row justify-content-center">
+                <div class="col-sm-auto text-center my-1">
+                    <Pagination></Pagination>
+                </div>
+                <div class="col-sm-auto text-center align-self-center">
+                    <button class="btn btn-outline-primary my-1" @click="addToCompare()">
+                        <i class="fas fa-balance-scale"></i>
+                        Compare
+                        <i v-if="indexOfCompare() !== -1" class="fas fa-check"></i>
+                    </button>
                 </div>
             </div>
+
             <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
         </main-content>
     </div>

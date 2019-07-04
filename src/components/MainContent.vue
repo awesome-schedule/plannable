@@ -1,9 +1,9 @@
 <template>
     <div
-        class="schedule"
+        class="schedule mt-2"
         :style="{
             width: status.isMobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
-            'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw' // fixed margin for mobile
+            'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
         }"
     >
         <transition name="fade">

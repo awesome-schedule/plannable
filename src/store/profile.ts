@@ -23,6 +23,7 @@ class Profile {
         const name = localStorage.getItem('currentProfile');
         const profiles = [];
         if (!name) {
+            // backward compatibility
             for (const sem of semesters.concat().reverse()) {
                 const oldData = localStorage.getItem(sem.id);
                 if (oldData) {

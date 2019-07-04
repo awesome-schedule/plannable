@@ -64,49 +64,49 @@ export default class Information extends Vue {
 
     readonly urlSteps = [
         {
-            title: "Save and share your schedules using URL",
+            title: 'Save and share your schedules using URL',
             src: this.imgPath('exportURL1.png')
         },
         {
-            title: "Copy the URL",
+            title: 'Copy the URL',
             src: this.imgPath('exportURL2.png')
         },
         {
-            title: "Share the URL with others",
+            title: 'Share the URL with others',
             src: this.imgPath('exportURL3.png')
         },
         {
-            title: "Paste the URL here",
+            title: 'Paste the URL here',
             src: this.imgPath('exportURL4.png')
         },
         {
-            title: "There! Your schedule is loaded",
+            title: 'There! Your schedule is loaded',
             src: this.imgPath('exportURL5.png')
         }
-    ]
+    ];
 
     readonly jsonSteps = [
         {
-            title: "Download Json file",
+            title: 'Download Json file',
             src: this.imgPath('exportJson1.png')
         },
         {
-            title: "Save it somethere you can find",
+            title: 'Save it somethere you can find',
             src: this.imgPath('exportJson2.png')
         },
         {
-            title: "You can share it with your friends, or just load it on your computer",
+            title: 'You can share it with your friends, or just load it on your computer',
             src: this.imgPath('exportJson3.png')
         },
         {
-            title: "Load it!!!",
+            title: 'Load it!!!',
             src: this.imgPath('exportJson4.png')
         },
         {
-            title: "Boom!! Your schedule is loaded",
+            title: 'Boom!! Your schedule is loaded',
             src: this.imgPath('exportJson5.png')
-        },
-    ]
+        }
+    ];
 
     readonly icalSteps = [
         {

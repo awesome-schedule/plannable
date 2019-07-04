@@ -573,7 +573,7 @@
                 <h6>Sort Options</h6>
                 Currently, we provide the following list of sort options. If you prefer a
                 mathematical description on how they are computed, see
-                <a href="#item-11-1">Appendix</a>.
+                <a href="#item-11-1" @click="showGuide(9)">Appendix</a>.
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>Variance: Balance the class time each day</li>

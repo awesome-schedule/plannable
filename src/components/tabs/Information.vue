@@ -108,14 +108,14 @@
                 <p>
                     <strong
                         >Important note: It is recommended that you save the schedule after you
-                        finish (see <a href="#item-7-2">Export to JSON</a>, or
-                        <a href="#item-7-1">Export to iCalendar</a>), because our website uses your
-                        browser cache to store data, which could be lost if it expires or the cache
-                        is cleared. If you find any problem when using our website, please first
-                        check whether you are using a compatible browser (see
-                        <a href="#item-11-2">browser compatibility</a>). If it is not a problem with
-                        your browser, please consider
-                        <a href="#item-9-2">submitting a bug report</a>.
+                        finish (see <a href="#item-7-2" @click="showGuide(7)">Export to JSON</a>, or
+                        <a href="#item-7-1" @click="showGuide(7)">Export to iCalendar</a>), because
+                        our website uses your browser cache to store data, which could be lost if it
+                        expires or the cache is cleared. If you find any problem when using our
+                        website, please first check whether you are using a compatible browser (see
+                        <a href="#item-11-2" @click="showGuide(9)">browser compatibility</a>). If it
+                        is not a problem with your browser, please consider
+                        <a href="#item-9-2" @click="showGuide(9)">submitting a bug report</a>.
                     </strong>
                 </p>
                 <p>
@@ -191,7 +191,7 @@
                     level domain operated by a Chinese company. However, your data is not
                     synchronized (and it is techniqually impossible to do so). If you want to
                     transfer your data between them, you need to use the
-                    <a href="#item-7-2">Export to JSON</a> function provided.
+                    <a href="#item-7-2" @click="showGuide(7)">Export to JSON</a> function provided.
                 </p>
 
                 <h5>Privacy</h5>

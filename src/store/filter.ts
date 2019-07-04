@@ -18,7 +18,6 @@ import { to12hr } from '@/utils';
 import Event from '@/models/Event';
 
 interface FilterStateBase {
-    [x: string]: any;
     readonly timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;

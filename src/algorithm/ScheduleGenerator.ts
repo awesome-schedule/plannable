@@ -121,7 +121,7 @@ class ScheduleGenerator {
                 : courseRec.sections.map(s => [s]);
 
             // for each combined section, form a RawAlgoCourse
-            for (const sections of combined) {
+            outer: for (const sections of combined) {
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
@@ -129,14 +129,9 @@ class ScheduleGenerator {
                 if (!blocksArray) continue;
 
                 // don't include this combined section if it conflicts with any time filter or event.
-                let conflict = false;
                 for (const td of timeSlots) {
-                    if (checkTimeConflict(td, blocksArray, 2, 3)) {
-                        conflict = true;
-                        break;
-                    }
+                    if (checkTimeConflict(td, blocksArray, 2, 3)) continue outer;
                 }
-                if (conflict) continue;
 
                 const sectionIndices: number[] = [];
                 for (const section of sections) {
@@ -228,7 +223,7 @@ class ScheduleGenerator {
          */
         const currentSchedule: RawAlgoSchedule = [];
         const { maxNumSchedules } = this.options;
-        while (true) {
+        outer: while (true) {
             if (classNum >= numCourses) {
                 evaluator.add(currentSchedule.concat());
                 if (++count >= maxNumSchedules) return;
@@ -251,23 +246,18 @@ class ScheduleGenerator {
             // the time dict of the newly chosen class
             const candidate = classList[classNum][choiceNum];
             const timeDict = candidate[2];
-            let conflict = false;
             for (let i = 0; i < classNum; i++) {
                 if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3)) {
-                    conflict = true;
-                    break;
+                    ++choiceNum;
+                    continue outer;
                 }
             }
 
-            if (conflict) {
-                ++choiceNum;
-            } else {
-                // if the schedule matches,
-                // record the next path memory and go to the next class, reset the choiceNum = 0
-                currentSchedule[classNum] = candidate;
-                pathMemory[classNum++] = choiceNum + 1;
-                choiceNum = 0;
-            }
+            // if the schedule matches,
+            // record the next path memory and go to the next class, reset the choiceNum = 0
+            currentSchedule[classNum] = candidate;
+            pathMemory[classNum++] = choiceNum + 1;
+            choiceNum = 0;
         }
     }
 }

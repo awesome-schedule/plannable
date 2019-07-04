@@ -368,9 +368,9 @@ class ScheduleEvaluator {
      * count the number of sort options enabled.
      * @returns [number of sort options enabled, the index of the last enabled sort option]
      */
-    public countSortOpt() {
+    public countSortOpt(): [number, number] {
         let count = 0;
-        let lastIdx: number = -1;
+        let lastIdx = -1;
         for (let i = 0; i < this.options.sortBy.length; i++) {
             const option = this.options.sortBy[i];
             if (option.enabled) {

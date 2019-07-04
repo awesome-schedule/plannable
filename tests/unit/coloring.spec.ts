@@ -17,21 +17,16 @@ function randGraph(numNodes: number, probConn: number) {
 }
 
 function verifyColoring(adjList: Int16Array[], colors: Int16Array) {
-    let flag = true;
     for (let i = 0; i < adjList.length; i++) {
         const curCol = colors[i];
         for (const adj of adjList[i]) {
             if (curCol === colors[adj]) {
                 console.warn(i, 'and', adj, 'have the same color', curCol);
-                flag = false;
-                break;
+                return false;
             }
         }
-        if (!flag) {
-            break;
-        }
     }
-    return flag;
+    return true;
 }
 
 describe('graph verifier', () => {

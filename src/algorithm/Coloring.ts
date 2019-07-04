@@ -107,23 +107,16 @@ export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: In
         }
 
         neighbors = adjList[current];
-        for (let color = 0; color < 19260817; color++) {
-            let flag = true;
+        outer: for (let color = 0; color < 19260817; color++) {
             // find a available color
-            for (const v of neighbors) {
-                if (colors[v] === color) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag) {
-                // update the saturation degrees of the neighbors
-                colors[current] = color;
-                if (color > numColors) numColors = color;
-                colorOrder[i] = current;
-                for (const v of neighbors) saturations[v].add(color);
-                break;
-            }
+            for (const v of neighbors) if (colors[v] === color) continue outer;
+
+            // update the saturation degrees of the neighbors
+            colors[current] = color;
+            if (color > numColors) numColors = color;
+            colorOrder[i] = current;
+            for (const v of neighbors) saturations[v].add(color);
+            break;
         }
     }
     return numColors + 1;

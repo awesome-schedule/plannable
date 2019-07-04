@@ -26,6 +26,9 @@ describe('notification test', () => {
         });
         expect(noti.msg).toBe(' ');
         expect(noti.cls).toBe('info');
+        noti.clear();
+        noti.clearHistory();
+        expect(noti.empty()).toBe(true);
     });
 
     it('timeout', async () => {

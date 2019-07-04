@@ -1,10 +1,6 @@
 /**
  * @module store
  */
-
-/**
- *
- */
 import Event from '../models/Event';
 
 interface Sidebars {
@@ -51,7 +47,7 @@ class Status {
         showInfo: false,
         showExternal: false,
         showLog: false,
-        showCompare: false,
+        showCompare: false
     };
 
     /**

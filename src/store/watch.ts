@@ -1,9 +1,13 @@
+/**
+ * @module store
+ */
 import { Component, Watch } from 'vue-property-decorator';
 import Store from './store';
 import Schedule from '@/models/Schedule';
 /**
  * the watch factory defines some watchers on the members in `Store`.
  * these watchers are defined outside of the `Store` class because they should only be registered once.
+ * @author Hanzhi Zhou
  */
 @Component
 // tslint:disable-next-line: max-classes-per-file

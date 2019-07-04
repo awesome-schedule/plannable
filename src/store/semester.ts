@@ -1,10 +1,6 @@
 /**
  * @module store
  */
-
-/**
- *
- */
 import { loadSemesterData } from '../data/CatalogLoader';
 import { loadSemesterList } from '../data/SemesterListLoader';
 import { SemesterJSON } from '../models/Catalog';

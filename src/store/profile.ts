@@ -1,6 +1,15 @@
+/**
+ * @module store
+ */
 import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
 
+/**
+ * the profile class handles profiles adding, renaming and deleting
+ * @note profile selection is handled in the [[Store]] class
+ * because it also needs to manipulate other store modules
+ * @author Hanzhi Zhou
+ */
 class Profile {
     /**
      * a reactive property. whenever changed, the `currentProfile` in the `localStorage` will be updated

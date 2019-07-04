@@ -1,6 +1,13 @@
+/**
+ * @module components
+ */
 import $ from 'jquery';
 import 'bootstrap';
 import { Vue, Component, Prop } from 'vue-property-decorator';
+/**
+ * component for displaying and copying URL created by [[ExportView]]
+ * @author Hanzhi Zhou
+ */
 @Component
 export default class URLModal extends Vue {
     @Prop(String) readonly url!: string;

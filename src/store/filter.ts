@@ -1,10 +1,5 @@
 /**
  * @module store
- * @author Hanzhi Zhou
- */
-
-/**
- *
  */
 import ScheduleEvaluator, {
     SortMode,
@@ -165,7 +160,8 @@ function getDefaultOptions() {
 window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.timeMatrix);
 
 /**
- * the filter module handles the manipulation of filters
+ * the filter module handles the storage and manipulation of filters
+ * @author Hanzhi Zhou
  */
 class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     /**

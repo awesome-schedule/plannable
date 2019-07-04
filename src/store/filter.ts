@@ -260,7 +260,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
     toJSON() {
         // exclude sort modes
-        const { sortModes, ...others } = this;
+        const { sortModes, ...others } = this as FilterStore;
         return others as FilterStateJSON;
     }
 

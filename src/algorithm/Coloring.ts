@@ -38,22 +38,12 @@ function graphColorBackTrack(
     const neighbors = graph[vertex];
     const len = neighbors.length;
 
-    for (let color = 0; color < numColors; color++) {
-        let canColor = true;
-        for (let i = 0; i < len; i++) {
-            if (colors[neighbors[i]] === color) {
-                canColor = false;
-                break;
-            }
-        }
-        if (canColor) {
-            colors[vertex] = color;
+    outer: for (let color = 0; color < numColors; color++) {
+        for (let i = 0; i < len; i++) if (colors[neighbors[i]] === color) continue outer;
 
-            if (graphColorBackTrack(graph, colors, colorOrder, opCount, numColors, v + 1))
-                return true;
-
-            colors[vertex] = -1;
-        }
+        colors[vertex] = color;
+        if (graphColorBackTrack(graph, colors, colorOrder, opCount, numColors, v + 1)) return true;
+        colors[vertex] = -1;
     }
     return false;
 }
@@ -67,7 +57,8 @@ function graphColorBackTrack(
  */
 export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: Int16Array): number {
     colors.fill(-1);
-    if (!adjList.length) return 0;
+    const numNodes = adjList.length;
+    if (!numNodes) return 0;
 
     // keep track of the saturation
     const saturations = adjList.map(() => new Set<number>());
@@ -75,7 +66,7 @@ export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: In
     // first node is just the one of the maximum degree
     let current = 0,
         maxDegree = -1;
-    for (let i = 0; i < adjList.length; i++) {
+    for (let i = 0; i < numNodes; i++) {
         const degree = adjList[i].length;
         if (degree > maxDegree) {
             maxDegree = degree;
@@ -90,11 +81,11 @@ export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: In
     colorOrder[0] = current;
     let numColors = 0;
 
-    for (let i = 1; i < adjList.length; i++) {
+    for (let i = 1; i < numNodes; i++) {
         // find the next node to be colored:
         // find the node of the maximum degree of saturation and break ties by degrees
         let maxSat = -1;
-        for (let j = 0; j < saturations.length; j++) {
+        for (let j = 0; j < numNodes; j++) {
             if (colors[j] === -1) {
                 const sat = saturations[j].size;
                 if (sat > maxSat) {

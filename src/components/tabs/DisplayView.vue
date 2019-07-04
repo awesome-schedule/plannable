@@ -38,7 +38,10 @@
                     />
                 </div>
             </div>
-            <div class="form-group row no-gutters mb-0" title="height of a class on schedule">
+            <div
+                class="form-group row no-gutters mb-0"
+                title="Height of the cells containing classes on the schedule grid"
+            >
                 <label for="class-height" class="col-lg-6 col-form-label">Class Height</label>
                 <div class="col-lg-6">
                     <input

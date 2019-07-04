@@ -45,7 +45,7 @@
                     </nav>
                 </div>
                 <div @click="showGuide(5)">
-                    <a class="nav-link" href="#item-5"><i class="fas fa-cog" /> Display Settings</a>
+                    <a class="nav-link" href="#item-5"><i class="fas fa-cog" /> Settings</a>
                 </div>
                 <div @click="showGuide(6)">
                     <a class="nav-link" href="#item-6"
@@ -634,7 +634,7 @@
             </div>
 
             <div v-if="selected === 5 || !selected">
-                <h3 id="item-5"><i class="fas fa-cog"></i> Display Settings</h3>
+                <h3 id="item-5"><i class="fas fa-cog"></i> Settings</h3>
                 <hr />
                 <p>
                     Settings enable you to customize the display of the scheduler so that it
@@ -654,12 +654,21 @@
                             <strong>View Schedule</strong> mode
                             <strong>(Note: this is not a filter)</strong>
                         </li>
-                        <li>Class Height: Height of the cells containing classes on the schedule grid</li>
-                        <li>Grid Height: Height of an empty cell. You can specify a smaller value to compress empty space</li>
+                        <li>
+                            Class Height: Height of the cells containing classes on the schedule
+                            grid
+                        </li>
+                        <li>
+                            Grid Height: Height of an empty cell. You can specify a smaller value to
+                            compress empty space
+                        </li>
                         <li>Show Time: Show the day and time when the class takes place</li>
                         <li>Show Room: Show the building and room where the class takes place</li>
                         <li>Show Instructor: Show the instructor of the class</li>
-                        <li>Time Options: Display can be either standard time (12 hour) or military time (24 hour)</li>
+                        <li>
+                            Time Options: Display can be either standard time (12 hour) or military
+                            time (24 hour)
+                        </li>
                     </ol>
                 </div>
 
@@ -674,15 +683,17 @@
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
-                            Max number of search results: The maximum number of the relevant results shown
-                            below the <strong>search field </strong> <i class="fas fa-search"></i>
+                            Max number of search results: The maximum number of the relevant results
+                            shown below the <strong>search field </strong>
+                            <i class="fas fa-search"></i>
                         </li>
                         <li>
-                            Expand all when searching: Unfold all the sections under each course in the search results
+                            Expand all when searching: Unfold all the sections under each course in
+                            the search results
                         </li>
                         <li>
-                            Show title on class list: Show the title of each selected
-                            class in your schedule
+                            Show title on class list: Show the title of each selected class in your
+                            schedule
                         </li>
                     </ol>
                 </div>
@@ -697,23 +708,27 @@
                             be geneterated. A value that is too big may cause your browser to crash.
                         </li>
                         <li>
-                            Combine Sections: For conciseness, sections scheduled at the same time and belong to
-                            the same course are combined into one section
+                            Combine Sections: For conciseness, sections scheduled at the same time
+                            and belong to the same course are combined into one section
                         </li>
                         <li>
-                            Enable Log History: You can view schedule logs by enabling this feature, 
+                            Enable Log History: You can view schedule logs by enabling this feature,
                             such as the info, warnings and errors
                         </li>
                         <li>
                             Enable Fuzzy Search: You can search for classes using our advanced fuzzy
-                            search algorithm. This is an opt-in feature because it may crash some browsers. To safely use this feature, you should use Chrome/Firefox and make sure that your computer is equipped with at least 8GB of memory (RAM).
+                            search algorithm. This is an opt-in feature because it may crash some
+                            browsers. To safely use this feature, you should use Chrome/Firefox and
+                            make sure that your computer is equipped with at least 8GB of memory
+                            (RAM).
                         </li>
                         <li>
                             Update Semester Data: manually update the class data from Lou's List
                             (our website automatically updates class data every two hours)
                         </li>
                         <li>
-                            Reset All and Clean: Clear all data stored, including course catalog and all your profiles, and reset the website to its default state
+                            Reset All and Clean: Clear all data stored, including course catalog and
+                            all your profiles, and reset the website to its default state
                         </li>
                     </ol>
                 </div>
@@ -759,9 +774,9 @@
                 </h3>
                 <hr />
                 <p>
-                    A profile contains all your schedules, filters, display settings, events and
-                    palette configuration for a given semester. We provide the following functions
-                    to help you manipulate and store your profile.
+                    A profile contains all your schedules, filters, settings, events and palette
+                    configuration for a given semester. We provide the following functions to help
+                    you manipulate and store your profile.
                 </p>
                 <h5 id="item-7-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -931,11 +946,11 @@
                 </p>
                 <p>
                     Additionally, when you import a profile from either URL or a JSON file, a
-                    separate entry will be created if its name does not conflict with the
-                    existing profiles. If there is a conflict, you will be prompted to choose either
+                    separate entry will be created if its name does not conflict with the existing
+                    profiles. If there is a conflict, you will be prompted to choose either
                     overwriting the existing profile or keep both.
                 </p>
-               <v-card class="mt-3 mb-5 mx-auto gif-center">
+                <v-card class="mt-3 mb-5 mx-auto gif-center">
                     <v-img :src="imgPath('multipleProfile.png')"></v-img>
                 </v-card>
                 <button
@@ -949,8 +964,8 @@
             <div v-if="selected === 8 || !selected">
                 <h3 id="item-8"><i class="fas fa-balance-scale"></i> Compare Schedules</h3>
                 <p>
-                    Compare schedule feature enables you to identify the differences and similarities between different schedules.
-                    This feature also works well with the
+                    Compare schedule feature enables you to identify the differences and
+                    similarities between different schedules. This feature also works well with the
                     <strong>
                         <a href="#item-7-3" @click="showGuide(7)">mutiple profiles </a></strong
                     >

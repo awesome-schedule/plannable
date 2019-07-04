@@ -624,8 +624,6 @@
                     </v-img>
                 </v-card>
 
-                <!-- <h3 id="item-5">Display Settings</h3>
-                <hr /> -->
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -640,16 +638,15 @@
                 <hr />
                 <p>
                     Settings enable you to customize the display of the scheduler so that it
-                    provides you with more information and fits your need better.
+                    provides you with more information or better fits your need.
                 </p>
                 <h5 id="item-5-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Schedule Settings</strong>
                 </h5>
                 <p>
-                    You can change the grid size and the display information of the scheduler here:
+                    You can change the grid size and the displayed items of your schedules here:
                 </p>
-
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
@@ -657,12 +654,12 @@
                             <strong>View Schedule</strong> mode
                             <strong>(Note: this is not a filter)</strong>
                         </li>
-                        <li>Class Height: The height of the class block on the schedule grid</li>
-                        <li>Grid Height: The height of the schedule grid</li>
-                        <li>Show Time: Show the date and time which the class takes place</li>
-                        <li>Show Room: Show the building and room which the class takes place</li>
+                        <li>Class Height: Height of the cells containing classes on the schedule grid</li>
+                        <li>Grid Height: Height of an empty cell. You can specify a smaller value to compress empty space</li>
+                        <li>Show Time: Show the day and time when the class takes place</li>
+                        <li>Show Room: Show the building and room where the class takes place</li>
                         <li>Show Instructor: Show the instructor of the class</li>
-                        <li>Time Options: Display can be either standard time or military time</li>
+                        <li>Time Options: Display can be either standard time (12 hour) or military time (24 hour)</li>
                     </ol>
                 </div>
 
@@ -671,23 +668,21 @@
                     ><strong> Course Search</strong>
                 </h5>
                 <p>
-                    Here you can change the display settings of the <strong>Select Class </strong>
+                    Here you can change some settings for the <strong>Select Class </strong>
                     <i class="far fa-calendar-alt"></i> tab
                 </p>
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
-                            Max number of search results: The number of the relevant classes shown
-                            on the <strong>search field </strong> <i class="fas fa-search"></i> when
-                            you do a search
+                            Max number of search results: The maximum number of the relevant results shown
+                            below the <strong>search field </strong> <i class="fas fa-search"></i>
                         </li>
                         <li>
-                            Expand all when searching: Unfold all the sections under each relevant
-                            class
+                            Expand all when searching: Unfold all the sections under each course in the search results
                         </li>
                         <li>
-                            Show title on class list: Show the the description of each selected
-                            class under <strong>Edit Class/View Schedule</strong>
+                            Show title on class list: Show the title of each selected
+                            class in your schedule
                         </li>
                     </ol>
                 </div>
@@ -699,27 +694,26 @@
                     <ol>
                         <li>
                             Max number of schedules: This sets a cap for the numbers of schedules to
-                            be geneterated so that it is more memory friendly to your computer:)
+                            be geneterated. A value that is too big may cause your browser to crash.
                         </li>
                         <li>
-                            Combine Sections: For simplicity, same sections at the same time under
-                            the same course are combined into one block for showing
+                            Combine Sections: For conciseness, sections scheduled at the same time and belong to
+                            the same course are combined into one section
                         </li>
                         <li>
-                            Enable Log History: You can view schedule logs here (such as the
-                            resquests, and errors)
+                            Enable Log History: You can view schedule logs by enabling this feature, 
+                            such as the info, warnings and errors
                         </li>
                         <li>
-                            Enable Fuzzy Search: You can browse class using more advanced fuzzy
-                            search algorithm
+                            Enable Fuzzy Search: You can search for classes using our advanced fuzzy
+                            search algorithm. This is an opt-in feature because it may crash some browsers. To safely use this feature, you should use Chrome/Firefox and make sure that your computer is equipped with at least 8GB of memory (RAM).
                         </li>
                         <li>
-                            Update Semester Data: manually request the class data from Lou's List
+                            Update Semester Data: manually update the class data from Lou's List
                             (our website automatically updates class data every two hours)
                         </li>
                         <li>
-                            Reset All and Clean: This clears the cache of the website and reset all
-                            the modifcations of the website to its original state
+                            Reset All and Clean: Clear all data stored, including course catalog and all your profiles, and reset the website to its default state
                         </li>
                     </ol>
                 </div>

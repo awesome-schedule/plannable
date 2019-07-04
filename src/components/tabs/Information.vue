@@ -54,7 +54,7 @@
                 </div>
                 <div @click="showGuide(7)">
                     <a class="nav-link" href="#item-7">
-                        <i class="fas fa-download"></i> Profile Management</a
+                        <i class="fas fa-download"></i> Import, Export, and Profile Management</a
                     >
                     <nav class="nav nav-pills flex-column">
                         <a class="nav-link ml-3 my-1 py-1" href="#item-7-1">Export to iCalendar</a>
@@ -431,7 +431,7 @@
                     ><strong> Schedule Rendering</strong>
                 </h5>
                 <p class="mb-1">
-                    It is better for you to know under what conditions are courses rendered on the
+                    It is better for you to know under what conditions the courses are rendered on the
                     schedule. In Edit Class mode, only the following type of courses are rendered on
                     the grid.
                 </p>
@@ -555,8 +555,8 @@
                     ><strong> Allow Waitlist/Closed</strong>
                 </h5>
                 <p>
-                    You can choose to include or exclude wait list or closed sections by ticking
-                    these two checkboxes.
+                    You can choose to include or exclude <strong>wait list</strong> or
+                    <strong>closed sections</strong> by ticking these two checkboxes.
                 </p>
                 <h5 id="item-4-3" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -594,7 +594,7 @@
                 </p>
 
                 <h6>Sort Modes</h6>
-                And there are two avaiable sort modes.
+                And there are two available sort modes.
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
@@ -629,7 +629,7 @@
                     class="btn btn-primary btn-lg my-5 float-right"
                     @click="showGuide(5)"
                 >
-                    Next Page: Display Setting
+                    Next Page: Settings
                 </button>
             </div>
 
@@ -765,12 +765,12 @@
                     class="btn btn-primary btn-lg my-5 float-right"
                     @click="showGuide(7)"
                 >
-                    Next Page: Import and Export
+                    Next Page: Import, Export, and Profile Management
                 </button>
             </div>
             <div v-if="selected === 7 || !selected">
                 <h3 id="item-7">
-                    <i class="fas fa-download"></i> Import, Export and Profile Management
+                    <i class="fas fa-download"></i> Import, Export, and Profile Management
                 </h3>
                 <hr />
                 <p>

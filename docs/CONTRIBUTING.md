@@ -9,11 +9,11 @@ Also, please note we have a [code of conduct](./CODE_OF_CONDUCT.md), please foll
 ## Current List of Things You Can Do
 
 -   Better mobile support
--   Better and more efficient fuzzy search (should be implemented in [SearchWorker.ts](/src/workers/SearchWorker.ts))
--   Better unit tests and unit tests for components (if possible)
+-   Better and more efficient fuzzy search (should be implemented in [SearchWorker.ts](/src/workers/SearchWorker.ts)). Current implementation is slow and memory consuming.
+-   Better unit tests and unit tests for store and components (if possible)
     -   Current unit tests are not robust. Unit tests for Vue components are completely missing
 -   More filters and sort options (should be implemented in [ScheduleEvaluator.ts](/src/algorithm/ScheduleEvaluator.ts) and/or [ScheduleGenerator.ts](/src/algorithm/ScheduleGenerator.ts))
--   Interface for schedule comparison and difference
+-   Ideas for schedule comparison and difference
 -   Support other colleges!
 -   Any other amazing things you want to add!
 

@@ -52,7 +52,9 @@ Some components are pure and some are not. Pure components refer to those whose 
 
 A common state management library used in Vue projects is Vuex. However, because it is simply too verbose to write type-safe Vuex code, we decided to not use it. Instead, we composed the store modules by ourselves and form a Mixin that is injected in places where it is needed.
 
-Our Store class (see [src/store/index.ts](/src/store/index.ts)) is declared as a Vue component so it can use Watch and other useful methods provided by Vue observation system. In this class, `filter`, `display`, etc. are references to the **instances** of the sub-module classes. The Store class keeps a list of **references** to the sub-module instances so that when they are mixed into other components, they refer to the same instance. Any mutation of the properties contained in these shared instances can be observed by Vue and trigger re-render in whatever places they are used.
+Our Store class (see [src/store/store.ts](/src/store/store.ts)) is declared as a Vue component so Vue can observe its data. In this class, `filter`, `display`, etc. are references to the **instances** of the sub-module classes. The Store class keeps a list of **references** to the sub-module instances so that when they are mixed into other components, they refer to the same instance. Any mutation of the properties contained in these shared instances can be observed by Vue and trigger re-render in whatever places they are used.
+
+The watchers that watch properties whose change should dispatch events are defined in [src/store/watch.ts](/src/store/watch.ts). They are declared outside of the Store class because they should be only registered once.
 
 ```typescript
 @Component

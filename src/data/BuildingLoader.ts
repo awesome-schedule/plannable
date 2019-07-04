@@ -1,6 +1,7 @@
 /**
  * Script for loading building list and distance (time) matrix
  * @author Hanzhi Zhou
+ * @module data
  */
 
 /**

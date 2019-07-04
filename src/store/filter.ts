@@ -9,7 +9,8 @@
 import ScheduleEvaluator, {
     SortMode,
     EvaluatorOptions,
-    SortOption
+    SortOption,
+    SortFunctions
 } from '../algorithm/ScheduleEvaluator';
 import { StoreModule } from '.';
 import { DAYS } from '@/models/Meta';
@@ -48,7 +49,7 @@ interface DetailedSortOption extends SortOption {
     /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
-    readonly exclusive: ReadonlyArray<string>;
+    readonly exclusive: ReadonlyArray<keyof SortFunctions>;
     /**
      * text displayed next to the checkbox
      */

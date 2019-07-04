@@ -27,9 +27,6 @@ module.exports = {
         '!**/App.ts',
         '!**/main.ts',
 
-        // todo
-        '!**/store/*.ts',
-
         // this is already used in other tests (a lot of other tests rely on its data)
         '!**/CatalogLoader.ts'
     ]

@@ -22,16 +22,12 @@ class Palette implements StoreModule<PaletteState, PaletteState> {
         this.savedColors = obj.savedColors || {};
     }
 
-    getDefault(): PaletteState {
-        return {
-            savedColors: {}
-        };
+    getDefault() {
+        return new Palette();
     }
 
-    toJSON(): PaletteState {
-        return {
-            savedColors: this.savedColors
-        };
+    toJSON() {
+        return this;
     }
 }
 

@@ -160,7 +160,7 @@ function getDefaultOptions() {
     return options;
 }
 
-// these two properties must be non-reactive,
+// this property must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
 window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.timeMatrix);
 

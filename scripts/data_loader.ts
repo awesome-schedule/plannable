@@ -47,10 +47,15 @@ async function loadSemesterData(semester: SemesterJSON) {
 
 async function main() {
     console.info('Loading semester list...');
-    const semesters = await loadSemesterList();
-    for (const semester of semesters) {
-        console.info('Loading', semester.name, 'data...');
-        await loadSemesterData(semester);
+    try {
+        const semesters = await loadSemesterList();
+        for (const semester of semesters) {
+            console.info('Loading', semester.name, 'data...');
+            await loadSemesterData(semester);
+        }
+    } catch (e) {
+        console.error(e);
+        return;
     }
 
     const update = spawn('bash', ['./auto_update.sh']);

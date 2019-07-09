@@ -16,12 +16,10 @@ import MainContent from './components/MainContent.vue';
 import ClassView from './components/tabs/ClassView.vue';
 import DisplayView from './components/tabs/DisplayView.vue';
 import EventView from './components/tabs/EventView.vue';
-import FuzzyView from './components/tabs/FuzzyView.vue';
 import ExportView from './components/tabs/ExportView.vue';
 import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
-import LogView from './components/tabs/LogView.vue';
 import CompareView from './components/tabs/CompareView.vue';
 
 // other components
@@ -39,7 +37,6 @@ import randomColor from 'randomcolor';
     components: {
         MainContent,
         ClassView,
-        FuzzyView,
         EventView,
         DisplayView,
         FilterView,
@@ -51,10 +48,12 @@ import randomColor from 'randomcolor';
         SectionModal,
         CourseModal,
         URLModal,
+        External,
         // use dynamic component for this one because it is relatively large in size
         Information: () => import('./components/tabs/Information.vue'),
-        External,
-        LogView
+        // opt-in components
+        FuzzyView: () => import('./components/tabs/FuzzyView.vue'),
+        LogView: () => import('./components/tabs/LogView.vue')
     }
 })
 export default class App extends Store {

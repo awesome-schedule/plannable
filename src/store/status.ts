@@ -33,7 +33,7 @@ class Status {
         return false;
     }
     /**
-     * sidebar display status
+     * **sidebar display status**
      * show the specific sidebar when true, and hide when all false
      */
     sideBar: SidebarStatus = {
@@ -56,10 +56,11 @@ class Status {
      * no need to assign to this value when doing computationally expensive operations
      */
     loading = false;
-
+    /**
+     * the event to edit
+     */
     eventToEdit: Event | null = null;
 
-    // Mobile Param
     isMobile = window.screen.width < 600;
     /**
      * fold sidebar if on mobile

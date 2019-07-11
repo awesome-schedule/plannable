@@ -186,7 +186,7 @@ class ScheduleEvaluator {
      */
     public schedules: CmpSchedule[] = [];
     /**
-     * the array of sort functions with `this` bind to the evaluator instance
+     * the dictionary of sort functions with `this` bind to the evaluator instance
      */
     public sortFunctions: SortFunctions;
 
@@ -439,7 +439,7 @@ class ScheduleEvaluator {
             const len = options.length;
 
             // if option[i] is reverse, ifReverse[i] will be -1
-            const ifReverse = new Int32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
+            const ifReverse = new Float32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
             const coeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: CmpSchedule, b: CmpSchedule) => {
                 let r = 0;

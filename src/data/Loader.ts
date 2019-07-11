@@ -8,7 +8,7 @@
  */
 import Expirable from './Expirable';
 import { NotiMsg } from '../store/notification';
-import { errToStr, timeout } from '../utils';
+import { errToStr, timeout, cancelablePromise, CancelablePromise } from '../utils';
 
 interface LoaderOptions<T, T_JSON extends Expirable> {
     /**
@@ -62,61 +62,36 @@ interface LoaderOptions<T, T_JSON extends Expirable> {
  * @param request the async function used to request data from remote, if local data expires or does not exist
  * @param construct function to construct the actual object T from its JSON-serializable representation T_JSON
  */
-export async function loadFromCache<T, T_JSON extends Expirable>(
+export function loadFromCache<T, T_JSON extends Expirable>(
     key: string,
     request: () => Promise<T>,
     construct: (x: T_JSON) => T,
     {
-        warnMsg = x => x,
-        errMsg = x => x,
-        succMsg = 'Success',
         expireTime = Infinity,
-        timeoutTime = -1,
         parse = x => (x ? JSON.parse(x) : null),
         validator = defaultValidator,
         force = false
     }: LoaderOptions<T, T_JSON>
-): Promise<NotiMsg<T>> {
+): { new: CancelablePromise<T>; old?: T } {
     const storage = localStorage.getItem(key);
     const data: T_JSON | null = parse(storage);
     if (validator(data)) {
         // expired
         if (new Date().getTime() - new Date(data.modified).getTime() > expireTime || force) {
-            try {
-                return {
-                    payload: await timeout(request(), timeoutTime),
-                    msg: succMsg,
-                    level: 'success'
-                };
-            } catch (err) {
-                // expired (or force update) but failed to request new data: use the old data and gives a warning
-                return {
-                    payload: construct(data),
-                    msg: warnMsg(errToStr(err)),
-                    level: 'warn'
-                };
-            }
+            return {
+                new: cancelablePromise(request()),
+                old: construct(data)
+            };
         } else {
             return {
-                payload: construct(data),
-                msg: succMsg,
-                level: 'success'
+                new: cancelablePromise(Promise.resolve(construct(data)))
             };
         }
         // data invalid or does not exist
     } else {
-        try {
-            return {
-                payload: await timeout(request(), timeoutTime),
-                msg: succMsg,
-                level: 'success'
-            };
-        } catch (err) {
-            return {
-                msg: errMsg(errToStr(err)),
-                level: 'error'
-            };
-        }
+        return {
+            new: cancelablePromise(request())
+        };
     }
 }
 

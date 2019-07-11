@@ -39,14 +39,27 @@ class Semesters implements SemesterState {
         return result;
     }
 
+    cancel() {
+        const p = this.pendingPromise;
+        if (p) p.cancel('Canceled');
+    }
+
     /**
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
         const temp = loadSemesterData(currentSemester, force);
-        this.pendingPromise = temp.new;
 
-        const result = await fallback(temp);
+        // allow one to cancel the pending promise if old data exists
+        if (temp.old) this.pendingPromise = temp.new;
+
+        const { name } = currentSemester;
+        const result = await fallback(temp, {
+            errMsg: x => `Failed to fetch ${name} data: ${x}`,
+            warnMsg: x => `Failed to fetch ${name} data: ${x}. Old data is used`,
+            succMsg: `Successfully loaded ${name} data!`,
+            timeoutTime: 15000
+        });
         //  if the a catalog object is returned
         if (result.payload) {
             window.catalog = result.payload;

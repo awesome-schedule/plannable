@@ -281,20 +281,26 @@ export default class Store extends Vue {
      * @param target the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(target?: SemesterJSON, force = false) {
+    async selectSemester(target: SemesterJSON | null | undefined, force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
-        if (!target) target = this.semester.semesters[0];
-        if (force) {
-            this.noti.info(`Updating ${target.name} data...`);
-            await this.loadProfile(this.profile.current, force);
-            return;
-        } else if (this.semester.currentSemester && target.id === this.semester.currentSemester.id)
-            return;
-
         this.status.loading = true;
+        if (!target) target = this.semester.semesters[0];
+
+        if (force) {
+            this.noti.info(`Updating ${target.name} data...`, 3600, true);
+            await this.loadProfile(this.profile.current, force);
+            this.status.loading = false;
+            return;
+        } else if (
+            this.semester.currentSemester &&
+            target.id === this.semester.currentSemester.id
+        ) {
+            this.status.loading = false;
+            return;
+        }
 
         const { profiles } = this.profile;
         let parsed: Partial<SemesterStorage> = {};

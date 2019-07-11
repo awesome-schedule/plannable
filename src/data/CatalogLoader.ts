@@ -39,11 +39,7 @@ export function loadSemesterData(semester: SemesterJSON, force = false) {
         () => requestSemesterData(semester),
         x => Catalog.fromJSON(x),
         {
-            // errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
-            // warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
-            // succMsg: `Successfully loaded ${semester.name} data!`,
             expireTime: semesterDataExpirationTime,
-            // timeoutTime: 15000,
             force
         }
     );
@@ -62,7 +58,7 @@ function saveCatalog(catalog: Catalog) {
 export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
+    const res = await (window.location.host === 'plannable.org' || true // Running on GitHub pages (primary address)?
         ? axios.post(
               `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
               stringify({

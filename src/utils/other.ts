@@ -109,10 +109,9 @@ export interface CancelablePromise<T> extends Promise<T> {
  */
 export function cancelablePromise<T>(promise: Promise<T>) {
     let cancel: Cancel;
-    const p = new Promise<T>((resolve, reject) => {
+    const p = new Promise((resolve, reject) => {
+        promise.then(res => resolve(res)).catch(err => reject(err));
         cancel = reason => reject(reason);
-        promise.catch(err => reject(err));
-        promise.then(res => resolve(res));
     }) as CancelablePromise<T>;
     p.cancel = cancel!;
     return p;

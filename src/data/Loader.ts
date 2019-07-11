@@ -103,24 +103,23 @@ export async function fallback<T, P extends Promise<T>>(
     { succMsg = '', warnMsg = x => x, errMsg = x => x, timeoutTime = 5000 }: FallbackOptions = {}
 ): Promise<NotiMsg<T>> {
     try {
+        const payload = await timeout(temp.new, timeoutTime);
         return {
-            payload: await timeout(temp.new, timeoutTime),
+            payload,
             msg: succMsg,
             level: 'success'
         };
-    } catch (err) {
-        if (temp.old) {
-            return {
-                payload: temp.old,
-                msg: warnMsg(errToStr(err)),
-                level: 'success'
-            };
-        } else {
-            return {
-                msg: errMsg(errToStr(err)),
-                level: 'success'
-            };
-        }
+    } catch (err_2) {
+        return temp.old
+            ? {
+                  payload: temp.old,
+                  msg: warnMsg(errToStr(err_2)),
+                  level: 'warn'
+              }
+            : {
+                  msg: errMsg(errToStr(err_2)),
+                  level: 'error'
+              };
     }
 }
 

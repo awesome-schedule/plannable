@@ -94,15 +94,28 @@ export function timeout<T>(
     msg = 'Time out fetching data. Please try again later'
 ): Promise<T> {
     if (time > 0) {
-        return Promise.race([
-            promise,
-            new Promise((resolve, reject) => {
-                window.setTimeout(() => {
-                    reject(msg);
-                }, time);
-            })
-        ]) as Promise<T>;
+        const p = cancelablePromise(promise);
+        setTimeout(() => p.cancel(msg), time);
+        return p;
     } else return promise;
+}
+
+type Cancel = (msg: any) => void;
+export interface CancelablePromise<T> extends Promise<T> {
+    cancel: Cancel;
+}
+/**
+ * @param promise
+ */
+export function cancelablePromise<T>(promise: Promise<T>) {
+    let cancel: Cancel;
+    const p = new Promise<T>((resolve, reject) => {
+        cancel = reason => reject(reason);
+        promise.catch(err => reject(err));
+        promise.then(res => resolve(res));
+    }) as CancelablePromise<T>;
+    p.cancel = cancel!;
+    return p;
 }
 
 /**

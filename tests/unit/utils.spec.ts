@@ -94,7 +94,7 @@ describe('Utility Tests', () => {
     });
 
     it('timeout', async () => {
-        const result = await Utils.timeout(new Promise((resolve, _) => resolve(1)), -1);
+        const result = await Utils.timeout(new Promise(resolve => resolve(1)), -1);
         expect(result).toBe(1);
         try {
             await Utils.timeout(

@@ -2,8 +2,10 @@
  * @module store
  */
 import { loadSemesterData } from '../data/CatalogLoader';
-import { loadSemesterList } from '../data/SemesterListLoader';
-import { SemesterJSON } from '../models/Catalog';
+import Catalog, { SemesterJSON } from '../models/Catalog';
+import { fallback } from '@/data/Loader';
+import { CancelablePromise } from '@/utils';
+import { loadSemesterList } from '@/data/SemesterListLoader';
 
 export interface SemesterState {
     [x: string]: any;
@@ -20,6 +22,7 @@ class Semesters implements SemesterState {
     semesters: SemesterJSON[] = [];
     currentSemester: SemesterJSON | null = null;
     lastUpdate: string = '';
+    pendingPromise: CancelablePromise<Catalog> | null = null;
 
     /**
      * load the list of semesters
@@ -40,8 +43,10 @@ class Semesters implements SemesterState {
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
-        const result = await loadSemesterData(currentSemester, force);
+        const temp = loadSemesterData(currentSemester, force);
+        this.pendingPromise = temp.new;
 
+        const result = await fallback(temp);
         //  if the a catalog object is returned
         if (result.payload) {
             window.catalog = result.payload;
@@ -51,6 +56,7 @@ class Semesters implements SemesterState {
             this.currentSemester = null;
             this.lastUpdate = '';
         }
+        this.pendingPromise = null;
         return result;
     }
 }

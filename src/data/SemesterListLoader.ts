@@ -10,9 +10,8 @@
 import axios from 'axios';
 import { SemesterJSON } from '../models/Catalog';
 import { semesterListExpirationTime } from '../models/Meta';
-import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
-import { loadFromCache } from './Loader';
+import { loadFromCache, fallback } from './Loader';
 import { getApi } from '.';
 
 interface SemesterListJSON extends Expirable {
@@ -27,15 +26,19 @@ interface SemesterListJSON extends Expirable {
  */
 export function loadSemesterList(count = 5) {
     // load the cached list of semesters, if it exists
-    return loadFromCache<SemesterJSON[], SemesterListJSON>(
-        'semesters',
-        () => requestSemesterList(count),
-        x => x.semesterList,
+    return fallback(
+        loadFromCache<SemesterJSON[], SemesterListJSON>(
+            'semesters',
+            () => requestSemesterList(count),
+            x => x.semesterList,
+            {
+                expireTime: semesterListExpirationTime
+            }
+        ),
         {
             succMsg: 'Semester list loaded',
             errMsg: x => `Failed to fetch semester list: ${x}`,
             warnMsg: x => `Failed to fetch semester list: ${x}. Old data is used`,
-            expireTime: semesterListExpirationTime,
             timeoutTime: 10000
         }
     );

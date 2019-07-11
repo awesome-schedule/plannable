@@ -8,9 +8,8 @@
  *
  */
 import axios from 'axios';
-import { NotiMsg } from '../store/notification';
 import Expirable from './Expirable';
-import { loadFromCache } from './Loader';
+import { loadFromCache, fallback } from './Loader';
 import { getApi } from '.';
 
 export interface TimeMatrixJSON extends Expirable {
@@ -29,17 +28,21 @@ export interface BuildingListJSON extends Expirable {
  * storage key: "timeMatrix"
  */
 export function loadTimeMatrix(force = false) {
-    return loadFromCache<Int32Array, TimeMatrixJSON>(
-        'timeMatrix',
-        requestTimeMatrix,
-        x => Int32Array.from(x.timeMatrix),
+    return fallback(
+        loadFromCache<Int32Array, TimeMatrixJSON>(
+            'timeMatrix',
+            requestTimeMatrix,
+            x => Int32Array.from(x.timeMatrix),
+            {
+                expireTime: 1000 * 86400,
+                force
+            }
+        ),
         {
             succMsg: 'Walking distance matrix loaded',
             warnMsg: x => `Failed to load walking distance matrix: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load walking distance matrix: ${x}. `,
-            expireTime: 1000 * 86400,
-            timeoutTime: 10000,
-            force
+            timeoutTime: 10000
         }
     );
 }
@@ -52,17 +55,21 @@ export function loadTimeMatrix(force = false) {
  * storage key: "buildingList"
  */
 export function loadBuildingList(force = false) {
-    return loadFromCache<string[], BuildingListJSON>(
-        'buildingList',
-        requestBuildingList,
-        x => x.buildingList,
+    return fallback(
+        loadFromCache<string[], BuildingListJSON>(
+            'buildingList',
+            requestBuildingList,
+            x => x.buildingList,
+            {
+                expireTime: 1000 * 86400,
+                force
+            }
+        ),
         {
             succMsg: 'Building list loaded',
             warnMsg: x => `Failed to load building list: ${x}. Old data is used instead`,
             errMsg: x => `Failed to load building list: ${x}. `,
-            expireTime: 1000 * 86400,
-            timeoutTime: 10000,
-            force
+            timeoutTime: 10000
         }
     );
 }

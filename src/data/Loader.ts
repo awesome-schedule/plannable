@@ -12,6 +12,26 @@ import { errToStr, timeout, cancelablePromise, CancelablePromise } from '../util
 
 interface LoaderOptions<T, T_JSON extends Expirable> {
     /**
+     * the expiration time of this T_JSON
+     */
+    expireTime?: number;
+    /**
+     * The parser that turns the string (or null if key does not exist)
+     * stored in local storage into T_JSON or null
+     */
+    parse?: (x: string | null) => T_JSON | null;
+    /**
+     * The validator that checks whether the return value of the parser is a valid T_JSON object
+     */
+    validator?: (x: T_JSON | null) => x is T_JSON;
+    /**
+     * whether this is a forced update. If true, request the data from remote with no regard to local data
+     */
+    force?: boolean;
+}
+
+interface FallbackOptions {
+    /**
      * the warning message to return when data expired and we failed to request new data from remote.
      * It takes the stringified exception as the parameter
      */
@@ -26,28 +46,11 @@ interface LoaderOptions<T, T_JSON extends Expirable> {
      */
     succMsg?: string;
     /**
-     * the expiration time of this T_JSON
-     */
-    expireTime?: number;
-    /**
      * the timeout in millisecond for requesting data from remote.
      * A timeout error with appropriate error message will be thrown for
      * response that does not return within this time interval
      */
     timeoutTime?: number;
-    /**
-     * The parser that turns the string (or null if key does not exist)
-     * stored in local storage into T_JSON or null
-     */
-    parse?: (x: string | null) => T_JSON | null;
-    /**
-     * The validator that checks whether the return value of the parser is a valid T_JSON object
-     */
-    validator?: (x: T_JSON | null) => x is T_JSON;
-    /**
-     * whether this is a forced update. If true, request the data from remote with no regard to local data
-     */
-    force?: boolean;
 }
 
 /**
@@ -92,6 +95,32 @@ export function loadFromCache<T, T_JSON extends Expirable>(
         return {
             new: cancelablePromise(request())
         };
+    }
+}
+
+export async function fallback<T, P extends Promise<T>>(
+    temp: { new: P; old?: T },
+    { succMsg = '', warnMsg = x => x, errMsg = x => x, timeoutTime = 5000 }: FallbackOptions = {}
+): Promise<NotiMsg<T>> {
+    try {
+        return {
+            payload: await timeout(temp.new, timeoutTime),
+            msg: succMsg,
+            level: 'success'
+        };
+    } catch (err) {
+        if (temp.old) {
+            return {
+                payload: temp.old,
+                msg: warnMsg(errToStr(err)),
+                level: 'success'
+            };
+        } else {
+            return {
+                msg: errMsg(errToStr(err)),
+                level: 'success'
+            };
+        }
     }
 }
 

@@ -31,36 +31,8 @@ import URLModal from './components/URLModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
-import { NotiMsg } from './store/notification';
 import randomColor from 'randomcolor';
-import { timeout, errToStr } from './utils';
 import { loadSemesterList } from './data/SemesterListLoader';
-
-async function fallback<T, P extends Promise<T>>(
-    temp: { new: P; old?: T },
-    { succMsg = '', warnMsg = (x: string) => x, errMsg = (x: string) => x, time = 5000 } = {}
-): Promise<NotiMsg<T>> {
-    try {
-        return {
-            payload: await timeout(temp.new, time),
-            msg: succMsg,
-            level: 'success'
-        };
-    } catch (err) {
-        if (temp.old) {
-            return {
-                payload: temp.old,
-                msg: warnMsg(errToStr(err)),
-                level: 'success'
-            };
-        } else {
-            return {
-                msg: errMsg(errToStr(err)),
-                level: 'success'
-            };
-        }
-    }
-}
 
 @Component({
     components: {
@@ -115,9 +87,9 @@ export default class App extends Store {
 
         // note: these three can be executed in parallel, i.e. they are not inter-dependent
         const [pay1, pay2, pay3] = await Promise.all([
-            fallback(loadTimeMatrix()),
-            fallback(loadBuildingList()),
-            fallback(loadSemesterList())
+            loadTimeMatrix(),
+            loadBuildingList(),
+            this.semester.loadSemesters()
         ]);
 
         this.noti.notify(pay1);
@@ -128,6 +100,7 @@ export default class App extends Store {
 
         this.noti.notify(pay3);
         if (pay3.payload) {
+            this.semester.semesters = pay3.payload;
             const urlResult = await this.loadConfigFromURL();
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);

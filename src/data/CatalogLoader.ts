@@ -21,7 +21,6 @@ import {
     STATUSES_PARSE,
     CourseType
 } from '../models/Meta';
-import { NotiMsg } from '../store/notification';
 import { loadFromCache } from './Loader';
 import { getApi } from '.';
 
@@ -40,11 +39,11 @@ export function loadSemesterData(semester: SemesterJSON, force = false) {
         () => requestSemesterData(semester),
         x => Catalog.fromJSON(x),
         {
-            errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
-            warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
-            succMsg: `Successfully loaded ${semester.name} data!`,
+            // errMsg: x => `Failed to fetch ${semester.name} data: ${x}`,
+            // warnMsg: x => `Failed to fetch ${semester.name} data: ${x}. Old data is used`,
+            // succMsg: `Successfully loaded ${semester.name} data!`,
             expireTime: semesterDataExpirationTime,
-            timeoutTime: 15000,
+            // timeoutTime: 15000,
             force
         }
     );

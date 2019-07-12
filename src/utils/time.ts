@@ -59,11 +59,19 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
     return null;
 }
 
+/**
+ * convert `13:00` style time to minutes starting from `00:00`
+ * @param time
+ */
 export function hr24toInt(time: string) {
     const sep = time.split(':');
     return +sep[0] * 60 + +sep[1];
 }
 
+/**
+ * convert `1:00AM` style time to minutes starting from `00:00`
+ * @param time
+ */
 export function hr12toInt(time: string) {
     return hr24toInt(to24hr(time));
 }
@@ -127,6 +135,10 @@ export function calcOverlap(a: number, b: number, c: number, d: number) {
     else return -1;
 }
 
+/**
+ * return the union of the blocks [a, b] and [c, d]
+ * @author Hanzhi Zhou
+ */
 export function blockUnion(
     a: number,
     b: number,

@@ -105,6 +105,8 @@ export interface CancelablePromise<T> extends Promise<T> {
     cancel: Cancel;
 }
 /**
+ * wrap a promise and return a new promise with a `cancel` method
+ * @author Hanzhi Zhou
  * @param promise
  */
 export function cancelablePromise<T>(promise: Promise<T>) {
@@ -119,7 +121,6 @@ export function cancelablePromise<T>(promise: Promise<T>) {
 
 /**
  * save a string a as text file
- *
  * @author Hanzhi Zhou
  * @param str the string to save as a file
  * @param filename

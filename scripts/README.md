@@ -1,8 +1,11 @@
 # Scripts
 
-Although the files contained in this directory are not directly related to our website itself, it is essential for the normal operation of our mirror (https://plannable.gitee.io) in China. To operate such a mirror, we basically have to create a mirror for the resources that are located in the U.S., among which the two important ones are the website itself and the course catalog.
+The scripts in this directory are used to deploy our website on both our primary address (https://plannable.org) and our mirror (https://plannable.gitee.io) in China. To operate such a mirror, we basically have to mirror the resources that are located in the U.S., among which the two important ones are the website itself and the course catalog. Normally, there is no need for you to understand or modify these scripts, nor should you execute them directly (except `run.sh`). If you want to update the data in scripts, just remove and re-clone it.
 
-The execution of these scripts require push access to https://github.com/awesome-schedule/data and https://gitee.com/plannable/plannable. Normally, there is no need for you to understand or modify these scripts, nor should you execute them directly. If you want to update the data in scripts, just cd into it and call `git pull`.
+```bash
+rm -rf data
+git clone https://github.com/awesome-schedule/data
+```
 
 ## Initialization
 
@@ -15,6 +18,10 @@ git clone https://github.com/awesome-schedule/data
 
 ## File Descriptions
 
+### deploy.sh
+
+This file gets executed by the Travis CI when we push new commit to the repository. It will run tests, compile our website, and build documentation. Moreover, if the new commit is on the master branch, it will push the website and documentation built to [awesome-schedule.github.io](https://github.com/awesome-schedule/awesome-schedule.github.io) repository.
+
 ### data_loader.ts
 
 The data loader can update the catalog of the latest 5 semesters by simply downloading the `csv` files from Lou's list, and it executes [auto_update.sh](./auto_update.sh) once per hour.
@@ -22,6 +29,8 @@ The data loader can update the catalog of the latest 5 semesters by simply downl
 It will also download the index page of Lou's list for getting the list of semesters.
 
 ### auto_update.sh
+
+The execution of this file requires push access to https://github.com/awesome-schedule/data and https://gitee.com/plannable/plannable.
 
 This is a bash script that does the following
 

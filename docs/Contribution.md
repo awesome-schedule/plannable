@@ -41,6 +41,7 @@ The state management module handles global states and storage. See [src/store](/
 | modal        | Hanzhi Zhou            |
 | notification | Hanzhi Zhou            |
 | palette      | Hanzhi Zhou            |
+| profile      | Hanzhi Zhou            |
 | schedule     | Hanzhi Zhou            |
 | semester     | Hanzhi Zhou            |
 | status       | Hanzhi Zhou, Zichao Hu |
@@ -54,12 +55,15 @@ Tabs are components holding the corresponding tab triggered when one clicks the 
 | Name        | Contributors                                     |
 | ----------- | ------------------------------------------------ |
 | ClassView   | Hanzhi Zhou                                      |
-| EventView   | Kaiying Shan, Hanzhi Zhou, Zichao Hu             |
+| CompareView | Kaiying Shan, Hanzhi Zhou                        |
 | DisplayView | Kaiying Shan, Hanzhi Zhou                        |
-| FilterView  | Hanzhi Zhou, Kaiying Shan                        |
-| PaletteView | Hanzhi Zhou                                      |
+| EventView   | Kaiying Shan, Hanzhi Zhou, Zichao Hu             |
 | ExportView  | Kaiying Shan, Hanzhi Zhou                        |
+| FilterView  | Hanzhi Zhou, Kaiying Shan                        |
+| FuzzyView   | Hanzhi Zhou                                      |
 | Information | Kaiying Shan, Hanzhi Zhou, Zichao Hu, Elena Long |
+| LogView     | Hanzhi Zhou                                      |
+| PaletteView | Hanzhi Zhou                                      |
 
 #### Miscellaneous components
 
@@ -73,8 +77,10 @@ They are located in [src/components](/src/components) folder.
 | CourseBlock  | Kaiying Shan              |
 | CourseModal  | Kaiying Shan, Hanzhi Zhou |
 | GridSchedule | Kaiying Shan              |
+| MainContent  | Hanzhi Zhou               |
 | Pagination   | Kaiying Shan, Hanzhi Zhou |
 | SectionModal | Kaiying Shan, Hanzhi Zhou |
+| URLModal     | Hanzhi Zhou               |
 
 ### Tool chain
 

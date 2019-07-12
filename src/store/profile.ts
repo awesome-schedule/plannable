@@ -60,6 +60,14 @@ class Profile {
         }
     }
 
+    /**
+     * rename a profile.
+     * note that name duplication is not checked! This check is done in [[ExportView.finishEdit]]
+     * @param idx
+     * @param oldName
+     * @param newName
+     * @param raw
+     */
     renameProfile(idx: number, oldName: string, newName: string, raw: string) {
         if (oldName === this.current) this.current = newName;
 

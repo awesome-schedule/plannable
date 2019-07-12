@@ -1,4 +1,4 @@
-<p align="center"><img src="./docs/cover.jpg" width="600px" alt="cover"/></p>
+<p align="center"><img src="./src/assets/cover.jpg" width="560px" alt="cover"/></p>
 
 <p align="center">
     <a href="https://app.codacy.com/app/hanzhi713/plannable?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=awesome-schedule/plannable&amp;utm_campaign=Badge_Grade_Dashboard"

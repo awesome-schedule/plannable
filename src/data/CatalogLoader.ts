@@ -90,31 +90,25 @@ export function parseSemesterData(csv_string: string) {
     console.time('reorganizing data');
 
     const rawCatalog: RawCatalog = Object.create(null);
-
-    for (let j = 1; j < raw_data.length; j++) {
+    const len = raw_data.length;
+    for (let j = 1; j < len; j++) {
         const data = raw_data[j];
 
         // todo: robust data validation
         const type = CLASS_TYPES[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
         const meetings: RawMeeting[] = [];
-        const s = new Set<string>();
+        const s: string[] = [];
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
             if (data[start]) {
                 // remove duplicated course meeting time
-                // but what does that even exist in the first place?
-                if (s.has(data[start + 1])) continue;
-
-                s.add(data[start + 1]);
-
-                const tempMeeting: RawMeeting = [
-                    data[start],
-                    data[start + 1],
-                    data[start + 2],
-                    data[start + 3]
-                ];
-                meetings.push(tempMeeting);
+                // but why does that even exist in the first place?
+                const meetingTime = data[start + 1];
+                if (!s.includes(meetingTime)) {
+                    s.push(meetingTime);
+                    meetings.push(data.slice(start, start + 4) as any);
+                }
             }
         }
 

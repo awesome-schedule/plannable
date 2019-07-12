@@ -82,9 +82,9 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
     const data: number[][] = res.data;
 
     if (data instanceof Array && data.length) {
-        const flattened = new Int32Array(data.length ** 2);
-
-        for (let i = 0; i < data.length; i++) flattened.set(data[i], i * data.length);
+        const len = data.length;
+        const flattened = new Int32Array(len ** 2);
+        for (let i = 0; i < len; i++) flattened.set(data[i], i * len);
 
         localStorage.setItem(
             'timeMatrix',

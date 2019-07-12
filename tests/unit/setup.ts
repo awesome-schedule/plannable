@@ -1,6 +1,6 @@
 import Catalog from '@/models/Catalog';
 import { requestSemesterData } from '@/data/CatalogLoader';
-import { requestTimeMatrix } from '@/data/BuildingLoader';
+import { requestTimeMatrix, requestBuildingList } from '@/data/BuildingLoader';
 
 global.console.time = jest.fn();
 global.console.timeEnd = jest.fn();
@@ -35,4 +35,5 @@ beforeAll(async () => {
     ]);
     window.catalog = new Catalog(catalog.semester, catalog.raw_data, catalog.modified);
     window.timeMatrix = await requestTimeMatrix();
+    window.buildingList = await requestBuildingList();
 });

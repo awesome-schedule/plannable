@@ -174,16 +174,6 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         saveStatus();
     }
 
-    /**
-     * clear the localStorage and reload the page
-     */
-    clearCache() {
-        if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
-            window.localStorage.clear();
-            window.location.reload(true);
-        }
-    }
-
     fromJSON(obj: Partial<ScheduleStateJSON>) {
         const defaultState = this.getDefault();
 

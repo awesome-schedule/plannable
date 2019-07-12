@@ -255,7 +255,7 @@
                 </small>
             </li>
             <li class="list-group-item">
-                <button class="btn btn-outline-danger w-100" @click="schedule.clearCache()">
+                <button class="btn btn-outline-danger w-100" @click="clearCache()">
                     Reset All and Clean
                 </button>
             </li>

@@ -63,6 +63,8 @@ const matchSortFunc = (a: Match<any>, b: Match<any>) => a.start - b.start;
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
  * depending on the array of section indices passed to its constructor.
+ *
+ * All course instances are immutable
  */
 export default class Course implements CourseFields, Hashable {
     public readonly department: string;

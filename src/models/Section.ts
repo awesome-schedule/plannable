@@ -20,6 +20,8 @@ export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Ma
 /**
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
+ *
+ * All section instances are immutable
  */
 export default class Section implements CourseFields, Hashable {
     public readonly department: string;
@@ -133,18 +135,15 @@ export default class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
 
                 dayBlock.push(...timeBlock);
-                if (buildingList && buildingList.length) {
-                    const { room } = meeting;
-                    const roomMatch = findBestMatch(room.toLowerCase(), buildingList as string[]);
-                    // we set the match threshold to 0.4
-                    if (roomMatch.bestMatch.rating >= 0.4) {
-                        dayBlock.push(roomMatch.bestMatchIndex);
-                    } else {
-                        // mismatch!
-                        console.warn(room, 'match not found!');
-                        dayBlock.push(-1);
-                    }
+
+                const { room } = meeting;
+                const roomMatch = findBestMatch(room.toLowerCase(), buildingList as string[]);
+                // we set the match threshold to 0.4
+                if (roomMatch.bestMatch.rating >= 0.4) {
+                    dayBlock.push(roomMatch.bestMatchIndex);
                 } else {
+                    // mismatch!
+                    console.warn(room, 'match not found!');
                     dayBlock.push(-1);
                 }
             }

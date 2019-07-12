@@ -9,4 +9,14 @@ import Store from '@/store';
  * @author Kaiying Shan, Hanzhi Zhou
  */
 @Component
-export default class DisplayView extends Store {}
+export default class DisplayView extends Store {
+    /**
+     * clear the localStorage and reload the page
+     */
+    clearCache() {
+        if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
+            window.localStorage.clear();
+            window.location.reload(true);
+        }
+    }
+}

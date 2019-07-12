@@ -159,6 +159,7 @@ export default class Store extends Vue {
      * recover all store modules' states from the localStorage,
      * and assign a correct Catalog object to `window.catalog`,
      * @param name
+     * @param force force update current semester data and load the given profile
      */
     async loadProfile(name?: string, force = false) {
         if (!this.semester.semesters.length) {
@@ -228,6 +229,9 @@ export default class Store extends Vue {
         return true;
     }
 
+    /**
+     * convert filter to generator options
+     */
     getGeneratorOptions(): GeneratorOptions | void {
         const filteredStatus: CourseStatus[] = [];
         if (!this.filter.allowWaitlist) filteredStatus.push('Wait List');

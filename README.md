@@ -65,7 +65,7 @@ npm install
 npm run serve
 ```
 
-You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, you can run `bash run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
+You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, you can run `bash scripts/run.sh` in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
 
 Then you can visit the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
 

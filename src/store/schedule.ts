@@ -163,14 +163,13 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
      * clear the currently active schedules and generated schedules
      */
     clear() {
-        this.currentSchedule.clean();
         this.proposedSchedule.clean();
-        this.generated = false;
         if (this.cpIndex === this.proposedScheduleIndex) {
             this.cpIndex = -1;
             window.scheduleEvaluator.clear();
             this.numGenerated = 0;
         }
+        this.switchSchedule(false);
         saveStatus();
     }
 

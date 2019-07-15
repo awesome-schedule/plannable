@@ -120,7 +120,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -173,6 +173,16 @@ export default class Schedule {
      */
     public colorSlots: Set<string>[];
     public pendingCompute = 0;
+
+    /**
+     * The separator of sections in different time periods,
+     * representing different end times of **sections**
+     * Example:
+     * ```js
+     * [[10, 17], [12, 28]]
+     * ```
+     */
+    public dateSeparators: [number, number][] = [];
 
     /**
      * the currently previewed (hovered) section
@@ -354,12 +364,16 @@ export default class Schedule {
             if (sections === -1) {
                 this.currentIds[currentIdKey] = ' - ';
                 this.place(course);
+                for (const sec of course.sections) {
+                    this.dateSeparators.push(sec.getDateArray()[0] as [number, number]);
+                }
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
                     const sec = course.getFirstSection();
                     this.currentIds[currentIdKey] = sec.id.toString();
                     this.place(sec);
+                    this.dateSeparators.push(sec.getDateArray()[0] as [number, number]);
                 } else if (sections.size > 0) {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
@@ -375,6 +389,9 @@ export default class Schedule {
                                 ? `${id.toString()}+${num}` // use +n if there're multiple sections
                                 : id.toString();
                             this.place(crs);
+                            for (const sec of crs.sections) {
+                                this.dateSeparators.push(sec.getDateArray()[0] as [number, number]);
+                            }
                         }
                     } else {
                         // a subset of the sections
@@ -408,6 +425,7 @@ export default class Schedule {
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
 
         for (const event of this.events) if (event.display) this.place(event);
+
 
         this.computeBlockPositions();
     }

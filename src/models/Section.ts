@@ -184,4 +184,18 @@ export default class Section implements CourseFields, Hashable {
         if (element instanceof Set) return this.key === key && element.has(this.sid);
         else return this.equals(element);
     }
+
+    /**
+     * returns an array that represents the date and month of the section's
+     * start and end day
+     * Example:
+     * ```js
+     * [[8, 26], [12, 26]]
+     * ```
+     */
+    public getDateArray() {
+        return this.meetings[0].dates.split(' - ').
+            map(x => x.split('/').splice(0, 2).
+                map(a => parseInt(a)));
+    }
 }

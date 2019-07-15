@@ -1,6 +1,6 @@
 /**
  * @module models
- * @author Kaiying Shan
+ * @author Kaiying Cat
  */
 
 /**

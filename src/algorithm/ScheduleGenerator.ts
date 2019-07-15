@@ -47,7 +47,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> {}
+export interface TimeArray extends Week<number> { }
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -87,7 +87,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: ReadonlyArray<string>,
         public readonly options: GeneratorOptions
-    ) {}
+    ) { }
 
     /**
      * The entrance of the schedule generator
@@ -150,7 +150,7 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                    } satisfy your filters and do not conflict with your events`
+                        } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);

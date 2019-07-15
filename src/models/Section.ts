@@ -103,6 +103,14 @@ export default class Section implements CourseFields, Hashable {
     }
 
     /**
+     * @returns all meeting times of this section concatenated together (separated by |)
+     * and concatenated by their dates
+     */
+    public combinedTimeAndDate() {
+        return this.combinedTime() + ' ' + this.meetings[0].dates;
+    }
+
+    /**
      * @remarks The hashes of all sections of a Course by design are equal to each other.
      * @returns the hash of the Course that this section belongs to.
      */

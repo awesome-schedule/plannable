@@ -142,8 +142,8 @@ class ScheduleGenerator {
                     sectionIndices.push(section.sid);
                 }
 
-                const [[startDay, startMon], [endDay, endMon]] = sections[0].meetings[0].dates.split(' - ').map(x => x.split('/').splice(0, 2).map(a => parseInt(a)));
-
+                const [[startDay, startMon], [endDay, endMon]] = sections[0].meetings[0].dates
+                    .split(' - ').map(x => x.split('/').splice(0, 2).map(a => parseInt(a)));
 
                 const dateArr: [number, number, number, number] = [startDay, startMon, endDay, endMon];
 
@@ -254,7 +254,8 @@ class ScheduleGenerator {
             const timeDict = candidate[2];
             const dateArr = candidate[3];
             for (let i = 0; i < classNum; i++) {
-                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3) && checkDateConflict(currentSchedule[i][3], dateArr)) {
+                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3)
+                    && checkDateConflict(currentSchedule[i][3], dateArr)) {
                     ++choiceNum;
                     continue outer;
                 }

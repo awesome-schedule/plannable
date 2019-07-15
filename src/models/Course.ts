@@ -181,7 +181,7 @@ export default class Course implements CourseFields, Hashable {
     }
 
     /**
-     * Get an object in which the key is the days string and
+     * Get an object in which the key is the days + date string and
      * value is the array of section indices contained in this Course occurring at that time.
      * For example:
      * ```js
@@ -191,7 +191,7 @@ export default class Course implements CourseFields, Hashable {
     public getCombined() {
         const combined: { [x: string]: Section[] } = {};
         for (const section of this.sections) {
-            const day = section.combinedTime();
+            const day = section.combinedTimeAndDate();
             if (combined[day]) combined[day].push(section);
             else combined[day] = [section];
         }

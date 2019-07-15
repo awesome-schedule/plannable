@@ -9,7 +9,7 @@
 import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
-import { checkTimeConflict } from '../utils';
+import { checkTimeConflict, checkDateConflict } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 import { CourseStatus, Week } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
@@ -47,7 +47,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> {}
+export interface TimeArray extends Week<number> { }
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -56,13 +56,14 @@ export interface TimeArray extends Week<number> {}
  * 0: key of this course
  * 1: an array of section indices
  * 2: TimeArray
+ * 3: Start and end date
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], []]]
+ * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], []], [8, 28, 12, 26]]
  * ```
  */
-export type RawAlgoCourse = [string, number[], TimeArray];
+export type RawAlgoCourse = [string, number[], TimeArray, [number, number, number, number]];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -87,7 +88,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: ReadonlyArray<string>,
         public readonly options: GeneratorOptions
-    ) {}
+    ) { }
 
     /**
      * The entrance of the schedule generator
@@ -141,7 +142,12 @@ class ScheduleGenerator {
                     sectionIndices.push(section.sid);
                 }
 
-                if (sectionIndices.length) classes.push([key, sectionIndices, blocksArray]);
+                const [[startDay, startMon], [endDay, endMon]] = sections[0].meetings[0].dates.split(' - ').map(x => x.split('/').splice(0, 2).map(a => parseInt(a)));
+
+
+                const dateArr: [number, number, number, number] = [startDay, startMon, endDay, endMon];
+
+                if (sectionIndices.length) classes.push([key, sectionIndices, blocksArray, dateArr]);
             }
 
             // throw an error of none of the sections pass the filter
@@ -150,7 +156,7 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                    } satisfy your filters and do not conflict with your events`
+                        } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);
@@ -246,8 +252,9 @@ class ScheduleGenerator {
             // the time dict of the newly chosen class
             const candidate = classList[classNum][choiceNum];
             const timeDict = candidate[2];
+            const dateArr = candidate[3];
             for (let i = 0; i < classNum; i++) {
-                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3)) {
+                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3) && checkDateConflict(currentSchedule[i][3], dateArr)) {
                     ++choiceNum;
                     continue outer;
                 }

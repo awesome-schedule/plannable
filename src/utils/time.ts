@@ -118,6 +118,36 @@ export function checkTimeConflict(
     }
     return false;
 }
+/**
+ * check if two events (meetings) have conflict on dates
+ * @author Kaiying Cat
+ * @param dateArr1 [startMonth, startDate, endMonth, endDate] of event 1
+ * @param dateArr2 [startMonth, startDate, endMonth, endDate] of event 2
+ * @returns true if conflicted
+ */
+export function checkDateConflict(dateArr1: number[], dateArr2: number[]) {
+    const m = calcOverlap(dateArr1[0], dateArr1[2], dateArr2[0], dateArr2[2]);
+    if (m < 0) {
+        return false;
+    } else if (m === 0) {
+        // event 1's end month is same as event 2's start
+        if (dateArr1[2] === dateArr2[0]) {
+            if (dateArr1[3] < dateArr2[1]) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            if (dateArr2[3] < dateArr1[1]) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    } else {
+        return true;
+    }
+}
 
 /**
  * calculate the overlap between time block [a, b] and [c, d].

@@ -513,7 +513,7 @@ export default class Schedule {
             const endMin = Utils.to24hr(end);
             // wait... start time equals end time?
             if (startMin === endMin) {
-                console.warn(events, startMin, endMin);
+                console.warn('start time equals end time:', events, startMin, endMin);
                 return;
             }
             for (let i = 0; i < days.length; i += 2) {

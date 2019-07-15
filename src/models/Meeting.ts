@@ -24,15 +24,18 @@ export default class Meeting {
         }
         return profs;
     }
+
     public readonly instructor: string;
     public readonly days: string;
     public readonly dates: string;
     public readonly room: string;
+    public readonly incomplete: boolean;
     constructor(raw: RawMeeting) {
         this.instructor = raw[0];
         this.days = raw[1];
         this.room = raw[2];
         this.dates = raw[3];
+        this.incomplete = raw.some(x => !x);
     }
 
     public sameTimeAs(other: Meeting) {

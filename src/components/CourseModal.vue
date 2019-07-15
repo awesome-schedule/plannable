@@ -14,16 +14,14 @@
                 <div class="modal-body">
                     <h6 v-html="highlightMatch(course.title, 'title', course.matches)"></h6>
                     <div style="width: 100%; overflow-x: auto;">
-                        <table style="color:#808080; font-size:0.75rem;">
+                        <table id="sec-table" class="m-color">
                             <tr v-for="section in course.sections" :key="section.section">
-                                <td class="info">Section:&nbsp;{{ section.section }}</td>
-                                <td class="info">ID:&nbsp;{{ section.id }}</td>
+                                <td>Section&nbsp;{{ section.section }}</td>
+                                <td>ID:&nbsp;{{ section.id }}</td>
                                 <td
-                                    class="info"
                                     v-html="highlightMatch(section.topic, 'topic', section.matches)"
                                 ></td>
                                 <td
-                                    class="info"
                                     v-html="
                                         highlightMatch(
                                             section.instructors.join(', '),
@@ -32,18 +30,24 @@
                                         )
                                     "
                                 ></td>
-                                <td class="info">
-                                    <template v-for="meeting in section.meetings"
-                                        >{{ meeting.days }} <br :key="meeting.days" />
+                                <td>
+                                    <template v-for="(date, idx) in dates(section)"
+                                        >{{ date }}
+                                        <br :key="idx" />
                                     </template>
                                 </td>
-                                <td class="info">
-                                    <template v-for="meeting in section.meetings"
-                                        >{{ meeting.room }} <br :key="meeting.days" />
+                                <td>
+                                    <template v-for="(meeting, idx) in section.meetings"
+                                        >{{ meeting.days }} <br :key="idx" />
                                     </template>
                                 </td>
-                                <td class="info">{{ section.status }}</td>
-                                <td class="info">
+                                <td>
+                                    <template v-for="(meeting, idx) in section.meetings"
+                                        >{{ meeting.room }} <br :key="idx" />
+                                    </template>
+                                </td>
+                                <td>{{ section.status }}</td>
+                                <td>
                                     {{ section.enrollment + '/' + section.enrollment_limit }}
                                 </td>
                             </tr>
@@ -67,7 +71,10 @@
 <script lang="ts" src="./CourseModal.ts"></script>
 
 <style scoped>
-.info {
+#sec-table {
+    font-size: 0.8rem;
+}
+#sec-table > tr > td {
     white-space: nowrap;
     vertical-align: top;
     padding-right: 12px;

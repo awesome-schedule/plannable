@@ -265,7 +265,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                 const sidKeys = Object.keys(sectionMap[key]).sort(
                     (a, b) => parseInt(a) - parseInt(b)
                 );
-                const item = sectionMap[key][sidKeys[0]][0].result.item.course;
+                const {item} = sectionMap[key][sidKeys[0]][0].result;
 
                 const combSecMatches: SectionMatch[][] = [];
                 const matchedSids = sidKeys.map(x => parseInt(x));
@@ -281,7 +281,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                 }
-                course = [item.raw, key, matchedSids, [], combSecMatches];
+                course = [courseDict[item.key].raw, key, matchedSids, [], combSecMatches];
             }
             finalResults.push(course);
         }

@@ -101,14 +101,19 @@ export function parseSemesterData(csv_string: string) {
         const s: string[] = [];
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
-            if (data[start]) {
+            const a = data[start],
+                b = data[start + 1],
+                c = data[start + 2],
+                d = data[start + 3];
+            if (a || b || c || d) {
                 // remove duplicated course meeting time
                 // but why does that even exist in the first place?
-                const meetingTime = data[start + 1];
-                if (!s.includes(meetingTime)) {
-                    s.push(meetingTime);
-                    meetings.push(data.slice(start, start + 4) as any);
+                if (!s.includes(b)) {
+                    s.push(b);
+                } else {
+                    console.warn(data);
                 }
+                meetings.push([a, b, c, d]);
             }
         }
 

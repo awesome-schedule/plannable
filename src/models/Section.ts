@@ -53,12 +53,13 @@ export default class Section implements CourseFields, Hashable {
     public readonly wait_list: number;
     public readonly instructors: ReadonlyArray<string>;
     public readonly meetings: ReadonlyArray<Meeting>;
+    public readonly hasIncompleteMeetings: boolean;
     /**
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
      */
     constructor(
-        public readonly course: Course,
+        course: Course,
         public readonly sid: number,
         public readonly matches: ReadonlyArray<SectionMatch> = []
     ) {
@@ -81,6 +82,7 @@ export default class Section implements CourseFields, Hashable {
         this.wait_list = raw[6];
         this.meetings = raw[7].map(x => new Meeting(x));
         this.instructors = Meeting.getInstructors(raw[7]);
+        this.hasIncompleteMeetings = this.meetings.some(m => m.incomplete);
     }
 
     public get displayName() {
@@ -109,7 +111,7 @@ export default class Section implements CourseFields, Hashable {
     }
 
     /**
-     * get the time and room of this section's meetings as [[TimeArray]] and [[RoomArray]]
+     * get the time and room of this section's meetings as [[TimeArray]]
      */
     public getTimeRoom(): TimeArray | null {
         const timeDict: TimeArray = [[], [], [], [], []];

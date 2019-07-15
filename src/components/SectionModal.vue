@@ -9,17 +9,14 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div v-if="section.topic" style="color:#a0a0a0">{{ section.topic }}</div>
-                    <div style="color:#a0a0a0">{{ section.type }} | {{ section.units }} units</div>
-                    <div style="color:#a0a0a0">{{ section.instructors.join(', ') }}</div>
-                    <div
-                        v-for="meeting in section.meetings"
-                        :key="meeting.days"
-                        style="color:#a0a0a0"
-                    >
-                        {{ meeting.days }} {{ meeting.room }}
+                    <div v-if="section.topic" class="m-color">{{ section.topic }}</div>
+                    <div class="m-color">{{ section.type }} | {{ section.units }} units</div>
+                    <div class="m-color">{{ section.instructors.join(', ') }}</div>
+                    <div v-for="(meeting, idx) in section.meetings" :key="idx" class="m-color">
+                        {{ dates[idx] }}<br v-if="dates[idx]" />
+                        {{ meeting.days }} @ {{ meeting.room }}
                     </div>
-                    <div style="color:#a0a0a0">
+                    <div class="m-color">
                         {{ section.status }} {{ section.enrollment }}/{{ section.enrollment_limit }}
                     </div>
                     <br />
@@ -43,4 +40,8 @@
 
 <script lang="ts" src="./SectionModal.ts"></script>
 
-<style></style>
+<style>
+.m-color {
+    color: #888;
+}
+</style>

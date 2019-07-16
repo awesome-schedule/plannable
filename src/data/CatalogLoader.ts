@@ -108,7 +108,7 @@ export function parseSemesterData(csv_string: string) {
             if (a || b || c || d) {
                 // remove duplicated course meeting time
                 // but why does that even exist in the first place?
-                if (!s.includes(b)) {
+                if (b && !s.includes(b)) {
                     s.push(b);
                 } else {
                     console.warn(data);

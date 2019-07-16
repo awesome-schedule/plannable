@@ -121,7 +121,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -203,11 +203,9 @@ export default class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
-
         for (const [key, sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
-        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -252,7 +250,6 @@ export default class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -261,13 +258,11 @@ export default class Schedule {
      */
     public removePreview() {
         this._preview = null;
-        this.constructDateSeparator();
         this.computeSchedule(false);
     }
 
     public preview(section: Section) {
         this._preview = section;
-        this.constructDateSeparator();
         this.computeSchedule(false);
     }
 
@@ -346,12 +341,16 @@ export default class Schedule {
         if (!catalog) return;
 
         this.cleanSchedule();
-        let all: { [x: string]: Set<number> | -1; };
+        this.constructDateSeparator();
+        let all: { [x: string]: Set<number> | -1 };
         if (this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length) {
             all = this.All;
         } else {
-            all = this.separatedAll[this.dateSeparators[this.dateSelector][0] +
-                '/' + this.dateSeparators[this.dateSelector][1]];
+            all = this.separatedAll[
+                this.dateSeparators[this.dateSelector][0] +
+                    '/' +
+                    this.dateSeparators[this.dateSelector][1]
+            ];
         }
 
         for (const key in all) {
@@ -433,7 +432,6 @@ export default class Schedule {
 
         for (const event of this.events) if (event.display) this.place(event);
 
-
         this.computeBlockPositions();
     }
 
@@ -460,7 +458,6 @@ export default class Schedule {
             }
         }
 
-
         for (const dts of this.dateSeparators) {
             this.separatedAll[dts[0] + '/' + dts[1]] = Object.create(null);
         }
@@ -473,8 +470,10 @@ export default class Schedule {
                 const [[sm, sd], [em, ed]] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const [sepM, sepD] = this.dateSeparators[i];
-                    if (compareDate(sm, sd, sepM, sepD) < 0 && (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) > 0)) {
-
+                    if (
+                        compareDate(sm, sd, sepM, sepD) < 0 &&
+                        (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) > 0)
+                    ) {
                         if (diffSecs[sepM + '/' + sepD]) {
                             diffSecs[sepM + '/' + sepD].push(sec.sid);
                         } else {
@@ -485,11 +484,13 @@ export default class Schedule {
                         break;
                     }
                 }
-
             }
             for (const diffTime in diffSecs) {
                 const secIds = diffSecs[diffTime];
-                const secNum: Set<number> | -1 = secIds.length === course.sections.length && this.All[key] === -1 ? -1 : new Set(secIds);
+                const secNum: Set<number> | -1 =
+                    secIds.length === course.sections.length && this.All[key] === -1
+                        ? -1
+                        : new Set(secIds);
                 this.separatedAll[diffTime][key] = secNum;
             }
         }
@@ -611,7 +612,6 @@ export default class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.constructDateSeparator();
         this.computeSchedule();
     }
 

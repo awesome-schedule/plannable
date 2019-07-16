@@ -31,10 +31,14 @@
                                     "
                                 ></td>
                                 <td>
-                                    <template v-for="(date, idx) in dates(section)"
-                                        >{{ date }}
-                                        <br :key="idx" />
-                                    </template>
+                                    <div
+                                        v-for="(m, idx) in section.meetings"
+                                        :key="idx"
+                                        class="w-100 d-block"
+                                        :class="{ 'bg-warning': !m.dates }"
+                                    >
+                                        {{ m.dates || 'Unknown' }}
+                                    </div>
                                 </td>
                                 <td>
                                     <template v-for="(meeting, idx) in section.meetings"

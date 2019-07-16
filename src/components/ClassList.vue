@@ -128,6 +128,11 @@
                                                         )
                                                     "
                                                 ></span>
+                                                <i
+                                                    v-if="sec.hasIncompleteMeetings"
+                                                    title="This section has incomplete meeting time information"
+                                                    class="text-warning fas fa-exclamation-triangle"
+                                                ></i>
                                             </li>
                                             <template v-for="meeting in sec.meetings">
                                                 <li :key="meeting.days">

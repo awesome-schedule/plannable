@@ -47,7 +47,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> { }
+export interface TimeArray extends Week<number> {}
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -88,7 +88,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: ReadonlyArray<string>,
         public readonly options: GeneratorOptions
-    ) { }
+    ) {}
 
     /**
      * The entrance of the schedule generator
@@ -134,20 +134,32 @@ class ScheduleGenerator {
                     if (checkTimeConflict(td, blocksArray, 2, 3)) continue outer;
                 }
 
-                const sectionIndices: number[] = [];
+                const secIndices: number[] = [];
                 for (const section of sections) {
                     // filter out sections with unwanted status
                     if (this.options.status.includes(section.status)) continue;
 
-                    sectionIndices.push(section.sid);
+                    secIndices.push(section.sid);
                 }
 
-                const [[startDay, startMon], [endDay, endMon]] = sections[0].meetings[0].dates
-                    .split(' - ').map(x => x.split('/').splice(0, 2).map(a => parseInt(a)));
-
-                const dateArr: [number, number, number, number] = [startDay, startMon, endDay, endMon];
-
-                if (sectionIndices.length) classes.push([key, sectionIndices, blocksArray, dateArr]);
+                if (secIndices.length)
+                    classes.push([
+                        key,
+                        secIndices,
+                        blocksArray,
+                        sections[0].meetings[0].dates
+                            .split(' - ')
+                            .map(x =>
+                                x
+                                    .split('/')
+                                    .splice(0, 2)
+                                    .map(a => +a)
+                            )
+                            .reduce((acc, x) => {
+                                acc.push(...x);
+                                return acc;
+                            }, []) as [number, number, number, number]
+                    ]);
             }
 
             // throw an error of none of the sections pass the filter
@@ -156,7 +168,7 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                        } satisfy your filters and do not conflict with your events`
+                    } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);
@@ -254,8 +266,10 @@ class ScheduleGenerator {
             const timeDict = candidate[2];
             const dateArr = candidate[3];
             for (let i = 0; i < classNum; i++) {
-                if (checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3)
-                    && checkDateConflict(currentSchedule[i][3], dateArr)) {
+                if (
+                    checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3) &&
+                    checkDateConflict(currentSchedule[i][3], dateArr)
+                ) {
                     ++choiceNum;
                     continue outer;
                 }

@@ -29,6 +29,9 @@ export default class Meeting {
     public readonly days: string;
     public readonly dates: string;
     public readonly room: string;
+    /**
+     * indicates that some fields are incomplete
+     */
     public readonly incomplete: boolean;
     constructor(raw: RawMeeting) {
         this.instructor = raw[0];

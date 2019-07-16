@@ -9,7 +9,6 @@
  */
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
-
 import MainContent from './components/MainContent.vue';
 
 // tab components

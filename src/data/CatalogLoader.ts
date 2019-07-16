@@ -69,7 +69,9 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
                   Extended: 'Yes'
               })
           ) // use the mirror/local dev server
-        : axios.get(`${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv`));
+        : axios.get(
+              `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
+          ));
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);
@@ -98,22 +100,17 @@ export function parseSemesterData(csv_string: string) {
         const type = CLASS_TYPES[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
         const meetings: RawMeeting[] = [];
-        const s: string[] = [];
+        let lastDate: string = '';
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
             const a = data[start],
                 b = data[start + 1],
-                c = data[start + 2],
-                d = data[start + 3];
-            if (a || b || c || d) {
-                // remove duplicated course meeting time
-                // but why does that even exist in the first place?
-                if (b && !s.includes(b)) {
-                    s.push(b);
-                } else {
-                    console.warn(data);
-                }
-                meetings.push([a, b, c, d]);
+                c = data[start + 2];
+            lastDate = data[start + 3] || lastDate;
+            if (a || b || c) {
+                if (!(a && b && c && lastDate))
+                    console.warn(key, [a, b, c, lastDate], 'is incomplete');
+                meetings.push([a, b, c, lastDate]);
             }
         }
 

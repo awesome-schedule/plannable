@@ -6,8 +6,8 @@
 /**
  *
  */
-import { TimeArray } from '../algorithm';
-import { hashCode, parseTimeAll } from '../utils';
+import { TimeArray, MeetingDate } from '../algorithm';
+import { hashCode, parseTimeAll, parseDate } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import { findBestMatch } from 'string-similarity';
 import Hashable from './Hashable';
@@ -54,7 +54,7 @@ export default class Section implements CourseFields, Hashable {
     public readonly instructors: ReadonlyArray<string>;
     public readonly meetings: ReadonlyArray<Meeting>;
     public readonly hasIncompleteMeetings: boolean;
-    public readonly dateArray: [[number, number], [number, number]];
+    public readonly dateArray: MeetingDate;
     /**
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
@@ -84,9 +84,7 @@ export default class Section implements CourseFields, Hashable {
         this.meetings = raw[7].map(x => new Meeting(x));
         this.instructors = Meeting.getInstructors(raw[7]);
         this.hasIncompleteMeetings = this.meetings.some(m => m.incomplete);
-        this.dateArray = this.meetings[0].dates.split(' - ').
-            map(x => x.split('/').splice(0, 2).
-                map(a => parseInt(a))) as [[number, number], [number, number]];
+        this.dateArray = parseDate(this.meetings.find(d => d.dates)!.dates);
     }
 
     public get displayName() {

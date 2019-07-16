@@ -9,7 +9,7 @@
 import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
-import { checkTimeConflict, checkDateConflict } from '../utils';
+import { checkTimeConflict, checkDateConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 import { CourseStatus, Week } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
@@ -49,6 +49,8 @@ export type TimeBlock = [number, number];
  */
 export interface TimeArray extends Week<number> {}
 
+export type MeetingDate = [number, number, number, number];
+
 /**
  * The data structure used in the algorithm to represent a Course that
  * possibly has multiple sections combined (occurring at the same time)
@@ -63,7 +65,7 @@ export interface TimeArray extends Week<number> {}
  * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], []], [8, 28, 12, 26]]
  * ```
  */
-export type RawAlgoCourse = [string, number[], TimeArray, [number, number, number, number]];
+export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -147,18 +149,7 @@ class ScheduleGenerator {
                         key,
                         secIndices,
                         blocksArray,
-                        sections[0].meetings[0].dates
-                            .split(' - ')
-                            .map(x =>
-                                x
-                                    .split('/')
-                                    .splice(0, 2)
-                                    .map(a => +a)
-                            )
-                            .reduce((acc, x) => {
-                                acc.push(...x);
-                                return acc;
-                            }, []) as [number, number, number, number]
+                        parseDate(sections[0].meetings.find(m => m.dates)!.dates)
                     ]);
             }
 

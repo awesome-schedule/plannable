@@ -121,7 +121,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -349,8 +349,8 @@ export default class Schedule {
         } else {
             all = this.separatedAll[
                 this.dateSeparators[this.dateSelector][0] +
-                '/' +
-                this.dateSeparators[this.dateSelector][1]
+                    '/' +
+                    this.dateSeparators[this.dateSelector][1]
             ];
         }
 
@@ -443,16 +443,18 @@ export default class Schedule {
         for (const key in this.All) {
             const course = catalog.getCourse(key, this.All[key]);
             for (const sec of course.sections) {
-                this.dateSeparators.push(sec.dateArray[0]);
-                this.dateSeparators.push(sec.dateArray[1]);
+                type T = [number, number];
+                this.dateSeparators.push(
+                    sec.dateArray.slice(0, 2) as T,
+                    sec.dateArray.slice(2) as T
+                );
             }
         }
 
         this.dateSeparators.sort((a, b) => Utils.compareDate(a[0], a[1], b[0], b[1]));
         for (let i = 1; i < this.dateSeparators.length; i++) {
             const a = this.dateSeparators[i - 1];
-            const b = this.dateSeparators[i];
-            const cmp = compareDate(a[0], a[1], b[0], b[1]);
+            const cmp = compareDate(a[0], a[1], ...this.dateSeparators[i]);
             if (cmp === 0 || cmp === -1) {
                 this.dateSeparators.splice(i, 1);
                 i--;
@@ -460,25 +462,25 @@ export default class Schedule {
         }
 
         for (const dts of this.dateSeparators) {
-            this.separatedAll[dts[0] + '/' + dts[1]] = Object.create(null);
+            this.separatedAll[dts.join('/')] = Object.create(null);
         }
 
         for (const key in this.All) {
             const course = catalog.getCourse(key, this.All[key]);
             const diffSecs: { [dt: string]: number[] } = {};
             for (const sec of course.sections) {
-                const dtKey = sec.dateArray[1][0] + '/' + sec.dateArray[1][1];
-                const [[sm, sd], [em, ed]] = sec.dateArray;
+                const [sm, sd, em, ed] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const [sepM, sepD] = this.dateSeparators[i];
                     if (
                         compareDate(sm, sd, sepM, sepD) < 0 &&
                         (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) > 0)
                     ) {
-                        if (diffSecs[sepM + '/' + sepD]) {
-                            diffSecs[sepM + '/' + sepD].push(sec.sid);
+                        const date = sepM + '/' + sepD;
+                        if (diffSecs[date]) {
+                            diffSecs[date].push(sec.sid);
                         } else {
-                            diffSecs[sepM + '/' + sepD] = [sec.sid];
+                            diffSecs[date] = [sec.sid];
                         }
                     }
                     if (compareDate(em, ed, sepM, sepD) < 0) {
@@ -488,7 +490,7 @@ export default class Schedule {
             }
             for (const diffTime in diffSecs) {
                 const secIds = diffSecs[diffTime];
-                const secNum: Set<number> | -1 =
+                const secNum =
                     secIds.length === course.sections.length && this.All[key] === -1
                         ? -1
                         : new Set(secIds);

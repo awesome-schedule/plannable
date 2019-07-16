@@ -50,8 +50,8 @@ export function loadSemesterList(count = 5) {
 export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
     console.time('get semester list');
     const response = await (window.location.host === 'plannable.org'
-        ? axios.get(`https://rabi.phys.virginia.edu/mySIS/CS2/index.php`)
-        : axios.get(`${getApi()}/data/Semester Data/index.html`));
+        ? axios.get(`https://rabi.phys.virginia.edu/mySIS/CS2/index.php?time=${Math.random()}`)
+        : axios.get(`${getApi()}/data/Semester Data/index.html?time=${Math.random()}`));
     console.timeEnd('get semester list');
 
     const element = document.createElement('html');

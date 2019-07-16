@@ -6,7 +6,7 @@
 /**
  *
  */
-import { TimeArray, TimeBlock } from '../algorithm';
+import { TimeArray, TimeBlock, MeetingDate } from '../algorithm';
 import { Day, dayToInt } from '@/models/Meta';
 /**
  * @author Hanzhi Zhou
@@ -118,6 +118,22 @@ export function checkTimeConflict(
     }
     return false;
 }
+
+export function parseDate(date: string) {
+    return date
+        .split(' - ')
+        .map(x =>
+            x
+                .split('/')
+                .splice(0, 2)
+                .map(a => +a)
+        )
+        .reduce((acc, x) => {
+            acc.push(...x);
+            return acc;
+        }, []) as MeetingDate;
+}
+
 /**
  * check if two events (meetings) have conflict on dates
  * @author Kaiying Cat
@@ -125,7 +141,7 @@ export function checkTimeConflict(
  * @param dateArr2 [startMonth, startDate, endMonth, endDate] of event 2
  * @returns true if conflicted
  */
-export function checkDateConflict(dateArr1: number[], dateArr2: number[]) {
+export function checkDateConflict(dateArr1: MeetingDate, dateArr2: MeetingDate) {
     const m = calcOverlap(dateArr1[0], dateArr1[2], dateArr2[0], dateArr2[2]);
     if (m < 0) {
         return false;

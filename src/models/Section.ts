@@ -1,5 +1,5 @@
 /**
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Kaiying Cat
  * @module models
  */
 
@@ -54,6 +54,7 @@ export default class Section implements CourseFields, Hashable {
     public readonly instructors: ReadonlyArray<string>;
     public readonly meetings: ReadonlyArray<Meeting>;
     public readonly hasIncompleteMeetings: boolean;
+    public readonly dateArray: [[number, number], [number, number]];
     /**
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
@@ -83,6 +84,9 @@ export default class Section implements CourseFields, Hashable {
         this.meetings = raw[7].map(x => new Meeting(x));
         this.instructors = Meeting.getInstructors(raw[7]);
         this.hasIncompleteMeetings = this.meetings.some(m => m.incomplete);
+        this.dateArray = this.meetings[0].dates.split(' - ').
+            map(x => x.split('/').splice(0, 2).
+                map(a => parseInt(a))) as [[number, number], [number, number]];
     }
 
     public get displayName() {
@@ -183,19 +187,5 @@ export default class Section implements CourseFields, Hashable {
     public has(element: Section | Set<number>, key?: string): boolean {
         if (element instanceof Set) return this.key === key && element.has(this.sid);
         else return this.equals(element);
-    }
-
-    /**
-     * returns an array that represents the date and month of the section's
-     * start and end day
-     * Example:
-     * ```js
-     * [[8, 26], [12, 26]]
-     * ```
-     */
-    public getDateArray() {
-        return this.meetings[0].dates.split(' - ').
-            map(x => x.split('/').splice(0, 2).
-                map(a => parseInt(a)));
     }
 }

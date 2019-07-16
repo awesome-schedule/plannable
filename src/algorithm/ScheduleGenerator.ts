@@ -1,6 +1,6 @@
 /**
  * @module algorithm
- * @author Hanzhi Zhou, Zichao Hu
+ * @author Hanzhi Zhou, Zichao Hu, Kaiying Cat
  */
 
 /**

@@ -28,6 +28,7 @@ import Pagination from './components/Pagination.vue';
 import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
 import URLModal from './components/URLModal.vue';
+import DateSeparator from './components/DateSeparator.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
@@ -49,6 +50,7 @@ import randomColor from 'randomcolor';
         CourseModal,
         URLModal,
         External,
+        DateSeparator,
         // use dynamic component for this one because it is relatively large in size
         Information: () => import('./components/tabs/Information.vue'),
         // opt-in components

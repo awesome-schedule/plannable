@@ -17,6 +17,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
 import { Day, Week, TYPES, dayToInt } from './Meta';
+import { compareDate } from '../utils';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
@@ -183,6 +184,8 @@ export default class Schedule {
      * ```
      */
     public dateSeparators: [number, number][] = [];
+    public separatedAll: { [date: string]: { [x: string]: Set<number> | -1 } } = {};
+    public dateSelector: number = -1;
 
     /**
      * the currently previewed (hovered) section
@@ -204,6 +207,7 @@ export default class Schedule {
         for (const [key, sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
+        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -248,6 +252,7 @@ export default class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
+        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -256,11 +261,13 @@ export default class Schedule {
      */
     public removePreview() {
         this._preview = null;
+        this.constructDateSeparator();
         this.computeSchedule(false);
     }
 
     public preview(section: Section) {
         this._preview = section;
+        this.constructDateSeparator();
         this.computeSchedule(false);
     }
 
@@ -339,9 +346,16 @@ export default class Schedule {
         if (!catalog) return;
 
         this.cleanSchedule();
+        let all: { [x: string]: Set<number> | -1; };
+        if (this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length) {
+            all = this.All;
+        } else {
+            all = this.separatedAll[this.dateSeparators[this.dateSelector][0] +
+                '/' + this.dateSeparators[this.dateSelector][1]];
+        }
 
-        for (const key in this.All) {
-            const sections = this.All[key];
+        for (const key in all) {
+            const sections = all[key];
             /**
              * we need a full course record of key `key`
              */
@@ -364,16 +378,12 @@ export default class Schedule {
             if (sections === -1) {
                 this.currentIds[currentIdKey] = ' - ';
                 this.place(course);
-                for (const sec of course.sections) {
-                    this.dateSeparators.push(sec.getDateArray()[0] as [number, number]);
-                }
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
                     const sec = course.getFirstSection();
                     this.currentIds[currentIdKey] = sec.id.toString();
                     this.place(sec);
-                    this.dateSeparators.push(sec.getDateArray()[0] as [number, number]);
                 } else if (sections.size > 0) {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
@@ -389,9 +399,6 @@ export default class Schedule {
                                 ? `${id.toString()}+${num}` // use +n if there're multiple sections
                                 : id.toString();
                             this.place(crs);
-                            for (const sec of crs.sections) {
-                                this.dateSeparators.push(sec.getDateArray()[0] as [number, number]);
-                            }
                         }
                     } else {
                         // a subset of the sections
@@ -428,6 +435,64 @@ export default class Schedule {
 
 
         this.computeBlockPositions();
+    }
+
+    public constructDateSeparator() {
+        const catalog = window.catalog;
+        this.dateSeparators.length = 0;
+
+        for (const key in this.All) {
+            const course = catalog.getCourse(key, this.All[key]);
+            for (const sec of course.sections) {
+                this.dateSeparators.push(sec.dateArray[0]);
+                this.dateSeparators.push(sec.dateArray[1]);
+            }
+        }
+
+        this.dateSeparators.sort((a, b) => Utils.compareDate(a[0], a[1], b[0], b[1]));
+        for (let i = 1; i < this.dateSeparators.length; i++) {
+            const a = this.dateSeparators[i - 1];
+            const b = this.dateSeparators[i];
+            const cmp = compareDate(a[0], a[1], b[0], b[1]);
+            if (cmp == 0 || cmp == -1) {
+                this.dateSeparators.splice(i, 1);
+                i--;
+            }
+        }
+
+
+        for (const dts of this.dateSeparators) {
+            this.separatedAll[dts[0] + '/' + dts[1]] = Object.create(null);
+        }
+
+        for (const key in this.All) {
+            const course = catalog.getCourse(key, this.All[key]);
+            const diffSecs: { [dt: string]: number[] } = {};
+            for (const sec of course.sections) {
+                const dtKey = sec.dateArray[1][0] + '/' + sec.dateArray[1][1];
+                const [[sm, sd], [em, ed]] = sec.dateArray;
+                for (let i = 0; i < this.dateSeparators.length; i++) {
+                    const [sepM, sepD] = this.dateSeparators[i];
+                    if (compareDate(sm, sd, sepM, sepD) < 0 && (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) > 0)) {
+
+                        if (diffSecs[sepM + '/' + sepD]) {
+                            diffSecs[sepM + '/' + sepD].push(sec.sid);
+                        } else {
+                            diffSecs[sepM + '/' + sepD] = [sec.sid];
+                        }
+                    }
+                    if (compareDate(em, ed, sepM, sepD) < 0) {
+                        break;
+                    }
+                }
+
+            }
+            for (const diffTime in diffSecs) {
+                const secIds = diffSecs[diffTime];
+                const secNum: Set<number> | -1 = secIds.length === course.sections.length && this.All[key] === -1 ? -1 : new Set(secIds);
+                this.separatedAll[diffTime][key] = secNum;
+            }
+        }
     }
 
     public computeBlockPositions() {
@@ -546,6 +611,7 @@ export default class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
+        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -602,6 +668,7 @@ export default class Schedule {
         // note: is it desirable to deep-copy all the events?
         const cpy = new Schedule([], deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
         cpy.All = AllCopy;
+        cpy.constructDateSeparator();
         cpy.computeSchedule();
         return cpy;
     }

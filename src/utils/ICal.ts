@@ -30,10 +30,12 @@ export function toICal(schedule: Schedule) {
 
     for (const blocks of schedule.days) {
         for (const sb of blocks) {
-            if (sb.section instanceof Section) {
-                for (const m of sb.section.meetings) {
-                    if (!m.dates || m.dates === 'TBD' || m.dates === 'TBA') continue;
-                    const [sd, , ed] = m.dates.split(' ');
+            const { section } = sb;
+            if (section instanceof Section) {
+                const { dates } = section;
+                if (!dates || dates === 'TBD' || dates === 'TBA') continue;
+                for (const m of section.meetings) {
+                    const [sd, , ed] = dates.split(' ');
                     const [sl, sm, sr] = sd.split('/');
                     startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
                     const [el, em, er] = ed.split('/');

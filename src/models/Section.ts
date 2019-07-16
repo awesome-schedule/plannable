@@ -52,6 +52,7 @@ export default class Section implements CourseFields, Hashable {
     public readonly enrollment_limit: number;
     public readonly wait_list: number;
     public readonly instructors: ReadonlyArray<string>;
+    public readonly dates: string;
     public readonly meetings: ReadonlyArray<Meeting>;
     public readonly hasIncompleteMeetings: boolean;
     public readonly dateArray: MeetingDate;
@@ -81,10 +82,10 @@ export default class Section implements CourseFields, Hashable {
         this.enrollment = raw[4];
         this.enrollment_limit = raw[5];
         this.wait_list = raw[6];
-        this.meetings = raw[7].map(x => new Meeting(x));
-        this.instructors = Meeting.getInstructors(raw[7]);
+        this.dateArray = parseDate((this.dates = raw[7]));
+        this.meetings = raw[8].map(x => new Meeting(x));
+        this.instructors = Meeting.getInstructors(raw[8]);
         this.hasIncompleteMeetings = this.meetings.some(m => m.incomplete);
-        this.dateArray = parseDate(this.meetings.find(d => d.dates)!.dates);
     }
 
     public get displayName() {
@@ -98,18 +99,11 @@ export default class Section implements CourseFields, Hashable {
     }
 
     /**
-     * @returns all meeting times of this section concatenated together, separated by |
-     */
-    public combinedTime() {
-        return this.meetings.reduce((acc, v) => acc + v.days + '|', '');
-    }
-
-    /**
-     * @returns all meeting times of this section concatenated together (separated by |)
+     * @returns all meeting times of this section concatenated together
      * and concatenated by their dates
      */
-    public combinedTimeAndDate() {
-        return this.combinedTime() + ' ' + this.meetings[0].dates;
+    public combinedTime() {
+        return this.meetings.reduce((acc, v) => acc + '|' + v.days, this.dates);
     }
 
     /**

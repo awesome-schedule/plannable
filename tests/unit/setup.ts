@@ -31,7 +31,8 @@ beforeAll(async () => {
         93,
         91,
         52,
-        [['Comp. Vision', 'MoWe 5:00PM - 6:15PM', 'Thornton Hall E316', '08/27/2019 - 12/06/2019']]
+        '08/27/2019 - 12/06/2019',
+        [['Comp. Vision', 'MoWe 5:00PM - 6:15PM', 'Thornton Hall E316']]
     ]);
     window.catalog = new Catalog(catalog.semester, catalog.raw_data, catalog.modified);
     window.timeMatrix = await requestTimeMatrix();

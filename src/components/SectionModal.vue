@@ -12,8 +12,8 @@
                     <div v-if="section.topic" class="m-color">{{ section.topic }}</div>
                     <div class="m-color">{{ section.type }} | {{ section.units }} units</div>
                     <div class="m-color">{{ section.instructors.join(', ') }}</div>
+                    <div class="m-color">{{ section.dates }}</div>
                     <div v-for="(meeting, idx) in section.meetings" :key="idx" class="m-color">
-                        {{ dates[idx] }}<br v-if="dates[idx]" />
                         {{ meeting.days }} @ {{ meeting.room }}
                     </div>
                     <div class="m-color">

@@ -62,9 +62,21 @@ export type RawCourse = [string, number, number, string, string, string, RawSect
  *
  * 6: wait_list
  *
- * 7: meetings
+ * 7: date
+ *
+ * 8: meetings
  */
-export type RawSection = [number, string, string, number, number, number, number, RawMeeting[]];
+export type RawSection = [
+    number,
+    string,
+    string,
+    number,
+    number,
+    number,
+    number,
+    string,
+    RawMeeting[]
+];
 
 /**
  * 0: instructor
@@ -75,7 +87,7 @@ export type RawSection = [number, string, string, number, number, number, number
  *
  * 3: dates
  */
-export type RawMeeting = [string, string, string, string];
+export type RawMeeting = [string, string, string];
 
 export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr';
 

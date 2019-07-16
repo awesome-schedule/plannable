@@ -145,12 +145,7 @@ class ScheduleGenerator {
                 }
 
                 if (secIndices.length)
-                    classes.push([
-                        key,
-                        secIndices,
-                        blocksArray,
-                        parseDate(sections[0].meetings.find(m => m.dates)!.dates)
-                    ]);
+                    classes.push([key, secIndices, blocksArray, parseDate(sections[0].dates)]);
             }
 
             // throw an error of none of the sections pass the filter

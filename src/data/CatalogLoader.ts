@@ -100,17 +100,17 @@ export function parseSemesterData(csv_string: string) {
         const type = CLASS_TYPES[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
         const meetings: RawMeeting[] = [];
-        let lastDate: string = '';
+        const date: string = data[6 + 3];
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
             const a = data[start],
                 b = data[start + 1],
                 c = data[start + 2];
-            lastDate = data[start + 3] || lastDate;
             if (a || b || c) {
-                if (!(a && b && c && lastDate))
-                    console.warn(key, [a, b, c, lastDate], 'is incomplete');
-                meetings.push([a, b, c, lastDate]);
+                if (data[start + 3] && data[start + 3] !== date)
+                    console.warn(key, data[start + 3], date);
+                if (!(a && b && c)) console.warn(key, [a, b, c], 'is incomplete');
+                meetings.push([a, b, c]);
             }
         }
 
@@ -124,6 +124,7 @@ export function parseSemesterData(csv_string: string) {
             +data[25],
             +data[26],
             +data[27],
+            date,
             meetings
         ];
 

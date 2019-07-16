@@ -127,7 +127,10 @@
                 <div class="col-sm-auto text-center my-1">
                     <Pagination></Pagination>
                 </div>
-                <div v-if="schedule.currentSchedule.dateSeparators.length > 2" class="col-sm-auto text-center my-1">
+                <div
+                    v-if="schedule.currentSchedule.dateSeparators.length > 2"
+                    class="col-sm-auto text-center my-1"
+                >
                     <date-separator :cur-schedule="schedule.currentSchedule"></date-separator>
                 </div>
                 <div class="col-sm-auto text-center align-self-center">

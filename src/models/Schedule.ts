@@ -121,7 +121,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -207,6 +207,7 @@ export default class Schedule {
             this.All[key] = new Set(sections);
         }
         this.computeSchedule();
+        this.constructDateSeparator();
     }
 
     /**
@@ -251,6 +252,7 @@ export default class Schedule {
             }
         }
         this.computeSchedule();
+        this.constructDateSeparator();
     }
 
     /**
@@ -341,15 +343,14 @@ export default class Schedule {
         if (!catalog) return;
 
         this.cleanSchedule();
-        this.constructDateSeparator();
         let all: { [x: string]: Set<number> | -1 };
         if (this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length) {
             all = this.All;
         } else {
             all = this.separatedAll[
                 this.dateSeparators[this.dateSelector][0] +
-                    '/' +
-                    this.dateSeparators[this.dateSelector][1]
+                '/' +
+                this.dateSeparators[this.dateSelector][1]
             ];
         }
 
@@ -452,7 +453,7 @@ export default class Schedule {
             const a = this.dateSeparators[i - 1];
             const b = this.dateSeparators[i];
             const cmp = compareDate(a[0], a[1], b[0], b[1]);
-            if (cmp == 0 || cmp == -1) {
+            if (cmp === 0 || cmp === -1) {
                 this.dateSeparators.splice(i, 1);
                 i--;
             }
@@ -613,6 +614,7 @@ export default class Schedule {
     public remove(key: string) {
         delete this.All[key];
         this.computeSchedule();
+        this.constructDateSeparator();
     }
 
     public cleanSchedule() {

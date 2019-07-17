@@ -121,7 +121,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -438,9 +438,12 @@ export default class Schedule {
             const course = catalog.getCourse(key, this.All[key]);
             for (const sec of course.sections) {
                 type T = [number, number];
+                const temp = sec.dateArray.slice(2);
+                const a = new Date(new Date().getFullYear() + '/' + temp[0] + '/' + temp[1]);
+                const b = new Date(a.getTime() + 24 * 60 * 60 * 1000);
                 this.dateSeparators.push(
                     sec.dateArray.slice(0, 2) as T,
-                    sec.dateArray.slice(2) as T
+                    [b.getMonth() + 1, b.getDate()] as T
                 );
             }
         }
@@ -468,7 +471,7 @@ export default class Schedule {
                     const [sepM, sepD] = this.dateSeparators[i];
                     if (
                         compareDate(sm, sd, sepM, sepD) < 0 &&
-                        (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) > 0)
+                        (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) >= 0)
                     ) {
                         const date = sepM + '/' + sepD;
                         if (diffSecs[date]) {
@@ -477,9 +480,9 @@ export default class Schedule {
                             diffSecs[date] = [sec.sid];
                         }
                     }
-                    if (compareDate(em, ed, sepM, sepD) < 0) {
-                        break;
-                    }
+                    // if (compareDate(em, ed, sepM, sepD) < 0) {
+                    //     break;
+                    // }
                 }
             }
             for (const diffTime in diffSecs) {

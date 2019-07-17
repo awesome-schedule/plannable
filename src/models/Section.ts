@@ -24,6 +24,13 @@ export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Ma
  * All section instances are immutable
  */
 export default class Section implements CourseFields, Hashable {
+    public static readonly Validity = [
+        'Valid',
+        'This section has several different meeting dates, which is currently not supported by the scheduler.',
+        'Some meetings have incomplete information.',
+        'Some meetings have invalid start or end time.'
+    ];
+
     public readonly department: string;
     public readonly number: number;
     public readonly type: string;
@@ -54,7 +61,7 @@ export default class Section implements CourseFields, Hashable {
     public readonly instructors: ReadonlyArray<string>;
     public readonly dates: string;
     public readonly meetings: ReadonlyArray<Meeting>;
-    public readonly hasIncompleteMeetings: boolean;
+    public readonly valid: number;
     public readonly dateArray: MeetingDate;
     /**
      * @param course a reference to the course that this section belongs to
@@ -83,13 +90,26 @@ export default class Section implements CourseFields, Hashable {
         this.enrollment_limit = raw[5];
         this.wait_list = raw[6];
         this.dateArray = parseDate((this.dates = raw[7]));
-        this.meetings = raw[8].map(x => new Meeting(x));
-        this.instructors = Meeting.getInstructors(raw[8]);
-        this.hasIncompleteMeetings = this.meetings.some(m => m.incomplete);
+        this.valid = raw[8];
+        this.meetings = raw[9].map(x => new Meeting(x));
+        this.instructors = Meeting.getInstructors(raw[9]);
     }
 
     public get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
+    }
+
+    public get validMsg() {
+        let mask = 1;
+        let msg = '';
+        let count = 1;
+        for (let i = 1; i < 4; i++) {
+            if (this.valid & mask) {
+                msg += `${count++}. ${Section.Validity[i]} \n`;
+            }
+            mask <<= 1;
+        }
+        return msg;
     }
 
     public sameTimeAs(other: Section) {

@@ -28,15 +28,10 @@ export default class Meeting {
     public readonly instructor: string;
     public readonly days: string;
     public readonly room: string;
-    /**
-     * indicates that some fields are incomplete
-     */
-    public readonly incomplete: boolean;
     constructor(raw: RawMeeting) {
         this.instructor = raw[0];
         this.days = raw[1];
         this.room = raw[2];
-        this.incomplete = raw.some(x => !x);
     }
 
     public sameTimeAs(other: Meeting) {

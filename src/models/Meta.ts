@@ -75,6 +75,7 @@ export type RawSection = [
     number,
     number,
     string,
+    number,
     RawMeeting[]
 ];
 
@@ -84,8 +85,6 @@ export type RawSection = [
  * 1: days
  *
  * 2: room
- *
- * 3: dates
  */
 export type RawMeeting = [string, string, string];
 

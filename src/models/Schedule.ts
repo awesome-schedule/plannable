@@ -343,16 +343,10 @@ export default class Schedule {
         if (!catalog) return;
 
         this.cleanSchedule();
-        let all: { [x: string]: Set<number> | -1 };
-        if (this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length) {
-            all = this.All;
-        } else {
-            all = this.separatedAll[
-                this.dateSeparators[this.dateSelector][0] +
-                    '/' +
-                    this.dateSeparators[this.dateSelector][1]
-            ];
-        }
+        const all =
+            this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length
+                ? this.All
+                : this.separatedAll[this.dateSeparators[this.dateSelector].join('/')];
 
         for (const key in all) {
             const sections = all[key];
@@ -462,7 +456,7 @@ export default class Schedule {
         }
 
         for (const dts of this.dateSeparators) {
-            this.separatedAll[dts.join('/')] = Object.create(null);
+            this.separatedAll[dts.join('/')] = {};
         }
 
         for (const key in this.All) {

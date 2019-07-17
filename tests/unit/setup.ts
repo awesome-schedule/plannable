@@ -32,6 +32,7 @@ beforeAll(async () => {
         91,
         52,
         '08/27/2019 - 12/06/2019',
+        0,
         [['Comp. Vision', 'MoWe 5:00PM - 6:15PM', 'Thornton Hall E316']]
     ]);
     window.catalog = new Catalog(catalog.semester, catalog.raw_data, catalog.modified);

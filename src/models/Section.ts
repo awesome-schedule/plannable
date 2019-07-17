@@ -14,6 +14,16 @@ import Hashable from './Hashable';
 import Meeting from './Meeting';
 import { STATUSES, dayToInt, CourseStatus } from './Meta';
 
+/**
+ * last three bits of this number correspond to the three types of invalid sections,
+ * as specified by [[Section.Validity]]
+ *
+ * flag & 0b1 !== 0 => Section.Validity[1]
+ * flag & 0b10 !== 0 => Section.Validity[2]
+ * flag & 0b100 !== 0 => Section.Validity[3]
+ */
+export type ValidFlag = number;
+
 type SectionMatchFields = 'topic' | 'instructors';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
 
@@ -61,7 +71,8 @@ export default class Section implements CourseFields, Hashable {
     public readonly instructors: ReadonlyArray<string>;
     public readonly dates: string;
     public readonly meetings: ReadonlyArray<Meeting>;
-    public readonly valid: number;
+
+    public readonly valid: ValidFlag;
     public readonly dateArray: MeetingDate;
     /**
      * @param course a reference to the course that this section belongs to
@@ -99,6 +110,9 @@ export default class Section implements CourseFields, Hashable {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
 
+    /**
+     * convert [[Section.valid]] to human readable message
+     */
     public get validMsg() {
         let mask = 1;
         let msg = '';

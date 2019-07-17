@@ -7,22 +7,23 @@
 /**
  *
  */
+import { ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
+import { getApi } from '.';
 import Catalog, { CatalogJSON, SemesterJSON } from '../models/Catalog';
 import {
+    CourseStatus,
+    CourseType,
     RawCatalog,
     RawMeeting,
     RawSection,
-    CourseStatus,
     semesterDataExpirationTime,
-    TYPES_PARSE,
     STATUSES_PARSE,
-    CourseType
+    TYPES_PARSE
 } from '../models/Meta';
 import { loadFromCache } from './Loader';
-import { getApi } from '.';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -101,7 +102,7 @@ export function parseSemesterData(csv_string: string) {
         const key = (data[1] + data[2] + type).toLowerCase();
         const meetings: RawMeeting[] = [];
         const date: string = data[6 + 3];
-        let valid = 0;
+        let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
             const a = data[start],
@@ -109,15 +110,22 @@ export function parseSemesterData(csv_string: string) {
                 c = data[start + 2];
             if (a || b || c) {
                 const meetingDate = data[start + 3];
+                // inconsistent date
                 if (meetingDate && meetingDate !== date) valid |= 1;
+
+                // incomplete information
                 if (!a || !c || a === 'TBA' || c === 'TBA' || a === 'TBD' || c === 'TBD')
                     valid |= 2;
+
+                // invalid meeting time
                 if (!b || b === 'TBA' || b === 'TBD') {
                     valid |= 4;
                 } else {
                     const [, startT, , endT] = b.split(' ');
                     if (startT === endT) valid |= 4;
                 }
+
+                // insertion sort
                 let k = 0;
                 for (; k < meetings.length; k++) {
                     if (b < meetings[k][1]) break;

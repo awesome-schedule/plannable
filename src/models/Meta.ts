@@ -1,3 +1,5 @@
+import { ValidFlag } from './Section';
+
 /**
  * Meta stores some constants and type definitions
  * @author Hanzhi Zhou
@@ -64,7 +66,9 @@ export type RawCourse = [string, number, number, string, string, string, RawSect
  *
  * 7: date
  *
- * 8: meetings
+ * 8: valid
+ *
+ * 9: meetings
  */
 export type RawSection = [
     number,
@@ -75,7 +79,7 @@ export type RawSection = [
     number,
     number,
     string,
-    number,
+    ValidFlag,
     RawMeeting[]
 ];
 

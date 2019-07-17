@@ -123,8 +123,8 @@
         <log-view v-else-if="sideBar.showLog"></log-view>
 
         <main-content v-if="!sideBar.showInfo && !sideBar.showExternal && !sideBar.showCompare">
-            <div v-if="schedule.generated" id="pg" class="w-100 mb-2 row justify-content-center">
-                <div class="col-sm-auto text-center my-1">
+            <div id="pg" class="w-100 mb-2 row justify-content-center">
+                <div v-if="schedule.generated" class="col-sm-auto text-center my-1">
                     <Pagination></Pagination>
                 </div>
                 <div
@@ -133,7 +133,7 @@
                 >
                     <date-separator :cur-schedule="schedule.currentSchedule"></date-separator>
                 </div>
-                <div class="col-sm-auto text-center align-self-center">
+                <div v-if="schedule.generated" class="col-sm-auto text-center align-self-center">
                     <button class="btn btn-outline-primary my-1" @click="addToCompare()">
                         <i class="fas fa-balance-scale"></i>
                         Compare

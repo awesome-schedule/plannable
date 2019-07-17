@@ -68,10 +68,14 @@ export default class CompareView extends Store {
             schedule.totalCredit +
             '\n' +
             secs
-                .map(x =>
-                    x.sections
-                        .map(y => y.displayName + ' ' + y.title)
-                        .reduce((a, z) => a + ', ' + z)
+                .map(
+                    x =>
+                        x.department +
+                        x.number +
+                        '-' +
+                        x.sections.map(y => y.section).reduce((a, z) => a + '/' + z) +
+                        ' ' +
+                        x.title
                 )
                 .reduce((a, x) => a + '\n' + x)
         );

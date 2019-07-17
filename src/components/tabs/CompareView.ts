@@ -33,16 +33,11 @@ export default class CompareView extends Store {
         this.compareSchedule = new Schedule();
         for (let i = 0; i < this.compare.length; i++) {
             const comp = this.compare[i];
-            const sche = comp.schedule;
-            const color = comp.color;
+            const { schedule, color } = comp;
             for (let j = 0; j < 5; j++) {
-                for (const sb of sche.days[j]) {
+                for (const sb of schedule.days[j]) {
                     const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
-                    if (this.highlightIdx === i) {
-                        nsb.strong = true;
-                    } else {
-                        nsb.strong = false;
-                    }
+                    nsb.strong = this.highlightIdx === i;
                     this.compareSchedule.days[j].push(nsb);
                 }
             }
@@ -75,7 +70,7 @@ export default class CompareView extends Store {
             secs
                 .map(x =>
                     x.sections
-                        .map(y => y.department + ' ' + y.number + '-' + y.section + ' ' + y.title)
+                        .map(y => y.displayName + ' ' + y.title)
                         .reduce((a, z) => a + ', ' + z)
                 )
                 .reduce((a, x) => a + '\n' + x)

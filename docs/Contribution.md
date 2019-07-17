@@ -159,3 +159,10 @@ Hanzhi Zhou
 Inline doc writing and doc building
 
 Hanzhi Zhou
+
+### Acknowledgement
+
+Special thanks to
+
+1. Prof. Lou Bloomfield for updating Lou's list to provide up-to-date data
+2. Annie Cao for fetching major data from the registrar

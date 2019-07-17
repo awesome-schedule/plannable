@@ -13,7 +13,6 @@ Also, please note we have a [code of conduct](./CODE_OF_CONDUCT.md), please foll
 -   Better unit tests and unit tests for store and components (if possible)
     -   Current unit tests are not robust. Unit tests for Vue components are completely missing
 -   More filters and sort options (should be implemented in [ScheduleEvaluator.ts](/src/algorithm/ScheduleEvaluator.ts) and/or [ScheduleGenerator.ts](/src/algorithm/ScheduleGenerator.ts))
--   Ideas for schedule comparison and difference
 -   Support other colleges!
 -   Any other amazing things you want to add!
 

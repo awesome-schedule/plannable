@@ -15,6 +15,8 @@
                     :key="cur"
                     class="list-group-item px-1"
                     :title="getTitle(idx)"
+                    @mouseenter="highlight(idx)"
+                    @mouseleave="highlight(idx)"
                 >
                     <div class="row no-gutters justify-content-between">
                         <div class="col-sm-auto mr-auto">

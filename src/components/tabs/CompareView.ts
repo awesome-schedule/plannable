@@ -63,7 +63,7 @@ export default class CompareView extends Store {
         const schedule = this.compare[idx].schedule;
         const all = schedule.All;
         const catalog = window.catalog;
-        let secs: Course[] = [];
+        const secs: Course[] = [];
         for (const crs in all) {
             const num = all[crs];
             secs.push(catalog.getCourse(crs, num));

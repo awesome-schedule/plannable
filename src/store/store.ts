@@ -126,6 +126,10 @@ interface CompareCandidate {
      * index of the generated schedule
      */
     index: number;
+    /**
+     * index of proposed schedule
+     */
+    pIdx: number;
     color: string;
 }
 

@@ -20,7 +20,7 @@
                 >
                     <div class="row no-gutters justify-content-between">
                         <div class="col-sm-auto mr-auto">
-                            Schedule {{ cur.index + 1 }}<br />
+                            Schedule {{ cur.pIdx + 1 }}/{{ cur.index + 1 }}<br />
                             <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
                         </div>
                         <div class="col-sm-auto text-right align-self-center">

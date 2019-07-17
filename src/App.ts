@@ -132,7 +132,8 @@ export default class App extends Store {
                 schedule: this.schedule.currentSchedule,
                 profileName: this.profile.current,
                 index: this.schedule.currentScheduleIndex,
-                color
+                color,
+                pIdx: this.schedule.cpIndex
             });
         }
     }

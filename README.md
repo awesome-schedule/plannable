@@ -79,10 +79,6 @@ Then you can visit the development server at [http://127.0.0.1:8080](http://127.
 
 Please refer to our [Contribution Log](docs/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)
 
-## Acknowledgement
-
-Prof. Lou Bloomfield for providing data
-
 ## Contributing
 
 Please refer to our [documentation](docs/README.md) and [contributing guide](docs/CONTRIBUTING.md).

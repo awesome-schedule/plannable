@@ -261,7 +261,6 @@ class ScheduleGenerator {
                 }
             }
 
-
             // if the schedule matches,
             // record the next path memory and go to the next class, reset the choiceNum = 0
             currentSchedule[classNum] = candidate;

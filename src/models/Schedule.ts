@@ -442,8 +442,9 @@ export default class Schedule {
                 continue;
             }
             const course = catalog.getCourse(key, this.All[key]);
-            for (const sec of course.sections) {
-                tempSeparator.push([sec.dateArray[0], sec.dateArray[1] + 24 * 60 * 60 * 1000]);
+            for (const { dateArray } of course.sections) {
+                if (dateArray)
+                    tempSeparator.push([dateArray[0], dateArray[1] + 24 * 60 * 60 * 1000]);
             }
         }
 
@@ -499,6 +500,9 @@ export default class Schedule {
             const diffSecs: { [dt: string]: number[] } = {};
             // separate sections based of different meeting dates
             for (const sec of course.sections) {
+                // skip invalid dates
+                if (!sec.dateArray) continue;
+
                 const [start, end] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const sep = this.dateSeparators[i];

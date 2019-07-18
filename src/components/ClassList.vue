@@ -128,12 +128,13 @@
                                                         )
                                                     "
                                                 ></span>
+                                                <!-- 14 = 0b1110, i.e. validity > 1 -->
                                                 <i
                                                     v-if="sec.valid"
                                                     :title="sec.validMsg"
                                                     class="fas fa-exclamation-triangle"
                                                     :class="
-                                                        sec.valid & 1
+                                                        sec.valid & 14
                                                             ? `text-danger`
                                                             : `text-warning`
                                                     "

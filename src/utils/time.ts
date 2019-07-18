@@ -6,7 +6,7 @@
 /**
  *
  */
-import { TimeArray, TimeBlock, MeetingDate } from '../algorithm';
+import { TimeArray, TimeBlock } from '../algorithm';
 import { Day, dayToInt } from '@/models/Meta';
 /**
  * @author Hanzhi Zhou
@@ -77,7 +77,7 @@ export function hr12toInt(time: string) {
 }
 
 /**
- * return true of two `TimeArray` objects have overlapping time blocks, false otherwise
+ * return true of two [[TimeArray]] objects have overlapping time blocks, false otherwise
  * @author Hanzhi Zhou
  * @param timeArray1
  * @param timeArray2
@@ -119,8 +119,19 @@ export function checkTimeConflict(
     return false;
 }
 
-export function parseDate(date: string) {
-    return date.split(' - ').map(x => new Date(x).getTime()) as [number, number];
+/**
+ * parse `08/27/2019 - 12/17/2019` style dates to a tuple of numbers
+ * @param date
+ */
+export function parseDate(date: string): [number, number] | undefined {
+    const [start, end] = date.split(' - ');
+    if (!start || !end) return;
+    // start month / start day / start year
+    const [sm, sd, sy] = start.split('/');
+    const startDate = new Date(+sy, +sm, +sd);
+    const [em, ed, ey] = end.split('/');
+    const endDate = new Date(+ey, +em, +ed);
+    return [startDate.getTime(), endDate.getTime()];
 }
 
 /**

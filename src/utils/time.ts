@@ -124,34 +124,6 @@ export function parseDate(date: string) {
 }
 
 /**
- * check if two events (meetings) have conflict on dates
- * @author Kaiying Cat
- * @param dateArr1 [start, end] of event 1
- * @param dateArr2 [start, end] of event 2
- * @returns true if conflicted
- */
-export function checkDateConflict(dateArr1: MeetingDate, dateArr2: MeetingDate) {
-    return calcOverlap(dateArr1[0], dateArr1[1], ...dateArr2) !== -1;
-}
-
-// /**
-//  * returns negative if the 1st date is earlier, 0 if same, positive if the 1st if later
-//  * @param m1
-//  * @param d1
-//  * @param m2
-//  * @param d2
-//  */
-// export function compareDate(m1: number, d1: number, m2: number, d2: number): number {
-//     if (m1 === m2 && d1 === d2) {
-//         return 0;
-//     } else if (m1 !== m2) {
-//         return m1 - m2;
-//     } else {
-//         return d1 - d2;
-//     }
-// }
-
-/**
  * calculate the overlap between time block [a, b] and [c, d].
  * @author Hanzhi Zhou
  * @returns

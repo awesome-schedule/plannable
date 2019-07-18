@@ -17,7 +17,6 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
 import { Day, Week, TYPES, dayToInt } from './Meta';
-import { checkDateConflict } from '../utils';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
@@ -121,7 +120,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -348,7 +347,7 @@ export default class Schedule {
         const all =
             this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length
                 ? this.All
-                : this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()];
+                : this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()];
 
         for (const key in all) {
             const sections = all[key];
@@ -444,17 +443,17 @@ export default class Schedule {
             }
             const course = catalog.getCourse(key, this.All[key]);
             for (const sec of course.sections) {
-                tempSeparator.push(
-                    [sec.dateArray[0],
-                    sec.dateArray[1] + 24 * 60 * 60 * 1000]
-                );
+                tempSeparator.push([sec.dateArray[0], sec.dateArray[1] + 24 * 60 * 60 * 1000]);
             }
         }
 
         tempSeparator.sort((a, b) => a[0] - b[0]);
 
         for (let i = 1; i < tempSeparator.length; i++) {
-            if (tempSeparator[i - 1][0] === tempSeparator[i][0] && tempSeparator[i - 1][1] === tempSeparator[i][1]) {
+            if (
+                tempSeparator[i - 1][0] === tempSeparator[i][0] &&
+                tempSeparator[i - 1][1] === tempSeparator[i][1]
+            ) {
                 tempSeparator.splice(i, 1);
                 i--;
             }
@@ -488,7 +487,7 @@ export default class Schedule {
         for (let i = 1; i < this.dateSeparators.length; i++) {
             const dts = this.dateSeparators[i];
             const temp = new Date(dts);
-            this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()] = {};
+            this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
 
         for (const key in this.All) {
@@ -504,11 +503,8 @@ export default class Schedule {
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const sep = this.dateSeparators[i];
                     const temp = new Date(sep);
-                    if (
-                        start < sep &&
-                        (i === 0 || end >= this.dateSeparators[i - 1])
-                    ) {
-                        const date = (temp.getMonth() + 1) + '/' + temp.getDate();
+                    if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
+                        const date = temp.getMonth() + 1 + '/' + temp.getDate();
                         if (diffSecs[date]) {
                             diffSecs[date].push(sec.sid);
                         } else {

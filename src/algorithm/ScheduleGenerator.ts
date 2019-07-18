@@ -9,7 +9,7 @@
 import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule from '../models/Schedule';
-import { checkTimeConflict, checkDateConflict, parseDate } from '../utils';
+import { checkTimeConflict, parseDate, calcOverlap } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 import { CourseStatus, Week } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
@@ -47,7 +47,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> { }
+export interface TimeArray extends Week<number> {}
 
 export type MeetingDate = [number, number];
 
@@ -90,7 +90,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: ReadonlyArray<string>,
         public readonly options: GeneratorOptions
-    ) { }
+    ) {}
 
     /**
      * The entrance of the schedule generator
@@ -154,7 +154,7 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                        } satisfy your filters and do not conflict with your events`
+                    } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);
@@ -202,11 +202,11 @@ class ScheduleGenerator {
      */
     public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
         /**
-         * current index of course
+         * current course index
          */
         let classNum = 0;
         /**
-         * the index of the section within the course indicated by `classNum`
+         * the index of the section of the course indicated by `classNum`
          */
         let choiceNum = 0;
         /**
@@ -249,12 +249,14 @@ class ScheduleGenerator {
 
             // the time dict of the newly chosen class
             const candidate = classList[classNum][choiceNum];
-            const timeDict = candidate[2];
-            const dateArr = candidate[3];
+            const timeBlocks = candidate[2];
+            const date1 = candidate[3];
             for (let i = 0; i < classNum; i++) {
+                const schedule = currentSchedule[i];
+                const date2 = schedule[3];
                 if (
-                    checkTimeConflict(currentSchedule[i][2], timeDict, 3, 3) &&
-                    checkDateConflict(currentSchedule[i][3], dateArr)
+                    checkTimeConflict(schedule[2], timeBlocks, 3, 3) &&
+                    calcOverlap(date1[0], date1[1], date2[0], date2[1]) !== -1
                 ) {
                     ++choiceNum;
                     continue outer;

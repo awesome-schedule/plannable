@@ -5,9 +5,9 @@ describe('date test', () => {
         for (let i = 0; i < 30; i++) {
             const d1 = new Date();
             const d2 = new Date(
-                d1.getTime() + Math.floor(Math.random() * 5 + 2) * 24 * 60 * 60 * 1000
+                d1.getTime() + Math.floor(Math.random() * 2 + 6) * 24 * 60 * 60 * 1000
             );
-            const d3 = new Date(d1.getTime() + 4 * 24 * 60 * 60 * 1000);
+            const d3 = new Date(d1.getTime() + 5 * 24 * 60 * 60 * 1000);
             const d4 = new Date(d1.getTime() + 10 * 24 * 60 * 60 * 1000);
 
             const arr1: [number, number] =

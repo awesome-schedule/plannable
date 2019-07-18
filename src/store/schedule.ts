@@ -51,7 +51,7 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 }
 
 // tslint:disable-next-line: no-empty-interface
-interface ScheduleStore extends ScheduleState {}
+interface ScheduleStore extends ScheduleState { }
 
 /**
  * the schedule module provides methods to manipulate schedules

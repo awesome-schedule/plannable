@@ -15,4 +15,9 @@ export default class DateSeparator extends Vue {
         this.curSchedule.dateSelector = idx;
         this.curSchedule.computeSchedule();
     }
+
+    public convDate(n: number, offset: number = 0) {
+        const date = new Date(n + offset * 24 * 60 * 60 * 1000);
+        return date.getMonth() + 1 + '/' + date.getDate();
+    }
 }

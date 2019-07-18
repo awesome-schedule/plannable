@@ -1,25 +1,8 @@
-import { compareDate, checkDateConflict } from '@/utils/time';
+import { checkDateConflict } from '@/utils/time';
 
 describe('date test', () => {
-    it('compare date', () => {
-        for (let i = 0; i < 100; i++) {
-            const d1 = new Date();
-            const d2 = new Date(
-                d1.getTime() + Math.floor(Math.random() * 5 + 1) * 24 * 60 * 60 * 1000
-            );
-            expect(
-                compareDate(d1.getMonth() + 1, d1.getDate(), d2.getMonth() + 1, d2.getDate())
-            ).toBeLessThan(0);
-            expect(
-                compareDate(d2.getMonth() + 1, d2.getDate(), d1.getMonth() + 1, d1.getDate())
-            ).toBeGreaterThan(0);
-            expect(
-                compareDate(d1.getMonth() + 1, d1.getDate(), d1.getMonth() + 1, d1.getDate())
-            ).toBe(0);
-        }
-    });
     it('check date conflict', () => {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 30; i++) {
             const d1 = new Date();
             const d2 = new Date(
                 d1.getTime() + Math.floor(Math.random() * 5 + 2) * 24 * 60 * 60 * 1000
@@ -27,12 +10,18 @@ describe('date test', () => {
             const d3 = new Date(d1.getTime() + 4 * 24 * 60 * 60 * 1000);
             const d4 = new Date(d1.getTime() + 10 * 24 * 60 * 60 * 1000);
 
-            const arr1: [number, number, number, number] =
-                [d1.getMonth() + 1, d1.getDate(), d2.getMonth() + 1, d2.getDate()];
-            const arr2: [number, number, number, number] =
-                [d2.getMonth() + 1, d2.getDate(), d4.getMonth() + 1, d4.getDate()];
+            const arr1: [number, number] =
+                [d1.getTime(), d2.getTime()];
+            const arr2: [number, number] =
+                [d3.getTime(), d4.getTime()];
 
             expect(checkDateConflict(arr1, arr2)).toBe(true);
+            expect(checkDateConflict(arr2, arr1)).toBe(true);
+
+            const arr3: [number, number] = [d1.getTime(), d3.getTime()];
+            const arr4: [number, number] = [d2.getTime(), d4.getTime()];
+
+            expect(checkDateConflict(arr3, arr4)).toBe(false);
         }
     });
 });

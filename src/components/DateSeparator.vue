@@ -6,13 +6,9 @@
             class="btn btn-outline-primary"
             @click="selectInterval(idx)"
         >
-            {{
-                curSchedule.dateSeparators[+idx - 1][0] +
-                    '/' +
-                    curSchedule.dateSeparators[+idx - 1][1]
-            }}
-            to
-            {{ curSchedule.dateSeparators[+idx][0] + '/' + curSchedule.dateSeparators[+idx][1] }}
+            {{ convDate(curSchedule.dateSeparators[+idx - 1]) }}
+            -
+            {{ convDate(curSchedule.dateSeparators[+idx], -1) }}
             <i v-if="curSchedule.dateSelector === idx" class="fas fa-check"></i>
         </button>
 

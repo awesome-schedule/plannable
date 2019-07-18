@@ -17,7 +17,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
 import { Day, Week, TYPES, dayToInt } from './Meta';
-import { compareDate } from '../utils';
+import { checkDateConflict } from '../utils';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
@@ -132,7 +132,7 @@ export default class Schedule {
                 schedule.All[key] = sections;
             }
         }
-
+        schedule.constructDateSeparator();
         schedule.computeSchedule();
         return schedule;
     }
@@ -183,7 +183,7 @@ export default class Schedule {
      * [[10, 17], [12, 28]]
      * ```
      */
-    public dateSeparators: [number, number][] = [];
+    public dateSeparators: number[] = [];
     public separatedAll: { [date: string]: { [x: string]: Set<number> | -1 } } = {};
     public dateSelector: number = -1;
 
@@ -206,8 +206,8 @@ export default class Schedule {
         for (const [key, sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
-        this.computeSchedule();
         this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     /**
@@ -251,8 +251,8 @@ export default class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        this.computeSchedule();
         this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     /**
@@ -343,10 +343,12 @@ export default class Schedule {
         if (!catalog) return;
 
         this.cleanSchedule();
+        const temp = new Date(this.dateSeparators[this.dateSelector]);
+
         const all =
             this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length
                 ? this.All
-                : this.separatedAll[this.dateSeparators[this.dateSelector].join('/')];
+                : this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()];
 
         for (const key in all) {
             const sections = all[key];
@@ -433,64 +435,95 @@ export default class Schedule {
     public constructDateSeparator() {
         const catalog = window.catalog;
         this.dateSeparators.length = 0;
+        const tempSeparator: [number, number][] = [];
 
+        // record all start and end points
         for (const key in this.All) {
+            if (this.All[key] === -1) {
+                continue;
+            }
             const course = catalog.getCourse(key, this.All[key]);
             for (const sec of course.sections) {
-                type T = [number, number];
-                const temp = sec.dateArray.slice(2);
-                const a = new Date(new Date().getFullYear() + '/' + temp[0] + '/' + temp[1]);
-                const b = new Date(a.getTime() + 24 * 60 * 60 * 1000);
-                this.dateSeparators.push(
-                    sec.dateArray.slice(0, 2) as T,
-                    [b.getMonth() + 1, b.getDate()] as T
+                tempSeparator.push(
+                    [sec.dateArray[0],
+                    sec.dateArray[1] + 24 * 60 * 60 * 1000]
                 );
             }
         }
 
-        this.dateSeparators.sort((a, b) => Utils.compareDate(a[0], a[1], b[0], b[1]));
+        tempSeparator.sort((a, b) => a[0] - b[0]);
+
+        for (let i = 1; i < tempSeparator.length; i++) {
+            if (tempSeparator[i - 1][0] === tempSeparator[i][0] && tempSeparator[i - 1][1] === tempSeparator[i][1]) {
+                tempSeparator.splice(i, 1);
+                i--;
+            }
+        }
+
+        // abandon start points that are the same as some end points
+        // e.g. in [[8/26 - 10.17], [10.17 - 12.6]], one 10.17 would be abandoned
+        outer: for (let i = 0; i < tempSeparator.length; i++) {
+            for (let j = 0; j < i; j++) {
+                if (tempSeparator[i][0] === tempSeparator[j][1]) {
+                    this.dateSeparators.push(tempSeparator[i][1]);
+                    continue outer;
+                }
+            }
+            this.dateSeparators.push(tempSeparator[i][0], tempSeparator[i][1]);
+        }
+
+        this.dateSeparators.sort((a, b) => a - b);
+
+        // discard repeated separators
         for (let i = 1; i < this.dateSeparators.length; i++) {
             const a = this.dateSeparators[i - 1];
-            const cmp = compareDate(a[0], a[1], ...this.dateSeparators[i]);
-            if (cmp === 0 || cmp === -1) {
+            const b = this.dateSeparators[i];
+            if (a - b === 0) {
                 this.dateSeparators.splice(i, 1);
                 i--;
             }
         }
 
-        for (const dts of this.dateSeparators) {
-            this.separatedAll[dts.join('/')] = {};
+        // create empty objects for separated "All"
+        for (let i = 1; i < this.dateSeparators.length; i++) {
+            const dts = this.dateSeparators[i];
+            const temp = new Date(dts);
+            this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()] = {};
         }
 
         for (const key in this.All) {
+            if (this.All[key] === -1) {
+                continue;
+            }
             const course = catalog.getCourse(key, this.All[key]);
+            // eg. { 12/6 : [1, 3, 4] }
             const diffSecs: { [dt: string]: number[] } = {};
+            // separate sections based of different meeting dates
             for (const sec of course.sections) {
-                const [sm, sd, em, ed] = sec.dateArray;
+                const [start, end] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
-                    const [sepM, sepD] = this.dateSeparators[i];
+                    const sep = this.dateSeparators[i];
+                    const temp = new Date(sep);
                     if (
-                        compareDate(sm, sd, sepM, sepD) < 0 &&
-                        (i === 0 || compareDate(em, ed, ...this.dateSeparators[i - 1]) >= 0)
+                        start < sep &&
+                        (i === 0 || end >= this.dateSeparators[i - 1])
                     ) {
-                        const date = sepM + '/' + sepD;
+                        const date = (temp.getMonth() + 1) + '/' + temp.getDate();
                         if (diffSecs[date]) {
                             diffSecs[date].push(sec.sid);
                         } else {
                             diffSecs[date] = [sec.sid];
                         }
                     }
-                    // if (compareDate(em, ed, sepM, sepD) < 0) {
-                    //     break;
-                    // }
+                    if (end < sep) {
+                        break;
+                    }
                 }
             }
+            // put each group of sections into corresponding separated "All"
             for (const diffTime in diffSecs) {
                 const secIds = diffSecs[diffTime];
-                const secNum =
-                    secIds.length === course.sections.length && this.All[key] === -1
-                        ? -1
-                        : new Set(secIds);
+                const secNum = new Set(secIds);
                 this.separatedAll[diffTime][key] = secNum;
             }
         }
@@ -612,8 +645,8 @@ export default class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.computeSchedule();
         this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     public cleanSchedule() {

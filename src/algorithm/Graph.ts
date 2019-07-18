@@ -55,3 +55,21 @@ export class Vertex<T> {
  * adjacency list representation of a graph
  */
 export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
+
+/**
+ * perform depth first search to find a connected component
+ *
+ * @returns node indices belonging to the connected component found
+ */
+export function DFS(start: number, adjList: Int16Array[], visited: Uint8Array): number[] {
+    const neighbors = adjList[start];
+    const componentNodes = [start];
+    visited[start] = 1;
+    for (const i of neighbors) {
+        if (!visited[i]) {
+            visited[i] = 1;
+            componentNodes.push(...DFS(i, adjList, visited));
+        }
+    }
+    return componentNodes;
+}

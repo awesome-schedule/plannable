@@ -7,7 +7,7 @@
 /**
  *
  */
-import { colorDepthSearch, graphColoringExact } from '../algorithm';
+import { colorDepthSearch, graphColoringExact, DFS } from '../algorithm';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -121,7 +121,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -348,7 +348,7 @@ export default class Schedule {
         const all =
             this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length
                 ? this.All
-                : this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()];
+                : this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()];
 
         for (const key in all) {
             const sections = all[key];
@@ -444,17 +444,17 @@ export default class Schedule {
             }
             const course = catalog.getCourse(key, this.All[key]);
             for (const sec of course.sections) {
-                tempSeparator.push(
-                    [sec.dateArray[0],
-                    sec.dateArray[1] + 24 * 60 * 60 * 1000]
-                );
+                tempSeparator.push([sec.dateArray[0], sec.dateArray[1] + 24 * 60 * 60 * 1000]);
             }
         }
 
         tempSeparator.sort((a, b) => a[0] - b[0]);
 
         for (let i = 1; i < tempSeparator.length; i++) {
-            if (tempSeparator[i - 1][0] === tempSeparator[i][0] && tempSeparator[i - 1][1] === tempSeparator[i][1]) {
+            if (
+                tempSeparator[i - 1][0] === tempSeparator[i][0] &&
+                tempSeparator[i - 1][1] === tempSeparator[i][1]
+            ) {
                 tempSeparator.splice(i, 1);
                 i--;
             }
@@ -488,7 +488,7 @@ export default class Schedule {
         for (let i = 1; i < this.dateSeparators.length; i++) {
             const dts = this.dateSeparators[i];
             const temp = new Date(dts);
-            this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()] = {};
+            this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
 
         for (const key in this.All) {
@@ -504,11 +504,8 @@ export default class Schedule {
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const sep = this.dateSeparators[i];
                     const temp = new Date(sep);
-                    if (
-                        start < sep &&
-                        (i === 0 || end >= this.dateSeparators[i - 1])
-                    ) {
-                        const date = (temp.getMonth() + 1) + '/' + temp.getDate();
+                    if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
+                        const date = temp.getMonth() + 1 + '/' + temp.getDate();
                         if (diffSecs[date]) {
                             diffSecs[date].push(sec.sid);
                         } else {
@@ -529,63 +526,47 @@ export default class Schedule {
         }
     }
 
-    public dfs(adjList: Int16Array[], start: number, visited: Set<number>): number[] {
-        const lst = adjList[start];
-        const group = [];
-        for (const i of lst) {
-            if (!visited.has(i)) {
-                visited.add(i);
-                group.push(...this.dfs(adjList, i, visited));
-            }
-        }
-        group.push(start);
-        return group;
-    }
-
+    /**
+     * for the array of schedule blocks provided, construct an adjacency list
+     * to represent the conflicts between each pair of blocks
+     */
     public constructAdjList(blocks: ScheduleBlock[]) {
         blocks.sort((a, b) => b.duration - a.duration);
+        const len = blocks.length;
         const adjList: number[][] = blocks.map(() => []);
 
         // construct an undirected graph
-        for (let i = 0; i < blocks.length; i++) {
-            for (let j = i + 1; j < blocks.length; j++) {
+        for (let i = 0; i < len; i++) {
+            for (let j = i + 1; j < len; j++) {
                 if (blocks[i].conflict(blocks[j])) {
                     adjList[i].push(j);
                     adjList[j].push(i);
                 }
             }
         }
-        return adjList;
+        // convert to typed array so it will be much faster
+        return adjList.map(x => new Int16Array(x));
     }
 
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            const adjList = this.constructAdjList(blocks);
-            const fastGraph = adjList.map(x => Int16Array.from(x));
-            const visited: Set<number> = new Set();
-            const diffBlocks: ScheduleBlock[][] = [];
-            for (let i = 0; i < fastGraph.length; i++) {
-                if (!visited.has(i)) {
-                    visited.add(i);
-                    const temp = this.dfs(fastGraph, i, visited);
-                    diffBlocks.push([]);
-                    for (const t of temp) {
-                        diffBlocks[diffBlocks.length - 1].push(blocks[t]);
-                    }
-                }
+            const fastGraph = this.constructAdjList(blocks);
+            const len = fastGraph.length;
+            const visited = new Uint8Array(len);
+            // find all connected components
+            const components: ScheduleBlock[][] = [];
+            for (let i = 0; i < len; i++) {
+                if (!visited[i])
+                    components.push(DFS(i, fastGraph, visited).map(idx => blocks[idx]));
             }
-            for (const bls of diffBlocks) {
-                this._computeBlockPositions(bls);
-            }
+
+            // we run coloring for each component
+            for (const bls of components) this._computeBlockPositions(bls);
         }
     }
 
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const adjList = this.constructAdjList(blocks);
-        // convert to typed array so its much faster
-        const fastGraph = adjList.map(x => Int16Array.from(x));
-
-        // console.log(fg.length);
+        const fastGraph = this.constructAdjList(blocks);
         const colors = new Int16Array(fastGraph.length);
         const _ = graphColoringExact(fastGraph, colors);
         // const [colors, _] = dsatur(fastGraph);
@@ -619,8 +600,6 @@ export default class Schedule {
             }
         }
         graph.clear();
-
-
     }
 
     /**
@@ -654,7 +633,7 @@ export default class Schedule {
                         this.placeHelper(color, meeting.days, course);
                 } else {
                     // if we don't combined the sections, we call place each section
-                    for (const section of course.sections) {
+                    for (const section of courseSec) {
                         // note: sections belonging to the same course will have the same color
                         const color = this.getColor(section);
                         for (const meeting of section.meetings)

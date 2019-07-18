@@ -529,56 +529,112 @@ export default class Schedule {
         }
     }
 
+    public dfs(adjList: Int16Array[], start: number, visited: Set<number>): number[] {
+        const lst = adjList[start];
+        const group = [];
+        for (const i of lst) {
+            if (!visited.has(i)) {
+                visited.add(i);
+                group.push(...this.dfs(adjList, i, visited));
+            }
+        }
+        group.push(start);
+        return group;
+    }
+
+    public constructAdjList(blocks: ScheduleBlock[]) {
+        blocks.sort((a, b) => b.duration - a.duration);
+        const adjList: number[][] = blocks.map(() => []);
+
+        // construct an undirected graph
+        for (let i = 0; i < blocks.length; i++) {
+            for (let j = i + 1; j < blocks.length; j++) {
+                if (blocks[i].conflict(blocks[j])) {
+                    adjList[i].push(j);
+                    adjList[j].push(i);
+                }
+            }
+        }
+        return adjList;
+    }
+
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            blocks.sort((a, b) => b.duration - a.duration);
-            const adjList: number[][] = blocks.map(() => []);
-
-            // construct an undirected graph
-            for (let i = 0; i < blocks.length; i++) {
-                for (let j = i + 1; j < blocks.length; j++) {
-                    if (blocks[i].conflict(blocks[j])) {
-                        adjList[i].push(j);
-                        adjList[j].push(i);
-                    }
-                }
-            }
-            // convert to typed array so its much faster
+            const adjList = this.constructAdjList(blocks);
             const fastGraph = adjList.map(x => Int16Array.from(x));
-            const colors = new Int16Array(fastGraph.length);
-            const _ = graphColoringExact(fastGraph, colors);
-            // const [colors, _] = dsatur(fastGraph);
-
-            const graph = colorDepthSearch(fastGraph, colors);
-            for (const node of graph.keys()) {
-                // skip any non-root node in the depth-first trees
-                if (node.parent) continue;
-
-                // traverse all the paths starting from the root
-                const paths = node.path;
-                for (const path of paths) {
-                    // compute the left and width of the root node if they're not computed
-                    const firstBlock = blocks[path[0].val];
-                    if (firstBlock.left === -1) {
-                        firstBlock.left = 0;
-                        firstBlock.width = 1 / (path[0].pathDepth + 1);
-                    }
-
-                    // computed the left and width of the remaining nodes based on
-                    // the already computed information of the previous node
-                    for (let i = 1; i < path.length; i++) {
-                        const block = blocks[path[i].val];
-                        const previousBlock = blocks[path[i - 1].val];
-
-                        block.left = Math.max(block.left, previousBlock.left + previousBlock.width);
-
-                        // remaining width / number of remaining path length
-                        block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
+            const visited: Set<number> = new Set();
+            const diffBlocks: ScheduleBlock[][] = [];
+            for (let i = 0; i < fastGraph.length; i++) {
+                if (!visited.has(i)) {
+                    visited.add(i);
+                    const temp = this.dfs(fastGraph, i, visited);
+                    diffBlocks.push([]);
+                    for (const t of temp) {
+                        diffBlocks[diffBlocks.length - 1].push(blocks[t]);
                     }
                 }
             }
-            graph.clear();
+            for (const bls of diffBlocks) {
+                this._computeBlockPositions(bls);
+            }
         }
+    }
+
+    private _computeBlockPositions(blocks: ScheduleBlock[]) {
+        const adjList = this.constructAdjList(blocks);
+        // convert to typed array so its much faster
+        const fastGraph = adjList.map(x => Int16Array.from(x));
+
+        const visited: Set<number> = new Set();
+        const diffBlocks: ScheduleBlock[][] = [];
+
+        // for (let i = 0; i < fastGraph.length; i++) {
+        //     if (!visited.has(i)) {
+        //         visited.add(i);
+        //         const temp = this.dfs(fastGraph, i, visited);
+        //         diffBlocks.push([]);
+        //         for (const t of temp) {
+        //             diffBlocks[diffBlocks.length - 1].push(blocks[t]);
+        //         }
+        //     }
+        // }
+
+        // console.log(fg.length);
+        const colors = new Int16Array(fastGraph.length);
+        const _ = graphColoringExact(fastGraph, colors);
+        // const [colors, _] = dsatur(fastGraph);
+
+        const graph = colorDepthSearch(fastGraph, colors);
+        for (const node of graph.keys()) {
+            // skip any non-root node in the depth-first trees
+            if (node.parent) continue;
+
+            // traverse all the paths starting from the root
+            const paths = node.path;
+            for (const path of paths) {
+                // compute the left and width of the root node if they're not computed
+                const firstBlock = blocks[path[0].val];
+                if (firstBlock.left === -1) {
+                    firstBlock.left = 0;
+                    firstBlock.width = 1 / (path[0].pathDepth + 1);
+                }
+
+                // computed the left and width of the remaining nodes based on
+                // the already computed information of the previous node
+                for (let i = 1; i < path.length; i++) {
+                    const block = blocks[path[i].val];
+                    const previousBlock = blocks[path[i - 1].val];
+
+                    block.left = Math.max(block.left, previousBlock.left + previousBlock.width);
+
+                    // remaining width / number of remaining path length
+                    block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
+                }
+            }
+        }
+        graph.clear();
+
+
     }
 
     /**

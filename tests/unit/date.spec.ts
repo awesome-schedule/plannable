@@ -16,6 +16,12 @@ describe('date test', () => {
                 [d3.getTime(), d4.getTime()];
 
             expect(checkDateConflict(arr1, arr2)).toBe(true);
+            expect(checkDateConflict(arr2, arr1)).toBe(true);
+
+            const arr3: [number, number] = [d1.getTime(), d3.getTime()];
+            const arr4: [number, number] = [d2.getTime(), d4.getTime()];
+
+            expect(checkDateConflict(arr3, arr4)).toBe(false);
         }
     });
 });

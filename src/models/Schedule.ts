@@ -437,6 +437,7 @@ export default class Schedule {
         this.dateSeparators.length = 0;
         const tempSeparator: [number, number][] = [];
 
+        // record all start and end points
         for (const key in this.All) {
             if (this.All[key] === -1) {
                 continue;
@@ -458,6 +459,9 @@ export default class Schedule {
                 i--;
             }
         }
+
+        // abandon start points that are the same as some end points
+        // e.g. in [[8/26 - 10.17], [10.17 - 12.6]], one 10.17 would be abandoned
         outer: for (let i = 0; i < tempSeparator.length; i++) {
             for (let j = 0; j < i; j++) {
                 if (tempSeparator[i][0] === tempSeparator[j][1]) {
@@ -470,6 +474,7 @@ export default class Schedule {
 
         this.dateSeparators.sort((a, b) => a - b);
 
+        // discard repeated separators
         for (let i = 1; i < this.dateSeparators.length; i++) {
             const a = this.dateSeparators[i - 1];
             const b = this.dateSeparators[i];
@@ -479,7 +484,9 @@ export default class Schedule {
             }
         }
 
-        for (const dts of this.dateSeparators) {
+        // create empty objects for separated "All"
+        for (let i = 1; i < this.dateSeparators.length; i++) {
+            const dts = this.dateSeparators[i];
             const temp = new Date(dts);
             this.separatedAll[(temp.getMonth() + 1) + '/' + temp.getDate()] = {};
         }
@@ -489,7 +496,9 @@ export default class Schedule {
                 continue;
             }
             const course = catalog.getCourse(key, this.All[key]);
+            // eg. { 12/6 : [1, 3, 4] }
             const diffSecs: { [dt: string]: number[] } = {};
+            // separate sections based of different meeting dates
             for (const sec of course.sections) {
                 const [start, end] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
@@ -511,6 +520,7 @@ export default class Schedule {
                     }
                 }
             }
+            // put each group of sections into corresponding separated "All"
             for (const diffTime in diffSecs) {
                 const secIds = diffSecs[diffTime];
                 const secNum = new Set(secIds);

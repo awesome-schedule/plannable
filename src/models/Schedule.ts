@@ -585,20 +585,6 @@ export default class Schedule {
         // convert to typed array so its much faster
         const fastGraph = adjList.map(x => Int16Array.from(x));
 
-        const visited: Set<number> = new Set();
-        const diffBlocks: ScheduleBlock[][] = [];
-
-        // for (let i = 0; i < fastGraph.length; i++) {
-        //     if (!visited.has(i)) {
-        //         visited.add(i);
-        //         const temp = this.dfs(fastGraph, i, visited);
-        //         diffBlocks.push([]);
-        //         for (const t of temp) {
-        //             diffBlocks[diffBlocks.length - 1].push(blocks[t]);
-        //         }
-        //     }
-        // }
-
         // console.log(fg.length);
         const colors = new Int16Array(fastGraph.length);
         const _ = graphColoringExact(fastGraph, colors);

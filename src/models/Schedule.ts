@@ -132,7 +132,7 @@ export default class Schedule {
                 schedule.All[key] = sections;
             }
         }
-
+        schedule.constructDateSeparator();
         schedule.computeSchedule();
         return schedule;
     }
@@ -206,8 +206,8 @@ export default class Schedule {
         for (const [key, sections] of raw_schedule) {
             this.All[key] = new Set(sections);
         }
-        this.computeSchedule();
         this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     /**
@@ -251,8 +251,8 @@ export default class Schedule {
                 this.All[key] = new Set([section]);
             }
         }
-        this.computeSchedule();
         this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     /**
@@ -438,6 +438,9 @@ export default class Schedule {
         const tempSeparator: [number, number][] = [];
 
         for (const key in this.All) {
+            if (this.All[key] === -1) {
+                continue;
+            }
             const course = catalog.getCourse(key, this.All[key]);
             for (const sec of course.sections) {
                 tempSeparator.push(
@@ -482,10 +485,12 @@ export default class Schedule {
         }
 
         for (const key in this.All) {
+            if (this.All[key] === -1) {
+                continue;
+            }
             const course = catalog.getCourse(key, this.All[key]);
             const diffSecs: { [dt: string]: number[] } = {};
             for (const sec of course.sections) {
-                // const [sm, sd, em, ed] = sec.dateArray;
                 const [start, end] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const sep = this.dateSeparators[i];
@@ -508,10 +513,7 @@ export default class Schedule {
             }
             for (const diffTime in diffSecs) {
                 const secIds = diffSecs[diffTime];
-                const secNum =
-                    secIds.length === course.sections.length && this.All[key] === -1
-                        ? -1
-                        : new Set(secIds);
+                const secNum = new Set(secIds);
                 this.separatedAll[diffTime][key] = secNum;
             }
         }
@@ -633,8 +635,8 @@ export default class Schedule {
      */
     public remove(key: string) {
         delete this.All[key];
-        this.computeSchedule();
         this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     public cleanSchedule() {

@@ -2,7 +2,7 @@ import { checkDateConflict } from '@/utils/time';
 
 describe('date test', () => {
     it('check date conflict', () => {
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 30; i++) {
             const d1 = new Date();
             const d2 = new Date(
                 d1.getTime() + Math.floor(Math.random() * 5 + 2) * 24 * 60 * 60 * 1000

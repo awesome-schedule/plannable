@@ -11,6 +11,8 @@
     <title>Plannable</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+
+    <!-- Only a slim build is required. Ajax is performed via Axios -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -20,15 +22,25 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
+
     <!-- cdnjs is faster than the default cdn of font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"
         integrity="sha256-BtbhCIbtfeVWGsqxk1vOHEYXS6qcvQvLMZqjtpWUEx8=" crossorigin="anonymous" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.6.3/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
-    <!-- MathJax is used for information.vue, so could be lazy-loaded -->
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-AMS_HTML"
+
+    <!-- we only need Vue's runtime. No compiler is needed -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.runtime.min.js"
+        integrity="sha256-QSjTKFyl+0AHjs8OSm1238CRMQWixK8z7ymX/81u7i0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.0.0/papaparse.min.js"
+        integrity="sha256-9spiQYPW1tvqyjvgHC/NGy9VppNEuYAArVS3E/1bn6s=" crossorigin="anonymous"></script>
+
+    <!-- vue.draggable  requires sortable.js -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.9.0/Sortable.min.js"
+        integrity="sha256-dTRAC66orJgjxgfw22bvkFVLM8/S+vchcXIzHyYzNFg=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.23.0/vuedraggable.umd.min.js"
+        integrity="sha256-GAVdfR/7cRNqncNsUBZSbgGaHPgQ5yhi9FMjm+3AJTw=" crossorigin="anonymous"></script>
+
+    <!-- MathJax is used in information.vue only, so it could be lazy-loaded -->
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-AMS_HTML"
         integrity="sha256-XfgP+xwbEPil9LJp3IfNy1NPqFFcePfrdhfHYG5zTfs=" crossorigin="anonymous"></script>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-137414032-1"></script>

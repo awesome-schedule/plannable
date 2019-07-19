@@ -27,10 +27,10 @@ export type TimeBlock = [number, number];
 
 /**
  * The blocks is a iliffe vector storing the time and room information of the an entity at each day.
- * Index from 0 to 4 represents days from Monday to Friday.
+ * Index from 0 to 6 represents days from Monday to Sunday.
  * Example:
  * ```js
- * const timeDict = [ [600, 660, 11, 900, 960, 2], [], [], [],  [1200, 1260, 12] ]
+ * const timeDict = [ [600, 660, 11, 900, 960, 2], [], [], [],  [1200, 1260, 12], [], [] ]
  * ```
  * represents that this entity will take place
  * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
@@ -47,7 +47,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> {}
+export interface TimeArray extends Week<number> { }
 
 export type MeetingDate = [number, number];
 
@@ -62,7 +62,7 @@ export type MeetingDate = [number, number];
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], []], [8, 28, 12, 26]]
+ * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], [], [], []], [8, 28, 12, 26]]
  * ```
  */
 export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];
@@ -90,7 +90,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: ReadonlyArray<string>,
         public readonly options: GeneratorOptions
-    ) {}
+    ) { }
 
     /**
      * The entrance of the schedule generator
@@ -154,7 +154,7 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                    } satisfy your filters and do not conflict with your events`
+                        } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);

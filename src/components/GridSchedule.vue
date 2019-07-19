@@ -23,7 +23,8 @@
                     id="grid"
                     class="grid-container main mb-3"
                     :style="{
-                        'grid-template-columns': '20% 20% 20% 20% 20%',
+                        'grid-template-columns': `${100 / 7}% ${100 / 7}% ${100 / 7}% ${100 /
+                            7}% ${100 / 7}% ${100 / 7}% ${100 / 7}%`,
                         position: 'relative',
                         'grid-template-rows': heightInfo.reduce(
                             (acc, x) => acc + (x + 'px '),
@@ -55,8 +56,8 @@
                             :height-info="heightInfo"
                             :absolute-earliest="absoluteEarliest"
                             :style="{
-                                left: (+idx + scheduleBlock.left) * 20 + '%',
-                                width: 20 * scheduleBlock.width + '%'
+                                left: (+idx + scheduleBlock.left) * (100 / 7) + '%',
+                                width: (100 / 7) * scheduleBlock.width + '%'
                             }"
                             :day="day"
                         ></course-block>

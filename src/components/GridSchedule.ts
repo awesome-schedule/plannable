@@ -20,7 +20,7 @@ import Schedule from '@/models/Schedule';
 export default class GridSchedule extends Store {
     @Prop(Schedule) readonly currentSchedule!: Schedule;
 
-    daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     // note: we need Schedule.days because it's an array that keeps the keys in order
     get days() {
@@ -115,7 +115,7 @@ export default class GridSchedule extends Store {
     }
     get items() {
         const arr: number[] = [];
-        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
+        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 7;
         for (let i = 0; i < numBlocks; i++) {
             arr.push(i + 1);
         }

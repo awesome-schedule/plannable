@@ -120,7 +120,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -196,7 +196,7 @@ export default class Schedule {
      */
     constructor(raw_schedule: RawAlgoSchedule = [], public events: Event[] = []) {
         this.All = {};
-        this.days = [[], [], [], [], []];
+        this.days = [[], [], [], [], [], [], []];
         this._preview = null;
         this.colorSlots = Array.from({ length: Schedule.bgColors.length }, () => new Set<string>());
         this.totalCredit = 0;
@@ -670,7 +670,7 @@ export default class Schedule {
     }
 
     public cleanSchedule() {
-        this.days = [[], [], [], [], []];
+        this.days = [[], [], [], [], [], [], []];
         this.colorSlots.forEach(x => x.clear());
         this.totalCredit = 0;
         this.currentCourses = [];

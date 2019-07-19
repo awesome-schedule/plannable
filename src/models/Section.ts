@@ -152,7 +152,7 @@ export default class Section implements CourseFields, Hashable {
      * get the time and room of this section's meetings as [[TimeArray]]
      */
     public getTimeRoom(): TimeArray | null {
-        const timeDict: TimeArray = [[], [], [], [], []];
+        const timeDict: TimeArray = [[], [], [], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them and add to tmp_dict
         const buildingList = window.buildingList;

@@ -49,7 +49,7 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
 export function parseTimeAsTimeArray(time: string): TimeArray | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
-        const timeDict: TimeArray = [[], [], [], [], []];
+        const timeDict: TimeArray = [[], [], [], [], [], [], []];
         const s = hr12toInt(start),
             e = hr12toInt(end);
         for (let i = 0; i < days.length; i += 2)
@@ -91,7 +91,7 @@ export function checkTimeConflict(
     step1 = 2,
     step2 = 2
 ) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 7; i++) {
         const timeBlocks1 = timeArray1[i];
         const len1 = timeBlocks1.length;
         if (!len1) continue;

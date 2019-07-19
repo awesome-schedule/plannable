@@ -220,10 +220,10 @@ class ScheduleEvaluator {
      */
     public add(schedule: RawAlgoSchedule) {
         // sort time blocks of courses according to its schedule
-        const blocks: Week<number> = [[], [], [], [], []];
+        const blocks: Week<number> = [[], [], [], [], [], [], []];
         for (const course of schedule) {
             const blockArray = course[2];
-            for (let k = 0; k < 5; k++) {
+            for (let k = 0; k < 7; k++) {
                 // time and rooms at day k
                 const dayBlocks = blockArray[k];
                 const len = dayBlocks.length;

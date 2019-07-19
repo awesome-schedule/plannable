@@ -559,8 +559,10 @@ export default class Schedule {
             // find all connected components
             const components: ScheduleBlock[][] = [];
             for (let i = 0; i < len; i++) {
-                if (!visited[i])
+                if (!visited[i]) {
+                    visited[i] = 1;
                     components.push(DFS(i, fastGraph, visited).map(idx => blocks[idx]));
+                }
             }
 
             // we run coloring for each component

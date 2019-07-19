@@ -20,12 +20,17 @@ import Schedule from '@/models/Schedule';
 export default class GridSchedule extends Store {
     @Prop(Schedule) readonly currentSchedule!: Schedule;
 
-    daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    df = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     // note: we need Schedule.days because it's an array that keeps the keys in order
     get days() {
         return this.display.showWeekend ? DAYS : DAYS.slice(0, 5);
     }
+
+    get daysFull() {
+        return this.display.showWeekend ? this.df : this.df.slice(0, 5);
+    }
+
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
      * return 0 if no class

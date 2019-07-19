@@ -24,7 +24,7 @@ export default class GridSchedule extends Store {
 
     // note: we need Schedule.days because it's an array that keeps the keys in order
     get days() {
-        return DAYS;
+        return this.display.showWeekend ? DAYS : DAYS.slice(0, 5);
     }
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
@@ -82,6 +82,15 @@ export default class GridSchedule extends Store {
             return timeToNum(late);
         }
     }
+
+    get gridTemplateCols() {
+        const numCol = this.numCol;
+        return `${100 / numCol}% ${100 / numCol}% ${100 /
+            numCol}% ${100 / numCol}% ${100 / numCol}% ${
+            numCol === 7 ? 100 / numCol + '%' : ''
+            } ${numCol === 7 ? 100 / numCol + '%' : ''}`;
+    }
+
     /**
      * computes the number of rows we need
      */
@@ -92,6 +101,11 @@ export default class GridSchedule extends Store {
         }
         return num;
     }
+
+    get numCol() {
+        return this.display.showWeekend ? 7 : 5;
+    }
+
     get hours() {
         let curTime = '';
         if (this.absoluteEarliest % 2 === 0) {
@@ -115,7 +129,7 @@ export default class GridSchedule extends Store {
     }
     get items() {
         const arr: number[] = [];
-        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 7;
+        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * this.numCol;
         for (let i = 0; i < numBlocks; i++) {
             arr.push(i + 1);
         }

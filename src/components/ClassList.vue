@@ -97,17 +97,21 @@
                                 class="list-group class-info"
                             >
                                 <li
-                                    class="list-group-item class-section"
+                                    class="list-group-item class-section py-1"
                                     style="cursor: pointer"
-                                    title="click to all sections in this time period"
+                                    title="click to select all sections in this time period"
                                     @click="selectAll(value.key, value)"
                                 >
                                     <div class="row no-gutters justify-content-between">
                                         <div class="col-md-auto">
                                             <strong>{{ key }}</strong>
                                         </div>
-                                        <div v-if="allTimeSelected(crs.key, key)" class="col col-1">
-                                            <i class="far fa-check-square"></i>
+                                        <div class="col col-1">
+                                            <i
+                                                v-if="allTimeSelected(crs.key, key)"
+                                                class="far fa-check-square"
+                                            ></i>
+                                            <i v-else class="far fa-square"></i>
                                         </div>
                                     </div>
                                 </li>

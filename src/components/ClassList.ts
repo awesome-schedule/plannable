@@ -18,7 +18,7 @@ import Course from '../models/Course';
  * 1. displaying the list of courses that are match the query string when searching
  * 2. displaying the list of courses currently selected
  *
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Kaiying Cat
  */
 @Component({
     components: {
@@ -59,6 +59,39 @@ export default class ClassList extends Vue {
     select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
         this.$emit('update_course', key, idx, this.isEntering);
+    }
+
+    selectAll(key: string, course: Course) {
+        for (const sec of course.sections) {
+            this.select(key, sec.sid);
+        }
+    }
+
+    get separatedCourses(): { [course: string]: { [date: string]: Course } } {
+        const courseObj: { [course: string]: { [date: string]: Course } } = Object.create(null);
+        for (const course of this.courses) {
+            const obj: { [date: string]: number[] } = Object.create(null);
+            const sections = course.sections;
+            for (const sec of sections) {
+                if (obj[sec.dates]) {
+                    obj[sec.dates].push(sec.sid);
+                } else {
+                    obj[sec.dates] = [sec.sid];
+                }
+            }
+
+            const segments: { [date: string]: Course } = Object.create(null);
+            const len = course.sections.length;
+            for (const key in obj) {
+                if (obj[key].length === len) {
+                    segments[key] = course;
+                } else {
+                    segments[key] = window.catalog.getCourse(course.key, new Set(obj[key]));
+                }
+            }
+            courseObj[course.key] = segments;
+        }
+        return courseObj;
     }
 
     /**

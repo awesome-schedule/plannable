@@ -68,105 +68,123 @@
                 </div>
                 <Expand>
                     <div v-if="expanded(crs.key)" :id="`${crs.key}trans`" class="trans">
-                        <div
-                            v-for="(sec, idx) in crs.sections"
-                            :key="sec.section"
-                            :class="{ show: isEntering && expandOnEntering }"
+                        <a
+                            v-if="showAny"
+                            style="font-size: 1rem; padding: 0.5rem 0 0.5rem 1rem"
+                            class="list-group-item list-group-item-action class-section"
+                            :class="{ active: schedule.All[crs.key] === -1 }"
+                            :title="
+                                schedule.All[crs.key] === -1
+                                    ? 'click to unselect'
+                                    : 'click to select'
+                            "
+                            @click="select(crs.key, -1)"
                         >
-                            <a
-                                v-if="showAny && +idx === 0"
-                                style="font-size: 1rem; padding: 0.5rem 0 0.5rem 1rem"
-                                class="list-group-item list-group-item-action class-section"
-                                :class="{ active: schedule.All[crs.key] === -1 }"
-                                :title="
-                                    schedule.All[crs.key] === -1
-                                        ? 'click to unselect'
-                                        : 'click to select'
-                                "
-                                @click="select(crs.key, -1)"
-                            >
-                                <div class="row no-gutters justify-content-between">
-                                    <div class="col-md-auto">Any Section</div>
-                                    <div class="col col-sm-1 align-self-center">
-                                        <i
-                                            v-if="schedule.All[crs.key] === -1"
-                                            class="far fa-check-square"
-                                        ></i>
-                                        <i v-else class="far fa-square"></i>
-                                    </div>
+                            <div class="row no-gutters justify-content-between">
+                                <div class="col-md-auto">Any Section</div>
+                                <div class="col col-sm-1 align-self-center">
+                                    <i
+                                        v-if="schedule.All[crs.key] === -1"
+                                        class="far fa-check-square"
+                                    ></i>
+                                    <i v-else class="far fa-square"></i>
                                 </div>
-                            </a>
-                            <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
-                            <div
-                                class="list-group-item list-group-item-action container-fluid class-section"
-                                :class="{
-                                    active: isActive(crs.key, sec.sid)
-                                }"
-                                :title="
-                                    isActive(crs.key, sec.sid)
-                                        ? 'click to unselect'
-                                        : 'click to select'
-                                "
-                                @click="select(crs.key, sec.sid)"
-                                @mouseenter="schedule.preview(sec)"
-                                @mouseleave="schedule.removePreview()"
+                            </div>
+                        </a>
+                        <div v-for="(value, key) in separatedCourses[crs.key]" :key="key">
+                            <ul
+                                v-if="Object.keys(separatedCourses[crs.key]).length > 1"
+                                class="list-group class-info"
+                                style="font-size: 0.75rem;"
                             >
-                                <div class="row no-gutters justify-content-between">
-                                    <div class="col-md-auto">
-                                        <ul
-                                            class="list-unstyled class-info"
-                                            style="font-size: 0.75rem;"
-                                        >
-                                            <li>
-                                                Section {{ sec.section }}
-                                                <span
+                                <li class="list-group-item" @click="selectAll(value.key, value)">
+                                    {{ key }}
+                                </li>
+                            </ul>
+                            <div
+                                v-for="sec in value.sections"
+                                :key="sec.sid"
+                                :class="{ show: isEntering && expandOnEntering }"
+                            >
+                                <div
+                                    class="list-group-item list-group-item-action container-fluid class-section"
+                                    :class="{
+                                        active: isActive(crs.key, sec.sid)
+                                    }"
+                                    :title="
+                                        isActive(crs.key, sec.sid)
+                                            ? 'click to unselect'
+                                            : 'click to select'
+                                    "
+                                    @click="select(crs.key, sec.sid)"
+                                    @mouseenter="schedule.preview(sec)"
+                                    @mouseleave="schedule.removePreview()"
+                                >
+                                    <div class="row no-gutters justify-content-between">
+                                        <div class="col-md-auto">
+                                            <ul
+                                                class="list-unstyled class-info"
+                                                style="font-size: 0.75rem;"
+                                            >
+                                                <li>
+                                                    Section {{ sec.section }}
+                                                    <span
+                                                        v-html="
+                                                            highlightMatch(
+                                                                sec.topic,
+                                                                'topic',
+                                                                sec.matches
+                                                            )
+                                                        "
+                                                    ></span>
+                                                    <!-- 14 = 0b1110, i.e. validity > 1 -->
+                                                    <i
+                                                        v-if="sec.valid"
+                                                        :title="sec.validMsg"
+                                                        class="fas fa-exclamation-triangle"
+                                                        :class="
+                                                            sec.valid & 14
+                                                                ? `text-danger`
+                                                                : `text-warning`
+                                                        "
+                                                    ></i>
+                                                </li>
+                                                <template v-for="meeting in sec.meetings">
+                                                    <li :key="meeting.days">
+                                                        {{ meeting.days }}
+                                                    </li>
+                                                </template>
+                                                <li
                                                     v-html="
                                                         highlightMatch(
-                                                            sec.topic,
-                                                            'topic',
+                                                            sec.instructors.join(', '),
+                                                            'instructors',
                                                             sec.matches
                                                         )
                                                     "
-                                                ></span>
-                                                <!-- 14 = 0b1110, i.e. validity > 1 -->
-                                                <i
-                                                    v-if="sec.valid"
-                                                    :title="sec.validMsg"
-                                                    class="fas fa-exclamation-triangle"
-                                                    :class="
-                                                        sec.valid & 14
-                                                            ? `text-danger`
-                                                            : `text-warning`
-                                                    "
-                                                ></i>
-                                            </li>
-                                            <template v-for="meeting in sec.meetings">
-                                                <li :key="meeting.days">
-                                                    {{ meeting.days }}
-                                                </li>
-                                            </template>
-                                            <li
-                                                v-html="
-                                                    highlightMatch(
-                                                        sec.instructors.join(', '),
-                                                        'instructors',
-                                                        sec.matches
-                                                    )
-                                                "
-                                            ></li>
-                                        </ul>
-                                    </div>
-                                    <div class="col col-sm-1 align-self-center">
-                                        <i
-                                            v-if="isActive(crs.key, sec.sid)"
-                                            class="far fa-check-square"
-                                        ></i>
-                                        <i v-else class="far fa-square"></i>
+                                                ></li>
+                                            </ul>
+                                        </div>
+                                        <div class="col col-sm-1 align-self-center">
+                                            <i
+                                                v-if="isActive(crs.key, sec.sid)"
+                                                class="far fa-check-square"
+                                            ></i>
+                                            <i v-else class="far fa-square"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <!-- <div
+                            v-for="sec in crs.sections"
+                            :key="sec.section"
+                            :class="{ show: isEntering && expandOnEntering }"
+                        > -->
+                    <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
+
+                    <!-- </div> -->
                 </Expand>
             </div>
         </div>

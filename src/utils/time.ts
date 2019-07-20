@@ -128,9 +128,9 @@ export function parseDate(date: string): [number, number] | undefined {
     if (!start || !end) return;
     // start month / start day / start year
     const [sm, sd, sy] = start.split('/');
-    const startDate = new Date(+sy, +sm, +sd);
+    const startDate = new Date(+sy, +sm - 1, +sd);
     const [em, ed, ey] = end.split('/');
-    const endDate = new Date(+ey, +em, +ed);
+    const endDate = new Date(+ey, +em - 1, +ed);
     return [startDate.getTime(), endDate.getTime()];
 }
 

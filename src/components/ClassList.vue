@@ -68,8 +68,9 @@
                 </div>
                 <Expand>
                     <div v-if="expanded(crs.key)" :id="`${crs.key}trans`" class="trans">
+                        <!-- no "Any Section" for engagement due to some strange requests -->
                         <a
-                            v-if="showAny"
+                            v-if="showAny && crs.department !== 'EGMT'"
                             style="font-size: 1rem; padding: 0.5rem 0 0.5rem 1rem"
                             class="list-group-item list-group-item-action class-section"
                             :class="{ active: schedule.All[crs.key] === -1 }"
@@ -98,7 +99,7 @@
                             >
                                 <li
                                     class="list-group-item list-group-item-action class-section py-2"
-                                    title="click to all sections in this time period"
+                                    title="click to select all sections in this time period"
                                     @click="selectAll(value.key, value)"
                                 >
                                     <div class="row no-gutters justify-content-between">

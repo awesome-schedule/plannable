@@ -95,15 +95,21 @@
                             <ul
                                 v-if="Object.keys(separatedCourses[crs.key]).length > 1"
                                 class="list-group class-info"
-                                style="font-size: 0.75rem;"
                             >
                                 <li
-                                    class="list-group-item"
+                                    class="list-group-item class-section"
                                     style="cursor: pointer"
                                     title="click to all sections in this time period"
                                     @click="selectAll(value.key, value)"
                                 >
-                                    <strong>{{ key }}</strong>
+                                    <div class="row no-gutters justify-content-between">
+                                        <div class="col-md-auto">
+                                            <strong>{{ key }}</strong>
+                                        </div>
+                                        <div v-if="allTimeSelected(crs.key, key)" class="col col-1">
+                                            <i class="far fa-check-square"></i>
+                                        </div>
+                                    </div>
                                 </li>
                             </ul>
                             <div

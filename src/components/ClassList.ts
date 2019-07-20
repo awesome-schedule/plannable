@@ -62,11 +62,28 @@ export default class ClassList extends Vue {
     }
 
     selectAll(key: string, course: Course) {
+        let notSelected = false;
         for (const sec of course.sections) {
             if (!this.isActive(key, sec.sid)) {
+                notSelected = true;
                 this.select(key, sec.sid);
             }
         }
+        if (!notSelected) {
+            for (const sec of course.sections) {
+                this.select(key, sec.sid);
+            }
+        }
+    }
+
+    allTimeSelected(key: string, time: string) {
+        const course = this.separatedCourses[key][time];
+        for (const sec of course.sections) {
+            if (!this.isActive(key, sec.sid)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     get separatedCourses(): { [course: string]: { [date: string]: Course } } {

@@ -97,8 +97,13 @@
                                 class="list-group class-info"
                                 style="font-size: 0.75rem;"
                             >
-                                <li class="list-group-item" @click="selectAll(value.key, value)">
-                                    {{ key }}
+                                <li
+                                    class="list-group-item"
+                                    style="cursor: pointer"
+                                    title="click to all sections in this time period"
+                                    @click="selectAll(value.key, value)"
+                                >
+                                    <strong>{{ key }}</strong>
                                 </li>
                             </ul>
                             <div

@@ -63,7 +63,9 @@ export default class ClassList extends Vue {
 
     selectAll(key: string, course: Course) {
         for (const sec of course.sections) {
-            this.select(key, sec.sid);
+            if (!this.isActive(key, sec.sid)) {
+                this.select(key, sec.sid);
+            }
         }
     }
 

@@ -97,7 +97,7 @@ export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
 /**
  * The generic iliffe vector used to store some information about each day within a week
  */
-export type Week<T> = [T[], T[], T[], T[], T[], T[], T[]];
+export type Week<T> = T[];
 
 export const dayToInt = Object.freeze({
     Mo: 0,

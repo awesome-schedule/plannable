@@ -27,10 +27,11 @@ export type TimeBlock = [number, number];
 
 /**
  * The blocks is a iliffe vector storing the time and room information of the an entity at each day.
- * Index from 0 to 6 represents days from Monday to Sunday.
+ * Index from 0 to 6 represents the index of information from Monday to Sunday
+ * -1 represents no class
  * Example:
  * ```js
- * const timeDict = [ [600, 660, 11, 900, 960, 2], [], [], [],  [1200, 1260, 12], [], [] ]
+ * const timeDict = [7, 0, 0, 0, 13, 0, 0, 600, 660, 11, 900, 960, 2, 1200, 1260, 12]
  * ```
  * represents that this entity will take place
  * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
@@ -38,16 +39,21 @@ export type TimeBlock = [number, number];
  *
  * a typical loop that visits these info is shown below
  * ```js
- * for (const day of blocks) {
- *     for (let i = 0; i < day.length; i += 3) {
- *         const start = day[i]; // start time of the `i / 3`th class
- *         const end = day[i + 1]; // end time of the `i / 3`th class
- *         const roomNumber = day[i + 2]; // room index of the `i / 3`th class
- *     }
+ * for (let i = 0; i < 7; i++){
+ *      if(arr[i] === 0) continue;
+ *      let j = i + 1;
+ *      while(j < arr.length && arr[j] === 0) j++;
+ *      const lastIdx = arr[j] || arr.length;
+ *      for(let k = i; k < lastIdx; k += 3){
+ *          const start = arr[k];
+ *          const end = arr[k + 1];
+ *          const roomNumber = arr[k + 2];
+ *      }
+ *      i = j;
  * }
  * ```
  */
-export interface TimeArray extends Week<number> { }
+export interface TimeArray extends Week<number> { };
 
 export type MeetingDate = [number, number];
 
@@ -62,7 +68,7 @@ export type MeetingDate = [number, number];
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], [], [], []], [8, 28, 12, 26]]
+ * ["span20205", [0, 1, 2], [7, 0, 0, 0, 13, 0, 0, 600, 660, 11, 900, 960, 2, 1200, 1260, 12], [8, 28, 12, 26]]
  * ```
  */
 export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];

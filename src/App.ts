@@ -77,11 +77,9 @@ export default class App extends Store {
         const config = new URLSearchParams(window.location.search).get('config');
 
         if (config) {
+            const result = this.parseFromURL(config);
             try {
-                this.profile.addProfile(
-                    lz.decompressFromEncodedURIComponent(config.trim()),
-                    'url loaded'
-                );
+                this.profile.addProfile(result, 'url loaded');
                 await this.loadProfile(undefined, !checkVersion());
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;
@@ -91,6 +89,112 @@ export default class App extends Store {
             }
         }
         return false;
+    }
+
+    parseFromURL(config: string) {
+        // get URL and convert to JSON
+        const data = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
+
+        // get the default objects to contruct the valid JSON
+        const display = this.display.getDefault();
+        const filter = this.filter.getDefault();
+        const schedule = this.schedule.getDefault();
+        const palette = this.palette.getDefault();
+
+        // construct a default JSON
+        const obj = {
+            name: '',
+            modified: '',
+            currentSemester: { id: '', name: '' },
+            display,
+            filter,
+            schedule,
+            palette
+        };
+
+        // get the first four value
+        obj.name = data[0];
+        obj.modified = data[1];
+        obj.currentSemester.id = data[2];
+        obj.currentSemester.name = data[3];
+
+        // display
+        // get and sort keys in display 
+        const display_keys = [];
+        for (const key in display) {
+            display_keys.push(key);
+        }
+        display_keys.sort();
+
+        // if the key name contains '_' then it corresponds to a certain index in data
+        // else it is in the binary
+        let counter = 4;
+        let display_bit = data[10];
+        for (const key of display_keys) {
+            if (key.includes('_')) {
+                obj.display[key] = data[counter];
+                counter += 1;
+            } else {
+                obj.display[key] = display_bit % 2 === 1 ? true : false;
+                display_bit = Math.floor(display_bit / 2);
+            }
+        }
+
+        // filter
+        // add timeSlots
+        obj.filter.timeSlots = data[11];
+
+        // get allowClosed, allowWaitlist, mode from binary
+        obj.filter.allowClosed = data[12] % 2 === 1 ? true : false;
+        obj.filter.allowWaitlist = Math.floor(data[12] / 2) % 2 === 1 ? true : false;
+
+        obj.filter.sortOptions.mode = Math.floor(Math.floor(data[12] / 2)/2) % 2 === 1 ? 1 : 0;
+
+        // sorting
+        // get the binary of enable_reverse
+        let enable_reverse = data[19];
+        
+        // get all objects from the array 
+        const sortBy = [];
+        const sort_names = [];
+
+        for (const key of obj.filter.sortOptions.sortBy) {
+            sort_names.push(key);
+        }
+
+        // loop through the ascii initials and match to the object name
+        for (const index in sort_names) {
+            const initial = String.fromCharCode(data[13 + parseInt(index)]);
+            for (const key of sort_names) {
+                if (key.name[0] === initial) {
+                    
+                    // if matched, decode the binary
+                    const enabled = enable_reverse % 2 === 1 ? true : false;
+                    enable_reverse = Math.floor(enable_reverse / 2);
+
+                    const reverse = enable_reverse % 2 === 1 ? true : false;
+                    enable_reverse = Math.floor(enable_reverse / 2);
+
+                    sortBy.push({
+                        name: key.name,
+                        enabled,
+                        reverse,
+                        exclusive: key.exclusive,
+                        title: key.title,
+                        description: key.description
+                    });
+                }
+            }
+        }
+
+        // replace the sortBy 
+        filter.sortOptions.sortBy = sortBy;
+
+        // add the schedule and palette
+        obj.schedule = data[20];
+        obj.palette = data[21];
+        console.log(obj)
+        return JSON.stringify(obj);
     }
 
     async created() {

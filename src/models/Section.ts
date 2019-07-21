@@ -12,7 +12,7 @@ import Course, { CourseFields, Match } from './Course';
 import { findBestMatch } from 'string-similarity';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { STATUSES, dayToInt, CourseStatus } from './Meta';
+import { STATUSES, dayToInt, CourseStatus, Day } from './Meta';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,
@@ -153,8 +153,7 @@ export default class Section implements CourseFields, Hashable {
      * get the time and room of this section's meetings as [[TimeArray]]
      */
     public getTimeRoom(): TimeArray | null {
-        const timeDict: TimeArray = [[], [], [], [], [], [], []];
-
+        const timeDict: number[][] = [[], [], [], [], [], [], []];
         // there may be multiple meeting times. parse each of them and add to tmp_dict
         const buildingList = window.buildingList;
         for (const meeting of this.meetings) {
@@ -190,7 +189,14 @@ export default class Section implements CourseFields, Hashable {
             }
         }
 
-        return timeDict;
+        const arr = new Array(8);
+
+        for (let i = 0; i < timeDict.length; i++) {
+            arr[i] = arr.length;
+            arr.push(...timeDict[i]);
+        }
+        arr[7] = arr.length;
+        return arr;
     }
 
     public equals(sc: Section): boolean {

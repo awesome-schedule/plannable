@@ -31,7 +31,7 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
 }
 
 /**
- * @author Hanzhi Zhou, (amended by) Kaiying Cat
+ * @author Kaiying Cat
  * @param time
  * @returns null when fail to parse
  *
@@ -42,22 +42,10 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
  * ```
  */
 export function parseTimeAsTimeArray(time: string): TimeArray | null {
-    // const [days, start, , end] = time.split(' ');
-    // if (days && start && end) {
-    //     const timeDict: TimeArray = [0, 0, 0, 0, 0, 0, 0];
-    //     const s = hr12toInt(start),
-    //         e = hr12toInt(end);
-    //     for (let i = 0; i < days.length; i += 2) {
-    //         timeDict[dayToInt[days.substr(i, i + 2) as Day]] = timeDict.length;
-    //         timeDict.push(s, e);
-    //     }
-    //     return timeDict;
-    // }
-    // return null;
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
         let lIdx = 0;
-        const arr: number[] = new Array(8);
+        const arr: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
         for (let i = 0; i < days.length; i += 2) {
             const idx = dayToInt[days.substr(i, i + 2) as Day];
             for (let j = lIdx; j <= idx; j++) {
@@ -106,17 +94,20 @@ export function checkTimeConflict(
     step1 = 2,
     step2 = 2
 ) {
-    for (let i = 0; i < 8; i++) {
-        const s1 = timeArray1[i];
-        const e1 = timeArray1[i + 1];
+    for (let i = 0; i < 7; i++) {
         const s2 = timeArray2[i];
         const e2 = timeArray2[i + 1];
+        // skip the entire loop if needed
+        if (s2 === e2) continue;
+
+        const s1 = timeArray1[i];
+        const e1 = timeArray1[i + 1];
         for (let j = s1; j < e1; j += step1) {
             const begin1 = timeArray1[j] + 1;
             const end1 = timeArray1[j + 1] - 1;
             for (let k = s2; k < e2; k += step2) {
-                const begin2 = timeArray2[k] + 1;
-                const end2 = timeArray2[k + 1] - 1;
+                const begin2 = timeArray2[k];
+                const end2 = timeArray2[k + 1];
                 if (
                     (begin1 <= begin2 && begin2 <= end1) ||
                     (begin1 <= end2 && end2 <= end1) ||
@@ -128,29 +119,6 @@ export function checkTimeConflict(
         }
     }
     return false;
-    // const timeBlocks1 = timeArray1[i];
-    // const len1 = timeBlocks1.length;
-    // if (!len1) continue;
-
-    // const timeBlocks2 = timeArray2[i];
-    // const len2 = timeBlocks2.length;
-    // if (!len2) continue;
-
-    // for (let j = 0; j < len1; j += step1) {
-    //     const begin1 = timeBlocks1[j] + 1;
-    //     const end1 = timeBlocks1[j + 1] - 1;
-    //     for (let k = 0; k < len2; k += step2) {
-    //         const begin2 = timeBlocks2[k];
-    //         const end2 = timeBlocks2[k + 1];
-    // if (
-    //     (begin1 <= begin2 && begin2 <= end1) ||
-    //     (begin1 <= end2 && end2 <= end1) ||
-    //     (begin1 >= begin2 && end1 <= end2)
-    // ) {
-    //     return true;
-    // }
-    //     }
-    // }
 }
 
 /**

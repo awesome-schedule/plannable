@@ -189,9 +189,10 @@ export default class Section implements CourseFields, Hashable {
             }
         }
 
-        const arr = new Array(8);
-
-        for (let i = 0; i < timeDict.length; i++) {
+        // convert iliffe vector to array
+        const arr = [0, 0, 0, 0, 0, 0, 0, 0];
+        const len = timeDict.length;
+        for (let i = 0; i < len; i++) {
             arr[i] = arr.length;
             arr.push(...timeDict[i]);
         }

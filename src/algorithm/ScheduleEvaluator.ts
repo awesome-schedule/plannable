@@ -228,49 +228,28 @@ class ScheduleEvaluator {
      */
     public add(schedule: RawAlgoSchedule) {
         // sort time blocks of courses according to its schedule
-        const arr: TimeArray = new Array(8);
+        const blocks: TimeArray = [0, 0, 0, 0, 0, 0, 0, 0];
         for (let i = 0; i < 7; i++) {
-            arr[i] = arr.length;
-            const s1 = arr[i];
+            const s1 = (blocks[i] = blocks.length);
             for (const course of schedule) {
                 const arr2 = course[2];
                 const s2 = arr2[i];
                 const e2 = arr2[i + 1];
-                const e1 = arr.length;
                 // insert & sort
                 for (let j = s2; j < e2; j += 3) {
-                    let k = arr.length - 3;
-                    for (; k >= s1; k -= 3) {
-                        if (arr[k] < arr2[j]) break;
-                    }
-                    arr.splice(k + 3, 0, ...arr2.slice(j, j + 3));
+                    let k = blocks.length - 3;
+                    const vToBeInserted = arr2[j];
+                    for (; k >= s1; k -= 3) if (blocks[k] < vToBeInserted) break;
+
+                    blocks.splice(k + 3, 0, vToBeInserted, arr2[j + 1], arr2[j + 2]);
                 }
             }
         }
-        arr[7] = arr.length;
-        // const blocks: number[][] = [[], [], [], [], [], [], []];
-        // for (const course of schedule) {
-        //     const blockArray = course[2];
-        //     for (let k = 0; k < 7; k++) {
-        //         // time and rooms at day k
-        //         const dayBlocks = blockArray[k];
-        //         const len = dayBlocks.length;
-        //         if (!len) continue;
-
-        //         const sortedBlocks = blocks[k];
-        //         for (let i = 0; i < len; i += 3) {
-        //             // insert dayBlocks[i:i+3] into the correct position in the block array
-        //             const ele = dayBlocks[i];
-        //             let j = 0;
-        //             for (; j < sortedBlocks.length; j += 3) if (ele < sortedBlocks[j]) break;
-        //             sortedBlocks.splice(j, 0, ele, dayBlocks[i + 1], dayBlocks[i + 2]);
-        //         }
-        //     }
-        // }
+        blocks[7] = blocks.length;
 
         this._schedules.push({
             schedule,
-            blocks: arr,
+            blocks,
             coeff: 0,
             index: this._schedules.length
         });

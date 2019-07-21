@@ -75,9 +75,13 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let sum = 0;
             let sumSq = 0;
-            for (const day of blocks) {
+            for (let i = 0; i < 7; i++) {
+                const start = blocks[i],
+                    end = blocks[i + 1];
                 let classTime = 0;
-                for (let j = 0; j < day.length; j += 3) classTime += day[j + 1] - day[j];
+                for (let j = start; j < end; j += 3) {
+                    classTime += blocks[j + 1] - blocks[j];
+                }
                 sum += classTime;
                 sumSq += classTime ** 2;
             }
@@ -93,9 +97,10 @@ class ScheduleEvaluator {
         compactness(this: ScheduleEvaluator, schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             let compact = 0;
-            for (const day of blocks) {
-                const len = day.length - 5;
-                for (let j = 0; j < len; j += 3) compact += day[j + 3] - day[j + 1];
+            for (let i = 0; i < 7; i++) {
+                const start = blocks[i],
+                    end = blocks[i + 1] - 5;
+                for (let j = start; j < end; j += 3) compact += blocks[j + 3] - blocks[j + 1];
             }
             return compact;
         },
@@ -110,12 +115,13 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const blocks = schedule.blocks;
             let totalOverlap = 0;
-            for (const day of blocks) {
+            for (let i = 0; i < 7; i++) {
+                const start = blocks[i],
+                    end = blocks[i + 1];
                 let dayOverlap = 0;
-                const len = day.length;
-                for (let j = 0; j < len; j += 3) {
+                for (let j = start; j < end; j += 3) {
                     // 11:00 to 14:00
-                    dayOverlap += Math.max(calcOverlap(660, 840, day[j], day[j + 1]), 0);
+                    dayOverlap += Math.max(calcOverlap(660, 840, blocks[j], blocks[j + 1]), 0);
                 }
 
                 if (dayOverlap > 60) totalOverlap += dayOverlap;
@@ -132,13 +138,14 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             const refTime = 12 * 60;
             let total = 0;
-            for (const day of blocks) {
-                const time = day[0];
-                if (time && time < refTime) {
-                    total += (refTime - time) ** 2;
+            for (let i = 0; i < 7; i++) {
+                const start = blocks[i],
+                    end = blocks[i + 1];
+                if (end > start) {
+                    const time = blocks[start];
+                    total += Math.max(refTime - time, 0) ** 2;
                 }
             }
-
             return total;
         },
 
@@ -152,13 +159,14 @@ class ScheduleEvaluator {
             const len = timeMatrix.length ** 0.5;
             const blocks = schedule.blocks;
             let dist = 0;
-            for (const day of blocks) {
-                const bl = day.length - 5;
-                for (let j = 0; j < bl; j += 3) {
+            for (let i = 0; i < 7; i++) {
+                const start = blocks[i],
+                    end = blocks[i + 1] - 5;
+                for (let j = start; j < end; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
-                    if (day[j + 3] - day[j + 1] > 45) {
-                        const r1 = day[j + 2],
-                            r2 = day[j + 5];
+                    if (blocks[j + 3] - blocks[j + 1] > 45) {
+                        const r1 = blocks[j + 2],
+                            r2 = blocks[j + 5];
 
                         // skip unknown buildings
                         if (r1 !== -1 && r2 !== -1) dist += timeMatrix[r1 * len + r2];
@@ -169,7 +177,7 @@ class ScheduleEvaluator {
         },
 
         /**
-         * the return value is not used. if this sort option is enabled, `shuffle` is called.
+         * the return value is not used. If this sort option is enabled, `shuffle` is called.
          */
         IamFeelingLucky() {
             return Math.random();

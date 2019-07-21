@@ -67,6 +67,7 @@ function checkVersion() {
         FuzzyView: () => import('./components/tabs/FuzzyView.vue'),
         LogView: () => import('./components/tabs/LogView.vue')
     }
+
 })
 export default class App extends Store {
     get sideBar() {
@@ -90,33 +91,21 @@ export default class App extends Store {
         }
         return false;
     }
-
-    parseFromURL(config: string) {
+    
+    // See ExportView.ts => convertJsonToArray()
+    parseFromURL(config: string) { 
+        
         // get URL and convert to JSON
         const data = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
 
         // get the default objects to contruct the valid JSON
         const display = this.display.getDefault();
         const filter = this.filter.getDefault();
-        const schedule = this.schedule.getDefault();
-        const palette = this.palette.getDefault();
-
-        // construct a default JSON
-        const obj = {
-            name: '',
-            modified: '',
-            currentSemester: { id: '', name: '' },
-            display,
-            filter,
-            schedule,
-            palette
-        };
-
+               
         // get the first four value
-        obj.name = data[0];
-        obj.modified = data[1];
-        obj.currentSemester.id = data[2];
-        obj.currentSemester.name = data[3];
+        const name = data[0];
+        const modified = data[1];
+        const currentSemester = {id: data[2], name : data[3]};
 
         // display
         // get and sort keys in display 
@@ -132,23 +121,22 @@ export default class App extends Store {
         let display_bit = data[10];
         for (const key of display_keys) {
             if (key.includes('_')) {
-                obj.display[key] = data[counter];
+                display[key] = data[counter];
                 counter += 1;
             } else {
-                obj.display[key] = display_bit % 2 === 1 ? true : false;
+                display[key] = display_bit % 2 === 1 ? true : false;
                 display_bit = Math.floor(display_bit / 2);
             }
         }
 
         // filter
         // add timeSlots
-        obj.filter.timeSlots = data[11];
+        filter.timeSlots = data[11];
 
         // get allowClosed, allowWaitlist, mode from binary
-        obj.filter.allowClosed = data[12] % 2 === 1 ? true : false;
-        obj.filter.allowWaitlist = Math.floor(data[12] / 2) % 2 === 1 ? true : false;
-
-        obj.filter.sortOptions.mode = Math.floor(Math.floor(data[12] / 2)/2) % 2 === 1 ? 1 : 0;
+        filter.allowClosed = data[12] % 2 === 1 ? true : false;
+        filter.allowWaitlist = Math.floor(data[12] / 2) % 2 === 1 ? true : false;
+        filter.sortOptions.mode = Math.floor(Math.floor(data[12] / 2) / 2) % 2 === 1 ? 1 : 0;
 
         // sorting
         // get the binary of enable_reverse
@@ -158,7 +146,7 @@ export default class App extends Store {
         const sortBy = [];
         const sort_names = [];
 
-        for (const key of obj.filter.sortOptions.sortBy) {
+        for (const key of filter.sortOptions.sortBy) {
             sort_names.push(key);
         }
 
@@ -191,9 +179,21 @@ export default class App extends Store {
         filter.sortOptions.sortBy = sortBy;
 
         // add the schedule and palette
-        obj.schedule = data[20];
-        obj.palette = data[21];
+        const schedule = data[20];
+        const palette = data[21];
+        
+        // construct a JSON
+        const obj = {
+            name,
+            modified,
+            currentSemester,
+            display,
+            filter,
+            schedule,
+            palette
+        }
         console.log(obj)
+
         return JSON.stringify(obj);
     }
 

@@ -91,6 +91,8 @@ export default class ExportView extends Store {
             this.modal.showURLModal(url.href);
         }
     }
+     
+    // See App.ts => parseFromURL()
     convertJsonToArray(jsonString: string) {
         /*
         result => 
@@ -113,7 +115,7 @@ export default class ExportView extends Store {
         palette
 
         */
-
+        
         // get values from the json object
         const json: SemesterStorage = JSON.parse(jsonString);
         const { name, modified, currentSemester, display, filter, schedule, palette } = json;

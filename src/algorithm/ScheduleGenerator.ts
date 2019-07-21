@@ -134,6 +134,9 @@ class ScheduleGenerator {
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
+                const date = parseDate(sections[0].dates);
+                if (!date) continue;
+
                 const blocksArray = sections[0].getTimeRoom();
                 if (!blocksArray) continue;
 
@@ -150,8 +153,7 @@ class ScheduleGenerator {
                     secIndices.push(section.sid);
                 }
 
-                if (secIndices.length)
-                    classes.push([key, secIndices, blocksArray, parseDate(sections[0].dates)]);
+                if (secIndices.length) classes.push([key, secIndices, blocksArray, date]);
             }
 
             // throw an error of none of the sections pass the filter

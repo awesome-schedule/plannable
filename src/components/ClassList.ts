@@ -18,7 +18,7 @@ import Course from '../models/Course';
  * 1. displaying the list of courses that are match the query string when searching
  * 2. displaying the list of courses currently selected
  *
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Kaiying Cat
  */
 @Component({
     components: {
@@ -59,6 +59,55 @@ export default class ClassList extends Vue {
     select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
         this.$emit('update_course', key, idx, this.isEntering);
+    }
+
+    selectAll(key: string, course: Course) {
+        let notSelected = false;
+        for (const sec of course.sections) {
+            if (!this.isActive(key, sec.sid)) {
+                notSelected = true;
+                this.select(key, sec.sid);
+            }
+        }
+        if (!notSelected) {
+            for (const sec of course.sections) {
+                this.select(key, sec.sid);
+            }
+        }
+    }
+
+    allTimeSelected(key: string, time: string) {
+        return this.separatedCourses[key][time].sections.every(sec => this.isActive(key, sec.sid));
+    }
+
+    get separatedCourses() {
+        const courseObj: { [course: string]: { [date: string]: Course } } = Object.create(null);
+        for (const course of this.courses) {
+            const obj: { [date: string]: Set<number> } = Object.create(null);
+            const sections = course.sections;
+            // group sections by dates
+            for (const { dates, sid } of sections) {
+                if (obj[dates]) {
+                    obj[dates].add(sid);
+                } else {
+                    obj[dates] = new Set<number>().add(sid);
+                }
+            }
+
+            const segments: { [date: string]: Course } = Object.create(null);
+            const len = course.sections.length;
+            for (const date in obj) {
+                // all sections are selected: use the full course
+                if (obj[date].size === len) {
+                    segments[date] = course;
+                    // some sections are selected: get the subset
+                } else {
+                    segments[date] = window.catalog.getCourse(course.key, obj[date]);
+                }
+            }
+            courseObj[course.key] = segments;
+        }
+        return courseObj;
     }
 
     /**

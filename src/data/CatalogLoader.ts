@@ -101,7 +101,7 @@ export function parseSemesterData(csv_string: string) {
         const type = CLASS_TYPES[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
         const meetings: RawMeeting[] = [];
-        const date: string = data[6 + 3];
+        let date: string = data[6 + 3];
         let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
@@ -110,18 +110,20 @@ export function parseSemesterData(csv_string: string) {
                 c = data[start + 2];
             if (a || b || c) {
                 const meetingDate = data[start + 3];
+                if (!date) date = meetingDate;
                 // inconsistent date
-                if (meetingDate && meetingDate !== date) valid |= 1;
+                if (meetingDate && meetingDate !== date) valid |= 2;
 
                 // incomplete information
                 if (!a || !c || a === 'TBA' || c === 'TBA' || a === 'TBD' || c === 'TBD')
-                    valid |= 2;
+                    valid |= 1;
 
-                // invalid meeting time
+                // unknown meeting time
                 if (!b || b === 'TBA' || b === 'TBD') {
                     valid |= 4;
                 } else {
                     const [, startT, , endT] = b.split(' ');
+                    // invalid meeting time
                     if (startT === endT) valid |= 4;
                 }
 
@@ -133,6 +135,9 @@ export function parseSemesterData(csv_string: string) {
                 meetings.splice(k, 0, [a, b, c]);
             }
         }
+
+        // unknown date
+        if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
 
         const tempSection: RawSection = [
             +data[0],

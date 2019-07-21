@@ -15,7 +15,7 @@ import Event from './Event';
 import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import noti from '@/store/notification';
+import noti, { NotiMsg } from '@/store/notification';
 import { Day, Week, TYPES, dayToInt } from './Meta';
 
 export interface ScheduleJSON {
@@ -300,7 +300,7 @@ export default class Schedule {
     public hover(key: string, strong: boolean = true) {
         const sections = this.All[key];
         if (sections instanceof Set) {
-            Object.values(this.days).forEach(blocks => {
+            this.days.forEach(blocks => {
                 for (const block of blocks) {
                     const container = block.section;
                     if (!(container instanceof Event)) {
@@ -442,8 +442,9 @@ export default class Schedule {
                 continue;
             }
             const course = catalog.getCourse(key, this.All[key]);
-            for (const sec of course.sections) {
-                tempSeparator.push([sec.dateArray[0], sec.dateArray[1] + 24 * 60 * 60 * 1000]);
+            for (const { dateArray } of course.sections) {
+                if (dateArray)
+                    tempSeparator.push([dateArray[0], dateArray[1] + 24 * 60 * 60 * 1000]);
             }
         }
 
@@ -499,6 +500,9 @@ export default class Schedule {
             const diffSecs: { [dt: string]: number[] } = {};
             // separate sections based of different meeting dates
             for (const sec of course.sections) {
+                // skip invalid dates
+                if (!sec.dateArray) continue;
+
                 const [start, end] = sec.dateArray;
                 for (let i = 0; i < this.dateSeparators.length; i++) {
                     const sep = this.dateSeparators[i];
@@ -555,8 +559,10 @@ export default class Schedule {
             // find all connected components
             const components: ScheduleBlock[][] = [];
             for (let i = 0; i < len; i++) {
-                if (!visited[i])
+                if (!visited[i]) {
+                    visited[i] = 1;
                     components.push(DFS(i, fastGraph, visited).map(idx => blocks[idx]));
+                }
             }
 
             // we run coloring for each component

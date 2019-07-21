@@ -33,7 +33,7 @@ import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 import randomColor from 'randomcolor';
 
-const version = '6.1';
+const version = '6.5';
 /**
  * returns whether the version stored in localStorage matches the current version
  * then, override localStorage with the current version
@@ -82,7 +82,7 @@ export default class App extends Store {
                     lz.decompressFromEncodedURIComponent(config.trim()),
                     'url loaded'
                 );
-                await this.loadProfile(undefined, checkVersion());
+                await this.loadProfile(undefined, !checkVersion());
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;
             } catch (err) {
@@ -115,7 +115,8 @@ export default class App extends Store {
             const urlResult = await this.loadConfigFromURL();
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
-                await this.loadProfile(this.profile.current, checkVersion());
+                // if version mismatch, force-update semester data
+                await this.loadProfile(this.profile.current, !checkVersion());
             } else {
                 history.replaceState(history.state, 'current', '/');
             }

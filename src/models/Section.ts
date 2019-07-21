@@ -36,9 +36,10 @@ export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Ma
 export default class Section implements CourseFields, Hashable {
     public static readonly Validity = [
         'Valid',
-        'This section has several different meeting dates, which is currently not supported by the scheduler.',
-        'Some meetings have incomplete information.',
-        'Some meetings have invalid start or end time.'
+        'Warning: Some meetings have incomplete information.',
+        'Fatal: This section has several different meeting dates.',
+        'Fatal: Some meetings have invalid start or end time.',
+        'Fatal: This section has unknown start and end date.'
     ];
 
     public readonly department: string;
@@ -73,7 +74,7 @@ export default class Section implements CourseFields, Hashable {
     public readonly meetings: ReadonlyArray<Meeting>;
 
     public readonly valid: ValidFlag;
-    public readonly dateArray: MeetingDate;
+    public readonly dateArray?: MeetingDate;
     /**
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
@@ -117,7 +118,7 @@ export default class Section implements CourseFields, Hashable {
         let mask = 1;
         let msg = '';
         let count = 1;
-        for (let i = 1; i < 4; i++) {
+        for (let i = 1; i < Section.Validity.length; i++) {
             if (this.valid & mask) {
                 msg += `${count++}. ${Section.Validity[i]} \n`;
             }

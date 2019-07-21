@@ -636,8 +636,8 @@
                 <h3 id="item-5"><i class="fas fa-cog"></i> Settings</h3>
                 <hr />
                 <p>
-                    Settings enable you to customize the display of the scheduler so that it
-                    provides you with more information or better fits your need.
+                    Settings enable you to customize the display of our website so that it provides
+                    you with more information or better fits your need.
                 </p>
                 <h5 id="item-5-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -649,7 +649,7 @@
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
-                            Schedule Start/End: The display of the scheduler time range under
+                            Schedule Start/End: The displayed schedule time range in the
                             <strong>View Schedule</strong> mode
                             <strong>(Note: this is not a filter)</strong>
                         </li>
@@ -658,12 +658,12 @@
                             grid
                         </li>
                         <li>
-                            Grid Height: Height of an empty cell. You can specify a smaller value to
-                            compress empty space
+                            Grid Height: Height of an empty cell. You can specify a value smaller
+                            than the class height to compress empty space
                         </li>
-                        <li>Show Time: Show the day and time when the class takes place</li>
-                        <li>Show Room: Show the building and room where the class takes place</li>
-                        <li>Show Instructor: Show the instructor of the class</li>
+                        <li>Show Time: Show the days and time when your classes take place</li>
+                        <li>Show Room: Show the buildings and rooms of your classes</li>
+                        <li>Show Instructor: Show the instructors of your classes</li>
                         <li>
                             Time Options: Display can be either standard time (12 hour) or military
                             time (24 hour)

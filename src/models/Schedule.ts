@@ -15,7 +15,7 @@ import Event from './Event';
 import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import noti from '@/store/notification';
+import noti, { NotiMsg } from '@/store/notification';
 import { Day, Week, TYPES, dayToInt } from './Meta';
 
 export interface ScheduleJSON {
@@ -300,7 +300,7 @@ export default class Schedule {
     public hover(key: string, strong: boolean = true) {
         const sections = this.All[key];
         if (sections instanceof Set) {
-            Object.values(this.days).forEach(blocks => {
+            this.days.forEach(blocks => {
                 for (const block of blocks) {
                     const container = block.section;
                     if (!(container instanceof Event)) {

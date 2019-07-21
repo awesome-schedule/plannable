@@ -80,26 +80,29 @@ export default class ClassList extends Vue {
         return this.separatedCourses[key][time].sections.every(sec => this.isActive(key, sec.sid));
     }
 
-    get separatedCourses(): { [course: string]: { [date: string]: Course } } {
+    get separatedCourses() {
         const courseObj: { [course: string]: { [date: string]: Course } } = Object.create(null);
         for (const course of this.courses) {
-            const obj: { [date: string]: number[] } = Object.create(null);
+            const obj: { [date: string]: Set<number> } = Object.create(null);
             const sections = course.sections;
-            for (const sec of sections) {
-                if (obj[sec.dates]) {
-                    obj[sec.dates].push(sec.sid);
+            // group sections by dates
+            for (const { dates, sid } of sections) {
+                if (obj[dates]) {
+                    obj[dates].add(sid);
                 } else {
-                    obj[sec.dates] = [sec.sid];
+                    obj[dates] = new Set<number>().add(sid);
                 }
             }
 
             const segments: { [date: string]: Course } = Object.create(null);
             const len = course.sections.length;
-            for (const key in obj) {
-                if (obj[key].length === len) {
-                    segments[key] = course;
+            for (const date in obj) {
+                // all sections are selected: use the full course
+                if (obj[date].size === len) {
+                    segments[date] = course;
+                    // some sections are selected: get the subset
                 } else {
-                    segments[key] = window.catalog.getCourse(course.key, new Set(obj[key]));
+                    segments[date] = window.catalog.getCourse(course.key, obj[date]);
                 }
             }
             courseObj[course.key] = segments;

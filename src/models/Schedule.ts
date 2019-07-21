@@ -120,7 +120,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -148,7 +148,15 @@ export default class Schedule {
     /**
      * computed based on `this.All` by `computeSchedule`
      */
-    public days: Week<ScheduleBlock>;
+    public days: [
+        ScheduleBlock[], // Monday
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[] // Sunday
+    ];
     /**
      * total credits stored in this schedule, computed based on `this.All`
      */

@@ -26,12 +26,15 @@ import { NotiMsg } from '@/store/notification';
 export type TimeBlock = [number, number];
 
 /**
- * The blocks is a iliffe vector storing the time and room information of the an entity at each day.
+ * The blocks is a condensed vector storing the time and room information of the a schedule at each day.
  * Index from 0 to 6 represents the index of information from Monday to Sunday
- * -1 represents no class
  * Example:
  * ```js
- * const timeDict = [7, 0, 0, 0, 13, 0, 0, 600, 660, 11, 900, 960, 2, 1200, 1260, 12]
+ * const timeArr = [
+ *   7, 7, 7, 7, 13, 13, 13, //indices
+ *   600, 660, 11, 900, 960, // Monday
+ *   1200, 1260, 12 // Friday
+ * ]
  * ```
  * represents that this entity will take place
  * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
@@ -39,21 +42,25 @@ export type TimeBlock = [number, number];
  *
  * a typical loop that visits these info is shown below
  * ```js
- * for (let i = 0; i < 7; i++){
- *      if(arr[i] === 0) continue;
- *      let j = i + 1;
- *      while(j < arr.length && arr[j] === 0) j++;
- *      const lastIdx = arr[j] || arr.length;
- *      for(let k = i; k < lastIdx; k += 3){
- *          const start = arr[k];
- *          const end = arr[k + 1];
- *          const roomNumber = arr[k + 2];
- *      }
- *      i = j;
+ * let dayStart, dayEnd;
+ * for (let i = 0; i < 6; i++){
+ *   dayStart = timeArr[i],
+ *   dayEnd   = timeArr[i+1];
+ *   for (let j = dayStart; j < dayEnd; j+=3) {
+ *     const timeStart = timeArr[j],
+ *           timeEnd   = timeArr[j+1],
+ *           roomIdx   = timeArr[j+2];
+ *   }
+ * }
+ * const len = timeArr.length;
+ * for (let j = dayEnd; j < len; j+=3) {
+ *   const timeStart = timeArr[j],
+ *         timeEnd   = timeArr[j+1],
+ *         roomIdx   = timeArr[j+2];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> { };
+export interface TimeArray extends Week<number> {}
 
 export type MeetingDate = [number, number];
 
@@ -96,7 +103,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: ReadonlyArray<string>,
         public readonly options: GeneratorOptions
-    ) { }
+    ) {}
 
     /**
      * The entrance of the schedule generator
@@ -162,7 +169,7 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                        } satisfy your filters and do not conflict with your events`
+                    } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);

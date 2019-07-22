@@ -275,6 +275,10 @@ export default class Schedule {
         this.computeSchedule(false);
     }
 
+    /**
+     * add an event to this schedule
+     * @throws error if an existing event conflicts with this event
+     */
     public addEvent(
         days: string,
         display: boolean,
@@ -578,6 +582,10 @@ export default class Schedule {
         }
     }
 
+    /**
+     * compute the width and left of the blocks passed in
+     * @param blocks blocks belonging to the same connected component
+     */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
         const fastGraph = this.constructAdjList(blocks);
         const colors = new Int16Array(fastGraph.length);

@@ -134,15 +134,14 @@ export default class App extends Store {
         // get allowClosed, allowWaitlist, mode from binary
         filter.allowClosed = Boolean(data[12] & 1);
         filter.allowWaitlist = Boolean(data[12] & 2);
-        filter.sortOptions.mode = data[12] & 4;
+        filter.sortOptions.mode = +Boolean(data[12] & 4); // convert to 0 or 1
 
         // sorting
         // get the binary of enable_reverse
         const enable_reverse = data[19];
 
-        // copy the sortBy array
         const sortBy = filter.sortOptions.sortBy;
-
+        const sortCopy = [];
         // loop through the ascii initials and match to the object name
         let mask = 1;
         for (let i = 0; i < sortBy.length; i++) {
@@ -155,7 +154,10 @@ export default class App extends Store {
 
             sortOpt.reverse = Boolean(enable_reverse & mask);
             mask <<= 1;
+
+            sortCopy.push(sortOpt);
         }
+        filter.sortOptions.sortBy = sortCopy;
 
         // add the schedule and palette
         const schedule = data[20];

@@ -12,7 +12,7 @@ import Course, { CourseFields, Match } from './Course';
 import { findBestMatch } from 'string-similarity';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { STATUSES, dayToInt, CourseStatus, Day } from './Meta';
+import { STATUSES, dayToInt, CourseStatus } from './Meta';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,

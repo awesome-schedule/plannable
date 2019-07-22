@@ -55,7 +55,7 @@ export default class CompareView extends Store {
         this.renderSchedule();
     }
     getTitle(idx: number) {
-        const schedule = this.compare[idx].schedule;
+        const { schedule, pIdx, index } = this.compare[idx];
         const all = schedule.All;
         const catalog = window.catalog;
         const secs: Course[] = [];
@@ -64,20 +64,15 @@ export default class CompareView extends Store {
             secs.push(catalog.getCourse(crs, num));
         }
         return (
-            'Total credits: ' +
-            schedule.totalCredit +
-            '\n' +
-            secs
+            `Generated schedule ${index + 1},\nCorresponds to proposed schedule ${pIdx + 1}\n` +
+            `Total credits: ${schedule.totalCredit}\n${secs
                 .map(
                     x =>
-                        x.department +
-                        x.number +
-                        '-' +
-                        x.sections.map(y => y.section).reduce((a, z) => a + '/' + z) +
-                        ' ' +
-                        x.title
+                        `${x.department} ${x.number}-${x.sections
+                            .map(y => y.section)
+                            .reduce((a, z) => a + '/' + z)} ${x.title}`
                 )
-                .reduce((a, x) => a + '\n' + x)
+                .reduce((a, x) => a + '\n' + x)}`
         );
     }
     highlight(idx: number) {

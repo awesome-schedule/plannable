@@ -11,7 +11,6 @@ import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoSchedule, TimeArray } from './ScheduleGenerator';
-import { Week } from '@/models/Meta';
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;

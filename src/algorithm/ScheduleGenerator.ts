@@ -11,7 +11,7 @@ import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { checkTimeConflict, parseDate, calcOverlap } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
-import { CourseStatus, Week } from '@/models/Meta';
+import { CourseStatus } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
 
 /**
@@ -54,7 +54,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export interface TimeArray extends Week<number> {}
+export type TimeArray = number[];
 
 export type MeetingDate = [number, number];
 

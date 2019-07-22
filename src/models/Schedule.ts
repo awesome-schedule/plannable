@@ -15,8 +15,8 @@ import Event from './Event';
 import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import noti, { NotiMsg } from '@/store/notification';
-import { Day, Week, TYPES, dayToInt } from './Meta';
+import noti from '@/store/notification';
+import { Day, TYPES, dayToInt } from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };

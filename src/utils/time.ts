@@ -97,7 +97,7 @@ export function checkTimeConflict(
     for (let i = 0; i < 7; i++) {
         const s2 = timeArray2[i];
         const e2 = timeArray2[i + 1];
-        // skip the entire loop if needed
+        // skip the entire inner loop if needed
         if (s2 === e2) continue;
 
         const s1 = timeArray1[i];

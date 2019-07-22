@@ -31,7 +31,7 @@ export type TimeBlock = [number, number];
  * Example:
  * ```js
  * const timeArr = [
- *   7, 7, 7, 7, 13, 13, 13, //indices
+ *   7, 7, 7, 7, 13, 13, 13, 13, //indices
  *   600, 660, 11, 900, 960, // Monday
  *   1200, 1260, 12 // Friday
  * ]
@@ -43,7 +43,7 @@ export type TimeBlock = [number, number];
  * a typical loop that visits these info is shown below
  * ```js
  * let dayStart, dayEnd;
- * for (let i = 0; i < 6; i++){
+ * for (let i = 0; i < 7; i++){
  *   dayStart = timeArr[i],
  *   dayEnd   = timeArr[i+1];
  *   for (let j = dayStart; j < dayEnd; j+=3) {
@@ -51,12 +51,6 @@ export type TimeBlock = [number, number];
  *           timeEnd   = timeArr[j+1],
  *           roomIdx   = timeArr[j+2];
  *   }
- * }
- * const len = timeArr.length;
- * for (let j = dayEnd; j < len; j+=3) {
- *   const timeStart = timeArr[j],
- *         timeEnd   = timeArr[j+1],
- *         roomIdx   = timeArr[j+2];
  * }
  * ```
  */

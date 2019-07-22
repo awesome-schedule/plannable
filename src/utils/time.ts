@@ -44,14 +44,16 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
 export function parseTimeAsTimeArray(time: string): TimeArray | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
+        const s = hr12toInt(start);
+        const e = hr12toInt(end);
         let lIdx = 0;
-        const arr: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
+        const arr: number[] = [1, 1, 1, 1, 1, 1, 1, 1];
         for (let i = 0; i < days.length; i += 2) {
-            const idx = dayToInt[days.substr(i, i + 2) as Day];
+            const idx = dayToInt[days.substr(i, 2) as Day];
             for (let j = lIdx; j <= idx; j++) {
                 arr[j] = arr.length;
             }
-            arr.push(hr12toInt(start), hr12toInt(end));
+            arr.push(s, e);
             lIdx = idx + 1;
         }
         for (let i = lIdx; i < 8; i++) {

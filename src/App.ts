@@ -67,7 +67,6 @@ function checkVersion() {
         FuzzyView: () => import('./components/tabs/FuzzyView.vue'),
         LogView: () => import('./components/tabs/LogView.vue')
     }
-
 })
 export default class App extends Store {
     get sideBar() {
@@ -91,34 +90,33 @@ export default class App extends Store {
         }
         return false;
     }
-    
-    // See ExportView.ts => convertJsonToArray()
-    parseFromURL(config: string) { 
-        
+
+    /**
+     * @author Zichao Hu
+     * @see [[ExportView.convertJsonToArray]]
+     * @param config
+     */
+    parseFromURL(config: string) {
         // get URL and convert to JSON
-        const data = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
+        const data: any[] = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
 
         // get the default objects to contruct the valid JSON
         const display = this.display.getDefault();
         const filter = this.filter.getDefault();
-               
+
         // get the first four value
         const name = data[0];
         const modified = data[1];
-        const currentSemester = {id: data[2], name : data[3]};
+        const currentSemester = { id: data[2], name: data[3] };
 
         // display
-        // get and sort keys in display 
-        const display_keys = [];
-        for (const key in display) {
-            display_keys.push(key);
-        }
-        display_keys.sort();
+        // get and sort keys in display
+        const display_keys = Object.keys(display).sort();
 
         // if the key name contains '_' then it corresponds to a certain index in data
         // else it is in the binary
         let counter = 4;
-        let display_bit = data[10];
+        let display_bit: number = data[10];
         for (const key of display_keys) {
             if (key.includes('_')) {
                 display[key] = data[counter];
@@ -134,54 +132,35 @@ export default class App extends Store {
         filter.timeSlots = data[11];
 
         // get allowClosed, allowWaitlist, mode from binary
-        filter.allowClosed = data[12] % 2 === 1 ? true : false;
-        filter.allowWaitlist = Math.floor(data[12] / 2) % 2 === 1 ? true : false;
-        filter.sortOptions.mode = Math.floor(Math.floor(data[12] / 2) / 2) % 2 === 1 ? 1 : 0;
+        filter.allowClosed = Boolean(data[12] & 1);
+        filter.allowWaitlist = Boolean(data[12] & 2);
+        filter.sortOptions.mode = data[12] & 4;
 
         // sorting
         // get the binary of enable_reverse
-        let enable_reverse = data[19];
-        
-        // get all objects from the array 
-        const sortBy = [];
-        const sort_names = [];
+        const enable_reverse = data[19];
 
-        for (const key of filter.sortOptions.sortBy) {
-            sort_names.push(key);
-        }
+        // copy the sortBy array
+        const sortBy = filter.sortOptions.sortBy;
 
         // loop through the ascii initials and match to the object name
-        for (const index in sort_names) {
-            const initial = String.fromCharCode(data[13 + parseInt(index)]);
-            for (const key of sort_names) {
-                if (key.name[0] === initial) {
-                    
-                    // if matched, decode the binary
-                    const enabled = enable_reverse % 2 === 1 ? true : false;
-                    enable_reverse = Math.floor(enable_reverse / 2);
+        let mask = 1;
+        for (let i = 0; i < sortBy.length; i++) {
+            const initial = data[13 + i];
+            const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
 
-                    const reverse = enable_reverse % 2 === 1 ? true : false;
-                    enable_reverse = Math.floor(enable_reverse / 2);
+            // if matched, decode the enabled and reverse info from the binary
+            sortOpt.enabled = Boolean(enable_reverse & mask);
+            mask <<= 1;
 
-                    sortBy.push({
-                        name: key.name,
-                        enabled,
-                        reverse,
-                        exclusive: key.exclusive,
-                        title: key.title,
-                        description: key.description
-                    });
-                }
-            }
+            sortOpt.reverse = Boolean(enable_reverse & mask);
+            mask <<= 1;
         }
-
-        // replace the sortBy 
-        filter.sortOptions.sortBy = sortBy;
 
         // add the schedule and palette
         const schedule = data[20];
         const palette = data[21];
-        
+
         // construct a JSON
         const obj = {
             name,
@@ -191,8 +170,8 @@ export default class App extends Store {
             filter,
             schedule,
             palette
-        }
-        console.log(obj)
+        };
+        console.log(obj);
 
         return JSON.stringify(obj);
     }

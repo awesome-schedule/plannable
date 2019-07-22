@@ -91,11 +91,16 @@ export default class ExportView extends Store {
             this.modal.showURLModal(url.href);
         }
     }
-     
-    // See App.ts => parseFromURL()
+
+    /**
+     * See [[App.parseFromURL]]
+     * convert JSON string to tuple of tuples to reduce the num of chars
+     * @author Zichao Hu
+     * @param jsonString
+     */
     convertJsonToArray(jsonString: string) {
         /*
-        result => 
+        result =>
         name
         modified
         currentSemester.id
@@ -106,16 +111,17 @@ export default class ExportView extends Store {
         _maxNumSchedules
         _numsearchResults
         _partialHeight
-        binary: combineSections, enableFuzzy, enableLog, expandOnEntering, multiSelect, showClasslistTitle, showInstructor, showRoom, showTime, standard
+        binary: combineSections, enableFuzzy, enableLog, expandOnEntering, multiSelect,
+        showClasslistTitle, showInstructor, showRoom, showTime, standard
         timeSlots
         binary: allowClosed, Waitlist, mode
-        sortOptions: name_initial acii :[c,d,l,n,v,I] --> could change in order
+        sortOptions: name_initial ascii code :[c,d,l,n,v,I] --> could change in order
         binary: enabled/reverse
         schedule
         palette
 
         */
-        
+
         // get values from the json object
         const json: SemesterStorage = JSON.parse(jsonString);
         const { name, modified, currentSemester, display, filter, schedule, palette } = json;
@@ -126,19 +132,15 @@ export default class ExportView extends Store {
 
         // compressing display
         // get all keys in the display object and sort them
-        const display_keys = [];
-        for (const key in display) {
-            display_keys.push(key);
-        }
-        display_keys.sort();
+        const display_keys = Object.keys(display).sort();
 
         // convert to binary, the first key => the first/rightmost bit
-        // there are 10 features to consider
+        // there are 10 keys to consider
         let display_bit = 0;
         let counter = 0;
         for (const key of display_keys) {
             if (display[key] === true) {
-                display_bit = display_bit + 2 ** counter;
+                display_bit += 2 ** counter;
                 counter++;
             } else if (display[key] === false) {
                 counter++;
@@ -171,8 +173,7 @@ export default class ExportView extends Store {
         // add the binary of their repestive state: enabled or reverse
         counter = 0;
         filter_bit = 0;
-        for (const index in filter.sortOptions.sortBy) {
-            const sortBy = filter.sortOptions.sortBy[index];
+        for (const sortBy of filter.sortOptions.sortBy) {
             const ascii = sortBy.name.charCodeAt(0);
             result.push(ascii);
             if (sortBy.enabled) {

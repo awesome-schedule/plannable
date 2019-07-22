@@ -73,6 +73,30 @@ export default class App extends Store {
         return this.status.sideBar;
     }
 
+    async loadCoursesFromURL() {
+        const config = new URLSearchParams(window.location.search).get('courses');
+        if (config) {
+            try {
+                const courses = JSON.parse(decodeURIComponent(config));
+                if (courses && courses instanceof Array && courses.length) {
+                    const schedule = this.schedule.getDefault();
+                    courses.forEach(key => (schedule.currentSchedule.All[key] = -1));
+                    this.profile.addProfile(JSON.stringify({ schedule }), 'Li Hao');
+                    await this.loadProfile(undefined, !checkVersion());
+
+                    this.noti.success('Courses loaded from Li Hao', 3, true);
+                    return true;
+                } else {
+                    throw new Error('Invalid course format');
+                }
+            } catch (e) {
+                this.noti.error('Failed to load courses from Li Hao: ' + e.message, 3, true);
+                return false;
+            }
+        }
+        return false;
+    }
+
     async loadConfigFromURL() {
         const config = new URLSearchParams(window.location.search).get('config');
 
@@ -104,7 +128,7 @@ export default class App extends Store {
         const display = this.display.getDefault();
         const filter = this.filter.getDefault();
 
-        // get the first four value
+        // get the first four values
         const name = data[0];
         const modified = data[1];
         const currentSemester = { id: data[2], name: data[3] };
@@ -139,8 +163,6 @@ export default class App extends Store {
         // sorting
         // get the binary of enable_reverse
         const enable_reverse = data[19];
-
-        // copy the sortBy array
         const sortBy = filter.sortOptions.sortBy;
 
         // loop through the ascii initials and match to the object name
@@ -195,7 +217,7 @@ export default class App extends Store {
         this.noti.notify(pay3);
         if (pay3.payload) {
             this.semester.semesters = pay3.payload;
-            const urlResult = await this.loadConfigFromURL();
+            const urlResult = (await this.loadConfigFromURL()) || (await this.loadCoursesFromURL());
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
                 // if version mismatch, force-update semester data

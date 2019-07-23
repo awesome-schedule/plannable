@@ -61,7 +61,7 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
             lIdx = idx + 1;
         }
         // fill the index for succeeding days
-        for (let i = lIdx; i < 8; i++) arr[i] = len;
+        for (let i = lIdx; i < 8; i++) arr[i] = len + 8;
         return arr;
     }
     return null;

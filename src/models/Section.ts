@@ -153,7 +153,9 @@ export default class Section implements CourseFields, Hashable {
      * get the time and room of this section's meetings as [[TimeArray]]
      */
     public getTimeRoom(): TimeArray | null {
-        const timeDict: number[][] = [[], [], [], [], [], [], []];
+        // arrays of times and rooms in each day
+        const dayArray: number[][] = [[], [], [], [], [], [], []];
+
         // there may be multiple meeting times. parse each of them and add to tmp_dict
         const buildingList = window.buildingList;
         for (const meeting of this.meetings) {
@@ -170,10 +172,9 @@ export default class Section implements CourseFields, Hashable {
 
             // for each day
             for (const day of date) {
-                const d = dayToInt[day];
-                const dayBlock = timeDict[d];
-                // the timeBlock is flattened
+                const dayBlock = dayArray[dayToInt[day]];
 
+                // the timeBlock is flattened
                 dayBlock.push(...timeBlock);
 
                 const { room } = meeting;
@@ -190,14 +191,15 @@ export default class Section implements CourseFields, Hashable {
         }
 
         // convert iliffe vector to array
-        const arr = [0, 0, 0, 0, 0, 0, 0, 0];
-        const len = timeDict.length;
-        for (let i = 0; i < len; i++) {
-            arr[i] = arr.length;
-            arr.push(...timeDict[i]);
+        const timeBlocks = new Int16Array(dayArray.reduce((acc, arr) => acc + arr.length, 8));
+        let count = 0;
+        for (let i = 0; i < 7; i++) {
+            timeBlocks[i] = count + 8;
+            timeBlocks.set(dayArray[i], count + 8);
+            count += dayArray[i].length;
         }
-        arr[7] = arr.length;
-        return arr;
+        timeBlocks[7] = timeBlocks.length;
+        return timeBlocks;
     }
 
     public equals(sc: Section): boolean {

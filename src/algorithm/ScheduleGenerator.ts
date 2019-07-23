@@ -15,19 +15,9 @@ import { CourseStatus } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
 
 /**
- * A `TimeBlock` defines the start and end time of a 'Block'
- * that a Meeting will take place. These two numbers are the minutes starting from 0:00
- *
- * To represent time from 10:00 to 11:00:
- * ```js
- * [600, 660]
- * ```
- */
-export type TimeBlock = [number, number];
-
-/**
  * The blocks is a condensed vector storing the time and room information of the a schedule at each day.
- * Index from 0 to 6 represents the index of information from Monday to Sunday
+ * Index from 0 to 6 represents the index of information from Monday to Sunday.
+ * Index 7 is the length of the array, which is there for convenience.
  * Example:
  * ```js
  * const timeArr = [
@@ -54,7 +44,7 @@ export type TimeBlock = [number, number];
  * }
  * ```
  */
-export type TimeArray = number[];
+export type TimeArray = Int16Array | number[];
 
 export type MeetingDate = [number, number];
 
@@ -64,12 +54,14 @@ export type MeetingDate = [number, number];
  *
  * 0: key of this course
  * 1: an array of section indices
- * 2: TimeArray
- * 3: Start and end date
+ * 2: [[TimeArray]]
+ * 3: Start and end date in millisecond (obtained via Date.getTime)
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2], [7, 0, 0, 0, 13, 0, 0, 600, 660, 11, 900, 960, 2, 1200, 1260, 12], [8, 28, 12, 26]]
+ * ["span20205", [0, 1, 2],
+ * [7, 7, 7, 7, 13, 13, 13, 13, 600, 660, 11, 900, 960, 2, 1200, 1260, 12],
+ * [1563863108659, 1574231108659]]
  * ```
  */
 export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];

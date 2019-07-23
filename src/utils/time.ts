@@ -6,7 +6,7 @@
 /**
  *
  */
-import { TimeArray, TimeBlock } from '../algorithm';
+import { TimeArray } from '../algorithm';
 import { Day, dayToInt } from '@/models/Meta';
 /**
  * @author Hanzhi Zhou
@@ -15,10 +15,10 @@ import { Day, dayToInt } from '@/models/Meta';
  *
  * Example usage and return value:
  * ```js
- * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
+ * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [600, 660]]
  * ```
  */
-export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
+export function parseTimeAll(time: string): [Day[], [number, number]] | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
         const dayList: Day[] = [];
@@ -47,18 +47,21 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
         const s = hr12toInt(start);
         const e = hr12toInt(end);
         let lIdx = 0; // last day index
-        const arr: number[] = [1, 1, 1, 1, 1, 1, 1, 1];
-        for (let i = 0; i < days.length; i += 2) {
+        const len = days.length;
+        const arr = new Int16Array(8 + len);
+        for (let i = 0; i < len; i += 2) {
             const idx = dayToInt[days.substr(i, 2) as Day];
+            // fill the index for previous days
             for (let j = lIdx; j <= idx; j++) {
-                arr[j] = arr.length;
+                arr[j] = 8 + i;
             }
-            arr.push(s, e);
+            // place start and end
+            arr[8 + i] = s;
+            arr[8 + i + 1] = e;
             lIdx = idx + 1;
         }
-        for (let i = lIdx; i < 8; i++) {
-            arr[i] = arr.length;
-        }
+        // fill the index for succeeding days
+        for (let i = lIdx; i < 8; i++) arr[i] = len;
         return arr;
     }
     return null;

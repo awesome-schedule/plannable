@@ -223,7 +223,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                 isNaN(+endTime[1])
             ) {
                 return {
-                    msg: 'Invalid time input!',
+                    msg: 'Invalid time input! Please check your filters.',
                     level: 'error'
                 };
             }
@@ -233,7 +233,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
         if (!events.length)
             return {
-                msg: 'You need to select at least one day!',
+                msg: 'You need to select at least one day! Please check your filters.',
                 level: 'error'
             };
 

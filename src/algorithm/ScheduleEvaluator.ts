@@ -75,10 +75,9 @@ class ScheduleEvaluator {
             let sum = 0;
             let sumSq = 0;
             for (let i = 0; i < 7; i++) {
-                const start = blocks[i],
-                    end = blocks[i + 1];
+                const end = blocks[i + 1];
                 let classTime = 0;
-                for (let j = start; j < end; j += 3) {
+                for (let j = blocks[i]; j < end; j += 3) {
                     classTime += blocks[j + 1] - blocks[j];
                 }
                 sum += classTime;
@@ -97,9 +96,10 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let compact = 0;
             for (let i = 0; i < 7; i++) {
-                const start = blocks[i],
-                    end = blocks[i + 1] - 5;
-                for (let j = start; j < end; j += 3) compact += blocks[j + 3] - blocks[j + 1];
+                const end = blocks[i + 1] - 5;
+                for (let j = blocks[i]; j < end; j += 3) {
+                    compact += blocks[j + 3] - blocks[j + 1];
+                }
             }
             return compact;
         },
@@ -115,10 +115,9 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let totalOverlap = 0;
             for (let i = 0; i < 7; i++) {
-                const start = blocks[i],
-                    end = blocks[i + 1];
+                const end = blocks[i + 1];
                 let dayOverlap = 0;
-                for (let j = start; j < end; j += 3) {
+                for (let j = blocks[i]; j < end; j += 3) {
                     // 11:00 to 14:00
                     dayOverlap += Math.max(calcOverlap(660, 840, blocks[j], blocks[j + 1]), 0);
                 }
@@ -159,9 +158,8 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let dist = 0;
             for (let i = 0; i < 7; i++) {
-                const start = blocks[i],
-                    end = blocks[i + 1] - 5;
-                for (let j = start; j < end; j += 3) {
+                const end = blocks[i + 1] - 5;
+                for (let j = blocks[i]; j < end; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
                     if (blocks[j + 3] - blocks[j + 1] > 45) {
                         const r1 = blocks[j + 2],
@@ -226,25 +224,35 @@ class ScheduleEvaluator {
      * @remarks insertion sort is used as there are not many elements in each day array.
      */
     public add(schedule: RawAlgoSchedule) {
-        // sort time blocks of courses according to its schedule
-        const blocks: TimeArray = [0, 0, 0, 0, 0, 0, 0, 0];
+        // calculate the total number of elements in the TimeArray we need to allocate
+        let total = 8;
+        for (const course of schedule) total += course[2].length - 8;
+        const blocks = new Int16Array(total);
+        blocks[7] = total;
+
+        total = 8;
         for (let i = 0; i < 7; i++) {
-            const s1 = (blocks[i] = blocks.length);
+            // start of the current day
+            const s1 = (blocks[i] = total);
             for (const course of schedule) {
                 const arr2 = course[2];
-                const s2 = arr2[i];
                 const e2 = arr2[i + 1];
-                // insert & sort
-                for (let j = s2; j < e2; j += 3) {
-                    let k = blocks.length - 3;
+                // insertion sort
+                for (let j = arr2[i]; j < e2; j += 3, total += 3) {
+                    let k = s1;
                     const vToBeInserted = arr2[j];
-                    for (; k >= s1; k -= 3) if (blocks[k] < vToBeInserted) break;
-
-                    blocks.splice(k + 3, 0, vToBeInserted, arr2[j + 1], arr2[j + 2]);
+                    for (; k < total; k += 3) {
+                        if (vToBeInserted < blocks[k]) break;
+                    }
+                    // move elements 3 slots toward the end
+                    blocks.copyWithin(k + 3, k, total);
+                    // insert three elements
+                    blocks[k] = vToBeInserted;
+                    blocks[k + 1] = arr2[j + 1];
+                    blocks[k + 2] = arr2[j + 2];
                 }
             }
         }
-        blocks[7] = blocks.length;
 
         this._schedules.push({
             schedule,

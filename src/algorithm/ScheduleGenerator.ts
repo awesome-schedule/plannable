@@ -15,7 +15,8 @@ import { CourseStatus } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
 
 /**
- * The blocks is a condensed vector storing the time and room information of the a schedule at each day.
+ * The blocks is a condensed fixed-length array
+ * storing the time and room information of the a schedule at each day.
  * Index from 0 to 6 represents the index of information from Monday to Sunday.
  * Index 7 is the length of the array, which is there for convenience.
  * Example:
@@ -44,7 +45,7 @@ import { NotiMsg } from '@/store/notification';
  * }
  * ```
  */
-export type TimeArray = Int16Array | number[];
+export type TimeArray = Int16Array;
 
 export type MeetingDate = [number, number];
 
@@ -224,7 +225,6 @@ class ScheduleGenerator {
         const pathMemory = new Int32Array(numCourses);
         /**
          * The current schedule, build incrementally and in-place.
-         * After one successful build, all elements are removed **in-place**
          */
         const currentSchedule: RawAlgoSchedule = [];
         const { maxNumSchedules } = this.options;
@@ -241,14 +241,14 @@ class ScheduleGenerator {
              * reset the memory path forward to zero
              */
             while (choiceNum >= classList[classNum].length) {
-                // if all possibilities are exhausted, then break out the loop
+                // if all possibilities are exhausted, break out the loop
                 if (--classNum < 0) return;
 
                 choiceNum = pathMemory[classNum];
                 pathMemory.fill(0, classNum + 1);
             }
 
-            // the time dict of the newly chosen class
+            // the newly chosen section
             const candidate = classList[classNum][choiceNum];
             const timeBlocks = candidate[2];
             const date1 = candidate[3];
@@ -264,8 +264,8 @@ class ScheduleGenerator {
                 }
             }
 
-            // if the schedule matches,
-            // record the next path memory and go to the next class, reset the choiceNum = 0
+            // if the section does not conflict with any previously chosen sections,
+            // increment the path memory and go to the next class, reset the choiceNum = 0
             currentSchedule[classNum] = candidate;
             pathMemory[classNum++] = choiceNum + 1;
             choiceNum = 0;

@@ -11,7 +11,7 @@ it('filter', () => {
 
     filter.timeSlots.push([false, false, true, false, false, '00:00', '']);
     const { msg } = filter.computeFilter();
-    expect(msg).toBe('Invalid time input!');
+    expect(msg).toBe('Invalid time input! Please check your filters.');
 });
 
 it('json', () => {

@@ -6,16 +6,21 @@ test('dummy', () => {
     expect(1).toBe(1);
 });
 
-const d1 = (new Date('2019/8/28')).getTime();
-const d2 = (new Date('2019/12/7')).getTime();
+const d1 = new Date('2019/8/28').getTime();
+const d2 = new Date('2019/12/7').getTime();
 
 const schedules: RawAlgoSchedule = [
-    ['1', [1], [[100, 200, -1], [], [], [], []], [d1, d2]],
-    ['2', [1], [[50, 80, -1], [], [], [], []], [d1, d2]],
-    ['3', [1], [[350, 450, -1], [], [], [], []], [d1, d2]],
-    ['4', [1], [[10, 15, -1], [], [], [], []], [d1, d2]],
-    ['5', [1], [[], [500, 600, -1, 300, 350, -1], [], [], []], [d1, d2]],
-    ['6', [1], [[], [250, 300, -1, 100, 200, -1], [], [], []], [d1, d2]]
+    ['1', [1], new Int16Array([8, 11, 11, 11, 11, 11, 11, 11, 100, 200, -1]), [d1, d2]],
+    ['2', [1], new Int16Array([8, 11, 11, 11, 11, 11, 11, 11, 50, 80, -1]), [d1, d2]],
+    ['3', [1], new Int16Array([8, 11, 11, 11, 11, 11, 11, 11, 350, 450, -1]), [d1, d2]],
+    ['4', [1], new Int16Array([8, 11, 11, 11, 11, 11, 11, 11, 10, 15, -1]), [d1, d2]],
+    [
+        '5',
+        [1],
+        new Int16Array([8, 8, 14, 11, 11, 11, 11, 11, 500, 600, -1, 300, 350, -1]),
+        [d1, d2]
+    ],
+    ['6', [1], new Int16Array([8, 8, 14, 11, 11, 11, 11, 11, 250, 300, -1, 100, 200, -1]), [d1, d2]]
 ];
 
 describe('Schedule Evaluator Test', () => {
@@ -31,8 +36,35 @@ describe('Schedule Evaluator Test', () => {
         const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
         evaluator.add(schedules);
         const s = evaluator._schedules[0];
-        expect(s.blocks[0]).toEqual([10, 15, -1, 50, 80, -1, 100, 200, -1, 350, 450, -1]);
-        expect(s.blocks[1]).toEqual([100, 200, -1, 250, 300, -1, 300, 350, -1, 500, 600, -1]);
+        console.info(s.blocks);
+        expect(Array.from(s.blocks.slice(8, 20))).toEqual([
+            10,
+            15,
+            -1,
+            50,
+            80,
+            -1,
+            100,
+            200,
+            -1,
+            350,
+            450,
+            -1
+        ]);
+        expect(Array.from(s.blocks.slice(20))).toEqual([
+            100,
+            200,
+            -1,
+            250,
+            300,
+            -1,
+            300,
+            350,
+            -1,
+            500,
+            600,
+            -1
+        ]);
     });
 
     it('lunch Test', () => {

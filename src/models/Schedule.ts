@@ -15,8 +15,8 @@ import Event from './Event';
 import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import noti, { NotiMsg } from '@/store/notification';
-import { Day, Week, TYPES, dayToInt } from './Meta';
+import noti from '@/store/notification';
+import { Day, TYPES, dayToInt } from './Meta';
 
 export interface ScheduleJSON {
     All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
@@ -148,7 +148,15 @@ export default class Schedule {
     /**
      * computed based on `this.All` by `computeSchedule`
      */
-    public days: Week<ScheduleBlock>;
+    public days: [
+        ScheduleBlock[], // Monday
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[],
+        ScheduleBlock[] // Sunday
+    ];
     /**
      * total credits stored in this schedule, computed based on `this.All`
      */
@@ -196,7 +204,7 @@ export default class Schedule {
      */
     constructor(raw_schedule: RawAlgoSchedule = [], public events: Event[] = []) {
         this.All = {};
-        this.days = [[], [], [], [], []];
+        this.days = [[], [], [], [], [], [], []];
         this._preview = null;
         this.colorSlots = Array.from({ length: Schedule.bgColors.length }, () => new Set<string>());
         this.totalCredit = 0;
@@ -267,6 +275,10 @@ export default class Schedule {
         this.computeSchedule(false);
     }
 
+    /**
+     * add an event to this schedule
+     * @throws error if an existing event conflicts with this event
+     */
     public addEvent(
         days: string,
         display: boolean,
@@ -570,6 +582,10 @@ export default class Schedule {
         }
     }
 
+    /**
+     * compute the width and left of the blocks passed in
+     * @param blocks blocks belonging to the same connected component
+     */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
         const fastGraph = this.constructAdjList(blocks);
         const colors = new Int16Array(fastGraph.length);
@@ -676,7 +692,7 @@ export default class Schedule {
     }
 
     public cleanSchedule() {
-        this.days = [[], [], [], [], []];
+        this.days = [[], [], [], [], [], [], []];
         this.colorSlots.forEach(x => x.clear());
         this.totalCredit = 0;
         this.currentCourses = [];

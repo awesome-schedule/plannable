@@ -92,22 +92,19 @@ export type RawSection = [
  */
 export type RawMeeting = [string, string, string];
 
-export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr';
-
-/**
- * The generic iliffe vector used to store some information about each day within a week
- */
-export type Week<T> = [T[], T[], T[], T[], T[]];
+export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
 
 export const dayToInt = Object.freeze({
     Mo: 0,
     Tu: 1,
     We: 2,
     Th: 3,
-    Fr: 4
+    Fr: 4,
+    Sa: 5,
+    Su: 6
 }) as { readonly [key in Day]: number };
 
-export const DAYS: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+export const DAYS: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 /**
  * lecture type number => meaning
  */

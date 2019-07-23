@@ -31,6 +31,9 @@ export interface DisplayState {
     // search options
     expandOnEntering: boolean;
     numSearchResults: number;
+
+    // weekdays
+    showWeekend: boolean;
 }
 
 function bound(num: number, low: number, high: number) {
@@ -60,6 +63,7 @@ class Display implements StoreModule<DisplayState, DisplayState> {
     expandOnEntering = false;
     enableLog = false;
     enableFuzzy = false;
+    showWeekend = true;
 
     private _fullHeight: number = 40;
     private _partialHeight: number = 25;

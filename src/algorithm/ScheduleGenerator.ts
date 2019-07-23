@@ -11,26 +11,21 @@ import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { checkTimeConflict, parseDate, calcOverlap } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
-import { CourseStatus, Week } from '@/models/Meta';
+import { CourseStatus } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
 
 /**
- * A `TimeBlock` defines the start and end time of a 'Block'
- * that a Meeting will take place. These two numbers are the minutes starting from 0:00
- *
- * To represent time from 10:00 to 11:00:
- * ```js
- * [600, 660]
- * ```
- */
-export type TimeBlock = [number, number];
-
-/**
- * The blocks is a iliffe vector storing the time and room information of the an entity at each day.
- * Index from 0 to 4 represents days from Monday to Friday.
+ * The blocks is a condensed fixed-length array
+ * storing the time and room information of the a schedule at each day.
+ * Index from 0 to 6 represents the index of information from Monday to Sunday.
+ * Index 7 is the length of the array, which is there for convenience.
  * Example:
  * ```js
- * const timeDict = [ [600, 660, 11, 900, 960, 2], [], [], [],  [1200, 1260, 12] ]
+ * const timeArr = [
+ *   7, 7, 7, 7, 13, 13, 13, 13, //indices
+ *   600, 660, 11, 900, 960, // Monday
+ *   1200, 1260, 12 // Friday
+ * ]
  * ```
  * represents that this entity will take place
  * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
@@ -38,16 +33,19 @@ export type TimeBlock = [number, number];
  *
  * a typical loop that visits these info is shown below
  * ```js
- * for (const day of blocks) {
- *     for (let i = 0; i < day.length; i += 3) {
- *         const start = day[i]; // start time of the `i / 3`th class
- *         const end = day[i + 1]; // end time of the `i / 3`th class
- *         const roomNumber = day[i + 2]; // room index of the `i / 3`th class
- *     }
+ * let dayStart, dayEnd;
+ * for (let i = 0; i < 7; i++){
+ *   dayStart = timeArr[i],
+ *   dayEnd   = timeArr[i+1];
+ *   for (let j = dayStart; j < dayEnd; j+=3) {
+ *     const timeStart = timeArr[j],
+ *           timeEnd   = timeArr[j+1],
+ *           roomIdx   = timeArr[j+2];
+ *   }
  * }
  * ```
  */
-export interface TimeArray extends Week<number> {}
+export type TimeArray = Int16Array;
 
 export type MeetingDate = [number, number];
 
@@ -57,12 +55,14 @@ export type MeetingDate = [number, number];
  *
  * 0: key of this course
  * 1: an array of section indices
- * 2: TimeArray
- * 3: Start and end date
+ * 2: [[TimeArray]]
+ * 3: Start and end date in millisecond (obtained via Date.getTime)
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2], [[600, 650, 1], [600, 650, 3], [], [], []], [8, 28, 12, 26]]
+ * ["span20205", [0, 1, 2],
+ * [7, 7, 7, 7, 13, 13, 13, 13, 600, 660, 11, 900, 960, 2, 1200, 1260, 12],
+ * [1563863108659, 1574231108659]]
  * ```
  */
 export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];
@@ -225,7 +225,6 @@ class ScheduleGenerator {
         const pathMemory = new Int32Array(numCourses);
         /**
          * The current schedule, build incrementally and in-place.
-         * After one successful build, all elements are removed **in-place**
          */
         const currentSchedule: RawAlgoSchedule = [];
         const { maxNumSchedules } = this.options;
@@ -242,14 +241,14 @@ class ScheduleGenerator {
              * reset the memory path forward to zero
              */
             while (choiceNum >= classList[classNum].length) {
-                // if all possibilities are exhausted, then break out the loop
+                // if all possibilities are exhausted, break out the loop
                 if (--classNum < 0) return;
 
                 choiceNum = pathMemory[classNum];
                 pathMemory.fill(0, classNum + 1);
             }
 
-            // the time dict of the newly chosen class
+            // the newly chosen section
             const candidate = classList[classNum][choiceNum];
             const timeBlocks = candidate[2];
             const date1 = candidate[3];
@@ -265,8 +264,8 @@ class ScheduleGenerator {
                 }
             }
 
-            // if the schedule matches,
-            // record the next path memory and go to the next class, reset the choiceNum = 0
+            // if the section does not conflict with any previously chosen sections,
+            // increment the path memory and go to the next class, reset the choiceNum = 0
             currentSchedule[classNum] = candidate;
             pathMemory[classNum++] = choiceNum + 1;
             choiceNum = 0;

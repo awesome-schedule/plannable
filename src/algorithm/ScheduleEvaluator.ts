@@ -11,7 +11,6 @@ import Event from '../models/Event';
 import Schedule from '../models/Schedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoSchedule, TimeArray } from './ScheduleGenerator';
-import { Week } from '@/models/Meta';
 
 export interface CmpSchedule {
     readonly schedule: RawAlgoSchedule;
@@ -75,9 +74,12 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             let sum = 0;
             let sumSq = 0;
-            for (const day of blocks) {
+            for (let i = 0; i < 7; i++) {
+                const end = blocks[i + 1];
                 let classTime = 0;
-                for (let j = 0; j < day.length; j += 3) classTime += day[j + 1] - day[j];
+                for (let j = blocks[i]; j < end; j += 3) {
+                    classTime += blocks[j + 1] - blocks[j];
+                }
                 sum += classTime;
                 sumSq += classTime ** 2;
             }
@@ -93,9 +95,11 @@ class ScheduleEvaluator {
         compactness(this: ScheduleEvaluator, schedule: CmpSchedule) {
             const blocks = schedule.blocks;
             let compact = 0;
-            for (const day of blocks) {
-                const len = day.length - 5;
-                for (let j = 0; j < len; j += 3) compact += day[j + 3] - day[j + 1];
+            for (let i = 0; i < 7; i++) {
+                const end = blocks[i + 1] - 5;
+                for (let j = blocks[i]; j < end; j += 3) {
+                    compact += blocks[j + 3] - blocks[j + 1];
+                }
             }
             return compact;
         },
@@ -110,12 +114,12 @@ class ScheduleEvaluator {
             // 11:00 to 14:00
             const blocks = schedule.blocks;
             let totalOverlap = 0;
-            for (const day of blocks) {
+            for (let i = 0; i < 7; i++) {
+                const end = blocks[i + 1];
                 let dayOverlap = 0;
-                const len = day.length;
-                for (let j = 0; j < len; j += 3) {
+                for (let j = blocks[i]; j < end; j += 3) {
                     // 11:00 to 14:00
-                    dayOverlap += Math.max(calcOverlap(660, 840, day[j], day[j + 1]), 0);
+                    dayOverlap += Math.max(calcOverlap(660, 840, blocks[j], blocks[j + 1]), 0);
                 }
 
                 if (dayOverlap > 60) totalOverlap += dayOverlap;
@@ -132,13 +136,14 @@ class ScheduleEvaluator {
             const blocks = schedule.blocks;
             const refTime = 12 * 60;
             let total = 0;
-            for (const day of blocks) {
-                const time = day[0];
-                if (time && time < refTime) {
-                    total += (refTime - time) ** 2;
+            for (let i = 0; i < 7; i++) {
+                const start = blocks[i],
+                    end = blocks[i + 1];
+                if (end > start) {
+                    const time = blocks[start];
+                    total += Math.max(refTime - time, 0) ** 2;
                 }
             }
-
             return total;
         },
 
@@ -152,13 +157,13 @@ class ScheduleEvaluator {
             const len = timeMatrix.length ** 0.5;
             const blocks = schedule.blocks;
             let dist = 0;
-            for (const day of blocks) {
-                const bl = day.length - 5;
-                for (let j = 0; j < bl; j += 3) {
+            for (let i = 0; i < 7; i++) {
+                const end = blocks[i + 1] - 5;
+                for (let j = blocks[i]; j < end; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
-                    if (day[j + 3] - day[j + 1] > 45) {
-                        const r1 = day[j + 2],
-                            r2 = day[j + 5];
+                    if (blocks[j + 3] - blocks[j + 1] > 45) {
+                        const r1 = blocks[j + 2],
+                            r2 = blocks[j + 5];
 
                         // skip unknown buildings
                         if (r1 !== -1 && r2 !== -1) dist += timeMatrix[r1 * len + r2];
@@ -169,7 +174,7 @@ class ScheduleEvaluator {
         },
 
         /**
-         * the return value is not used. if this sort option is enabled, `shuffle` is called.
+         * the return value is not used. If this sort option is enabled, `shuffle` is called.
          */
         IamFeelingLucky() {
             return Math.random();
@@ -219,23 +224,32 @@ class ScheduleEvaluator {
      * @remarks insertion sort is used as there are not many elements in each day array.
      */
     public add(schedule: RawAlgoSchedule) {
-        // sort time blocks of courses according to its schedule
-        const blocks: Week<number> = [[], [], [], [], []];
-        for (const course of schedule) {
-            const blockArray = course[2];
-            for (let k = 0; k < 5; k++) {
-                // time and rooms at day k
-                const dayBlocks = blockArray[k];
-                const len = dayBlocks.length;
-                if (!len) continue;
+        // calculate the total number of elements in the TimeArray we need to allocate
+        let total = 8;
+        for (const course of schedule) total += course[2].length - 8;
+        const blocks = new Int16Array(total);
+        blocks[7] = total;
 
-                const sortedBlocks = blocks[k];
-                for (let i = 0; i < len; i += 3) {
-                    // insert dayBlocks[i:i+3] into the correct position in the block array
-                    const ele = dayBlocks[i];
-                    let j = 0;
-                    for (; j < sortedBlocks.length; j += 3) if (ele < sortedBlocks[j]) break;
-                    sortedBlocks.splice(j, 0, ele, dayBlocks[i + 1], dayBlocks[i + 2]);
+        total = 8;
+        for (let i = 0; i < 7; i++) {
+            // start of the current day
+            const s1 = (blocks[i] = total);
+            for (const course of schedule) {
+                const arr2 = course[2];
+                const e2 = arr2[i + 1];
+                // insertion sort
+                for (let j = arr2[i]; j < e2; j += 3, total += 3) {
+                    let k = s1;
+                    const vToBeInserted = arr2[j];
+                    for (; k < total; k += 3) {
+                        if (vToBeInserted < blocks[k]) break;
+                    }
+                    // move elements 3 slots toward the end
+                    blocks.copyWithin(k + 3, k, total);
+                    // insert three elements
+                    blocks[k] = vToBeInserted;
+                    blocks[k + 1] = arr2[j + 1];
+                    blocks[k + 2] = arr2[j + 2];
                 }
             }
         }

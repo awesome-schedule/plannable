@@ -51,6 +51,7 @@ declare global {
         catalog: Readonly<Catalog>;
         timeMatrix: Readonly<Int32Array>;
         buildingList: ReadonlyArray<string>;
+        similaritySchedule: [string, ...number[]][];
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -79,6 +80,7 @@ Vue.directive('top', {
 
 window.axios = axios;
 window.querystring = querystring;
+window.similaritySchedule = [];
 
 Vue.config.productionTip = false;
 Vue.config.devtools = true;

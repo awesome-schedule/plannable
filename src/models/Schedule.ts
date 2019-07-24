@@ -120,7 +120,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }

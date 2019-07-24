@@ -110,6 +110,14 @@ const defaultOptions: DetailedEvaluatorOptions = {
             description: 'Start my day as late as possible'
         },
         {
+            name: 'similarity',
+            enabled: false,
+            reverse: false,
+            exclusive: ['IamFeelingLucky'],
+            title: 'similarity',
+            description: 'Similar to a selected schedule'
+        },
+        {
             name: 'IamFeelingLucky',
             enabled: false,
             reverse: false,

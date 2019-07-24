@@ -174,6 +174,26 @@ class ScheduleEvaluator {
         },
 
         /**
+         * need optimization (e.g. sort schedule and similarity schedule at first)
+         */
+        similarity(this: ScheduleEvaluator, schedule: CmpSchedule) {
+            const simSchedule = window.similaritySchedule;
+            const cmp = schedule.schedule;
+            let sum = 0;
+            for (const sim of simSchedule) {
+                for (const c of cmp) {
+                    if (sim[0] === c[0]) {
+                        if (sim[1] === c[1][0]) {
+                            sum += 1;
+                        }
+                        break;
+                    }
+                }
+            }
+            return -1 * sum;
+        },
+
+        /**
          * the return value is not used. If this sort option is enabled, `shuffle` is called.
          */
         IamFeelingLucky() {
@@ -520,6 +540,10 @@ class ScheduleEvaluator {
         this._schedules = [];
         this.sortCoeffCache = {};
         this.events = [];
+    }
+
+    public updateSimilarity() {
+        delete this.sortCoeffCache.similarity;
     }
 
     /**

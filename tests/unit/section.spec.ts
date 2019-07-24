@@ -13,6 +13,10 @@ describe('section test', () => {
         const timeRoom = sec.getTimeRoom()!;
         expect((timeRoom.length - 8) / 3).toBe(Math.floor((timeRoom.length - 8) / 3));
         expect(sec.has(sec2));
+
+        const sec3 = catalog.getSection('cs99993', 0);
+        expect(sec3.valid & 0b1110).toBeTruthy();
+        expect(sec3.validMsg).not.toBe('Valid');
     });
 
     it('multiple meetings', () => {

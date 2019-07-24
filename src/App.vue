@@ -140,11 +140,6 @@
                         <i v-if="indexOfCompare() !== -1" class="fas fa-check"></i>
                     </button>
                 </div>
-                <div v-if="schedule.generated" class="col-sm-auto text-center align-self-center">
-                    <button class="btn btn-outline-primary my-1" @click="similarity()">
-                        Similarity
-                    </button>
-                </div>
             </div>
 
             <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>

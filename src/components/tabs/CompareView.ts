@@ -83,4 +83,43 @@ export default class CompareView extends Store {
         }
         this.renderSchedule();
     }
+    similarity(idx: number) {
+        const all = this.compare[idx].schedule.All;
+        const sim: [string, ...number[]][] = [];
+        for (const key in all) {
+            sim.push([key, ...(all[key] as Set<number>).keys()] as [string, ...number[]]);
+        }
+        window.similaritySchedule = sim;
+        window.scheduleEvaluator.updateSimilarity();
+        if (!window.scheduleEvaluator.empty()) {
+            window.scheduleEvaluator.sort({ newOptions: this.filter.sortOptions });
+            if (!this.schedule.generated) {
+                this.schedule.switchSchedule(true);
+            } else {
+                // re-assign the current schedule
+                this.schedule.currentSchedule = window.scheduleEvaluator.getSchedule(
+                    this.schedule.currentScheduleIndex
+                );
+            }
+        }
+
+    }
+    isSimilarSchedule(idx: number) {
+        const all = this.compare[idx].schedule.All;
+        const a: [string, ...number[]][] = [];
+        for (const key in all) {
+            a.push([key, ...(all[key] as Set<number>).keys()] as [string, ...number[]]);
+        }
+        const b = window.similaritySchedule;
+        if (a.length !== b.length) return false;
+        outer: for (const i of a) {
+            for (const j of b) {
+                if (i[0] === j[0]) {
+                    if (i[1] === j[1]) continue outer;
+                }
+            }
+            return false;
+        }
+        return true;
+    }
 }

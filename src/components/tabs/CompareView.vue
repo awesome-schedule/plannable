@@ -14,14 +14,23 @@
                     v-for="(cur, idx) in compare"
                     :key="cur"
                     class="list-group-item px-1"
-                    :title="getTitle(idx)"
                     @mouseenter="highlight(idx)"
                     @mouseleave="highlight(idx)"
                 >
                     <div class="row no-gutters justify-content-between">
-                        <div class="col-sm-auto mr-auto">
+                        <div class="col-sm-auto mr-auto" :title="getTitle(idx)">
                             Schedule {{ cur.pIdx + 1 }}/{{ cur.index + 1 }}<br />
                             <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
+                        </div>
+                        <div
+                            class="col-sm-3 mx-auto align-self-center"
+                            title="if you want your schedule to be as similar to this schedule as possible, click this and select 'similarity' in filters"
+                        >
+                            <button @click="similarity(idx)">
+                                Preferred
+                                <i v-if="isSimilarSchedule(idx)" class="far fa-check-square"></i>
+                                <i v-else class="far fa-square"></i>
+                            </button>
                         </div>
                         <div class="col-sm-auto text-right align-self-center">
                             <input

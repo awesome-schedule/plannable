@@ -258,25 +258,4 @@ export default class App extends Store {
             });
         }
     }
-
-    similarity() {
-        const all = this.schedule.currentSchedule.All;
-        const sim = [];
-        for (const key in all) {
-            sim.push([key, ...(all[key] as Set<number>).keys()] as [string, ...number[]]);
-        }
-        window.similaritySchedule = sim;
-        window.scheduleEvaluator.updateSimilarity();
-        if (!window.scheduleEvaluator.empty()) {
-            window.scheduleEvaluator.sort({ newOptions: this.filter.sortOptions });
-            if (!this.schedule.generated) {
-                this.schedule.switchSchedule(true);
-            } else {
-                // re-assign the current schedule
-                this.schedule.currentSchedule = window.scheduleEvaluator.getSchedule(
-                    this.schedule.currentScheduleIndex
-                );
-            }
-        }
-    }
 }

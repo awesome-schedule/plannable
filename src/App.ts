@@ -116,7 +116,7 @@ export default class App extends Store {
     }
 
     /**
-     * @author Zichao Hu
+     * @author Zichao Hu, Hanzhi Zhou
      * @see [[ExportView.convertJsonToArray]]
      * @param config
      */

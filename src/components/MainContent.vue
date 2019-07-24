@@ -54,24 +54,6 @@
                             <v-icon size="24px">fas fa-exclamation-circle</v-icon>
                         </v-btn>
                     </a>
-                    <a
-                        style="color:inherit;text-decoration: none;"
-                        target="_blank"
-                        href="https://www.youtube.com/watch?v=GFKAmRvqwkg"
-                    >
-                        <v-btn class="mx-3" title="Watch our video on YouTube" dark icon
-                            ><v-icon size="22px">fab fa-youtube</v-icon>
-                        </v-btn>
-                    </a>
-                    <a
-                        style="color:inherit;text-decoration: none;"
-                        target="_blank"
-                        href="https://docs.google.com/forms/d/e/1FAIpQLScsXZdkFFIljwyhuyAOwjGhEbq_LzY-POxEyJsK_jLrBIUmvw/viewform"
-                    >
-                        <v-btn class="mx-3" title="Fill out a survey to make us better" dark icon
-                            ><v-icon size="24px">fas fa-poll</v-icon>
-                        </v-btn>
-                    </a>
                 </v-card-title>
 
                 <v-card-actions class="grey darken-3 justify-content-center">

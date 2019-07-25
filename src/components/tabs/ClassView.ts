@@ -11,7 +11,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Course from '@/models/Course';
 import Store from '@/store';
 import ClassList from '../ClassList.vue';
-import { SearchMatches } from '@/models/Catalog';
+import { SearchMatch } from '@/models/Catalog';
 
 /**
  * component for editing classes and manipulating schedules
@@ -34,7 +34,7 @@ export default class ClassView extends Store {
     // autocompletion related fields
     isEntering = false;
     inputCourses: Course[] = [];
-    inputMatches: SearchMatches = [];
+    inputMatches: SearchMatch[] = [];
 
     /**
      * get classes that match the input query.

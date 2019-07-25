@@ -41,9 +41,9 @@ interface SearchWorker extends Worker {
     postMessage(x: string | typeof window.catalog.courseDict): void;
 }
 
-export type SearchMatches = [CourseMatch[], Map<number, SectionMatch[]>][];
+export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
 
-function addSectionMatches(prevMatches: SearchMatches[0], secMatches: Map<number, SectionMatch[]>) {
+function addSectionMatches(prevMatches: SearchMatch, secMatches: Map<number, SectionMatch[]>) {
     const combSecMatches = prevMatches[1];
     for (const [sid, matches] of secMatches) {
         const prevMats = combSecMatches.get(sid);
@@ -164,14 +164,14 @@ export default class Catalog {
         if (!worker) return Promise.reject('Worker not initialized!');
         const promise = new Promise((resolve, reject) => {
             worker.onmessage = ({
-                data
+                data: [args, matches]
             }: {
-                data: [CourseConstructorArguments[], SearchMatches];
-            }) => resolve([data[0].map(x => new Course(...x)), data[1]]);
+                data: [CourseConstructorArguments[], SearchMatch[]];
+            }) => resolve([args.map(x => new Course(...x)), matches]);
             worker.onerror = err => reject(err);
         });
         worker.postMessage(query);
-        return promise as Promise<[Course[], SearchMatches]>;
+        return promise as Promise<[Course[], SearchMatch[]]>;
     }
 
     /**
@@ -180,7 +180,7 @@ export default class Catalog {
      * @param query
      * @param max_results
      */
-    public search(query: string, max_results = 6): [Course[], SearchMatches] {
+    public search(query: string, max_results = 6): [Course[], SearchMatch[]] {
         query = query
             .trim()
             .toLowerCase()
@@ -205,7 +205,7 @@ export default class Catalog {
         }
 
         const results: Course[] = [];
-        const matches: SearchMatches = [];
+        const matches: SearchMatch[] = [];
         const courses = this.courses;
         const len = courses.length;
 
@@ -245,7 +245,7 @@ export default class Catalog {
         queryNoSp: string,
         course: Course,
         results: Course[],
-        matches: SearchMatches
+        matches: SearchMatch[]
     ) {
         const key = course.key;
         const keyIdx = key.indexOf(queryNoSp);
@@ -272,7 +272,7 @@ export default class Catalog {
         field: 'title' | 'description',
         course: Course,
         results: Course[],
-        matches: SearchMatches
+        matches: SearchMatch[]
     ) {
         const target = course[field].toLowerCase();
         const key = course.key;
@@ -293,7 +293,7 @@ export default class Catalog {
         }
     }
 
-    private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatches) {
+    private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
@@ -313,7 +313,7 @@ export default class Catalog {
         if (topicMatches.size) this.appendToResult(course, topicMatches, results, matches);
     }
 
-    private searchProf(query: string, course: Course, results: Course[], matches: SearchMatches) {
+    private searchProf(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
@@ -337,11 +337,11 @@ export default class Catalog {
         course: Course,
         matches: Map<number, SectionMatch[]>,
         results: Course[],
-        allMatches: SearchMatches
+        allMatches: SearchMatch[]
     ) {
         const prev = results.findIndex(x => x.key === course.key);
         if (prev !== -1) {
-            results[prev] = new Course(course.raw, course.key, [
+            results[prev] = course.getCourse([
                 ...new Set(course.sids.concat([...matches.keys()])) // eliminate duplicates
             ]);
             addSectionMatches(allMatches[prev], matches);

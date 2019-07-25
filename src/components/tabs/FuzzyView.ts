@@ -5,7 +5,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Store from '@/store';
 import Course from '@/models/Course';
 import ClassList from '../ClassList.vue';
-import { SearchMatches } from '@/models/Catalog';
+import { SearchMatch } from '@/models/Catalog';
 
 /**
  * component for performing fuzzy-search against the catalog of courses
@@ -18,7 +18,7 @@ import { SearchMatches } from '@/models/Catalog';
 })
 export default class FuzzyView extends Store {
     inputCourses: Course[] = [];
-    inputMatches: SearchMatches = [];
+    inputMatches: SearchMatch[] = [];
 
     /**
      * represent the current state of the fuzzy search component.

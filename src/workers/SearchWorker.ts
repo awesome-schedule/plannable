@@ -14,12 +14,12 @@ import { Searcher, SearchResult, ReturnMatchData, SearchOptions } from 'fast-fuz
 import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
-import { SearchMatches } from '@/models/Catalog';
+import { SearchMatch } from '@/models/Catalog';
 
 type Course = NonFunctionProperties<_Course>;
 type Section = NonFunctionProperties<_Section>;
 
-declare function postMessage(msg: [CourseConstructorArguments[], SearchMatches] | 'ready'): void;
+declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] | 'ready'): void;
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
@@ -209,7 +209,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             .slice(0, 12);
 
         const finalResults: CourseConstructorArguments[] = [];
-        const allMatches: SearchMatches = [];
+        const allMatches: SearchMatch[] = [];
 
         // merge course and section matches
         for (const [key] of scoreEntries) {

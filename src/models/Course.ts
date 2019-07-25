@@ -6,7 +6,7 @@
 /**
  *
  */
-import Section, { SectionMatch } from './Section';
+import Section from './Section';
 import { RawCourse, CourseType, TYPES } from './Meta';
 import Hashable from './Hashable';
 import { hashCode } from '../utils';
@@ -58,8 +58,6 @@ type CourseMatchField = 'title' | 'description' | 'key';
 export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T>;
 export type CourseConstructorArguments = ConstructorParameters<typeof Course>;
 
-const matchSortFunc = (a: Match<any>, b: Match<any>) => a.start - b.start;
-
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
  * depending on the array of section indices passed to its constructor.
@@ -86,8 +84,6 @@ export default class Course implements CourseFields, Hashable {
      * @param key the key of this course, e.g. cs11105
      * equal to (department + number + `Meta.TYPES_PARSE`\[type\]). see [[Meta.TYPES_PARSE]]
      * @param sids A list of section indices
-     * @param matches matches for this course
-     * @param secMatches matches for the sections contained in this course
      */
     constructor(
         public readonly raw: RawCourse,
@@ -121,7 +117,7 @@ export default class Course implements CourseFields, Hashable {
     }
 
     /**
-     * Get the CourseRecord at a given range of sections
+     * Get the Course containing only the given sections
      */
     public getCourse(sids: number[]) {
         return new Course(this.raw, this.key, sids);

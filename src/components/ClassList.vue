@@ -3,7 +3,7 @@
         <div class="card-body p-0" tabindex="-1" @keyup.esc="$emit('close')">
             <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
             <div
-                v-for="(crs, crsIdx) in courses"
+                v-for="(crs, idx) in courses"
                 :key="crs.key"
                 class="list-group list-group-flush w-100"
                 @mouseenter="schedule.hover(crs.key)"
@@ -26,9 +26,7 @@
                             <h6 class="mb-1">
                                 <span
                                     v-if="matches.length"
-                                    v-html="
-                                        highlightMatch(crs.displayName, 'key', matches[crsIdx][0])
-                                    "
+                                    v-html="highlightMatch(crs.displayName, 'key', matches[idx][0])"
                                 >
                                 </span>
                                 <span v-else>{{ crs.displayName }}</span>
@@ -44,7 +42,7 @@
                                 <p
                                     v-if="matches.length"
                                     style="font-size: 0.85rem; margin: 0;"
-                                    v-html="highlightMatch(crs.title, 'title', matches[crsIdx][0])"
+                                    v-html="highlightMatch(crs.title, 'title', matches[idx][0])"
                                 ></p>
                                 <p v-else style="font-size: 0.85rem; margin: 0;">
                                     {{ crs.title }}
@@ -64,7 +62,7 @@
                                 class="fas fa-info-circle click-icon"
                                 :class="{ 'pr-2': !showClasslistTitle }"
                                 title="View class description"
-                                @click="$emit('course_modal', crs)"
+                                @click="$emit('course_modal', { crs, match: matches[idx] })"
                             ></i>
                             <br v-if="showClasslistTitle" />
                             <i
@@ -160,7 +158,7 @@
                                                             highlightMatch(
                                                                 sec.topic,
                                                                 'topic',
-                                                                matches[crsIdx][1].get(sec.sid)
+                                                                matches[idx][1].get(sec.sid)
                                                             )
                                                         "
                                                     ></span>
@@ -177,18 +175,19 @@
                                                         "
                                                     ></i>
                                                 </li>
-                                                <template v-for="meeting in sec.meetings">
-                                                    <li :key="meeting.days">
-                                                        {{ meeting.days }}
-                                                    </li>
-                                                </template>
+                                                <li
+                                                    v-for="meeting in sec.meetings"
+                                                    :key="meeting.days"
+                                                >
+                                                    {{ meeting.days }}
+                                                </li>
                                                 <li
                                                     v-if="matches.length"
                                                     v-html="
                                                         highlightMatch(
                                                             sec.instructors.join(', '),
                                                             'instructors',
-                                                            matches[crsIdx][1].get(sec.sid)
+                                                            matches[idx][1].get(sec.sid)
                                                         )
                                                     "
                                                 ></li>

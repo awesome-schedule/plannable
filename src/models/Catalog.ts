@@ -37,20 +37,17 @@ export interface CatalogJSON extends Expirable {
 }
 
 interface SearchWorker extends Worker {
-    onmessage(x: any): void;
+    onmessage(x: MessageEvent): void;
     postMessage(x: string | typeof window.catalog.courseDict): void;
 }
-
+/**
+ * the match indices for a [[Course]]
+ *
+ * 0: the array of matches for the fields of this Course
+ *
+ * 1: the Map that maps [[Section.sid]] to the array of matches for the fields of that section
+ */
 export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
-
-function addSectionMatches(prevMatches: SearchMatch, secMatches: Map<number, SectionMatch[]>) {
-    const combSecMatches = prevMatches[1];
-    for (const [sid, matches] of secMatches) {
-        const prevMats = combSecMatches.get(sid);
-        if (prevMats) prevMats.push(...matches);
-        else combSecMatches.set(sid, matches);
-    }
-}
 
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
@@ -95,8 +92,8 @@ export default class Catalog {
             const Worker = require('worker-loader!../workers/SearchWorker');
             const worker: SearchWorker = new Worker();
             const prom = new Promise(resolve => {
-                worker.onmessage = msg => {
-                    resolve(msg.data as 'ready');
+                worker.onmessage = ({ data }) => {
+                    resolve(data as 'ready');
                 };
             }) as Promise<'ready'>;
             worker.postMessage(this.courseDict);
@@ -106,6 +103,9 @@ export default class Catalog {
         return Promise.resolve('ready') as Promise<'ready'>;
     }
 
+    /**
+     * terminate the worker and free memory
+     */
     public disposeWorker() {
         if (this.worker) {
             this.worker.terminate();
@@ -159,6 +159,9 @@ export default class Catalog {
         }
     }
 
+    /**
+     * perform fuzzy search in the dedicated web worker
+     */
     public fuzzySearch(query: string) {
         const worker = this.worker;
         if (!worker) return Promise.reject('Worker not initialized!');
@@ -297,7 +300,8 @@ export default class Catalog {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
-        for (let i = 0; i < sections.length; i++) {
+        const len = sections.length;
+        for (let i = 0; i < len; i++) {
             const topic = sections[i].topic;
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
@@ -317,7 +321,8 @@ export default class Catalog {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
-        for (let i = 0; i < sections.length; i++) {
+        const len = sections.length;
+        for (let i = 0; i < len; i++) {
             const profs = sections[i].instructors.join(', ').toLowerCase();
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
@@ -342,9 +347,15 @@ export default class Catalog {
         const prev = results.findIndex(x => x.key === course.key);
         if (prev !== -1) {
             results[prev] = course.getCourse([
-                ...new Set(course.sids.concat([...matches.keys()])) // eliminate duplicates
+                ...new Set(course.sids.concat([...matches.keys()])) // merge sids and eliminate duplicates
             ]);
-            addSectionMatches(allMatches[prev], matches);
+            // merge the section matches with the previously recorded section matches
+            const combSecMatches = allMatches[prev][1];
+            for (const [sid, mats] of matches) {
+                const prevMats = combSecMatches.get(sid);
+                if (prevMats) prevMats.push(...mats);
+                else combSecMatches.set(sid, mats);
+            }
         } else {
             results.push(course.getCourse([...matches.keys()]));
             allMatches.push([[], matches]);

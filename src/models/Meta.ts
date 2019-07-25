@@ -108,7 +108,7 @@ export const DAYS: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su
 /**
  * lecture type number => meaning
  */
-export const TYPES: { [x: number]: CourseType } = Object.freeze({
+export const TYPES = Object.freeze({
     '-1': '',
     0: 'Clinical',
     1: 'Discussion',

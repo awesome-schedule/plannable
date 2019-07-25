@@ -30,6 +30,7 @@
             <ClassList
                 ref="enteringClassList"
                 :courses="inputCourses"
+                :matches="inputMatches"
                 :schedule="schedule.currentSchedule"
                 :is-entering="true"
                 :show-classlist-title="display.showClasslistTitle"

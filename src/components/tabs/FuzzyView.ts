@@ -5,6 +5,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Store from '@/store';
 import Course from '@/models/Course';
 import ClassList from '../ClassList.vue';
+import { SearchMatches } from '@/models/Catalog';
 
 /**
  * component for performing fuzzy-search against the catalog of courses
@@ -17,6 +18,7 @@ import ClassList from '../ClassList.vue';
 })
 export default class FuzzyView extends Store {
     inputCourses: Course[] = [];
+    inputMatches: SearchMatches = [];
 
     /**
      * represent the current state of the fuzzy search component.
@@ -57,6 +59,7 @@ export default class FuzzyView extends Store {
     async getClass(query: string) {
         if (!query) {
             this.inputCourses = [];
+            this.inputMatches = [];
             return;
         }
         this.loading = true;
@@ -65,11 +68,11 @@ export default class FuzzyView extends Store {
 
         console.time('query');
         try {
-            this.inputCourses = await window.catalog.fuzzySearch(query);
+            [this.inputCourses, this.inputMatches] = await window.catalog.fuzzySearch(query);
+            console.log(this.inputMatches);
         } catch (err) {
-            const e: Error | ErrorEvent = err;
-            this.noti.error(e.message);
-            console.error(e);
+            this.noti.error(err.message);
+            console.error(err);
         } finally {
             this.loading = false;
             console.timeEnd('query');

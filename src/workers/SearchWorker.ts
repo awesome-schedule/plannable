@@ -14,11 +14,12 @@ import { Searcher, SearchResult, ReturnMatchData, SearchOptions } from 'fast-fuz
 import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
+import { SearchMatches } from '@/models/Catalog';
 
 type Course = NonFunctionProperties<_Course>;
 type Section = NonFunctionProperties<_Section>;
 
-declare function postMessage(msg: CourseConstructorArguments[] | 'ready'): void;
+declare function postMessage(msg: [CourseConstructorArguments[], SearchMatches] | 'ready'): void;
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
@@ -116,9 +117,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
         } = Object.create(null);
 
         const sectionMap: {
-            [x: string]: {
-                [y: string]: ResultEntry<Section, 'topic' | 'instructors'>[];
-            };
+            [x: string]: Map<number, ResultEntry<Section, 'topic' | 'instructors'>[]>;
         } = Object.create(null);
 
         const sectionRecorder: Set<string> = new Set();
@@ -176,14 +175,15 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                     };
 
                     if (sectionMap[key]) {
-                        if (sectionMap[key][item.sid]) {
-                            sectionMap[key][item.sid].push(tempObj);
+                        const secMatches = sectionMap[key].get(item.sid);
+                        if (secMatches) {
+                            secMatches.push(tempObj);
                         } else {
-                            sectionMap[key][item.sid] = [tempObj];
+                            sectionMap[key].set(item.sid, [tempObj]);
                         }
                     } else {
-                        sectionMap[key] = Object.create(null);
-                        sectionMap[key][item.sid.toString()] = [tempObj];
+                        sectionMap[key] = new Map();
+                        sectionMap[key].set(item.sid, [tempObj]);
                     }
 
                     const secKey = `${item.key} ${item.sid}`;
@@ -208,83 +208,82 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             )
             .slice(0, 12);
 
-        for (const [key] of scoreEntries) {
-            if (courseMap[key]) {
-                resolveOverlap(courseMap[key]);
-            }
-
-            if (sectionMap[key]) {
-                for (const matches of Object.values(sectionMap[key])) {
-                    resolveOverlap(matches);
-                }
-            }
-        }
-
         const finalResults: CourseConstructorArguments[] = [];
+        const allMatches: SearchMatches = [];
 
         // merge course and section matches
         for (const [key] of scoreEntries) {
             const courseMatch = courseMap[key];
-            let course: CourseConstructorArguments;
             if (courseMatch) {
+                resolveOverlap(courseMatch);
+
                 const { item } = courseMatch[0].result;
 
-                const mats: CourseMatch[] = courseMatch.map(({ match, result }) => ({
-                    match,
-                    start: result.match.index,
-                    end: result.match.index + result.match.length
-                }));
-
-                const combSecMatches: SectionMatch[][] = [];
-                const s = sectionMap[key];
-
-                if (s) {
-                    const matchedSecIdx = Object.keys(s);
-                    const secMatches: { [sid: string]: SectionMatch[] } = Object.create(null);
-
-                    for (const sid of Object.keys(s)) {
-                        secMatches[sid] = s[sid].map(({ match, result }) => ({
-                            match,
-                            start: result.match.index,
-                            end: result.match.index + result.match.length
-                        }));
-                    }
-
-                    for (const sid of item.sids) {
-                        if (matchedSecIdx.indexOf(sid.toString()) === -1) {
-                            combSecMatches.push([]);
-                        } else {
-                            combSecMatches.push(secMatches[sid]);
-                        }
-                    }
-                }
-                course = [item.raw, key, item.sids, mats, combSecMatches];
-                // only section match exists
-            } else {
-                const s = sectionMap[key];
-                const sidKeys = Object.keys(sectionMap[key]).sort(
-                    (a, b) => parseInt(a) - parseInt(b)
+                const crsMatches: CourseMatch[] = courseMatch.map(
+                    ({ match, result: { match: m } }) => ({
+                        match,
+                        start: m.index,
+                        end: m.index + m.length
+                    })
                 );
-                const {item} = sectionMap[key][sidKeys[0]][0].result;
 
                 const combSecMatches: SectionMatch[][] = [];
-                const matchedSids = sidKeys.map(x => parseInt(x));
+                const s = sectionMap[key];
 
+                // if the section matches for this course exist
                 if (s) {
-                    for (const sid of sidKeys) {
-                        combSecMatches.push(
-                            s[sid].map(({ match, result }) => ({
+                    const secMatches = new Map<number, SectionMatch[]>();
+
+                    for (const [sid, matches] of s) {
+                        resolveOverlap(matches);
+                        secMatches.set(
+                            sid,
+                            matches.map(({ match, result: { match: m } }) => ({
                                 match,
-                                start: result.match.index,
-                                end: result.match.index + result.match.length
+                                start: m.index,
+                                end: m.index + m.length
                             }))
                         );
                     }
+
+                    for (const sid of item.sids) {
+                        const matches = secMatches.get(sid);
+                        if (matches) {
+                            combSecMatches.push(matches);
+                        } else {
+                            combSecMatches.push([]);
+                        }
+                    }
                 }
-                course = [courseDict[item.key].raw, key, matchedSids, [], combSecMatches];
+                finalResults.push([item.raw, key, item.sids]);
+                allMatches.push([crsMatches, combSecMatches]);
+
+                // only section match exists
+            } else {
+                const s = sectionMap[key];
+                if (s) {
+                    const sids = [...s.keys()].sort((a, b) => a - b);
+                    const combSecMatches: SectionMatch[][] = [];
+                    for (const sid of sids) {
+                        const matches = s.get(sid)!;
+                        resolveOverlap(matches);
+                        combSecMatches.push(
+                            matches.map(({ match, result: { match: m } }) => ({
+                                match,
+                                start: m.index,
+                                end: m.index + m.length
+                            }))
+                        );
+                    }
+                    finalResults.push([
+                        courseDict[s.get(sids[0])![0].result.item.key].raw,
+                        key,
+                        sids
+                    ]);
+                    allMatches.push([[], combSecMatches]);
+                }
             }
-            finalResults.push(course);
         }
-        postMessage(finalResults);
+        postMessage([finalResults, allMatches]);
     }
 };

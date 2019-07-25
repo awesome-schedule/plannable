@@ -36,12 +36,8 @@ export interface CatalogJSON extends Expirable {
     readonly raw_data: RawCatalog;
 }
 
-interface SearchWorkerOnMessage extends MessageEvent {
-    data: 'ready' | CourseConstructorArguments[];
-}
-
 interface SearchWorker extends Worker {
-    onmessage(x: SearchWorkerOnMessage): void;
+    onmessage(x: any): void;
     postMessage(x: string | typeof window.catalog.courseDict): void;
 }
 
@@ -186,13 +182,15 @@ export default class Catalog {
         const worker = this.worker;
         if (!worker) return Promise.reject('Worker not initialized!');
         const promise = new Promise((resolve, reject) => {
-            worker.onmessage = ({ data }) => {
-                resolve((data as CourseConstructorArguments[]).map(x => new Course(...x)));
-            };
+            worker.onmessage = ({
+                data
+            }: {
+                data: [CourseConstructorArguments[], SearchMatches];
+            }) => resolve([data[0].map(x => new Course(...x)), data[1]]);
             worker.onerror = err => reject(err);
         });
         worker.postMessage(query);
-        return promise as Promise<Course[]>;
+        return promise as Promise<[Course[], SearchMatches]>;
     }
 
     /**

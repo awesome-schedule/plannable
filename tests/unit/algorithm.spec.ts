@@ -57,7 +57,7 @@ describe('ScheduleGenerator Test', () => {
         const { payload: result2 } = generator.getSchedules(schedule);
         expect(result2!.empty()).toBeFalsy();
 
-        sort.sortBy[5].enabled = true;
+        sort.sortBy[6].enabled = true;
         const { payload: result3 } = generator.getSchedules(schedule);
         expect(result3!.empty()).toBeFalsy();
 

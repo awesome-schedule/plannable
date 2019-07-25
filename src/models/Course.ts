@@ -80,7 +80,6 @@ export default class Course implements CourseFields, Hashable {
      */
     public readonly sids: ReadonlyArray<number>;
     public readonly sections: ReadonlyArray<Section>;
-    public readonly matches: ReadonlyArray<CourseMatch>;
 
     /**
      * @param raw the raw representation of this course
@@ -93,9 +92,7 @@ export default class Course implements CourseFields, Hashable {
     constructor(
         public readonly raw: RawCourse,
         public readonly key: string,
-        sids: ReadonlyArray<number> = [],
-        matches: ReadonlyArray<CourseMatch> = [],
-        public readonly secMatches: ReadonlyArray<ReadonlyArray<SectionMatch>> = []
+        sids: ReadonlyArray<number> = []
     ) {
         if (sids.length) {
             this.sids = sids.slice().sort((a, b) => a - b);
@@ -109,15 +106,7 @@ export default class Course implements CourseFields, Hashable {
         this.units = raw[3];
         this.title = raw[4];
         this.description = raw[5];
-        this.matches = matches.concat().sort(matchSortFunc);
-
-        if (secMatches.length === this.sids.length) {
-            this.sections = this.sids.map(
-                (sid, idx) => new Section(this, sid, secMatches[idx].concat().sort(matchSortFunc))
-            );
-        } else {
-            this.sections = this.sids.map(sid => new Section(this, sid));
-        }
+        this.sections = this.sids.map(sid => new Section(this, sid));
     }
 
     get displayName() {
@@ -129,37 +118,6 @@ export default class Course implements CourseFields, Hashable {
      */
     public getFirstSection() {
         return this.sections[0];
-    }
-
-    public addMatch(match: CourseMatch) {
-        const matches = this.matches.concat();
-        matches.push(match);
-        return new Course(this.raw, this.key, this.sids, matches, this.secMatches);
-    }
-
-    public addSectionMatches(sids: number[], secMatches: SectionMatch[][]) {
-        const newSecMatches = this.secMatches.map(x => x.concat());
-        const newSids = this.sids.concat();
-
-        const zipped = sids
-            .map((x, i) => [x, secMatches[i]] as [number, SectionMatch[]])
-            .filter(([sid, matches]) => {
-                const exIdx = newSids.findIndex(s => s === sid);
-                if (exIdx === -1) return true;
-                else {
-                    newSecMatches[exIdx].push(...matches);
-                    return false;
-                }
-            });
-
-        for (const [sid, matches] of zipped) {
-            let j = 0;
-            for (; j < newSids.length; j++) if (sid < newSids[j]) break;
-
-            newSids.splice(j, 0, sid);
-            newSecMatches.splice(j, 0, matches);
-        }
-        return new Course(this.raw, this.key, newSids, this.matches, newSecMatches);
     }
 
     /**

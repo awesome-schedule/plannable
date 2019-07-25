@@ -11,6 +11,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Course from '@/models/Course';
 import Store from '@/store';
 import ClassList from '../ClassList.vue';
+import { SearchMatches } from '@/models/Catalog';
 
 /**
  * component for editing classes and manipulating schedules
@@ -32,7 +33,8 @@ export default class ClassView extends Store {
     }
     // autocompletion related fields
     isEntering = false;
-    inputCourses: Course[] | null = null;
+    inputCourses: Course[] = [];
+    inputMatches: SearchMatches = [];
 
     /**
      * get classes that match the input query.
@@ -46,7 +48,8 @@ export default class ClassView extends Store {
     getClass(query: string) {
         if (!query) {
             this.isEntering = false;
-            this.inputCourses = null;
+            this.inputCourses = [];
+            this.inputMatches = [];
             return;
         }
         if (this.schedule.generated) {
@@ -54,7 +57,10 @@ export default class ClassView extends Store {
         }
 
         console.time('query');
-        this.inputCourses = window.catalog.search(query, this.display.numSearchResults);
+        [this.inputCourses, this.inputMatches] = window.catalog.search(
+            query,
+            this.display.numSearchResults
+        );
         console.timeEnd('query');
 
         this.isEntering = true;

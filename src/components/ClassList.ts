@@ -11,6 +11,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
 import Course from '../models/Course';
+import { SearchMatches } from '@/models/Catalog';
 
 /**
  * A **pure** component for
@@ -30,6 +31,7 @@ export default class ClassList extends Vue {
      * the array of courses to be displayed on this list
      */
     @Prop(Array) readonly courses!: Course[];
+    @Prop(Array) readonly matches!: SearchMatches;
     /**
      * the schedule used to extract the already selected sections of the courses given above
      */

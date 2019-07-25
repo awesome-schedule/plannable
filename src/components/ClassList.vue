@@ -2,7 +2,7 @@
     <div id="class-list w-100">
         <div class="card-body p-0" tabindex="-1" @keyup.esc="$emit('close')">
             <div
-                v-for="crs in courses"
+                v-for="(crs, crsIdx) in courses"
                 :key="crs.key"
                 class="list-group list-group-flush w-100"
                 @mouseenter="schedule.hover(crs.key)"
@@ -23,7 +23,11 @@
                             @click="collapse(crs.key)"
                         >
                             <h6 class="mb-1">
-                                <span v-html="highlightMatch(crs.displayName, 'key', crs.matches)">
+                                <span
+                                    v-html="
+                                        highlightMatch(crs.displayName, 'key', matches[crsIdx][0])
+                                    "
+                                >
                                 </span>
                                 <span
                                     v-if="emptyCourse(crs)"
@@ -37,7 +41,7 @@
                             <p
                                 v-if="showClasslistTitle || isEntering"
                                 style="font-size: 0.85rem; margin: 0;"
-                                v-html="highlightMatch(crs.title, 'title', crs.matches)"
+                                v-html="highlightMatch(crs.title, 'title', matches[crsIdx][0])"
                             ></p>
                         </div>
                         <div

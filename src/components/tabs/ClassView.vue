@@ -52,6 +52,7 @@
             <ClassList
                 ref="enteringClassList"
                 :courses="inputCourses"
+                :matches="inputMatches"
                 :schedule="schedule.currentSchedule"
                 :is-entering="isEntering"
                 :show-classlist-title="display.showClasslistTitle"

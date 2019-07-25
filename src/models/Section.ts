@@ -79,11 +79,7 @@ export default class Section implements CourseFields, Hashable {
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
      */
-    constructor(
-        course: Course,
-        public readonly sid: number,
-        public readonly matches: ReadonlyArray<SectionMatch> = []
-    ) {
+    constructor(course: Course, public readonly sid: number) {
         this.key = course.key;
 
         this.department = course.department;

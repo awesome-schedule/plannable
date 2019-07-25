@@ -1,6 +1,7 @@
 <template>
     <div id="class-list w-100">
         <div class="card-body p-0" tabindex="-1" @keyup.esc="$emit('close')">
+            <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
             <div
                 v-for="(crs, crsIdx) in courses"
                 :key="crs.key"
@@ -24,11 +25,13 @@
                         >
                             <h6 class="mb-1">
                                 <span
+                                    v-if="matches.length"
                                     v-html="
                                         highlightMatch(crs.displayName, 'key', matches[crsIdx][0])
                                     "
                                 >
                                 </span>
+                                <span v-else>{{ crs.displayName }}</span>
                                 <span
                                     v-if="emptyCourse(crs)"
                                     class="ml-1 text-warning"
@@ -37,12 +40,16 @@
                                     <i class="fas fa-exclamation-triangle"></i>
                                 </span>
                             </h6>
-
-                            <p
-                                v-if="showClasslistTitle || isEntering"
-                                style="font-size: 0.85rem; margin: 0;"
-                                v-html="highlightMatch(crs.title, 'title', matches[crsIdx][0])"
-                            ></p>
+                            <template v-if="showClasslistTitle || isEntering">
+                                <p
+                                    v-if="matches.length"
+                                    style="font-size: 0.85rem; margin: 0;"
+                                    v-html="highlightMatch(crs.title, 'title', matches[crsIdx][0])"
+                                ></p>
+                                <p v-else style="font-size: 0.85rem; margin: 0;">
+                                    {{ crs.title }}
+                                </p>
+                            </template>
                         </div>
                         <div
                             class="col align-self-center"
@@ -148,14 +155,16 @@
                                                 <li>
                                                     Section {{ sec.section }}
                                                     <span
+                                                        v-if="matches.length"
                                                         v-html="
                                                             highlightMatch(
                                                                 sec.topic,
                                                                 'topic',
-                                                                sec.matches
+                                                                matches[crsIdx][1].get(sec.sid)
                                                             )
                                                         "
                                                     ></span>
+                                                    <span v-else> {{ sec.topic }}</span>
                                                     <!-- 14 = 0b1110, i.e. validity > 1 -->
                                                     <i
                                                         v-if="sec.valid"
@@ -174,14 +183,16 @@
                                                     </li>
                                                 </template>
                                                 <li
+                                                    v-if="matches.length"
                                                     v-html="
                                                         highlightMatch(
                                                             sec.instructors.join(', '),
                                                             'instructors',
-                                                            sec.matches
+                                                            matches[crsIdx][1].get(sec.sid)
                                                         )
                                                     "
                                                 ></li>
+                                                <li v-else>{{ sec.instructors.join(', ') }}</li>
                                             </ul>
                                         </div>
                                         <div class="col col-sm-1 align-self-center">
@@ -196,14 +207,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- <div
-                            v-for="sec in crs.sections"
-                            :key="sec.section"
-                            :class="{ show: isEntering && expandOnEntering }"
-                        > -->
-                    <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
-
-                    <!-- </div> -->
                 </Expand>
             </div>
         </div>

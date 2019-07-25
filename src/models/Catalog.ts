@@ -41,33 +41,14 @@ interface SearchWorker extends Worker {
     postMessage(x: string | typeof window.catalog.courseDict): void;
 }
 
-export type SearchMatches = [CourseMatch[], SectionMatch[][]][];
+export type SearchMatches = [CourseMatch[], Map<number, SectionMatch[]>][];
 
-function addSectionMatches(
-    course: Course,
-    prevMatches: SearchMatches[0],
-    sids: number[],
-    secMatches: SectionMatch[][]
-) {
-    const newSecMatches = prevMatches[1];
-    const newSids = course.sids.concat();
-    const zipped = sids
-        .map((x, i) => [x, secMatches[i]] as [number, SectionMatch[]])
-        .filter(([sid, matches]) => {
-            const exIdx = newSids.findIndex(s => s === sid);
-            if (exIdx === -1) return true;
-            else {
-                newSecMatches[exIdx].push(...matches);
-                return false;
-            }
-        });
-
-    for (const [sid, matches] of zipped) {
-        let j = 0;
-        for (; j < newSids.length; j++) if (sid < newSids[j]) break;
-
-        newSids.splice(j, 0, sid);
-        newSecMatches.splice(j, 0, matches);
+function addSectionMatches(prevMatches: SearchMatches[0], secMatches: Map<number, SectionMatch[]>) {
+    const combSecMatches = prevMatches[1];
+    for (const [sid, matches] of secMatches) {
+        const prevMats = combSecMatches.get(sid);
+        if (prevMats) prevMats.push(...matches);
+        else combSecMatches.set(sid, matches);
     }
 }
 
@@ -281,7 +262,7 @@ export default class Catalog {
                         end: end + +(end > deptLen)
                     }
                 ],
-                []
+                new Map()
             ]);
         }
     }
@@ -307,22 +288,20 @@ export default class Catalog {
                 matches[prev][0].push(match);
             } else {
                 results.push(course);
-                matches.push([[match], []]);
+                matches.push([[match], new Map()]);
             }
         }
     }
 
     private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatches) {
         // check any topic/professor match. Select the sections which only match the topic/professor
-        const topicMatchIdx = [];
-        const topicMatches: [SectionMatch][] = [];
+        const topicMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
         for (let i = 0; i < sections.length; i++) {
             const topic = sections[i].topic;
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
-                topicMatchIdx.push(i);
-                topicMatches.push([
+                topicMatches.set(i, [
                     {
                         match: 'topic',
                         start: topicIdx,
@@ -331,21 +310,18 @@ export default class Catalog {
                 ]);
             }
         }
-        if (topicMatchIdx.length)
-            this.appendToResult(course, topicMatchIdx, topicMatches, results, matches);
+        if (topicMatches.size) this.appendToResult(course, topicMatches, results, matches);
     }
 
     private searchProf(query: string, course: Course, results: Course[], matches: SearchMatches) {
         // check any topic/professor match. Select the sections which only match the topic/professor
-        const profMatchIdx = [];
-        const profMatches: [SectionMatch][] = [];
+        const profMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
         for (let i = 0; i < sections.length; i++) {
             const profs = sections[i].instructors.join(', ').toLowerCase();
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
-                profMatchIdx.push(i);
-                profMatches.push([
+                profMatches.set(i, [
                     {
                         match: 'instructors',
                         start: profIdx,
@@ -354,23 +330,24 @@ export default class Catalog {
                 ]);
             }
         }
-        if (profMatchIdx.length)
-            this.appendToResult(course, profMatchIdx, profMatches, results, matches);
+        if (profMatches.size) this.appendToResult(course, profMatches, results, matches);
     }
 
     private appendToResult(
         course: Course,
-        sids: number[],
-        secMatches: SectionMatch[][],
+        matches: Map<number, SectionMatch[]>,
         results: Course[],
         allMatches: SearchMatches
     ) {
         const prev = results.findIndex(x => x.key === course.key);
         if (prev !== -1) {
-            addSectionMatches(results[prev], allMatches[prev], sids, secMatches);
+            results[prev] = new Course(course.raw, course.key, [
+                ...new Set(course.sids.concat([...matches.keys()])) // eliminate duplicates
+            ]);
+            addSectionMatches(allMatches[prev], matches);
         } else {
-            results.push(course.getCourse(sids));
-            allMatches.push([[], secMatches]);
+            results.push(course.getCourse([...matches.keys()]));
+            allMatches.push([[], matches]);
         }
     }
 }

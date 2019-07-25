@@ -227,13 +227,10 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                     })
                 );
 
-                const combSecMatches: SectionMatch[][] = [];
+                const secMatches = new Map<number, SectionMatch[]>();
                 const s = sectionMap[key];
-
                 // if the section matches for this course exist
                 if (s) {
-                    const secMatches = new Map<number, SectionMatch[]>();
-
                     for (const [sid, matches] of s) {
                         resolveOverlap(matches);
                         secMatches.set(
@@ -245,29 +242,20 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                             }))
                         );
                     }
-
-                    for (const sid of item.sids) {
-                        const matches = secMatches.get(sid);
-                        if (matches) {
-                            combSecMatches.push(matches);
-                        } else {
-                            combSecMatches.push([]);
-                        }
-                    }
                 }
                 finalResults.push([item.raw, key, item.sids]);
-                allMatches.push([crsMatches, combSecMatches]);
+                allMatches.push([crsMatches, secMatches]);
 
                 // only section match exists
             } else {
+                const secMatches = new Map<number, SectionMatch[]>();
                 const s = sectionMap[key];
                 if (s) {
-                    const sids = [...s.keys()].sort((a, b) => a - b);
-                    const combSecMatches: SectionMatch[][] = [];
-                    for (const sid of sids) {
-                        const matches = s.get(sid)!;
+                    const sids = [...s.keys()];
+                    for (const [sid, matches] of s) {
                         resolveOverlap(matches);
-                        combSecMatches.push(
+                        secMatches.set(
+                            sid,
                             matches.map(({ match, result: { match: m } }) => ({
                                 match,
                                 start: m.index,
@@ -280,7 +268,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         key,
                         sids
                     ]);
-                    allMatches.push([[], combSecMatches]);
+                    allMatches.push([[], secMatches]);
                 }
             }
         }

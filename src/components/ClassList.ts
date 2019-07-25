@@ -30,11 +30,11 @@ export default class ClassList extends Vue {
     /**
      * the array of courses to be displayed on this list
      */
-    @Prop(Array) readonly courses!: Course[];
+    @Prop({ type: Array, default: [] }) readonly courses!: Course[];
     /**
      * the array of matches corresponding to the array of courses
      */
-    @Prop(Array) readonly matches!: SearchMatches;
+    @Prop({ type: Array, default: [] }) readonly matches!: SearchMatches;
     /**
      * the schedule used to extract the already selected sections of the courses given above
      */

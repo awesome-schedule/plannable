@@ -39,6 +39,9 @@ class Semesters implements SemesterState {
         return result;
     }
 
+    /**
+     * cancel the pendingPromise
+     */
     cancel() {
         const p = this.pendingPromise;
         if (p) p.cancel('Canceled');

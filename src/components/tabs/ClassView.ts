@@ -26,7 +26,7 @@ export default class ClassView extends Store {
     /**
      * get the list of current ids, sorted in alphabetical order of the keys
      */
-    get currentIds(): [string, string][] {
+    get currentIds() {
         return Object.entries(this.schedule.currentSchedule.currentIds).sort((a, b) =>
             a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
         );

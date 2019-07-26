@@ -120,7 +120,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                    record.section
+                                        record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -174,7 +174,7 @@ export default class Schedule {
      * {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}
      * ```
      */
-    public currentIds: { [x: string]: string };
+    public currentIds: { [x: string]: string[] };
 
     /**
      * keep track of used colors to avoid color collision
@@ -380,16 +380,15 @@ export default class Schedule {
             this.totalCredit += isNaN(credit) ? 0 : credit;
 
             const currentIdKey = course.displayName;
-
             // if any section
             if (sections === -1) {
-                this.currentIds[currentIdKey] = ' - ';
+                this.currentIds[currentIdKey] = [' - '];
                 this.place(course);
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
                     const sec = course.getFirstSection();
-                    this.currentIds[currentIdKey] = sec.id.toString();
+                    this.currentIds[currentIdKey] = [sec.id.toString()];
                     this.place(sec);
                 } else if (sections.size > 0) {
                     if (Schedule.options.multiSelect) {
@@ -397,22 +396,12 @@ export default class Schedule {
                         const combined = Object.values(course.getCombined()).map(secs =>
                             catalog.getCourse(course.key, new Set(secs.map(sec => sec.sid)))
                         );
-                        const id = combined[0].getFirstSection().id;
-
-                        // count the total number of sections in this combined course array
-                        const num = sections.size - 1;
-                        for (const crs of combined) {
-                            this.currentIds[currentIdKey] = num
-                                ? `${id.toString()}+${num}` // use +n if there're multiple sections
-                                : id.toString();
-                            this.place(crs);
-                        }
+                        for (const crs of combined) this.place(crs);
                     } else {
                         // a subset of the sections
                         this.place(course);
-                        this.currentIds[currentIdKey] =
-                            course.getFirstSection().id.toString() + '+' + (sections.size - 1);
                     }
+                    this.currentIds[currentIdKey] = course.sections.map(sec => sec.id.toString());
                 }
             }
         }

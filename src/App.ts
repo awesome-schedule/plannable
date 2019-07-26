@@ -116,6 +116,19 @@ export default class App extends Store {
     }
 
     /**
+     * load credentials from Li Hao
+     */
+    loadCredentials() {
+        const search = new URLSearchParams(window.location.search);
+        const username = search.get('username'),
+            credential = search.get('credential');
+        if (username && credential) {
+            localStorage.setItem('username', username);
+            localStorage.setItem('credential', credential);
+        }
+    }
+
+    /**
      * @author Zichao Hu, Hanzhi Zhou
      * @see [[ExportView.convertJsonToArray]]
      * @param config
@@ -211,6 +224,8 @@ export default class App extends Store {
             loadBuildingList(),
             this.semester.loadSemesters()
         ]);
+
+        this.loadCredentials();
 
         this.noti.notify(pay1);
         if (pay1.payload) window.timeMatrix = pay1.payload;

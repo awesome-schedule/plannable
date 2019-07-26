@@ -2,9 +2,10 @@
  * @module components/tabs
  */
 import Store, { SemesterStorage } from '@/store';
-import { savePlain, toICal } from '@/utils';
+import { savePlain, toICal, errToStr } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
+import axios from 'axios';
 
 /**
  * component for import/export/print schedules and managing profiles
@@ -12,8 +13,15 @@ import { Component, Watch } from 'vue-property-decorator';
  */
 @Component
 export default class ExportView extends Store {
+    get canSync() {
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+        return username && credential;
+    }
     fileName = 'schedule';
     newName: (string | null)[] = [];
+
+    liHaoURL: string = '??/courses/api/save_plannable_profile';
 
     created() {
         this.newName = this.profile.profiles.map(() => null);
@@ -221,6 +229,28 @@ export default class ExportView extends Store {
     }
     print() {
         window.print();
+    }
+
+    async sync() {
+        for (const profile of this.profile.profiles) {
+            const content = localStorage.getItem(profile);
+            if (content) {
+                try {
+                    const parsed: SemesterStorage = JSON.parse(content);
+                    const username = localStorage.getItem('username');
+                    const credential = localStorage.getItem('credential');
+                    await axios.post(this.liHaoURL, {
+                        username,
+                        credential,
+                        name: parsed.name,
+                        profile: content
+                    });
+                } catch (e) {
+                    this.noti.error(errToStr(e));
+                    console.error(e);
+                }
+            }
+        }
     }
 
     @Watch('profile.current', { immediate: true })

@@ -135,7 +135,7 @@ export function parseSemesterData(csv_string: string) {
                 meetings.splice(k, 0, [a, b, c]);
             }
         }
-
+        date = date || '';
         // unknown date
         if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
 

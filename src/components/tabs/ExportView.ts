@@ -7,6 +7,7 @@ import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
 import axios from 'axios';
 import { ScheduleStore } from '@/store/schedule';
+import { Palette } from '@/store/palette';
 
 /**
  * component for import/export/print schedules and managing profiles
@@ -22,7 +23,8 @@ export default class ExportView extends Store {
     fileName = 'schedule';
     newName: (string | null)[] = [];
 
-    liHaoURL: string = '??/courses/api/save_plannable_profile';
+    liHaoUpURL: string = '??/courses/api/save_plannable_profile';
+    liHaoDownURL: string = '??/courses/api/get_plannable_profile';
 
     created() {
         this.newName = this.profile.profiles.map(() => null);
@@ -128,7 +130,6 @@ export default class ExportView extends Store {
         binary: enabled/reverse
         schedule
         palette
-
         */
 
         // get values from the json object
@@ -149,15 +150,14 @@ export default class ExportView extends Store {
         let counter = 0;
         for (const key of display_keys) {
             if (display[key] === true) {
-                display_bit += 2 ** counter;
-                counter++;
+                display_bit |= counter;
+                counter <<= 1;
             } else if (display[key] === false) {
-                counter++;
+                counter <<= 1;
             } else {
                 result.push(display[key]);
             }
         }
-
         result.push(display_bit);
 
         // compressing filter
@@ -166,39 +166,31 @@ export default class ExportView extends Store {
 
         // convert allowClosed, allowWaitlist, mode to binary
         let filter_bit = 0;
-        if (filter.allowClosed) {
-            filter_bit += 2 ** 0;
-        }
-        if (filter.allowWaitlist) {
-            filter_bit += 2 ** 1;
-        }
-        if (filter.sortOptions.mode === 1) {
-            filter_bit += 2 ** 2;
-        }
+        if (filter.allowClosed) filter_bit += 2 ** 0;
+        if (filter.allowWaitlist) filter_bit += 2 ** 1;
+        if (filter.sortOptions.mode === 1) filter_bit += 2 ** 2;
+
         result.push(filter_bit);
 
         // sorting
         // add all initial ascii to the array in order
-        // add the binary of their repestive state: enabled or reverse
-        counter = 0;
+        // add the binary of their respective state: enabled or reverse
+        counter = 1;
         filter_bit = 0;
         for (const sortBy of filter.sortOptions.sortBy) {
             const ascii = sortBy.name.charCodeAt(0);
             result.push(ascii);
-            if (sortBy.enabled) {
-                filter_bit += 2 ** counter;
-            }
-            counter += 1;
-            if (sortBy.reverse) {
-                filter_bit += 2 ** counter;
-            }
-            counter += 1;
+            if (sortBy.enabled) filter_bit |= counter;
+            counter <<= 1;
+            if (sortBy.reverse) filter_bit |= counter;
+            counter <<= 1;
         }
         result.push(filter_bit);
 
         // add schedule and palette objects to the array
         result.push(ScheduleStore.compressJSON(schedule));
-        result.push(palette);
+        result.push(Palette.compressJSON(palette));
+        console.log(result);
         return JSON.stringify(result);
     }
     deleteProfile(name: string, idx: number) {
@@ -233,23 +225,55 @@ export default class ExportView extends Store {
     }
 
     async sync() {
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+
+        const storedProfiles: SemesterStorage[] = (await axios.post(this.liHaoDownURL, {
+            username,
+            credential
+        })).data.map((s: string) => JSON.parse(s));
+
+        const up: string[] = [],
+            overlap: SemesterStorage[] = [];
         for (const profile of this.profile.profiles) {
-            const content = localStorage.getItem(profile);
-            if (content) {
-                try {
-                    const parsed: SemesterStorage = JSON.parse(content);
-                    const username = localStorage.getItem('username');
-                    const credential = localStorage.getItem('credential');
-                    await axios.post(this.liHaoURL, {
-                        username,
-                        credential,
-                        name: parsed.name,
-                        profile: content
-                    });
-                } catch (e) {
-                    this.noti.error(errToStr(e));
-                    console.error(e);
-                }
+            const target = storedProfiles.find(s => s.name === profile);
+            if (target) {
+                overlap.push(target);
+            } else {
+                up.push(profile);
+            }
+        }
+        const down = storedProfiles.filter(s => !overlap.find(o => o.name === s.name));
+        // upload profiles
+        for (const name of up) {
+            axios.post(this.liHaoUpURL, {
+                username,
+                credential,
+                name,
+                profile: localStorage.getItem(name)
+            });
+        }
+        // download profiles
+        const prevCur = this.profile.current;
+        for (const profile of down) {
+            this.profile.addProfile(JSON.stringify(profile), profile.name || 'Hoos');
+        }
+        this.profile.current = prevCur;
+
+        // sync overlapped profiles
+        for (const profile of overlap) {
+            const t1 = new Date(profile.modified).getTime();
+            const local = localStorage.getItem(profile.name)!;
+            const t2 = new Date(JSON.parse(local).modified).getTime();
+            if (t1 > t2) {
+                localStorage.setItem(profile.name, JSON.stringify(profile));
+            } else if (t1 < t2) {
+                axios.post(this.liHaoUpURL, {
+                    username,
+                    credential,
+                    name: profile.name,
+                    profile: local
+                });
             }
         }
     }

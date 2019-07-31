@@ -54,7 +54,7 @@ interface ScheduleStateJSONShort {
     0: ScheduleStateJSON['currentScheduleIndex'];
     1: ScheduleStateJSON['proposedScheduleIndex'];
     2: ScheduleStateJSON['cpIndex'];
-    3: ScheduleStateJSON['generated'];
+    3: number;
     4: ScheduleJSONShort[];
 }
 
@@ -71,7 +71,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
             obj.currentScheduleIndex,
             obj.proposedScheduleIndex,
             obj.cpIndex,
-            obj.generated,
+            +obj.generated,
             obj.proposedSchedules.map(s => Schedule.compressJSON(s))
         ];
     }
@@ -81,7 +81,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
             currentScheduleIndex: obj[0],
             proposedScheduleIndex: obj[1],
             cpIndex: obj[2],
-            generated: obj[3],
+            generated: Boolean(obj[3]),
             proposedSchedules: obj[4].map(s => Schedule.decompressJSON(s))
         };
     }

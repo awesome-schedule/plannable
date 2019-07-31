@@ -128,9 +128,12 @@
             </li>
         </ul>
         <div v-if="canSync" class="mx-4 my-2 text-center">
-            <input v-model="liHaoURL" type="text" class="form-control form-control-sm" />
+            Upload URL: <br />
+            <input v-model="liHaoUpURL" type="text" class="form-control form-control-sm" />
+            Download URL: <br />
+            <input v-model="liHaoDownURL" type="text" class="form-control form-control-sm" />
             <button class="btn btn-outline-danger mt-1" @click="sync()">
-                Sync with Li Hao
+                Sync All
             </button>
         </div>
     </nav>

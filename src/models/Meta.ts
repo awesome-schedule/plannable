@@ -102,9 +102,9 @@ export const dayToInt = Object.freeze({
     Fr: 4,
     Sa: 5,
     Su: 6
-}) as { readonly [key in Day]: number };
+});
 
-export const DAYS: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+export const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
 /**
  * lecture type number => meaning
  */

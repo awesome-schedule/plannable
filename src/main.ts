@@ -50,7 +50,7 @@ declare global {
         scheduleEvaluator: ScheduleEvaluator;
         catalog: Readonly<Catalog>;
         timeMatrix: Readonly<Int32Array>;
-        buildingList: ReadonlyArray<string>;
+        buildingList: readonly string[];
         similaritySchedule: [string, ...number[]][];
     }
 

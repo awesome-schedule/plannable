@@ -69,9 +69,9 @@ export default class Section implements CourseFields, Hashable {
     public readonly enrollment: number;
     public readonly enrollment_limit: number;
     public readonly wait_list: number;
-    public readonly instructors: ReadonlyArray<string>;
+    public readonly instructors: readonly string[];
     public readonly dates: string;
-    public readonly meetings: ReadonlyArray<Meeting>;
+    public readonly meetings: readonly Meeting[];
 
     public readonly valid: ValidFlag;
     public readonly dateArray?: MeetingDate;

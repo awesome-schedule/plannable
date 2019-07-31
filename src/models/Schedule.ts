@@ -50,7 +50,7 @@ export default class Schedule {
         multiSelect: true
     });
 
-    public static readonly bgColors: ReadonlyArray<string> = [
+    public static readonly bgColors: readonly string[] = [
         '#f7867e',
         '#ffb74c',
         '#82677E',

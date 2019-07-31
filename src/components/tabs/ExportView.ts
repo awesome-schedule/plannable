@@ -23,33 +23,50 @@ export default class ExportView extends Store {
     fileName = 'schedule';
     newName: (string | null)[] = [];
 
-    liHaoUpURL: string = '??/courses/api/save_plannable_profile';
-    liHaoDownURL: string = '??/courses/api/get_plannable_profile';
+    liHaoUpURL: string = 'http://localhost:8081/courses/api/save_plannable_profile';
+    liHaoDownURL: string = 'http://localhost:8081/courses/api/get_plannable_profiles';
+
+    remoteProfiles: SemesterStorage[] = [];
 
     created() {
         this.newName = this.profile.profiles.map(() => null);
+    }
+    async fetchRemoteProfiles() {
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+        this.remoteProfiles = (await axios.post(this.liHaoDownURL, {
+            username,
+            credential
+        })).data.map((s: string) => JSON.parse(s));
+
+        console.log(this.remoteProfiles);
+        // this.$forceUpdate();
     }
     /**
      * get the meta data of a profile in an array
      * @param name
      */
-    getMeta(name: string) {
-        const data = localStorage.getItem(name);
-        if (data) {
-            let parsed: Partial<SemesterStorage> | null = null;
-            try {
-                parsed = JSON.parse(data);
-            } catch (err) {
-                console.error(err);
+    getMeta(name: string | SemesterStorage) {
+        let parsed: Partial<SemesterStorage> | null = null;
+        const meta = [];
+        if (typeof name === 'string') {
+            const data = localStorage.getItem(name);
+            if (data) {
+                try {
+                    parsed = JSON.parse(data);
+                } catch (err) {
+                    console.error(err);
+                }
             }
-            if (parsed) {
-                const meta = [];
-                if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
-                if (parsed.currentSemester) meta.push(parsed.currentSemester.name);
-                return meta;
-            }
+        } else {
+            parsed = name;
         }
-        return ['Data corruption'];
+        if (parsed) {
+            if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
+            if (parsed.currentSemester) meta.push(parsed.currentSemester.name);
+        }
+        if (!meta.length) meta.push('Data Corruption');
+        return meta;
     }
 
     onUploadJson(event: { target: EventTarget | null }) {

@@ -66,7 +66,7 @@
             </li>
         </ul>
         <div class="btn bg-info nav-btn mt-2">
-            Profile Management
+            Local Profiles
         </div>
         <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
             <li
@@ -127,15 +127,44 @@
                 </div>
             </li>
         </ul>
-        <div v-if="canSync" class="mx-4 my-2 text-center">
-            Upload URL: <br />
-            <input v-model="liHaoUpURL" type="text" class="form-control form-control-sm" />
-            Download URL: <br />
-            <input v-model="liHaoDownURL" type="text" class="form-control form-control-sm" />
-            <button class="btn btn-outline-danger mt-1" @click="sync()">
-                Sync All
-            </button>
-        </div>
+        <template v-if="canSync">
+            <div class="btn bg-info nav-btn mt-2">
+                Remote Profiles
+            </div>
+            <div class="mx-4 my-2 text-center">
+                Upload URL: <br />
+                <input v-model="liHaoUpURL" type="text" class="form-control form-control-sm" />
+                Download URL: <br />
+                <input v-model="liHaoDownURL" type="text" class="form-control form-control-sm" />
+                <button class="btn btn-outline-danger mt-1" @click="fetchRemoteProfiles()">
+                    Fetch All
+                </button>
+            </div>
+            <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
+                <li
+                    v-for="data in remoteProfiles"
+                    :key="data.name"
+                    class="list-group-item list-group-item-action pl-3 pr-2"
+                >
+                    <div class="form-row no-gutters justify-content-between">
+                        <div class="col-sm-auto mr-auto" style="cursor: pointer">
+                            <span>
+                                <span>{{ data.name }}</span> <br />
+                                <small class="text-muted">{{ data.currentSemester.name }} </small>
+                                <br />
+                                <small class="text-muted"
+                                    >{{ new Date(data.modified).toLocaleString() }}
+                                </small>
+                                <br />
+                            </span>
+                        </div>
+                        <div class="col-sm-auto text-right" style="font-size: 16px">
+                            <i class="fa fa-times ml-1 click-icon" title="delete this profile"></i>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </template>
     </nav>
 </template>
 

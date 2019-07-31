@@ -10,6 +10,7 @@
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 import MainContent from './components/MainContent.vue';
+import axios from 'axios';
 
 // tab components
 import ClassView from './components/tabs/ClassView.vue';
@@ -34,6 +35,7 @@ import Store from './store';
 import randomColor from 'randomcolor';
 
 const version = '6.5';
+let note = 'loading release note...';
 /**
  * returns whether the version stored in localStorage matches the current version
  * then, override localStorage with the current version
@@ -41,7 +43,25 @@ const version = '6.5';
 function checkVersion() {
     const match = localStorage.getItem('version') === version;
     localStorage.setItem('version', version);
+    if (!match) {
+        triggerVersionModal();
+    }
     return match;
+}
+
+async function triggerVersionModal() {
+    await releaseNote();
+    $('#versionModal').modal();
+}
+
+async function releaseNote() {
+    await axios.get('https://api.github.com/repos/awesome-schedule/plannable/releases/18748320')
+        .then(res => {
+            note = res.data.body;
+        }).catch(err => {
+            note = 'Failed to obtain release note.'
+                + ' See https://github.com/awesome-schedule/plannable/releases instead.';
+        });
 }
 
 @Component({
@@ -69,8 +89,19 @@ function checkVersion() {
     }
 })
 export default class App extends Store {
+
+    note: string = note;
+
     get sideBar() {
         return this.status.sideBar;
+    }
+
+    get version() {
+        return version;
+    }
+
+    refreshNote() {
+        this.note = note;
     }
 
     async loadCoursesFromURL() {

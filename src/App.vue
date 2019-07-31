@@ -1,5 +1,28 @@
 <template>
     <div id="app" class="w-100" @change="saveStatus()">
+        <div
+            id="versionModal"
+            class="modal fade"
+            tabindex="-1"
+            role="dialog"
+            @focus="refreshNote()"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="exampleModalLabel" class="modal-title">
+                            Release note for version {{ version }}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {{ note }}
+                    </div>
+                </div>
+            </div>
+        </div>
         <course-modal :course="modal.course" :match="modal.match"></course-modal>
         <section-modal
             :semester="semester.currentSemester"

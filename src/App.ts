@@ -32,6 +32,7 @@ import DateSeparator from './components/DateSeparator.vue';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
 import randomColor from 'randomcolor';
+import { ScheduleStore } from './store/schedule';
 
 const version = '6.5';
 /**
@@ -197,7 +198,7 @@ export default class App extends Store {
         filter.sortOptions.sortBy = sortCopy;
 
         // add the schedule and palette
-        const schedule = data[20];
+        const schedule = ScheduleStore.decompressJSON(data[20]);
         const palette = data[21];
 
         // construct a JSON

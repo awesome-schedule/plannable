@@ -6,6 +6,7 @@ import { savePlain, toICal, errToStr } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
 import axios from 'axios';
+import { ScheduleStore } from '@/store/schedule';
 
 /**
  * component for import/export/print schedules and managing profiles
@@ -196,7 +197,7 @@ export default class ExportView extends Store {
         result.push(filter_bit);
 
         // add schedule and palette objects to the array
-        result.push(schedule);
+        result.push(ScheduleStore.compressJSON(schedule));
         result.push(palette);
         return JSON.stringify(result);
     }

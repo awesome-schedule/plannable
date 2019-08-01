@@ -38,19 +38,16 @@ export default class ExportView extends Store {
             username,
             credential
         })).data.map((s: string) => JSON.parse(s));
-
-        console.log(this.remoteProfiles);
-        // this.$forceUpdate();
     }
     /**
-     * get the meta data of a profile in an array
-     * @param name
+     * get the meta data of a profile
+     * @param obj the name of the profile or the already-parsed profile
      */
-    getMeta(name: string | SemesterStorage) {
+    getMeta(obj: string | SemesterStorage) {
         let parsed: Partial<SemesterStorage> | null = null;
         const meta = [];
-        if (typeof name === 'string') {
-            const data = localStorage.getItem(name);
+        if (typeof obj === 'string') {
+            const data = localStorage.getItem(obj);
             if (data) {
                 try {
                     parsed = JSON.parse(data);
@@ -59,7 +56,7 @@ export default class ExportView extends Store {
                 }
             }
         } else {
-            parsed = name;
+            parsed = obj;
         }
         if (parsed) {
             if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
@@ -242,39 +239,28 @@ export default class ExportView extends Store {
     }
 
     async sync() {
-        const username = localStorage.getItem('username');
-        const credential = localStorage.getItem('credential');
-
-        const storedProfiles: SemesterStorage[] = (await axios.post(this.liHaoDownURL, {
-            username,
-            credential
-        })).data.map((s: string) => JSON.parse(s));
-
+        await this.fetchRemoteProfiles();
         const up: string[] = [],
             overlap: SemesterStorage[] = [];
         for (const profile of this.profile.profiles) {
-            const target = storedProfiles.find(s => s.name === profile);
+            const target = this.remoteProfiles.find(s => s.name === profile);
             if (target) {
                 overlap.push(target);
             } else {
                 up.push(profile);
             }
         }
-        const down = storedProfiles.filter(s => !overlap.find(o => o.name === s.name));
+        const down = this.remoteProfiles.filter(s => !overlap.find(o => o.name === s.name));
         // upload profiles
         for (const name of up) {
-            axios.post(this.liHaoUpURL, {
-                username,
-                credential,
-                name,
-                profile: localStorage.getItem(name)
-            });
+            this.uploadProfile(name, localStorage.getItem(name)!);
         }
         // download profiles
         const prevCur = this.profile.current;
         for (const profile of down) {
             this.profile.addProfile(JSON.stringify(profile), profile.name || 'Hoos');
         }
+        // restore current
         this.profile.current = prevCur;
 
         // sync overlapped profiles
@@ -282,17 +268,34 @@ export default class ExportView extends Store {
             const t1 = new Date(profile.modified).getTime();
             const local = localStorage.getItem(profile.name)!;
             const t2 = new Date(JSON.parse(local).modified).getTime();
+            // remote is newer than local
             if (t1 > t2) {
                 localStorage.setItem(profile.name, JSON.stringify(profile));
+                // local is newer than remote
             } else if (t1 < t2) {
-                axios.post(this.liHaoUpURL, {
-                    username,
-                    credential,
-                    name: profile.name,
-                    profile: local
-                });
+                if (
+                    confirm(
+                        `Your local profile ${
+                            profile.name
+                        } seems newer than its corresponding remote profile. Confirm overwriting?`
+                    )
+                )
+                    this.uploadProfile(name, local);
             }
         }
+    }
+
+    uploadProfile(name: string, profile?: string) {
+        if (!profile) profile = localStorage.getItem(name)!;
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+
+        axios.post(this.liHaoUpURL, {
+            username,
+            credential,
+            name,
+            profile
+        });
     }
 
     @Watch('profile.current', { immediate: true })

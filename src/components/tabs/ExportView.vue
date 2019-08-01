@@ -123,6 +123,7 @@
                             title="delete this profile"
                             @click="deleteProfile(name, idx)"
                         ></i>
+                        <i class="fas fa-upload" @click="uploadProfile(name)"></i>
                     </div>
                 </div>
             </li>

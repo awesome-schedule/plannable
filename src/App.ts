@@ -60,7 +60,6 @@ async function triggerVersionModal() {
 async function releaseNote() {
     await axios.get('https://api.github.com/repos/awesome-schedule/plannable/releases')
         .then(res => {
-            console.log(res);
             let ul = -1;
             note = (res.data[0].body as string).split(/\n+/).map(x => {
                 let temp = 0;
@@ -77,7 +76,6 @@ async function releaseNote() {
                             tag = '</ul>';
                         }
                         ul = match.length;
-                        console.log(match.length);
                         li = 1;
                         return `${tag}<li>`;
                         // style="margin-left: ${5 * match.length}px"
@@ -86,7 +84,6 @@ async function releaseNote() {
                     }).replace('<img', '<img class="img-fluid my-3" ')
                     + (temp === 0 ? li === 0 ? /<\w+>/.exec(x) ? '' : '<br />' : '</li>' : `</h${temp}>`);
                 if (li === 0 && ul !== -1) {
-                    console.log(x);
                     res = '</ul>'.repeat(ul + 1) + res;
                     ul = -1;
                 }

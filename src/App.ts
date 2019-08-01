@@ -11,6 +11,7 @@ import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 import MainContent from './components/MainContent.vue';
 import axios from 'axios';
+import cheerio from 'cheerio';
 
 // tab components
 import ClassView from './components/tabs/ClassView.vue';
@@ -55,9 +56,24 @@ async function triggerVersionModal() {
 }
 
 async function releaseNote() {
-    await axios.get('https://api.github.com/repos/awesome-schedule/plannable/releases/18748320')
+    await axios.get('https://api.github.com/repos/awesome-schedule/plannable/releases')
         .then(res => {
-            note = res.data.body;
+            console.log(res.data[0].body);
+            note = (res.data[0].body as string).split(/\n+/).map(x => {
+                let temp = 0;
+                let li = 0;
+                return x.replace(/(#*)(\s)/,
+                    (s1: string, match1: string, match2: string) =>
+                        match1.length === 0 ? match2 : ('<h' + (temp = match1.length) + '>'))
+                    .replace(/(\s*)-\s/, (s: string, match: string) => {
+                        if (temp !== 0) return match + '- ';
+                        li = 1;
+                        return `<li style="margin-left: ${5 * match.length}px">`;
+                    }).replace(/!\[([\w -]+)\]\(([\w -/:]+)\)/, (s, match1: string, match2) => {
+                        return `<img src=${match2} alt=${match1}></img>`;
+                    }).replace('<img', '<img class="img-fluid my-3" ')
+                    + (temp === 0 ? li === 0 ? /<\w+>/.exec(x) ? '' : '<br />' : '</li>' : `</h${temp}>`);
+            }).join(' ');
         }).catch(err => {
             note = 'Failed to obtain release note.'
                 + ' See https://github.com/awesome-schedule/plannable/releases instead.';
@@ -101,7 +117,8 @@ export default class App extends Store {
     }
 
     refreshNote() {
-        this.note = note;
+        $('#release-note-body').html(note);
+        // this.note = note;
     }
 
     async loadCoursesFromURL() {

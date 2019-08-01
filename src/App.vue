@@ -7,17 +7,15 @@
             role="dialog"
             @focus="refreshNote()"
         >
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 id="exampleModalLabel" class="modal-title">
-                            Release note for version {{ version }}
-                        </h5>
+                        <h5 id="exampleModalLabel" class="modal-title">Release v{{ version }}</h5>
                         <button type="button" class="close" data-dismiss="modal">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div id="release-note-body" class="mx-3 my-3">
                         {{ note }}
                     </div>
                 </div>

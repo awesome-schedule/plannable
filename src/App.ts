@@ -71,7 +71,7 @@ async function releaseNote() {
              * If this line is not in an "ul", it will be set to -1 at the end of the callback function.
              */
             let ul = -1;
-            note = (res.data[0].body as string).split(/\n+/).map(x => {
+            note = (res.data[0].body as string).split(/[\r\n]+/).map(x => {
                 /**
                  * Records the number corresponds to the largeness of header.
                  * It is 0 if this line is not a header.

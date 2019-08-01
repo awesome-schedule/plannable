@@ -15,7 +15,7 @@
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <div id="release-note-body" class="mx-3 my-3">
+                    <div id="release-note-body" class="mx-4 my-4">
                         {{ note }}
                     </div>
                 </div>

@@ -60,21 +60,37 @@ async function triggerVersionModal() {
 async function releaseNote() {
     await axios.get('https://api.github.com/repos/awesome-schedule/plannable/releases')
         .then(res => {
-            console.log(res.data[0].body);
+            console.log(res);
+            let ul = -1;
             note = (res.data[0].body as string).split(/\n+/).map(x => {
                 let temp = 0;
                 let li = 0;
-                return x.replace(/(#*)(\s)/,
+                let res = x.replace(/^(#*)(\s)/,
                     (s1: string, match1: string, match2: string) =>
                         match1.length === 0 ? match2 : ('<h' + (temp = match1.length) + '>'))
-                    .replace(/(\s*)-\s/, (s: string, match: string) => {
+                    .replace(/^(\s*)-\s/, (s: string, match: string) => {
                         if (temp !== 0) return match + '- ';
+                        let tag = '';
+                        if (match.length > ul) {
+                            tag = '<ul>';
+                        } else if (match.length < ul) {
+                            tag = '</ul>';
+                        }
+                        ul = match.length;
+                        console.log(match.length);
                         li = 1;
-                        return `<li style="margin-left: ${5 * match.length}px">`;
+                        return `${tag}<li>`;
+                        // style="margin-left: ${5 * match.length}px"
                     }).replace(/!\[([\w -]+)\]\(([\w -/:]+)\)/, (s, match1: string, match2) => {
                         return `<img src=${match2} alt=${match1}></img>`;
                     }).replace('<img', '<img class="img-fluid my-3" ')
                     + (temp === 0 ? li === 0 ? /<\w+>/.exec(x) ? '' : '<br />' : '</li>' : `</h${temp}>`);
+                if (li === 0 && ul !== -1) {
+                    console.log(x);
+                    res = '</ul>'.repeat(ul + 1) + res;
+                    ul = -1;
+                }
+                return res;
             }).join(' ');
         }).catch(err => {
             note = 'Failed to obtain release note.'

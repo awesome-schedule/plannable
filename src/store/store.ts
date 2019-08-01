@@ -340,7 +340,6 @@ export default class Store extends Vue {
                     } else {
                         if (!parsed.currentSemester) parsed = temp;
                     }
-                    break;
                 }
             }
         }

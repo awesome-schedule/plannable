@@ -46,7 +46,7 @@ export function openVAGrade(course: CourseFields) {
 export function highlightMatch<T extends string>(
     str: string,
     expMatch: T,
-    matches?: ReadonlyArray<Match<T>>
+    matches?: readonly Match<T>[]
 ) {
     if (!matches || !matches.length) return str;
     let result = '';

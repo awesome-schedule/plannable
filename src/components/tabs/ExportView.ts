@@ -6,6 +6,8 @@ import { savePlain, toICal, errToStr } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
 import axios from 'axios';
+import { ScheduleStore } from '@/store/schedule';
+import { Palette } from '@/store/palette';
 
 /**
  * component for import/export/print schedules and managing profiles
@@ -21,32 +23,47 @@ export default class ExportView extends Store {
     fileName = 'schedule';
     newName: (string | null)[] = [];
 
-    liHaoURL: string = '??/courses/api/save_plannable_profile';
+    liHaoUpURL: string = 'http://localhost:8081/courses/api/save_plannable_profile';
+    liHaoDownURL: string = 'http://localhost:8081/courses/api/get_plannable_profiles';
+
+    remoteProfiles: SemesterStorage[] = [];
 
     created() {
         this.newName = this.profile.profiles.map(() => null);
     }
+    async fetchRemoteProfiles() {
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+        this.remoteProfiles = (await axios.post(this.liHaoDownURL, {
+            username,
+            credential
+        })).data.map((s: string) => JSON.parse(s));
+    }
     /**
-     * get the meta data of a profile in an array
-     * @param name
+     * get the meta data of a profile
+     * @param obj the name of the profile or the already-parsed profile
      */
-    getMeta(name: string) {
-        const data = localStorage.getItem(name);
-        if (data) {
-            let parsed: Partial<SemesterStorage> | null = null;
-            try {
-                parsed = JSON.parse(data);
-            } catch (err) {
-                console.error(err);
+    getMeta(obj: string | SemesterStorage) {
+        let parsed: Partial<SemesterStorage> | null = null;
+        const meta = [];
+        if (typeof obj === 'string') {
+            const data = localStorage.getItem(obj);
+            if (data) {
+                try {
+                    parsed = JSON.parse(data);
+                } catch (err) {
+                    console.error(err);
+                }
             }
-            if (parsed) {
-                const meta = [];
-                if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
-                if (parsed.currentSemester) meta.push(parsed.currentSemester.name);
-                return meta;
-            }
+        } else {
+            parsed = obj;
         }
-        return ['Data corruption'];
+        if (parsed) {
+            if (parsed.modified) meta.push(new Date(parsed.modified).toLocaleString());
+            if (parsed.currentSemester) meta.push(parsed.currentSemester.name);
+        }
+        if (!meta.length) meta.push('Data Corruption');
+        return meta;
     }
 
     onUploadJson(event: { target: EventTarget | null }) {
@@ -127,7 +144,6 @@ export default class ExportView extends Store {
         binary: enabled/reverse
         schedule
         palette
-
         */
 
         // get values from the json object
@@ -148,15 +164,14 @@ export default class ExportView extends Store {
         let counter = 0;
         for (const key of display_keys) {
             if (display[key] === true) {
-                display_bit += 2 ** counter;
-                counter++;
+                display_bit |= counter;
+                counter <<= 1;
             } else if (display[key] === false) {
-                counter++;
+                counter <<= 1;
             } else {
                 result.push(display[key]);
             }
         }
-
         result.push(display_bit);
 
         // compressing filter
@@ -165,39 +180,31 @@ export default class ExportView extends Store {
 
         // convert allowClosed, allowWaitlist, mode to binary
         let filter_bit = 0;
-        if (filter.allowClosed) {
-            filter_bit += 2 ** 0;
-        }
-        if (filter.allowWaitlist) {
-            filter_bit += 2 ** 1;
-        }
-        if (filter.sortOptions.mode === 1) {
-            filter_bit += 2 ** 2;
-        }
+        if (filter.allowClosed) filter_bit += 2 ** 0;
+        if (filter.allowWaitlist) filter_bit += 2 ** 1;
+        if (filter.sortOptions.mode === 1) filter_bit += 2 ** 2;
+
         result.push(filter_bit);
 
         // sorting
         // add all initial ascii to the array in order
-        // add the binary of their repestive state: enabled or reverse
-        counter = 0;
+        // add the binary of their respective state: enabled or reverse
+        counter = 1;
         filter_bit = 0;
         for (const sortBy of filter.sortOptions.sortBy) {
             const ascii = sortBy.name.charCodeAt(0);
             result.push(ascii);
-            if (sortBy.enabled) {
-                filter_bit += 2 ** counter;
-            }
-            counter += 1;
-            if (sortBy.reverse) {
-                filter_bit += 2 ** counter;
-            }
-            counter += 1;
+            if (sortBy.enabled) filter_bit |= counter;
+            counter <<= 1;
+            if (sortBy.reverse) filter_bit |= counter;
+            counter <<= 1;
         }
         result.push(filter_bit);
 
         // add schedule and palette objects to the array
-        result.push(schedule);
-        result.push(palette);
+        result.push(ScheduleStore.compressJSON(schedule));
+        result.push(Palette.compressJSON(palette));
+        console.log(result);
         return JSON.stringify(result);
     }
     deleteProfile(name: string, idx: number) {
@@ -213,6 +220,7 @@ export default class ExportView extends Store {
         if (!item) return;
         this.profile.current = profileName;
         this.loadProfile();
+        this.$forceUpdate();
     }
     finishEdit(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);
@@ -231,25 +239,103 @@ export default class ExportView extends Store {
         window.print();
     }
 
-    async sync() {
-        for (const profile of this.profile.profiles) {
-            const content = localStorage.getItem(profile);
-            if (content) {
-                try {
-                    const parsed: SemesterStorage = JSON.parse(content);
-                    const username = localStorage.getItem('username');
-                    const credential = localStorage.getItem('credential');
-                    await axios.post(this.liHaoURL, {
-                        username,
-                        credential,
-                        name: parsed.name,
-                        profile: content
-                    });
-                } catch (e) {
-                    this.noti.error(errToStr(e));
-                    console.error(e);
-                }
+    // async sync() {
+    //     await this.fetchRemoteProfiles();
+    //     const up: string[] = [],
+    //         overlap: SemesterStorage[] = [];
+    //     for (const profile of this.profile.profiles) {
+    //         const target = this.remoteProfiles.find(s => s.name === profile);
+    //         if (target) {
+    //             overlap.push(target);
+    //         } else {
+    //             up.push(profile);
+    //         }
+    //     }
+    //     const down = this.remoteProfiles.filter(s => !overlap.find(o => o.name === s.name));
+    //     const proms = [];
+    //     // upload profiles
+    //     for (const name of up) {
+    //         proms.push(this.uploadProfile(name));
+    //     }
+    //     // download profiles
+    //     const prevCur = this.profile.current;
+    //     for (const profile of down) {
+    //         this.profile.addProfile(JSON.stringify(profile), profile.name || 'Hoos');
+    //     }
+    //     // restore current
+    //     this.profile.current = prevCur;
+
+    //     // sync overlapped profiles
+    //     for (const profile of overlap) {
+    //         const t1 = new Date(profile.modified).getTime();
+    //         const local = localStorage.getItem(profile.name)!;
+    //         const t2 = new Date(JSON.parse(local).modified).getTime();
+    //         // remote is newer than local
+    //         if (t1 > t2) {
+    //             localStorage.setItem(profile.name, JSON.stringify(profile));
+    //             // local is newer than remote
+    //         } else if (t1 < t2) {
+    //             if (
+    //                 confirm(
+    //                     `Your local profile ${
+    //                         profile.name
+    //                     } seems newer than its corresponding remote profile. Confirm overwriting?`
+    //                 )
+    //             )
+    //                 proms.push(this.uploadProfile(name));
+    //         }
+    //     }
+    //     await Promise.all(proms);
+    //     await this.fetchRemoteProfiles();
+    // }
+
+    uploadProfile(name: string) {
+        const local = localStorage.getItem(name);
+        if (!local) return Promise.reject('No local profile present!');
+
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+
+        const remote = this.remoteProfiles.find(p => p.name === name);
+        if (remote) {
+            // const t1 = new Date(remote.modified).getTime();
+            // const t2 = new Date(JSON.parse(local).modified).getTime();
+            if (
+                !confirm('A remote profile with the same name already exists. Confirm overwriting?')
+            )
+                return Promise.reject('Cancelled');
+        }
+
+        return axios.post(this.liHaoUpURL, {
+            username,
+            credential,
+            name,
+            profile: local
+        });
+    }
+
+    downloadProfile(profile: SemesterStorage) {
+        const local = localStorage.getItem(profile.name);
+        if (local) {
+            const t1 = new Date(profile.modified).getTime();
+            const t2 = new Date(JSON.parse(local).modified).getTime();
+
+            // local is newer than remote
+            if (t1 < t2) {
+                if (
+                    !confirm(
+                        `Your local profile ${
+                            profile.name
+                        } seems newer than its corresponding remote profile. Confirm overwriting?`
+                    )
+                )
+                    return;
             }
+            localStorage.setItem(profile.name, JSON.stringify(profile));
+            this.$forceUpdate();
+        } else {
+            this.profile.addProfile(JSON.stringify(profile), profile.name, false);
+            this.newName.push(null);
         }
     }
 

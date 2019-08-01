@@ -51,7 +51,7 @@ export enum SortMode {
  * options for the schedule evaluator
  */
 export interface EvaluatorOptions {
-    readonly sortBy: ReadonlyArray<SortOption>;
+    readonly sortBy: readonly SortOption[];
     mode: SortMode;
 }
 

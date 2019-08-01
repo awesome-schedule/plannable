@@ -76,8 +76,8 @@ export default class Course implements CourseFields, Hashable {
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: ReadonlyArray<number>;
-    public readonly sections: ReadonlyArray<Section>;
+    public readonly sids: readonly number[];
+    public readonly sections: readonly Section[];
 
     /**
      * @param raw the raw representation of this course
@@ -88,7 +88,7 @@ export default class Course implements CourseFields, Hashable {
     constructor(
         public readonly raw: RawCourse,
         public readonly key: string,
-        sids: ReadonlyArray<number> = []
+        sids: readonly number[] = []
     ) {
         if (sids.length) {
             this.sids = sids.slice().sort((a, b) => a - b);

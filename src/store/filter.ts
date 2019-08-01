@@ -44,7 +44,7 @@ interface DetailedSortOption extends SortOption {
     /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
-    readonly exclusive: ReadonlyArray<keyof SortFunctions>;
+    readonly exclusive: readonly (keyof SortFunctions)[];
     /**
      * text displayed next to the checkbox
      */
@@ -59,7 +59,7 @@ interface DetailedSortOption extends SortOption {
  * A JSON-serializable version of the [[EvaluatorOptions]] with more details
  */
 interface DetailedEvaluatorOptions extends EvaluatorOptions {
-    sortBy: ReadonlyArray<DetailedSortOption>;
+    sortBy: readonly DetailedSortOption[];
     toJSON: () => EvaluatorOptions;
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
 }
@@ -184,7 +184,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     allowClosed = true;
     sortOptions = getDefaultOptions();
 
-    readonly sortModes: ReadonlyArray<DetailedSortMode> = [
+    readonly sortModes: readonly DetailedSortMode[] = [
         {
             mode: SortMode.combined,
             title: 'Combined',

@@ -11,16 +11,28 @@ import { colorDepthSearch, graphColoringExact, DFS } from '../algorithm';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
-import Event from './Event';
+import Event, { EventJSON } from './Event';
 import Hashable from './Hashable';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import noti from '@/store/notification';
 import { Day, TYPES, dayToInt } from './Meta';
 
+interface SectionJSON {
+    id: number;
+    section: string;
+}
+
+type SectionJSONShort = [number, string];
+
 export interface ScheduleJSON {
-    All: { [x: string]: { id: number; section: string }[] | number[] | -1 };
+    All: { [x: string]: SectionJSON[] | number[] | -1 };
     events: Event[];
+}
+
+export interface ScheduleJSONShort {
+    0: { [x: string]: [number, string][] | -1 };
+    1: EventJSON[];
 }
 
 export interface ScheduleOptions {
@@ -38,7 +50,7 @@ export default class Schedule {
         multiSelect: true
     });
 
-    public static readonly bgColors: ReadonlyArray<string> = [
+    public static readonly bgColors: readonly string[] = [
         '#f7867e',
         '#ffb74c',
         '#82677E',
@@ -58,6 +70,34 @@ export default class Schedule {
         return typeof x[0] === 'number';
     }
 
+    public static compressJSON(obj: ScheduleJSON): ScheduleJSONShort {
+        const { All, events } = obj;
+        const shortAll: { [x: string]: SectionJSONShort[] | -1 } = {};
+        for (const key in All) {
+            const sections = All[key];
+            shortAll[key] =
+                sections === -1
+                    ? sections
+                    : (sections as SectionJSON[]).map(({ id, section }) => [id, section]);
+        }
+        return [shortAll, events.map(e => Event.prototype.toJSONShort.call(e))];
+    }
+
+    public static decompressJSON(obj: ScheduleJSONShort): ScheduleJSON {
+        const All: { [x: string]: SectionJSON[] | -1 } = {};
+        obj[0] = obj[0] || {};
+        obj[1] = obj[1] || [];
+        for (const key in obj[0]) {
+            const entry = obj[0][key];
+            All[key] =
+                entry instanceof Array ? entry.map(e => ({ id: e[0], section: e[1] })) : entry;
+        }
+        return {
+            All,
+            events: obj[1].map(e => Event.fromJSONShort(e))
+        };
+    }
+
     /**
      * instantiate a `Schedule` object from its JSON representation.
      * the `computeSchedule` method will be invoked
@@ -66,7 +106,9 @@ export default class Schedule {
         if (!obj) return null;
         const schedule = new Schedule();
         if (obj.events)
-            schedule.events = obj.events.map(x => Object.setPrototypeOf(x, Event.prototype));
+            schedule.events = obj.events.map(x =>
+                x instanceof Event ? x : Object.setPrototypeOf(x, Event.prototype)
+            );
 
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
         if (keys.length === 0) return schedule;
@@ -613,8 +655,7 @@ export default class Schedule {
     }
 
     /**
-     * places a `Section`/`Course`/`Event`/ into one of the `Mo` to `Fr` array according to its `days` property
-     *
+     * place a `Section`/`Course`/`Event`/ into one of the `Mo` to `Su` array according to its `days` property
      * @remarks we can place a Course instance if all of its sections occur at the same time
      */
     public place(course: Section | Course | Event) {
@@ -698,23 +739,23 @@ export default class Schedule {
     /**
      * Serialize `this` to JSON
      */
-    public toJSON() {
-        const obj: ScheduleJSON = {
-            All: {},
-            events: this.events
-        };
+    public toJSON(): ScheduleJSON {
+        const All: { [x: string]: SectionJSON[] | -1 } = {};
         const catalog = window.catalog;
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Set) {
-                obj.All[key] = [...sections].map(sid => {
+                All[key] = [...sections].map(sid => {
                     const { id, section } = catalog.getSection(key, sid);
                     return { id, section };
                 });
-            } else obj.All[key] = sections;
+            } else All[key] = sections;
         }
-        return obj;
+        return {
+            All,
+            events: this.events
+        };
     }
 
     /**
@@ -748,9 +789,7 @@ export default class Schedule {
         if (rendered)
             return (
                 this.events.some(x => x.days === key) ||
-                Object.values(this.days).some(blocks =>
-                    blocks.some(block => block.section.key === key)
-                )
+                this.days.some(blocks => blocks.some(block => block.section.key === key))
             );
         else return key in this.All || this.events.some(x => x.days === key);
     }

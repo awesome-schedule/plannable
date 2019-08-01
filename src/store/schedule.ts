@@ -5,7 +5,7 @@
 /**
  *
  */
-import Schedule, { ScheduleJSON } from '../models/Schedule';
+import Schedule, { ScheduleJSON, ScheduleJSONShort } from '../models/Schedule';
 import { StoreModule, saveStatus } from '.';
 
 interface ScheduleStateBase {
@@ -50,14 +50,42 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
+interface ScheduleStateJSONShort {
+    0: ScheduleStateJSON['currentScheduleIndex'];
+    1: ScheduleStateJSON['proposedScheduleIndex'];
+    2: ScheduleStateJSON['cpIndex'];
+    3: number;
+    4: ScheduleJSONShort[];
+}
+
 // tslint:disable-next-line: no-empty-interface
-interface ScheduleStore extends ScheduleState { }
+export interface ScheduleStore extends ScheduleState {}
 
 /**
  * the schedule module provides methods to manipulate schedules
  * @author Hanzhi Zhou
  */
-class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
+export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
+    public static compressJSON(obj: ScheduleStateJSON): ScheduleStateJSONShort {
+        return [
+            obj.currentScheduleIndex,
+            obj.proposedScheduleIndex,
+            obj.cpIndex,
+            +obj.generated,
+            obj.proposedSchedules.map(s => Schedule.compressJSON(s))
+        ];
+    }
+
+    public static decompressJSON(obj: ScheduleStateJSONShort): ScheduleStateJSON {
+        return {
+            currentScheduleIndex: obj[0],
+            proposedScheduleIndex: obj[1],
+            cpIndex: obj[2],
+            generated: Boolean(obj[3]),
+            proposedSchedules: obj[4].map(s => Schedule.decompressJSON(s))
+        };
+    }
+
     constructor() {
         Object.assign(this, this.getDefault());
     }
@@ -78,7 +106,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         }
     }
     /**
-     * create a new empty schedule at the end of the proposedSchedules array and immediate switch to it
+     * create a new empty schedule at the end of the proposedSchedules array and immediately switch to it
      */
     newProposed() {
         this.proposedSchedules.push(new Schedule());

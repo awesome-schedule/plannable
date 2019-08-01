@@ -91,16 +91,16 @@ export default class Catalog {
         if (!this.worker) {
             const Worker = require('worker-loader!../workers/SearchWorker');
             const worker: SearchWorker = new Worker();
-            const prom = new Promise(resolve => {
+            const prom: Promise<'ready'> = new Promise(resolve => {
                 worker.onmessage = ({ data }) => {
-                    resolve(data as 'ready');
+                    resolve(data);
                 };
-            }) as Promise<'ready'>;
+            });
             worker.postMessage(this.courseDict);
             this.worker = worker;
             return prom;
         }
-        return Promise.resolve('ready') as Promise<'ready'>;
+        return Promise.resolve('ready');
     }
 
     /**

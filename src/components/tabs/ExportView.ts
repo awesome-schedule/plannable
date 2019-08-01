@@ -220,6 +220,7 @@ export default class ExportView extends Store {
         if (!item) return;
         this.profile.current = profileName;
         this.loadProfile();
+        this.$forceUpdate();
     }
     finishEdit(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);
@@ -238,64 +239,104 @@ export default class ExportView extends Store {
         window.print();
     }
 
-    async sync() {
-        await this.fetchRemoteProfiles();
-        const up: string[] = [],
-            overlap: SemesterStorage[] = [];
-        for (const profile of this.profile.profiles) {
-            const target = this.remoteProfiles.find(s => s.name === profile);
-            if (target) {
-                overlap.push(target);
-            } else {
-                up.push(profile);
-            }
-        }
-        const down = this.remoteProfiles.filter(s => !overlap.find(o => o.name === s.name));
-        // upload profiles
-        for (const name of up) {
-            this.uploadProfile(name, localStorage.getItem(name)!);
-        }
-        // download profiles
-        const prevCur = this.profile.current;
-        for (const profile of down) {
-            this.profile.addProfile(JSON.stringify(profile), profile.name || 'Hoos');
-        }
-        // restore current
-        this.profile.current = prevCur;
+    // async sync() {
+    //     await this.fetchRemoteProfiles();
+    //     const up: string[] = [],
+    //         overlap: SemesterStorage[] = [];
+    //     for (const profile of this.profile.profiles) {
+    //         const target = this.remoteProfiles.find(s => s.name === profile);
+    //         if (target) {
+    //             overlap.push(target);
+    //         } else {
+    //             up.push(profile);
+    //         }
+    //     }
+    //     const down = this.remoteProfiles.filter(s => !overlap.find(o => o.name === s.name));
+    //     const proms = [];
+    //     // upload profiles
+    //     for (const name of up) {
+    //         proms.push(this.uploadProfile(name));
+    //     }
+    //     // download profiles
+    //     const prevCur = this.profile.current;
+    //     for (const profile of down) {
+    //         this.profile.addProfile(JSON.stringify(profile), profile.name || 'Hoos');
+    //     }
+    //     // restore current
+    //     this.profile.current = prevCur;
 
-        // sync overlapped profiles
-        for (const profile of overlap) {
+    //     // sync overlapped profiles
+    //     for (const profile of overlap) {
+    //         const t1 = new Date(profile.modified).getTime();
+    //         const local = localStorage.getItem(profile.name)!;
+    //         const t2 = new Date(JSON.parse(local).modified).getTime();
+    //         // remote is newer than local
+    //         if (t1 > t2) {
+    //             localStorage.setItem(profile.name, JSON.stringify(profile));
+    //             // local is newer than remote
+    //         } else if (t1 < t2) {
+    //             if (
+    //                 confirm(
+    //                     `Your local profile ${
+    //                         profile.name
+    //                     } seems newer than its corresponding remote profile. Confirm overwriting?`
+    //                 )
+    //             )
+    //                 proms.push(this.uploadProfile(name));
+    //         }
+    //     }
+    //     await Promise.all(proms);
+    //     await this.fetchRemoteProfiles();
+    // }
+
+    uploadProfile(name: string) {
+        const local = localStorage.getItem(name);
+        if (!local) return Promise.reject('No local profile present!');
+
+        const username = localStorage.getItem('username');
+        const credential = localStorage.getItem('credential');
+
+        const remote = this.remoteProfiles.find(p => p.name === name);
+        if (remote) {
+            // const t1 = new Date(remote.modified).getTime();
+            // const t2 = new Date(JSON.parse(local).modified).getTime();
+            if (
+                !confirm('A remote profile with the same name already exists. Confirm overwriting?')
+            )
+                return Promise.reject('Cancelled');
+        }
+
+        return axios.post(this.liHaoUpURL, {
+            username,
+            credential,
+            name,
+            profile: local
+        });
+    }
+
+    downloadProfile(profile: SemesterStorage) {
+        const local = localStorage.getItem(profile.name);
+        if (local) {
             const t1 = new Date(profile.modified).getTime();
-            const local = localStorage.getItem(profile.name)!;
             const t2 = new Date(JSON.parse(local).modified).getTime();
-            // remote is newer than local
-            if (t1 > t2) {
-                localStorage.setItem(profile.name, JSON.stringify(profile));
-                // local is newer than remote
-            } else if (t1 < t2) {
+
+            // local is newer than remote
+            if (t1 < t2) {
                 if (
-                    confirm(
+                    !confirm(
                         `Your local profile ${
                             profile.name
                         } seems newer than its corresponding remote profile. Confirm overwriting?`
                     )
                 )
-                    this.uploadProfile(name, local);
+                    return;
             }
+            localStorage.setItem(profile.name, JSON.stringify(profile));
+            this.$forceUpdate();
+        } else {
+            this.profile.addProfile(JSON.stringify(profile), profile.name, false);
+            this.newName.push(null);
         }
-    }
-
-    uploadProfile(name: string, profile?: string) {
-        if (!profile) profile = localStorage.getItem(name)!;
-        const username = localStorage.getItem('username');
-        const credential = localStorage.getItem('credential');
-
-        axios.post(this.liHaoUpURL, {
-            username,
-            credential,
-            name,
-            profile
-        });
     }
 
     @Watch('profile.current', { immediate: true })

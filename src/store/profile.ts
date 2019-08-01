@@ -104,8 +104,9 @@ class Profile {
      * @note you need to call loadProfile() manually
      * @param raw
      * @param fallbackName the fallback name if the raw does not contain the name of the profile
+     * @param sw whether to switch to the newly added schedule
      */
-    addProfile(raw: string, fallbackName: string) {
+    addProfile(raw: string, fallbackName: string, sw = true) {
         const raw_data: SemesterStorage = JSON.parse(raw);
         let profileName = raw_data.name || fallbackName;
         const prevIdx = this.profiles.findIndex(p => p === profileName);
@@ -135,7 +136,7 @@ class Profile {
         } else {
             localStorage.setItem(profileName, raw);
         }
-        this.current = profileName;
+        if (sw) this.current = profileName;
     }
 }
 

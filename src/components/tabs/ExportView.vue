@@ -123,7 +123,11 @@
                             title="delete this profile"
                             @click="deleteProfile(name, idx)"
                         ></i>
-                        <i class="fas fa-upload" @click="uploadProfile(name)"></i>
+                        <i
+                            v-if="canSync"
+                            class="fas fa-upload ml-1 click-icon"
+                            @click="uploadProfile(name).then(fetchRemoteProfiles)"
+                        ></i>
                     </div>
                 </div>
             </li>
@@ -160,7 +164,11 @@
                             </span>
                         </div>
                         <div class="col-sm-auto text-right" style="font-size: 16px">
-                            <i class="fa fa-times ml-1 click-icon" title="delete this profile"></i>
+                            <i
+                                class="fa fa-download ml-1 click-icon"
+                                title="Download this profile"
+                                @click="downloadProfile(data)"
+                            ></i>
                         </div>
                     </div>
                 </li>

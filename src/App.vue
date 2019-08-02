@@ -1,6 +1,6 @@
 <template>
     <div id="app" class="w-100" @change="saveStatus()">
-        <version-modal :note="note" :version="version" @ref_note="refreshNote()"></version-modal>
+        <version-modal :version="version" @ref_note="refreshNote()"></version-modal>
         <course-modal :course="modal.course" :match="modal.match"></course-modal>
         <section-modal
             :semester="semester.currentSemester"

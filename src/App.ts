@@ -11,7 +11,6 @@ import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 import MainContent from './components/MainContent.vue';
 import axios from 'axios';
-import cheerio from 'cheerio';
 
 // tab components
 import ClassView from './components/tabs/ClassView.vue';
@@ -30,6 +29,7 @@ import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
 import URLModal from './components/URLModal.vue';
 import DateSeparator from './components/DateSeparator.vue';
+import VersionModal from './components/VersionModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store from './store';
@@ -68,7 +68,8 @@ async function releaseNote() {
             /**
              * Records the # of layers (of "ul") that this line is at.
              * Denoted by the number of spaces before a "- " in the front of the current line.
-             * If this line is not in an "ul", it will be set to -1 at the end of the callback function.
+             * If this line is not in an "ul", it will be set to -1 at the end of the callback function
+             * in .map()'s parameter.
              */
             let ul = -1;
             note = (res.data[0].body as string).split(/[\r\n]+/).map(x => {
@@ -84,8 +85,8 @@ async function releaseNote() {
                 let result = x.replace(/^(#*)(\s)/,
                     (s1: string, match1: string, match2: string) => {
                         /**
-                         * Replace # to <h1> (and so on...) and set the variable header, so that "header" can be used to
-                         * close this element (give it a "</h1>")
+                         * Replace # to <h1> (and so on...) and set the variable "header", so that "header" can be used
+                         * to close this element (give it a "</h1>")
                          */
                         return match1.length === 0 ? match2 : ('<h' + (head = match1.length) + '>');
                     })
@@ -137,6 +138,7 @@ async function releaseNote() {
         SectionModal,
         CourseModal,
         URLModal,
+        VersionModal,
         External,
         DateSeparator,
         // use dynamic component for this one because it is relatively large in size

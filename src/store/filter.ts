@@ -14,7 +14,7 @@ import { to12hr } from '@/utils';
 import Event from '@/models/Event';
 
 interface FilterStateBase {
-    readonly timeSlots: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string][];
+    readonly timeSlots: TimeSlot[];
     allowWaitlist: boolean;
     allowClosed: boolean;
 }
@@ -63,6 +63,15 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
     toJSON: () => EvaluatorOptions;
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
 }
+
+/**
+ * index 0 - 6: whether Mo - Su are selected
+ *
+ * 7: start time, of 24 hour format
+ *
+ * 8: end time, of 24 hour format
+ */
+export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
 
 /**
  * a list of sort options with default values assigned
@@ -172,14 +181,7 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.tim
  * @author Hanzhi Zhou
  */
 class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
-    /**
-     * index 0 - 4: whether Mo - Fr are selected
-     *
-     * 6: start time, of 24 hour format
-     *
-     * 7: end time, of 24 hour format
-     */
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string][] = [];
+    timeSlots: TimeSlot[] = [];
     allowWaitlist = true;
     allowClosed = true;
     sortOptions = getDefaultOptions();
@@ -216,7 +218,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
         for (const time of this.timeSlots) {
             let days = '';
-            for (let j = 0; j < 5; j++) {
+            for (let j = 0; j < 7; j++) {
                 if (time[j]) days += DAYS[j];
             }
 

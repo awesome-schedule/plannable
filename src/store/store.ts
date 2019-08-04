@@ -44,7 +44,7 @@ interface LegacyStorage {
 
     display: DisplayState;
 
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;
     sortOptions: EvaluatorOptions;
@@ -59,7 +59,7 @@ interface AncientStorage extends DisplayState {
     currentSchedule: LegacyScheduleJSON;
     proposedSchedule: LegacyScheduleJSON;
 
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;
     sortOptions: EvaluatorOptions;

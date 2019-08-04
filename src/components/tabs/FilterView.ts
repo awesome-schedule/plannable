@@ -33,7 +33,7 @@ export default class FilterView extends Store {
     }
 
     addTimeSlot() {
-        this.filter.timeSlots.push([false, false, false, false, false, '', '']);
+        this.filter.timeSlots.push([false, false, false, false, false, false, false, '', '']);
     }
     removeTimeSlot(n: number) {
         this.filter.timeSlots.splice(n, 1);

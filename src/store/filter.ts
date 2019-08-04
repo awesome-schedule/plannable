@@ -14,7 +14,7 @@ import { to12hr } from '@/utils';
 import Event from '@/models/Event';
 
 interface FilterStateBase {
-    readonly timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    readonly timeSlots: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string][];
     allowWaitlist: boolean;
     allowClosed: boolean;
 }
@@ -179,7 +179,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
      *
      * 7: end time, of 24 hour format
      */
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][] = [];
+    timeSlots: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string][] = [];
     allowWaitlist = true;
     allowClosed = true;
     sortOptions = getDefaultOptions();
@@ -222,8 +222,8 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
             if (!days) continue;
 
-            const startTime = time[5].split(':');
-            const endTime = time[6].split(':');
+            const startTime = time[7].split(':');
+            const endTime = time[8].split(':');
             if (
                 isNaN(+startTime[0]) ||
                 isNaN(+startTime[1]) ||
@@ -235,7 +235,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                     level: 'error'
                 };
             }
-            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
+            days += ' ' + to12hr(time[7]) + ' - ' + to12hr(time[8]);
             events.push(new Event(days, false));
         }
 

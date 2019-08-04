@@ -2,7 +2,7 @@
  * @module components/tabs
  */
 import Store, { SemesterStorage } from '@/store';
-import { savePlain, toICal, errToStr } from '@/utils';
+import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
 import axios from 'axios';

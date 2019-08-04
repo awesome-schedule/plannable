@@ -25,6 +25,7 @@ export default class ExportView extends Store {
 
     liHaoUpURL: string = 'http://localhost:8081/courses/api/save_plannable_profile';
     liHaoDownURL: string = 'http://localhost:8081/courses/api/get_plannable_profiles';
+    liHaoEditURL: string = 'http://localhost:8081/courses/api/edit_plannable_profiles';
 
     remoteProfiles: SemesterStorage[] = [];
 
@@ -161,7 +162,7 @@ export default class ExportView extends Store {
         // convert to binary, the first key => the first/rightmost bit
         // there are 10 keys to consider
         let display_bit = 0;
-        let counter = 0;
+        let counter = 1;
         for (const key of display_keys) {
             if (display[key] === true) {
                 display_bit |= counter;
@@ -211,6 +212,20 @@ export default class ExportView extends Store {
         if (confirm(`Are you sure to delete ${name}?`)) {
             this.newName.splice(idx, 1);
             const prof = this.profile.deleteProfile(name, idx);
+            if (
+                this.canSync &&
+                this.remoteProfiles.find(p => p.name === name) &&
+                confirm(`Also delete the remote profile ${name}`)
+            ) {
+                const username = localStorage.getItem('username')!,
+                    credential = localStorage.getItem('credential');
+                axios.post(this.liHaoEditURL, {
+                    username,
+                    credential,
+                    action: 'delete',
+                    name
+                });
+            }
             if (prof) this.loadProfile();
         }
     }
@@ -232,62 +247,27 @@ export default class ExportView extends Store {
             const prevIdx = this.profile.profiles.findIndex(n => n === newName);
             if (prevIdx !== -1) return this.noti.error('Duplicated name!');
             this.profile.renameProfile(idx, oldName, newName, raw);
+            if (
+                this.canSync &&
+                this.remoteProfiles.find(p => p.name === oldName) &&
+                confirm(`Also rename the remote profile ${oldName} to ${newName}`)
+            ) {
+                const username = localStorage.getItem('username')!,
+                    credential = localStorage.getItem('credential');
+                axios.post(this.liHaoEditURL, {
+                    username,
+                    credential,
+                    action: 'rename',
+                    oldName,
+                    newName
+                });
+            }
         }
         this.$set(this.newName, idx, null);
     }
     print() {
         window.print();
     }
-
-    // async sync() {
-    //     await this.fetchRemoteProfiles();
-    //     const up: string[] = [],
-    //         overlap: SemesterStorage[] = [];
-    //     for (const profile of this.profile.profiles) {
-    //         const target = this.remoteProfiles.find(s => s.name === profile);
-    //         if (target) {
-    //             overlap.push(target);
-    //         } else {
-    //             up.push(profile);
-    //         }
-    //     }
-    //     const down = this.remoteProfiles.filter(s => !overlap.find(o => o.name === s.name));
-    //     const proms = [];
-    //     // upload profiles
-    //     for (const name of up) {
-    //         proms.push(this.uploadProfile(name));
-    //     }
-    //     // download profiles
-    //     const prevCur = this.profile.current;
-    //     for (const profile of down) {
-    //         this.profile.addProfile(JSON.stringify(profile), profile.name || 'Hoos');
-    //     }
-    //     // restore current
-    //     this.profile.current = prevCur;
-
-    //     // sync overlapped profiles
-    //     for (const profile of overlap) {
-    //         const t1 = new Date(profile.modified).getTime();
-    //         const local = localStorage.getItem(profile.name)!;
-    //         const t2 = new Date(JSON.parse(local).modified).getTime();
-    //         // remote is newer than local
-    //         if (t1 > t2) {
-    //             localStorage.setItem(profile.name, JSON.stringify(profile));
-    //             // local is newer than remote
-    //         } else if (t1 < t2) {
-    //             if (
-    //                 confirm(
-    //                     `Your local profile ${
-    //                         profile.name
-    //                     } seems newer than its corresponding remote profile. Confirm overwriting?`
-    //                 )
-    //             )
-    //                 proms.push(this.uploadProfile(name));
-    //         }
-    //     }
-    //     await Promise.all(proms);
-    //     await this.fetchRemoteProfiles();
-    // }
 
     uploadProfile(name: string) {
         const local = localStorage.getItem(name);

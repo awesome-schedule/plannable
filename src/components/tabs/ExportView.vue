@@ -141,6 +141,8 @@
                 <input v-model="liHaoUpURL" type="text" class="form-control form-control-sm" />
                 Download URL: <br />
                 <input v-model="liHaoDownURL" type="text" class="form-control form-control-sm" />
+                Edit URL: <br />
+                <input v-model="liHaoEditURL" type="text" class="form-control form-control-sm" />
                 <button class="btn btn-outline-danger mt-1" @click="fetchRemoteProfiles()">
                     Fetch All
                 </button>

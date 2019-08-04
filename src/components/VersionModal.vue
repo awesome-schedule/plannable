@@ -9,7 +9,7 @@
                     </button>
                 </div>
                 <div id="release-note-body" class="mx-4 my-4">
-                    {{ note }}
+                    Loading release note...
                 </div>
             </div>
         </div>

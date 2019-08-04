@@ -22,7 +22,7 @@ describe('ScheduleGenerator Test', () => {
     it('ScheduleGenerator', () => {
         const catalog = window.catalog;
         const buildingList = window.buildingList;
-        store.filter.timeSlots.push([true, false, true, false, true, '0:15', '0:50']);
+        store.filter.timeSlots.push([true, false, true, false, true, false, false, '0:15', '0:50']);
         const options = store.getGeneratorOptions();
         if (!options) throw new Error('failed to get options');
 

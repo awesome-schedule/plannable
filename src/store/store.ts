@@ -8,7 +8,7 @@ import { SemesterJSON } from '../models/Catalog';
 import { CourseStatus } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import display, { DisplayState } from './display';
-import filter, { FilterStateJSON } from './filter';
+import filter, { FilterStateJSON, TimeSlot } from './filter';
 import modal from './modal';
 import noti from './notification';
 import palette, { PaletteState } from './palette';
@@ -44,7 +44,7 @@ interface LegacyStorage {
 
     display: DisplayState;
 
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    timeSlots: TimeSlot[];
     allowWaitlist: boolean;
     allowClosed: boolean;
     sortOptions: EvaluatorOptions;
@@ -59,7 +59,7 @@ interface AncientStorage extends DisplayState {
     currentSchedule: LegacyScheduleJSON;
     proposedSchedule: LegacyScheduleJSON;
 
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    timeSlots: TimeSlot[];
     allowWaitlist: boolean;
     allowClosed: boolean;
     sortOptions: EvaluatorOptions;

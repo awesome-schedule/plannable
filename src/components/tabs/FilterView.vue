@@ -30,7 +30,7 @@
                 <div class="form-group row no-gutters align-items-center text-center mb-2">
                     <div class="col col-5 align-self-center">
                         <input
-                            v-model="value[5]"
+                            v-model="value[7]"
                             type="time"
                             class="form-control form-control-sm"
                         />
@@ -38,7 +38,7 @@
                     <div class="col col-1 align-self-center">-</div>
                     <div class="col col-5">
                         <input
-                            v-model="value[6]"
+                            v-model="value[8]"
                             type="time"
                             class="form-control form-control-sm"
                         />

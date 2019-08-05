@@ -1,6 +1,8 @@
 /**
  * @module store
  */
+import lz from 'lz-string';
+
 import { Vue, Component } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
@@ -369,15 +371,16 @@ export default class Store extends Vue {
         await this.loadProfile();
         this.status.loading = false;
     }
+}
 
-    /**
-     * See [[App.parseFromURL]]
-     * convert JSON string to tuple of tuples to reduce the num of chars
-     * @author Zichao Hu
-     * @param jsonString
-     */
-    convertJsonToArray(jsonString: string) {
-        /*
+/**
+ * See [[parseFromURL]]
+ * convert JSON string to tuple of tuples to reduce the num of chars
+ * @author Zichao Hu
+ * @param jsonString
+ */
+export const convertJsonToArray = (jsonString: string) => {
+    /*
         result =>
         name
         modified
@@ -399,65 +402,151 @@ export default class Store extends Vue {
         palette
         */
 
-        // get values from the json object
-        const json: SemesterStorage = JSON.parse(jsonString);
-        const { name, modified, currentSemester, display, filter, schedule, palette } = json;
+    // get values from the json object
+    const json: SemesterStorage = JSON.parse(jsonString);
+    const { name, modified, currentSemester, display, filter, schedule, palette } = json;
 
-        // add first four value the the array
-        const result = [];
-        result.push(name, modified, currentSemester.id, currentSemester.name);
+    // add first four value the the array
+    const result = [];
+    result.push(name, modified, currentSemester.id, currentSemester.name);
 
-        // compressing display
-        // get all keys in the display object and sort them
-        const display_keys = Object.keys(display).sort();
+    // compressing display
+    // get all keys in the display object and sort them
+    const display_keys = Object.keys(display).sort();
 
-        // convert to binary, the first key => the first/rightmost bit
-        // there are 10 keys to consider
-        let display_bit = 0;
-        let counter = 1;
-        for (const key of display_keys) {
-            if (display[key] === true) {
-                display_bit |= counter;
-                counter <<= 1;
-            } else if (display[key] === false) {
-                counter <<= 1;
-            } else {
-                result.push(display[key]);
-            }
-        }
-        result.push(display_bit);
-
-        // compressing filter
-        // add timeSlots to array
-        result.push(filter.timeSlots);
-
-        // convert allowClosed, allowWaitlist, mode to binary
-        let filter_bit = 0;
-        if (filter.allowClosed) filter_bit += 2 ** 0;
-        if (filter.allowWaitlist) filter_bit += 2 ** 1;
-        if (filter.sortOptions.mode === 1) filter_bit += 2 ** 2;
-
-        result.push(filter_bit);
-
-        // sorting
-        // add all initial ascii to the array in order
-        // add the binary of their respective state: enabled or reverse
-        counter = 1;
-        filter_bit = 0;
-        for (const sortBy of filter.sortOptions.sortBy) {
-            const ascii = sortBy.name.charCodeAt(0);
-            result.push(ascii);
-            if (sortBy.enabled) filter_bit |= counter;
+    // convert to binary, the first key => the first/rightmost bit
+    // there are 10 keys to consider
+    let display_bit = 0;
+    let counter = 1;
+    for (const key of display_keys) {
+        if (display[key] === true) {
+            display_bit |= counter;
             counter <<= 1;
-            if (sortBy.reverse) filter_bit |= counter;
+        } else if (display[key] === false) {
             counter <<= 1;
+        } else {
+            result.push(display[key]);
         }
-        result.push(filter_bit);
-
-        // add schedule and palette objects to the array
-        result.push(ScheduleStore.compressJSON(schedule));
-        result.push(Palette.compressJSON(palette));
-        console.log(result);
-        return JSON.stringify(result);
     }
-}
+    result.push(display_bit);
+
+    // compressing filter
+    // add timeSlots to array
+    result.push(filter.timeSlots);
+
+    // convert allowClosed, allowWaitlist, mode to binary
+    let filter_bit = 0;
+    if (filter.allowClosed) filter_bit += 2 ** 0;
+    if (filter.allowWaitlist) filter_bit += 2 ** 1;
+    if (filter.sortOptions.mode === 1) filter_bit += 2 ** 2;
+
+    result.push(filter_bit);
+
+    // sorting
+    // add all initial ascii to the array in order
+    // add the binary of their respective state: enabled or reverse
+    counter = 1;
+    filter_bit = 0;
+    for (const sortBy of filter.sortOptions.sortBy) {
+        const ascii = sortBy.name.charCodeAt(0);
+        result.push(ascii);
+        if (sortBy.enabled) filter_bit |= counter;
+        counter <<= 1;
+        if (sortBy.reverse) filter_bit |= counter;
+        counter <<= 1;
+    }
+    result.push(filter_bit);
+
+    // add schedule and palette objects to the array
+    result.push(ScheduleStore.compressJSON(schedule));
+    result.push(Palette.compressJSON(palette));
+    console.log(result);
+    return JSON.stringify(result);
+};
+
+/**
+ * @author Zichao Hu, Hanzhi Zhou
+ * @see [[convertJsonToArray]]
+ * @param config
+ */
+export const parseFromURL = (config: string) => {
+    // get URL and convert to JSON
+    const data: any[] = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
+
+    // get the default objects to contruct the valid JSON
+    const displaySettings = display.getDefault();
+    const filterSettings = filter.getDefault();
+
+    // get the first four values
+    const name = data[0];
+    const modified = data[1];
+    const currentSemester = { id: data[2], name: data[3] };
+
+    // displaySettings
+    // get and sort keys in displaySettings
+    const display_keys = Object.keys(displaySettings).sort();
+
+    // if the key name contains '_' then it corresponds to a certain index in data
+    // else it is in the binary
+    let counter = 4;
+    let display_bit: number = data[10];
+    for (const key of display_keys) {
+        if (key.includes('_')) {
+            displaySettings[key] = data[counter];
+            counter += 1;
+        } else {
+            displaySettings[key] = display_bit % 2 === 1 ? true : false;
+            display_bit = Math.floor(display_bit / 2);
+        }
+    }
+
+    // filterSettings
+    // add timeSlots
+    filterSettings.timeSlots = data[11];
+
+    // get allowClosed, allowWaitlist, mode from binary
+    filterSettings.allowClosed = Boolean(data[12] & 1);
+    filterSettings.allowWaitlist = Boolean(data[12] & 2);
+    filterSettings.sortOptions.mode = +Boolean(data[12] & 4); // convert to 0 or 1
+
+    // sorting
+    // get the binary of enable_reverse
+    const enable_reverse = data[19];
+
+    const sortBy = filterSettings.sortOptions.sortBy;
+    const sortCopy = [];
+    // loop through the ascii initials and match to the object name
+    let mask = 1;
+    for (let i = 0; i < sortBy.length; i++) {
+        const initial = data[13 + i];
+        const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
+
+        // if matched, decode the enabled and reverse info from the binary
+        sortOpt.enabled = Boolean(enable_reverse & mask);
+        mask <<= 1;
+
+        sortOpt.reverse = Boolean(enable_reverse & mask);
+        mask <<= 1;
+
+        sortCopy.push(sortOpt);
+    }
+    filterSettings.sortOptions.sortBy = sortCopy;
+
+    // add the schedule and palette
+    const schedule = ScheduleStore.decompressJSON(data[21]);
+    const palette = Palette.decompressJSON(data[22]);
+
+    // construct a JSON
+    const obj = {
+        name,
+        modified,
+        currentSemester,
+        displaySettings,
+        filterSettings,
+        schedule,
+        palette
+    };
+    console.log(obj);
+
+    return JSON.stringify(obj);
+};

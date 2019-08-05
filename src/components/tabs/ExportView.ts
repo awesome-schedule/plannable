@@ -1,7 +1,7 @@
 /**
  * @module components/tabs
  */
-import Store, { SemesterStorage } from '@/store';
+import Store, { SemesterStorage,convertJsonToArray } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
@@ -109,7 +109,7 @@ export default class ExportView extends Store {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(this.profile.current);
         if (json) {
-            const result = this.convertJsonToArray(json);
+            const result = convertJsonToArray(json);
             const url = new URL(window.location.href);
             url.searchParams.set('config', lz.compressToEncodedURIComponent(result));
             this.modal.showURLModal(url.href);

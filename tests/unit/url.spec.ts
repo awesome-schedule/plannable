@@ -72,7 +72,7 @@ describe('url convertJsonToArray test', () => {
         const v = 'v'.charCodeAt(0);
         const I = 'I'.charCodeAt(0);
 
-        // expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
+        expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
 
         // display
         // _earliest
@@ -129,7 +129,7 @@ describe('url convertJsonToArray test', () => {
         const v = 'v'.charCodeAt(0);
         const I = 'I'.charCodeAt(0);
 
-        // expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
+        expect(urlCompressed[0]).toEqual('test_filter');
 
         // display
         // _earliest

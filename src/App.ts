@@ -34,7 +34,6 @@ import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import randomColor from 'randomcolor';
 
-
 const version = '6.5';
 let note = 'loading release note...';
 /**
@@ -89,7 +88,8 @@ async function releaseNote() {
                     x
                         .replace(/^(#*)(\s)/, (s1: string, match1: string, match2: string) => {
                             /**
-                             * Replace # to <h1> (and so on...) and set the variable "header", so that "header" can be used
+                             * Replace # to <h1> (and so on...) and set the variable "header",
+                             * so that "header" can be used
                              * to close this element (give it a "</h1>")
                              */
                             return match1.length === 0

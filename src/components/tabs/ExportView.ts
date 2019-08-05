@@ -9,7 +9,7 @@ import axios from 'axios';
 
 /**
  * component for import/export/print schedules and managing profiles
- * @author Kaiying Shan, Hanzhi Zhou, Zichao Hu
+ * @author Kaiying Shan, Hanzhi Zhou
  */
 @Component
 export default class ExportView extends Store {
@@ -155,6 +155,8 @@ export default class ExportView extends Store {
             const prevIdx = this.profile.profiles.findIndex(n => n === newName);
             if (prevIdx !== -1) return this.noti.error('Duplicated name!');
             this.profile.renameProfile(idx, oldName, newName, raw);
+
+            // find the remote profile corresponding to the profile to be renamed
             if (
                 this.canSync &&
                 this.remoteProfiles.find(p => p.name === oldName) &&
@@ -186,8 +188,6 @@ export default class ExportView extends Store {
 
         const remote = this.remoteProfiles.find(p => p.name === name);
         if (remote) {
-            // const t1 = new Date(remote.modified).getTime();
-            // const t2 = new Date(JSON.parse(local).modified).getTime();
             if (
                 !confirm('A remote profile with the same name already exists. Confirm overwriting?')
             )
@@ -225,10 +225,5 @@ export default class ExportView extends Store {
             this.profile.addProfile(JSON.stringify(profile), profile.name, false);
             this.newName.push(null);
         }
-    }
-
-    @Watch('profile.current', { immediate: true })
-    private w() {
-        this.fileName = this.profile.current;
     }
 }

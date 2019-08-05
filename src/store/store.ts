@@ -472,7 +472,7 @@ export const parseFromURL = (config: string) => {
     // get URL and convert to JSON
     const data: any[] = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
 
-    // get the default objects to contruct the valid JSON
+    // get the default objects to construct the valid JSON
     const displaySettings = display.getDefault();
     const filterSettings = filter.getDefault();
 
@@ -532,8 +532,10 @@ export const parseFromURL = (config: string) => {
     filterSettings.sortOptions.sortBy = sortCopy;
 
     // add the schedule and palette
-    const schedule = ScheduleStore.decompressJSON(data[21]);
-    const palette = Palette.decompressJSON(data[22]);
+    // tslint:disable-next-line: no-shadowed-variable
+    const schedule = ScheduleStore.decompressJSON(data[21]),
+        // tslint:disable-next-line: no-shadowed-variable
+        palette = Palette.decompressJSON(data[22]);
 
     // construct a JSON
     const obj = {

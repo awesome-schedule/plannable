@@ -46,12 +46,34 @@ function intTo24hr(num: number) {
         .padStart(2, '0')}:${(num % 60).toString().padStart(2, '0')}`;
 }
 
+export type DisplayJSONShort = [number, ...any[]];
+
 /**
  * the display module handles global display options
  * @author Hanzhi Zhou
  */
-// @Component
-class Display implements StoreModule<DisplayState, DisplayState> {
+export class Display implements StoreModule<DisplayState, DisplayState> {
+    public static compressJSON(obj: DisplayState) {
+        // get all keys in the display object and sort them
+        const display_keys = Object.keys(obj).sort();
+        const result: DisplayJSONShort = [0];
+
+        // convert to binary, the first key => the first/rightmost bit
+        let display_bit = 0;
+        let counter = 1;
+        for (const key of display_keys) {
+            if (display[key] === true) {
+                display_bit |= counter;
+                counter <<= 1;
+            } else if (display[key] === false) {
+                counter <<= 1;
+            } else {
+                result.push(display[key]);
+            }
+        }
+        result[0] = display_bit;
+        return result;
+    }
     [x: string]: any;
     showTime = false;
     showRoom = true;

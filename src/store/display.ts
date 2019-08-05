@@ -101,16 +101,16 @@ class Display implements StoreModule<DisplayState, DisplayState> {
         return this._earliest;
     }
     set earliest(e) {
-        this._earliest = intTo24hr(bound(hr24toInt(e), 0, 12 * 60 - 1));
+        this._earliest = intTo24hr(bound(hr24toInt(e || '8:00'), 0, 12 * 60 - 1));
     }
     get latest() {
         return this._latest;
     }
     set latest(e) {
-        this._latest = intTo24hr(bound(hr24toInt(e), 12 * 60, 24 * 60 - 1));
+        this._latest = intTo24hr(bound(hr24toInt(e || '22:00'), 12 * 60, 24 * 60 - 1));
     }
 
-    // when doing serialization, we only record the enumerable properties
+    // when doing serialization, we only record the enumerable properties, excluding the getters
     fromJSON(obj: Partial<DisplayState>) {
         const defaultVal = this.getDefault();
         for (const key in defaultVal) {

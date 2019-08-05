@@ -212,9 +212,44 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             sortBits,
             initials,
             // convert bool to 0 or 1
-            obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x) ),
+            obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x)),
         ] as const;
     }
+
+    public static decompressJSON(obj: ReturnType<typeof FilterStore.compressJSON>) {
+        // tslint:disable-next-line: no-shadowed-variable
+        const filter = new FilterStore();
+        const [filterBits, sortBits, initials, slots] = obj;
+
+        // get allowClosed, allowWaitlist, mode from binary
+        filter.allowClosed = Boolean(filterBits & 1);
+        filter.allowWaitlist = Boolean(filterBits & 2);
+        filter.sortOptions.mode = +Boolean(filterBits & 4); // convert to 0 or 1
+
+        // decode time slots
+        filter.timeSlots = slots.map(slot => slot.map((x, i) => i < 7 ? Boolean(x) : x) as TimeSlot);
+
+        // decode the enable and reverse info of sort
+        const sortBy = filter.sortOptions.sortBy;
+        const sortCopy = [];
+        // loop through the ascii initials and match to the object name
+        let mask = 1;
+        for (const initial of initials) {
+            const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
+
+            // if matched, decode the enabled and reverse info from the binary
+            sortOpt.enabled = Boolean(sortBits & mask);
+            mask <<= 1;
+
+            sortOpt.reverse = Boolean(sortBits & mask);
+            mask <<= 1;
+
+            sortCopy.push(sortOpt);
+        }
+        filter.sortOptions.sortBy = sortCopy;
+        return filter.toJSON();
+    }
+
     timeSlots: TimeSlot[] = [];
     allowWaitlist = true;
     allowClosed = true;

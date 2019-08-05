@@ -74,6 +74,26 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
         result[0] = display_bit;
         return result;
     }
+    public static decompressJSON(obj: DisplayJSONShort) {
+        const displaySettings = new Display();
+
+        // get and sort keys in displaySettings
+        const keys = Object.keys(displaySettings).sort();
+
+        // if the key name contains '_' then it corresponds to a certain index in data
+        // else it is in the binary
+        let counter = 1;
+        let display_bit: number = obj[0];
+        for (const key of keys) {
+            if (key.includes('_')) {
+                displaySettings[key] = obj[counter++];
+            } else {
+                displaySettings[key] = display_bit % 2 === 1 ? true : false;
+                display_bit = Math.floor(display_bit / 2);
+            }
+        }
+        return displaySettings;
+    }
     [x: string]: any;
     showTime = false;
     showRoom = true;

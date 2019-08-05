@@ -1,4 +1,4 @@
-import {convertJsonToArray} from '@/store';
+import { compressJSON } from '@/store';
 import empty from './test_data/empty_schedule.json';
 import mySchedule2019Fall from './test_data/mySchedule2019Fall.json';
 import test_filter from './test_data/test_filter.json';
@@ -6,7 +6,7 @@ import test_filter from './test_data/test_filter.json';
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty);
-        const urlCompressed = JSON.parse(convertJsonToArray(test1));
+        const urlCompressed: any = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -61,7 +61,7 @@ describe('url convertJsonToArray test', () => {
 
     it('mySchedule2019Fall', () => {
         const test1 = JSON.stringify(mySchedule2019Fall);
-        const urlCompressed = JSON.parse(convertJsonToArray(test1));
+        const urlCompressed: any = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -118,7 +118,7 @@ describe('url convertJsonToArray test', () => {
 
     it('test_filter', () => {
         const test1 = JSON.stringify(test_filter);
-        const urlCompressed = JSON.parse(convertJsonToArray(test1));
+        const urlCompressed: any = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);

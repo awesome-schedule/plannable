@@ -379,7 +379,7 @@ export default class Store extends Vue {
  * @author Zichao Hu
  * @param jsonString
  */
-export const convertJsonToArray = (jsonString: string) => {
+export function convertJsonToArray(jsonString: string) {
     /*
         result =>
         name
@@ -404,11 +404,11 @@ export const convertJsonToArray = (jsonString: string) => {
 
     // get values from the json object
     const json: SemesterStorage = JSON.parse(jsonString);
+    // tslint:disable-next-line: no-shadowed-variable
     const { name, modified, currentSemester, display, filter, schedule, palette } = json;
 
     // add first four value the the array
-    const result = [];
-    result.push(name, modified, currentSemester.id, currentSemester.name);
+    const result: any[] = [name, modified, currentSemester.id, currentSemester.name];
 
     // compressing display
     // get all keys in the display object and sort them
@@ -460,9 +460,8 @@ export const convertJsonToArray = (jsonString: string) => {
     // add schedule and palette objects to the array
     result.push(ScheduleStore.compressJSON(schedule));
     result.push(Palette.compressJSON(palette));
-    console.log(result);
     return JSON.stringify(result);
-};
+}
 
 /**
  * @author Zichao Hu, Hanzhi Zhou

@@ -26,13 +26,6 @@
         </div>
         <ul class="list-group list-group-flush mx-1">
             <li class="list-group-item">
-                <input
-                    v-model="fileName"
-                    class="form-control"
-                    placeholder="filename"
-                    title="file name"
-                    type="text"
-                />
                 <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
                     <button class="btn btn-outline-dark px-0" @click="saveToJson()">
                         Export JSON

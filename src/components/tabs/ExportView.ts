@@ -1,7 +1,7 @@
 /**
  * @module components/tabs
  */
-import Store, { SemesterStorage,convertJsonToArray } from '@/store';
+import Store, { SemesterStorage, convertJsonToArray } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
@@ -18,7 +18,6 @@ export default class ExportView extends Store {
         const credential = localStorage.getItem('credential');
         return username && credential;
     }
-    fileName = 'schedule';
     newName: (string | null)[] = [];
 
     liHaoUpURL: string = 'http://localhost:8081/courses/api/save_plannable_profile';
@@ -99,11 +98,12 @@ export default class ExportView extends Store {
     }
     saveToJson() {
         if (!this.semester.currentSemester) return;
+        const { current } = this.profile;
         const json = localStorage.getItem(this.profile.current);
-        if (json) savePlain(json, (this.fileName || 'schedule') + '.json');
+        if (json) savePlain(json, current + '.json');
     }
     saveToIcal() {
-        savePlain(toICal(this.schedule.currentSchedule), (this.fileName || 'schedule') + '.ical');
+        savePlain(toICal(this.schedule.currentSchedule), this.profile.current + '.ical');
     }
     exportToURL() {
         if (!this.semester.currentSemester) return;

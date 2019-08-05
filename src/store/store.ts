@@ -390,10 +390,10 @@ export default class Store extends Vue {
         _numsearchResults
         _partialHeight
         binary: combineSections, enableFuzzy, enableLog, expandOnEntering, multiSelect,
-        showClasslistTitle, showInstructor, showRoom, showTime, standard
+        showClasslistTitle, showInstructor, showRoom, showTime, showWeekend, standard
         timeSlots
         binary: allowClosed, Waitlist, mode
-        sortOptions: name_initial ascii code :[c,d,l,n,v,I] --> could change in order
+        sortOptions: name_initial ascii code :[c,d,l,n,s,v,I] --> could change in order
         binary: enabled/reverse
         schedule
         palette

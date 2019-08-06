@@ -55,11 +55,12 @@ export type DisplayJSONShort = [number, ...any[]];
 export class Display implements StoreModule<DisplayState, DisplayState> {
     public static compressJSON(obj: DisplayState) {
         // get all keys in the display object and sort them
-        const display_keys = Object.keys(obj).sort();
-
+        
         // display_keys: "combineSections","enableFuzzy","enableLog","expandOnEntering","multiSelect",
         // "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
         
+        const display_keys = Object.keys(obj).sort();
+
         const result: DisplayJSONShort = [0];
         console.log(display_keys);
         // convert to binary, the first key => the first/rightmost bit

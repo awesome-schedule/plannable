@@ -3,9 +3,6 @@ import empty from './test_data/empty_schedule.json';
 import mySchedule2019Fall from './test_data/mySchedule2019Fall.json';
 import test_filter from './test_data/test_filter.json';
 
-// display_keys: "combineSections","enableFuzzy","enableLog","expandOnEntering","multiSelect",
-// "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
-
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty);
@@ -19,47 +16,52 @@ describe('url convertJsonToArray test', () => {
         const s = 's'.charCodeAt(0);
         const v = 'v'.charCodeAt(0);
         const I = 'I'.charCodeAt(0);
+        console.warn(urlCompressed);
 
         // display
+        const display_test = urlCompressed[4];
+
+        // binary
+        expect(display_test[0]).toEqual(753);
+
         // _earliest
-        expect(urlCompressed[4]).toEqual('08:00');
+        expect(display_test[1]).toEqual('08:00');
 
         // _fullHeight
-        expect(urlCompressed[5]).toEqual(40);
+        expect(display_test[2]).toEqual(40);
 
         // _latest
-        expect(urlCompressed[6]).toEqual('19:00');
+        expect(display_test[3]).toEqual('19:00');
 
         // _maxNumSchedules
-        expect(urlCompressed[7]).toEqual(100000);
+        expect(display_test[4]).toEqual(100000);
 
         // _numSearchResults
-        expect(urlCompressed[8]).toEqual(6);
+        expect(display_test[5]).toEqual(6);
 
         // _partialHeight
-        expect(urlCompressed[9]).toEqual(25);
-
-        // binary
-        expect(urlCompressed[10]).toEqual(753);
+        expect(display_test[6]).toEqual(25);
 
         // filter
-        // time slots
-        expect(urlCompressed[11]).toEqual([]);
+        const filter_test = urlCompressed[5];
 
         // binary: allowWaitlist, etc
-        expect(urlCompressed[12]).toEqual(7);
+        expect(filter_test[0]).toEqual(7);
+        // binary
+        expect(filter_test[1]).toEqual(5);
 
         // name initials ascii
-        expect(urlCompressed[13]).toEqual(d);
-        expect(urlCompressed[14]).toEqual(v);
-        expect(urlCompressed[15]).toEqual(c);
-        expect(urlCompressed[16]).toEqual(l);
-        expect(urlCompressed[17]).toEqual(n);
-        expect(urlCompressed[18]).toEqual(s);
-        expect(urlCompressed[19]).toEqual(I);
+        const ascii_test = filter_test[2];
+        expect(ascii_test[0]).toEqual(d);
+        expect(ascii_test[1]).toEqual(v);
+        expect(ascii_test[2]).toEqual(c);
+        expect(ascii_test[3]).toEqual(l);
+        expect(ascii_test[4]).toEqual(n);
+        expect(ascii_test[5]).toEqual(s);
+        expect(ascii_test[6]).toEqual(I);
 
-        // binary
-        expect(urlCompressed[20]).toEqual(5);
+        // time slots
+        expect(filter_test[3]).toEqual([]);
     });
 
     it('mySchedule2019Fall', () => {
@@ -76,47 +78,51 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
-
+        console.warn('fal2019', urlCompressed);
         // display
+        const display_test = urlCompressed[4];
+
+        // binary
+        // expect(display_test[0]).toEqual(1265);
+
         // _earliest
-        expect(urlCompressed[4]).toEqual('09:00');
+        expect(display_test[1]).toEqual('09:00');
 
         // _fullHeight
-        expect(urlCompressed[5]).toEqual(100);
+        expect(display_test[2]).toEqual(100);
 
         // _latest
-        expect(urlCompressed[6]).toEqual('19:00');
+        expect(display_test[3]).toEqual('19:00');
 
         // _maxNumSchedules
-        expect(urlCompressed[7]).toEqual(5000);
+        expect(display_test[4]).toEqual(5000);
 
         // _numSearchResults
-        expect(urlCompressed[8]).toEqual(10);
+        expect(display_test[5]).toEqual(10);
 
         // _partialHeight
-        expect(urlCompressed[9]).toEqual(25);
-
-        // binary
-        expect(urlCompressed[10]).toEqual(1265);
+        expect(display_test[6]).toEqual(25);
 
         // filter
-        // time slots
-        expect(urlCompressed[11]).toEqual([]);
+        const filter_test = urlCompressed[5];
 
         // binary: allowWaitlist, etc
-        expect(urlCompressed[12]).toEqual(6);
+        expect(filter_test[0]).toEqual(6);
+        // binary
+        expect(filter_test[1]).toEqual(8465);
 
         // name initials ascii
-        expect(urlCompressed[13]).toEqual(d);
-        expect(urlCompressed[14]).toEqual(v);
-        expect(urlCompressed[15]).toEqual(c);
-        expect(urlCompressed[16]).toEqual(l);
-        expect(urlCompressed[17]).toEqual(n);
-        expect(urlCompressed[18]).toEqual(s);
-        expect(urlCompressed[19]).toEqual(I);
+        const ascii_test = filter_test[2];
+        expect(ascii_test[0]).toEqual(d);
+        expect(ascii_test[1]).toEqual(v);
+        expect(ascii_test[2]).toEqual(c);
+        expect(ascii_test[3]).toEqual(l);
+        expect(ascii_test[4]).toEqual(n);
+        expect(ascii_test[5]).toEqual(s);
+        expect(ascii_test[6]).toEqual(I);
 
-        // binary
-        expect(urlCompressed[20]).toEqual(8465);
+        // time slots
+        expect(filter_test[3]).toEqual([]);
     });
 
     it('test_filter', () => {
@@ -133,46 +139,52 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('test_filter');
+        console.warn('test_filter', urlCompressed);
 
         // display
+        const display_test = urlCompressed[4];
+
+        // binary
+        expect(display_test[0]).toEqual(1265);
+
         // _earliest
-        expect(urlCompressed[4]).toEqual('09:00');
+        expect(display_test[1]).toEqual('09:00');
 
         // _fullHeight
-        expect(urlCompressed[5]).toEqual(100);
+        expect(display_test[2]).toEqual(100);
 
         // _latest
-        expect(urlCompressed[6]).toEqual('19:00');
+        expect(display_test[3]).toEqual('19:00');
 
         // _maxNumSchedules
-        expect(urlCompressed[7]).toEqual(5000);
+        expect(display_test[4]).toEqual(5000);
 
         // _numSearchResults
-        expect(urlCompressed[8]).toEqual(10);
+        expect(display_test[5]).toEqual(10);
 
         // _partialHeight
-        expect(urlCompressed[9]).toEqual(25);
-
-        // binary
-        expect(urlCompressed[10]).toEqual(1265);
+        expect(display_test[6]).toEqual(25);
 
         // filter
-        // time slots
-        expect(urlCompressed[11]).toEqual([]);
+        const filter_test = urlCompressed[5];
 
         // binary: allowWaitlist, etc
-        expect(urlCompressed[12]).toEqual(6);
-
-        // name initials ascii
-        expect(urlCompressed[13]).toEqual(I);
-        expect(urlCompressed[14]).toEqual(l);
-        expect(urlCompressed[15]).toEqual(v);
-        expect(urlCompressed[16]).toEqual(d);
-        expect(urlCompressed[17]).toEqual(n);
-        expect(urlCompressed[18]).toEqual(s);
-        expect(urlCompressed[19]).toEqual(c);
+        expect(filter_test[0]).toEqual(6);
 
         // binary
-        expect(urlCompressed[20]).toEqual(10275);
+        expect(filter_test[1]).toEqual(10275);
+
+        // name initials ascii
+        const ascii_test = filter_test[2];
+        expect(ascii_test[0]).toEqual(I);
+        expect(ascii_test[1]).toEqual(l);
+        expect(ascii_test[2]).toEqual(v);
+        expect(ascii_test[3]).toEqual(d);
+        expect(ascii_test[4]).toEqual(n);
+        expect(ascii_test[5]).toEqual(s);
+        expect(ascii_test[6]).toEqual(c);
+
+        // time slots
+        expect(filter_test[3]).toEqual([]);
     });
 });

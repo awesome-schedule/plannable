@@ -2,7 +2,12 @@ import { compressJSON } from '@/store';
 import empty from './test_data/empty_schedule.json';
 import mySchedule2019Fall from './test_data/mySchedule2019Fall.json';
 import test_filter from './test_data/test_filter.json';
+import miscellaneousTest1 from './test_data/miscellaneousTest1.json';
 
+// display_keys: "combineSections","enableFuzzy","enableLog","expandOnEntering","multiSelect",
+// "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
+
+// filter: allowClosed, allowWaitlist, mode from binary
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty);
@@ -186,5 +191,108 @@ describe('url convertJsonToArray test', () => {
 
         // time slots
         expect(filter_test[3]).toEqual([]);
+    });
+
+    it('miscellaneousTest1', () => {
+        const test1 = JSON.stringify(miscellaneousTest1);
+        const urlCompressed: any = compressJSON(test1);
+
+        // get filter name initial asciis
+        const c = 'c'.charCodeAt(0);
+        const d = 'd'.charCodeAt(0);
+        const l = 'l'.charCodeAt(0);
+        const n = 'n'.charCodeAt(0);
+        const s = 's'.charCodeAt(0);
+        const v = 'v'.charCodeAt(0);
+        const I = 'I'.charCodeAt(0);
+
+        expect(urlCompressed[0]).toEqual('miscellaneousTest1');
+        console.warn('miscellaneousTest1', urlCompressed);
+
+        // display
+        const display_test = urlCompressed[4];
+
+        // binary
+        expect(display_test[0]).toEqual(1023);
+
+        // _earliest
+        expect(display_test[1]).toEqual('10:00');
+
+        // _fullHeight
+        expect(display_test[2]).toEqual(40);
+
+        // _latest
+        expect(display_test[3]).toEqual('21:00');
+
+        // _maxNumSchedules
+        expect(display_test[4]).toEqual(100000);
+
+        // _numSearchResults
+        expect(display_test[5]).toEqual(6);
+
+        // _partialHeight
+        expect(display_test[6]).toEqual(25);
+
+        // filter
+        const filter_test = urlCompressed[5];
+
+        // binary: allowWaitlist, etc
+        expect(filter_test[0]).toEqual(3);
+
+        // binary
+        expect(filter_test[1]).toEqual(10942);
+
+        // name initials ascii
+        const ascii_test = filter_test[2];
+        expect(ascii_test[0]).toEqual(I);
+        expect(ascii_test[1]).toEqual(d);
+        expect(ascii_test[2]).toEqual(v);
+        expect(ascii_test[3]).toEqual(s);
+        expect(ascii_test[4]).toEqual(c);
+        expect(ascii_test[5]).toEqual(l);
+        expect(ascii_test[6]).toEqual(n);
+
+        // time slots
+        expect(filter_test[3]).toEqual([]);
+
+        // schedule
+        const schedule_test = urlCompressed[6];
+
+        // currentScheduleIndex
+        expect(schedule_test[0]).toEqual(6);
+
+        // proposedScheduleIndex
+        expect(schedule_test[1]).toEqual(2);
+
+        // cpIndex
+        expect(schedule_test[2]).toEqual(1);
+
+        // generated: Boolean(obj[3]),
+        expect(schedule_test[3]).toEqual(0);
+
+        // schedule length
+        const schedules = schedule_test[4];
+        console.warn('schedules', schedules);
+        expect(schedules.length).toEqual(3);
+
+        // default length
+        expect(schedules[0].length).toEqual(2);
+
+        // schedule[0] length
+        const schedule0 = schedules[0][0];
+        expect(Object.keys(schedule0).length).toEqual(5);
+
+        // schedule[1] length
+        const schedule1 = schedules[1][0];
+        expect(Object.keys(schedule1).length).toEqual(2);
+
+        // schedule[1] length
+        const schedule2 = schedules[2][0];
+        expect(Object.keys(schedule2).length).toEqual(1);
+
+        // palette
+        const palette_test = urlCompressed[7];
+        expect(Object.keys(palette_test).length).toEqual(5)
+
     });
 });

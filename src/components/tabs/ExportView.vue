@@ -85,7 +85,7 @@
                             v-model="newName[idx]"
                             class="form-control form-control-sm"
                             type="text"
-                            @keyup.enter="finishEdit(name, idx)"
+                            @keyup.enter="renameProfile(name, idx)"
                             @keyup.esc="$set(newName, idx, null)"
                         />
                     </div>
@@ -108,7 +108,7 @@
                             v-else
                             class="fas fa-check ml-1 click-icon"
                             title="confirm renaming"
-                            @click="finishEdit(name, idx)"
+                            @click="renameProfile(name, idx)"
                         ></i>
                         <i
                             v-if="profile.profiles.length > 1"
@@ -119,7 +119,8 @@
                         <i
                             v-if="canSync"
                             class="fas fa-upload ml-1 click-icon"
-                            @click="uploadProfile(name).then(fetchRemoteProfiles)"
+                            title="upload this profile to remote"
+                            @click="uploadProfile(name)"
                         ></i>
                     </div>
                 </div>
@@ -127,7 +128,7 @@
         </ul>
         <template v-if="canSync">
             <div class="btn bg-info nav-btn mt-2">
-                Remote Profiles
+                Remote Profiles <span class="badge badge-primary">Beta</span>
             </div>
             <div class="mx-4 my-2 text-center">
                 Upload URL: <br />
@@ -142,13 +143,13 @@
             </div>
             <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
                 <li
-                    v-for="data in remoteProfiles"
+                    v-for="(data, idx) in remoteProfiles"
                     :key="data.name"
                     class="list-group-item list-group-item-action pl-3 pr-2"
                 >
                     <div class="form-row no-gutters justify-content-between">
                         <div class="col-sm-auto mr-auto" style="cursor: pointer">
-                            <span>
+                            <span v-if="remoteNewName[idx] === null">
                                 <span>{{ data.name }}</span> <br />
                                 <small class="text-muted">{{ data.currentSemester.name }} </small>
                                 <br />
@@ -157,11 +158,36 @@
                                 </small>
                                 <br />
                             </span>
+                            <input
+                                v-else
+                                v-model="remoteNewName[idx]"
+                                class="form-control form-control-sm"
+                                type="text"
+                                @keyup.enter="renameRemote(data.name, idx)"
+                                @keyup.esc="$set(remoteNewName, idx, null)"
+                            />
                         </div>
                         <div class="col-sm-auto text-right" style="font-size: 16px">
                             <i
+                                v-if="remoteNewName[idx] === null"
+                                class="fas fa-edit click-icon"
+                                title="rename this profile"
+                                @click="$set(remoteNewName, idx, data.name)"
+                            ></i>
+                            <i
+                                v-else
+                                class="fas fa-check ml-1 click-icon"
+                                title="confirm renaming"
+                                @click="renameRemote(data.name, idx)"
+                            ></i>
+                            <i
+                                class="fa fa-times ml-1 click-icon"
+                                title="delete this profile"
+                                @click="deleteRemote(data.name, idx)"
+                            ></i>
+                            <i
                                 class="fa fa-download ml-1 click-icon"
-                                title="Download this profile"
+                                title="download this profile"
                                 @click="downloadProfile(data)"
                             ></i>
                         </div>

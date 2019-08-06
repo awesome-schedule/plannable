@@ -1,5 +1,5 @@
 <template>
-    <div class="w-100" @change="saveStatus()">
+    <div id="app" class="w-100" @change="saveStatus()">
         <version-modal :version="version" @ref_note="refreshNote()"></version-modal>
         <course-modal :course="modal.course" :match="modal.match"></course-modal>
         <section-modal

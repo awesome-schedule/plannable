@@ -19,10 +19,11 @@ export default class ExportView extends Store {
         return username && credential;
     }
     newName: (string | null)[] = [];
+    remoteNewName: (string | null)[] = [];
 
-    liHaoUpURL: string = 'http://localhost:8081/courses/api/save_plannable_profile';
-    liHaoDownURL: string = 'http://localhost:8081/courses/api/get_plannable_profiles';
-    liHaoEditURL: string = 'http://localhost:8081/courses/api/edit_plannable_profiles';
+    liHaoUpURL: string = 'http://localhost:7000/courses/api/save_plannable_profile';
+    liHaoDownURL: string = 'http://localhost:7000/courses/api/get_plannable_profile';
+    liHaoEditURL: string = 'http://localhost:7000/courses/api/edit_plannable_profile';
 
     remoteProfiles: SemesterStorage[] = [];
 
@@ -36,6 +37,7 @@ export default class ExportView extends Store {
             username,
             credential
         })).data.map((s: string) => JSON.parse(s));
+        this.remoteNewName = this.remoteProfiles.map(() => null);
     }
     /**
      * get the meta data of a profile
@@ -120,23 +122,36 @@ export default class ExportView extends Store {
 
     deleteProfile(name: string, idx: number) {
         if (confirm(`Are you sure to delete ${name}?`)) {
-            this.newName.splice(idx, 1);
+            this.newName.pop();
             const prof = this.profile.deleteProfile(name, idx);
-            if (
-                this.canSync &&
-                this.remoteProfiles.find(p => p.name === name) &&
-                confirm(`Also delete the remote profile ${name}`)
-            ) {
-                const username = localStorage.getItem('username')!,
-                    credential = localStorage.getItem('credential');
-                axios.post(this.liHaoEditURL, {
-                    username,
-                    credential,
-                    action: 'delete',
-                    name
-                });
+            if (this.canSync) {
+                const rIdx = this.remoteProfiles.findIndex(p => p.name === name);
+                if (rIdx !== -1)
+                    this.deleteRemote(name, rIdx, `Also delete the remote profile ${name}`);
             }
+
+            // if the deleted profile is the current profile, reload the newly selected current profile
             if (prof) this.loadProfile();
+        }
+    }
+    /**
+     * delete profile from remote
+     * @param name
+     * @param msg optional confirmation msg
+     */
+    async deleteRemote(name: string, idx: number, msg?: string) {
+        if (!msg) msg = `Are you sure to delete the remote profile ${name}?`;
+        if (confirm(msg)) {
+            const username = localStorage.getItem('username'),
+                credential = localStorage.getItem('credential');
+            await axios.post(this.liHaoEditURL, {
+                username,
+                credential,
+                action: 'delete',
+                name
+            });
+            this.remoteProfiles.splice(idx, 1);
+            this.remoteNewName.pop();
         }
     }
     selectProfile(profileName: string) {
@@ -147,15 +162,15 @@ export default class ExportView extends Store {
         this.loadProfile();
         this.$forceUpdate();
     }
-    finishEdit(oldName: string, idx: number) {
+    renameProfile(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);
         if (!raw) return;
 
         const newName = this.newName[idx];
         if (!newName) return this.$set(this.newName, idx, null);
         if (newName !== oldName) {
-            const prevIdx = this.profile.profiles.findIndex(n => n === newName);
-            if (prevIdx !== -1) return this.noti.error('Duplicated name!');
+            if (this.profile.profiles.find(n => n === newName))
+                return this.noti.error('Duplicated name!');
             this.profile.renameProfile(idx, oldName, newName, raw);
 
             // find the remote profile corresponding to the profile to be renamed
@@ -163,25 +178,36 @@ export default class ExportView extends Store {
                 this.canSync &&
                 this.remoteProfiles.find(p => p.name === oldName) &&
                 confirm(`Also rename the remote profile ${oldName} to ${newName}`)
-            ) {
-                const username = localStorage.getItem('username')!,
-                    credential = localStorage.getItem('credential');
-                axios.post(this.liHaoEditURL, {
-                    username,
-                    credential,
-                    action: 'rename',
-                    oldName,
-                    newName
-                });
-            }
+            )
+                this.renameRemote(oldName, idx, newName);
         }
         this.$set(this.newName, idx, null);
+    }
+    async renameRemote(oldName: string, idx: number, newName?: string | null) {
+        if (!newName) {
+            newName = this.remoteNewName[idx];
+            if (!newName) return this.$set(this.remoteNewName, idx, null);
+            if (oldName === newName) return this.$set(this.remoteNewName, idx, null);
+            if (this.remoteProfiles.find(p => p.name === newName))
+                return this.noti.error('Duplicated name!');
+        }
+        const username = localStorage.getItem('username'),
+            credential = localStorage.getItem('credential');
+        await axios.post(this.liHaoEditURL, {
+            username,
+            credential,
+            action: 'rename',
+            oldName,
+            newName
+        });
+        this.remoteProfiles[idx].name = newName;
+        this.$set(this.remoteNewName, idx, null);
     }
     print() {
         window.print();
     }
 
-    uploadProfile(name: string) {
+    async uploadProfile(name: string) {
         const local = localStorage.getItem(name);
         if (!local) return Promise.reject('No local profile present!');
 
@@ -196,33 +222,23 @@ export default class ExportView extends Store {
                 return Promise.reject('Cancelled');
         }
 
-        return axios.post(this.liHaoUpURL, {
+        await axios.post(this.liHaoUpURL, {
             username,
             credential,
             name,
             profile: local
         });
+        this.remoteProfiles.push(JSON.parse(local));
     }
 
     downloadProfile(profile: SemesterStorage) {
         const local = localStorage.getItem(profile.name);
         if (local) {
-            const t1 = new Date(profile.modified).getTime();
-            const t2 = new Date(JSON.parse(local).modified).getTime();
-
-            // local is newer than remote
-            if (t1 < t2) {
-                if (
-                    !confirm(
-                        `Your local profile ${
-                            profile.name
-                        } seems newer than its corresponding remote profile. Confirm overwriting?`
-                    )
-                )
-                    return;
-            }
+            // const t1 = new Date(profile.modified).getTime();
+            // const t2 = new Date(JSON.parse(local).modified).getTime();
+            if (!confirm(`Overwrite your local profile with remote profile?`)) return;
             localStorage.setItem(profile.name, JSON.stringify(profile));
-            this.$forceUpdate();
+            this.$forceUpdate(); // todo
         } else {
             this.profile.addProfile(JSON.stringify(profile), profile.name, false);
             this.newName.push(null);

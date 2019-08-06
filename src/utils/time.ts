@@ -6,7 +6,7 @@
 /**
  *
  */
-import { TimeArray } from '../algorithm';
+import { TimeArray, MeetingDate } from '../algorithm';
 import { Day, dayToInt } from '@/models/Meta';
 /**
  * @author Hanzhi Zhou
@@ -130,7 +130,7 @@ export function checkTimeConflict(
  * parse `08/27/2019 - 12/17/2019` style dates to a tuple of numbers
  * @param date
  */
-export function parseDate(date: string): Float64Array | undefined {
+export function parseDate(date: string): MeetingDate | undefined {
     const [start, end] = date.split(' - ');
     if (!start || !end) return;
     // start month / start day / start year
@@ -138,10 +138,11 @@ export function parseDate(date: string): Float64Array | undefined {
     const startDate = new Date(+sy, +sm - 1, +sd);
     const [em, ed, ey] = end.split('/');
     const endDate = new Date(+ey, +em - 1, +ed);
-    const arr = new Float64Array(2);
-    arr[0] = startDate.getTime();
-    arr[1] = endDate.getTime();
-    return arr;
+    // const arr = new Float64Array(2);
+    // arr[0] = startDate.getTime();
+    // arr[1] = endDate.getTime();
+    // return arr;
+    return [startDate.getTime(), endDate.getTime()]
 }
 
 /**

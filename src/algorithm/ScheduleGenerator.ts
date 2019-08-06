@@ -46,7 +46,7 @@ import { NotiMsg } from '@/store/notification';
  * ```
  */
 export type TimeArray = Int16Array;
-export type MeetingDate = Float64Array;
+export type MeetingDate = Float64Array | [number, number];
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -64,7 +64,7 @@ export type MeetingDate = Float64Array;
  * [1563863108659, 1574231108659]]
  * ```
  */
-export type RawAlgoCourse = [string, number[], TimeArray, Int16Array];
+export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -129,9 +129,10 @@ class ScheduleGenerator {
                 // but rooms..., well this is a compromise
                 const temp = parseDate(sections[0].dates);
                 if (!temp) continue;
-                const date = new Int16Array(2);
-                date[0] = temp[0] / (86400*1000);
-                date[1] = temp[1] / (86400*1000);
+                const date = temp;
+                // const date = new Int16Array(2);
+                // date[0] = temp[0] / (86400*1000);
+                // date[1] = temp[1] / (86400*1000);
 
                 const blocksArray = sections[0].getTimeRoom();
                 if (!blocksArray) continue;
@@ -166,30 +167,30 @@ class ScheduleGenerator {
         // note: this makes the algorithm deterministic
         classList.sort((a, b) => a.length - b.length);
 
-        let total = 0;
-        for (const sections of classList) {
-            for (const sec of sections) {
-                total += sec[2].length * 2;
-                total += 4;
-            }
-        }
-        const buffer = new ArrayBuffer(total);
-        total = 0;
-        for (const sections of classList) {
-            for (const sec of sections) {
-                const oldArr = sec[2];
-                const tLen = oldArr.length;
-                const newArr = new Int16Array(buffer, total, tLen);
-                newArr.set(oldArr);
-                sec[2] = newArr;
-                total += tLen * 2;
+        // let total = 0;
+        // for (const sections of classList) {
+        //     for (const sec of sections) {
+        //         total += sec[2].length * 2;
+        //         total += 4;
+        //     }
+        // }
+        // const buffer = new ArrayBuffer(total);
+        // total = 0;
+        // for (const sections of classList) {
+        //     for (const sec of sections) {
+        //         const oldArr = sec[2];
+        //         const tLen = oldArr.length;
+        //         const newArr = new Int16Array(buffer, total, tLen);
+        //         newArr.set(oldArr);
+        //         sec[2] = newArr;
+        //         total += tLen * 2;
 
-                const dateArr = new Int16Array(buffer, total, 2);
-                dateArr.set(sec[3]);
-                sec[3] = dateArr;
-                total += 4;
-            }
-        }
+        //         const dateArr = new Int16Array(buffer, total, 2);
+        //         dateArr.set(sec[3]);
+        //         sec[3] = dateArr;
+        //         total += 4;
+        //     }
+        // }
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');

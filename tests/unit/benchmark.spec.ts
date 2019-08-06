@@ -40,13 +40,14 @@ test('algorithm benchmark', () => {
     // sort.sortBy[4].enabled = true;
 
     let total = 0;
-    for (let i = 0; i < 5; i++) {
+    const num = 6;
+    for (let i = 0; i < num; i++) {
         const start = new Date().getTime();
         const { payload: result } = generator.getSchedules(schedule, false);
-        expect(result!.empty()).toBeFalsy();
         const time = (new Date().getTime() - start) / 1000;
+        expect(result!.empty()).toBeFalsy();
         total += time;
         console.info('run', i + 1, time + 's');
     }
-    console.info('Average', total / 5 + 's');
+    console.info('Average', total / num + 's');
 });

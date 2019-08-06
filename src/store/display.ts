@@ -62,13 +62,13 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
         let bits = 0;
         let counter = 1;
         for (const key of keys) {
-            if (display[key] === true) {
+            if (obj[key] === true) {
                 bits |= counter;
                 counter <<= 1;
-            } else if (display[key] === false) {
+            } else if (obj[key] === false) {
                 counter <<= 1;
             } else {
-                result.push(display[key]);
+                result.push(obj[key]);
             }
         }
         result[0] = bits;

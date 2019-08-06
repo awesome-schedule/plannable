@@ -64,7 +64,7 @@ export type MeetingDate = Float64Array;
  * [1563863108659, 1574231108659]]
  * ```
  */
-export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];
+export type RawAlgoCourse = [string, number[], TimeArray, Int16Array];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -100,7 +100,7 @@ class ScheduleGenerator {
      *
      * @see [[ScheduleEvaluator]]
      */
-    public getSchedules(schedule: Schedule): NotiMsg<ScheduleEvaluator> {
+    public getSchedules(schedule: Schedule, sort = true): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
 
         // convert events to TimeArrays so that we can easily check for time conflict
@@ -127,8 +127,11 @@ class ScheduleGenerator {
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
-                const date = parseDate(sections[0].dates);
-                if (!date) continue;
+                const temp = parseDate(sections[0].dates);
+                if (!temp) continue;
+                const date = new Int16Array(2);
+                date[0] = temp[0] / (86400*1000);
+                date[1] = temp[1] / (86400*1000);
 
                 const blocksArray = sections[0].getTimeRoom();
                 if (!blocksArray) continue;
@@ -167,9 +170,7 @@ class ScheduleGenerator {
         for (const sections of classList) {
             for (const sec of sections) {
                 total += sec[2].length * 2;
-                const mod = total % 8;
-                total += mod === 0 ? 0 : 8 - mod;
-                total += 16;
+                total += 4;
             }
         }
         const buffer = new ArrayBuffer(total);
@@ -183,13 +184,10 @@ class ScheduleGenerator {
                 sec[2] = newArr;
                 total += tLen * 2;
 
-                const mod = total % 8;
-                total += mod === 0 ? 0 : 8 - mod;
-
-                const dateArr = new Float64Array(buffer, total, 2);
+                const dateArr = new Int16Array(buffer, total, 2);
                 dateArr.set(sec[3]);
                 sec[3] = dateArr;
-                total += 16;
+                total += 4;
             }
         }
         console.timeEnd('algorithm bootstrapping');
@@ -209,7 +207,7 @@ class ScheduleGenerator {
 
         const size = evaluator.size();
         if (size > 0) {
-            evaluator.sort();
+            if (sort) evaluator.sort();
             return {
                 level: 'success',
                 msg: `${size} Schedules Generated!`,

@@ -3,6 +3,9 @@ import empty from './test_data/empty_schedule.json';
 import mySchedule2019Fall from './test_data/mySchedule2019Fall.json';
 import test_filter from './test_data/test_filter.json';
 
+// display_keys: "combineSections","enableFuzzy","enableLog","expandOnEntering","multiSelect",
+// "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
+
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty);

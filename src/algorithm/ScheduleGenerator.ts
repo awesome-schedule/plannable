@@ -46,8 +46,7 @@ import { NotiMsg } from '@/store/notification';
  * ```
  */
 export type TimeArray = Int16Array;
-
-export type MeetingDate = [number, number];
+export type MeetingDate = Float64Array;
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -163,6 +162,36 @@ class ScheduleGenerator {
         }
         // note: this makes the algorithm deterministic
         classList.sort((a, b) => a.length - b.length);
+
+        let total = 0;
+        for (const sections of classList) {
+            for (const sec of sections) {
+                total += sec[2].length * 2;
+                const mod = total % 8;
+                total += mod === 0 ? 0 : 8 - mod;
+                total += 16;
+            }
+        }
+        const buffer = new ArrayBuffer(total);
+        total = 0;
+        for (const sections of classList) {
+            for (const sec of sections) {
+                const oldArr = sec[2];
+                const tLen = oldArr.length;
+                const newArr = new Int16Array(buffer, total, tLen);
+                newArr.set(oldArr);
+                sec[2] = newArr;
+                total += tLen * 2;
+
+                const mod = total % 8;
+                total += mod === 0 ? 0 : 8 - mod;
+
+                const dateArr = new Float64Array(buffer, total, 2);
+                dateArr.set(sec[3]);
+                sec[3] = dateArr;
+                total += 16;
+            }
+        }
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');

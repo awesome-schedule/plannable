@@ -177,7 +177,7 @@ export default class ExportView extends Store {
             if (
                 this.canSync &&
                 this.remoteProfiles.find(p => p.name === oldName) &&
-                confirm(`Also rename the remote profile ${oldName} to ${newName}`)
+                confirm(`Also rename the remote profile ${oldName} to ${newName}?`)
             )
                 this.renameRemote(oldName, idx, newName);
         }
@@ -211,8 +211,8 @@ export default class ExportView extends Store {
         const local = localStorage.getItem(name);
         if (!local) return Promise.reject('No local profile present!');
 
-        const username = localStorage.getItem('username');
-        const credential = localStorage.getItem('credential');
+        const username = localStorage.getItem('username'),
+            credential = localStorage.getItem('credential');
 
         const remote = this.remoteProfiles.find(p => p.name === name);
         if (remote) {
@@ -230,7 +230,9 @@ export default class ExportView extends Store {
         });
         this.remoteProfiles.push(JSON.parse(local));
     }
-
+    /**
+     * save a remote profile to localStorage
+     */
     downloadProfile(profile: SemesterStorage) {
         const local = localStorage.getItem(profile.name);
         if (local) {

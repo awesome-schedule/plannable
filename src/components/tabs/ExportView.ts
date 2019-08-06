@@ -183,6 +183,12 @@ export default class ExportView extends Store {
         }
         this.$set(this.newName, idx, null);
     }
+    /**
+     * rename a remote profile
+     * @param oldName
+     * @param idx
+     * @param newName if not provided, use `remoteNewName[idx]`
+     */
     async renameRemote(oldName: string, idx: number, newName?: string | null) {
         if (!newName) {
             newName = this.remoteNewName[idx];
@@ -193,14 +199,21 @@ export default class ExportView extends Store {
         }
         const username = localStorage.getItem('username'),
             credential = localStorage.getItem('credential');
-        await axios.post(this.liHaoEditURL, {
-            username,
-            credential,
-            action: 'rename',
-            oldName,
-            newName
-        });
-        this.remoteProfiles[idx].name = newName;
+        const profile = this.remoteProfiles[idx];
+        profile.name = newName;
+        try {
+            await axios.post(this.liHaoEditURL, {
+                username,
+                credential,
+                action: 'rename',
+                oldName,
+                newName,
+                profile
+            });
+        } catch (err) {
+            this.noti.error(err.message);
+            profile.name = oldName;
+        }
         this.$set(this.remoteNewName, idx, null);
     }
     print() {

@@ -15,7 +15,7 @@ export class Palette implements StoreModule<PaletteState, PaletteState> {
     public static compressJSON(obj: PaletteState) {
         return obj.savedColors;
     }
-    public static decompressJSON(obj: { [x: string]: string }): PaletteState {
+    public static decompressJSON(obj: ReturnType<typeof Palette.compressJSON>) {
         return { savedColors: obj };
     }
     public savedColors: { [x: string]: string } = {};

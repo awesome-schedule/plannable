@@ -55,15 +55,15 @@ export type DisplayJSONShort = [number, ...any[]];
 export class Display implements StoreModule<DisplayState, DisplayState> {
     public static compressJSON(obj: DisplayState) {
         // get all keys in the display object and sort them
-        const display_keys = Object.keys(obj).sort();
+        const keys = Object.keys(obj).sort();
         const result: DisplayJSONShort = [0];
 
         // convert to binary, the first key => the first/rightmost bit
-        let display_bit = 0;
+        let bits = 0;
         let counter = 1;
-        for (const key of display_keys) {
+        for (const key of keys) {
             if (display[key] === true) {
-                display_bit |= counter;
+                bits |= counter;
                 counter <<= 1;
             } else if (display[key] === false) {
                 counter <<= 1;
@@ -71,7 +71,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
                 result.push(display[key]);
             }
         }
-        result[0] = display_bit;
+        result[0] = bits;
         return result;
     }
     public static decompressJSON(obj: DisplayJSONShort) {
@@ -82,14 +82,15 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
 
         // if the key name contains '_' then it corresponds to a certain index in data
         // else it is in the binary
-        let counter = 1;
-        let display_bit: number = obj[0];
+        let counter = 1,
+            mask = 1;
+        const bits = obj[0];
         for (const key of keys) {
-            if (key.includes('_')) {
+            if (key.startsWith('_')) {
                 displaySettings[key] = obj[counter++];
             } else {
-                displaySettings[key] = display_bit % 2 === 1 ? true : false;
-                display_bit = Math.floor(display_bit / 2);
+                displaySettings[key] = Boolean(bits & mask);
+                mask <<= 1;
             }
         }
         return displaySettings;

@@ -30,11 +30,6 @@ export interface ScheduleJSON {
     events: Event[];
 }
 
-export interface ScheduleJSONShort {
-    0: { [x: string]: [number, string][] | -1 };
-    1: EventJSON[];
-}
-
 export interface ScheduleOptions {
     multiSelect: boolean;
     combineSections: boolean;
@@ -70,7 +65,7 @@ export default class Schedule {
         return typeof x[0] === 'number';
     }
 
-    public static compressJSON(obj: ScheduleJSON): ScheduleJSONShort {
+    public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
         const shortAll: { [x: string]: SectionJSONShort[] | -1 } = {};
         for (const key in All) {
@@ -80,21 +75,21 @@ export default class Schedule {
                     ? sections
                     : (sections as SectionJSON[]).map(({ id, section }) => [id, section]);
         }
-        return [shortAll, events.map(e => Event.prototype.toJSONShort.call(e))];
+        return [shortAll, events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
 
-    public static decompressJSON(obj: ScheduleJSONShort): ScheduleJSON {
+    public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
         const All: { [x: string]: SectionJSON[] | -1 } = {};
-        obj[0] = obj[0] || {};
-        obj[1] = obj[1] || [];
-        for (const key in obj[0]) {
-            const entry = obj[0][key];
+        const shortAll = obj[0] || {},
+       events = obj[1] || [];
+        for (const key in shortAll) {
+            const entry = shortAll[key];
             All[key] =
                 entry instanceof Array ? entry.map(e => ({ id: e[0], section: e[1] })) : entry;
         }
         return {
             All,
-            events: obj[1].map(e => Event.fromJSONShort(e))
+            events: events.map(e => Event.fromJSONShort(e))
         };
     }
 

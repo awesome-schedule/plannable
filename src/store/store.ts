@@ -1,19 +1,21 @@
 /**
  * @module store
  */
+import lz from 'lz-string';
+
 import { Vue, Component } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import { CourseStatus } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import display, { DisplayState } from './display';
-import filter, { FilterStateJSON, TimeSlot } from './filter';
+import display, { DisplayState, Display } from './display';
+import filter, { FilterStateJSON, TimeSlot, FilterStore } from './filter';
 import modal from './modal';
 import noti from './notification';
-import palette, { PaletteState } from './palette';
+import palette, { PaletteState, Palette } from './palette';
 import profile from './profile';
-import schedule, { ScheduleStateJSON } from './schedule';
+import schedule, { ScheduleStateJSON, ScheduleStore } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
 import Expirable from '@/data/Expirable';
@@ -369,4 +371,54 @@ export default class Store extends Vue {
         await this.loadProfile();
         this.status.loading = false;
     }
+}
+
+/**
+ * See [[parseFromURL]]
+ * convert JSON string to tuple of tuples to reduce the num of chars
+ * @author Zichao Hu
+ * @param jsonString
+ */
+export function compressJSON(jsonString: string) {
+    const json: SemesterStorage = JSON.parse(jsonString);
+    // tslint:disable-next-line: no-shadowed-variable
+    const { name, modified, currentSemester, display, filter, schedule, palette } = json;
+
+    // add first four value the the array
+    return [
+        name,
+        modified,
+        currentSemester.id,
+        currentSemester.name,
+        Display.compressJSON(display),
+        FilterStore.compressJSON(filter),
+        ScheduleStore.compressJSON(schedule),
+        Palette.compressJSON(palette)
+    ] as const;
+}
+
+/**
+ * @author Zichao Hu, Hanzhi Zhou
+ * @see [[convertJsonToArray]]
+ * @param config
+ */
+export function parseFromURL(config: string) {
+    // get URL and convert to JSON
+    const data: ReturnType<typeof compressJSON> = JSON.parse(
+        lz.decompressFromEncodedURIComponent(config.trim())
+    );
+
+    // construct a JSON
+    const obj = {
+        name: data[0],
+        modified: data[1],
+        currentSemester: { id: data[2], name: data[3] },
+        display: Display.decompressJSON(data[4]),
+        filter: FilterStore.decompressJSON(data[5]),
+        schedule: ScheduleStore.decompressJSON(data[6]),
+        palette: Palette.decompressJSON(data[7])
+    };
+    console.log(obj);
+
+    return JSON.stringify(obj);
 }

@@ -7,7 +7,6 @@
 /**
  *
  */
-import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 import MainContent from './components/MainContent.vue';
 import axios from 'axios';
@@ -32,10 +31,8 @@ import DateSeparator from './components/DateSeparator.vue';
 import VersionModal from './components/VersionModal.vue';
 
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
-import Store from './store';
+import Store, { parseFromURL } from './store';
 import randomColor from 'randomcolor';
-import { ScheduleStore } from './store/schedule';
-import { Palette } from './store/palette';
 
 const version = '6.5';
 let note = 'loading release note...';
@@ -64,7 +61,9 @@ async function triggerVersionModal() {
  */
 async function releaseNote() {
     try {
-        const res = await axios.get('https://api.github.com/repos/awesome-schedule/plannable/releases');
+        const res = await axios.get(
+            'https://api.github.com/repos/awesome-schedule/plannable/releases'
+        );
 
         /**
          * Records the # of layers (of "ul") that this line is at.
@@ -73,54 +72,70 @@ async function releaseNote() {
          * in .map()'s parameter.
          */
         let ul = -1;
-        note = (res.data[0].body as string).split(/[\r\n]+/).map(x => {
-            /**
-             * Records the number corresponds to the largeness of header.
-             * It is 0 if this line is not a header.
-             */
-            let head = 0;
-            /**
-             * Records if this line is in an "ul" or not by checking if this line starts with "- ";
-             */
-            let li = 0;
-            let result = x.replace(/^(#*)(\s)/,
-                (s1: string, match1: string, match2: string) => {
-                    /**
-                     * Replace # to <h1> (and so on...) and set the variable "header", so that "header" can be used
-                     * to close this element (give it a "</h1>")
-                     */
-                    return match1.length === 0 ? match2 : ('<h' + (head = match1.length) + '>');
-                })
-                .replace(/^(\s*)-\s/, (s: string, match: string) => {
-                    /**
-                     * Replace "- Cats are the best" with "<li>Cats are the best</li>"
-                     * Set appropriate list group information
-                     */
-                    if (head !== 0) return match + '- ';
-                    let tag = '';
-                    if (match.length > ul) {
-                        tag = '<ul>';
-                    } else if (match.length < ul) {
-                        tag = '</ul>';
-                    }
-                    ul = match.length;
-                    li = 1;
-                    return `${tag}<li>`;
-                }).replace(/!\[([\w -]+)\]\(([\w -/:]+)\)/, (s, match1: string, match2) => {
-                    // convert md image to html
-                    return `<img src=${match2} alt=${match1}></img>`;
-                }).replace('<img', '<img class="img-fluid my-3" ')
-                + (head === 0 ? li === 0 ? /<\/?\w+>/.exec(x) ? '' : '<br />' : '</li>' : `</h${head}>`);
-            if (li === 0 && ul !== -1) {
-                // append "</ul>"s according to the variable "ul"
-                result = '</ul>'.repeat(ul / 4 + 1) + result;
-                ul = -1;
-            }
-            return result;
-        }).join(' ');
+        note = (res.data[0].body as string)
+            .split(/[\r\n]+/)
+            .map(x => {
+                /**
+                 * Records the number corresponds to the largeness of header.
+                 * It is 0 if this line is not a header.
+                 */
+                let head = 0;
+                /**
+                 * Records if this line is in an "ul" or not by checking if this line starts with "- ";
+                 */
+                let li = 0;
+                let result =
+                    x
+                        .replace(/^(#*)(\s)/, (s1: string, match1: string, match2: string) => {
+                            /**
+                             * Replace # to <h1> (and so on...) and set the variable "header",
+                             * so that "header" can be used
+                             * to close this element (give it a "</h1>")
+                             */
+                            return match1.length === 0
+                                ? match2
+                                : '<h' + (head = match1.length) + '>';
+                        })
+                        .replace(/^(\s*)-\s/, (s: string, match: string) => {
+                            /**
+                             * Replace "- Cats are the best" with "<li>Cats are the best</li>"
+                             * Set appropriate list group information
+                             */
+                            if (head !== 0) return match + '- ';
+                            let tag = '';
+                            if (match.length > ul) {
+                                tag = '<ul>';
+                            } else if (match.length < ul) {
+                                tag = '</ul>';
+                            }
+                            ul = match.length;
+                            li = 1;
+                            return `${tag}<li>`;
+                        })
+                        .replace(/!\[([\w -]+)\]\(([\w -/:]+)\)/, (s, match1: string, match2) => {
+                            // convert md image to html
+                            return `<img src=${match2} alt=${match1}></img>`;
+                        })
+                        .replace('<img', '<img class="img-fluid my-3" ') +
+                    (head === 0
+                        ? li === 0
+                            ? /<\/?\w+>/.exec(x)
+                                ? ''
+                                : '<br />'
+                            : '</li>'
+                        : `</h${head}>`);
+                if (li === 0 && ul !== -1) {
+                    // append "</ul>"s according to the variable "ul"
+                    result = '</ul>'.repeat(ul / 4 + 1) + result;
+                    ul = -1;
+                }
+                return result;
+            })
+            .join(' ');
     } catch (err) {
-        note = 'Failed to obtain release note.'
-            + ' See https://github.com/awesome-schedule/plannable/releases instead.';
+        note =
+            'Failed to obtain release note.' +
+            ' See https://github.com/awesome-schedule/plannable/releases instead.';
     }
 }
 
@@ -150,7 +165,6 @@ async function releaseNote() {
     }
 })
 export default class App extends Store {
-
     note: string = note;
 
     get sideBar() {
@@ -194,7 +208,7 @@ export default class App extends Store {
         const config = new URLSearchParams(window.location.search).get('config');
 
         if (config) {
-            const result = this.parseFromURL(config);
+            const result = parseFromURL(config);
             try {
                 this.profile.addProfile(result, 'url loaded');
                 await this.loadProfile(undefined, !checkVersion());
@@ -219,93 +233,6 @@ export default class App extends Store {
             localStorage.setItem('username', username);
             localStorage.setItem('credential', credential);
         }
-    }
-
-    /**
-     * @author Zichao Hu, Hanzhi Zhou
-     * @see [[ExportView.convertJsonToArray]]
-     * @param config
-     */
-    parseFromURL(config: string) {
-        // get URL and convert to JSON
-        const data: any[] = JSON.parse(lz.decompressFromEncodedURIComponent(config.trim()));
-
-        // get the default objects to contruct the valid JSON
-        const display = this.display.getDefault();
-        const filter = this.filter.getDefault();
-
-        // get the first four values
-        const name = data[0];
-        const modified = data[1];
-        const currentSemester = { id: data[2], name: data[3] };
-
-        // display
-        // get and sort keys in display
-        const display_keys = Object.keys(display).sort();
-
-        // if the key name contains '_' then it corresponds to a certain index in data
-        // else it is in the binary
-        let counter = 4;
-        let display_bit: number = data[10];
-        for (const key of display_keys) {
-            if (key.includes('_')) {
-                display[key] = data[counter];
-                counter += 1;
-            } else {
-                display[key] = display_bit % 2 === 1 ? true : false;
-                display_bit = Math.floor(display_bit / 2);
-            }
-        }
-
-        // filter
-        // add timeSlots
-        filter.timeSlots = data[11];
-
-        // get allowClosed, allowWaitlist, mode from binary
-        filter.allowClosed = Boolean(data[12] & 1);
-        filter.allowWaitlist = Boolean(data[12] & 2);
-        filter.sortOptions.mode = +Boolean(data[12] & 4); // convert to 0 or 1
-
-        // sorting
-        // get the binary of enable_reverse
-        const enable_reverse = data[19];
-
-        const sortBy = filter.sortOptions.sortBy;
-        const sortCopy = [];
-        // loop through the ascii initials and match to the object name
-        let mask = 1;
-        for (let i = 0; i < sortBy.length; i++) {
-            const initial = data[13 + i];
-            const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
-
-            // if matched, decode the enabled and reverse info from the binary
-            sortOpt.enabled = Boolean(enable_reverse & mask);
-            mask <<= 1;
-
-            sortOpt.reverse = Boolean(enable_reverse & mask);
-            mask <<= 1;
-
-            sortCopy.push(sortOpt);
-        }
-        filter.sortOptions.sortBy = sortCopy;
-
-        // add the schedule and palette
-        const schedule = ScheduleStore.decompressJSON(data[21]);
-        const palette = Palette.decompressJSON(data[22]);
-
-        // construct a JSON
-        const obj = {
-            name,
-            modified,
-            currentSemester,
-            display,
-            filter,
-            schedule,
-            palette
-        };
-        console.log(obj);
-
-        return JSON.stringify(obj);
     }
 
     async created() {

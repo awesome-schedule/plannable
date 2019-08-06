@@ -153,7 +153,7 @@ We use a number of algorithms to generate, sort and render schedules. They can b
 
 For unit tests, see [tests/unit](/tests/unit)
 
-Hanzhi Zhou
+Hanzhi Zhou, Zichao Hu
 
 ### Documentation
 

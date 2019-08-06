@@ -1,17 +1,15 @@
 /**
  * @module components/tabs
  */
-import Store, { SemesterStorage } from '@/store';
+import Store, { SemesterStorage, compressJSON } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component, Watch } from 'vue-property-decorator';
 import axios from 'axios';
-import { ScheduleStore } from '@/store/schedule';
-import { Palette } from '@/store/palette';
 
 /**
  * component for import/export/print schedules and managing profiles
- * @author Kaiying Shan, Hanzhi Zhou, Zichao Hu
+ * @author Kaiying Shan, Hanzhi Zhou
  */
 @Component
 export default class ExportView extends Store {
@@ -20,7 +18,6 @@ export default class ExportView extends Store {
         const credential = localStorage.getItem('credential');
         return username && credential;
     }
-    fileName = 'schedule';
     newName: (string | null)[] = [];
 
     liHaoUpURL: string = 'http://localhost:8081/courses/api/save_plannable_profile';
@@ -101,113 +98,26 @@ export default class ExportView extends Store {
     }
     saveToJson() {
         if (!this.semester.currentSemester) return;
+        const { current } = this.profile;
         const json = localStorage.getItem(this.profile.current);
-        if (json) savePlain(json, (this.fileName || 'schedule') + '.json');
+        if (json) savePlain(json, current + '.json');
     }
     saveToIcal() {
-        savePlain(toICal(this.schedule.currentSchedule), (this.fileName || 'schedule') + '.ical');
+        savePlain(toICal(this.schedule.currentSchedule), this.profile.current + '.ical');
     }
     exportToURL() {
         if (!this.semester.currentSemester) return;
         const json = localStorage.getItem(this.profile.current);
         if (json) {
-            const result = this.convertJsonToArray(json);
             const url = new URL(window.location.href);
-            url.searchParams.set('config', lz.compressToEncodedURIComponent(result));
+            url.searchParams.set(
+                'config',
+                lz.compressToEncodedURIComponent(JSON.stringify(compressJSON(json)))
+            );
             this.modal.showURLModal(url.href);
         }
     }
 
-    /**
-     * See [[App.parseFromURL]]
-     * convert JSON string to tuple of tuples to reduce the num of chars
-     * @author Zichao Hu
-     * @param jsonString
-     */
-    convertJsonToArray(jsonString: string) {
-        /*
-        result =>
-        name
-        modified
-        currentSemester.id
-        currentSemester.name,
-        _earliest
-        _fullHeight
-        _lastest
-        _maxNumSchedules
-        _numsearchResults
-        _partialHeight
-        binary: combineSections, enableFuzzy, enableLog, expandOnEntering, multiSelect,
-        showClasslistTitle, showInstructor, showRoom, showTime, standard
-        timeSlots
-        binary: allowClosed, Waitlist, mode
-        sortOptions: name_initial ascii code :[c,d,l,n,v,I] --> could change in order
-        binary: enabled/reverse
-        schedule
-        palette
-        */
-
-        // get values from the json object
-        const json: SemesterStorage = JSON.parse(jsonString);
-        const { name, modified, currentSemester, display, filter, schedule, palette } = json;
-
-        // add first four value the the array
-        const result = [];
-        result.push(name, modified, currentSemester.id, currentSemester.name);
-
-        // compressing display
-        // get all keys in the display object and sort them
-        const display_keys = Object.keys(display).sort();
-
-        // convert to binary, the first key => the first/rightmost bit
-        // there are 10 keys to consider
-        let display_bit = 0;
-        let counter = 1;
-        for (const key of display_keys) {
-            if (display[key] === true) {
-                display_bit |= counter;
-                counter <<= 1;
-            } else if (display[key] === false) {
-                counter <<= 1;
-            } else {
-                result.push(display[key]);
-            }
-        }
-        result.push(display_bit);
-
-        // compressing filter
-        // add timeSlots to array
-        result.push(filter.timeSlots);
-
-        // convert allowClosed, allowWaitlist, mode to binary
-        let filter_bit = 0;
-        if (filter.allowClosed) filter_bit += 2 ** 0;
-        if (filter.allowWaitlist) filter_bit += 2 ** 1;
-        if (filter.sortOptions.mode === 1) filter_bit += 2 ** 2;
-
-        result.push(filter_bit);
-
-        // sorting
-        // add all initial ascii to the array in order
-        // add the binary of their respective state: enabled or reverse
-        counter = 1;
-        filter_bit = 0;
-        for (const sortBy of filter.sortOptions.sortBy) {
-            const ascii = sortBy.name.charCodeAt(0);
-            result.push(ascii);
-            if (sortBy.enabled) filter_bit |= counter;
-            counter <<= 1;
-            if (sortBy.reverse) filter_bit |= counter;
-            counter <<= 1;
-        }
-        result.push(filter_bit);
-
-        // add schedule and palette objects to the array
-        result.push(ScheduleStore.compressJSON(schedule));
-        result.push(Palette.compressJSON(palette));
-        console.log(result);
-        return JSON.stringify(result);
-    }
     deleteProfile(name: string, idx: number) {
         if (confirm(`Are you sure to delete ${name}?`)) {
             this.newName.splice(idx, 1);
@@ -247,6 +157,8 @@ export default class ExportView extends Store {
             const prevIdx = this.profile.profiles.findIndex(n => n === newName);
             if (prevIdx !== -1) return this.noti.error('Duplicated name!');
             this.profile.renameProfile(idx, oldName, newName, raw);
+
+            // find the remote profile corresponding to the profile to be renamed
             if (
                 this.canSync &&
                 this.remoteProfiles.find(p => p.name === oldName) &&
@@ -278,8 +190,6 @@ export default class ExportView extends Store {
 
         const remote = this.remoteProfiles.find(p => p.name === name);
         if (remote) {
-            // const t1 = new Date(remote.modified).getTime();
-            // const t2 = new Date(JSON.parse(local).modified).getTime();
             if (
                 !confirm('A remote profile with the same name already exists. Confirm overwriting?')
             )
@@ -317,10 +227,5 @@ export default class ExportView extends Store {
             this.profile.addProfile(JSON.stringify(profile), profile.name, false);
             this.newName.push(null);
         }
-    }
-
-    @Watch('profile.current', { immediate: true })
-    private w() {
-        this.fileName = this.profile.current;
     }
 }

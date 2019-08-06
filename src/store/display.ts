@@ -46,12 +46,56 @@ function intTo24hr(num: number) {
         .padStart(2, '0')}:${(num % 60).toString().padStart(2, '0')}`;
 }
 
+export type DisplayJSONShort = [number, ...any[]];
+
 /**
  * the display module handles global display options
  * @author Hanzhi Zhou
  */
-// @Component
-class Display implements StoreModule<DisplayState, DisplayState> {
+export class Display implements StoreModule<DisplayState, DisplayState> {
+    public static compressJSON(obj: DisplayState) {
+        // get all keys in the display object and sort them
+        const keys = Object.keys(obj).sort();
+        const result: DisplayJSONShort = [0];
+
+        // convert to binary, the first key => the first/rightmost bit
+        let bits = 0;
+        let counter = 1;
+        for (const key of keys) {
+            if (display[key] === true) {
+                bits |= counter;
+                counter <<= 1;
+            } else if (display[key] === false) {
+                counter <<= 1;
+            } else {
+                result.push(display[key]);
+            }
+        }
+        result[0] = bits;
+        return result;
+    }
+    public static decompressJSON(obj: DisplayJSONShort) {
+        const displaySettings = new Display();
+
+        // get and sort keys in displaySettings
+        const keys = Object.keys(displaySettings).sort();
+
+        // if the key name contains '_' then it corresponds to a certain index in data
+        // else it is in the binary
+        let counter = 1,
+            mask = 1;
+        const bits = obj[0];
+        for (const key of keys) {
+            if (key.startsWith('_')) {
+                displaySettings[key] = obj[counter++];
+            } else {
+                displaySettings[key] = Boolean(bits & mask);
+                mask <<= 1;
+            }
+        }
+        return displaySettings;
+    }
+
     [x: string]: any;
     showTime = false;
     showRoom = true;

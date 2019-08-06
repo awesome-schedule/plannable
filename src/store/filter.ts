@@ -73,6 +73,10 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
  */
 export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
 
+// export type TimeSlotShort = {
+//     [x in Exclude<keyof TimeSlot, keyof any[]>]: TimeSlot[x] extends boolean ? number : TimeSlot[x]
+// };
+
 /**
  * a list of sort options with default values assigned
  */
@@ -180,7 +184,72 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.tim
  * the filter module handles the storage and manipulation of filters
  * @author Hanzhi Zhou
  */
-class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
+export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
+    public static compressJSON(obj: FilterStateJSON) {
+        // convert allowClosed, allowWaitlist, mode to binary
+        let filterBits = 0;
+        if (obj.allowClosed) filterBits += 2 ** 0;
+        if (obj.allowWaitlist) filterBits += 2 ** 1;
+        if (obj.sortOptions.mode === 1) filterBits += 2 ** 2;
+
+        // sorting
+        // add all initial ascii to the array in order
+        // add the binary of their respective state: enabled or reverse
+        let mask = 1;
+        let sortBits = 0;
+
+        // name_initial ascii code :[c,d,l,n,s,v,I] --> could change in order
+        const initials: number[] = [];
+        for (const sortBy of obj.sortOptions.sortBy) {
+            initials.push(sortBy.name.charCodeAt(0));
+            if (sortBy.enabled) sortBits |= mask;
+            mask <<= 1;
+            if (sortBy.reverse) sortBits |= mask;
+            mask <<= 1;
+        }
+        return [
+            filterBits,
+            sortBits,
+            initials,
+            // convert bool to 0 or 1
+            obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x)),
+        ] as const;
+    }
+
+    public static decompressJSON(obj: ReturnType<typeof FilterStore.compressJSON>) {
+        // tslint:disable-next-line: no-shadowed-variable
+        const filter = new FilterStore();
+        const [filterBits, sortBits, initials, slots] = obj;
+
+        // get allowClosed, allowWaitlist, mode from binary
+        filter.allowClosed = Boolean(filterBits & 1);
+        filter.allowWaitlist = Boolean(filterBits & 2);
+        filter.sortOptions.mode = +Boolean(filterBits & 4); // convert to 0 or 1
+
+        // decode time slots
+        filter.timeSlots = slots.map(slot => slot.map((x, i) => i < 7 ? Boolean(x) : x) as TimeSlot);
+
+        // decode the enable and reverse info of sort
+        const sortBy = filter.sortOptions.sortBy;
+        const sortCopy = [];
+        // loop through the ascii initials and match to the object name
+        let mask = 1;
+        for (const initial of initials) {
+            const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
+
+            // if matched, decode the enabled and reverse info from the binary
+            sortOpt.enabled = Boolean(sortBits & mask);
+            mask <<= 1;
+
+            sortOpt.reverse = Boolean(sortBits & mask);
+            mask <<= 1;
+
+            sortCopy.push(sortOpt);
+        }
+        filter.sortOptions.sortBy = sortCopy;
+        return filter.toJSON();
+    }
+
     timeSlots: TimeSlot[] = [];
     allowWaitlist = true;
     allowClosed = true;

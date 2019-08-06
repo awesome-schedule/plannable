@@ -5,7 +5,7 @@
 /**
  *
  */
-import Schedule, { ScheduleJSON, ScheduleJSONShort } from '../models/Schedule';
+import Schedule, { ScheduleJSON } from '../models/Schedule';
 import { StoreModule, saveStatus } from '.';
 
 interface ScheduleStateBase {
@@ -50,14 +50,6 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
-interface ScheduleStateJSONShort {
-    0: ScheduleStateJSON['currentScheduleIndex'];
-    1: ScheduleStateJSON['proposedScheduleIndex'];
-    2: ScheduleStateJSON['cpIndex'];
-    3: number;
-    4: ScheduleJSONShort[];
-}
-
 // tslint:disable-next-line: no-empty-interface
 export interface ScheduleStore extends ScheduleState {}
 
@@ -66,17 +58,19 @@ export interface ScheduleStore extends ScheduleState {}
  * @author Hanzhi Zhou
  */
 export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
-    public static compressJSON(obj: ScheduleStateJSON): ScheduleStateJSONShort {
+    public static compressJSON(obj: ScheduleStateJSON) {
         return [
             obj.currentScheduleIndex,
             obj.proposedScheduleIndex,
             obj.cpIndex,
             +obj.generated,
             obj.proposedSchedules.map(s => Schedule.compressJSON(s))
-        ];
+        ] as const;
     }
 
-    public static decompressJSON(obj: ScheduleStateJSONShort): ScheduleStateJSON {
+    public static decompressJSON(
+        obj: ReturnType<typeof ScheduleStore.compressJSON>
+    ): ScheduleStateJSON {
         return {
             currentScheduleIndex: obj[0],
             proposedScheduleIndex: obj[1],

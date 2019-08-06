@@ -1,0 +1,65 @@
+{
+    "name": "mySchedule2019Fall",
+    "modified": "2019-08-05T09:01:00.988Z",
+    "currentSemester": { "id": "1198", "name": "Fall 2019" },
+    "display": {
+        "showTime": false,
+        "showRoom": true,
+        "showInstructor": true,
+        "showClasslistTitle": true,
+        "standard": true,
+        "multiSelect": true,
+        "combineSections": true,
+        "expandOnEntering": false,
+        "enableLog": false,
+        "enableFuzzy": false,
+        "showWeekend": false,
+        "_fullHeight": 100,
+        "_partialHeight": 25,
+        "_maxNumSchedules": 5000,
+        "_numSearchResults": 10,
+        "_earliest": "09:00",
+        "_latest": "19:00"
+    },
+    "filter": {
+        "timeSlots": [],
+        "allowWaitlist": true,
+        "allowClosed": false,
+        "sortOptions": {
+            "sortBy": [
+                { "name": "distance", "enabled": true, "reverse": false },
+                { "name": "variance", "enabled": false, "reverse": false },
+                { "name": "compactness", "enabled": true, "reverse": false },
+                { "name": "lunchTime", "enabled": false, "reverse": false },
+                { "name": "noEarly", "enabled": true, "reverse": false },
+                { "name": "similarity", "enabled": false, "reverse": false },
+                { "name": "IamFeelingLucky", "enabled": false, "reverse": true }
+            ],
+            "mode": 1
+        }
+    },
+    "schedule": {
+        "currentScheduleIndex": 0,
+        "proposedSchedules": [
+            {
+                "All": {
+                    "cs21505": -1,
+                    "cs21504": -1,
+                    "cs41025": -1,
+                    "ece23305": -1,
+                    "ece23308": -1,
+                    "apma30805": -1,
+                    "apma21305": -1,
+                    "span30105": -1
+                },
+                "events": []
+            }
+        ],
+        "proposedScheduleIndex": 0,
+        "cpIndex": -1,
+        "generated": false
+    },
+    "palette": {
+        "savedColors": { "apma30805": "#ea02e2", "cs21504": "#0a507f", "ece23305": "#bf3f00" }
+    }
+}

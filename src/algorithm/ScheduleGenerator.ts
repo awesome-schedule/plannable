@@ -46,7 +46,7 @@ import { NotiMsg } from '@/store/notification';
  * ```
  */
 export type TimeArray = Int16Array;
-export type MeetingDate = Float64Array | [number, number];
+export type MeetingDate = [number, number];
 
 /**
  * The data structure used in the algorithm to represent a Course that
@@ -89,7 +89,7 @@ class ScheduleGenerator {
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: readonly string[],
         public readonly options: GeneratorOptions
-    ) {}
+    ) { }
 
     /**
      * The entrance of the schedule generator
@@ -127,12 +127,8 @@ class ScheduleGenerator {
                 // only take the time and room info of the first section
                 // time will be the same for sections in this array
                 // but rooms..., well this is a compromise
-                const temp = parseDate(sections[0].dates);
-                if (!temp) continue;
-                const date = temp;
-                // const date = new Int16Array(2);
-                // date[0] = temp[0] / (86400*1000);
-                // date[1] = temp[1] / (86400*1000);
+                const date = parseDate(sections[0].dates);
+                if (!date) continue;
 
                 const blocksArray = sections[0].getTimeRoom();
                 if (!blocksArray) continue;
@@ -159,38 +155,13 @@ class ScheduleGenerator {
                     level: 'error',
                     msg: `No sections of ${courseRec.department} ${courseRec.number} ${
                         courseRec.type
-                    } satisfy your filters and do not conflict with your events`
+                        } satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);
         }
         // note: this makes the algorithm deterministic
         classList.sort((a, b) => a.length - b.length);
-
-        // let total = 0;
-        // for (const sections of classList) {
-        //     for (const sec of sections) {
-        //         total += sec[2].length * 2;
-        //         total += 4;
-        //     }
-        // }
-        // const buffer = new ArrayBuffer(total);
-        // total = 0;
-        // for (const sections of classList) {
-        //     for (const sec of sections) {
-        //         const oldArr = sec[2];
-        //         const tLen = oldArr.length;
-        //         const newArr = new Int16Array(buffer, total, tLen);
-        //         newArr.set(oldArr);
-        //         sec[2] = newArr;
-        //         total += tLen * 2;
-
-        //         const dateArr = new Int16Array(buffer, total, 2);
-        //         dateArr.set(sec[3]);
-        //         sec[3] = dateArr;
-        //         total += 4;
-        //     }
-        // }
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
@@ -231,6 +202,7 @@ class ScheduleGenerator {
      * @requires optimization
      */
     public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
+        console.time('pre-computing conflict');
         /**
          * current course index
          */
@@ -248,14 +220,58 @@ class ScheduleGenerator {
          */
         const numCourses = classList.length;
         /**
+         * the max number of schedules to be generated
+         */
+        const { maxNumSchedules } = this.options;
+        /**
          * record the index of sections that are already tested
          */
-        const pathMemory = new Int32Array(numCourses);
+        const pathMemory = new Uint16Array(numCourses);
         /**
          * The current schedule, build incrementally and in-place.
          */
         const currentSchedule: RawAlgoSchedule = [];
-        const { maxNumSchedules } = this.options;
+        /**
+         * the choiceNum array corresponding to the currentSchedule
+         */
+        const currentChoices = new Uint16Array(numCourses);
+        /**
+         * the maximum number of sections in each course
+         */
+        const maxLen = Math.max(...classList.map(c => c.length));
+        /**
+         * the side length of the conflict cache matrix
+         */
+        const sideLen = maxLen * numCourses;
+        const conflictCache = new Uint8Array(sideLen ** 2);
+
+        // pre-compute the conflict between each pair of sections
+        for (let i = 0; i < numCourses; i++) {
+            for (let j = i + 1; j < numCourses; j++) {
+                const secs1 = classList[i],
+                    secs2 = classList[j];
+                const len1 = secs1.length,
+                    len2 = secs2.length;
+                for (let m = 0; m < len1; m++) {
+                    for (let n = 0; n < len2; n++) {
+                        const i1 = i * maxLen + m,
+                            i2 = j * maxLen + n;
+
+                        const sec1 = secs1[m],
+                            sec2 = secs2[n];
+                        const date1 = sec1[3],
+                            date2 = sec2[3];
+
+                        // conflict is symmetric
+                        conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] =
+                            +((checkTimeConflict(sec1[2], sec2[2], 3, 3) &&
+                                calcOverlap(date1[0], date1[1], date2[0], date2[1]) !== -1));
+                    }
+                }
+            }
+        }
+        console.timeEnd('pre-computing conflict');
+
         outer: while (true) {
             if (classNum >= numCourses) {
                 evaluator.add(currentSchedule.concat());
@@ -276,17 +292,11 @@ class ScheduleGenerator {
                 pathMemory.fill(0, classNum + 1);
             }
 
-            // the newly chosen section
-            const candidate = classList[classNum][choiceNum];
-            const timeBlocks = candidate[2];
-            const date1 = candidate[3];
+            // check conflict between the newly chosen section and the sections already in the schedule
             for (let i = 0; i < classNum; i++) {
-                const schedule = currentSchedule[i];
-                const date2 = schedule[3];
-                if (
-                    checkTimeConflict(schedule[2], timeBlocks, 3, 3) &&
-                    calcOverlap(date1[0], date1[1], date2[0], date2[1]) !== -1
-                ) {
+                const i1 = classNum * maxLen + choiceNum,
+                    i2 = i * maxLen + currentChoices[i];
+                if (conflictCache[i2 * sideLen + i1] || conflictCache[i1 * sideLen + i2]) {
                     ++choiceNum;
                     continue outer;
                 }
@@ -294,7 +304,8 @@ class ScheduleGenerator {
 
             // if the section does not conflict with any previously chosen sections,
             // increment the path memory and go to the next class, reset the choiceNum = 0
-            currentSchedule[classNum] = candidate;
+            currentSchedule[classNum] = classList[classNum][choiceNum];
+            currentChoices[classNum] = choiceNum;
             pathMemory[classNum++] = choiceNum + 1;
             choiceNum = 0;
         }

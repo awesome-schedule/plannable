@@ -4,12 +4,12 @@
 import Store, { SemesterStorage, compressJSON } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
-import { Component, Watch } from 'vue-property-decorator';
+import { Component } from 'vue-property-decorator';
 import axios from 'axios';
 
 /**
  * component for import/export/print schedules and managing profiles
- * @author Kaiying Shan, Hanzhi Zhou
+ * @author Hanzhi Zhou, Kaiying Shan
  */
 @Component
 export default class ExportView extends Store {

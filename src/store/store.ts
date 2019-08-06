@@ -380,11 +380,11 @@ export default class Store extends Vue {
  * @param jsonString
  */
 export function compressJSON(jsonString: string) {
-    const json: SemesterStorage = JSON.parse(jsonString);
     // tslint:disable-next-line: no-shadowed-variable
-    const { name, modified, currentSemester, display, filter, schedule, palette } = json;
+    const { name, modified, currentSemester, display, filter, schedule, palette } = JSON.parse(
+        jsonString
+    ) as SemesterStorage;
 
-    // add first four value the the array
     return [
         name,
         modified,
@@ -402,14 +402,13 @@ export function compressJSON(jsonString: string) {
  * @see [[convertJsonToArray]]
  * @param config
  */
-export function parseFromURL(config: string) {
+export function parseFromURL(config: string): SemesterStorage {
     // get URL and convert to JSON
     const data: ReturnType<typeof compressJSON> = JSON.parse(
         lz.decompressFromEncodedURIComponent(config.trim())
     );
 
-    // construct a JSON
-    const obj = {
+    return {
         name: data[0],
         modified: data[1],
         currentSemester: { id: data[2], name: data[3] },
@@ -418,7 +417,4 @@ export function parseFromURL(config: string) {
         schedule: ScheduleStore.decompressJSON(data[6]),
         palette: Palette.decompressJSON(data[7])
     };
-    console.log(obj);
-
-    return JSON.stringify(obj);
 }

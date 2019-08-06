@@ -208,9 +208,8 @@ export default class App extends Store {
         const config = new URLSearchParams(window.location.search).get('config');
 
         if (config) {
-            const result = parseFromURL(config);
             try {
-                this.profile.addProfile(result, 'url loaded');
+                this.profile.addProfile(JSON.stringify(parseFromURL(config)), 'url loaded');
                 await this.loadProfile(undefined, !checkVersion());
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;

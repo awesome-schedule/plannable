@@ -100,14 +100,13 @@ export function checkTimeConflict(
     step2 = 2
 ) {
     for (let i = 0; i < 7; i++) {
-        const s2 = timeArray2[i];
-        const e2 = timeArray2[i + 1];
+        const s2 = timeArray2[i],
+            e2 = timeArray2[i + 1];
         // skip the entire inner loop if needed
         if (s2 === e2) continue;
 
-        const s1 = timeArray1[i];
         const e1 = timeArray1[i + 1];
-        for (let j = s1; j < e1; j += step1) {
+        for (let j = timeArray1[i]; j < e1; j += step1) {
             const begin1 = timeArray1[j] + 1;
             const end1 = timeArray1[j + 1] - 1;
             for (let k = s2; k < e2; k += step2) {
@@ -138,11 +137,7 @@ export function parseDate(date: string): MeetingDate | undefined {
     const startDate = new Date(+sy, +sm - 1, +sd);
     const [em, ed, ey] = end.split('/');
     const endDate = new Date(+ey, +em - 1, +ed);
-    // const arr = new Float64Array(2);
-    // arr[0] = startDate.getTime();
-    // arr[1] = endDate.getTime();
-    // return arr;
-    return [startDate.getTime(), endDate.getTime()]
+    return [startDate.getTime(), endDate.getTime()];
 }
 
 /**

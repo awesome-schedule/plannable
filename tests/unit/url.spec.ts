@@ -300,48 +300,27 @@ import test_filter from './test_data/test_filter.json';
 
 describe('parseFromURL', () => {
     it('parse_empty_schedule', () => {
-        const test1 = JSON.stringify(empty_schedule);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(JSON.stringify(empty_schedule));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL);
         const json = parseFromURL(URL);
-        console.warn(json.display);
-        console.warn(empty_schedule.display);
-
-        expect(json).toEqual(empty_schedule);
+        expect(JSON.parse(JSON.stringify(json))).toEqual(empty_schedule);
     });
-
     it('parse_mySchedule2019Fall', () => {
-        const test1 = JSON.stringify(mySchedule2019Fall);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(JSON.stringify(mySchedule2019Fall));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL);
         const json = parseFromURL(URL);
-        console.warn(json.display);
-        console.warn(mySchedule2019Fall.display);
-
-        expect(json).toEqual(mySchedule2019Fall);
+        expect(JSON.parse(JSON.stringify(json))).toEqual(mySchedule2019Fall);
     });
     it('parse_test_filter', () => {
-        const test1 = JSON.stringify(test_filter);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(JSON.stringify(test_filter));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL);
         const json = parseFromURL(URL);
-        console.warn(json.display);
-        console.warn(test_filter.display);
-
-        expect(json).toEqual(test_filter);
+        expect(JSON.parse(JSON.stringify(json))).toEqual(test_filter);
     });
     it('parse_miscellaneousTest1', () => {
-        const test1 = JSON.stringify(miscellaneousTest1);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(JSON.stringify(miscellaneousTest1));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL);
         const json = parseFromURL(URL);
-        console.warn(json.display);
-        console.warn(miscellaneousTest1.display);
-
-        expect(json).toEqual(miscellaneousTest1);
+        expect(JSON.parse(JSON.stringify(json))).toEqual(miscellaneousTest1);
     });
 });

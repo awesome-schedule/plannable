@@ -90,14 +90,16 @@ export default class CompareView extends Store {
         }
         const all = this.compare[idx].schedule.All;
         window.similaritySchedule = all;
-        window.scheduleEvaluator.updateSimilarity();
-        if (!window.scheduleEvaluator.empty()) {
-            window.scheduleEvaluator.sort({ newOptions: this.filter.sortOptions });
+        const evaluator = window.scheduleEvaluator;
+
+        delete evaluator.sortCoeffCache.similarity;
+        if (!evaluator.empty()) {
+            evaluator.sort();
             if (!this.schedule.generated) {
                 this.schedule.switchSchedule(true);
             } else {
                 // re-assign the current schedule
-                this.schedule.currentSchedule = window.scheduleEvaluator.getSchedule(
+                this.schedule.currentSchedule = evaluator.getSchedule(
                     this.schedule.currentScheduleIndex
                 );
             }

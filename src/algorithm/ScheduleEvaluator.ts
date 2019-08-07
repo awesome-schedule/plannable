@@ -218,7 +218,7 @@ class ScheduleEvaluator {
     /**
      * the cache of coefficient array for each evaluating function
      */
-    private sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
+    public sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
 
     /**
      * @param options
@@ -540,10 +540,6 @@ class ScheduleEvaluator {
         this._schedules = [];
         this.sortCoeffCache = {};
         this.events = [];
-    }
-
-    public updateSimilarity() {
-        delete this.sortCoeffCache.similarity;
     }
 
     /**

@@ -161,7 +161,7 @@ class ScheduleEvaluator {
                 const end = blocks[i + 1] - 5;
                 for (let j = blocks[i]; j < end; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
-                    if (blocks[j + 3] - blocks[j + 1] > 45) {
+                    if (blocks[j + 3] - blocks[j + 1] < 45) {
                         const r1 = blocks[j + 2],
                             r2 = blocks[j + 5];
 

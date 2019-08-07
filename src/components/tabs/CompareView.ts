@@ -84,12 +84,12 @@ export default class CompareView extends Store {
         this.renderSchedule();
     }
     similarity(idx: number) {
-        const all = this.compare[idx].schedule.All;
-        const sim: [string, ...number[]][] = [];
-        for (const key in all) {
-            sim.push([key, ...(all[key] as Set<number>).keys()] as [string, ...number[]]);
+        if (this.compare[idx].schedule.allEquals(window.similaritySchedule)) {
+            window.similaritySchedule = {};
+            return;
         }
-        window.similaritySchedule = sim;
+        const all = this.compare[idx].schedule.All;
+        window.similaritySchedule = all;
         window.scheduleEvaluator.updateSimilarity();
         if (!window.scheduleEvaluator.empty()) {
             window.scheduleEvaluator.sort({ newOptions: this.filter.sortOptions });
@@ -102,24 +102,9 @@ export default class CompareView extends Store {
                 );
             }
         }
-
     }
     isSimilarSchedule(idx: number) {
-        const all = this.compare[idx].schedule.All;
-        const a: [string, ...number[]][] = [];
-        for (const key in all) {
-            a.push([key, ...(all[key] as Set<number>).keys()] as [string, ...number[]]);
-        }
-        const b = window.similaritySchedule;
-        if (a.length !== b.length) return false;
-        outer: for (const i of a) {
-            for (const j of b) {
-                if (i[0] === j[0]) {
-                    if (i[1] === j[1]) continue outer;
-                }
-            }
-            return false;
-        }
-        return true;
+        const sche = this.compare[idx].schedule;
+        return sche.allEquals(window.similaritySchedule);
     }
 }

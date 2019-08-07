@@ -177,16 +177,16 @@ class ScheduleEvaluator {
          * need optimization (e.g. sort schedule and similarity schedule at first)
          */
         similarity(this: ScheduleEvaluator, schedule: CmpSchedule) {
-            const simSchedule = window.similaritySchedule;
+            const sim = window.similaritySchedule;
             const cmp = schedule.schedule;
             let sum = 0;
-            for (const sim of simSchedule) {
-                for (const c of cmp) {
-                    if (sim[0] === c[0]) {
-                        if (sim[1] === c[1][0]) {
-                            sum += 1;
+            for (const c of cmp) {
+                const st = sim[c[0]];
+                if (st) {
+                    for (const i of c[1]) {
+                        if ((st as Set<number>).has(i)) {
+                            sum++;
                         }
-                        break;
                     }
                 }
             }

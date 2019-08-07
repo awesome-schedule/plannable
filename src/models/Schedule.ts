@@ -81,7 +81,7 @@ export default class Schedule {
     public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
         const All: { [x: string]: SectionJSON[] | -1 } = {};
         const shortAll = obj[0] || {},
-       events = obj[1] || [];
+            events = obj[1] || [];
         for (const key in shortAll) {
             const entry = shortAll[key];
             All[key] =
@@ -157,7 +157,7 @@ export default class Schedule {
                             else
                                 noti.warn(
                                     `Section ${
-                                        record.section
+                                    record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
@@ -800,12 +800,42 @@ export default class Schedule {
     }
 
     public equals(s: Schedule) {
-        const keys = Object.keys(this.All);
+        // const keys = Object.keys(this.All);
+        // // unequal length
+        // if (keys.length !== Object.keys(s.All).length) return false;
+        // for (const key of keys) {
+        //     const val1 = this.All[key],
+        //         val2 = s.All[key];
+        //     if (!val2) return false;
+        //     // unequal value
+        //     if (val1 === -1 || val2 === -1) {
+        //         if (val1 !== val2) return false;
+        //     } else {
+        //         if (val1.size !== val2.size) return false;
+        //         for (const v of val1) if (!val2.has(v)) return false;
+        //     }
+        // }
+
+        const days1 = this.events.map(x => x.days).sort();
+        const days2 = s.events.map(x => x.days).sort();
+        if (days1.length !== days2.length) return false;
+        for (let i = 0; i < days1.length; i++) if (days1[i] !== days2[i]) return false;
+
+        return this.allEquals(s.All);
+    }
+
+    /**
+     * returns if an "All" equals to another
+     * @param b another "All"
+     */
+    public allEquals(b: { [x: string]: Set<number> | -1; }) {
+        const a = this.All;
+        const keys = Object.keys(a);
         // unequal length
-        if (keys.length !== Object.keys(s.All).length) return false;
+        if (keys.length !== Object.keys(b).length) return false;
         for (const key of keys) {
-            const val1 = this.All[key],
-                val2 = s.All[key];
+            const val1 = a[key],
+                val2 = b[key];
             if (!val2) return false;
             // unequal value
             if (val1 === -1 || val2 === -1) {
@@ -815,11 +845,6 @@ export default class Schedule {
                 for (const v of val1) if (!val2.has(v)) return false;
             }
         }
-
-        const days1 = this.events.map(x => x.days).sort();
-        const days2 = s.events.map(x => x.days).sort();
-        if (days1.length !== days2.length) return false;
-        for (let i = 0; i < days1.length; i++) if (days1[i] !== days2[i]) return false;
 
         return true;
     }

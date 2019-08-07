@@ -7,11 +7,11 @@
 /**
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
+import { SearchMatch } from '@/models/Catalog';
 import Course from '@/models/Course';
 import Store from '@/store';
+import { Component, Vue } from 'vue-property-decorator';
 import ClassList from '../ClassList.vue';
-import { SearchMatch } from '@/models/Catalog';
 
 /**
  * component for editing classes and manipulating schedules

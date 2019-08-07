@@ -6,13 +6,13 @@
 /**
  *
  */
-import { TimeArray, MeetingDate } from '../algorithm';
-import { hashCode, parseTimeAll, parseDate } from '../utils';
-import Course, { CourseFields, Match } from './Course';
 import { findBestMatch } from 'string-similarity';
+import { MeetingDate, TimeArray } from '../algorithm';
+import { hashCode, parseDate, parseTimeAll } from '../utils';
+import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { STATUSES, dayToInt, CourseStatus } from './Meta';
+import { CourseStatus, dayToInt, STATUSES } from './Meta';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,

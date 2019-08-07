@@ -7,11 +7,11 @@
 /**
  *
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { SearchMatch } from '@/models/Catalog';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-import Course from '../models/Course';
-import { SearchMatch } from '@/models/Catalog';
 
 /**
  * A **pure** component for

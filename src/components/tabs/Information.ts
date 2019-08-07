@@ -2,10 +2,10 @@
  * @module components/tabs
  */
 // tslint:disable:max-line-length
-import { Vue, Component } from 'vue-property-decorator';
-import { VueMathjax } from 'vue-mathjax';
 import 'bootstrap';
 import $ from 'jquery';
+import { VueMathjax } from 'vue-mathjax';
+import { Component, Vue } from 'vue-property-decorator';
 
 import {
     // used in information.vue
@@ -16,10 +16,10 @@ import {
 
     // steppers
     VStepper,
-    VStepperHeader,
-    VStepperStep,
     VStepperContent,
-    VStepperItems
+    VStepperHeader,
+    VStepperItems,
+    VStepperStep
 } from 'vuetify/lib';
 
 @Component({

@@ -5,8 +5,8 @@
 /**
  *
  */
-import { StoreModule } from '.';
 import { hr24toInt } from '@/utils';
+import { StoreModule } from '.';
 
 export interface DisplayState {
     [x: string]: any;

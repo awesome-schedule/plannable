@@ -7,32 +7,32 @@
 /**
  *
  */
+import axios from 'axios';
 import { Component } from 'vue-property-decorator';
 import MainContent from './components/MainContent.vue';
-import axios from 'axios';
 
 // tab components
 import ClassView from './components/tabs/ClassView.vue';
+import CompareView from './components/tabs/CompareView.vue';
 import DisplayView from './components/tabs/DisplayView.vue';
 import EventView from './components/tabs/EventView.vue';
 import ExportView from './components/tabs/ExportView.vue';
 import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
-import CompareView from './components/tabs/CompareView.vue';
 
 // other components
+import CourseModal from './components/CourseModal.vue';
+import DateSeparator from './components/DateSeparator.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
-import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
 import URLModal from './components/URLModal.vue';
-import DateSeparator from './components/DateSeparator.vue';
 import VersionModal from './components/VersionModal.vue';
 
+import randomColor from 'randomcolor';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
-import randomColor from 'randomcolor';
 
 const version = '6.5';
 let note = 'loading release note...';

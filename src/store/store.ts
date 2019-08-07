@@ -3,22 +3,22 @@
  */
 import lz from 'lz-string';
 
-import { Vue, Component } from 'vue-property-decorator';
+import Expirable from '@/data/Expirable';
+import { Component, Vue } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import { CourseStatus } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import display, { DisplayState, Display } from './display';
-import filter, { FilterStateJSON, TimeSlot, FilterStore } from './filter';
+import display, { Display, DisplayState } from './display';
+import filter, { FilterStateJSON, FilterStore, TimeSlot } from './filter';
 import modal from './modal';
 import noti from './notification';
-import palette, { PaletteState, Palette } from './palette';
+import palette, { Palette, PaletteState } from './palette';
 import profile from './profile';
 import schedule, { ScheduleStateJSON, ScheduleStore } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
-import Expirable from '@/data/Expirable';
 
 export interface SemesterStorage extends Expirable {
     name: string;

@@ -1,8 +1,8 @@
 /**
  * @module components/tabs
  */
-import { Component } from 'vue-property-decorator';
 import Store from '@/store';
+import { Component } from 'vue-property-decorator';
 
 /**
  * component for editing display settings

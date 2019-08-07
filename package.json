@@ -7,6 +7,7 @@
         "build": "vue-cli-service build --modern",
         "lint": "vue-cli-service lint",
         "test": "jest",
+        "tslint": "tslint --project . --fix",
         "tsdoc": "typedoc --plugin typedoc-plugin-external-module-name --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
         "exec": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"}",
         "postinstall": "patch-package"

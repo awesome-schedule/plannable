@@ -9,21 +9,21 @@
 import axios from 'axios';
 import querystring from 'querystring';
 import Vue from 'vue';
+import 'vuetify/src/stylus/app.styl';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch, openLousList, openVAGrade } from './utils';
-import 'vuetify/src/stylus/app.styl';
 
 import Vuetify, {
     VApp, // required
-    VFooter,
+    VBtn,
     VCard,
-    VCardTitle,
-    VCardText,
     VCardActions,
-    VIcon,
-    VBtn
+    VCardText,
+    VCardTitle,
+    VFooter,
+    VIcon
 } from 'vuetify/lib';
 
 Vue.use(Vuetify, {

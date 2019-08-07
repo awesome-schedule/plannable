@@ -1,6 +1,6 @@
-import { loadTimeMatrix, loadBuildingList } from '@/data/BuildingLoader';
+import { loadBuildingList, loadTimeMatrix } from '@/data/BuildingLoader';
+import { fallback, loadFromCache } from '@/data/Loader';
 import { loadSemesterList } from '@/data/SemesterListLoader';
-import { loadFromCache, fallback } from '@/data/Loader';
 
 describe('Data loader test', () => {
     it('Time matrix symmetry', async () => {

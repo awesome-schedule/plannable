@@ -6,11 +6,11 @@
 /**
  *
  */
-import Section from '../models/Section';
-import Course from '../models/Course';
-import $ from 'jquery';
-import 'bootstrap';
 import { SearchMatch } from '@/models/Catalog';
+import 'bootstrap';
+import $ from 'jquery';
+import Course from '../models/Course';
+import Section from '../models/Section';
 
 /**
  * the modal module handles modal triggering

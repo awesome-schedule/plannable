@@ -1,11 +1,11 @@
 /**
  * @module components/tabs
  */
-import Store, { SemesterStorage, compressJSON } from '@/store';
+import Store, { compressJSON, SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
+import axios from 'axios';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
-import axios from 'axios';
 
 /**
  * component for import/export/print schedules and managing profiles

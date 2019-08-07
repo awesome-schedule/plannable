@@ -1,6 +1,6 @@
-import Catalog from '@/models/Catalog';
+import { requestBuildingList, requestTimeMatrix } from '@/data/BuildingLoader';
 import { requestSemesterData } from '@/data/CatalogLoader';
-import { requestTimeMatrix, requestBuildingList } from '@/data/BuildingLoader';
+import Catalog from '@/models/Catalog';
 
 global.console.time = jest.fn();
 global.console.timeEnd = jest.fn();

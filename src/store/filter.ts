@@ -1,17 +1,17 @@
 /**
  * @module store
  */
-import ScheduleEvaluator, {
-    SortMode,
-    EvaluatorOptions,
-    SortOption,
-    SortFunctions
-} from '../algorithm/ScheduleEvaluator';
-import { StoreModule } from '.';
-import { DAYS } from '@/models/Meta';
-import { NotiMsg } from './notification';
-import { to12hr } from '@/utils';
 import Event from '@/models/Event';
+import { DAYS } from '@/models/Meta';
+import { to12hr } from '@/utils';
+import { StoreModule } from '.';
+import ScheduleEvaluator, {
+    EvaluatorOptions,
+    SortFunctions,
+    SortMode,
+    SortOption
+} from '../algorithm/ScheduleEvaluator';
+import { NotiMsg } from './notification';
 
 interface FilterStateBase {
     readonly timeSlots: TimeSlot[];
@@ -72,10 +72,6 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
  * 8: end time, of 24 hour format
  */
 export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
-
-// export type TimeSlotShort = {
-//     [x in Exclude<keyof TimeSlot, keyof any[]>]: TimeSlot[x] extends boolean ? number : TimeSlot[x]
-// };
 
 /**
  * a list of sort options with default values assigned

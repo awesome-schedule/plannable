@@ -6,9 +6,9 @@
 /**
  *
  */
-import Expirable from './Expirable';
 import { NotiMsg } from '../store/notification';
-import { errToStr, timeout, cancelablePromise, CancelablePromise } from '../utils';
+import { cancelablePromise, CancelablePromise, errToStr, timeout } from '../utils';
+import Expirable from './Expirable';
 
 interface LoaderOptions<T_JSON extends Expirable> {
     /**

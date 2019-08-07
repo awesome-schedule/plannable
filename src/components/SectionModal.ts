@@ -1,9 +1,9 @@
 /**
  * @module components
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
-import Section from '@/models/Section';
 import { SemesterJSON } from '@/models/Catalog';
+import Section from '@/models/Section';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
 /**
  * Component for displaying detailed information of a single Section

@@ -1,14 +1,14 @@
 /**
  * @module components/tabs
  */
+import Course from '@/models/Course';
+import Schedule from '@/models/Schedule';
+import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';
+import randomColor from 'randomcolor';
 import { Component } from 'vue-property-decorator';
 import GridSchedule from '../GridSchedule.vue';
 import MainContent from '../MainContent.vue';
-import Schedule from '@/models/Schedule';
-import ScheduleBlock from '@/models/ScheduleBlock';
-import randomColor from 'randomcolor';
-import Course from '@/models/Course';
 
 /**
  * component for comparing multiple schedules

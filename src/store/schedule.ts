@@ -5,8 +5,8 @@
 /**
  *
  */
+import { saveStatus, StoreModule } from '.';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { StoreModule, saveStatus } from '.';
 
 interface ScheduleStateBase {
     /**

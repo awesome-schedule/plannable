@@ -2,9 +2,9 @@ import lz from 'lz-string';
 
 import { compressJSON, parseFromURL } from '@/store';
 import empty_schedule from './test_data/empty_schedule.json';
+import miscellaneousTest1 from './test_data/miscellaneousTest1.json';
 import mySchedule2019Fall from './test_data/mySchedule2019Fall.json';
 import test_filter from './test_data/test_filter.json';
-import miscellaneousTest1 from './test_data/miscellaneousTest1.json';
 
 // display_keys: "combineSections","enableFuzzy","enableLog","expandOnEntering","multiSelect",
 // "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
@@ -303,7 +303,7 @@ describe('parseFromURL', () => {
         const test1 = JSON.stringify(empty_schedule);
         const urlCompressed: any = compressJSON(test1);
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL)
+        console.warn(URL);
         const json = parseFromURL(URL);
         console.warn(json.display);
         console.warn(empty_schedule.display);
@@ -315,7 +315,7 @@ describe('parseFromURL', () => {
         const test1 = JSON.stringify(mySchedule2019Fall);
         const urlCompressed: any = compressJSON(test1);
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL)
+        console.warn(URL);
         const json = parseFromURL(URL);
         console.warn(json.display);
         console.warn(mySchedule2019Fall.display);
@@ -326,7 +326,7 @@ describe('parseFromURL', () => {
         const test1 = JSON.stringify(test_filter);
         const urlCompressed: any = compressJSON(test1);
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL)
+        console.warn(URL);
         const json = parseFromURL(URL);
         console.warn(json.display);
         console.warn(test_filter.display);
@@ -337,7 +337,7 @@ describe('parseFromURL', () => {
         const test1 = JSON.stringify(miscellaneousTest1);
         const urlCompressed: any = compressJSON(test1);
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        console.warn(URL)
+        console.warn(URL);
         const json = parseFromURL(URL);
         console.warn(json.display);
         console.warn(miscellaneousTest1.display);

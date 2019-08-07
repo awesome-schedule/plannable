@@ -6,10 +6,10 @@
 /**
  *
  */
-import Section from './Section';
-import { RawCourse, CourseType, TYPES } from './Meta';
-import Hashable from './Hashable';
 import { hashCode } from '../utils';
+import Hashable from './Hashable';
+import { CourseType, RawCourse, TYPES } from './Meta';
+import Section from './Section';
 
 /**
  * represents all public information of a Course

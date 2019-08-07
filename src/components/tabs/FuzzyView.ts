@@ -1,11 +1,11 @@
 /**
  * @module components/tabs
  */
-import { Component, Vue } from 'vue-property-decorator';
-import Store from '@/store';
-import Course from '@/models/Course';
-import ClassList from '../ClassList.vue';
 import { SearchMatch } from '@/models/Catalog';
+import Course from '@/models/Course';
+import Store from '@/store';
+import { Component, Vue } from 'vue-property-decorator';
+import ClassList from '../ClassList.vue';
 
 /**
  * component for performing fuzzy-search against the catalog of courses

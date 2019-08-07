@@ -7,7 +7,7 @@
 /**
  *
  */
-import { Vertex, Graph } from './Graph';
+import { Graph, Vertex } from './Graph';
 
 /**
  * An exact graph coloring algorithm using backtracking

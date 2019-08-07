@@ -5,8 +5,8 @@
 /**
  * @author Cat
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
 import Schedule from '@/models/Schedule';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class DateSeparator extends Vue {

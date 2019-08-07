@@ -1,12 +1,12 @@
 /**
  * @module components
  */
+import Schedule from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
 import { DAYS } from '../models/Meta';
 import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
-import Schedule from '@/models/Schedule';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid

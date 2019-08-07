@@ -2,8 +2,8 @@
  * @module components
  */
 import { Component } from 'vue-property-decorator';
-import Store from '../store';
 import config from '../config';
+import Store from '../store';
 
 /**
  * the container for the notification and content right of the side bar

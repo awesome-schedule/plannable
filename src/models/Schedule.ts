@@ -7,16 +7,16 @@
 /**
  *
  */
-import { colorDepthSearch, graphColoringExact, DFS } from '../algorithm';
+import noti from '@/store/notification';
+import { colorDepthSearch, DFS, graphColoringExact } from '../algorithm';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
-import Event, { EventJSON } from './Event';
+import Event from './Event';
 import Hashable from './Hashable';
+import { Day, dayToInt, TYPES } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import noti from '@/store/notification';
-import { Day, TYPES, dayToInt } from './Meta';
 
 interface SectionJSON {
     id: number;

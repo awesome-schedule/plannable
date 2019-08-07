@@ -1,9 +1,9 @@
 /**
  * @module components
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
-import Course from '@/models/Course';
 import { SearchMatch } from '@/models/Catalog';
+import Course from '@/models/Course';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
 /**
  * component for displaying detailed information of a Course along with all sections contained in it

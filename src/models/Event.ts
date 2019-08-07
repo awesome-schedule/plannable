@@ -6,8 +6,8 @@
 /**
  *
  */
-import { hashCode, parseTimeAsTimeArray } from '../utils';
 import { TimeArray } from '../algorithm';
+import { hashCode, parseTimeAsTimeArray } from '../utils';
 import Hashable from './Hashable';
 
 export type EventJSON = [string, number, string?, string?, string?];

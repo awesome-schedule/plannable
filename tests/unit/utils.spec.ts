@@ -1,6 +1,6 @@
+import config from '@/config';
 import * as Utils from '@/utils';
 import axios from 'axios';
-import config from '@/config';
 
 beforeAll(async () => {
     window.open = jest.fn();

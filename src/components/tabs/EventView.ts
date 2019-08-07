@@ -1,11 +1,11 @@
 /**
  * @module components/tabs
  */
-import { Component, Watch } from 'vue-property-decorator';
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
-import { to12hr, to24hr, hr24toInt } from '@/utils';
+import { hr24toInt, to12hr, to24hr } from '@/utils';
+import { Component, Watch } from 'vue-property-decorator';
 
 /**
  * the component for adding and editing events

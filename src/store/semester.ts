@@ -1,11 +1,11 @@
 /**
  * @module store
  */
+import { fallback } from '@/data/Loader';
+import { loadSemesterList } from '@/data/SemesterListLoader';
+import { CancelablePromise } from '@/utils';
 import { loadSemesterData } from '../data/CatalogLoader';
 import Catalog, { SemesterJSON } from '../models/Catalog';
-import { fallback } from '@/data/Loader';
-import { CancelablePromise } from '@/utils';
-import { loadSemesterList } from '@/data/SemesterListLoader';
 
 export interface SemesterState {
     [x: string]: any;

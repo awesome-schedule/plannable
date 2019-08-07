@@ -10,11 +10,11 @@
 /**
  *
  */
-import { Searcher, SearchResult, ReturnMatchData, SearchOptions } from 'fast-fuzzy';
-import _Course, { CourseMatch, CourseConstructorArguments } from '../models/Course';
+import { SearchMatch } from '@/models/Catalog';
+import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
+import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
-import { SearchMatch } from '@/models/Catalog';
 
 type Course = NonFunctionProperties<_Course>;
 type Section = NonFunctionProperties<_Section>;
@@ -27,11 +27,11 @@ let descripSearcher: _Searcher<Course>;
 let topicSearcher: _Searcher<Section>;
 let instrSearcher: _Searcher<Section>;
 const searcherOpts = {
-    returnMatchData: true as true,
+    returnMatchData: true,
     ignoreCase: true,
     ignoreSymbols: true,
     normalizeWhitespace: true
-};
+} as const;
 
 let courseDict: { [x: string]: Course };
 

@@ -1,9 +1,9 @@
 /**
  * @module components
  */
-import $ from 'jquery';
 import 'bootstrap';
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import $ from 'jquery';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 /**
  * component for displaying and copying URL created by [[ExportView]]
  * @author Hanzhi Zhou

@@ -6,9 +6,9 @@
  *
  */
 import { requestSemesterData } from '@/data/CatalogLoader';
-import path from 'path';
-import fs from 'fs';
 import Catalog, { SemesterJSON } from '@/models/Catalog';
+import fs from 'fs';
+import path from 'path';
 
 declare global {
     namespace NodeJS {

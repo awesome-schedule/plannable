@@ -6,8 +6,8 @@
 /**
  *
  */
-import { TimeArray, MeetingDate } from '../algorithm';
 import { Day, dayToInt } from '@/models/Meta';
+import { MeetingDate, TimeArray } from '../algorithm';
 /**
  * @author Hanzhi Zhou
  * @param time

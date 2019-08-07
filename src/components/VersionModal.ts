@@ -1,7 +1,7 @@
 /**
  * @module components
  */
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 /**
  * component for displaying version information
  * @author Kaiying Shan

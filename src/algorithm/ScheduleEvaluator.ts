@@ -156,7 +156,7 @@ class ScheduleEvaluator {
                 const bl = day.length - 5;
                 for (let j = 0; j < bl; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
-                    if (day[j + 3] - day[j + 1] > 45) {
+                    if (day[j + 3] - day[j + 1] < 45) {
                         const r1 = day[j + 2],
                             r2 = day[j + 5];
 

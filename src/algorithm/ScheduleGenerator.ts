@@ -268,7 +268,7 @@ class ScheduleGenerator {
          * the length of the sum of time arrays for each schedule
          */
         const timeArrLensAll = new Uint16Array(buffer, byteOffset);
-        
+
         for (let i = 0; i < numCourses; i++) {
             const secs = classList[i];
             const len = secs.length;

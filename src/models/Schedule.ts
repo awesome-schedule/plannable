@@ -8,7 +8,7 @@
  *
  */
 import noti from '@/store/notification';
-import { colorDepthSearch, DFS, graphColoringExact } from '../algorithm';
+import { colorDepthSearch, DFS, graphColoringExact, toNativeAdjList } from '../algorithm';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -571,7 +571,7 @@ export default class Schedule {
      * for the array of schedule blocks provided, construct an adjacency list
      * to represent the conflicts between each pair of blocks
      */
-    public constructAdjList(blocks: ScheduleBlock[]) {
+    public constructAdjList(blocks: ScheduleBlock[], offset = 0) {
         blocks.sort((a, b) => b.duration - a.duration);
         const len = blocks.length;
         const adjList: number[][] = blocks.map(() => []);
@@ -585,13 +585,12 @@ export default class Schedule {
                 }
             }
         }
-        // convert to typed array so it will be much faster
-        return adjList.map(x => new Int16Array(x));
+        return toNativeAdjList(adjList, offset);
     }
 
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            const fastGraph = this.constructAdjList(blocks);
+            const [fastGraph] = this.constructAdjList(blocks);
             const len = fastGraph.length;
             const visited = new Uint8Array(len);
             // find all connected components
@@ -613,10 +612,11 @@ export default class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const fastGraph = this.constructAdjList(blocks);
-        const colors = new Int16Array(fastGraph.length);
-        const _ = graphColoringExact(fastGraph, colors);
-        // const [colors, _] = dsatur(fastGraph);
+        const len = blocks.length;
+        // use offset because we will allocate the color array next to the adjList
+        const [fastGraph, buffer] = this.constructAdjList(blocks, len * 2);
+        const colors = new Int16Array(buffer, 0, len);
+        graphColoringExact(fastGraph, colors);
 
         const graph = colorDepthSearch(fastGraph, colors);
         for (const node of graph.keys()) {

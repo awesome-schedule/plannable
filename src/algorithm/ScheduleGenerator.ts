@@ -224,18 +224,6 @@ class ScheduleGenerator {
          */
         const { maxNumSchedules } = this.options;
         /**
-         * record the index of sections that are already tested
-         */
-        const pathMemory = new Uint16Array(numCourses);
-        /**
-         * The current schedule, build incrementally and in-place.
-         */
-        const currentSchedule: RawAlgoSchedule = [];
-        /**
-         * the choiceNum array corresponding to the currentSchedule
-         */
-        const currentChoices = new Uint16Array(numCourses);
-        /**
          * the maximum number of sections in each course
          */
         const maxLen = Math.max(...classList.map(c => c.length));
@@ -243,7 +231,53 @@ class ScheduleGenerator {
          * the side length of the conflict cache matrix
          */
         const sideLen = maxLen * numCourses;
-        const conflictCache = new Uint8Array(sideLen ** 2);
+        const buffer = new ArrayBuffer(
+            numCourses * 4 + sideLen ** 2 + numCourses * maxNumSchedules * 2
+            + maxLen * numCourses * 2 + maxNumSchedules * 2
+        );
+        let byteOffset = 0;
+        /**
+         * record the index of sections that are already tested
+         */
+        const pathMemory = new Uint16Array(buffer, byteOffset, numCourses);
+        byteOffset += numCourses * 2;
+        /**
+         * the choiceNum array corresponding to the currentSchedule
+         */
+        const currentChoices = new Uint16Array(buffer, byteOffset, numCourses);
+        byteOffset += numCourses * 2;
+        /**
+         * the conflict cache matrix
+         */
+        const conflictCache = new Uint8Array(buffer, byteOffset, sideLen ** 2);
+        byteOffset += sideLen ** 2;
+        /**
+         * the array of `choiceNum`s.
+         */
+        const allChoices = new Uint16Array(buffer, byteOffset, numCourses * maxNumSchedules);
+        byteOffset += numCourses * maxNumSchedules * 2;
+        /**
+         * the cache of the length of time arrays for each section
+         * | Sections | Course1 | Course 2 | ... |
+         * | -------- | ------- | -------- | --- |
+         * | Sec1     | 56      | 72       |     |
+         * | Sec2     | 56      | 56       |     |
+         * ...
+         * course-major order
+         */
+        const timeArrLens = new Uint16Array(buffer, byteOffset, maxLen * numCourses);
+        byteOffset += maxLen * numCourses * 2;
+        /**
+         * the length of the sum of time arrays for each schedule
+         */
+        const timeArrLensAll = new Uint16Array(buffer, byteOffset);
+        for (let i = 0; i < numCourses; i++) {
+            const secs = classList[i];
+            const len = secs.length;
+            for (let j = 0; j < len; j++) {
+                timeArrLens[j * numCourses + i] = secs[j][2].length;
+            }
+        }
 
         // pre-compute the conflict between each pair of sections
         for (let i = 0; i < numCourses; i++) {
@@ -271,11 +305,10 @@ class ScheduleGenerator {
             }
         }
         console.timeEnd('pre-computing conflict');
-
         outer: while (true) {
             if (classNum >= numCourses) {
-                evaluator.add(currentSchedule.concat());
-                if (++count >= maxNumSchedules) return;
+                allChoices.set(currentChoices, count * numCourses);
+                if (++count >= maxNumSchedules) break outer;
                 choiceNum = pathMemory[--classNum];
             }
 
@@ -286,7 +319,7 @@ class ScheduleGenerator {
              */
             while (choiceNum >= classList[classNum].length) {
                 // if all possibilities are exhausted, break out the loop
-                if (--classNum < 0) return;
+                if (--classNum < 0) break outer;
 
                 choiceNum = pathMemory[classNum];
                 pathMemory.fill(0, classNum + 1);
@@ -304,10 +337,29 @@ class ScheduleGenerator {
 
             // if the section does not conflict with any previously chosen sections,
             // increment the path memory and go to the next class, reset the choiceNum = 0
-            currentSchedule[classNum] = classList[classNum][choiceNum];
             currentChoices[classNum] = choiceNum;
             pathMemory[classNum++] = choiceNum + 1;
             choiceNum = 0;
+        }
+        byteOffset = 0;
+        for (let i = 0; i < count; i++) {
+            const start = i * numCourses;
+            let sum = 8;
+            for (let j = 0; j < numCourses; j++)
+                sum += timeArrLens[allChoices[start + j] * numCourses + j] - 8;
+            timeArrLensAll[i] = sum;
+            byteOffset += sum * 2;
+        }
+        const blocksAll = new ArrayBuffer(byteOffset);
+        byteOffset = 0;
+        for (let i = 0; i < count; i++) {
+            const s = [];
+            const start = i * numCourses;
+            for (let j = 0; j < numCourses; j++)
+                s[j] = classList[j][allChoices[start + j]];
+            const size = timeArrLensAll[i];
+            evaluator.add(s, blocksAll, byteOffset, size);
+            byteOffset += size * 2;
         }
     }
 }

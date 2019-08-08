@@ -243,13 +243,8 @@ class ScheduleEvaluator {
      * @requires optimization
      * @remarks insertion sort is used as there are not many elements in each day array.
      */
-    public add(schedule: RawAlgoSchedule) {
-        // calculate the total number of elements in the TimeArray we need to allocate
-        let total = 8;
-        for (const course of schedule) total += course[2].length - 8;
-        const blocks = new Int16Array(total);
-        blocks[7] = total;
-
+    public add(schedule: RawAlgoSchedule, buffer: ArrayBuffer, offset: number, total: number) {
+        const blocks = new Int16Array(buffer, offset, total);
         total = 8;
         for (let i = 0; i < 7; i++) {
             // start of the current day

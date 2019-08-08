@@ -247,7 +247,7 @@ class ScheduleGenerator {
         const currentChoices = new Uint16Array(buffer, byteOffset, numCourses);
         byteOffset += numCourses * 2;
         /**
-         * the conflict cache matrix
+         * the conflict cache matrix. Columns are the courses
          */
         const conflictCache = new Uint8Array(buffer, byteOffset, sideLen ** 2);
         byteOffset += sideLen ** 2;
@@ -263,7 +263,7 @@ class ScheduleGenerator {
          * | Sec1     | 56      | 72       |     |
          * | Sec2     | 56      | 56       |     |
          * ...
-         * course-major order
+         * Columns are the courses
          */
         const timeArrLens = new Uint16Array(buffer, byteOffset, maxLen * numCourses);
         byteOffset += maxLen * numCourses * 2;
@@ -288,8 +288,8 @@ class ScheduleGenerator {
                     len2 = secs2.length;
                 for (let m = 0; m < len1; m++) {
                     for (let n = 0; n < len2; n++) {
-                        const i1 = i * maxLen + m,
-                            i2 = j * maxLen + n;
+                        const i1 = m * numCourses + i, // courses are in the columns
+                            i2 = n * numCourses + j;
 
                         const sec1 = secs1[m],
                             sec2 = secs2[n];
@@ -327,9 +327,9 @@ class ScheduleGenerator {
 
             // check conflict between the newly chosen section and the sections already in the schedule
             for (let i = 0; i < classNum; i++) {
-                const i1 = classNum * maxLen + choiceNum,
-                    i2 = i * maxLen + currentChoices[i];
-                if (conflictCache[i2 * sideLen + i1] || conflictCache[i1 * sideLen + i2]) {
+                if (conflictCache[
+                    (currentChoices[i] * numCourses + i) * sideLen + choiceNum * numCourses + classNum
+                ]) {
                     ++choiceNum;
                     continue outer;
                 }

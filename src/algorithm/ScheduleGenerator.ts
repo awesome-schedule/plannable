@@ -163,19 +163,14 @@ class ScheduleGenerator {
         // note: this makes the algorithm deterministic
         classList.sort((a, b) => a.length - b.length);
 
-        const evaluator = new ScheduleEvaluator(
-            this.options.sortOptions,
-            window.timeMatrix,
-            schedule.events
-        );
-        this.createSchedule(classList, evaluator);
+        const evaluator = this.createSchedule(classList, schedule.events);
 
         // free a little memory by removing the time amd room info,
         // which are no longer needed, from each section
         classList.forEach(sections => sections.forEach(section => section.splice(2)));
         console.timeEnd('running algorithm:');
 
-        const size = evaluator.size();
+        const size = evaluator.size;
         if (size > 0) {
             if (sort) evaluator.sort();
             return {
@@ -202,7 +197,7 @@ class ScheduleGenerator {
      * 1. Each course has no more than 255 sections
      * 2. Each section meets no more than 82 times in a week
      */
-    public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
+    public createSchedule(classList: RawAlgoCourse[][], events: Event[]) {
         /**
          * current course index
          */
@@ -364,20 +359,29 @@ class ScheduleGenerator {
         /**
          * the array buffer on which all `blocks` in the evaluator are allocated
          */
-        const blocksBuffer = new ArrayBuffer(byteOffset);
+        const blocksBuffer = new ArrayBuffer(byteOffset),
+            blocksArray: Int16Array[] = [];
+
         byteOffset = 0;
         for (let i = 0; i < count; i++) {
-            const s = [];
             // build the schedule from the choices
-            const start = i * numCourses;
-            for (let j = 0; j < numCourses; j++)
-                s.push(classList[j][allChoices[start + j]]);
-
-            // add the schedule to the evaluator
             const size = timeArrLensAll[i];
-            evaluator.add(s, blocksBuffer, byteOffset, size);
+            const blocks = new Int16Array(blocksBuffer, byteOffset, size);
+            blocksArray.push(blocks);
             byteOffset += size * 2;
+            // add the schedule to the evaluator
+            ScheduleEvaluator.sortBlocks(blocks, allChoices, classList, numCourses, i * numCourses);
         }
+
+        return new ScheduleEvaluator(
+            this.options.sortOptions,
+            window.timeMatrix,
+            events,
+            blocksArray,
+            classList,
+            allChoices.slice(0, count * numCourses) // only COPY the needed part,
+            // to allow the underlying buffer of the original array to be garbage collected
+        );
     }
 }
 

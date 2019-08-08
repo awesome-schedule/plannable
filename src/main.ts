@@ -11,9 +11,10 @@ import querystring from 'querystring';
 import Vue from 'vue';
 import 'vuetify/src/stylus/app.styl';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch, openLousList, openVAGrade } from './utils';
+import {routes} from './routes/index';
+import HomePage from './routes/HomePage.vue';
 
 import Vuetify, {
     VApp, // required
@@ -89,5 +90,13 @@ Vue.prototype.openVAGrade = openVAGrade;
 Vue.prototype.highlightMatch = highlightMatch;
 
 new Vue({
-    render: h => h(App)
+    data: {
+        currentRoute: window.location.pathname
+      },
+    render(h){
+        const matchingView = routes[this.currentRoute]
+        const component = matchingView ? matchingView : HomePage
+
+        console.log('route',this.currentRoute)
+        return h(component)}
 }).$mount('#app');

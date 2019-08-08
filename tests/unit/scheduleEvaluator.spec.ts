@@ -23,10 +23,12 @@ const schedules: RawAlgoSchedule = [
     ['6', [1], new Int16Array([8, 8, 14, 11, 11, 11, 11, 11, 250, 300, -1, 100, 200, -1]), [d1, d2]]
 ];
 
+const size = schedules.reduce((acc, x) => acc + (x[2].length - 8) * 2, 8 * 2);
+const buffer = new ArrayBuffer(size);
 describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
         const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
-        evaluator.add(schedules);
+        evaluator.add(schedules, buffer, 0, size / 2);
         const s = evaluator._schedules[0];
         const func = evaluator.sortFunctions.compactness.bind(evaluator);
         expect(func(s)).toBe(35 + 20 + 150 + 50 + 0 + 150);
@@ -34,7 +36,7 @@ describe('Schedule Evaluator Test', () => {
 
     it('Insertion Test', () => {
         const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
-        evaluator.add(schedules);
+        evaluator.add(schedules, buffer, 0, size / 2);
         const s = evaluator._schedules[0];
         console.info(s.blocks);
         expect(Array.from(s.blocks.slice(8, 20))).toEqual([

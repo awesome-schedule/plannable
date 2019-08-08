@@ -162,9 +162,7 @@ class ScheduleGenerator {
         }
         // note: this makes the algorithm deterministic
         classList.sort((a, b) => a.length - b.length);
-        console.timeEnd('algorithm bootstrapping');
 
-        console.time('running algorithm:');
         const evaluator = new ScheduleEvaluator(
             this.options.sortOptions,
             window.timeMatrix,
@@ -202,7 +200,6 @@ class ScheduleGenerator {
      * @requires optimization
      */
     public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
-        console.time('pre-computing conflict');
         /**
          * current course index
          */
@@ -271,6 +268,7 @@ class ScheduleGenerator {
          * the length of the sum of time arrays for each schedule
          */
         const timeArrLensAll = new Uint16Array(buffer, byteOffset);
+        
         for (let i = 0; i < numCourses; i++) {
             const secs = classList[i];
             const len = secs.length;
@@ -304,10 +302,20 @@ class ScheduleGenerator {
                 }
             }
         }
-        console.timeEnd('pre-computing conflict');
+        console.timeEnd('algorithm bootstrapping');
+        console.time('running algorithm:');
         outer: while (true) {
             if (classNum >= numCourses) {
-                allChoices.set(currentChoices, count * numCourses);
+                const start = count * numCourses;
+                // pre-calculate the length of the time arrays combined in each schedule
+                let sum = 8;
+                for (let j = 0; j < numCourses; j++)
+                    // also assign currentChoices to allChoices
+                    sum += timeArrLens[(allChoices[start + j] = currentChoices[j]) * numCourses + j] - 8;
+
+                timeArrLensAll[count] = sum;
+                byteOffset += sum * 2; // add to the total number of bytes
+
                 if (++count >= maxNumSchedules) break outer;
                 choiceNum = pathMemory[--classNum];
             }
@@ -341,24 +349,21 @@ class ScheduleGenerator {
             pathMemory[classNum++] = choiceNum + 1;
             choiceNum = 0;
         }
-        byteOffset = 0;
-        for (let i = 0; i < count; i++) {
-            const start = i * numCourses;
-            let sum = 8;
-            for (let j = 0; j < numCourses; j++)
-                sum += timeArrLens[allChoices[start + j] * numCourses + j] - 8;
-            timeArrLensAll[i] = sum;
-            byteOffset += sum * 2;
-        }
-        const blocksAll = new ArrayBuffer(byteOffset);
+        /**
+         * the array buffer on which all `blocks` in the evaluator are allocated
+         */
+        const blocksBuffer = new ArrayBuffer(byteOffset);
         byteOffset = 0;
         for (let i = 0; i < count; i++) {
             const s = [];
+            // build the schedule from the choices
             const start = i * numCourses;
             for (let j = 0; j < numCourses; j++)
-                s[j] = classList[j][allChoices[start + j]];
+                s.push(classList[j][allChoices[start + j]]);
+
+            // add the schedule to the evaluator
             const size = timeArrLensAll[i];
-            evaluator.add(s, blocksAll, byteOffset, size);
+            evaluator.add(s, blocksBuffer, byteOffset, size);
             byteOffset += size * 2;
         }
     }

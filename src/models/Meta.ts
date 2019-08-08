@@ -50,9 +50,9 @@ export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
 export type RawCourse = [string, number, number, string, string, string, RawSection[]];
 
 /**
- * 0: id
+ * 0: id (5 digit id for sis)
  *
- * 1: section
+ * 1: section (sid)
  *
  * 2: topic
  *

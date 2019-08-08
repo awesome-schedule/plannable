@@ -86,6 +86,7 @@ export default class CompareView extends Store {
     similarity(idx: number) {
         if (this.compare[idx].schedule.allEquals(window.similaritySchedule)) {
             window.similaritySchedule = {};
+            this.$forceUpdate();
             return;
         }
         const all = this.compare[idx].schedule.All;
@@ -104,6 +105,7 @@ export default class CompareView extends Store {
                 );
             }
         }
+        this.$forceUpdate();
     }
     isSimilarSchedule(idx: number) {
         const sche = this.compare[idx].schedule;

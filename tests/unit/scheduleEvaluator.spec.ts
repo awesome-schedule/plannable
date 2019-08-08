@@ -23,21 +23,24 @@ const schedules: RawAlgoSchedule = [
     ['6', [1], new Int16Array([8, 8, 14, 11, 11, 11, 11, 11, 250, 300, -1, 100, 200, -1]), [d1, d2]]
 ];
 
+const classList = Array.from({ length: 6 }, (_, i) => [schedules[i]]);
+const allChoices = new Uint8Array(6);
+
+const size = schedules.reduce((acc, x) => acc + (x[2].length - 8), 8);
+const blocks = new Int16Array(size);
 describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
         const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
-        evaluator.add(schedules);
-        const s = evaluator._schedules[0];
-        const func = evaluator.sortFunctions.compactness.bind(evaluator);
-        expect(func(s)).toBe(35 + 20 + 150 + 50 + 0 + 150);
+        const b = blocks.slice();
+        ScheduleEvaluator.sortBlocks(b, allChoices, classList, 6, 0);
+        const func = ScheduleEvaluator.sortFunctions.compactness.bind(evaluator);
+        expect(func(b)).toBe(35 + 20 + 150 + 50 + 0 + 150);
     });
 
     it('Insertion Test', () => {
-        const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
-        evaluator.add(schedules);
-        const s = evaluator._schedules[0];
-        console.info(s.blocks);
-        expect(Array.from(s.blocks.slice(8, 20))).toEqual([
+        const b = blocks.slice();
+        ScheduleEvaluator.sortBlocks(b, allChoices, classList, 6, 0);
+        expect(Array.from(b.slice(8, 20))).toEqual([
             10,
             15,
             -1,
@@ -51,7 +54,7 @@ describe('Schedule Evaluator Test', () => {
             450,
             -1
         ]);
-        expect(Array.from(s.blocks.slice(20))).toEqual([
+        expect(Array.from(b.slice(20))).toEqual([
             100,
             200,
             -1,

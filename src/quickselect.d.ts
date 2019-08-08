@@ -16,4 +16,21 @@ declare module 'quickselect' {
         right?: number,
         compare?: (x: T, y: T) => number
     ): void;
+    export default function quickselect(
+        arr:
+            | Int8Array
+            | Uint8Array
+            | Int16Array
+            | Uint16Array
+            | Int32Array
+            | Uint32Array
+            | Float32Array
+            | Float64Array
+            | BigInt64Array
+            | BigUint64Array,
+        k: number,
+        left?: number,
+        right?: number,
+        compare?: (x: number, y: number) => number
+    ): void;
 }

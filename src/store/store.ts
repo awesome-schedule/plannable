@@ -283,7 +283,7 @@ export default class Store extends Vue {
         const evaluator = msg.payload;
         if (evaluator) {
             window.scheduleEvaluator = evaluator;
-            this.schedule.numGenerated = evaluator.size();
+            this.schedule.numGenerated = evaluator.size;
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } else {

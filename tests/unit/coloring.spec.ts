@@ -1,3 +1,4 @@
+import { toNativeAdjList } from '@/algorithm';
 import * as Coloring from '@/algorithm/Coloring';
 
 function randGraph(numNodes: number, probConn: number) {
@@ -13,7 +14,7 @@ function randGraph(numNodes: number, probConn: number) {
             }
         }
     }
-    return graph.map(arr => new Int16Array(arr));
+    return toNativeAdjList(graph);
 }
 
 function verifyColoring(adjList: Int16Array[], colors: Int16Array) {
@@ -36,7 +37,7 @@ describe('graph verifier', () => {
 
         for (const numN of numNodes) {
             for (const prob of probConn) {
-                const adjList = randGraph(numN, prob);
+                const [adjList] = randGraph(numN, prob);
                 console.info('num nodes:', numN, 'prob conn:', prob);
 
                 const colors = new Int16Array(adjList.length);

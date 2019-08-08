@@ -198,6 +198,9 @@ class ScheduleGenerator {
      * classList[i][j] // represents the jth section of the ith class
      * ```
      * @requires optimization
+     * @remarks The use of data structure assumes that
+     * 1. Each course has no more than 255 sections
+     * 2. Each section meets no more than 82 times in a week
      */
     public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
         /**
@@ -228,47 +231,56 @@ class ScheduleGenerator {
          * the side length of the conflict cache matrix
          */
         const sideLen = maxLen * numCourses;
-        const buffer = new ArrayBuffer(
-            numCourses * 4 + sideLen ** 2 + numCourses * maxNumSchedules * 2
-            + maxLen * numCourses * 2 + maxNumSchedules * 2
-        );
-        let byteOffset = 0;
+        let byteOffset =
+            numCourses * 4 + // pathMemory + currentChoices
+            maxLen * numCourses * 2 + // timeArrLens
+            sideLen ** 2 + (sideLen ** 2) % 2 + // conflictCache
+            numCourses * maxNumSchedules * 2; // allChoices
+
+        byteOffset += byteOffset % 2 + maxNumSchedules * 2; // timeArrLensAll with byte alignment
+        const buffer = new ArrayBuffer(byteOffset);
+        byteOffset = 0;
         /**
          * record the index of sections that are already tested
          */
-        const pathMemory = new Uint16Array(buffer, byteOffset, numCourses);
-        byteOffset += numCourses * 2;
+        const pathMemory = new Uint8Array(buffer, byteOffset, numCourses);
+        byteOffset += numCourses;
         /**
          * the choiceNum array corresponding to the currentSchedule
          */
-        const currentChoices = new Uint16Array(buffer, byteOffset, numCourses);
-        byteOffset += numCourses * 2;
+        const currentChoices = new Uint8Array(buffer, byteOffset, numCourses);
+        byteOffset += numCourses;
         /**
-         * the conflict cache matrix. Columns are the courses
+         * the cache of the length of TimeArrays for each section
+         * | Sections | Course1 | Course 2 | ... |
+         * | -------- | ------- | -------- | --- |
+         * | Sec1     | 14      | 14       |     |
+         * | Sec2     | 14      | 17       |     |
+         * ...
+         * Columns are the courses
+         */
+        const timeArrLens = new Uint8Array(buffer, byteOffset, maxLen * numCourses);
+        byteOffset += maxLen * numCourses;
+        /**
+         * the conflict cache matrix, a 4d tensor. Indexed like this:
+         * ```js
+         * conflictCache[course1][section1][course2][section2]
+         * ```
          */
         const conflictCache = new Uint8Array(buffer, byteOffset, sideLen ** 2);
         byteOffset += sideLen ** 2;
         /**
          * the array of `choiceNum`s.
          */
-        const allChoices = new Uint16Array(buffer, byteOffset, numCourses * maxNumSchedules);
-        byteOffset += numCourses * maxNumSchedules * 2;
-        /**
-         * the cache of the length of time arrays for each section
-         * | Sections | Course1 | Course 2 | ... |
-         * | -------- | ------- | -------- | --- |
-         * | Sec1     | 56      | 72       |     |
-         * | Sec2     | 56      | 56       |     |
-         * ...
-         * Columns are the courses
-         */
-        const timeArrLens = new Uint16Array(buffer, byteOffset, maxLen * numCourses);
-        byteOffset += maxLen * numCourses * 2;
+        const allChoices = new Uint8Array(buffer, byteOffset, numCourses * maxNumSchedules);
+        byteOffset += numCourses * maxNumSchedules;
+        byteOffset += byteOffset % 2; // byte alignment
         /**
          * the length of the sum of time arrays for each schedule
          */
         const timeArrLensAll = new Uint16Array(buffer, byteOffset);
 
+        // compute timeArrLens
         for (let i = 0; i < numCourses; i++) {
             const secs = classList[i];
             const len = secs.length;

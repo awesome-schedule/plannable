@@ -24,6 +24,8 @@ import {
     TYPES_PARSE
 } from '../models/Meta';
 import { loadFromCache } from './Loader';
+import CatalogDB, { CourseTableItem, SectionTableItem, MeetingTableItem } from '@/database/CatalogDB';
+import Meeting from '@/models/Meeting';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -35,6 +37,7 @@ import { loadFromCache } from './Loader';
  * @param force force update
  */
 export function loadSemesterData(semester: SemesterJSON, force = false) {
+
     return loadFromCache<Catalog, CatalogJSON>(
         `${semester.id}data`,
         () => requestSemesterData(semester),
@@ -61,24 +64,65 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
         ? axios.post(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
-              stringify({
-                  Semester: semester.id,
-                  Group: 'CS',
-                  Description: 'Yes',
-                  submit: 'Submit Data Request',
-                  Extended: 'Yes'
-              })
-          ) // use the mirror/local dev server
+            `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
+            stringify({
+                Semester: semester.id,
+                Group: 'CS',
+                Description: 'Yes',
+                submit: 'Submit Data Request',
+                Extended: 'Yes'
+            })
+        ) // use the mirror/local dev server
         : axios.get(
-              `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
-          ));
+            `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
+        ));
     console.timeEnd(`request semester ${semester.name} data`);
 
     const parsed = parseSemesterData(res.data);
     const catalog = new Catalog(semester, parsed, new Date().toJSON());
     saveCatalog(catalog);
     return catalog;
+}
+
+export function parseSemesterData2() {
+    const db = new CatalogDB();
+    const rawCatalog: RawCatalog = {};
+    const sections = db.sections;
+    const meetings = db.meetings;
+    db.courses.each(crs => {
+        const sectionArr: RawSection[] = [];
+        crs.sections.map(sid => sections.get(sid).then(sec => {
+            if (!sec) return;
+            const meetingArr: RawMeeting[] = [];
+            sec.meetings.map(mid => meetings.get(mid).then(mt => {
+                if (!mt) return;
+                meetingArr.push([mt.instructor, mt.days, mt.room] as RawMeeting);
+            }));
+            const rawSec = [
+                sec.id as number,
+                sec.sid,
+                sec.topic,
+                sec.status,
+                sec.enrollment,
+                sec.enrollment_limit,
+                sec.wait_list,
+                sec.date,
+                sec.valid,
+                meetingArr
+            ] as RawSection;
+            sectionArr.push(rawSec);
+        }));
+
+        rawCatalog[crs.department + crs.number + crs.type] = [
+            crs.department,
+            crs.number,
+            crs.type,
+            crs.units,
+            crs.title,
+            crs.description,
+            sectionArr
+        ];
+    });
 }
 
 export function parseSemesterData(csv_string: string) {

@@ -139,7 +139,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
         return this._maxNumSchedules;
     }
     set maxNumSchedules(x) {
-        this._maxNumSchedules = bound(x, 1000, 2000000);
+        this._maxNumSchedules = bound(x, 1000, 5000000);
     }
     get earliest() {
         return this._earliest;

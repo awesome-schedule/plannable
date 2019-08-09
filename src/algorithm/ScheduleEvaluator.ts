@@ -70,17 +70,18 @@ class ScheduleEvaluator {
          *
          * returns a higher value when the class times are unbalanced
          */
-        variance(this: ScheduleEvaluator, blocks: TimeArray) {
-            let sum = 0;
-            let sumSq = 0;
-            for (let i = 0; i < 7; i++) {
-                const end = blocks[i + 1];
+        variance(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
+            let sum = 0,
+                sumSq = 0;
+            const oEnd = offset + 7;
+            for (let i = offset; i < oEnd ; i++) {
+                const end = offset + blocks[i + 1];
                 let classTime = 0;
-                for (let j = blocks[i]; j < end; j += 3) {
+                for (let j = blocks[i] + offset; j < end; j += 3) {
                     classTime += blocks[j + 1] - blocks[j];
                 }
                 sum += classTime;
-                sumSq += classTime ** 2;
+                sumSq += classTime * classTime;
             }
             return sumSq / 5 - (sum / 5) ** 2;
         },
@@ -91,11 +92,12 @@ class ScheduleEvaluator {
          *
          * The greater the time gap between classes, the greater the return value will be
          */
-        compactness(this: ScheduleEvaluator, blocks: TimeArray) {
+        compactness(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
             let compact = 0;
-            for (let i = 0; i < 7; i++) {
-                const end = blocks[i + 1] - 5;
-                for (let j = blocks[i]; j < end; j += 3) {
+            const oEnd = offset + 7;
+            for (let i = offset; i < oEnd ; i++) {
+                const end = offset + blocks[i + 1] - 5;
+                for (let j = blocks[i] + offset; j < end; j += 3) {
                     compact += blocks[j + 3] - blocks[j + 1];
                 }
             }
@@ -108,15 +110,16 @@ class ScheduleEvaluator {
          *
          * The greater the overlap, the greater the return value will be
          */
-        lunchTime(this: ScheduleEvaluator, blocks: TimeArray) {
+        lunchTime(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
             // 11:00 to 14:00
             let totalOverlap = 0;
-            for (let i = 0; i < 7; i++) {
-                const end = blocks[i + 1];
+            const oEnd = offset + 7;
+            for (let i = offset; i < oEnd; i++) {
+                const end = blocks[i + 1] + offset;
                 let dayOverlap = 0;
-                for (let j = blocks[i]; j < end; j += 3) {
+                for (let j = blocks[i] + offset; j < end; j += 3) {
                     // 11:00 to 14:00
-                    dayOverlap += Math.max(calcOverlap(660, 840, blocks[j], blocks[j + 1]), 0);
+                    dayOverlap += calcOverlap(660, 840, blocks[j], blocks[j + 1]);
                 }
 
                 if (dayOverlap > 60) totalOverlap += dayOverlap;
@@ -129,14 +132,15 @@ class ScheduleEvaluator {
          *
          * For a schedule that has earlier classes, this method will return a higher number
          */
-        noEarly(this: ScheduleEvaluator, blocks: TimeArray) {
-            const refTime = 12 * 60;
+        noEarly(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
+            const refTime = 12 * 60,
+                  oEnd = offset + 7;
             let total = 0;
-            for (let i = 0; i < 7; i++) {
+            for (let i = offset; i < oEnd; i++) {
                 const start = blocks[i],
                     end = blocks[i + 1];
-                if (end > start) {
-                    const time = blocks[start];
+                if (end > start) { // if this day is not empty
+                    const time = blocks[start + offset];
                     total += Math.max(refTime - time, 0) ** 2;
                 }
             }
@@ -146,15 +150,16 @@ class ScheduleEvaluator {
         /**
          * compute the sum of walking distances between each consecutive pair of classes
          */
-        distance(this: ScheduleEvaluator, blocks: TimeArray) {
+        distance(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
             const timeMatrix = this.timeMatrix;
 
             // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
-            const len = timeMatrix.length ** 0.5;
+            const len = timeMatrix.length ** 0.5,
+                  oEnd = offset + 7;
             let dist = 0;
-            for (let i = 0; i < 7; i++) {
-                const end = blocks[i + 1] - 5;
-                for (let j = blocks[i]; j < end; j += 3) {
+            for (let i = offset; i < oEnd; i++) {
+                const end = blocks[i + 1] + offset - 5;
+                for (let j = blocks[i] + offset; j < end; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
                     if (blocks[j + 3] - blocks[j + 1] < 45) {
                         const r1 = blocks[j + 2],
@@ -171,12 +176,15 @@ class ScheduleEvaluator {
         /**
          * need optimization (e.g. sort schedule and similarity schedule at first)
          */
-        similarity(this: ScheduleEvaluator, start: number, len: number) {
-            const sim = window.similaritySchedule;
-            const classList = this.classList;
+        similarity(this: ScheduleEvaluator, start: number) {
+            const sim = window.similaritySchedule,
+                  classList = this.classList,
+                  allChoices = this.allChoices;
+            const numCourses = classList.length;
             let sum = 0;
-            for (let j  = 0; j < len; j++) {
-                const course = classList[j][start + j];
+            start *= numCourses;
+            for (let j  = 0; j < numCourses; j++) {
+                const course = classList[j][allChoices[start + j]];
                 const key = sim[course[0]];
                 if (key) {
                     for (const sid of course[1]) {
@@ -197,31 +205,39 @@ class ScheduleEvaluator {
     };
     public static sortBlocks(
         blocks: Int16Array, allChoices: Uint8Array,
-        classList: RawAlgoCourse[][], numCourses: number, start: number
+        classList: TimeArray[][], offset: number, idx: number
     ) {
-        let size = 8;
+        const numCourses = classList.length,
+              start = idx * numCourses;
+        let bound = 8; // size does not contain offset
+        // no offset in j because arr2 also needs it
         for (let j = 0; j < 7; j++) {
             // start of the current day
-            const s1 = (blocks[j] = size);
+            const s1 = (blocks[j + offset] = bound);
             for (let k = 0; k < numCourses; k++) {
-                const arr2 = classList[k][allChoices[start + k]][2];
+                const arr2 = classList[k][allChoices[start + k]];
                 const e2 = arr2[j + 1];
                 // insertion sort
-                for (let n = arr2[j]; n < e2; n += 3, size += 3) {
-                    let p = s1;
-                    const vToBeInserted = arr2[n];
-                    for (; p < size; p += 3) {
+                for (let n = arr2[j]; n < e2; n += 3, bound += 3) {
+                    // p already contains offset
+                    let p = s1 + offset;
+                    const vToBeInserted = arr2[n],
+                          realBound = bound + offset;
+                    for (; p < realBound; p += 3) {
                         if (vToBeInserted < blocks[p]) break;
                     }
                     // move elements 3 slots toward the end
-                    blocks.copyWithin(p + 3, p, size);
-                    // insert three elements
+                    // same as `blocks.copyWithin(p + 3, p, realBound);`, but faster
+                    for (let m = p; m < realBound; m++) blocks[m + 3] = blocks[m];
+                    // insert three elements at p
                     blocks[p] = vToBeInserted;
                     blocks[p + 1] = arr2[n + 1];
                     blocks[p + 2] = arr2[n + 2];
                 }
             }
         }
+        blocks[offset + 7] = bound;
+        return bound;
     }
     /**
      * the cache of coefficient array for each evaluating function
@@ -235,6 +251,11 @@ class ScheduleEvaluator {
      * the coefficient array
      */
     public coeffs: Float32Array;
+    /**
+     * the indices of the schedules in insertion order.
+     * It is simply a range from 0 to `this.size`
+     */
+    private _indices: Uint32Array;
 
     /**
      * @param options
@@ -244,12 +265,18 @@ class ScheduleEvaluator {
         public options: Readonly<EvaluatorOptions>,
         public timeMatrix: Readonly<Int32Array>,
         public events: Event[] = [],
-        public blocks: Int16Array[] = [],
         public classList: RawAlgoCourse[][] = [],
-        public allChoices: Uint8Array = new Uint8Array()
+        public offsets = new Uint32Array(),
+        public blocks = new Int16Array(),
+        public allChoices = new Uint8Array()
     ) {
-        this.indices = Uint32Array.from({length: blocks.length}, (_, i) => i);
-        this.coeffs = new Float32Array(blocks.length);
+        const len = offsets.length;
+        const _indices = new Uint32Array(len);
+        for (let i = 0; i < len; i++) _indices[i] = i;
+
+        this._indices = _indices;
+        this.indices = _indices.slice();
+        this.coeffs = new Float32Array(offsets.length);
     }
 
     get size() {
@@ -281,14 +308,14 @@ class ScheduleEvaluator {
         } else {
             console.time(funcName);
             const newCache = new Float32Array(len);
-            const blocks = this.blocks;
+            const blocks = this.blocks,
+                  offsets = this.offsets;
             if (funcName === 'similarity') {
                 const evalFunc = ScheduleEvaluator.sortFunctions[funcName].bind(this);
-                const numCourses = this.classList.length;
-                for (let i = 0; i < len; i++) newCache[i] = evalFunc(i * numCourses, numCourses);
+                for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
             } else {
                 const evalFunc = ScheduleEvaluator.sortFunctions[funcName].bind(this);
-                for (let i = 0; i < len; i++) newCache[i] = evalFunc(blocks[i]);
+                for (let i = 0; i < len; i++) newCache[i] = evalFunc(blocks, offsets[i]);
             }
             this.sortCoeffCache[funcName] = newCache;
             if (assign) this.coeffs.set(newCache);
@@ -404,6 +431,7 @@ class ScheduleEvaluator {
         this.computeCoeff();
 
         console.time('sorting: ');
+        this.indices.set(this._indices);
         if (this.isRandom()) {
             this.shuffle(this.indices);
             console.timeEnd('sorting: ');

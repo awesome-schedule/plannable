@@ -7,6 +7,7 @@
 /**
  *
  */
+import CatalogDB from '@/database/CatalogDB';
 import { ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
@@ -24,8 +25,6 @@ import {
     TYPES_PARSE
 } from '../models/Meta';
 import { loadFromCache } from './Loader';
-import CatalogDB, { CourseTableItem, SectionTableItem, MeetingTableItem } from '@/database/CatalogDB';
-import Meeting from '@/models/Meeting';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -84,7 +83,49 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
     return catalog;
 }
 
-export function parseSemesterData2() {
+export async function getSemesterData(currentSemester: SemesterJSON, force = false) {
+    const t = localStorage.getItem('idbTimestamp');
+    if (!t || +t - (new Date).getTime() > 60 * 60 * 1000 || force) {
+        const db = new CatalogDB();
+        await db.courses.clear();
+        await db.sections.clear();
+        await db.meetings.clear();
+        await requestSemesterDataAndStore();
+    }
+    return retrieveFromDB();
+}
+
+export async function requestSemesterDataAndStore() {
+    const semester = window.catalog.semester;
+    console.time(`request semester ${semester.name} data`);
+
+    const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
+        ? axios.post(
+            `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
+            stringify({
+                Semester: semester.id,
+                Group: 'CS',
+                Description: 'Yes',
+                submit: 'Submit Data Request',
+                Extended: 'Yes'
+            })
+        ) // use the mirror/local dev server
+        : axios.get(
+            `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
+        ));
+    console.timeEnd(`request semester ${semester.name} data`);
+    const data: string[][] = parse(res.data, {
+        skipEmptyLines: true,
+        header: false
+    }).data;
+
+}
+
+export function parseSemesterData2(data: string[][]) {
+
+}
+
+export function retrieveFromDB() {
     const db = new CatalogDB();
     const rawCatalog: RawCatalog = {};
     const sections = db.sections;
@@ -123,6 +164,7 @@ export function parseSemesterData2() {
             sectionArr
         ];
     });
+    return rawCatalog;
 }
 
 export function parseSemesterData(csv_string: string) {

@@ -358,7 +358,7 @@ class ScheduleGenerator {
          */
         const offsets = new Uint32Array(buf, 0, count);
         /**
-         * the array buffer on which all `blocks` in the evaluator are allocated
+         * the array on which all `blocks` in the evaluator are allocated
          */
         const blocks = new Int16Array(buf, count * 4);
         byteOffset = 0;

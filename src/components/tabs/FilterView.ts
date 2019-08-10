@@ -1,6 +1,10 @@
 /**
  * @module components/tabs
  */
+
+/**
+ *
+ */
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
@@ -9,6 +13,7 @@ import draggable from 'vuedraggable';
 /**
  * the component for editing and applying filters
  * @author Hanzhi Zhou, Kaiying Shan
+ * @noInheritDoc
  */
 @Component({
     components: {

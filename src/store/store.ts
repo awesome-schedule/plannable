@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import lz from 'lz-string';
 
 import Expirable from '@/data/Expirable';

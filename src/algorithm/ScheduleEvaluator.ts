@@ -265,7 +265,13 @@ class ScheduleEvaluator {
 
     /**
      * @param options
+     * @param timeMatrix see [[Window.timeMatrix]]
      * @param events the array of events kept, use to construct generated schedules
+     * @param classList the 2d array of (combined) sections
+     * @param offsets the offsets into the `blocks`
+     * @param blocks array of [[TimeArray]]s concatenated together
+     * @param allChoices array of `currentChoices` concatenated together
+     * @param refSchedule the reference schedule used by the [[ScheduleEvaluator.similarity]] sort function
      */
     constructor(
         public options: Readonly<EvaluatorOptions>,

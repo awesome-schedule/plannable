@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
 

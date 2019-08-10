@@ -1,7 +1,10 @@
 /**
  * @module components/tabs
  */
-import Course from '@/models/Course';
+
+/**
+ *
+ */
 import Schedule from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';
@@ -13,6 +16,7 @@ import MainContent from '../MainContent.vue';
 /**
  * component for comparing multiple schedules
  * @author Kaiying Shan, Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component({
     components: {

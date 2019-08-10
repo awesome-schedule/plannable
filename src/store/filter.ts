@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import { to12hr } from '@/utils';

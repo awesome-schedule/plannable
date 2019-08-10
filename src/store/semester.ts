@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import { fallback } from '@/data/Loader';
 import { loadSemesterList } from '@/data/SemesterListLoader';
 import { CancelablePromise } from '@/utils';

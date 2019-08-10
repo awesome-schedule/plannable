@@ -8,7 +8,7 @@
         "lint": "vue-cli-service lint",
         "test": "jest",
         "tslint": "tslint --project . --fix",
-        "tsdoc": "typedoc --plugin typedoc-plugin-external-module-name --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
+        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
         "exec": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"}",
         "postinstall": "patch-package"
     },
@@ -65,6 +65,7 @@
         "ts-node": "^8.3.0",
         "typedoc": "^0.15.0",
         "typedoc-plugin-external-module-name": "^2.1.0",
+        "typedoc-plugin-no-inherit": "^1.1.9",
         "typescript": "^3.5.3",
         "vue-class-component": "^7.1.0",
         "vue-property-decorator": "^8.2.1",

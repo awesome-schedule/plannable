@@ -23,7 +23,7 @@ declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] 
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
-let descripSearcher: _Searcher<Course>;
+let descriptionSearcher: _Searcher<Course>;
 let topicSearcher: _Searcher<Section>;
 let instrSearcher: _Searcher<Section>;
 const searcherOpts = {
@@ -89,7 +89,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             ...searcherOpts,
             keySelector: obj => obj.title
         });
-        descripSearcher = new Searcher(courses, {
+        descriptionSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.description
         });
@@ -126,7 +126,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             const q = querySeg[j];
             const last = j === querySeg.length - 1;
 
-            const coursesResults = [titleSearcher.search(q), descripSearcher.search(q)];
+            const coursesResults = [titleSearcher.search(q), descriptionSearcher.search(q)];
             const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
 
             // map search result to course (or section) and record the match score

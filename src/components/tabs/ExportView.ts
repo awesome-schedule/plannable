@@ -1,6 +1,10 @@
 /**
  * @module components/tabs
  */
+
+/**
+ *
+ */
 import { backend } from '@/config';
 import Store, { compressJSON, SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
@@ -12,6 +16,7 @@ import { Component } from 'vue-property-decorator';
  * component for import/export/print schedules and managing profiles
  * @author Hanzhi Zhou, Kaiying Shan
  * @todo credential safety
+ * @noInheritDoc
  */
 @Component
 export default class ExportView extends Store {

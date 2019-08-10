@@ -264,7 +264,11 @@ class ScheduleGenerator {
         /**
          * the conflict cache matrix, a 4d tensor. Indexed like this:
          * ```js
-         * conflictCache[course1][section1][course2][section2]
+         * conflictCache[section1][course1][section2][course2]
+         * ```
+         * which translates to
+         * ```js
+         * conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
          * ```
          */
         const conflictCache = new Uint8Array(buffer, byteOffset, sideLen ** 2);
@@ -352,6 +356,9 @@ class ScheduleGenerator {
         console.timeEnd('running algorithm:');
         console.time('add to eval');
 
+        /**
+         * the buffer which stores the `offsets` and `blocks`
+         */
         const buf = new ArrayBuffer(count * 4 + byteOffset * 2);
         /**
          * the cumulative length of the time arrays for each schedule

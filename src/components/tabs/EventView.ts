@@ -1,6 +1,10 @@
 /**
  * @module components/tabs
  */
+
+/**
+ *
+ */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import Store from '@/store';
@@ -10,6 +14,7 @@ import { Component, Watch } from 'vue-property-decorator';
 /**
  * the component for adding and editing events
  * @author Kaiying Shan, Hanzhi Zhou, Zichao Hu
+ * @noInheritDoc
  */
 @Component
 export default class EventView extends Store {

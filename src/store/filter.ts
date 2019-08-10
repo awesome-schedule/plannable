@@ -7,7 +7,7 @@
  */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
-import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
+import Schedule, { ScheduleAll, SectionJSON, SectionJSONShort } from '@/models/Schedule';
 import { to12hr } from '@/utils';
 import { StoreModule } from '.';
 import ScheduleEvaluator, {
@@ -16,7 +16,7 @@ import ScheduleEvaluator, {
     SortMode,
     SortOption
 } from '../algorithm/ScheduleEvaluator';
-import { NotiMsg } from './notification';
+import noti, { NotiMsg } from './notification';
 
 interface FilterStateBase {
     readonly timeSlots: TimeSlot[];
@@ -79,6 +79,7 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
  * 8: end time, of 24 hour format
  */
 export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
+export type TimeSlotShort = [number, number, number, number, number, number, number, string, string];
 
 /**
  * a list of sort options with default values assigned
@@ -188,7 +189,9 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.tim
  * @author Hanzhi Zhou
  */
 export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
-    public static compressJSON(obj: FilterStateJSON) {
+    public static compressJSON(obj: FilterStateJSON): readonly [
+        number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort[]>
+    ] {
         // convert allowClosed, allowWaitlist, mode to binary
         let filterBits = 0;
         if (obj.allowClosed) filterBits += 2 ** 0;
@@ -210,15 +213,17 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             if (sortBy.reverse) sortBits |= mask;
             mask <<= 1;
         }
-        const schedule = Schedule.fromJSON({All: obj.refSchedule, events: []})!;
+        const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule, events: []});
+        if (level === 'warn')
+            noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
         return [
             filterBits,
             sortBits,
             initials,
             // convert bool to 0 or 1
-            obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x)),
-            Schedule.compressJSON(schedule.toJSON())
-        ] as const;
+            obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x) as TimeSlotShort),
+            schedule && level !== 'warn' ? Schedule.compressJSON(schedule.toJSON())[0] : {}
+        ];
     }
 
     public static decompressJSON(obj: ReturnType<typeof FilterStore.compressJSON>) {
@@ -252,8 +257,8 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             sortCopy.push(sortOpt);
         }
         filter.sortOptions.sortBy = sortCopy;
-        const schedule = Schedule.fromJSON(Schedule.decompressJSON(ref));
-        if (schedule) filter.refSchedule = schedule.All;
+        const {payload: schedule, level} = Schedule.fromJSON(Schedule.decompressJSON([ref]));
+        if (schedule && level !== 'warn') filter.refSchedule = schedule.All;
         return filter.toJSON();
     }
 
@@ -344,16 +349,16 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
 
-        const ref = Schedule.fromJSON({All: obj.refSchedule || {}, events: []});
-        this.refSchedule = ref && ref.All ? ref.All : defaultVal.refSchedule ;
+        const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule || {}, events: []});
+        if (level === 'warn')
+            noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
+        this.refSchedule = schedule && level !== 'warn' ? schedule.All : defaultVal.refSchedule ;
     }
 
     toJSON(): FilterStateJSON {
         // exclude sort modes
         const { sortModes, refSchedule: ref, ...others } = this;
-        const schedule = new Schedule();
-        schedule.All = ref;
-        const refSchedule = schedule.toJSON().All;
+        const refSchedule = new Schedule(ref).toJSON().All;
         return { refSchedule, ...others };
     }
 

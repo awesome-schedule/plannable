@@ -7,7 +7,7 @@
 /**
  *
  */
-import noti from '@/store/notification';
+import { NotiMsg } from '@/store/notification';
 import { colorDepthSearch, DFS, graphColoringExact, toNativeAdjList } from '../algorithm';
 import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
@@ -100,8 +100,11 @@ export default class Schedule {
      * instantiate a `Schedule` object from its JSON representation.
      * the `computeSchedule` method will be invoked
      */
-    public static fromJSON(obj?: ScheduleJSON): Schedule | null {
-        if (!obj) return null;
+    public static fromJSON(obj?: ScheduleJSON): NotiMsg<Schedule> {
+        if (!obj) return {
+            level: 'error',
+            msg: 'Invalid object'
+        };
         const schedule = new Schedule();
         if (obj.events)
             schedule.events = obj.events.map(x =>
@@ -109,8 +112,13 @@ export default class Schedule {
             );
 
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
-        if (keys.length === 0) return schedule;
+        if (keys.length === 0) return {
+            level: 'success',
+            msg: 'Empty schedule',
+            payload: schedule
+        };
 
+        const warnings = [];
         const catalog = window.catalog;
         const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
         // convert array to set
@@ -123,11 +131,12 @@ export default class Schedule {
             let convKey = key;
             if (parts && parts.length === 4) {
                 parts[3] = TYPES[+parts[3]];
+                parts[1] = parts[1].toUpperCase();
                 convKey = parts.slice(1).join(' ');
             }
             // non existent course
             if (!course) {
-                noti.warn(`${convKey} does not exist anymore! It probably has been removed!`);
+                warnings.push(`${convKey} does not exist anymore! It probably has been removed!`);
                 continue;
             }
             const allSections = course.sections;
@@ -142,7 +151,7 @@ export default class Schedule {
                             secs.filter(sid => {
                                 // sid >= length possibly implies that section is removed from SIS
                                 if (sid >= allSections.length) {
-                                    noti.warn(
+                                    warnings.push(
                                         `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
                                     );
                                 }
@@ -158,12 +167,11 @@ export default class Schedule {
                             );
                             if (idx !== -1) set.add(idx);
                             // if not, it possibly means that section is removed from SIS
-                            else
-                                noti.warn(
-                                    `Section ${
+                            else warnings.push(
+                                `Section ${
                                     record.section
                                     } of ${convKey} does not exist anymore! It probably has been removed!`
-                                );
+                            );
                         }
                         schedule.All[key] = set;
                     }
@@ -174,7 +182,19 @@ export default class Schedule {
         }
         schedule.constructDateSeparator();
         schedule.computeSchedule();
-        return schedule;
+        if (warnings.length) {
+            return {
+                level: 'warn',
+                payload: schedule,
+                msg: warnings.join('<br>')
+            };
+        } else {
+            return {
+                level: 'success',
+                payload: schedule,
+                msg: 'Success'
+            };
+        }
     }
 
     /**
@@ -243,7 +263,7 @@ export default class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw_schedule: RawAlgoSchedule = [], public events: Event[] = []) {
+    constructor(raw: RawAlgoSchedule | ScheduleAll = [], public events: Event[] = []) {
         this.All = {};
         this.days = [[], [], [], [], [], [], []];
         this._preview = null;
@@ -251,8 +271,12 @@ export default class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
-        for (const [key, sections] of raw_schedule) {
-            this.All[key] = new Set(sections);
+        if (raw instanceof Array) {
+            for (const [key, sections] of raw) {
+                this.All[key] = new Set(sections);
+            }
+        } else {
+            this.All = raw;
         }
         this.constructDateSeparator();
         this.computeSchedule();
@@ -337,6 +361,7 @@ export default class Schedule {
             }
         }
         this.events.push(newEvent);
+        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -771,11 +796,7 @@ export default class Schedule {
             }
         }
         // note: is it desirable to deep-copy all the events?
-        const cpy = new Schedule([], deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
-        cpy.All = AllCopy;
-        cpy.constructDateSeparator();
-        cpy.computeSchedule();
-        return cpy;
+        return new Schedule(AllCopy, deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
     }
 
     /**

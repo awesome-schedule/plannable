@@ -22,7 +22,7 @@ describe('Schedule Test', () => {
         const json = `{"All":{"cs21505":[0],"cs21504":[1], "cs11105": -1},
         "id":1,"title":"Schedule","events":[],"savedColors":{"cs21505":"#af2007","cs21504":"#068239"}}`;
         const parsed = JSON.parse(json);
-        const schedule = Schedule.fromJSON(parsed)!;
+        const schedule = Schedule.fromJSON(parsed).payload!;
         expect(schedule).toBeTruthy();
         expect(schedule.All).toEqual({
             cs21505: new Set([0]),
@@ -30,14 +30,14 @@ describe('Schedule Test', () => {
             cs11105: -1
         });
 
-        expect(schedule.fromJSON()).toBeFalsy();
+        expect(schedule.fromJSON().payload).toBeFalsy();
         expect(
             schedule
                 .fromJSON({
                     All: {},
                     events: []
-                })!
-                .empty()
+                })
+                .payload!.empty()
         ).toBe(true);
     });
 
@@ -46,7 +46,7 @@ describe('Schedule Test', () => {
         let json = `
         {"All":{"cs21025":-1,"cs21105":[{"id":15486,"section":"001"}]},"id":0,"title":"Schedule","events":[]}`;
         let parsed = JSON.parse(json);
-        let schedule = Schedule.fromJSON(parsed)!;
+        let schedule = Schedule.fromJSON(parsed).payload!;
         expect(schedule).toBeTruthy();
         expect(schedule.empty()).toBeFalsy();
 
@@ -56,7 +56,7 @@ describe('Schedule Test', () => {
         "cs213123123": [1], "cs11105": [999],
         "cs21505": [{"id": "asd", "section": "invalid section"}]},"id":0,"title":"Schedule","events":[]}`;
         parsed = JSON.parse(json);
-        schedule = Schedule.fromJSON(parsed)!;
+        schedule = Schedule.fromJSON(parsed).payload!;
     });
 
     it('add/update course/events', () => {

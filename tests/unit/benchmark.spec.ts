@@ -20,8 +20,7 @@ test('algorithm benchmark', () => {
 
     const generator = new ScheduleGenerator(catalog, buildingList, options);
     expect(typeof generator.createSchedule).toBe('function');
-    const schedule = new Schedule();
-    schedule.All = {
+    const schedule = new Schedule({
         cs11105: -1,
         cs11104: -1,
         enwr15107: -1,
@@ -30,7 +29,7 @@ test('algorithm benchmark', () => {
         chem14105: -1,
         chem14101: -1,
         cs21025: -1
-    };
+    });
     // const sort = options.sortOptions;
     // sort.sortBy[0].enabled = true;
     // sort.sortBy[1].enabled = true;

@@ -130,7 +130,7 @@ export function checkTimeConflict(
  * @param date
  */
 export function parseDate(date: string): MeetingDate | undefined {
-    if (!date) date = '';
+    if (typeof date !== 'string') date = '';
     const [start, end] = date.split(' - ');
     if (!start || !end) return;
     // start month / start day / start year

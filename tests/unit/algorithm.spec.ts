@@ -28,8 +28,7 @@ describe('ScheduleGenerator Test', () => {
 
         const generator = new ScheduleGenerator(catalog, buildingList, options);
         expect(typeof generator.createSchedule).toBe('function');
-        const schedule = new Schedule();
-        schedule.All = {
+        const schedule = new Schedule({
             cs11105: -1,
             cs11104: -1,
             ece23305: -1,
@@ -38,7 +37,7 @@ describe('ScheduleGenerator Test', () => {
             apma31105: -1,
             phys24194: -1,
             kine11005: -1
-        };
+        });
         let sort = options.sortOptions;
         sort.sortBy[0].enabled = true;
         sort.sortBy[1].enabled = true;

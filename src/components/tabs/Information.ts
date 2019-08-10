@@ -116,7 +116,7 @@ export default class Information extends Vue {
             src: this.imgPath('exportJson1.png')
         },
         {
-            title: 'Save it somethere you can find',
+            title: 'Save it somewhere you can find',
             src: this.imgPath('exportJson2.png')
         },
         {

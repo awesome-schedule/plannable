@@ -16,12 +16,13 @@ import draggable from 'vuedraggable';
     }
 })
 export default class FilterView extends Store {
+
     get days() {
         return DAYS;
     }
 
     get enableSimilarity() {
-        return window.similaritySchedule && Object.keys(window.similaritySchedule).length > 0;
+        return window.scheduleEvaluator.refSchedule && Object.keys(window.scheduleEvaluator.refSchedule).length > 0;
     }
 
     dragEnd() {

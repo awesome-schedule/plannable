@@ -55,6 +55,18 @@
                     </div>
                 </li>
             </ul>
+            <div class="btn bg-info nav-btn mt-1">
+                Sort by Similarity to Another Schedule
+            </div>
+            <ul class="list-group list-group-flush mx-1">
+                <li v-if="enableSimilarity()" class="list-group-item">
+                    {{ refSchedule }}
+                </li>
+                <li v-else class="list-group-item">
+                    Select "preferred" for any schedule in the compare list to enable sort by
+                    similarity to the selected schedule.
+                </li>
+            </ul>
         </nav>
         <main-content>
             <grid-schedule :current-schedule="compareSchedule"></grid-schedule>

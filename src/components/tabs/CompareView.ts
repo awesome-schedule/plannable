@@ -26,6 +26,22 @@ export default class CompareView extends Store {
     created() {
         this.renderSchedule();
     }
+
+    enableSimilarity() {
+        return window.scheduleEvaluator.refSchedule && Object.keys(window.scheduleEvaluator.refSchedule).length > 0;
+    }
+
+    get refSchedule() {
+        let info = '';
+        const ref = window.scheduleEvaluator.refSchedule;
+        for (const key in ref) {
+            const crs = window.catalog.getCourse(key, ref[key]);
+            info += `${crs.department} ${crs.number}-${crs.sections.map(s => s.section)
+                .reduce((x, a) => a + '/' + x)} ${crs.title}\n`;
+        }
+        return info;
+    }
+
     renderSchedule() {
         this.compareSchedule = new Schedule();
         for (let i = 0; i < this.compare.length; i++) {

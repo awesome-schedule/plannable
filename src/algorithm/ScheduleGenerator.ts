@@ -88,7 +88,7 @@ class ScheduleGenerator {
     constructor(
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: readonly string[],
-        public readonly options: GeneratorOptions
+        public readonly options: GeneratorOptions,
     ) { }
 
     /**
@@ -100,7 +100,8 @@ class ScheduleGenerator {
      *
      * @see [[ScheduleEvaluator]]
      */
-    public getSchedules(schedule: Schedule, sort = true): NotiMsg<ScheduleEvaluator> {
+    public getSchedules(schedule: Schedule, sort = true, refSchedule?: ScheduleAll<Set<number>>)
+        : NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
 
         // convert events to TimeArrays so that we can easily check for time conflict
@@ -171,7 +172,7 @@ class ScheduleGenerator {
             timeArrayList.push(timeArrays);
             dateList.push(dates);
         }
-        const evaluator = this.createSchedule(classList, timeArrayList, dateList, schedule.events);
+        const evaluator = this.createSchedule(classList, timeArrayList, dateList, schedule.events, refSchedule);
         const size = evaluator.size;
         if (size > 0) {
             if (sort) evaluator.sort();
@@ -203,7 +204,8 @@ class ScheduleGenerator {
         classList: RawAlgoCourse[][],
         timeArrayList: TimeArray[][],
         dateList: MeetingDate[][],
-        events: Event[]
+        events: Event[],
+        refSchedule?: ScheduleAll<Set<number>>
     ) {
         /**
          * current course index
@@ -379,6 +381,7 @@ class ScheduleGenerator {
             blocks,
             allChoices.slice(0, count * numCourses), // only COPY the needed part,
             // to allow the underlying buffer of the original array to be garbage collected
+            refSchedule
         );
     }
 }

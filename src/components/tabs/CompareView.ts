@@ -115,6 +115,7 @@ export default class CompareView extends Store {
             }
         }
         this.$forceUpdate();
+        this.saveStatus();
     }
     isSimilarSchedule(idx: number) {
         return this.compare[idx].schedule.allEquals(window.scheduleEvaluator.refSchedule);

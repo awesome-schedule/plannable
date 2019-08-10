@@ -74,7 +74,7 @@ class ScheduleEvaluator {
             let sum = 0,
                 sumSq = 0;
             const oEnd = offset + 7;
-            for (let i = offset; i < oEnd ; i++) {
+            for (let i = offset; i < oEnd; i++) {
                 const end = offset + blocks[i + 1];
                 let classTime = 0;
                 for (let j = blocks[i] + offset; j < end; j += 3) {
@@ -95,7 +95,7 @@ class ScheduleEvaluator {
         compactness(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
             let compact = 0;
             const oEnd = offset + 7;
-            for (let i = offset; i < oEnd ; i++) {
+            for (let i = offset; i < oEnd; i++) {
                 const end = offset + blocks[i + 1] - 5;
                 for (let j = blocks[i] + offset; j < end; j += 3) {
                     compact += blocks[j + 3] - blocks[j + 1];
@@ -134,7 +134,7 @@ class ScheduleEvaluator {
          */
         noEarly(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
             const refTime = 12 * 60,
-                  oEnd = offset + 7;
+                oEnd = offset + 7;
             let total = 0;
             for (let i = offset; i < oEnd; i++) {
                 const start = blocks[i],
@@ -155,7 +155,7 @@ class ScheduleEvaluator {
 
             // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5,
-                  oEnd = offset + 7;
+                oEnd = offset + 7;
             let dist = 0;
             for (let i = offset; i < oEnd; i++) {
                 const end = blocks[i + 1] + offset - 5;
@@ -178,12 +178,12 @@ class ScheduleEvaluator {
          */
         similarity(this: ScheduleEvaluator, start: number) {
             const sim = this.refSchedule,
-                  classList = this.classList,
-                  allChoices = this.allChoices;
+                classList = this.classList,
+                allChoices = this.allChoices;
             const numCourses = classList.length;
             let sum = 0;
             start *= numCourses;
-            for (let j  = 0; j < numCourses; j++) {
+            for (let j = 0; j < numCourses; j++) {
                 const course = classList[j][allChoices[start + j]];
                 const key = sim[course[0]];
                 if (key) {
@@ -216,7 +216,7 @@ class ScheduleEvaluator {
         arrayList: TimeArray[][], offset: number, idx: number
     ) {
         const numCourses = arrayList.length,
-              start = idx * numCourses;
+            start = idx * numCourses;
         let bound = 8; // size does not contain offset
         // no offset in j because arr2 also needs it
         for (let j = 0; j < 7; j++) {
@@ -230,13 +230,13 @@ class ScheduleEvaluator {
                     // p already contains offset
                     let p = s1 + offset;
                     const vToBeInserted = arr2[n],
-                          realBound = bound + offset;
+                        realBound = bound + offset;
                     for (; p < realBound; p += 3) {
                         if (vToBeInserted < blocks[p]) break;
                     }
                     // move elements 3 slots toward the end
                     // same as `blocks.copyWithin(p + 3, p, realBound);`, but faster
-                    for (let m = realBound - 1; m >= p ; m--) blocks[m + 3] = blocks[m];
+                    for (let m = realBound - 1; m >= p; m--) blocks[m + 3] = blocks[m];
                     // insert three elements at p
                     blocks[p] = vToBeInserted;
                     blocks[p + 1] = arr2[n + 1];
@@ -318,7 +318,7 @@ class ScheduleEvaluator {
             console.time(funcName);
             const newCache = new Float32Array(len);
             const blocks = this.blocks,
-                  offsets = this.offsets;
+                offsets = this.offsets;
             if (funcName === 'similarity') {
                 const evalFunc = ScheduleEvaluator.sortFunctions[funcName].bind(this);
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
@@ -527,8 +527,8 @@ class ScheduleEvaluator {
         idx = this.indices[idx] * this.classList.length;
         return new Schedule(
             Array.from(this.allChoices.slice(idx, idx + this.classList.length))
-            .map((choice, classNum) => this.classList[classNum][choice]),
-        this.events);
+                .map((choice, classNum) => this.classList[classNum][choice]),
+            this.events);
     }
     /**
      * whether this evaluator contains an empty array of schedules

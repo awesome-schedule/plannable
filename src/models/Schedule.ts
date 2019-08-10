@@ -18,19 +18,19 @@ import { Day, dayToInt, TYPES } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 
-interface SectionJSON {
+export interface SectionJSON {
     id: number;
     section: string;
 }
 
-type SectionJSONShort = [number, string];
+export type SectionJSONShort = [number, string];
 
 export interface ScheduleAll<T = Set<number>> {
     [x: string]: T | -1;
 }
 
 export interface ScheduleJSON {
-    All: ScheduleAll<SectionJSON[] | number[]>;
+    All: ScheduleAll<SectionJSON[]>;
     events: Event[];
 }
 
@@ -112,7 +112,7 @@ export default class Schedule {
         if (keys.length === 0) return schedule;
 
         const catalog = window.catalog;
-        const regex = /([a-z]{1,5})([0-9]{1,4})(.*)/i;
+        const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
         // convert array to set
         for (const key of keys) {
             const sections = obj.All[key];
@@ -137,8 +137,9 @@ export default class Schedule {
                 } else {
                     // backward compatibility for version prior to v5.0 (inclusive)
                     if (Schedule.isNumberArray(sections)) {
+                        const secs = sections as number[];
                         schedule.All[key] = new Set(
-                            sections.filter(sid => {
+                            secs.filter(sid => {
                                 // sid >= length possibly implies that section is removed from SIS
                                 if (sid >= allSections.length) {
                                     noti.warn(

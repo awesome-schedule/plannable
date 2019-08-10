@@ -116,12 +116,26 @@
                                 style="display: inline-block"
                             >
                                 <input
+                                    v-if="option.name === 'similarity' && !filter.similarityEnabled"
+                                    type="checkbox"
+                                    class="custom-control-input"
+                                    :value="option.name"
+                                    disabled
+                                    @click="
+                                        noti.info(
+                                            'To enable sort by similarity, please first set a reference schedule in the compare tab',
+                                            3,
+                                            true
+                                        )
+                                    "
+                                />
+                                <input
+                                    v-else
                                     :id="option.name"
                                     v-model="option.enabled"
                                     type="checkbox"
                                     class="custom-control-input"
                                     :value="option.name"
-                                    :disabled="option.name === 'similarity' && !enableSimilarity"
                                     @change="changeSorting(+optIdx)"
                                 />
                                 <label

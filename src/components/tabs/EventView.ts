@@ -53,17 +53,17 @@ export default class EventView extends Store {
         let days = this.eventWeek.reduce((acc, x, i) => acc + (x ? this.days[i] : ''), '');
 
         if (!days) {
-            this.noti.error('Please select at least one day');
+            this.noti.error('Event: Please select at least one day');
             return;
         }
         if (!this.eventTimeFrom || !this.eventTimeTo) {
-            this.noti.error('Please check your start/end time');
+            this.noti.error('Event: Please check your start/end time');
             return;
         }
         const start = hr24toInt(this.eventTimeFrom),
             end = hr24toInt(this.eventTimeTo);
         if (start >= end) {
-            this.noti.error('Start time must be earlier than end time');
+            this.noti.error('Event: Start time must be earlier than end time');
             return;
         }
         days += ` ${to12hr(this.eventTimeFrom)} - ${to12hr(this.eventTimeTo)}`;

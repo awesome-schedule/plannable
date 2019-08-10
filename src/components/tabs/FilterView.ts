@@ -21,23 +21,18 @@ import draggable from 'vuedraggable';
     }
 })
 export default class FilterView extends Store {
-
     get days() {
         return DAYS;
     }
 
-    get enableSimilarity() {
-        return window.scheduleEvaluator.refSchedule && Object.keys(window.scheduleEvaluator.refSchedule).length > 0;
-    }
-
     dragEnd() {
-        if (this.filter.sortOptions.mode === 0) this.changeSorting(undefined);
+        if (this.filter.sortOptions.mode === 0) this.changeSorting();
     }
 
     /**
      * negate the boolean value at `this.timeSlots[i][j]`
      * @param i the index of the time filter
-     * @param j the index of the day (0 ~ 4)
+     * @param j the index of the day (0 to 7)
      */
     updateFilterDay(i: number, j: number) {
         this.$set(this.filter.timeSlots[i], j, !this.filter.timeSlots[i][j]);
@@ -52,7 +47,7 @@ export default class FilterView extends Store {
 
     /**
      * get called when the sort mode changed or sort option at `optIdx` changed.
-     * call [[ScheduleEvaluator.changeSort]]
+     * call [[ScheduleEvaluator.sort]]
      *
      * if a sort option changed, also disable options that are mutually exclusive to that one.
      *

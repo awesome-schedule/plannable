@@ -38,7 +38,12 @@ export default class Pagination extends Store {
      * zero based offset
      */
     start = 0;
-    goto = null;
+    goto: number | null = null;
+
+    @Watch('goto')
+    gotoWatch() {
+        this.switchPage((this.goto || 1) - 1);
+    }
 
     updateStart() {
         if (this.idx < this.start) {

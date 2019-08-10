@@ -225,7 +225,7 @@ export default class Store extends Vue {
      */
     validateSortOptions() {
         if (!Object.values(this.filter.sortOptions.sortBy).some(x => x.enabled)) {
-            this.noti.error('You must have at least one sort option!');
+            this.noti.error('Filter: You must have at least one sort option!');
             return false;
         } else if (
             Object.values(this.filter.sortOptions.sortBy).some(
@@ -233,13 +233,7 @@ export default class Store extends Vue {
             ) &&
             (!window.buildingList || !window.timeMatrix)
         ) {
-            this.noti.error('Building list fails to load. Please disable "walking distance"');
-            return false;
-        } else if (false) {
-            // todo
-            this.noti.error(
-                'Please first set a reference schedule before using sort by similarity!'
-            );
+            this.noti.error('Filter: Building list fails to load. Please disable "walking distance"');
             return false;
         }
         return true;

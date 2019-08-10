@@ -31,6 +31,7 @@ import URLModal from './components/URLModal.vue';
 import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
+import config from './config';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
@@ -180,24 +181,24 @@ export default class App extends Store {
     }
 
     async loadCoursesFromURL() {
-        const config = new URLSearchParams(window.location.search).get('courses');
-        if (config) {
+        const courseArray = new URLSearchParams(window.location.search).get('courses');
+        if (courseArray) {
             try {
-                const courses = JSON.parse(decodeURIComponent(config));
+                const courses = JSON.parse(decodeURIComponent(courseArray));
                 if (courses && courses instanceof Array && courses.length) {
                     const schedule = this.schedule.getDefault();
                     courses.forEach(key => (schedule.currentSchedule.All[key] = -1));
                     this.profile.addProfile(JSON.stringify({ schedule }), 'Li Hao');
                     await this.loadProfile(undefined, !checkVersion());
 
-                    this.noti.success('Courses loaded from Hoosmyprofessor', 3, true);
+                    this.noti.success('Courses loaded from ' + config.backendName, 3, true);
                     return true;
                 } else {
                     throw new Error('Invalid course format');
                 }
             } catch (e) {
                 this.noti.error(
-                    'Failed to load courses from Hoosmyprofessor: ' + e.message,
+                    `Failed to load courses from ${config.backendName}: ` + e.message,
                     3,
                     true
                 );
@@ -208,11 +209,11 @@ export default class App extends Store {
     }
 
     async loadConfigFromURL() {
-        const config = new URLSearchParams(window.location.search).get('config');
+        const encoded = new URLSearchParams(window.location.search).get('config');
 
-        if (config) {
+        if (encoded) {
             try {
-                this.profile.addProfile(JSON.stringify(parseFromURL(config)), 'url loaded');
+                this.profile.addProfile(JSON.stringify(parseFromURL(encoded)), 'url loaded');
                 await this.loadProfile(undefined, !checkVersion());
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;

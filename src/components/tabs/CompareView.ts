@@ -23,9 +23,6 @@ import MainContent from '../MainContent.vue';
 export default class CompareView extends Store {
     compareSchedule = new Schedule();
     highlightIdx = -1;
-    get number() {
-        return this.compare.length;
-    }
     created() {
         this.renderSchedule();
     }
@@ -33,7 +30,7 @@ export default class CompareView extends Store {
         this.compareSchedule = new Schedule();
         for (let i = 0; i < this.compare.length; i++) {
             const { schedule, color } = this.compare[i];
-            for (let j = 0; j < 5; j++) {
+            for (let j = 0; j < 7; j++) {
                 for (const sb of schedule.days[j]) {
                     const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
                     nsb.strong = this.highlightIdx === i;
@@ -53,15 +50,14 @@ export default class CompareView extends Store {
         this.compare.splice(idx, 1);
         this.renderSchedule();
     }
+    /**
+     * get the description of the schedule at index `idx` of the `compare` array
+     * @param idx
+     */
     getTitle(idx: number) {
         const { schedule, pIdx, index } = this.compare[idx];
-        const all = schedule.All;
         const catalog = window.catalog;
-        const secs: Course[] = [];
-        for (const crs in all) {
-            const num = all[crs];
-            secs.push(catalog.getCourse(crs, num));
-        }
+        const secs = Object.entries(schedule.All).map(x => catalog.getCourse(...x));
         return (
             `Generated schedule ${index + 1},\nCorresponds to proposed schedule ${pIdx + 1}\n` +
             `Total credits: ${schedule.totalCredit}\n${secs

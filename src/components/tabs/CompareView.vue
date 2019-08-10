@@ -5,7 +5,7 @@
                 Compare Schedules
             </div>
             <ul class="list-group list-group-flush mx-1">
-                <li v-if="number === 0" class="list-group-item">
+                <li v-if="compare.length === 0" class="list-group-item">
                     You haven't selected any schedule to compare yet. Select one by clicking the
                     "Compare" button at the top of the page when you have generated some schedules.
                     You can also compare generated schedules across different profiles.

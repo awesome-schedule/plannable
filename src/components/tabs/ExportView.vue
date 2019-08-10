@@ -184,7 +184,11 @@
                 </li>
             </ul>
             <div class="w-100 text-center">
-                <button class="btn btn-outline-primary mt-2 w-75" @click="logout()">
+                <button
+                    class="btn btn-outline-primary mt-2 w-75"
+                    title="Close connection to remote"
+                    @click="logout()"
+                >
                     Logout
                 </button>
             </div>

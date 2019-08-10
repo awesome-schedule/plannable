@@ -18,7 +18,7 @@ export default class EventView extends Store {
     }
 
     // event related fields
-    eventWeek = [false, false, false, false, false];
+    eventWeek = [false, false, false, false, false, false, false];
     eventTimeFrom = '';
     eventTimeTo = '';
     eventTitle? = '';

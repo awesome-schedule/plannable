@@ -1,10 +1,39 @@
+import { CourseFields } from './models/Course';
+
+export const backend = {
+    name: 'Hoosmyprofessor',
+    up: 'http://match.msnatuva.org/courses/api/save_plannable_profile/',
+    down: 'http://match.msnatuva.org/courses/api/get_plannable_profile/',
+    edit: 'http://match.msnatuva.org/courses/api/edit_plannable_profile/'
+} as const;
+
+export const external = {
+    enableDetails: true,
+    viewDetails(semesterId: string, courseId: number) {
+        window.open(
+            'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
+                semesterId +
+                '&ClassNumber=' +
+                courseId,
+            '_blank',
+            'width=650,height=700,scrollbars=yes'
+        );
+    },
+    enableGrades: true,
+    viewGrades(course: CourseFields) {
+        window.open(
+            `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
+            '_blank',
+            'width=650,height=700,scrollbars=yes'
+        );
+    }
+} as const;
+
 export default {
     sideBarWidth: 19,
     sideMargin: 3,
     tabBarWidthMobile: 10,
     tabBarWidth: 3,
-    backendName: 'Hoosmyprofessor',
-    backendUp: 'http://match.msnatuva.org/courses/api/save_plannable_profile/',
-    backendDown: 'http://match.msnatuva.org/courses/api/get_plannable_profile/',
-    backendEdit: 'http://match.msnatuva.org/courses/api/edit_plannable_profile/'
+    backend,
+    external
 } as const;

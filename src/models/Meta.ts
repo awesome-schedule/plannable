@@ -1,10 +1,13 @@
-import { ValidFlag } from './Section';
-
 /**
  * Meta stores some constants and type definitions
  * @author Hanzhi Zhou
  * @module models
  */
+
+/**
+ *
+ */
+import { ValidFlag } from './Section';
 
 /**
  * the raw catalog is represented as a big dictionary

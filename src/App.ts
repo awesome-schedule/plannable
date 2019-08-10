@@ -31,7 +31,7 @@ import URLModal from './components/URLModal.vue';
 import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
-import config from './config';
+import {backend} from './config';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
@@ -191,14 +191,14 @@ export default class App extends Store {
                     this.profile.addProfile(JSON.stringify({ schedule }), 'Li Hao');
                     await this.loadProfile(undefined, !checkVersion());
 
-                    this.noti.success('Courses loaded from ' + config.backendName, 3, true);
+                    this.noti.success('Courses loaded from ' + backend.name, 3, true);
                     return true;
                 } else {
                     throw new Error('Invalid course format');
                 }
             } catch (e) {
                 this.noti.error(
-                    `Failed to load courses from ${config.backendName}: ` + e.message,
+                    `Failed to load courses from ${backend.name}: ` + e.message,
                     3,
                     true
                 );

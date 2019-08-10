@@ -1,6 +1,10 @@
 /**
  * @module components/tabs
  */
+
+/**
+ *
+ */
 // tslint:disable:max-line-length
 import 'bootstrap';
 import $ from 'jquery';
@@ -22,6 +26,11 @@ import {
     VStepperStep
 } from 'vuetify/lib';
 
+/**
+ * tab for displaying user guide
+ * @author Hanzhi Zhou, Kaiying Shan, Zichao Hu, Elena Long
+ * @noInheritDoc
+ */
 @Component({
     components: {
         VueMathjax,

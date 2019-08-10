@@ -1,7 +1,11 @@
 /**
  * @module components/tabs
  */
-import config from '@/config';
+
+/**
+ *
+ */
+import { backend } from '@/config';
 import Store, { compressJSON, SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import axios from 'axios';
@@ -12,6 +16,7 @@ import { Component } from 'vue-property-decorator';
  * component for import/export/print schedules and managing profiles
  * @author Hanzhi Zhou, Kaiying Shan
  * @todo credential safety
+ * @noInheritDoc
  */
 @Component
 export default class ExportView extends Store {
@@ -35,7 +40,7 @@ export default class ExportView extends Store {
     async fetchRemoteProfiles() {
         const username = localStorage.getItem('username');
         const credential = localStorage.getItem('credential');
-        this.remoteProfiles = (await axios.post(config.backendDown, {
+        this.remoteProfiles = (await axios.post(backend.down, {
             username,
             credential
         })).data.map((s: string) => JSON.parse(s));
@@ -146,7 +151,7 @@ export default class ExportView extends Store {
         if (confirm(msg)) {
             const username = localStorage.getItem('username'),
                 credential = localStorage.getItem('credential');
-            await axios.post(config.backendEdit, {
+            await axios.post(backend.edit, {
                 username,
                 credential,
                 action: 'delete',
@@ -204,7 +209,7 @@ export default class ExportView extends Store {
         const profile = this.remoteProfiles[idx];
         profile.name = newName;
         try {
-            await axios.post(config.backendEdit, {
+            await axios.post(backend.edit, {
                 username,
                 credential,
                 action: 'rename',
@@ -237,7 +242,7 @@ export default class ExportView extends Store {
                 return Promise.reject('Cancelled');
         }
 
-        await axios.post(config.backendUp, {
+        await axios.post(backend.up, {
             username,
             credential,
             name,

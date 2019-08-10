@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import Schedule from '@/models/Schedule';
 import { Component, Watch } from 'vue-property-decorator';
 import Store from './store';

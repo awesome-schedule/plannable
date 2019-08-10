@@ -79,13 +79,12 @@ export default class Schedule {
                     ? sections
                     : (sections as SectionJSON[]).map(({ id, section }) => [id, section]);
         }
-        return [shortAll, events.map(e => Event.prototype.toJSONShort.call(e))] as const;
+        return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
 
     public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
         const All: ScheduleAll<SectionJSON[]> = {};
-        const shortAll = obj[0] || {},
-            events = obj[1] || [];
+        const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
             All[key] =
@@ -113,7 +112,7 @@ export default class Schedule {
         if (keys.length === 0) return schedule;
 
         const catalog = window.catalog;
-        const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
+        const regex = /([a-z]{1,5})([0-9]{1,4})(.*)/i;
         // convert array to set
         for (const key of keys) {
             const sections = obj.All[key];

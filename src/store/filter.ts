@@ -190,7 +190,7 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.tim
  */
 export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     public static compressJSON(obj: FilterStateJSON): readonly [
-        number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort[]>
+        number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort>
     ] {
         // convert allowClosed, allowWaitlist, mode to binary
         let filterBits = 0;

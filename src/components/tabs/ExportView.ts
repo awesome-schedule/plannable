@@ -119,9 +119,11 @@ export default class ExportView extends Store {
         const json = localStorage.getItem(this.profile.current);
         if (json) {
             const url = new URL(window.location.href);
+            const compressed = compressJSON(json);
+            console.log(compressed);
             url.searchParams.set(
                 'config',
-                lz.compressToEncodedURIComponent(JSON.stringify(compressJSON(json)))
+                lz.compressToEncodedURIComponent(JSON.stringify(compressed))
             );
             this.modal.showURLModal(url.href);
         }

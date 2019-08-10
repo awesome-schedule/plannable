@@ -188,12 +188,23 @@ export default class Store extends Vue {
                 console.error(e);
             }
         }
-        const msg = await this.semester.selectSemester(
-            parsed.currentSemester || this.semester.semesters[0],
-            force
-        );
-        this.noti.notify(msg);
-        if (!msg.payload) return;
+
+        // do not re-select current semester if it is already selected and this is not a force-update
+        if (
+            parsed.currentSemester &&
+            this.semester.currentSemester &&
+            parsed.currentSemester.id === this.semester.currentSemester.id &&
+            !force
+        ) {
+            console.warn('Loading aborted');
+        } else {
+            const msg = await this.semester.selectSemester(
+                parsed.currentSemester || this.semester.semesters[0],
+                force
+            );
+            this.noti.notify(msg);
+            if (!msg.payload) return;
+        }
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};
@@ -233,7 +244,9 @@ export default class Store extends Vue {
             ) &&
             (!window.buildingList || !window.timeMatrix)
         ) {
-            this.noti.error('Filter: Building list fails to load. Please disable "walking distance"');
+            this.noti.error(
+                'Filter: Building list fails to load. Please disable "walking distance"'
+            );
             return false;
         }
         return true;
@@ -400,19 +413,21 @@ export function compressJSON(jsonString: string) {
 
 /**
  * @author Zichao Hu, Hanzhi Zhou
- * @see [[convertJsonToArray]]
  * @param config
+ * @note JSON decompression requires the catalog of the semester to be pre-loaded,
+ * because the reference schedule conversion in filter requires it
  */
-export function parseFromURL(config: string): SemesterStorage {
+export async function parseFromURL(config: string): Promise<SemesterStorage> {
     // get URL and convert to JSON
     const data: ReturnType<typeof compressJSON> = JSON.parse(
         lz.decompressFromEncodedURIComponent(config.trim())
     );
-
+    const currentSemester = { id: data[2], name: data[3] };
+    await semester.selectSemester(currentSemester);
     return {
         name: data[0],
         modified: data[1],
-        currentSemester: { id: data[2], name: data[3] },
+        currentSemester,
         display: Display.decompressJSON(data[4]),
         filter: FilterStore.decompressJSON(data[5]),
         schedule: ScheduleStore.decompressJSON(data[6]),

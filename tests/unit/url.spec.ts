@@ -299,28 +299,28 @@ describe('url convertJsonToArray test', () => {
 });
 
 describe('parseFromURL', () => {
-    it('parse_empty_schedule', () => {
+    it('parse_empty_schedule', async () => {
         const urlCompressed = compressJSON(JSON.stringify(empty_schedule));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(empty_schedule);
     });
-    it('parse_mySchedule2019Fall', () => {
+    it('parse_mySchedule2019Fall', async () => {
         const urlCompressed = compressJSON(JSON.stringify(mySchedule2019Fall));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(mySchedule2019Fall);
     });
-    it('parse_test_filter', () => {
+    it('parse_test_filter', async () => {
         const urlCompressed = compressJSON(JSON.stringify(test_filter));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(test_filter);
     });
-    it('parse_miscellaneousTest1', () => {
+    it('parse_miscellaneousTest1', async () => {
         const urlCompressed = compressJSON(JSON.stringify(miscellaneousTest1));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(miscellaneousTest1);
     });
 });

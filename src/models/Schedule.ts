@@ -23,7 +23,7 @@ export interface SectionJSON {
     section: string;
 }
 
-export type SectionJSONShort = [number, string];
+export type SectionJSONShort = (number | string)[];
 
 export interface ScheduleAll<T = Set<number>> {
     [x: string]: T | -1;
@@ -71,13 +71,16 @@ export default class Schedule {
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: ScheduleAll<SectionJSONShort[]> = {};
+        const shortAll: ScheduleAll<SectionJSONShort> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
                 sections === -1
                     ? sections
-                    : (sections as SectionJSON[]).map(({ id, section }) => [id, section]);
+                    : (sections as SectionJSON[]).reduce((acc, { id, section }) => {
+                        acc.push(id, section);
+                        return acc;
+                    }, [] as SectionJSONShort);
         }
         return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
@@ -87,8 +90,15 @@ export default class Schedule {
         const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
-            All[key] =
-                entry instanceof Array ? entry.map(e => ({ id: e[0], section: e[1] })) : entry;
+            const decompEntry: SectionJSON[] = [];
+            if (entry instanceof Array) {
+                for (let i = 0; i < entry.length; i+=2) {
+                    decompEntry.push({ id: entry[i] as number, section: entry[i+1] as string });
+                }
+                All[key] = decompEntry;
+            } else {
+                All[key] = entry;
+            }
         }
         return {
             All,

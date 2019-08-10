@@ -31,7 +31,7 @@ import URLModal from './components/URLModal.vue';
 import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
-import {backend} from './config';
+import { backend } from './config';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
@@ -213,7 +213,7 @@ export default class App extends Store {
 
         if (encoded) {
             try {
-                this.profile.addProfile(JSON.stringify(parseFromURL(encoded)), 'url loaded');
+                this.profile.addProfile(JSON.stringify(await parseFromURL(encoded)), 'url loaded');
                 await this.loadProfile(undefined, !checkVersion());
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;

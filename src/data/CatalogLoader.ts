@@ -24,6 +24,7 @@ import {
     STATUSES_PARSE,
     TYPES_PARSE
 } from '../models/Meta';
+import { cancelablePromise, CancelablePromise, errToStr, timeout } from '../utils';
 import { loadFromCache } from './Loader';
 
 /**
@@ -46,6 +47,22 @@ export function loadSemesterData(semester: SemesterJSON, force = false) {
             force
         }
     );
+}
+
+export function loadSemesterData2(semester: SemesterJSON, force = false) {
+    const t = localStorage.getItem('idb_time');
+    const s = localStorage.getItem('idb_semester');
+    const db = new CatalogDB();
+    let old: Catalog | undefined;
+    if (s === semester.id && t && new Date().getTime() - +t > 1000 * 60 * 60) {
+        old = new Catalog(semester, retrieveFromDB(db), new Date(+t).toJSON());
+    }
+    const newCatalog = cancelablePromise(getSemesterData(semester, db, force));
+    return {
+        new: newCatalog,
+        old
+    } as { new: CancelablePromise<Catalog>; old?: Catalog | undefined; };
+    // { new: Promise<Catalog>; old?: Catalog | undefined; }
 }
 
 function saveCatalog(catalog: Catalog) {
@@ -83,20 +100,22 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
     return catalog;
 }
 
-export async function getSemesterData(currentSemester: SemesterJSON, force = false) {
-    const t = localStorage.getItem('idbTimestamp');
-    if (!t || +t - (new Date).getTime() > 60 * 60 * 1000 || force) {
-        const db = new CatalogDB();
+export async function getSemesterData(currentSemester: SemesterJSON, db: CatalogDB, force = false): Promise<Catalog> {
+    const t = localStorage.getItem('idb_time');
+    const s = localStorage.getItem('idb_semester');
+    if (!t || +t - (new Date()).getTime() > 60 * 60 * 1000 || force || !s || s !== currentSemester.id) {
         await db.courses.clear();
         await db.sections.clear();
         await db.meetings.clear();
-        await requestSemesterDataAndStore();
+        const raw_data = await requestSemesterData2(currentSemester);
+        localStorage.setItem('idb_time', (new Date()).getTime().toString());
+        localStorage.setItem('idb_semester', currentSemester.id);
+        return new Catalog(currentSemester, parseSemesterData2(raw_data, db), new Date().toJSON());
     }
-    return retrieveFromDB();
+    return new Catalog(currentSemester, retrieveFromDB(db), new Date().toJSON());
 }
 
-export async function requestSemesterDataAndStore() {
-    const semester = window.catalog.semester;
+export async function requestSemesterData2(semester: SemesterJSON) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
@@ -118,15 +137,126 @@ export async function requestSemesterDataAndStore() {
         skipEmptyLines: true,
         header: false
     }).data;
-
+    return data;
 }
 
-export function parseSemesterData2(data: string[][]) {
+export function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
+    console.log('parsing semester data');
+    const CLASS_TYPES = TYPES_PARSE;
+    const STATUSES = STATUSES_PARSE;
+    const rawCatalog: RawCatalog = {};
+    const len = raw_data.length;
+    for (let j = 1; j < len; j++) {
+        const data = raw_data[j];
 
+        // todo: robust data validation
+        const type = CLASS_TYPES[data[4] as CourseType];
+        const key = (data[1] + data[2] + type).toLowerCase();
+        const meetings: RawMeeting[] = [];
+        let date: string = data[6 + 3];
+        let valid: ValidFlag = 0;
+        for (let i = 0; i < 4; i++) {
+            const start = 6 + i * 4; // meeting information starts at index 6
+            const a = data[start],
+                b = data[start + 1],
+                c = data[start + 2];
+            if (a || b || c) {
+                const meetingDate = data[start + 3];
+                if (!date) date = meetingDate;
+                // inconsistent date
+                if (meetingDate && meetingDate !== date) valid |= 2;
+
+                // incomplete information
+                if (!a || !c || a === 'TBA' || c === 'TBA' || a === 'TBD' || c === 'TBD')
+                    valid |= 1;
+
+                // unknown meeting time
+                if (!b || b === 'TBA' || b === 'TBD') {
+                    valid |= 4;
+                } else {
+                    const [, startT, , endT] = b.split(' ');
+                    // invalid meeting time
+                    if (startT === endT) valid |= 4;
+                }
+
+                // insertion sort
+                let k = 0;
+                for (; k < meetings.length; k++) {
+                    if (b < meetings[k][1]) break;
+                }
+                meetings.splice(k, 0, [a, b, c]);
+            }
+        }
+        date = date || '';
+        // unknown date
+        if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
+
+        const tempSection: RawSection = [
+            +data[0],
+            data[3],
+            data[23],
+            STATUSES[data[24] as CourseStatus],
+            +data[25],
+            +data[26],
+            +data[27],
+            date,
+            valid,
+            meetings
+        ];
+
+        const meetingFK: number[] = [];
+
+        meetings.forEach(meeting => {
+            db.meetings.add({
+                instructor: meeting[0],
+                days: meeting[1],
+                room: meeting[2]
+            }).then(id => {
+                meetingFK.push(id);
+            });
+        });
+
+        db.sections.add({
+            id: tempSection[0],
+            sid: tempSection[1],
+            topic: tempSection[2],
+            status: tempSection[3],
+            enrollment: tempSection[4],
+            enrollment_limit: tempSection[5],
+            wait_list: tempSection[6],
+            date: tempSection[7],
+            valid: tempSection[8],
+            meetings: meetingFK
+        }, tempSection[0]);
+
+        if (rawCatalog[key]) {
+            rawCatalog[key][6].push(tempSection);
+            let original = [];
+            db.courses.get(key).then(crs => {
+                if (crs) original = crs.sections;
+            });
+            original.push(tempSection[0]);
+            db.courses.update(key, {
+                sections: original
+            });
+        } else {
+            rawCatalog[key] = [data[1], +data[2], type, data[5], data[22], data[28], [tempSection]];
+            db.courses.add({
+                id: key,
+                department: data[1],
+                number: +data[2],
+                type,
+                units: data[5],
+                title: data[22],
+                description: data[28],
+                sections: [tempSection[0]]
+            }, key);
+        }
+    }
+    return rawCatalog;
 }
 
-export function retrieveFromDB() {
-    const db = new CatalogDB();
+export function retrieveFromDB(db: CatalogDB) {
     const rawCatalog: RawCatalog = {};
     const sections = db.sections;
     const meetings = db.meetings;

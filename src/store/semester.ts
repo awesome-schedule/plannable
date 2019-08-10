@@ -4,7 +4,7 @@
 import { fallback } from '@/data/Loader';
 import { loadSemesterList } from '@/data/SemesterListLoader';
 import { CancelablePromise } from '@/utils';
-import { loadSemesterData } from '../data/CatalogLoader';
+import { loadSemesterData, loadSemesterData2 } from '../data/CatalogLoader';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 
 export interface SemesterState {
@@ -51,7 +51,7 @@ class Semesters implements SemesterState {
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
-        const temp = loadSemesterData(currentSemester, force);
+        const temp = loadSemesterData2(currentSemester, force);
 
         // allow one to cancel the pending promise if old data exists
         if (temp.old) this.pendingPromise = temp.new;

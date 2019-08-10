@@ -13,7 +13,7 @@ import test_filter from './test_data/test_filter.json';
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty_schedule);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -73,7 +73,7 @@ describe('url convertJsonToArray test', () => {
 
     it('mySchedule2019Fall', () => {
         const test1 = JSON.stringify(mySchedule2019Fall);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -134,7 +134,7 @@ describe('url convertJsonToArray test', () => {
 
     it('test_filter', () => {
         const test1 = JSON.stringify(test_filter);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -197,7 +197,7 @@ describe('url convertJsonToArray test', () => {
 
     it('miscellaneousTest1', () => {
         const test1 = JSON.stringify(miscellaneousTest1);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -277,8 +277,8 @@ describe('url convertJsonToArray test', () => {
         console.warn('schedules', schedules);
         expect(schedules.length).toEqual(3);
 
-        // default length
-        expect(schedules[0].length).toEqual(2);
+        // length with no events
+        expect(schedules[0].length).toEqual(1);
 
         // schedule[0] length
         const schedule0 = schedules[0][0];

@@ -4,12 +4,7 @@
             <div class="btn bg-info nav-btn">
                 Compare Schedules
             </div>
-            <ul class="list-group list-group-flush mx-1">
-                <li v-if="compare.length === 0" class="list-group-item">
-                    You haven't selected any schedule to compare yet. Select one by clicking the
-                    "Compare" button at the top of the page when you have generated some schedules.
-                    You can also compare generated schedules across different profiles.
-                </li>
+            <ul v-if="compare.length" class="list-group list-group-flush mx-1">
                 <li
                     v-for="(cur, idx) in compare"
                     :key="cur"
@@ -22,12 +17,12 @@
                             Schedule {{ cur.pIdx + 1 }}/{{ cur.index + 1 }}<br />
                             <small class="text-muted">Profile "{{ cur.profileName }}"</small><br />
                         </div>
-                        <div
-                            class="col-sm-3 mx-auto align-self-center"
-                            title="if you want your schedule to be as similar to this schedule as possible, click this and select 'similarity' in filters"
-                        >
-                            <button @click="similarity(idx)">
-                                Preferred
+                        <div class="col-sm-auto mr-1 align-self-center">
+                            <button
+                                title="if you want your schedule to be as similar to this schedule as possible, click me"
+                                @click="similarity(idx)"
+                            >
+                                Ref
                                 <i v-if="isSimilarSchedule(idx)" class="far fa-check-square"></i>
                                 <i v-else class="far fa-square"></i>
                             </button>
@@ -55,16 +50,21 @@
                     </div>
                 </li>
             </ul>
-            <div class="btn bg-info nav-btn mt-1">
+            <div v-else class="mx-4 my-2">
+                You haven't selected any schedule to compare yet. Select one by clicking the
+                "Compare" button at the top of the page when you have generated some schedules. You
+                can also compare generated schedules across different profiles.
+            </div>
+            <div class="btn bg-info nav-btn">
                 Sort by Similarity to Another Schedule
             </div>
             <ul class="list-group list-group-flush mx-1">
-                <li v-if="enableSimilarity()" class="list-group-item">
-                    {{ refSchedule }}
+                <li v-if="filter.similarityEnabled" class="list-group-item px-1">
+                    <pre>{{ refSchedule }}</pre>
                 </li>
                 <li v-else class="list-group-item">
-                    Select "preferred" for any schedule in the compare list to enable sort by
-                    similarity to the selected schedule.
+                    Select "Ref" for any schedule in the compare list to enable sort by similarity
+                    with reference to the selected schedule.
                 </li>
             </ul>
         </nav>

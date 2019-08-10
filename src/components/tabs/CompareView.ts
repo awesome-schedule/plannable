@@ -5,7 +5,7 @@
 /**
  *
  */
-import Schedule from '@/models/Schedule';
+import Schedule, { ScheduleAll } from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';
 import randomColor from 'randomcolor';
@@ -27,23 +27,13 @@ import MainContent from '../MainContent.vue';
 export default class CompareView extends Store {
     compareSchedule = new Schedule();
     highlightIdx = -1;
+
     created() {
         this.renderSchedule();
     }
 
-    enableSimilarity() {
-        return window.scheduleEvaluator.refSchedule && Object.keys(window.scheduleEvaluator.refSchedule).length > 0;
-    }
-
     get refSchedule() {
-        let info = '';
-        const ref = window.scheduleEvaluator.refSchedule;
-        for (const key in ref) {
-            const crs = window.catalog.getCourse(key, ref[key]);
-            info += `${crs.department} ${crs.number}-${crs.sections.map(s => s.section)
-                .reduce((x, a) => a + '/' + x)} ${crs.title}\n`;
-        }
-        return info;
+        return this.getDesc(this.filter.refSchedule);
     }
 
     renderSchedule() {
@@ -76,19 +66,26 @@ export default class CompareView extends Store {
      */
     getTitle(idx: number) {
         const { schedule, pIdx, index } = this.compare[idx];
-        const catalog = window.catalog;
-        const secs = Object.entries(schedule.All).map(x => catalog.getCourse(...x));
         return (
             `Generated schedule ${index + 1},\nCorresponds to proposed schedule ${pIdx + 1}\n` +
-            `Total credits: ${schedule.totalCredit}\n${secs
-                .map(
-                    x =>
-                        `${x.department} ${x.number}-${x.sections
-                            .map(y => y.section)
-                            .reduce((a, z) => a + '/' + z)} ${x.title}`
-                )
-                .reduce((a, x) => a + '\n' + x)}`
+            `Total credits: ${schedule.totalCredit}\n${this.getDesc(schedule.All)}`
         );
+    }
+    /**
+     * get description for a schedule
+     * @param All the `All variable` of a schedule
+     * @see [[Schedule.All]]
+     */
+    getDesc(All: ScheduleAll) {
+        const catalog = window.catalog;
+        return Object.entries(All)
+            .map(x => {
+                const course = catalog.getCourse(...x);
+                return `${course.department} ${course.number}-${course.sections
+                    .map(y => y.section)
+                    .reduce((a, z) => a + '/' + z)} ${course.title}`;
+            })
+            .reduce((a, x) => a + '\n' + x);
     }
     highlight(idx: number) {
         if (idx === this.highlightIdx) {
@@ -100,26 +97,30 @@ export default class CompareView extends Store {
     }
     similarity(idx: number) {
         const evaluator = window.scheduleEvaluator;
-        if (this.compare[idx].schedule.allEquals(evaluator.refSchedule)) {
-            evaluator.refSchedule = {};
-        } else {
-            evaluator.refSchedule = this.compare[idx].schedule.All;
+        // remove similarity cache
+        delete evaluator.sortCoeffCache.similarity;
+        const opt = evaluator.options.sortBy.find(x => x.name === 'similarity')!;
 
-            delete evaluator.sortCoeffCache.similarity;
-            if (!evaluator.empty()) {
-                evaluator.sort();
-                if (!this.schedule.generated) {
-                    this.schedule.switchSchedule(true);
-                } else {
-                    // re-assign the current schedule
-                    this.schedule.currentSchedule = evaluator.getSchedule(
-                        this.schedule.currentScheduleIndex
-                    );
-                }
+        // we click the reference schedule again: clear the reference schedule
+        if (this.compare[idx].schedule.allEquals(evaluator.refSchedule)) {
+            this.filter.refSchedule = evaluator.refSchedule = {};
+            opt.enabled = false;
+        } else {
+            this.filter.refSchedule = evaluator.refSchedule = this.compare[idx].schedule.All;
+            opt.enabled = true;
+        }
+        if (!evaluator.empty() && this.validateSortOptions()) {
+            evaluator.sort();
+            if (!this.schedule.generated) {
+                this.schedule.switchSchedule(true);
+            } else {
+                // re-assign the current schedule
+                this.schedule.currentSchedule = evaluator.getSchedule(
+                    this.schedule.currentScheduleIndex
+                );
             }
         }
         this.$forceUpdate();
-        this.saveStatus();
     }
     isSimilarSchedule(idx: number) {
         return this.compare[idx].schedule.allEquals(window.scheduleEvaluator.refSchedule);

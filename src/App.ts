@@ -177,7 +177,6 @@ export default class App extends Store {
 
     refreshNote() {
         $('#release-note-body').html(note);
-        // this.note = note;
     }
 
     async loadCoursesFromURL() {
@@ -191,13 +190,17 @@ export default class App extends Store {
                     this.profile.addProfile(JSON.stringify({ schedule }), 'Li Hao');
                     await this.loadProfile(undefined, !checkVersion());
 
-                    this.noti.success('Courses loaded from Li Hao', 3, true);
+                    this.noti.success('Courses loaded from Hoosmyprofessor', 3, true);
                     return true;
                 } else {
                     throw new Error('Invalid course format');
                 }
             } catch (e) {
-                this.noti.error('Failed to load courses from Li Hao: ' + e.message, 3, true);
+                this.noti.error(
+                    'Failed to load courses from Hoosmyprofessor: ' + e.message,
+                    3,
+                    true
+                );
                 return false;
             }
         }
@@ -222,7 +225,7 @@ export default class App extends Store {
     }
 
     /**
-     * load credentials from Li Hao
+     * load credentials from backend
      */
     loadCredentials() {
         const search = new URLSearchParams(window.location.search);
@@ -231,6 +234,7 @@ export default class App extends Store {
         if (username && credential) {
             localStorage.setItem('username', username);
             localStorage.setItem('credential', credential);
+            return true;
         }
     }
 
@@ -244,8 +248,6 @@ export default class App extends Store {
             this.semester.loadSemesters()
         ]);
 
-        this.loadCredentials();
-
         this.noti.notify(pay1);
         if (pay1.payload) window.timeMatrix = pay1.payload;
 
@@ -255,14 +257,15 @@ export default class App extends Store {
         this.noti.notify(pay3);
         if (pay3.payload) {
             this.semester.semesters = pay3.payload;
+            const cre = this.loadCredentials();
             const urlResult = (await this.loadConfigFromURL()) || (await this.loadCoursesFromURL());
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
                 // if version mismatch, force-update semester data
                 await this.loadProfile(this.profile.current, !checkVersion());
-            } else {
-                history.replaceState(history.state, 'current', '/');
             }
+            // clear url after obtained credentials/courses/config
+            if (urlResult || cre) history.replaceState(history.state, 'current', '/');
         }
 
         this.status.loading = false;

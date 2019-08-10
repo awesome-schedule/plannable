@@ -117,7 +117,7 @@
                             @click="deleteProfile(name, idx)"
                         ></i>
                         <i
-                            v-if="canSync"
+                            v-if="canSync()"
                             class="fas fa-upload ml-1 click-icon"
                             title="upload this profile to remote"
                             @click="uploadProfile(name)"
@@ -126,20 +126,9 @@
                 </div>
             </li>
         </ul>
-        <template v-if="canSync">
+        <template v-if="canSync()">
             <div class="btn bg-info nav-btn mt-2">
                 Remote Profiles <span class="badge badge-primary">Beta</span>
-            </div>
-            <div class="mx-4 my-2 text-center">
-                Upload URL: <br />
-                <input v-model="liHaoUpURL" type="text" class="form-control form-control-sm" />
-                Download URL: <br />
-                <input v-model="liHaoDownURL" type="text" class="form-control form-control-sm" />
-                Edit URL: <br />
-                <input v-model="liHaoEditURL" type="text" class="form-control form-control-sm" />
-                <button class="btn btn-outline-danger mt-1" @click="fetchRemoteProfiles()">
-                    Fetch All
-                </button>
             </div>
             <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
                 <li
@@ -194,6 +183,11 @@
                     </div>
                 </li>
             </ul>
+            <div class="w-100 text-center">
+                <button class="btn btn-outline-primary mt-2 w-75" @click="logout()">
+                    Logout
+                </button>
+            </div>
         </template>
     </nav>
 </template>

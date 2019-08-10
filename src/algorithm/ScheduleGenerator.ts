@@ -46,6 +46,9 @@ import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
  * ```
  */
 export type TimeArray = Int16Array;
+/**
+ * Start and end date in millisecond (obtained via [[Date.getTime]])
+ */
 export type MeetingDate = [number, number];
 
 /**
@@ -54,14 +57,10 @@ export type MeetingDate = [number, number];
  *
  * 0: key of this course
  * 1: an array of section indices
- * 2: [[TimeArray]]
- * 3: Start and end date in millisecond (obtained via Date.getTime)
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2],
- * [7, 7, 7, 7, 13, 13, 13, 13, 600, 660, 11, 900, 960, 2, 1200, 1260, 12],
- * [1563863108659, 1574231108659]]
+ * ["span20205", [0, 1, 2]]
  * ```
  */
 export type RawAlgoCourse = [string, number[]];
@@ -205,7 +204,7 @@ class ScheduleGenerator {
         timeArrayList: TimeArray[][],
         dateList: MeetingDate[][],
         events: Event[],
-        refSchedule?: ScheduleAll<Set<number>>
+        refSchedule: ScheduleAll = {}
     ) {
         /**
          * current course index

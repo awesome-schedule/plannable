@@ -271,7 +271,8 @@ class ScheduleEvaluator {
      * @param offsets the offsets into the `blocks`
      * @param blocks array of [[TimeArray]]s concatenated together
      * @param allChoices array of `currentChoices` concatenated together
-     * @param refSchedule the reference schedule used by the [[ScheduleEvaluator.similarity]] sort function
+     * @param refSchedule the reference schedule used by the
+     * [[ScheduleEvaluator.sortFunctions.similarity]] sort function
      */
     constructor(
         public options: Readonly<EvaluatorOptions>,
@@ -284,12 +285,16 @@ class ScheduleEvaluator {
         public refSchedule: ScheduleAll = {}
     ) {
         const len = offsets.length;
-        const _indices = new Uint32Array(len);
+        // allocate two set of indices on the same array buffer
+        const buffer = new ArrayBuffer(len * 8);
+        const _indices = new Uint32Array(buffer, 0, len);
         for (let i = 0; i < len; i++) _indices[i] = i;
 
         this._indices = _indices;
-        this.indices = _indices.slice();
-        this.coeffs = new Float32Array(offsets.length);
+        this.indices = new Uint32Array(buffer, len * 4, len);
+        this.indices.set(_indices);
+
+        this.coeffs = new Float32Array(len);
     }
 
     get size() {

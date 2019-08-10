@@ -112,7 +112,7 @@
                                 "
                             ></i>
                             <div
-                                class="custom-control custom-checkbox sort-option"
+                                class="custom-control custom-checkbox sort-option "
                                 style="display: inline-block"
                             >
                                 <input
@@ -121,6 +121,7 @@
                                     type="checkbox"
                                     class="custom-control-input"
                                     :value="option.name"
+                                    :disabled="option.name === 'similarity' && !enableSimilarity"
                                     @change="changeSorting(+optIdx)"
                                 />
                                 <label

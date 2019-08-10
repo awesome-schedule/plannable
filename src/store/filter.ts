@@ -152,7 +152,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             for (const raw_sort of raw.sortBy) {
                 for (const sort of this.sortBy) {
                     if (sort.name === raw_sort.name) {
-                        sort.enabled = raw_sort.enabled;
+                        sort.enabled = sort.name === 'similarity' ? false : raw_sort.enabled;
                         sort.reverse = raw_sort.reverse;
                         break;
                     }

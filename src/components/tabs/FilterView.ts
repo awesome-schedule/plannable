@@ -19,6 +19,11 @@ export default class FilterView extends Store {
     get days() {
         return DAYS;
     }
+
+    get enableSimilarity() {
+        return window.similaritySchedule && Object.keys(window.similaritySchedule).length > 0;
+    }
+
     dragEnd() {
         if (this.filter.sortOptions.mode === 0) this.changeSorting(undefined);
     }

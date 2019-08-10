@@ -70,7 +70,7 @@ class ScheduleEvaluator {
          *
          * returns a higher value when the class times are unbalanced
          */
-        variance(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
+        variance(blocks: TimeArray, offset: number) {
             let sum = 0,
                 sumSq = 0;
             const oEnd = offset + 7;
@@ -92,7 +92,7 @@ class ScheduleEvaluator {
          *
          * The greater the time gap between classes, the greater the return value will be
          */
-        compactness(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
+        compactness(blocks: TimeArray, offset: number) {
             let compact = 0;
             const oEnd = offset + 7;
             for (let i = offset; i < oEnd ; i++) {
@@ -110,7 +110,7 @@ class ScheduleEvaluator {
          *
          * The greater the overlap, the greater the return value will be
          */
-        lunchTime(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
+        lunchTime(blocks: TimeArray, offset: number) {
             // 11:00 to 14:00
             let totalOverlap = 0;
             const oEnd = offset + 7;
@@ -132,7 +132,7 @@ class ScheduleEvaluator {
          *
          * For a schedule that has earlier classes, this method will return a higher number
          */
-        noEarly(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
+        noEarly(blocks: TimeArray, offset: number) {
             const refTime = 12 * 60,
                   oEnd = offset + 7;
             let total = 0;
@@ -150,9 +150,7 @@ class ScheduleEvaluator {
         /**
          * compute the sum of walking distances between each consecutive pair of classes
          */
-        distance(this: ScheduleEvaluator, blocks: TimeArray, offset: number) {
-            const timeMatrix = this.timeMatrix;
-
+        distance(timeMatrix: Readonly<Int32Array>, blocks: TimeArray, offset: number) {
             // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5,
                   oEnd = offset + 7;
@@ -320,10 +318,14 @@ class ScheduleEvaluator {
             const blocks = this.blocks,
                   offsets = this.offsets;
             if (funcName === 'similarity') {
-                const evalFunc = ScheduleEvaluator.sortFunctions[funcName].bind(this);
+                const evalFunc = ScheduleEvaluator.sortFunctions.similarity.bind(this);
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
+             } else if (funcName === 'distance') {
+                const evalFunc = ScheduleEvaluator.sortFunctions.distance;
+                const timeMatrix = this.timeMatrix;
+                for (let i = 0; i < len; i++) newCache[i] = evalFunc(timeMatrix, blocks, offsets[i]);
             } else {
-                const evalFunc = ScheduleEvaluator.sortFunctions[funcName].bind(this);
+                const evalFunc = ScheduleEvaluator.sortFunctions[funcName];
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(blocks, offsets[i]);
             }
             this.sortCoeffCache[funcName] = newCache;

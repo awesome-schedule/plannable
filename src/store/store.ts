@@ -116,7 +116,7 @@ export function saveStatus() {
         modified: new Date().toJSON(),
         currentSemester,
         display,
-        filter,
+        filter: filter.toJSON(),
         schedule: schedule.toJSON(),
         palette
     };
@@ -273,14 +273,19 @@ export default class Store extends Vue {
 
         if (this.schedule.proposedSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
-
         const options = this.getGeneratorOptions();
         if (!options) return;
+
         const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
+
         console.time('schedule generation');
-        const msg = generator.getSchedules(this.schedule.proposedSchedule, true,
-            FilterStore.allArr2Set(this.filter.refSchedule));
+        const msg = generator.getSchedules(
+            this.schedule.proposedSchedule,
+            true,
+            this.filter.refSchedule
+        );
         console.timeEnd('schedule generation');
+
         this.noti.notify(msg, 'info', 3, true);
         const evaluator = msg.payload;
         if (evaluator) {

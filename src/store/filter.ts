@@ -7,7 +7,7 @@
  */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
-import Schedule, { ScheduleAll, ScheduleJSON } from '@/models/Schedule';
+import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
 import { to12hr } from '@/utils';
 import { StoreModule } from '.';
 import ScheduleEvaluator, {
@@ -26,11 +26,12 @@ interface FilterStateBase {
 
 export interface FilterState extends FilterStateBase {
     sortOptions: DetailedEvaluatorOptions;
+    refSchedule: ScheduleAll;
 }
 
 export interface FilterStateJSON extends FilterStateBase {
     sortOptions: EvaluatorOptions;
-    refSchedule: ScheduleAll<number[]>;
+    refSchedule: ScheduleAll<SectionJSON[]>;
 }
 
 /**
@@ -210,18 +211,14 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             if (sortBy.reverse) sortBits |= mask;
             mask <<= 1;
         }
-        const All: { [key: string]: number[] } = {};
-        const ref = window.scheduleEvaluator.refSchedule;
-        for (const key in window.scheduleEvaluator.refSchedule) {
-            All[key] = [...(ref[key] as Set<number>)];
-        }
+        const schedule = Schedule.fromJSON({All: obj.refSchedule, events: []})!;
         return [
             filterBits,
             sortBits,
             initials,
             // convert bool to 0 or 1
             obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x)),
-            Schedule.compressJSON({ All, events: [] })
+            Schedule.compressJSON(schedule.toJSON())
         ] as const;
     }
 
@@ -256,36 +253,16 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             sortCopy.push(sortOpt);
         }
         filter.sortOptions.sortBy = sortCopy;
-        const decRef = Schedule.decompressJSON(ref).All;
-        const refSchedule: { [key: string]: Set<number> } = {};
-        for (const key in decRef) {
-            refSchedule[key] = new Set(decRef[key] as number[]);
-        }
-        window.scheduleEvaluator.refSchedule = refSchedule;
+        const schedule = Schedule.fromJSON(Schedule.decompressJSON(ref));
+        if (schedule) filter.refSchedule = schedule.All;
         return filter.toJSON();
-    }
-
-    public static allSet2Arr(all: ScheduleAll<Set<number>>): ScheduleAll<number[]> {
-        const converted: ScheduleAll<number[]> = {};
-        for (const key in all) {
-            converted[key] = [...all[key] as Set<number>];
-        }
-        return converted;
-    }
-
-    public static allArr2Set(all: ScheduleAll<number[]>): ScheduleAll<Set<number>> {
-        const converted: ScheduleAll<Set<number>> = {};
-        for (const key in all) {
-            converted[key] = new Set(all[key] as number[]);
-        }
-        return converted;
     }
 
     timeSlots: TimeSlot[] = [];
     allowWaitlist = true;
     allowClosed = true;
     sortOptions = getDefaultOptions();
-    refSchedule = FilterStore.allSet2Arr(window.scheduleEvaluator.refSchedule);
+    refSchedule: ScheduleAll = {};
 
     readonly sortModes: readonly DetailedSortMode[] = [
         {
@@ -301,6 +278,10 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                 ' You can drag the sorting options to change their order.'
         }
     ];
+
+    get similarityEnabled() {
+        return Object.keys(this.refSchedule).length !== 0;
+    }
 
     /**
      * Preprocess the time filters and convert them to an array of event.
@@ -363,16 +344,18 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         this.allowWaitlist =
             typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
-        const ref = obj.refSchedule;
-        if (!ref) return;
-        this.refSchedule = ref;
+
+        const ref = Schedule.fromJSON({All: obj.refSchedule || {}, events: []});
+        this.refSchedule = ref && ref.All ? ref.All : defaultVal.refSchedule ;
     }
 
-    toJSON() {
+    toJSON(): FilterStateJSON {
         // exclude sort modes
-        const { sortModes, ...others } = this as FilterStore;
-        const refSchedule = FilterStore.allSet2Arr(window.scheduleEvaluator.refSchedule);
-        return { ...others, refSchedule } as FilterStateJSON;
+        const { sortModes, refSchedule: ref, ...others } = this;
+        const schedule = new Schedule();
+        schedule.All = ref;
+        const refSchedule = schedule.toJSON().All;
+        return { refSchedule, ...others };
     }
 
     getDefault() {

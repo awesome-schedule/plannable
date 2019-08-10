@@ -32,8 +32,7 @@ export default class CompareView extends Store {
     renderSchedule() {
         this.compareSchedule = new Schedule();
         for (let i = 0; i < this.compare.length; i++) {
-            const comp = this.compare[i];
-            const { schedule, color } = comp;
+            const { schedule, color } = this.compare[i];
             for (let j = 0; j < 5; j++) {
                 for (const sb of schedule.days[j]) {
                     const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
@@ -84,12 +83,11 @@ export default class CompareView extends Store {
         this.renderSchedule();
     }
     similarity(idx: number) {
-        if (this.compare[idx].schedule.allEquals(window.similaritySchedule)) {
-            window.similaritySchedule = {};
+        const evaluator = window.scheduleEvaluator;
+        if (this.compare[idx].schedule.allEquals(evaluator.refSchedule)) {
+            evaluator.refSchedule = {};
         } else {
-            const all = this.compare[idx].schedule.All;
-            window.similaritySchedule = all;
-            const evaluator = window.scheduleEvaluator;
+            evaluator.refSchedule = this.compare[idx].schedule.All;
 
             delete evaluator.sortCoeffCache.similarity;
             if (!evaluator.empty()) {
@@ -107,6 +105,6 @@ export default class CompareView extends Store {
         this.$forceUpdate();
     }
     isSimilarSchedule(idx: number) {
-        return this.compare[idx].schedule.allEquals(window.similaritySchedule);
+        return this.compare[idx].schedule.allEquals(window.scheduleEvaluator.refSchedule);
     }
 }

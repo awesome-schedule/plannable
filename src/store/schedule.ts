@@ -229,8 +229,8 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
 
     toJSON() {
         // exclude numGenerated and currentSchedule
-        const { numGenerated, currentSchedule, ...others } = this as ScheduleStore;
-        return others as ScheduleStateJSON;
+        const { numGenerated, currentSchedule, ...others } = this;
+        return others as any as ScheduleStateJSON;
     }
 
     getDefault(): ScheduleState {

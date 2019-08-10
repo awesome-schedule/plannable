@@ -25,8 +25,12 @@ interface SectionJSON {
 
 type SectionJSONShort = [number, string];
 
+export interface ScheduleAll<T = Set<number>> {
+    [x: string]: T | -1;
+}
+
 export interface ScheduleJSON {
-    All: { [x: string]: SectionJSON[] | number[] | -1 };
+    All: ScheduleAll<SectionJSON[] | number[]>;
     events: Event[];
 }
 
@@ -67,7 +71,7 @@ export default class Schedule {
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: { [x: string]: SectionJSONShort[] | -1 } = {};
+        const shortAll: ScheduleAll<SectionJSONShort[]> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
@@ -79,7 +83,7 @@ export default class Schedule {
     }
 
     public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
-        const All: { [x: string]: SectionJSON[] | -1 } = {};
+        const All: ScheduleAll<SectionJSON[]> = {};
         const shortAll = obj[0] || {},
             events = obj[1] || [];
         for (const key in shortAll) {
@@ -181,7 +185,7 @@ export default class Schedule {
      *
      * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
      */
-    public All: { [x: string]: Set<number> | -1 };
+    public All: ScheduleAll;
     /**
      * computed based on `this.All` by `computeSchedule`
      */
@@ -228,7 +232,7 @@ export default class Schedule {
      * ```
      */
     public dateSeparators: number[] = [];
-    public separatedAll: { [date: string]: { [x: string]: Set<number> | -1 } } = {};
+    public separatedAll: { [date: string]: ScheduleAll } = {};
     public dateSelector: number = -1;
 
     /**
@@ -735,7 +739,7 @@ export default class Schedule {
      * Serialize `this` to JSON
      */
     public toJSON(): ScheduleJSON {
-        const All: { [x: string]: SectionJSON[] | -1 } = {};
+        const All: ScheduleAll<SectionJSON[]> = {};
         const catalog = window.catalog;
         // convert set to array
         for (const key in this.All) {
@@ -757,7 +761,7 @@ export default class Schedule {
      * get a copy of this schedule
      */
     public copy(deepCopyEvent = true) {
-        const AllCopy: { [x: string]: Set<number> | -1 } = {};
+        const AllCopy: ScheduleAll = {};
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Set) {
@@ -800,22 +804,6 @@ export default class Schedule {
     }
 
     public equals(s: Schedule) {
-        // const keys = Object.keys(this.All);
-        // // unequal length
-        // if (keys.length !== Object.keys(s.All).length) return false;
-        // for (const key of keys) {
-        //     const val1 = this.All[key],
-        //         val2 = s.All[key];
-        //     if (!val2) return false;
-        //     // unequal value
-        //     if (val1 === -1 || val2 === -1) {
-        //         if (val1 !== val2) return false;
-        //     } else {
-        //         if (val1.size !== val2.size) return false;
-        //         for (const v of val1) if (!val2.has(v)) return false;
-        //     }
-        // }
-
         const days1 = this.events.map(x => x.days).sort();
         const days2 = s.events.map(x => x.days).sort();
         if (days1.length !== days2.length) return false;
@@ -828,7 +816,7 @@ export default class Schedule {
      * returns if an "All" equals to another
      * @param b another "All"
      */
-    public allEquals(b: { [x: string]: Set<number> | -1; }) {
+    public allEquals(b: ScheduleAll) {
         const a = this.All;
         const keys = Object.keys(a);
         // unequal length

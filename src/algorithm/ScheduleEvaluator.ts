@@ -8,7 +8,7 @@
  */
 import quickselect from 'quickselect';
 import Event from '../models/Event';
-import Schedule from '../models/Schedule';
+import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoCourse, RawAlgoSchedule, TimeArray } from './ScheduleGenerator';
 
@@ -177,7 +177,7 @@ class ScheduleEvaluator {
          * need optimization (e.g. sort schedule and similarity schedule at first)
          */
         similarity(this: ScheduleEvaluator, start: number) {
-            const sim = window.similaritySchedule,
+            const sim = this.refSchedule,
                   classList = this.classList,
                   allChoices = this.allChoices;
             const numCourses = classList.length;
@@ -271,12 +271,13 @@ class ScheduleEvaluator {
      */
     constructor(
         public options: Readonly<EvaluatorOptions>,
-        public timeMatrix: Readonly<Int32Array>,
-        public events: Event[] = [],
-        public classList: RawAlgoCourse[][] = [],
+        public readonly timeMatrix: Readonly<Int32Array>,
+        public readonly events: Event[] = [],
+        public readonly classList: RawAlgoCourse[][] = [],
         public offsets = new Uint32Array(),
         public blocks = new Int16Array(),
-        public allChoices = new Uint8Array()
+        public allChoices = new Uint8Array(),
+        public refSchedule: ScheduleAll = {}
     ) {
         const len = offsets.length;
         const _indices = new Uint32Array(len);
@@ -538,7 +539,12 @@ class ScheduleEvaluator {
 
     public clear() {
         this.sortCoeffCache = {};
-        this.events = [];
+        this.events.length = 0;
+        this.classList.length = 0;
+        this.indices = this._indices = new Uint32Array();
+        this.allChoices = new Uint8Array();
+        this.coeffs = new Float32Array();
+        this.blocks = new Int16Array();
     }
 
     /**

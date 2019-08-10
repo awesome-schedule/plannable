@@ -231,12 +231,8 @@ export default class Store extends Vue {
         ) {
             this.noti.error('Building list fails to load. Please disable "walking distance"');
             return false;
-        } else if (
-            Object.values(this.filter.sortOptions.sortBy).some(
-                x => x.name === 'similarity' && x.enabled
-            ) &&
-            !window.similaritySchedule
-        ) {
+        } else if (false) {
+            // todo
             this.noti.error(
                 'Please first set a reference schedule before using sort by similarity!'
             );

@@ -10,7 +10,7 @@ import { CourseStatus } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
 import Catalog from '../models/Catalog';
 import Event from '../models/Event';
-import Schedule from '../models/Schedule';
+import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 

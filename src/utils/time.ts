@@ -124,6 +124,7 @@ export function checkTimeConflict(
  * @param date
  */
 export function parseDate(date: string): [number, number] | undefined {
+    if (typeof date !== 'string') return;
     const [start, end] = date.split(' - ');
     if (!start || !end) return;
     // start month / start day / start year

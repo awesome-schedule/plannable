@@ -38,22 +38,12 @@ export default class FilterView extends Store {
         this.$set(this.filter.timeSlots[i], j, !this.filter.timeSlots[i][j]);
     }
 
-    addTimeSlot() {
-        this.filter.timeSlots.push([false, false, false, false, false, false, false, '', '']);
-    }
-    removeTimeSlot(n: number) {
-        this.filter.timeSlots.splice(n, 1);
-    }
-
     /**
      * get called when the sort mode changed or sort option at `optIdx` changed.
-     * call [[ScheduleEvaluator.sort]]
-     *
-     * if a sort option changed, also disable options that are mutually exclusive to that one.
-     *
-     * if the sort mode changed, do nothing
-     *
-     * @param optIdx c
+     * call [[ScheduleEvaluator.sort]]. Moreover,
+     * - if a sort option changed, also disable options that are mutually exclusive to that one.
+     * - if the sort mode changed, do nothing
+     * @param optIdx
      */
     changeSorting(optIdx?: number) {
         if (!this.validateSortOptions()) return;

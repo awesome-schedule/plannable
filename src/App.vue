@@ -222,7 +222,7 @@
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-    #pagination-container {
+    #pg {
         display: none !important;
     }
     nav {

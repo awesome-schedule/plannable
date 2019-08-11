@@ -110,7 +110,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     showWeekend = true;
 
     private _fullHeight: number = 40;
-    private _partialHeight: number = 25;
+    private _partialHeight: number = 30;
     private _maxNumSchedules: number = 100000;
     private _numSearchResults: number = 6;
     private _earliest = '08:00';

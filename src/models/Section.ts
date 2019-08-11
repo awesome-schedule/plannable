@@ -42,17 +42,6 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: This section has unknown start and end date.'
     ];
 
-    public readonly department: string;
-    public readonly number: number;
-    public readonly type: string;
-    public readonly units: string;
-    public readonly title: string;
-    public readonly description: string;
-
-    /**
-     * Key of the course that this section belongs to; same for all sections.
-     */
-    public readonly key: string;
     /**
      * the id of the section recorded in sis
      */
@@ -61,6 +50,9 @@ export default class Section implements CourseFields, Hashable {
      * the section number recorded in sis
      */
     public readonly section: string;
+    /**
+     * the topic of this section, may be empty
+     */
     public readonly topic: string;
     /**
      * one of "Open", "Closed" and "Wait List"
@@ -79,16 +71,7 @@ export default class Section implements CourseFields, Hashable {
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
      */
-    constructor(course: Course, public readonly sid: number) {
-        this.key = course.key;
-
-        this.department = course.department;
-        this.number = course.number;
-        this.type = course.type;
-        this.units = course.units;
-        this.title = course.title;
-        this.description = course.description;
-
+    constructor(public readonly course: Course, public readonly sid: number) {
         const raw = course.raw[6][sid];
         this.id = raw[0];
         this.section = raw[1];
@@ -102,8 +85,31 @@ export default class Section implements CourseFields, Hashable {
         this.meetings = raw[9].map(x => new Meeting(x));
         this.instructors = Meeting.getInstructors(raw[9]);
     }
-
-    public get displayName() {
+    /**
+     * Key of the course that this section belongs to; same for all sections.
+     */
+    get key() {
+        return this.course.key;
+    }
+    get department() {
+        return this.course.department;
+    }
+    get number() {
+        return this.course.number;
+    }
+    get type() {
+        return this.course.type;
+    }
+    get units() {
+        return this.course.units;
+    }
+    get title() {
+        return this.course.title;
+    }
+    get description() {
+        return this.course.description;
+    }
+    get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
 

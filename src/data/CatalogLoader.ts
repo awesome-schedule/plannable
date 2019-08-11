@@ -263,10 +263,11 @@ export function parseSemesterData2(raw_data: string[][], db: CatalogDB, currentS
         db.courses.bulkAdd(courseItemArr),
         db.sections.bulkAdd(sectionArr),
         db.meetings.bulkAdd(meetingArr)
-    ]);
+    ]).then(x => {
+        localStorage.setItem('idb_time', (new Date()).getTime().toString());
+        localStorage.setItem('idb_semester', currentSemester.id);
+    });
     console.timeEnd('parse semester data and store');
-    localStorage.setItem('idb_time', (new Date()).getTime().toString());
-    localStorage.setItem('idb_semester', currentSemester.id);
     return rawCatalog;
 }
 

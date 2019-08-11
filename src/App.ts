@@ -35,7 +35,7 @@ import { backend } from './config';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
-const version = '6.5';
+const version = '7.0';
 let note = 'loading release note...';
 /**
  * returns whether the version stored in localStorage matches the current version

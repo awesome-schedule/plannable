@@ -36,7 +36,8 @@
                 { "name": "noEarly", "enabled": false, "reverse": true }
             ],
             "mode": 0
-        }
+        },
+        "refSchedule": {}
     },
     "schedule": {
         "currentScheduleIndex": 6,

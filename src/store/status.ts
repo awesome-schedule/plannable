@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import Event from '../models/Event';
 
 interface Sidebars {

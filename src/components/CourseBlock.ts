@@ -1,6 +1,10 @@
 /**
  * @module components
  */
+
+/**
+ *
+ */
 import { Component, Prop } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Event from '../models/Event';
@@ -12,6 +16,7 @@ import { timeToNum, to12hr } from '../utils';
 /**
  * the component for rendering a course on GridSchedule
  * @author Kaiying Shan, Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component
 export default class CourseBlock extends Store {

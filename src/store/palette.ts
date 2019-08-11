@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import { StoreModule } from '.';
 
 export interface PaletteState {

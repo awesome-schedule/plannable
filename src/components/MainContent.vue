@@ -15,7 +15,7 @@
                 :class="`alert-${noti.cls}`"
                 style="width: 85%"
             >
-                {{ noti.msg }}
+                <span v-html="noti.msg"></span>
                 <button type="button" class="close" style="align:center" @click="noti.clear()">
                     <span aria-hidden="true">&times;</span>
                 </button>

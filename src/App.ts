@@ -31,10 +31,11 @@ import URLModal from './components/URLModal.vue';
 import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
+import { backend } from './config';
 import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
-const version = '6.5';
+const version = '7.0';
 let note = 'loading release note...';
 /**
  * returns whether the version stored in localStorage matches the current version
@@ -177,27 +178,30 @@ export default class App extends Store {
 
     refreshNote() {
         $('#release-note-body').html(note);
-        // this.note = note;
     }
 
     async loadCoursesFromURL() {
-        const config = new URLSearchParams(window.location.search).get('courses');
-        if (config) {
+        const courseArray = new URLSearchParams(window.location.search).get('courses');
+        if (courseArray) {
             try {
-                const courses = JSON.parse(decodeURIComponent(config));
+                const courses = JSON.parse(decodeURIComponent(courseArray));
                 if (courses && courses instanceof Array && courses.length) {
                     const schedule = this.schedule.getDefault();
                     courses.forEach(key => (schedule.currentSchedule.All[key] = -1));
                     this.profile.addProfile(JSON.stringify({ schedule }), 'Li Hao');
                     await this.loadProfile(undefined, !checkVersion());
 
-                    this.noti.success('Courses loaded from Li Hao', 3, true);
+                    this.noti.success('Courses loaded from ' + backend.name, 3, true);
                     return true;
                 } else {
                     throw new Error('Invalid course format');
                 }
             } catch (e) {
-                this.noti.error('Failed to load courses from Li Hao: ' + e.message, 3, true);
+                this.noti.error(
+                    `Failed to load courses from ${backend.name}: ` + e.message,
+                    3,
+                    true
+                );
                 return false;
             }
         }
@@ -205,11 +209,11 @@ export default class App extends Store {
     }
 
     async loadConfigFromURL() {
-        const config = new URLSearchParams(window.location.search).get('config');
+        const encoded = new URLSearchParams(window.location.search).get('config');
 
-        if (config) {
+        if (encoded) {
             try {
-                this.profile.addProfile(JSON.stringify(parseFromURL(config)), 'url loaded');
+                this.profile.addProfile(JSON.stringify(await parseFromURL(encoded)), 'url loaded');
                 await this.loadProfile(undefined, !checkVersion());
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;
@@ -222,7 +226,7 @@ export default class App extends Store {
     }
 
     /**
-     * load credentials from Li Hao
+     * load credentials from backend
      */
     loadCredentials() {
         const search = new URLSearchParams(window.location.search);
@@ -231,6 +235,7 @@ export default class App extends Store {
         if (username && credential) {
             localStorage.setItem('username', username);
             localStorage.setItem('credential', credential);
+            return true;
         }
     }
 
@@ -244,8 +249,6 @@ export default class App extends Store {
             this.semester.loadSemesters()
         ]);
 
-        this.loadCredentials();
-
         this.noti.notify(pay1);
         if (pay1.payload) window.timeMatrix = pay1.payload;
 
@@ -255,14 +258,15 @@ export default class App extends Store {
         this.noti.notify(pay3);
         if (pay3.payload) {
             this.semester.semesters = pay3.payload;
+            const cre = this.loadCredentials();
             const urlResult = (await this.loadConfigFromURL()) || (await this.loadCoursesFromURL());
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
                 // if version mismatch, force-update semester data
                 await this.loadProfile(this.profile.current, !checkVersion());
-            } else {
-                history.replaceState(history.state, 'current', '/');
             }
+            // clear url after obtained credentials/courses/config
+            if (urlResult || cre) history.replaceState(history.state, 'current', '/');
         }
 
         this.status.loading = false;

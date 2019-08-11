@@ -10,7 +10,7 @@ import { CourseStatus } from '@/models/Meta';
 import { NotiMsg } from '@/store/notification';
 import Catalog from '../models/Catalog';
 import Event from '../models/Event';
-import Schedule from '../models/Schedule';
+import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
@@ -46,6 +46,9 @@ import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
  * ```
  */
 export type TimeArray = Int16Array;
+/**
+ * Start and end date in millisecond (obtained via [[Date.getTime]])
+ */
 export type MeetingDate = [number, number];
 
 /**
@@ -54,17 +57,13 @@ export type MeetingDate = [number, number];
  *
  * 0: key of this course
  * 1: an array of section indices
- * 2: [[TimeArray]]
- * 3: Start and end date in millisecond (obtained via Date.getTime)
  *
  * Example:
  * ```js
- * ["span20205", [0, 1, 2],
- * [7, 7, 7, 7, 13, 13, 13, 13, 600, 660, 11, 900, 960, 2, 1200, 1260, 12],
- * [1563863108659, 1574231108659]]
+ * ["span20205", [0, 1, 2]]
  * ```
  */
-export type RawAlgoCourse = [string, number[], TimeArray, MeetingDate];
+export type RawAlgoCourse = [string, number[]];
 
 /**
  * A schedule is an array of `RawAlgoCourse`
@@ -88,7 +87,7 @@ class ScheduleGenerator {
     constructor(
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: readonly string[],
-        public readonly options: GeneratorOptions
+        public readonly options: GeneratorOptions,
     ) { }
 
     /**
@@ -100,7 +99,8 @@ class ScheduleGenerator {
      *
      * @see [[ScheduleEvaluator]]
      */
-    public getSchedules(schedule: Schedule, sort = true): NotiMsg<ScheduleEvaluator> {
+    public getSchedules(schedule: Schedule, sort = true, refSchedule?: ScheduleAll<Set<number>>)
+        : NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
 
         // convert events to TimeArrays so that we can easily check for time conflict
@@ -108,11 +108,16 @@ class ScheduleGenerator {
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeArray());
 
         const classList: RawAlgoCourse[][] = [];
+        const timeArrayList: TimeArray[][] = [];
+        const dateList: MeetingDate[][] = [];
+
         const courses = schedule.All;
 
         // for each course selected, form an array of sections
         for (const key in courses) {
-            const classes: RawAlgoCourse[] = [];
+            const classes: RawAlgoCourse[] = [],
+                timeArrays: TimeArray[] = [],
+                dates: MeetingDate[] = [];
 
             // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
@@ -130,12 +135,12 @@ class ScheduleGenerator {
                 const date = parseDate(sections[0].dates);
                 if (!date) continue;
 
-                const blocksArray = sections[0].getTimeRoom();
-                if (!blocksArray) continue;
+                const timeArray = sections[0].getTimeRoom();
+                if (!timeArray) continue;
 
                 // don't include this combined section if it conflicts with any time filter or event.
                 for (const td of timeSlots) {
-                    if (checkTimeConflict(td, blocksArray, 2, 3)) continue outer;
+                    if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;
                 }
 
                 const secIndices: number[] = [];
@@ -146,7 +151,11 @@ class ScheduleGenerator {
                     secIndices.push(section.sid);
                 }
 
-                if (secIndices.length) classes.push([key, secIndices, blocksArray, date]);
+                if (secIndices.length) {
+                    classes.push([key, secIndices]);
+                    timeArrays.push(timeArray);
+                    dates.push(date);
+                }
             }
 
             // throw an error of none of the sections pass the filter
@@ -159,25 +168,11 @@ class ScheduleGenerator {
                 };
             }
             classList.push(classes);
+            timeArrayList.push(timeArrays);
+            dateList.push(dates);
         }
-        // note: this makes the algorithm deterministic
-        classList.sort((a, b) => a.length - b.length);
-        console.timeEnd('algorithm bootstrapping');
-
-        console.time('running algorithm:');
-        const evaluator = new ScheduleEvaluator(
-            this.options.sortOptions,
-            window.timeMatrix,
-            schedule.events
-        );
-        this.createSchedule(classList, evaluator);
-
-        // free a little memory by removing the time amd room info,
-        // which are no longer needed, from each section
-        classList.forEach(sections => sections.forEach(section => section.splice(2)));
-        console.timeEnd('running algorithm:');
-
-        const size = evaluator.size();
+        const evaluator = this.createSchedule(classList, timeArrayList, dateList, schedule.events, refSchedule);
+        const size = evaluator.size;
         if (size > 0) {
             if (sort) evaluator.sort();
             return {
@@ -200,9 +195,17 @@ class ScheduleGenerator {
      * classList[i][j] // represents the jth section of the ith class
      * ```
      * @requires optimization
+     * @remarks The use of data structure assumes that
+     * 1. Each course has no more than 255 sections
+     * 2. Each section meets no more than 82 times in a week
      */
-    public createSchedule(classList: RawAlgoCourse[][], evaluator: ScheduleEvaluator) {
-        console.time('pre-computing conflict');
+    public createSchedule(
+        classList: RawAlgoCourse[][],
+        timeArrayList: TimeArray[][],
+        dateList: MeetingDate[][],
+        events: Event[],
+        refSchedule: ScheduleAll = {}
+    ) {
         /**
          * current course index
          */
@@ -224,18 +227,6 @@ class ScheduleGenerator {
          */
         const { maxNumSchedules } = this.options;
         /**
-         * record the index of sections that are already tested
-         */
-        const pathMemory = new Uint16Array(numCourses);
-        /**
-         * The current schedule, build incrementally and in-place.
-         */
-        const currentSchedule: RawAlgoSchedule = [];
-        /**
-         * the choiceNum array corresponding to the currentSchedule
-         */
-        const currentChoices = new Uint16Array(numCourses);
-        /**
          * the maximum number of sections in each course
          */
         const maxLen = Math.max(...classList.map(c => c.length));
@@ -243,39 +234,94 @@ class ScheduleGenerator {
          * the side length of the conflict cache matrix
          */
         const sideLen = maxLen * numCourses;
-        const conflictCache = new Uint8Array(sideLen ** 2);
+        let byteOffset =
+            numCourses * 2 + // pathMemory + currentChoices
+            maxLen * numCourses + // timeArrLens
+            sideLen ** 2 + // conflictCache
+            numCourses * maxNumSchedules; // allChoices
+        const buffer = new ArrayBuffer(byteOffset);
+        byteOffset = 0;
+        /**
+         * record the index of sections that are already tested
+         */
+        const pathMemory = new Uint8Array(buffer, byteOffset, numCourses);
+        byteOffset += numCourses;
+        /**
+         * the choiceNum array corresponding to the currentSchedule
+         */
+        const currentChoices = new Uint8Array(buffer, byteOffset, numCourses);
+        byteOffset += numCourses;
+        /**
+         * the cache of the length of TimeArrays for each section
+         * | Sections | Course1 | Course 2 | ... |
+         * | -------- | ------- | -------- | --- |
+         * | Sec1     | 14      | 14       |     |
+         * | Sec2     | 14      | 17       |     |
+         * ...
+         * Columns are the courses
+         */
+        const timeArrLens = new Uint8Array(buffer, byteOffset, maxLen * numCourses);
+        byteOffset += maxLen * numCourses;
+        /**
+         * the conflict cache matrix, a 4d tensor. Indexed like this:
+         * ```js
+         * conflictCache[section1][course1][section2][course2]
+         * ```
+         * which translates to
+         * ```js
+         * conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
+         * ```
+         */
+        const conflictCache = new Uint8Array(buffer, byteOffset, sideLen ** 2);
+        byteOffset += sideLen ** 2;
+        /**
+         * the array of `choiceNum`s.
+         */
+        const allChoices = new Uint8Array(buffer, byteOffset);
+
+        // compute timeArrLens
+        for (let i = 0; i < numCourses; i++) {
+            const arrs = timeArrayList[i];
+            const len = arrs.length;
+            for (let j = 0; j < len; j++) {
+                timeArrLens[j * numCourses + i] = arrs[j].length;
+            }
+        }
 
         // pre-compute the conflict between each pair of sections
         for (let i = 0; i < numCourses; i++) {
             for (let j = i + 1; j < numCourses; j++) {
-                const secs1 = classList[i],
-                    secs2 = classList[j];
-                const len1 = secs1.length,
-                    len2 = secs2.length;
+                const arrs1 = timeArrayList[i],
+                    arrs2 = timeArrayList[j],
+                    dates1 = dateList[i],
+                    dates2 = dateList[j],
+                    len1 = arrs1.length,
+                    len2 = arrs2.length;
                 for (let m = 0; m < len1; m++) {
                     for (let n = 0; n < len2; n++) {
-                        const i1 = i * maxLen + m,
-                            i2 = j * maxLen + n;
-
-                        const sec1 = secs1[m],
-                            sec2 = secs2[n];
-                        const date1 = sec1[3],
-                            date2 = sec2[3];
-
+                        const i1 = m * numCourses + i, // courses are in the columns
+                            i2 = n * numCourses + j;
                         // conflict is symmetric
                         conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] =
-                            +((checkTimeConflict(sec1[2], sec2[2], 3, 3) &&
-                                calcOverlap(date1[0], date1[1], date2[0], date2[1]) !== -1));
+                            +((checkTimeConflict(arrs1[m], arrs2[n], 3, 3) &&
+                                calcOverlap(dates1[m][0], dates1[m][1], dates2[n][0], dates2[n][1]) !== -1));
                     }
                 }
             }
         }
-        console.timeEnd('pre-computing conflict');
-
+        console.timeEnd('algorithm bootstrapping');
+        console.time('running algorithm:');
+        byteOffset = 0;
         outer: while (true) {
             if (classNum >= numCourses) {
-                evaluator.add(currentSchedule.concat());
-                if (++count >= maxNumSchedules) return;
+                const start = count * numCourses;
+                // accumulate the length of the time arrays combined in each schedule
+                byteOffset += 8;
+                for (let i = 0; i < numCourses; i++)
+                    // also assign currentChoices to allChoices
+                    byteOffset += timeArrLens[(allChoices[start + i] = currentChoices[i]) * numCourses + i] - 8;
+
+                if (++count >= maxNumSchedules) break outer;
                 choiceNum = pathMemory[--classNum];
             }
 
@@ -286,7 +332,7 @@ class ScheduleGenerator {
              */
             while (choiceNum >= classList[classNum].length) {
                 // if all possibilities are exhausted, break out the loop
-                if (--classNum < 0) return;
+                if (--classNum < 0) break outer;
 
                 choiceNum = pathMemory[classNum];
                 pathMemory.fill(0, classNum + 1);
@@ -294,9 +340,9 @@ class ScheduleGenerator {
 
             // check conflict between the newly chosen section and the sections already in the schedule
             for (let i = 0; i < classNum; i++) {
-                const i1 = classNum * maxLen + choiceNum,
-                    i2 = i * maxLen + currentChoices[i];
-                if (conflictCache[i2 * sideLen + i1] || conflictCache[i1 * sideLen + i2]) {
+                if (conflictCache[
+                    (currentChoices[i] * numCourses + i) * sideLen + choiceNum * numCourses + classNum
+                ]) {
                     ++choiceNum;
                     continue outer;
                 }
@@ -304,11 +350,45 @@ class ScheduleGenerator {
 
             // if the section does not conflict with any previously chosen sections,
             // increment the path memory and go to the next class, reset the choiceNum = 0
-            currentSchedule[classNum] = classList[classNum][choiceNum];
             currentChoices[classNum] = choiceNum;
             pathMemory[classNum++] = choiceNum + 1;
             choiceNum = 0;
         }
+        console.timeEnd('running algorithm:');
+        console.time('add to eval');
+
+        /**
+         * the buffer which stores the `offsets` and `blocks`
+         */
+        const buf = new ArrayBuffer(count * 4 + byteOffset * 2);
+        /**
+         * the cumulative length of the time arrays for each schedule
+         */
+        const offsets = new Uint32Array(buf, 0, count);
+        /**
+         * the array on which all `blocks` in the evaluator are allocated
+         */
+        const blocks = new Int16Array(buf, count * 4);
+        byteOffset = 0;
+        for (let i = 0; i < count; i++) {
+            // record the current offset
+            offsets[i] = byteOffset;
+            // sort the time blocks in order
+            byteOffset += ScheduleEvaluator.sortBlocks(blocks, allChoices, timeArrayList, byteOffset, i);
+        }
+        console.timeEnd('add to eval');
+
+        return new ScheduleEvaluator(
+            this.options.sortOptions,
+            window.timeMatrix,
+            events,
+            classList,
+            offsets,
+            blocks,
+            allChoices.slice(0, count * numCourses), // only COPY the needed part,
+            // to allow the underlying buffer of the original array to be garbage collected
+            refSchedule
+        );
     }
 }
 

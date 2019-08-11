@@ -3,7 +3,8 @@
  */
 
 /**
- * @author Cat
+ * @author Kaiying Cat
+ * @noInheritDoc
  */
 import Schedule from '@/models/Schedule';
 import { Component, Prop, Vue } from 'vue-property-decorator';

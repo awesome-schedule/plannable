@@ -1,6 +1,10 @@
 /**
  * @module components
  */
+
+/**
+ *
+ */
 import { Component } from 'vue-property-decorator';
 import config from '../config';
 import Store from '../store';
@@ -8,6 +12,7 @@ import Store from '../store';
 /**
  * the container for the notification and content right of the side bar
  * @author Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component
 export default class MainContent extends Store {

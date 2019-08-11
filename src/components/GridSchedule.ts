@@ -1,6 +1,10 @@
 /**
  * @module components
  */
+
+/**
+ *
+ */
 import Schedule from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
 import { DAYS } from '../models/Meta';
@@ -11,6 +15,7 @@ import CourseBlock from './CourseBlock.vue';
 /**
  * the component for rendering a schedule (with courses and events) on a grid
  * @author Kaiying Cat
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -90,10 +95,10 @@ export default class GridSchedule extends Store {
 
     get gridTemplateCols() {
         const numCol = this.numCol;
-        return `${100 / numCol}% ${100 / numCol}% ${100 /
-            numCol}% ${100 / numCol}% ${100 / numCol}% ${
+        return `${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 /
+            numCol}% ${numCol === 7 ? 100 / numCol + '%' : ''} ${
             numCol === 7 ? 100 / numCol + '%' : ''
-            } ${numCol === 7 ? 100 / numCol + '%' : ''}`;
+        }`;
     }
 
     /**

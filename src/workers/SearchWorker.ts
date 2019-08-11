@@ -12,18 +12,29 @@
  */
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
+import _Course, { CourseConstructorArguments, CourseFields, CourseMatch } from '../models/Course';
+import _Meeting from '../models/Meeting';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-type Course = NonFunctionProperties<_Course>;
-type Section = NonFunctionProperties<_Section>;
+// functions cannot be cloned via structured cloning
+type Meeting = NonFunctionProperties<_Meeting>;
+interface Section extends Pick<
+    _Section,
+    // course fields are defined as getters which cannot be cloned
+    Exclude<NonFunctionPropertyNames<_Section>, keyof CourseFields | undefined | 'meetings'>
+> {
+    readonly meetings: readonly Meeting[];
+}
+interface Course extends Pick<_Course, Exclude<NonFunctionPropertyNames<_Course>, 'sections'>> {
+    readonly sections: readonly Section[];
+}
 
 declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] | 'ready'): void;
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
-let descripSearcher: _Searcher<Course>;
+let descriptionSearcher: _Searcher<Course>;
 let topicSearcher: _Searcher<Section>;
 let instrSearcher: _Searcher<Section>;
 const searcherOpts = {
@@ -82,14 +93,16 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
         console.time('worker prep');
         courseDict = data;
         const courses = Object.values(courseDict);
-        const sections: Section[] = [];
-        for (const { sections: secs } of courses) sections.push(...secs);
+        const sections = courses.reduce((secs: Section[], course) => {
+            secs.push(...course.sections);
+            return secs;
+        }, []);
 
         titleSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.title
         });
-        descripSearcher = new Searcher(courses, {
+        descriptionSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.description
         });
@@ -126,7 +139,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             const q = querySeg[j];
             const last = j === querySeg.length - 1;
 
-            const coursesResults = [titleSearcher.search(q), descripSearcher.search(q)];
+            const coursesResults = [titleSearcher.search(q), descriptionSearcher.search(q)];
             const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
 
             // map search result to course (or section) and record the match score

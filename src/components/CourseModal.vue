@@ -62,7 +62,11 @@
                         v-html="highlightMatch(course.description, 'description', match[0])"
                     ></p>
 
-                    <button class="btn btn-outline-info" @click="openVAGrade(course)">
+                    <button
+                        v-if="config.enableGrades"
+                        class="btn btn-outline-info"
+                        @click="config.viewGrades(course)"
+                    >
                         Grade Distribution
                     </button>
                 </div>

@@ -79,7 +79,7 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
  * 8: end time, of 24 hour format
  */
 export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
-export type TimeSlotShort = [number, number, number, number, number, number, number, string, string];
+export type TimeSlotShort = [number, string, string];
 
 /**
  * a list of sort options with default values assigned
@@ -216,12 +216,22 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule, events: []});
         if (level === 'warn')
             noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
+
         return [
             filterBits,
             sortBits,
             initials,
-            // convert bool to 0 or 1
-            obj.timeSlots.map(slot => slot.map((x, i) => i < 7 ? +x : x) as TimeSlotShort),
+            // use 7 bits to represent the 7 days
+            obj.timeSlots.map(timeSlot => {
+                let m = 1,
+                    flag = 0;
+                for (let i = 0; i < 7; i++) {
+                    if (timeSlot[i]) flag |= m;
+                    m <<= 1;
+                }
+                return [flag, timeSlot[7], timeSlot[8]];
+            }),
+            // we ignore the events
             schedule && level !== 'warn' ? Schedule.compressJSON(schedule.toJSON())[0] : {}
         ];
     }
@@ -237,7 +247,16 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         filter.sortOptions.mode = +Boolean(filterBits & 4); // convert to 0 or 1
 
         // decode time slots
-        filter.timeSlots = slots.map(slot => slot.map((x, i) => i < 7 ? Boolean(x) : x) as TimeSlot);
+        filter.timeSlots = slots.map(slot => {
+            const timeSlot: TimeSlot = [false, false, false, false, false, false, false, slot[1], slot[2]];
+            const bits = slot[0];
+            let m = 1;
+            for (let i = 0; i < 7; i++) {
+                timeSlot[i] = Boolean(m & bits);
+                m <<= 1;
+            }
+            return timeSlot;
+        });
 
         // decode the enable and reverse info of sort
         const sortBy = filter.sortOptions.sortBy;
@@ -257,7 +276,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             sortCopy.push(sortOpt);
         }
         filter.sortOptions.sortBy = sortCopy;
-        const {payload: schedule, level} = Schedule.fromJSON(Schedule.decompressJSON([ref]));
+        const { payload: schedule, level } = Schedule.fromJSON(Schedule.decompressJSON([ref]));
         if (schedule && level !== 'warn') filter.refSchedule = schedule.All;
         return filter.toJSON();
     }
@@ -285,6 +304,13 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
     get similarityEnabled() {
         return Object.keys(this.refSchedule).length !== 0;
+    }
+
+    addTimeSlot() {
+        this.timeSlots.push([false, false, false, false, false, false, false, '', '']);
+    }
+    removeTimeSlot(n: number) {
+        this.timeSlots.splice(n, 1);
     }
 
     /**

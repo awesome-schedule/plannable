@@ -196,7 +196,7 @@ export default class Store extends Vue {
             parsed.currentSemester.id === this.semester.currentSemester.id &&
             !force
         ) {
-            console.warn('Loading aborted');
+            console.warn('Semester data loading aborted');
         } else {
             const msg = await this.semester.selectSemester(
                 parsed.currentSemester || this.semester.semesters[0],

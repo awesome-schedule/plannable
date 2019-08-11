@@ -108,7 +108,13 @@ export default class Schedule {
 
     /**
      * instantiate a `Schedule` object from its JSON representation.
-     * the `computeSchedule` method will be invoked
+     * the `computeSchedule` method will be invoked after instantiation
+     *
+     * @returns NotiMsg, whose level might be one of the following
+     * 1. success: a schedule is successfully parsed from the JSON object
+     * 2. warn: a schedule is successfully parsed, but some of the courses/sections recorded no longer exist
+     * in the catalog
+     * 3. error: the object passed in is falsy
      */
     public static fromJSON(obj?: ScheduleJSON): NotiMsg<Schedule> {
         if (!obj) return {
@@ -627,6 +633,9 @@ export default class Schedule {
         return toNativeAdjList(adjList, offset);
     }
 
+    /**
+     * compute the width and left of the blocks contained in each day
+     */
     public computeBlockPositions() {
         for (const blocks of this.days) {
             const [fastGraph] = this.constructAdjList(blocks);

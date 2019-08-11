@@ -2,7 +2,7 @@ import Dexie from 'dexie';
 import { ValidFlag } from '../models/Section';
 
 export interface CourseTableItem {
-    id: string;
+    id?: string;
     department: string;
     number: number;
     type: number;
@@ -13,7 +13,7 @@ export interface CourseTableItem {
 }
 
 export interface SectionTableItem {
-    id: number; // 5 digit sis id
+    id?: number; // 5 digit sis id
     sid: string; // section id
     topic: string;
     status: number;

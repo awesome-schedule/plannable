@@ -51,7 +51,7 @@ class Semesters implements SemesterState {
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
-        const temp = loadSemesterData2(currentSemester, force);
+        const temp = await loadSemesterData2(currentSemester, force);
 
         // allow one to cancel the pending promise if old data exists
         if (temp.old) this.pendingPromise = temp.new;
@@ -61,7 +61,7 @@ class Semesters implements SemesterState {
             errMsg: x => `Failed to fetch ${name} data: ${x}`,
             warnMsg: x => `Failed to fetch ${name} data: ${x}. Old data is used`,
             succMsg: `Successfully loaded ${name} data!`,
-            timeoutTime: 15000
+            timeoutTime: 150000000
         });
         //  if the a catalog object is returned
         if (result.payload) {

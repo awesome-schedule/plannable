@@ -1,10 +1,13 @@
-import { ValidFlag } from './Section';
-
 /**
  * Meta stores some constants and type definitions
  * @author Hanzhi Zhou
  * @module models
  */
+
+/**
+ *
+ */
+import { ValidFlag } from './Section';
 
 /**
  * the raw catalog is represented as a big dictionary
@@ -92,26 +95,23 @@ export type RawSection = [
  */
 export type RawMeeting = [string, string, string];
 
-export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr';
-
-/**
- * The generic iliffe vector used to store some information about each day within a week
- */
-export type Week<T> = [T[], T[], T[], T[], T[]];
+export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
 
 export const dayToInt = Object.freeze({
     Mo: 0,
     Tu: 1,
     We: 2,
     Th: 3,
-    Fr: 4
-}) as { readonly [key in Day]: number };
+    Fr: 4,
+    Sa: 5,
+    Su: 6
+});
 
-export const DAYS: ReadonlyArray<Day> = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+export const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
 /**
  * lecture type number => meaning
  */
-export const TYPES: { [x: number]: CourseType } = Object.freeze({
+export const TYPES = Object.freeze({
     '-1': '',
     0: 'Clinical',
     1: 'Discussion',

@@ -5,8 +5,9 @@
 /**
  *
  */
+import { saveStatus, StoreModule } from '.';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import { StoreModule, saveStatus } from '.';
+import noti from './notification';
 
 interface ScheduleStateBase {
     /**
@@ -51,13 +52,35 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 }
 
 // tslint:disable-next-line: no-empty-interface
-interface ScheduleStore extends ScheduleState { }
+export interface ScheduleStore extends ScheduleState {}
 
 /**
  * the schedule module provides methods to manipulate schedules
  * @author Hanzhi Zhou
  */
-class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
+export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
+    public static compressJSON(obj: ScheduleStateJSON) {
+        return [
+            obj.currentScheduleIndex,
+            obj.proposedScheduleIndex,
+            obj.cpIndex,
+            +obj.generated,
+            obj.proposedSchedules.map(s => Schedule.compressJSON(s))
+        ] as const;
+    }
+
+    public static decompressJSON(
+        obj: ReturnType<typeof ScheduleStore.compressJSON>
+    ): ScheduleStateJSON {
+        return {
+            currentScheduleIndex: obj[0],
+            proposedScheduleIndex: obj[1],
+            cpIndex: obj[2],
+            generated: Boolean(obj[3]),
+            proposedSchedules: obj[4].map(s => Schedule.decompressJSON(s))
+        };
+    }
+
     constructor() {
         Object.assign(this, this.getDefault());
     }
@@ -78,7 +101,7 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         }
     }
     /**
-     * create a new empty schedule at the end of the proposedSchedules array and immediate switch to it
+     * create a new empty schedule at the end of the proposedSchedules array and immediately switch to it
      */
     newProposed() {
         this.proposedSchedules.push(new Schedule());
@@ -179,9 +202,12 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
         const proposed = obj.proposedSchedules;
         if (proposed instanceof Array) {
             this.proposedSchedules = proposed.map(x => {
-                const temp = Schedule.fromJSON(x);
-                if (temp) return temp;
-                else return new Schedule();
+                const result = Schedule.fromJSON(x);
+                const temp = result.payload;
+                if (temp) {
+                    if (result.level === 'warn') noti.notify(result);
+                    return temp;
+                } else return new Schedule();
             });
         } else {
             this.proposedSchedules = defaultState.proposedSchedules;
@@ -207,8 +233,8 @@ class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJSON> {
 
     toJSON() {
         // exclude numGenerated and currentSchedule
-        const { numGenerated, currentSchedule, ...others } = this as ScheduleStore;
-        return others as ScheduleStateJSON;
+        const { numGenerated, currentSchedule, ...others } = this;
+        return (others as any) as ScheduleStateJSON;
     }
 
     getDefault(): ScheduleState {

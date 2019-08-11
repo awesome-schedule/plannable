@@ -5,28 +5,34 @@
                 <div class="modal-header">
                     <h5
                         class="modal-title"
-                        v-html="highlightMatch(course.displayName, 'key', course.matches)"
+                        v-html="highlightMatch(course.displayName, 'key', match[0])"
                     ></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h6 v-html="highlightMatch(course.title, 'title', course.matches)"></h6>
+                    <h6 v-html="highlightMatch(course.title, 'title', match[0])"></h6>
                     <div style="width: 100%; overflow-x: auto;">
                         <table id="sec-table" class="m-color">
                             <tr v-for="section in course.sections" :key="section.section">
                                 <td>Section&nbsp;{{ section.section }}</td>
                                 <td>ID:&nbsp;{{ section.id }}</td>
                                 <td
-                                    v-html="highlightMatch(section.topic, 'topic', section.matches)"
+                                    v-html="
+                                        highlightMatch(
+                                            section.topic,
+                                            'topic',
+                                            match[1].get(section.sid)
+                                        )
+                                    "
                                 ></td>
                                 <td
                                     v-html="
                                         highlightMatch(
                                             section.instructors.join(', '),
                                             'instructors',
-                                            section.matches
+                                            match[1].get(section.sid)
                                         )
                                     "
                                 ></td>
@@ -53,10 +59,14 @@
 
                     <p
                         class="mt-2"
-                        v-html="highlightMatch(course.description, 'description', course.matches)"
+                        v-html="highlightMatch(course.description, 'description', match[0])"
                     ></p>
 
-                    <button class="btn btn-outline-info" @click="openVAGrade(course)">
+                    <button
+                        v-if="config.enableGrades"
+                        class="btn btn-outline-info"
+                        @click="config.viewGrades(course)"
+                    >
                         Grade Distribution
                     </button>
                 </div>

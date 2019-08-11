@@ -1,14 +1,19 @@
 /**
  * @module components/tabs
  */
-import randomColor from 'randomcolor';
-import { Component } from 'vue-property-decorator';
+
+/**
+ *
+ */
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
+import randomColor from 'randomcolor';
+import { Component } from 'vue-property-decorator';
 
 /**
  * the component for customizing colors of classes and events
  * @author Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component
 export default class Palette extends Store {

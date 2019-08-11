@@ -52,12 +52,13 @@
             <ClassList
                 ref="enteringClassList"
                 :courses="inputCourses"
+                :matches="inputMatches"
                 :schedule="schedule.currentSchedule"
                 :is-entering="isEntering"
                 :show-classlist-title="display.showClasslistTitle"
                 :expand-on-entering="display.expandOnEntering"
                 @update_course="updateCourse"
-                @course_modal="modal.showCourseModal($event)"
+                @course_modal="modal.showCourseModal($event.crs, $event.match)"
                 @close="closeClassList()"
             ></ClassList>
         </div>
@@ -155,7 +156,7 @@
                     :show-classlist-title="display.showClasslistTitle"
                     @update_course="updateCourse"
                     @remove_course="removeCourse"
-                    @course_modal="modal.showCourseModal($event)"
+                    @course_modal="modal.showCourseModal($event.crs, $event.match)"
                 ></ClassList>
                 <div class="btn-group mt-3 w-100">
                     <button type="button" class="btn btn-outline-info" @click="generateSchedules()">
@@ -204,7 +205,11 @@
                 <table style="width:100%;font-size:14px">
                     <tr v-for="item in currentIds" :key="item[0]">
                         <td>{{ item[0] }}</td>
-                        <td>{{ item[1] }}</td>
+                        <td>
+                            <select class="custom-select custom-select-sm py-0">
+                                <option v-for="id in item[1]" :key="id">{{ id }}</option>
+                            </select>
+                        </td>
                     </tr>
                 </table>
             </li>

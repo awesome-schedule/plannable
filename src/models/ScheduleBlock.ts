@@ -6,10 +6,10 @@
 /**
  *
  */
-import Section from './Section';
-import Event from './Event';
 import { calcOverlap, hr24toInt } from '../utils';
 import Course from './Course';
+import Event from './Event';
+import Section from './Section';
 
 /**
  * A `ScheduleBlock` is a data structure that holds

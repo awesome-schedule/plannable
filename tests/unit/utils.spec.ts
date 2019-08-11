@@ -1,6 +1,6 @@
+import config from '@/config';
 import * as Utils from '@/utils';
 import axios from 'axios';
-import config from '@/config';
 
 beforeAll(async () => {
     window.open = jest.fn();
@@ -64,10 +64,12 @@ describe('Utility Tests', () => {
         expect(Utils.errToStr(new Error('asd') as any)).toBe('asd');
     });
 
-    it('other', () => {
-        Utils.openLousList('1198', 1);
-        Utils.openVAGrade(window.catalog.getCourse('cs11105'));
+    it('dummy', () => {
+        config.external.viewDetails('1198', 1);
+        config.external.viewGrades(window.catalog.getCourse('cs11105'));
+    });
 
+    it('other', () => {
         expect(Utils.timeToNum('12:00')).toBeTruthy();
         expect(Utils.timeToNum('12:00')).toBe(8);
         expect(Utils.timeToNum('12:30')).toBe(9);

@@ -7,18 +7,18 @@
 /**
  *
  */
-import { Vue, Component, Prop } from 'vue-property-decorator';
+import { SearchMatch } from '@/models/Catalog';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-import Course from '../models/Course';
 
 /**
  * A **pure** component for
- *
  * 1. displaying the list of courses that are match the query string when searching
  * 2. displaying the list of courses currently selected
- *
  * @author Hanzhi Zhou, Kaiying Cat
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -29,7 +29,11 @@ export default class ClassList extends Vue {
     /**
      * the array of courses to be displayed on this list
      */
-    @Prop(Array) readonly courses!: Course[];
+    @Prop({ type: Array, default: [] }) readonly courses!: Course[];
+    /**
+     * the array of matches corresponding to the array of courses
+     */
+    @Prop({ type: Array, default: [] }) readonly matches!: SearchMatch[];
     /**
      * the schedule used to extract the already selected sections of the courses given above
      */

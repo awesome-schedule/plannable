@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import { StoreModule } from '.';
 
 export interface PaletteState {
@@ -11,7 +15,13 @@ export interface PaletteState {
  * the palette module handles the customization of colors of courses and events
  * @author Hanzhi Zhou
  */
-class Palette implements StoreModule<PaletteState, PaletteState> {
+export class Palette implements StoreModule<PaletteState, PaletteState> {
+    public static compressJSON(obj: PaletteState) {
+        return obj.savedColors;
+    }
+    public static decompressJSON(obj: ReturnType<typeof Palette.compressJSON>) {
+        return { savedColors: obj };
+    }
     public savedColors: { [x: string]: string } = {};
 
     fromJSON(obj: PaletteState) {

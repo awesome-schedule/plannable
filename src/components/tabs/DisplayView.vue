@@ -73,6 +73,22 @@
                 </div>
             </div>
             <div class="form-group row no-gutters mt-0 mb-1">
+                <div class="col-md-6">
+                    <label for="displayWeekend" class="m-0">Show Weekends</label>
+                </div>
+                <div class="col-md-6">
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="displayWeekend"
+                            v-model="display.showWeekend"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="displayWeekend" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row no-gutters mt-0 mb-1">
                 <div class="col-md-6"><label for="displayTime" class="m-0">Show Time</label></div>
                 <div class="col-md-6">
                     <div class="custom-control custom-checkbox ml-1">

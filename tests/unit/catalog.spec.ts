@@ -3,16 +3,16 @@ import Schedule from '@/models/Schedule';
 describe('catalog test', () => {
     it('search', () => {
         const catalog = window.catalog;
-        expect(catalog.search('comp. visio').length).toBeGreaterThanOrEqual(1);
-        expect(catalog.search('cs', 6).length).toBe(6);
-        expect(catalog.search('asdasdasajkgwuoeisd').length).toBe(0);
-        expect(catalog.search('john').length).toBeGreaterThan(2);
-        expect(catalog.search('aaron bloomf').length).toBeGreaterThan(2);
-        expect(catalog.search('discre').length).toBeGreaterThan(1);
-        expect(catalog.search('quantum').length).toBeGreaterThan(1);
+        expect(catalog.search('comp. visio')[0].length).toBeGreaterThanOrEqual(1);
+        expect(catalog.search('cs', 6)[0].length).toBe(6);
+        expect(catalog.search('asdasdasajkgwuoeisd')[0].length).toBe(0);
+        expect(catalog.search('john')[0].length).toBeGreaterThan(2);
+        expect(catalog.search('aaron bloomf')[0].length).toBeGreaterThan(2);
+        expect(catalog.search('discre')[0].length).toBeGreaterThan(1);
+        expect(catalog.search('quantum')[0].length).toBeGreaterThan(1);
 
-        expect(catalog.search(':desc a').length).toBeGreaterThan(1);
-        expect(catalog.search(':prof asdasdasdasdasdasdsad').length).toBe(0);
+        expect(catalog.search(':desc a')[0].length).toBeGreaterThan(1);
+        expect(catalog.search(':prof asdasdasdasdasdasdsad')[0].length).toBe(0);
     });
 
     it('convert key', () => {

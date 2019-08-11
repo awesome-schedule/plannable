@@ -6,8 +6,8 @@
 /**
  *
  */
-import { TimeArray, TimeBlock } from '../algorithm';
 import { Day, dayToInt } from '@/models/Meta';
+import { TimeArray } from '../algorithm';
 /**
  * @author Hanzhi Zhou
  * @param time
@@ -15,10 +15,10 @@ import { Day, dayToInt } from '@/models/Meta';
  *
  * Example usage and return value:
  * ```js
- * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [10*60, 11*60]]
+ * parseTimeAll('MoWeFr 10:00AM - 11:00AM') => [['Mo', 'We', 'Fr'], [600, 660]]
  * ```
  */
-export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
+export function parseTimeAll(time: string): [Day[], [number, number]] | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
         const dayList: Day[] = [];
@@ -31,30 +31,38 @@ export function parseTimeAll(time: string): [Day[], TimeBlock] | null {
 }
 
 /**
- * @author Hanzhi Zhou
+ * @author Kaiying Cat
  * @param time
  * @returns null when fail to parse
  *
  * Example:
  * ```js
- * expect(parseTimeAsTimeArray('MoWeFr 10:00AM - 11:00AM')).toEqual([
- *     [600, 660],
- *     [],
- *     [600, 660],
- *     [],
- *     [600, 660],
- * ])
+ * expect(parseTimeAsTimeArray('MoWeFr 10:00AM - 11:00AM')).toEqual(
+ *  [ 7, 9, 9, 11, 11, 13, 13, 600, 660, 600, 660, 600, 660 ]);
  * ```
  */
 export function parseTimeAsTimeArray(time: string): TimeArray | null {
     const [days, start, , end] = time.split(' ');
     if (days && start && end) {
-        const timeDict: TimeArray = [[], [], [], [], []];
-        const s = hr12toInt(start),
-            e = hr12toInt(end);
-        for (let i = 0; i < days.length; i += 2)
-            timeDict[dayToInt[days.substr(i, 2) as Day]].push(s, e);
-        return timeDict;
+        const s = hr12toInt(start);
+        const e = hr12toInt(end);
+        let lIdx = 0; // last day index
+        const len = days.length;
+        const arr = new Int16Array(8 + len);
+        for (let i = 0; i < len; i += 2) {
+            const idx = dayToInt[days.substr(i, 2) as Day];
+            // fill the index for previous days
+            for (let j = lIdx; j <= idx; j++) {
+                arr[j] = 8 + i;
+            }
+            // place start and end
+            arr[8 + i] = s;
+            arr[8 + i + 1] = e;
+            lIdx = idx + 1;
+        }
+        // fill the index for succeeding days
+        for (let i = lIdx; i < 8; i++) arr[i] = len + 8;
+        return arr;
     }
     return null;
 }
@@ -78,7 +86,7 @@ export function hr12toInt(time: string) {
 
 /**
  * return true of two [[TimeArray]] objects have overlapping time blocks, false otherwise
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, (amended by) Kaiying Cat
  * @param timeArray1
  * @param timeArray2
  * @param step1 the increment step for array 1
@@ -91,21 +99,19 @@ export function checkTimeConflict(
     step1 = 2,
     step2 = 2
 ) {
-    for (let i = 0; i < 5; i++) {
-        const timeBlocks1 = timeArray1[i];
-        const len1 = timeBlocks1.length;
-        if (!len1) continue;
+    for (let i = 0; i < 7; i++) {
+        const s2 = timeArray2[i],
+            e2 = timeArray2[i + 1];
+        // skip the entire inner loop if needed
+        if (s2 === e2) continue;
 
-        const timeBlocks2 = timeArray2[i];
-        const len2 = timeBlocks2.length;
-        if (!len2) continue;
-
-        for (let j = 0; j < len1; j += step1) {
-            const begin1 = timeBlocks1[j] + 1;
-            const end1 = timeBlocks1[j + 1] - 1;
-            for (let k = 0; k < len2; k += step2) {
-                const begin2 = timeBlocks2[k];
-                const end2 = timeBlocks2[k + 1];
+        const e1 = timeArray1[i + 1];
+        for (let j = timeArray1[i]; j < e1; j += step1) {
+            const begin1 = timeArray1[j] + 1;
+            const end1 = timeArray1[j + 1] - 1;
+            for (let k = s2; k < e2; k += step2) {
+                const begin2 = timeArray2[k];
+                const end2 = timeArray2[k + 1];
                 if (
                     (begin1 <= begin2 && begin2 <= end1) ||
                     (begin1 <= end2 && end2 <= end1) ||

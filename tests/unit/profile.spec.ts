@@ -1,7 +1,8 @@
 import Store from '@/store';
 const s = new Store();
+let flag = true;
 beforeAll(() => {
-    window.confirm = () => true;
+    window.confirm = () => flag;
 });
 test('profile basic', async () => {
     await s.semester.loadSemesters();
@@ -29,4 +30,11 @@ test('profile basic', async () => {
     expect(s.profile.current).toBe('prof3');
     s.profile.deleteProfile('prof3', 1);
     expect(s.profile.current).toBe('prof4');
+
+    // duplicated name
+    flag = false;
+    s.profile.addProfile(JSON.stringify({ name: 'prof4' }), 'prof4');
+    expect(s.profile.current).toBe('prof4 (2)');
+    s.profile.addProfile(JSON.stringify({ name: 'prof4' }), 'prof4');
+    expect(s.profile.current).toBe('prof4 (3)');
 });

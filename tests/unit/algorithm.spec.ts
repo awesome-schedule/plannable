@@ -22,14 +22,13 @@ describe('ScheduleGenerator Test', () => {
     it('ScheduleGenerator', () => {
         const catalog = window.catalog;
         const buildingList = window.buildingList;
-        store.filter.timeSlots.push([true, false, true, false, true, '0:15', '0:50']);
+        store.filter.timeSlots.push([true, false, true, false, true, false, false, '0:15', '0:50']);
         const options = store.getGeneratorOptions();
         if (!options) throw new Error('failed to get options');
 
         const generator = new ScheduleGenerator(catalog, buildingList, options);
         expect(typeof generator.createSchedule).toBe('function');
-        const schedule = new Schedule();
-        schedule.All = {
+        const schedule = new Schedule({
             cs11105: -1,
             cs11104: -1,
             ece23305: -1,
@@ -38,7 +37,7 @@ describe('ScheduleGenerator Test', () => {
             apma31105: -1,
             phys24194: -1,
             kine11005: -1
-        };
+        });
         let sort = options.sortOptions;
         sort.sortBy[0].enabled = true;
         sort.sortBy[1].enabled = true;
@@ -57,7 +56,7 @@ describe('ScheduleGenerator Test', () => {
         const { payload: result2 } = generator.getSchedules(schedule);
         expect(result2!.empty()).toBeFalsy();
 
-        sort.sortBy[5].enabled = true;
+        sort.sortBy[6].enabled = true;
         const { payload: result3 } = generator.getSchedules(schedule);
         expect(result3!.empty()).toBeFalsy();
 
@@ -77,7 +76,7 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;
         result4.sort({ newOptions: sort });
-        result4.partialSort(result4.schedules, (a, b) => a.coeff - b.coeff, 10);
+        result4.partialSort(result4.indices, (a, b) => a - b, 10);
 
         sort.sortBy[3].enabled = true;
         sort.sortBy[3].reverse = true;

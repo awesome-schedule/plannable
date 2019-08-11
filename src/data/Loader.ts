@@ -6,11 +6,11 @@
 /**
  *
  */
-import Expirable from './Expirable';
 import { NotiMsg } from '../store/notification';
-import { errToStr, timeout, cancelablePromise, CancelablePromise } from '../utils';
+import { cancelablePromise, CancelablePromise, errToStr, timeout } from '../utils';
+import Expirable from './Expirable';
 
-interface LoaderOptions<T, T_JSON extends Expirable> {
+interface LoaderOptions<T_JSON extends Expirable> {
     /**
      * the expiration time of this T_JSON
      */
@@ -74,7 +74,7 @@ export function loadFromCache<T, T_JSON extends Expirable>(
         parse = x => (x ? JSON.parse(x) : null),
         validator = defaultValidator,
         force = false
-    }: LoaderOptions<T, T_JSON>
+    }: LoaderOptions<T_JSON>
 ): { new: CancelablePromise<T>; old?: T } {
     const storage = localStorage.getItem(key);
     const data: T_JSON | null = parse(storage);

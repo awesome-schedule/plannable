@@ -7,14 +7,16 @@
 /**
  *
  */
-import { Component, Vue } from 'vue-property-decorator';
+import { SearchMatch } from '@/models/Catalog';
 import Course from '@/models/Course';
 import Store from '@/store';
+import { Component, Vue } from 'vue-property-decorator';
 import ClassList from '../ClassList.vue';
 
 /**
  * component for editing classes and manipulating schedules
  * @author Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -25,14 +27,15 @@ export default class ClassView extends Store {
     /**
      * get the list of current ids, sorted in alphabetical order of the keys
      */
-    get currentIds(): [string, string][] {
+    get currentIds() {
         return Object.entries(this.schedule.currentSchedule.currentIds).sort((a, b) =>
             a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
         );
     }
     // autocompletion related fields
     isEntering = false;
-    inputCourses: Course[] | null = null;
+    inputCourses: Course[] = [];
+    inputMatches: SearchMatch[] = [];
 
     /**
      * get classes that match the input query.
@@ -46,7 +49,8 @@ export default class ClassView extends Store {
     getClass(query: string) {
         if (!query) {
             this.isEntering = false;
-            this.inputCourses = null;
+            this.inputCourses = [];
+            this.inputMatches = [];
             return;
         }
         if (this.schedule.generated) {
@@ -54,7 +58,10 @@ export default class ClassView extends Store {
         }
 
         console.time('query');
-        this.inputCourses = window.catalog.search(query, this.display.numSearchResults);
+        [this.inputCourses, this.inputMatches] = window.catalog.search(
+            query,
+            this.display.numSearchResults
+        );
         console.timeEnd('query');
 
         this.isEntering = true;

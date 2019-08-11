@@ -30,12 +30,13 @@
             <ClassList
                 ref="enteringClassList"
                 :courses="inputCourses"
+                :matches="inputMatches"
                 :schedule="schedule.currentSchedule"
                 :is-entering="true"
                 :show-classlist-title="display.showClasslistTitle"
                 :expand-on-entering="display.expandOnEntering"
                 @update_course="updateCourse"
-                @course_modal="modal.showCourseModal($event)"
+                @course_modal="modal.showCourseModal($event.crs, $event.match)"
                 @close="closeClassList()"
             ></ClassList>
         </div>

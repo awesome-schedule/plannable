@@ -1,22 +1,28 @@
 /**
  * @module store
  */
-import { Vue, Component } from 'vue-property-decorator';
+
+/**
+ *
+ */
+import lz from 'lz-string';
+
+import Expirable from '@/data/Expirable';
+import { Component, Vue } from 'vue-property-decorator';
 import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import { CourseStatus } from '../models/Meta';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
-import display, { DisplayState } from './display';
-import filter, { FilterStateJSON } from './filter';
+import display, { Display, DisplayState } from './display';
+import filter, { FilterStateJSON, FilterStore, TimeSlot } from './filter';
 import modal from './modal';
 import noti from './notification';
-import palette, { PaletteState } from './palette';
+import palette, { Palette, PaletteState } from './palette';
 import profile from './profile';
-import schedule, { ScheduleStateJSON } from './schedule';
+import schedule, { ScheduleStateJSON, ScheduleStore } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
-import Expirable from '@/data/Expirable';
 
 export interface SemesterStorage extends Expirable {
     name: string;
@@ -44,7 +50,7 @@ interface LegacyStorage {
 
     display: DisplayState;
 
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    timeSlots: TimeSlot[];
     allowWaitlist: boolean;
     allowClosed: boolean;
     sortOptions: EvaluatorOptions;
@@ -59,7 +65,7 @@ interface AncientStorage extends DisplayState {
     currentSchedule: LegacyScheduleJSON;
     proposedSchedule: LegacyScheduleJSON;
 
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    timeSlots: TimeSlot[];
     allowWaitlist: boolean;
     allowClosed: boolean;
     sortOptions: EvaluatorOptions;
@@ -110,7 +116,7 @@ export function saveStatus() {
         modified: new Date().toJSON(),
         currentSemester,
         display,
-        filter,
+        filter: filter.toJSON(),
         schedule: schedule.toJSON(),
         palette
     };
@@ -182,12 +188,23 @@ export default class Store extends Vue {
                 console.error(e);
             }
         }
-        const msg = await this.semester.selectSemester(
-            parsed.currentSemester || this.semester.semesters[0],
-            force
-        );
-        this.noti.notify(msg);
-        if (!msg.payload) return;
+
+        // do not re-select current semester if it is already selected and this is not a force-update
+        if (
+            parsed.currentSemester &&
+            this.semester.currentSemester &&
+            parsed.currentSemester.id === this.semester.currentSemester.id &&
+            !force
+        ) {
+            console.warn('Semester data loading aborted');
+        } else {
+            const msg = await this.semester.selectSemester(
+                parsed.currentSemester || this.semester.semesters[0],
+                force
+            );
+            this.noti.notify(msg);
+            if (!msg.payload) return;
+        }
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};
@@ -219,7 +236,7 @@ export default class Store extends Vue {
      */
     validateSortOptions() {
         if (!Object.values(this.filter.sortOptions.sortBy).some(x => x.enabled)) {
-            this.noti.error('You must have at least one sort option!');
+            this.noti.error('Filter: You must have at least one sort option!');
             return false;
         } else if (
             Object.values(this.filter.sortOptions.sortBy).some(
@@ -227,7 +244,9 @@ export default class Store extends Vue {
             ) &&
             (!window.buildingList || !window.timeMatrix)
         ) {
-            this.noti.error('Building list fails to load. Please disable "walking distance"');
+            this.noti.error(
+                'Filter: Building list fails to load. Please disable "walking distance"'
+            );
             return false;
         }
         return true;
@@ -261,17 +280,24 @@ export default class Store extends Vue {
 
         if (this.schedule.proposedSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
-
         const options = this.getGeneratorOptions();
         if (!options) return;
 
         const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
-        const msg = generator.getSchedules(this.schedule.proposedSchedule);
+
+        console.time('schedule generation');
+        const msg = generator.getSchedules(
+            this.schedule.proposedSchedule,
+            true,
+            this.filter.refSchedule
+        );
+        console.timeEnd('schedule generation');
+
         this.noti.notify(msg, 'info', 3, true);
         const evaluator = msg.payload;
         if (evaluator) {
             window.scheduleEvaluator = evaluator;
-            this.schedule.numGenerated = evaluator.size();
+            this.schedule.numGenerated = evaluator.size;
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } else {
@@ -330,7 +356,6 @@ export default class Store extends Vue {
                     } else {
                         if (!parsed.currentSemester) parsed = temp;
                     }
-                    break;
                 }
             }
         }
@@ -360,4 +385,52 @@ export default class Store extends Vue {
         await this.loadProfile();
         this.status.loading = false;
     }
+}
+
+/**
+ * See [[parseFromURL]]
+ * convert JSON string to tuple of tuples to reduce the num of chars
+ * @author Zichao Hu
+ * @param jsonString
+ */
+export function compressJSON(jsonString: string) {
+    // tslint:disable-next-line: no-shadowed-variable
+    const { name, modified, currentSemester, display, filter, schedule, palette } = JSON.parse(
+        jsonString
+    ) as SemesterStorage;
+
+    return [
+        name,
+        modified,
+        currentSemester.id,
+        currentSemester.name,
+        Display.compressJSON(display),
+        FilterStore.compressJSON(filter),
+        ScheduleStore.compressJSON(schedule),
+        Palette.compressJSON(palette)
+    ] as const;
+}
+
+/**
+ * @author Zichao Hu, Hanzhi Zhou
+ * @param config
+ * @note JSON decompression requires the catalog of the semester to be pre-loaded,
+ * because the reference schedule conversion in filter requires it
+ */
+export async function parseFromURL(config: string): Promise<SemesterStorage> {
+    // get URL and convert to JSON
+    const data: ReturnType<typeof compressJSON> = JSON.parse(
+        lz.decompressFromEncodedURIComponent(config.trim())
+    );
+    const currentSemester = { id: data[2], name: data[3] };
+    await semester.selectSemester(currentSemester);
+    return {
+        name: data[0],
+        modified: data[1],
+        currentSemester,
+        display: Display.decompressJSON(data[4]),
+        filter: FilterStore.decompressJSON(data[5]),
+        schedule: ScheduleStore.decompressJSON(data[6]),
+        palette: Palette.decompressJSON(data[7])
+    };
 }

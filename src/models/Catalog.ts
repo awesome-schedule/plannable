@@ -12,9 +12,9 @@
 /**
  *
  */
-import Course, { CourseMatch, CourseConstructorArguments } from './Course';
-import { RawCatalog } from './Meta';
 import Expirable from '../data/Expirable';
+import Course, { CourseConstructorArguments, CourseMatch } from './Course';
+import { RawCatalog } from './Meta';
 import Schedule from './Schedule';
 import { SectionMatch } from './Section';
 /**
@@ -36,14 +36,18 @@ export interface CatalogJSON extends Expirable {
     readonly raw_data: RawCatalog;
 }
 
-interface SearchWorkerOnMessage extends MessageEvent {
-    data: 'ready' | CourseConstructorArguments[];
-}
-
 interface SearchWorker extends Worker {
-    onmessage(x: SearchWorkerOnMessage): void;
+    onmessage(x: MessageEvent): void;
     postMessage(x: string | typeof window.catalog.courseDict): void;
 }
+/**
+ * the match indices for a [[Course]]
+ *
+ * 0: the array of matches for the fields of this Course
+ *
+ * 1: the Map that maps [[Section.sid]] to the array of matches for the fields of that section
+ */
+export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
 
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
@@ -87,18 +91,21 @@ export default class Catalog {
         if (!this.worker) {
             const Worker = require('worker-loader!../workers/SearchWorker');
             const worker: SearchWorker = new Worker();
-            const prom = new Promise(resolve => {
-                worker.onmessage = msg => {
-                    resolve(msg.data as 'ready');
+            const prom: Promise<'ready'> = new Promise(resolve => {
+                worker.onmessage = ({ data }) => {
+                    resolve(data);
                 };
-            }) as Promise<'ready'>;
+            });
             worker.postMessage(this.courseDict);
             this.worker = worker;
             return prom;
         }
-        return Promise.resolve('ready') as Promise<'ready'>;
+        return Promise.resolve('ready');
     }
 
+    /**
+     * terminate the worker and free memory
+     */
     public disposeWorker() {
         if (this.worker) {
             this.worker.terminate();
@@ -152,17 +159,22 @@ export default class Catalog {
         }
     }
 
+    /**
+     * perform fuzzy search in the dedicated web worker
+     */
     public fuzzySearch(query: string) {
         const worker = this.worker;
         if (!worker) return Promise.reject('Worker not initialized!');
         const promise = new Promise((resolve, reject) => {
-            worker.onmessage = ({ data }) => {
-                resolve((data as CourseConstructorArguments[]).map(x => new Course(...x)));
-            };
+            worker.onmessage = ({
+                data: [args, matches]
+            }: {
+                data: [CourseConstructorArguments[], SearchMatch[]];
+            }) => resolve([args.map(x => new Course(...x)), matches]);
             worker.onerror = err => reject(err);
         });
         worker.postMessage(query);
-        return promise as Promise<Course[]>;
+        return promise as Promise<[Course[], SearchMatch[]]>;
     }
 
     /**
@@ -171,7 +183,7 @@ export default class Catalog {
      * @param query
      * @param max_results
      */
-    public search(query: string, max_results = 6) {
+    public search(query: string, max_results = 6): [Course[], SearchMatch[]] {
         query = query
             .trim()
             .toLowerCase()
@@ -195,63 +207,66 @@ export default class Catalog {
             queryNoSp = temp.join('');
         }
 
-        const matches: Course[] = [];
+        const results: Course[] = [];
+        const matches: SearchMatch[] = [];
         const courses = this.courses;
         const len = courses.length;
 
         if (!spec || field === 'num' || field === 'key')
             for (let i = 0; i < len; i++) {
-                this.searchKey(queryNoSp, courses[i], matches);
-                if (matches.length >= max_results) return matches;
+                this.searchKey(queryNoSp, courses[i], results, matches);
+                if (results.length >= max_results) return [results, matches];
             }
 
         if (!spec || field === 'title')
             for (let i = 0; i < len; i++) {
-                this.searchField(query, 'title', courses[i], matches);
-                if (matches.length >= max_results) return matches;
+                this.searchField(query, 'title', courses[i], results, matches);
+                if (results.length >= max_results) return [results, matches];
             }
 
         if (!spec || field === 'topic')
             for (let i = 0; i < len; i++) {
-                this.searchTopic(query, courses[i], matches);
-                if (matches.length >= max_results) return matches;
+                this.searchTopic(query, courses[i], results, matches);
+                if (results.length >= max_results) return [results, matches];
             }
 
         if (!spec || field === 'prof')
             for (let i = 0; i < len; i++) {
-                this.searchProf(query, courses[i], matches);
-                if (matches.length >= max_results) return matches;
+                this.searchProf(query, courses[i], results, matches);
+                if (results.length >= max_results) return [results, matches];
             }
 
         if (!spec || field === 'desc')
             for (let i = 0; i < len; i++) {
-                this.searchField(query, 'description', courses[i], matches);
-                if (matches.length >= max_results) return matches;
+                this.searchField(query, 'description', courses[i], results, matches);
+                if (results.length >= max_results) return [results, matches];
             }
-        return matches;
+        return [results, matches];
     }
 
-    private searchKey(queryNoSp: string, course: Course, results: Course[]) {
+    private searchKey(
+        queryNoSp: string,
+        course: Course,
+        results: Course[],
+        matches: SearchMatch[]
+    ) {
         const key = course.key;
         const keyIdx = key.indexOf(queryNoSp);
         // match with the course number
         if (keyIdx !== -1) {
             const deptLen = course.department.length;
             const end = keyIdx + queryNoSp.length;
-            results.push(
-                new Course(
-                    course.raw,
-                    key,
-                    [],
-                    [
-                        {
-                            match: 'key',
-                            start: keyIdx + +(keyIdx >= deptLen),
-                            end: end + +(end > deptLen)
-                        }
-                    ]
-                )
-            );
+            results.push(course);
+            matches.push([
+                [
+                    {
+                        match: 'key',
+                        start: keyIdx + +(keyIdx >= deptLen),
+                        end: end + +(end > deptLen)
+                    }
+                ],
+                new Map()
+            ]);
         }
     }
 
@@ -259,7 +274,8 @@ export default class Catalog {
         query: string,
         field: 'title' | 'description',
         course: Course,
-        results: Course[]
+        results: Course[],
+        matches: SearchMatch[]
     ) {
         const target = course[field].toLowerCase();
         const key = course.key;
@@ -272,24 +288,24 @@ export default class Catalog {
                 end: targetIdx + query.length
             };
             if (prev !== -1) {
-                results[prev] = results[prev].addMatch(match);
+                matches[prev][0].push(match);
             } else {
-                results.push(new Course(course.raw, key, [], [match]));
+                results.push(course);
+                matches.push([[match], new Map()]);
             }
         }
     }
 
-    private searchTopic(query: string, course: Course, results: Course[]) {
+    private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
-        const topicMatchIdx = [];
-        const topicMatches: [SectionMatch][] = [];
+        const topicMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
-        for (let i = 0; i < sections.length; i++) {
+        const len = sections.length;
+        for (let i = 0; i < len; i++) {
             const topic = sections[i].topic;
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
-                topicMatchIdx.push(i);
-                topicMatches.push([
+                topicMatches.set(i, [
                     {
                         match: 'topic',
                         start: topicIdx,
@@ -298,20 +314,19 @@ export default class Catalog {
                 ]);
             }
         }
-        if (topicMatchIdx.length) this.appendToResult(course, topicMatchIdx, topicMatches, results);
+        if (topicMatches.size) this.appendToResult(course, topicMatches, results, matches);
     }
 
-    private searchProf(query: string, course: Course, results: Course[]) {
+    private searchProf(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
-        const profMatchIdx = [];
-        const profMatches: [SectionMatch][] = [];
+        const profMatches = new Map<number, [SectionMatch]>();
         const sections = course.sections;
-        for (let i = 0; i < sections.length; i++) {
+        const len = sections.length;
+        for (let i = 0; i < len; i++) {
             const profs = sections[i].instructors.join(', ').toLowerCase();
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
-                profMatchIdx.push(i);
-                profMatches.push([
+                profMatches.set(i, [
                     {
                         match: 'instructors',
                         start: profIdx,
@@ -320,20 +335,30 @@ export default class Catalog {
                 ]);
             }
         }
-        if (profMatchIdx.length) this.appendToResult(course, profMatchIdx, profMatches, results);
+        if (profMatches.size) this.appendToResult(course, profMatches, results, matches);
     }
 
     private appendToResult(
         course: Course,
-        sids: number[],
-        matches: SectionMatch[][],
-        results: Course[]
+        matches: Map<number, SectionMatch[]>,
+        results: Course[],
+        allMatches: SearchMatch[]
     ) {
         const prev = results.findIndex(x => x.key === course.key);
         if (prev !== -1) {
-            results[prev] = results[prev].addSectionMatches(sids, matches);
+            results[prev] = course.getCourse([
+                ...new Set(course.sids.concat([...matches.keys()])) // merge sids and eliminate duplicates
+            ]);
+            // merge the section matches with the previously recorded section matches
+            const combSecMatches = allMatches[prev][1];
+            for (const [sid, mats] of matches) {
+                const prevMats = combSecMatches.get(sid);
+                if (prevMats) prevMats.push(...mats);
+                else combSecMatches.set(sid, mats);
+            }
         } else {
-            results.push(new Course(course.raw, course.key, sids, [], matches));
+            results.push(course.getCourse([...matches.keys()]));
+            allMatches.push([[], matches]);
         }
     }
 }

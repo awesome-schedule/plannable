@@ -1,6 +1,7 @@
 <template>
     <div id="app" class="w-100" @change="saveStatus()">
-        <course-modal :course="modal.course"></course-modal>
+        <version-modal :version="version" @ref_note="refreshNote()"></version-modal>
+        <course-modal :course="modal.course" :match="modal.match"></course-modal>
         <section-modal
             :semester="semester.currentSemester"
             :section="modal.section"
@@ -221,7 +222,7 @@
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-    #pagination-container {
+    #pg {
         display: none !important;
     }
     nav {

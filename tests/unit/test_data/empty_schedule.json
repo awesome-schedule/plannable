@@ -1,0 +1,50 @@
+{
+    "name": "empty_schedule",
+    "modified": "2019-08-05T03:18:14.361Z",
+    "currentSemester": { "id": "1198", "name": "Fall 2019" },
+    "display": {
+        "showTime": false,
+        "showRoom": true,
+        "showInstructor": true,
+        "showClasslistTitle": true,
+        "standard": false,
+        "multiSelect": true,
+        "combineSections": true,
+        "expandOnEntering": false,
+        "enableLog": false,
+        "enableFuzzy": false,
+        "showWeekend": true,
+        "_fullHeight": 40,
+        "_partialHeight": 25,
+        "_maxNumSchedules": 100000,
+        "_numSearchResults": 6,
+        "_earliest": "08:00",
+        "_latest": "19:00"
+    },
+    "filter": {
+        "timeSlots": [],
+        "allowWaitlist": true,
+        "allowClosed": true,
+        "sortOptions": {
+            "sortBy": [
+                { "name": "distance", "enabled": true, "reverse": false },
+                { "name": "variance", "enabled": true, "reverse": false },
+                { "name": "compactness", "enabled": false, "reverse": false },
+                { "name": "lunchTime", "enabled": false, "reverse": false },
+                { "name": "noEarly", "enabled": false, "reverse": false },
+                { "name": "similarity", "enabled": false, "reverse": false },
+                { "name": "IamFeelingLucky", "enabled": false, "reverse": false }
+            ],
+            "mode": 1
+        },
+        "refSchedule": {}
+    },
+    "schedule": {
+        "currentScheduleIndex": 0,
+        "proposedSchedules": [{ "All": {}, "events": [] }],
+        "proposedScheduleIndex": 0,
+        "cpIndex": -1,
+        "generated": false
+    },
+    "palette": { "savedColors": {} }
+}

@@ -6,10 +6,10 @@
 /**
  *
  */
-import Section, { SectionMatch } from './Section';
-import { RawCourse, CourseType, TYPES } from './Meta';
-import Hashable from './Hashable';
 import { hashCode } from '../utils';
+import Hashable from './Hashable';
+import { CourseType, RawCourse, TYPES } from './Meta';
+import Section from './Section';
 
 /**
  * represents all public information of a Course
@@ -58,8 +58,6 @@ type CourseMatchField = 'title' | 'description' | 'key';
 export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T>;
 export type CourseConstructorArguments = ConstructorParameters<typeof Course>;
 
-const matchSortFunc = (a: Match<any>, b: Match<any>) => a.start - b.start;
-
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
  * depending on the array of section indices passed to its constructor.
@@ -78,24 +76,19 @@ export default class Course implements CourseFields, Hashable {
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: ReadonlyArray<number>;
-    public readonly sections: ReadonlyArray<Section>;
-    public readonly matches: ReadonlyArray<CourseMatch>;
+    public readonly sids: readonly number[];
+    public readonly sections: readonly Section[];
 
     /**
      * @param raw the raw representation of this course
      * @param key the key of this course, e.g. cs11105
      * equal to (department + number + `Meta.TYPES_PARSE`\[type\]). see [[Meta.TYPES_PARSE]]
      * @param sids A list of section indices
-     * @param matches matches for this course
-     * @param secMatches matches for the sections contained in this course
      */
     constructor(
         public readonly raw: RawCourse,
         public readonly key: string,
-        sids: ReadonlyArray<number> = [],
-        matches: ReadonlyArray<CourseMatch> = [],
-        public readonly secMatches: ReadonlyArray<ReadonlyArray<SectionMatch>> = []
+        sids: readonly number[] = []
     ) {
         if (sids.length) {
             this.sids = sids.slice().sort((a, b) => a - b);
@@ -109,15 +102,7 @@ export default class Course implements CourseFields, Hashable {
         this.units = raw[3];
         this.title = raw[4];
         this.description = raw[5];
-        this.matches = matches.concat().sort(matchSortFunc);
-
-        if (secMatches.length === this.sids.length) {
-            this.sections = this.sids.map(
-                (sid, idx) => new Section(this, sid, secMatches[idx].concat().sort(matchSortFunc))
-            );
-        } else {
-            this.sections = this.sids.map(sid => new Section(this, sid));
-        }
+        this.sections = this.sids.map(sid => new Section(this, sid));
     }
 
     get displayName() {
@@ -131,39 +116,8 @@ export default class Course implements CourseFields, Hashable {
         return this.sections[0];
     }
 
-    public addMatch(match: CourseMatch) {
-        const matches = this.matches.concat();
-        matches.push(match);
-        return new Course(this.raw, this.key, this.sids, matches, this.secMatches);
-    }
-
-    public addSectionMatches(sids: number[], secMatches: SectionMatch[][]) {
-        const newSecMatches = this.secMatches.map(x => x.concat());
-        const newSids = this.sids.concat();
-
-        const zipped = sids
-            .map((x, i) => [x, secMatches[i]] as [number, SectionMatch[]])
-            .filter(([sid, matches]) => {
-                const exIdx = newSids.findIndex(s => s === sid);
-                if (exIdx === -1) return true;
-                else {
-                    newSecMatches[exIdx].push(...matches);
-                    return false;
-                }
-            });
-
-        for (const [sid, matches] of zipped) {
-            let j = 0;
-            for (; j < newSids.length; j++) if (sid < newSids[j]) break;
-
-            newSids.splice(j, 0, sid);
-            newSecMatches.splice(j, 0, matches);
-        }
-        return new Course(this.raw, this.key, newSids, this.matches, newSecMatches);
-    }
-
     /**
-     * Get the CourseRecord at a given range of sections
+     * Get the Course containing only the given sections
      */
     public getCourse(sids: number[]) {
         return new Course(this.raw, this.key, sids);

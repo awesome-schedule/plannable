@@ -1,11 +1,15 @@
 /**
  * @module components/tabs
  */
+
+/**
+ *
+ */
 // tslint:disable:max-line-length
-import { Vue, Component } from 'vue-property-decorator';
-import { VueMathjax } from 'vue-mathjax';
 import 'bootstrap';
 import $ from 'jquery';
+import { VueMathjax } from 'vue-mathjax';
+import { Component, Vue } from 'vue-property-decorator';
 
 import {
     // used in information.vue
@@ -16,12 +20,17 @@ import {
 
     // steppers
     VStepper,
-    VStepperHeader,
-    VStepperStep,
     VStepperContent,
-    VStepperItems
+    VStepperHeader,
+    VStepperItems,
+    VStepperStep
 } from 'vuetify/lib';
 
+/**
+ * tab for displaying user guide
+ * @author Hanzhi Zhou, Kaiying Shan, Zichao Hu, Elena Long
+ * @noInheritDoc
+ */
 @Component({
     components: {
         VueMathjax,
@@ -107,7 +116,7 @@ export default class Information extends Vue {
             src: this.imgPath('exportJson1.png')
         },
         {
-            title: 'Save it somethere you can find',
+            title: 'Save it somewhere you can find',
             src: this.imgPath('exportJson2.png')
         },
         {

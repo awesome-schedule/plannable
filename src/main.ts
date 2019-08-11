@@ -6,24 +6,22 @@
 /**
  *
  */
-import axios from 'axios';
-import querystring from 'querystring';
 import Vue from 'vue';
+import 'vuetify/src/stylus/app.styl';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
-import { highlightMatch, openLousList, openVAGrade } from './utils';
-import 'vuetify/src/stylus/app.styl';
+import { highlightMatch } from './utils';
 
 import Vuetify, {
     VApp, // required
-    VFooter,
+    VBtn,
     VCard,
-    VCardTitle,
-    VCardText,
     VCardActions,
-    VIcon,
-    VBtn
+    VCardText,
+    VCardTitle,
+    VFooter,
+    VIcon
 } from 'vuetify/lib';
 
 Vue.use(Vuetify, {
@@ -45,12 +43,10 @@ Vue.use(Vuetify, {
 
 declare global {
     interface Window {
-        axios: typeof axios;
-        querystring: typeof querystring;
         scheduleEvaluator: ScheduleEvaluator;
         catalog: Readonly<Catalog>;
         timeMatrix: Readonly<Int32Array>;
-        buildingList: ReadonlyArray<string>;
+        buildingList: readonly string[];
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -63,8 +59,6 @@ declare global {
 declare module 'vue/types/vue' {
     // Declare augmentation for Vue
     interface Vue {
-        openLousList: typeof openLousList;
-        openVAGrade: typeof openVAGrade;
         highlightMatch: typeof highlightMatch;
     }
 }
@@ -77,13 +71,8 @@ Vue.directive('top', {
     }
 });
 
-window.axios = axios;
-window.querystring = querystring;
-
 Vue.config.productionTip = false;
 Vue.config.devtools = true;
-Vue.prototype.openLousList = openLousList;
-Vue.prototype.openVAGrade = openVAGrade;
 Vue.prototype.highlightMatch = highlightMatch;
 
 new Vue({

@@ -1,30 +1,37 @@
 /**
  * @module store
  */
-import ScheduleEvaluator, {
-    SortMode,
-    EvaluatorOptions,
-    SortOption,
-    SortFunctions
-} from '../algorithm/ScheduleEvaluator';
-import { StoreModule } from '.';
-import { DAYS } from '@/models/Meta';
-import { NotiMsg } from './notification';
-import { to12hr } from '@/utils';
+
+/**
+ *
+ */
 import Event from '@/models/Event';
+import { DAYS } from '@/models/Meta';
+import Schedule, { ScheduleAll, SectionJSON, SectionJSONShort } from '@/models/Schedule';
+import { to12hr } from '@/utils';
+import { StoreModule } from '.';
+import ScheduleEvaluator, {
+    EvaluatorOptions,
+    SortFunctions,
+    SortMode,
+    SortOption
+} from '../algorithm/ScheduleEvaluator';
+import noti, { NotiMsg } from './notification';
 
 interface FilterStateBase {
-    readonly timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][];
+    readonly timeSlots: TimeSlot[];
     allowWaitlist: boolean;
     allowClosed: boolean;
 }
 
 export interface FilterState extends FilterStateBase {
     sortOptions: DetailedEvaluatorOptions;
+    refSchedule: ScheduleAll;
 }
 
 export interface FilterStateJSON extends FilterStateBase {
     sortOptions: EvaluatorOptions;
+    refSchedule: ScheduleAll<SectionJSON[]>;
 }
 
 /**
@@ -44,7 +51,7 @@ interface DetailedSortOption extends SortOption {
     /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
-    readonly exclusive: ReadonlyArray<keyof SortFunctions>;
+    readonly exclusive: readonly (keyof SortFunctions)[];
     /**
      * text displayed next to the checkbox
      */
@@ -59,10 +66,20 @@ interface DetailedSortOption extends SortOption {
  * A JSON-serializable version of the [[EvaluatorOptions]] with more details
  */
 interface DetailedEvaluatorOptions extends EvaluatorOptions {
-    sortBy: ReadonlyArray<DetailedSortOption>;
+    sortBy: readonly DetailedSortOption[];
     toJSON: () => EvaluatorOptions;
     fromJSON: (x?: EvaluatorOptions) => DetailedEvaluatorOptions;
 }
+
+/**
+ * index 0 - 6: whether Mo - Su are selected
+ *
+ * 7: start time, of 24 hour format
+ *
+ * 8: end time, of 24 hour format
+ */
+export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
+export type TimeSlotShort = [number, string, string];
 
 /**
  * a list of sort options with default values assigned
@@ -108,6 +125,14 @@ const defaultOptions: DetailedEvaluatorOptions = {
             exclusive: ['IamFeelingLucky'],
             title: 'No Early',
             description: 'Start my day as late as possible'
+        },
+        {
+            name: 'similarity',
+            enabled: false,
+            reverse: false,
+            exclusive: ['IamFeelingLucky'],
+            title: 'similarity',
+            description: 'Similar to a selected schedule'
         },
         {
             name: 'IamFeelingLucky',
@@ -163,20 +188,106 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.tim
  * the filter module handles the storage and manipulation of filters
  * @author Hanzhi Zhou
  */
-class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
-    /**
-     * index 0 - 4: whether Mo - Fr are selected
-     *
-     * 6: start time, of 24 hour format
-     *
-     * 7: end time, of 24 hour format
-     */
-    timeSlots: [boolean, boolean, boolean, boolean, boolean, string, string][] = [];
+export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
+    public static compressJSON(obj: FilterStateJSON): readonly [
+        number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort>
+    ] {
+        // convert allowClosed, allowWaitlist, mode to binary
+        let filterBits = 0;
+        if (obj.allowClosed) filterBits += 2 ** 0;
+        if (obj.allowWaitlist) filterBits += 2 ** 1;
+        if (obj.sortOptions.mode === 1) filterBits += 2 ** 2;
+
+        // sorting
+        // add all initial ascii to the array in order
+        // add the binary of their respective state: enabled or reverse
+        let mask = 1;
+        let sortBits = 0;
+
+        // name_initial ascii code :[c,d,l,n,s,v,I] --> could change in order
+        const initials: number[] = [];
+        for (const sortBy of obj.sortOptions.sortBy) {
+            initials.push(sortBy.name.charCodeAt(0));
+            if (sortBy.enabled) sortBits |= mask;
+            mask <<= 1;
+            if (sortBy.reverse) sortBits |= mask;
+            mask <<= 1;
+        }
+        const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule, events: []});
+        if (level === 'warn')
+            noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
+
+        return [
+            filterBits,
+            sortBits,
+            initials,
+            // use 7 bits to represent the 7 days
+            obj.timeSlots.map(timeSlot => {
+                let m = 1,
+                    flag = 0;
+                for (let i = 0; i < 7; i++) {
+                    if (timeSlot[i]) flag |= m;
+                    m <<= 1;
+                }
+                return [flag, timeSlot[7], timeSlot[8]];
+            }),
+            // we ignore the events
+            schedule && level !== 'warn' ? Schedule.compressJSON(schedule.toJSON())[0] : {}
+        ];
+    }
+
+    public static decompressJSON(obj: ReturnType<typeof FilterStore.compressJSON>) {
+        // tslint:disable-next-line: no-shadowed-variable
+        const filter = new FilterStore();
+        const [filterBits, sortBits, initials, slots, ref] = obj;
+
+        // get allowClosed, allowWaitlist, mode from binary
+        filter.allowClosed = Boolean(filterBits & 1);
+        filter.allowWaitlist = Boolean(filterBits & 2);
+        filter.sortOptions.mode = +Boolean(filterBits & 4); // convert to 0 or 1
+
+        // decode time slots
+        filter.timeSlots = slots.map(slot => {
+            const timeSlot: TimeSlot = [false, false, false, false, false, false, false, slot[1], slot[2]];
+            const bits = slot[0];
+            let m = 1;
+            for (let i = 0; i < 7; i++) {
+                timeSlot[i] = Boolean(m & bits);
+                m <<= 1;
+            }
+            return timeSlot;
+        });
+
+        // decode the enable and reverse info of sort
+        const sortBy = filter.sortOptions.sortBy;
+        const sortCopy = [];
+        // loop through the ascii initials and match to the object name
+        let mask = 1;
+        for (const initial of initials) {
+            const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
+
+            // if matched, decode the enabled and reverse info from the binary
+            sortOpt.enabled = Boolean(sortBits & mask);
+            mask <<= 1;
+
+            sortOpt.reverse = Boolean(sortBits & mask);
+            mask <<= 1;
+
+            sortCopy.push(sortOpt);
+        }
+        filter.sortOptions.sortBy = sortCopy;
+        const { payload: schedule, level } = Schedule.fromJSON(Schedule.decompressJSON([ref]));
+        if (schedule && level !== 'warn') filter.refSchedule = schedule.All;
+        return filter.toJSON();
+    }
+
+    timeSlots: TimeSlot[] = [];
     allowWaitlist = true;
     allowClosed = true;
     sortOptions = getDefaultOptions();
+    refSchedule: ScheduleAll = {};
 
-    readonly sortModes: ReadonlyArray<DetailedSortMode> = [
+    readonly sortModes: readonly DetailedSortMode[] = [
         {
             mode: SortMode.combined,
             title: 'Combined',
@@ -190,6 +301,17 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                 ' You can drag the sorting options to change their order.'
         }
     ];
+
+    get similarityEnabled() {
+        return Object.keys(this.refSchedule).length !== 0;
+    }
+
+    addTimeSlot() {
+        this.timeSlots.push([false, false, false, false, false, false, false, '', '']);
+    }
+    removeTimeSlot(n: number) {
+        this.timeSlots.splice(n, 1);
+    }
 
     /**
      * Preprocess the time filters and convert them to an array of event.
@@ -208,14 +330,14 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
         for (const time of this.timeSlots) {
             let days = '';
-            for (let j = 0; j < 5; j++) {
+            for (let j = 0; j < 7; j++) {
                 if (time[j]) days += DAYS[j];
             }
 
             if (!days) continue;
 
-            const startTime = time[5].split(':');
-            const endTime = time[6].split(':');
+            const startTime = time[7].split(':');
+            const endTime = time[8].split(':');
             if (
                 isNaN(+startTime[0]) ||
                 isNaN(+startTime[1]) ||
@@ -227,7 +349,7 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                     level: 'error'
                 };
             }
-            days += ' ' + to12hr(time[5]) + ' - ' + to12hr(time[6]);
+            days += ' ' + to12hr(time[7]) + ' - ' + to12hr(time[8]);
             events.push(new Event(days, false));
         }
 
@@ -252,12 +374,18 @@ class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         this.allowWaitlist =
             typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
+
+        const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule || {}, events: []});
+        if (level === 'warn')
+            noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
+        this.refSchedule = schedule && level !== 'warn' ? schedule.All : defaultVal.refSchedule ;
     }
 
-    toJSON() {
+    toJSON(): FilterStateJSON {
         // exclude sort modes
-        const { sortModes, ...others } = this as FilterStore;
-        return others as FilterStateJSON;
+        const { sortModes, refSchedule: ref, ...others } = this;
+        const refSchedule = new Schedule(ref).toJSON().All;
+        return { refSchedule, ...others };
     }
 
     getDefault() {

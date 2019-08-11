@@ -8,11 +8,11 @@
  *
  */
 import axios from 'axios';
+import { getApi } from '.';
 import { SemesterJSON } from '../models/Catalog';
 import { semesterListExpirationTime } from '../models/Meta';
 import Expirable from './Expirable';
-import { loadFromCache, fallback } from './Loader';
-import { getApi } from '.';
+import { fallback, loadFromCache } from './Loader';
 
 interface SemesterListJSON extends Expirable {
     semesterList: SemesterJSON[];

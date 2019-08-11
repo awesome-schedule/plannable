@@ -8,9 +8,9 @@
  *
  */
 import axios from 'axios';
-import Expirable from './Expirable';
-import { loadFromCache, fallback } from './Loader';
 import { getApi } from '.';
+import Expirable from './Expirable';
+import { fallback, loadFromCache } from './Loader';
 
 export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];

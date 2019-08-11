@@ -1,16 +1,21 @@
 /**
  * @module components
  */
+
+/**
+ *
+ */
+import Schedule from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
 import { DAYS } from '../models/Meta';
 import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
-import Schedule from '@/models/Schedule';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid
  * @author Kaiying Cat
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -20,12 +25,17 @@ import Schedule from '@/models/Schedule';
 export default class GridSchedule extends Store {
     @Prop(Schedule) readonly currentSchedule!: Schedule;
 
-    daysFull = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+    df = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     // note: we need Schedule.days because it's an array that keeps the keys in order
     get days() {
-        return DAYS;
+        return this.display.showWeekend ? DAYS : DAYS.slice(0, 5);
     }
+
+    get daysFull() {
+        return this.display.showWeekend ? this.df : this.df.slice(0, 5);
+    }
+
     /**
      * return the block in which the earliest class starts, the 8:00 block is zero
      * return 0 if no class
@@ -82,6 +92,15 @@ export default class GridSchedule extends Store {
             return timeToNum(late);
         }
     }
+
+    get gridTemplateCols() {
+        const numCol = this.numCol;
+        return `${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 /
+            numCol}% ${numCol === 7 ? 100 / numCol + '%' : ''} ${
+            numCol === 7 ? 100 / numCol + '%' : ''
+        }`;
+    }
+
     /**
      * computes the number of rows we need
      */
@@ -92,6 +111,11 @@ export default class GridSchedule extends Store {
         }
         return num;
     }
+
+    get numCol() {
+        return this.display.showWeekend ? 7 : 5;
+    }
+
     get hours() {
         let curTime = '';
         if (this.absoluteEarliest % 2 === 0) {
@@ -115,7 +139,7 @@ export default class GridSchedule extends Store {
     }
     get items() {
         const arr: number[] = [];
-        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * 5;
+        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * this.numCol;
         for (let i = 0; i < numBlocks; i++) {
             arr.push(i + 1);
         }

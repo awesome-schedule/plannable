@@ -6,13 +6,13 @@
 /**
  *
  */
-import { TimeArray, MeetingDate } from '../algorithm';
-import { hashCode, parseTimeAll, parseDate } from '../utils';
-import Course, { CourseFields, Match } from './Course';
 import { findBestMatch } from 'string-similarity';
+import { MeetingDate, TimeArray } from '../algorithm';
+import { hashCode, parseDate, parseTimeAll } from '../utils';
+import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { STATUSES, dayToInt, CourseStatus } from './Meta';
+import { CourseStatus, dayToInt, STATUSES } from './Meta';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,
@@ -41,14 +41,6 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: Some meetings have invalid start or end time.',
         'Fatal: This section has unknown start and end date.'
     ];
-
-    public readonly department: string;
-    public readonly number: number;
-    public readonly type: string;
-    public readonly units: string;
-    public readonly title: string;
-    public readonly description: string;
-
     /**
      * Key of the course that this section belongs to; same for all sections.
      */
@@ -61,6 +53,9 @@ export default class Section implements CourseFields, Hashable {
      * the section number recorded in sis
      */
     public readonly section: string;
+    /**
+     * the topic of this section, may be empty
+     */
     public readonly topic: string;
     /**
      * one of "Open", "Closed" and "Wait List"
@@ -69,9 +64,9 @@ export default class Section implements CourseFields, Hashable {
     public readonly enrollment: number;
     public readonly enrollment_limit: number;
     public readonly wait_list: number;
-    public readonly instructors: ReadonlyArray<string>;
+    public readonly instructors: readonly string[];
     public readonly dates: string;
-    public readonly meetings: ReadonlyArray<Meeting>;
+    public readonly meetings: readonly Meeting[];
 
     public readonly valid: ValidFlag;
     public readonly dateArray?: MeetingDate;
@@ -79,21 +74,9 @@ export default class Section implements CourseFields, Hashable {
      * @param course a reference to the course that this section belongs to
      * @param sid the index of the section
      */
-    constructor(
-        course: Course,
-        public readonly sid: number,
-        public readonly matches: ReadonlyArray<SectionMatch> = []
-    ) {
-        this.key = course.key;
-
-        this.department = course.department;
-        this.number = course.number;
-        this.type = course.type;
-        this.units = course.units;
-        this.title = course.title;
-        this.description = course.description;
-
+    constructor(public readonly course: Course, public readonly sid: number) {
         const raw = course.raw[6][sid];
+        this.key = course.key;
         this.id = raw[0];
         this.section = raw[1];
         this.topic = raw[2];
@@ -107,7 +90,25 @@ export default class Section implements CourseFields, Hashable {
         this.instructors = Meeting.getInstructors(raw[9]);
     }
 
-    public get displayName() {
+    get department() {
+        return this.course.department;
+    }
+    get number() {
+        return this.course.number;
+    }
+    get type() {
+        return this.course.type;
+    }
+    get units() {
+        return this.course.units;
+    }
+    get title() {
+        return this.course.title;
+    }
+    get description() {
+        return this.course.description;
+    }
+    get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
 
@@ -153,7 +154,8 @@ export default class Section implements CourseFields, Hashable {
      * get the time and room of this section's meetings as [[TimeArray]]
      */
     public getTimeRoom(): TimeArray | null {
-        const timeDict: TimeArray = [[], [], [], [], []];
+        // arrays of times and rooms in each day
+        const dayArray: number[][] = [[], [], [], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them and add to tmp_dict
         const buildingList = window.buildingList;
@@ -171,10 +173,9 @@ export default class Section implements CourseFields, Hashable {
 
             // for each day
             for (const day of date) {
-                const d = dayToInt[day];
-                const dayBlock = timeDict[d];
-                // the timeBlock is flattened
+                const dayBlock = dayArray[dayToInt[day]];
 
+                // the timeBlock is flattened
                 dayBlock.push(...timeBlock);
 
                 const { room } = meeting;
@@ -190,7 +191,16 @@ export default class Section implements CourseFields, Hashable {
             }
         }
 
-        return timeDict;
+        // convert iliffe vector to array
+        const timeBlocks = new Int16Array(dayArray.reduce((acc, arr) => acc + arr.length, 8));
+        let count = 0;
+        for (let i = 0; i < 7; i++) {
+            timeBlocks[i] = count + 8;
+            timeBlocks.set(dayArray[i], count + 8);
+            count += dayArray[i].length;
+        }
+        timeBlocks[7] = timeBlocks.length;
+        return timeBlocks;
     }
 
     public equals(sc: Section): boolean {

@@ -27,7 +27,7 @@ Kaiying Shan, Hanzhi Zhou, Zichao Hu and Elena Long
 
 ### Main Component: [src/App.vue](/src/App.vue) and [src/App.ts](/src/App.ts)
 
-Hanzhi Zhou, Kaiying Shan, Elena Long
+Hanzhi Zhou, Kaiying Shan, Zichao Hu, Elena Long
 
 ### State Management
 
@@ -35,8 +35,8 @@ The state management module handles global states and storage. See [src/store](/
 
 | Name         | Contributors           |
 | ------------ | ---------------------- |
-| display      | Hanzhi Zhou            |
-| filter       | Hanzhi Zhou            |
+| display      | Hanzhi Zhou, Zichao Hu |
+| filter       | Hanzhi Zhou, Zichao Hu |
 | index        | Hanzhi Zhou            |
 | modal        | Hanzhi Zhou            |
 | notification | Hanzhi Zhou            |
@@ -45,6 +45,7 @@ The state management module handles global states and storage. See [src/store](/
 | schedule     | Hanzhi Zhou            |
 | semester     | Hanzhi Zhou            |
 | status       | Hanzhi Zhou, Zichao Hu |
+| store        | Hanzhi Zhou, Zichao Hu |
 
 ### Child Components
 
@@ -58,7 +59,7 @@ Tabs are components holding the corresponding tab triggered when one clicks the 
 | CompareView | Kaiying Shan, Hanzhi Zhou                        |
 | DisplayView | Kaiying Shan, Hanzhi Zhou                        |
 | EventView   | Kaiying Shan, Hanzhi Zhou, Zichao Hu             |
-| ExportView  | Kaiying Shan, Hanzhi Zhou                        |
+| ExportView  | Hanzhi Zhou, Kaiying Shan, Zichao Hu             |
 | FilterView  | Hanzhi Zhou, Kaiying Shan                        |
 | FuzzyView   | Hanzhi Zhou                                      |
 | Information | Kaiying Shan, Hanzhi Zhou, Zichao Hu, Elena Long |
@@ -136,29 +137,34 @@ Commonly used utility functions, found in [src/utils](/src/utils)
 | CatalogLoader      | Hanzhi Zhou, Kaiying Shan |
 | Loader             | Hanzhi Zhou               |
 | SemesterListLoader | Hanzhi Zhou               |
+| data/Distance      | Zichao Hu                 |
 
 ### Algorithm
 
 We use a number of algorithms to generate, sort and render schedules. They can be found in [src/algorithm](/src/algorithm)
 
-| Name               | Contributors           |
-| ------------------ | ---------------------- |
-| Schedule Generator | ZiChao Hu, Hanzhi Zhou |
-| Coloring           | Hanzhi Zhou            |
-| Graph              | Hanzhi Zhou            |
-| Schedule Evaluator | Hanzhi Zhou            |
+| Name               | Contributors                         |
+| ------------------ | ------------------------------------ |
+| Schedule Generator | Hanzhi Zhou, Zichao Hu, Kaiying Shan |
+| Coloring           | Hanzhi Zhou                          |
+| Graph              | Hanzhi Zhou                          |
+| Schedule Evaluator | Hanzhi Zhou                          |
 
 ### Testing
 
 For unit tests, see [tests/unit](/tests/unit)
 
-Hanzhi Zhou
+Hanzhi Zhou, Zichao Hu
 
 ### Documentation
 
 Inline doc writing and doc building
 
 Hanzhi Zhou
+
+### Marketing
+
+Kathy Ju, Zichao Hu
 
 ### Acknowledgement
 

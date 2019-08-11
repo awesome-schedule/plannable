@@ -7,7 +7,7 @@
 /**
  *
  */
-import CatalogDB, { CourseTableItem, SectionTableItem, MeetingTableItem } from '@/database/CatalogDB';
+import CatalogDB, { CourseTableItem, MeetingTableItem, SectionTableItem } from '@/database/CatalogDB';
 import { ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
@@ -116,13 +116,12 @@ export async function getSemesterData(currentSemester: SemesterJSON, db: Catalog
         await db.sections.clear();
         await db.meetings.clear();
         const raw_data = await requestSemesterData2(currentSemester);
-        localStorage.setItem('idb_time', (new Date()).getTime().toString());
-        localStorage.setItem('idb_semester', currentSemester.id);
-        const ctlg = await parseSemesterData2(raw_data, db);
+        const ctlg = await parseSemesterData2(raw_data, db, currentSemester);
+        return new Catalog(currentSemester, ctlg, new Date().toJSON());
+    } else {
+        const ctlg = await retrieveFromDB(db);
         return new Catalog(currentSemester, ctlg, new Date().toJSON());
     }
-    const ctlg = await retrieveFromDB(db);
-    return new Catalog(currentSemester, ctlg, new Date().toJSON());
 }
 
 export async function requestSemesterData2(semester: SemesterJSON) {
@@ -150,7 +149,7 @@ export async function requestSemesterData2(semester: SemesterJSON) {
     return data;
 }
 
-export async function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
+export async function parseSemesterData2(raw_data: string[][], db: CatalogDB, currentSemester: SemesterJSON) {
     console.time('parse semester data and store');
     const CLASS_TYPES = TYPES_PARSE;
     const STATUSES = STATUSES_PARSE;
@@ -158,6 +157,9 @@ export async function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
     const secFKs: { [key: string]: number[] } = {};
     const crsId: string[] = [];
     const len = raw_data.length;
+    let meetingId = 0;
+    const meetingArr: MeetingTableItem[] = [];
+    const sectionArr: SectionTableItem[] = [];
     for (let j = 1; j < len; j++) {
         const data = raw_data[j];
 
@@ -198,7 +200,10 @@ export async function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
                     if (b < meetings[k][1]) break;
                 }
                 meetings.splice(k, 0, [a, b, c]);
-                await db.meetings.add({ instructor: a, days: b, room: c }).then(id => meetingFK.push(id));
+                // await db.meetings.add({ instructor: a, days: b, room: c }).then(id => meetingFK.push(id));
+                meetingArr.push({ id: meetingId, instructor: a, days: b, room: c });
+                meetingFK.push(meetingId);
+                meetingId++;
             }
         }
         date = date || '';
@@ -218,7 +223,7 @@ export async function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
             meetings
         ];
 
-        db.sections.add({
+        sectionArr.push({
             id: tempSection[0],
             sid: tempSection[1],
             topic: tempSection[2],
@@ -233,34 +238,17 @@ export async function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
 
         if (rawCatalog[key]) {
             rawCatalog[key][6].push(tempSection);
-            // let original = [];
-            // db.courses.get(key).then(crs => {
-            //     if (crs) original = crs.sections;
-            // });
-            // original.push(tempSection[0]);
-            // db.courses.update(key, {
-            //     sections: original
-            // });
             secFKs[key].push(tempSection[0]);
         } else {
             crsId.push(key);
             rawCatalog[key] = [data[1], +data[2], type, data[5], data[22], data[28], [tempSection]];
             secFKs[key] = [tempSection[0]];
-            // db.courses.add({
-            //     id: key,
-            //     department: data[1],
-            //     number: +data[2],
-            //     type,
-            //     units: data[5],
-            //     title: data[22],
-            //     description: data[28],
-            //     sections: [tempSection[0]]
-            // });
         }
     }
+    const courseItemArr: CourseTableItem[] = [];
     for (const key of crsId) {
         const course = rawCatalog[key];
-        db.courses.add({
+        courseItemArr.push({
             id: key,
             department: course[0],
             number: course[1],
@@ -271,7 +259,16 @@ export async function parseSemesterData2(raw_data: string[][], db: CatalogDB) {
             sections: secFKs[key]
         });
     }
+    console.time('store to idb');
+    await Promise.all([
+        db.courses.bulkAdd(courseItemArr),
+        db.sections.bulkAdd(sectionArr),
+        db.meetings.bulkAdd(meetingArr)
+    ]);
+    console.timeEnd('store to idb');
     console.timeEnd('parse semester data and store');
+    localStorage.setItem('idb_time', (new Date()).getTime().toString());
+    localStorage.setItem('idb_semester', currentSemester.id);
     return rawCatalog;
 }
 
@@ -294,42 +291,24 @@ export async function retrieveFromDB(db: CatalogDB) {
             secMap.set(sec.id as number, sec);
         })),
         db.meetings.toArray(arr => arr.forEach(mt => {
-            if (!mt || !mt.id) return;
             mtMap.set(mt.id as number, mt);
         }))
     ]);
-
-    console.log(courseArr.length);
 
     console.timeEnd('get courses from db');
 
     for (const crs of courseArr) {
         if (!crs || !crs.id) continue;
         const sectionArr: RawSection[] = [];
-        // const secTableItem: Promise<SectionTableItem>[] = [];
-
-        // for (const id of crs.sections) {
-        //     const promise = db.sections.get(id);
-        //     secTableItem.push(promise);
-        // }
-        // const secs = await Promise.all(crs.sections.map(id => db.sections.get(id)));
-
-        // console.log('sec table item len: ' + secTableItem.length);
         for (const secId of crs.sections) {
             const sec = secMap.get(secId);
             if (!sec) continue;
-            // const sec = await promise;
             const meetingArr: RawMeeting[] = sec.meetings.map(mid => {
                 const mt = mtMap.get(mid) as MeetingTableItem;
+
                 return [mt.instructor, mt.days, mt.room];
             });
 
-            // const mts = await Promise.all(sec.meetings.map(x => db.meetings.get(x)));
-
-            // for (const mt of mts) {
-            //     if (!mt) continue;
-            //     meetingArr.push([mt.instructor, mt.days, mt.room] as RawMeeting);
-            // }
             const rawSec = [
                 sec.id as number,
                 sec.sid,
@@ -344,7 +323,6 @@ export async function retrieveFromDB(db: CatalogDB) {
             ] as RawSection;
             sectionArr.push(rawSec);
         }
-        // console.timeEnd('retrieve sections');
         rawCatalog[crs.id] = [
             crs.department,
             crs.number,

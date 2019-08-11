@@ -43,7 +43,7 @@ export default class CatalogDB extends Dexie {
             courses: 'id, department, number, type, units, title, description, sections',
             sections: 'id, sid, topic, status,'
                 + ' enrollment, enrollment_limit, wait_list, date, valid, meetings',
-            meetings: '++id, instructor, days, room'
+            meetings: 'id, instructor, days, room'
         });
         this.courses = this.table('courses');
         this.sections = this.table('sections');

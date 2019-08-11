@@ -41,7 +41,10 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: Some meetings have invalid start or end time.',
         'Fatal: This section has unknown start and end date.'
     ];
-
+    /**
+     * Key of the course that this section belongs to; same for all sections.
+     */
+    public readonly key: string;
     /**
      * the id of the section recorded in sis
      */
@@ -73,6 +76,7 @@ export default class Section implements CourseFields, Hashable {
      */
     constructor(public readonly course: Course, public readonly sid: number) {
         const raw = course.raw[6][sid];
+        this.key = course.key;
         this.id = raw[0];
         this.section = raw[1];
         this.topic = raw[2];
@@ -85,12 +89,7 @@ export default class Section implements CourseFields, Hashable {
         this.meetings = raw[9].map(x => new Meeting(x));
         this.instructors = Meeting.getInstructors(raw[9]);
     }
-    /**
-     * Key of the course that this section belongs to; same for all sections.
-     */
-    get key() {
-        return this.course.key;
-    }
+
     get department() {
         return this.course.department;
     }

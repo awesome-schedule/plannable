@@ -12,12 +12,23 @@
  */
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
+import _Course, { CourseConstructorArguments, CourseFields, CourseMatch } from '../models/Course';
+import _Meeting from '../models/Meeting';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-type Course = NonFunctionProperties<_Course>;
-type Section = NonFunctionProperties<_Section>;
+// functions cannot be cloned via structured cloning
+type Meeting = NonFunctionProperties<_Meeting>;
+interface Section extends Pick<
+    _Section,
+    // course fields are defined as getters which cannot be cloned
+    Exclude<NonFunctionPropertyNames<_Section>, keyof CourseFields | undefined | 'meetings'>
+> {
+    readonly meetings: readonly Meeting[];
+}
+interface Course extends Pick<_Course, Exclude<NonFunctionPropertyNames<_Course>, 'sections'>> {
+    readonly sections: readonly Section[];
+}
 
 declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] | 'ready'): void;
 
@@ -82,8 +93,10 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
         console.time('worker prep');
         courseDict = data;
         const courses = Object.values(courseDict);
-        const sections: Section[] = [];
-        for (const { sections: secs } of courses) sections.push(...secs);
+        const sections = courses.reduce((secs: Section[], course) => {
+            secs.push(...course.sections);
+            return secs;
+        }, []);
 
         titleSearcher = new Searcher(courses, {
             ...searcherOpts,

@@ -116,7 +116,7 @@ export async function getSemesterData(currentSemester: SemesterJSON, db: Catalog
         await db.sections.clear();
         await db.meetings.clear();
         const raw_data = await requestSemesterData2(currentSemester);
-        const ctlg = await parseSemesterData2(raw_data, db, currentSemester);
+        const ctlg = parseSemesterData2(raw_data, db, currentSemester);
         return new Catalog(currentSemester, ctlg, new Date().toJSON());
     } else {
         const ctlg = await retrieveFromDB(db);
@@ -149,7 +149,7 @@ export async function requestSemesterData2(semester: SemesterJSON) {
     return data;
 }
 
-export async function parseSemesterData2(raw_data: string[][], db: CatalogDB, currentSemester: SemesterJSON) {
+export function parseSemesterData2(raw_data: string[][], db: CatalogDB, currentSemester: SemesterJSON) {
     console.time('parse semester data and store');
     const CLASS_TYPES = TYPES_PARSE;
     const STATUSES = STATUSES_PARSE;
@@ -259,13 +259,11 @@ export async function parseSemesterData2(raw_data: string[][], db: CatalogDB, cu
             sections: secFKs[key]
         });
     }
-    console.time('store to idb');
-    await Promise.all([
+    Promise.all([
         db.courses.bulkAdd(courseItemArr),
         db.sections.bulkAdd(sectionArr),
         db.meetings.bulkAdd(meetingArr)
     ]);
-    console.timeEnd('store to idb');
     console.timeEnd('parse semester data and store');
     localStorage.setItem('idb_time', (new Date()).getTime().toString());
     localStorage.setItem('idb_semester', currentSemester.id);

@@ -44,9 +44,9 @@ let note = 'loading release note...';
 function checkVersion() {
     const match = localStorage.getItem('version') === version;
     localStorage.setItem('version', version);
-    if (!match) {
-        triggerVersionModal();
-    }
+    // if (!match) {
+    //     triggerVersionModal();
+    // }
     return match;
 }
 

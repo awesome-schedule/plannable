@@ -10,7 +10,6 @@ import Vue from 'vue';
 import 'vuetify/src/stylus/app.styl';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
-import CatalogDB from './database/CatalogDB';
 import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
 

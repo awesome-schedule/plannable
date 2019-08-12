@@ -76,10 +76,8 @@ export default class Catalog {
         public readonly raw_data: { [x: string]: Course },
         public readonly modified: string
     ) {
-        console.time('catalog prep data');
         this.courseDict = raw_data;
         this.courses = Object.values(raw_data);
-        console.timeEnd('catalog prep data');
     }
 
     /**

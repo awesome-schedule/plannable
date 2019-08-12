@@ -5,6 +5,7 @@
 /**
  *
  */
+import CatalogDB from '@/database/CatalogDB';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 
@@ -22,6 +23,9 @@ export default class DisplayView extends Store {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             window.localStorage.clear();
             window.location.reload(true);
+            const db = new CatalogDB();
+            db.courses.clear();
+            db.sections.clear();
         }
     }
 }

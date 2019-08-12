@@ -15,19 +15,14 @@ import { stringify } from 'querystring';
 import { getApi } from '.';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 
-import Course, { CourseFields } from '@/models/Course';
+import Course from '@/models/Course';
 import Meeting from '@/models/Meeting';
-import {
-    CourseStatus,
-    CourseType,
-    RawCatalog,
-    RawMeeting,
-    RawSection,
-    semesterDataExpirationTime,
-    STATUSES_PARSE,
-    TYPES_PARSE
-} from '../models/Meta';
+import { CourseType, RawCatalog, semesterDataExpirationTime, TYPES_PARSE } from '../models/Meta';
 import { cancelablePromise, CancelablePromise, errToStr, parseDate, timeout } from '../utils';
+
+type SectionPropertyDescriptors = {
+    [x in SectionOwnPropertyNames]: TypedPropertyDescriptor<Section[x]>
+};
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -39,47 +34,32 @@ import { cancelablePromise, CancelablePromise, errToStr, parseDate, timeout } fr
  * @param force force update
  */
 
-export async function loadSemesterData(semester: SemesterJSON, force = false) {
-    const t = localStorage.getItem('idb_time');
-    const s = localStorage.getItem('idb_semester');
-    const db = new CatalogDB();
-    let old: Catalog | undefined;
-    const newCatalog = cancelablePromise(getSemesterData(semester, db, force));
-    if (s === semester.id && t && new Date().getTime() - +t > semesterDataExpirationTime) {
-        const temp = await retrieveFromDB(db);
-        old = new Catalog(semester, temp, new Date(+t).toJSON());
-    }
-    return {
-        new: newCatalog,
-        old
-    } as { new: CancelablePromise<Catalog>; old?: Catalog | undefined };
-}
-
-export async function getSemesterData(
-    currentSemester: SemesterJSON,
-    db: CatalogDB,
+export async function loadSemesterData(
+    semester: SemesterJSON,
     force = false
-): Promise<Catalog> {
-    const t = localStorage.getItem('idb_time');
-    const s = localStorage.getItem('idb_semester');
-    if (
-        !t ||
-        new Date().getTime() - +t > semesterDataExpirationTime ||
-        force ||
-        s !== currentSemester.id
-    ) {
-        await db.courses.clear();
-        await db.sections.clear();
-        const ctlg = await requestSemesterData(currentSemester, db);
-        return ctlg;
-    } else {
-        try {
-            const ctlg = await retrieveFromDB(db);
-            return new Catalog(currentSemester, ctlg, new Date(+t).toJSON());
-        } catch (error) {
-            const ctlg = await requestSemesterData(currentSemester, db);
-            return ctlg;
+): Promise<{
+    new: CancelablePromise<Catalog>;
+    old?: Catalog;
+}> {
+    const time = localStorage.getItem('idb_time');
+    const semesterId = localStorage.getItem('idb_semester');
+    const db = new CatalogDB();
+    if (time && semesterId) {
+        const old = new Catalog(semester, await retrieveFromDB(db), new Date(+time).toJSON());
+        if (force || new Date().getTime() - +time > semesterDataExpirationTime) {
+            return {
+                new: cancelablePromise(requestSemesterData(semester, new CatalogDB())),
+                old
+            };
+        } else {
+            return {
+                new: cancelablePromise(Promise.resolve(old))
+            };
         }
+    } else {
+        return {
+            new: cancelablePromise(requestSemesterData(semester, new CatalogDB()))
+        };
     }
 }
 
@@ -286,84 +266,86 @@ export function parseSemesterData(
                 value: date,
                 enumerable: true
             }
-            // tslint:disable-next-line: max-line-length
-        } as { [x in SectionOwnPropertyNames]: TypedPropertyDescriptor<Section[x]> });
+        } as SectionPropertyDescriptors);
 
         course.ids.push(+data[0]);
         course.sections.push(section);
-        sectionArr.push(section);
+        const { course: _, ...others } = section;
+        sectionArr.push(others);
     }
-    Promise.all([
-        db.courses.bulkAdd(Object.values(rawCatalog)),
-        db.sections.bulkAdd(sectionArr)
-    ]).then(x => {
-        localStorage.setItem('idb_time', new Date().getTime().toString());
-        localStorage.setItem('idb_semester', currentSemester.id);
-    });
+    Promise.all([db.courses.clear(), db.sections.clear()])
+        .then(() => {
+            console.time('save to db');
+            Promise.all([
+                db.courses.bulkAdd(
+                    Object.values(rawCatalog).map(course => {
+                        const { sections, ...others } = course;
+                        return others;
+                    })
+                ),
+                db.sections.bulkAdd(sectionArr)
+            ]);
+        })
+        .then(() => {
+            localStorage.setItem('idb_time', new Date().getTime().toString());
+            localStorage.setItem('idb_semester', currentSemester.id);
+            console.timeEnd('save to db');
+        });
     console.timeEnd('parse semester data and store');
     return rawCatalog;
 }
 
 export async function retrieveFromDB(db: CatalogDB) {
-    console.time('retrieve from db');
-    const rawCatalog: RawCatalog = {};
-    const courseArr: CourseTableItem[] = [];
+    const rawCatalog: { [x: string]: Course } = {};
+
     console.time('get courses from db');
-
     const secMap: Map<number, SectionTableItem> = new Map();
-
-    await Promise.all([
-        db.courses.toArray(arr =>
-            arr.forEach(crs => {
-                if (!crs || !crs.id) return;
-                courseArr.push(crs);
-            })
-        ),
-        db.sections.toArray(arr =>
-            arr.forEach(sec => {
-                if (!sec || !sec.id) return;
-                secMap.set(sec.id as number, sec);
-            })
-        )
+    const [courses] = await Promise.all([
+        db.courses.toArray(),
+        db.sections.toArray(arr => {
+            for (const item of arr) {
+                secMap.set(item.id, item);
+            }
+            return arr;
+        })
     ]);
-
     console.timeEnd('get courses from db');
 
-    for (const crs of courseArr) {
-        if (!crs || !crs.id) continue;
-        const sectionArr: RawSection[] = [];
-        for (const secId of crs.sections) {
-            const sec = secMap.get(secId);
-            if (!sec) continue;
-            const meetingArr: RawMeeting[] = sec.meetings.map(mid => {
-                const mt = mtMap.get(mid) as MeetingTableItem;
-
-                return [mt.instructor, mt.days, mt.room];
-            });
-
-            const rawSec = [
-                sec.id as number,
-                sec.sid,
-                sec.topic,
-                sec.status,
-                sec.enrollment,
-                sec.enrollment_limit,
-                sec.wait_list,
-                sec.date,
-                sec.valid,
-                meetingArr
-            ] as RawSection;
-            sectionArr.push(rawSec);
+    console.time('retrieve from db');
+    for (const rawCourse of courses) {
+        // descriptors for this course
+        const desc = Object.getOwnPropertyDescriptors(rawCourse);
+        for (const key in desc) {
+            desc[key].configurable = false;
+            desc[key].writable = false;
         }
-        rawCatalog[crs.id] = [
-            crs.department,
-            crs.number,
-            crs.type,
-            crs.units,
-            crs.title,
-            crs.description,
-            sectionArr
-        ];
+        const sections: Section[] = [];
+        desc.sections = {
+            value: sections,
+            enumerable: true
+        };
+        const course: Course = Object.create(Course.prototype, desc);
+        for (const id of rawCourse.ids) {
+            const sec = secMap.get(id);
+            if (!sec) continue;
+            // descriptor for this section
+            const secDesc = Object.getOwnPropertyDescriptors(sec);
+            for (const key in secDesc) {
+                secDesc[key].configurable = false;
+                secDesc[key].writable = false;
+            }
+            const meetings: Meeting[] = secDesc.meetings.value!.map(m =>
+                Object.create(Meeting.prototype, Object.getOwnPropertyDescriptors(m))
+            );
+            secDesc.meetings.value = meetings;
+            // add missing property descriptors
+            secDesc.course = {
+                value: course,
+                enumerable: true
+            };
+            sections.push(Object.create(Section.prototype, secDesc));
+        }
+        rawCatalog[rawCourse.key] = course;
     }
     console.timeEnd('retrieve from db');
     return rawCatalog;

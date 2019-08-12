@@ -27,7 +27,8 @@ export type ValidFlag = number;
 type SectionMatchFields = 'topic' | 'instructors';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
 
-export type SectionOwnPropertyNames = Exclude<NonFunctionPropertyNames<Section>, undefined | keyof CourseFields | 'validMsg'>
+export type SectionOwnPropertyNames =
+Exclude<NonFunctionPropertyNames<Section>, undefined | keyof CourseFields | 'validMsg'>
 
 /**
  * A section contains all the fields that a Course has,

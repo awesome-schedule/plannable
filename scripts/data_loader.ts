@@ -1,9 +1,9 @@
-import cheerio from 'cheerio';
-import { stringify } from 'querystring';
 import axios from 'axios';
-import { SemesterJSON } from '../src/models/Catalog';
-import fs from 'fs';
+import cheerio from 'cheerio';
 import { spawn } from 'child_process';
+import fs from 'fs';
+import { stringify } from 'querystring';
+import { SemesterJSON } from '../src/models/Catalog';
 
 const dataDir = './data/Semester Data/';
 function cb(err: NodeJS.ErrnoException | null) {

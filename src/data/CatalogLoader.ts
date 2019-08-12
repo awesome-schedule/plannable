@@ -7,14 +7,16 @@
 /**
  *
  */
-import CatalogDB, { CourseTableItem, MeetingTableItem, SectionTableItem } from '@/database/CatalogDB';
-import { ValidFlag } from '@/models/Section';
+import CatalogDB, { CourseTableItem, SectionTableItem } from '@/database/CatalogDB';
+import Section, { SectionOwnPropertyNames, ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
 import { getApi } from '.';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 
+import Course, { CourseFields } from '@/models/Course';
+import Meeting from '@/models/Meeting';
 import {
     CourseStatus,
     CourseType,
@@ -25,7 +27,7 @@ import {
     STATUSES_PARSE,
     TYPES_PARSE
 } from '../models/Meta';
-import { cancelablePromise, CancelablePromise, errToStr, timeout } from '../utils';
+import { cancelablePromise, CancelablePromise, errToStr, parseDate, timeout } from '../utils';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -50,16 +52,24 @@ export async function loadSemesterData(semester: SemesterJSON, force = false) {
     return {
         new: newCatalog,
         old
-    } as { new: CancelablePromise<Catalog>; old?: Catalog | undefined; };
+    } as { new: CancelablePromise<Catalog>; old?: Catalog | undefined };
 }
 
-export async function getSemesterData(currentSemester: SemesterJSON, db: CatalogDB, force = false): Promise<Catalog> {
+export async function getSemesterData(
+    currentSemester: SemesterJSON,
+    db: CatalogDB,
+    force = false
+): Promise<Catalog> {
     const t = localStorage.getItem('idb_time');
     const s = localStorage.getItem('idb_semester');
-    if (!t || (new Date()).getTime() - +t > semesterDataExpirationTime || force || s !== currentSemester.id) {
+    if (
+        !t ||
+        new Date().getTime() - +t > semesterDataExpirationTime ||
+        force ||
+        s !== currentSemester.id
+    ) {
         await db.courses.clear();
         await db.sections.clear();
-        await db.meetings.clear();
         const ctlg = await requestSemesterData(currentSemester, db);
         return ctlg;
     } else {
@@ -78,18 +88,18 @@ export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB)
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
         ? axios.post(
-            `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
-            stringify({
-                Semester: semester.id,
-                Group: 'CS',
-                Description: 'Yes',
-                submit: 'Submit Data Request',
-                Extended: 'Yes'
-            })
-        ) // use the mirror/local dev server
+              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
+              stringify({
+                  Semester: semester.id,
+                  Group: 'CS',
+                  Description: 'Yes',
+                  submit: 'Submit Data Request',
+                  Extended: 'Yes'
+              })
+          ) // use the mirror/local dev server
         : axios.get(
-            `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
-        ));
+              `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
+          ));
     console.timeEnd(`request semester ${semester.name} data`);
     const data: string[][] = parse(res.data, {
         skipEmptyLines: true,
@@ -99,18 +109,16 @@ export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB)
     return new Catalog(semester, rawCatalog, new Date().toJSON());
 }
 
-export function parseSemesterData(raw_data: string[][], db: CatalogDB, currentSemester: SemesterJSON) {
+export function parseSemesterData(
+    raw_data: string[][],
+    db: CatalogDB,
+    currentSemester: SemesterJSON
+) {
     console.time('parse semester data and store');
     const CLASS_TYPES = TYPES_PARSE;
-    const STATUSES = STATUSES_PARSE;
-    const rawCatalog: RawCatalog = {};
-    const len = raw_data.length;
+    const rawCatalog: { [x: string]: Course } = {};
 
-    // variables for idb
-    let meetingId = 0;
-    const secFKs: { [key: string]: number[] } = {};
-    const crsId: string[] = [];
-    const meetingArr: MeetingTableItem[] = [];
+    const len = raw_data.length;
     const sectionArr: SectionTableItem[] = [];
     for (let j = 1; j < len; j++) {
         const data = raw_data[j];
@@ -118,30 +126,37 @@ export function parseSemesterData(raw_data: string[][], db: CatalogDB, currentSe
         // todo: robust data validation
         const type = CLASS_TYPES[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
-        const meetings: RawMeeting[] = [];
-        const meetingFK: number[] = [];
+
+        const meetings: Meeting[] = [];
         let date: string = data[6 + 3];
         let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
-            const a = data[start],
-                b = data[start + 1],
-                c = data[start + 2];
-            if (a || b || c) {
+            const instructor = data[start],
+                days = data[start + 1],
+                room = data[start + 2];
+            if (instructor || days || room) {
                 const meetingDate = data[start + 3];
                 if (!date) date = meetingDate;
                 // inconsistent date
                 if (meetingDate && meetingDate !== date) valid |= 2;
 
                 // incomplete information
-                if (!a || !c || a === 'TBA' || c === 'TBA' || a === 'TBD' || c === 'TBD')
+                if (
+                    !instructor ||
+                    !room ||
+                    instructor === 'TBA' ||
+                    room === 'TBA' ||
+                    instructor === 'TBD' ||
+                    room === 'TBD'
+                )
                     valid |= 1;
 
                 // unknown meeting time
-                if (!b || b === 'TBA' || b === 'TBD') {
+                if (!days || days === 'TBA' || days === 'TBD') {
                     valid |= 4;
                 } else {
-                    const [, startT, , endT] = b.split(' ');
+                    const [, startT, , endT] = days.split(' ');
                     // invalid meeting time
                     if (startT === endT) valid |= 4;
                 }
@@ -149,74 +164,140 @@ export function parseSemesterData(raw_data: string[][], db: CatalogDB, currentSe
                 // insertion sort
                 let k = 0;
                 for (; k < meetings.length; k++) {
-                    if (b < meetings[k][1]) break;
+                    if (days < meetings[k].days) break;
                 }
-                meetings.splice(k, 0, [a, b, c]);
-                // await db.meetings.add({ instructor: a, days: b, room: c }).then(id => meetingFK.push(id));
-                meetingArr.push({ id: meetingId, instructor: a, days: b, room: c });
-                meetingFK.push(meetingId);
-                meetingId++;
+                const meeting: Meeting = Object.create(Meeting.prototype, {
+                    instructor: {
+                        value: instructor,
+                        enumerable: true
+                    },
+                    days: {
+                        value: days,
+                        enumerable: true
+                    },
+                    room: {
+                        value: room,
+                        enumerable: true
+                    }
+                } as { [x in keyof Meeting]: TypedPropertyDescriptor<Meeting[x]> });
+
+                meetings.splice(k, 0, meeting);
             }
         }
         date = date || '';
         // unknown date
         if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
 
-        const tempSection: RawSection = [
-            +data[0],
-            data[3],
-            data[23],
-            STATUSES[data[24] as CourseStatus],
-            +data[25],
-            +data[26],
-            +data[27],
-            date,
-            valid,
-            meetings
-        ];
+        const course =
+            rawCatalog[key] ||
+            (rawCatalog[key] = Object.create(Course.prototype, {
+                department: {
+                    value: data[1],
+                    enumerable: true
+                },
+                number: {
+                    value: +data[2],
+                    enumerable: true
+                },
+                type: {
+                    value: data[4],
+                    enumerable: true
+                },
+                key: {
+                    value: key,
+                    enumerable: true
+                },
+                units: {
+                    value: data[5],
+                    enumerable: true
+                },
+                title: {
+                    value: data[22],
+                    enumerable: true
+                },
+                description: {
+                    value: data[28],
+                    enumerable: true
+                },
+                sections: {
+                    value: [] as Section[],
+                    enumerable: true
+                },
+                ids: {
+                    value: [] as number[],
+                    enumerable: true
+                }
+            } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> }));
 
-        sectionArr.push({
-            id: tempSection[0],
-            sid: tempSection[1],
-            topic: tempSection[2],
-            status: tempSection[3],
-            enrollment: tempSection[4],
-            enrollment_limit: tempSection[5],
-            wait_list: tempSection[6],
-            date: tempSection[7],
-            valid: tempSection[8],
-            meetings: meetingFK
-        });
+        const section: Section = Object.create(Section.prototype, {
+            course: {
+                value: course, // back ref to course
+                enumerable: true
+            },
+            key: {
+                value: key,
+                enumerable: true
+            },
+            id: {
+                value: +data[0],
+                enumerable: true
+            },
+            section: {
+                value: data[3],
+                enumerable: true
+            },
+            topic: {
+                value: data[23],
+                enumerable: true
+            },
+            status: {
+                value: data[24],
+                enumerable: true
+            },
+            enrollment: {
+                value: +data[25],
+                enumerable: true
+            },
+            enrollment_limit: {
+                value: +data[26],
+                enumerable: true
+            },
+            wait_list: {
+                value: +data[27],
+                enumerable: true
+            },
+            valid: {
+                value: valid,
+                enumerable: true
+            },
+            meetings: {
+                value: meetings,
+                enumerable: true
+            },
+            instructors: {
+                value: Meeting.getInstructors(meetings),
+                enumerable: true
+            },
+            dateArray: {
+                value: parseDate(date),
+                enumerable: true
+            },
+            dates: {
+                value: date,
+                enumerable: true
+            }
+            // tslint:disable-next-line: max-line-length
+        } as { [x in SectionOwnPropertyNames]: TypedPropertyDescriptor<Section[x]> });
 
-        if (rawCatalog[key]) {
-            rawCatalog[key][6].push(tempSection);
-            secFKs[key].push(tempSection[0]);
-        } else {
-            crsId.push(key);
-            rawCatalog[key] = [data[1], +data[2], type, data[5], data[22], data[28], [tempSection]];
-            secFKs[key] = [tempSection[0]];
-        }
-    }
-    const courseItemArr: CourseTableItem[] = [];
-    for (const key of crsId) {
-        const course = rawCatalog[key];
-        courseItemArr.push({
-            id: key,
-            department: course[0],
-            number: course[1],
-            type: course[2],
-            units: course[3],
-            title: course[4],
-            description: course[5],
-            sections: secFKs[key]
-        });
+        course.ids.push(+data[0]);
+        course.sections.push(section);
+        sectionArr.push(section);
     }
     Promise.all([
-        db.courses.bulkAdd(courseItemArr),
-        db.sections.bulkAdd(sectionArr),
-        db.meetings.bulkAdd(meetingArr)
+        db.courses.bulkAdd(Object.values(rawCatalog)),
+        db.sections.bulkAdd(sectionArr)
     ]).then(x => {
-        localStorage.setItem('idb_time', (new Date()).getTime().toString());
+        localStorage.setItem('idb_time', new Date().getTime().toString());
         localStorage.setItem('idb_semester', currentSemester.id);
     });
     console.timeEnd('parse semester data and store');
@@ -230,20 +311,20 @@ export async function retrieveFromDB(db: CatalogDB) {
     console.time('get courses from db');
 
     const secMap: Map<number, SectionTableItem> = new Map();
-    const mtMap: Map<number, MeetingTableItem> = new Map();
 
     await Promise.all([
-        db.courses.toArray(arr => arr.forEach(crs => {
-            if (!crs || !crs.id) return;
-            courseArr.push(crs);
-        })),
-        db.sections.toArray(arr => arr.forEach(sec => {
-            if (!sec || !sec.id) return;
-            secMap.set(sec.id as number, sec);
-        })),
-        db.meetings.toArray(arr => arr.forEach(mt => {
-            mtMap.set(mt.id as number, mt);
-        }))
+        db.courses.toArray(arr =>
+            arr.forEach(crs => {
+                if (!crs || !crs.id) return;
+                courseArr.push(crs);
+            })
+        ),
+        db.sections.toArray(arr =>
+            arr.forEach(sec => {
+                if (!sec || !sec.id) return;
+                secMap.set(sec.id as number, sec);
+            })
+        )
     ]);
 
     console.timeEnd('get courses from db');

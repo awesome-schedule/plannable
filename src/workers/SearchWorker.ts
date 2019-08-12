@@ -10,9 +10,10 @@
 /**
  *
  */
+import { RawAlgoCourse } from '@/algorithm';
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseConstructorArguments, CourseFields, CourseMatch } from '../models/Course';
+import _Course, { CourseFields, CourseMatch } from '../models/Course';
 import _Meeting from '../models/Meeting';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
@@ -30,7 +31,7 @@ interface Course extends Pick<_Course, Exclude<NonFunctionPropertyNames<_Course>
     readonly sections: readonly Section[];
 }
 
-declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] | 'ready'): void;
+declare function postMessage(msg: [RawAlgoCourse[], SearchMatch[]] | 'ready'): void;
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
@@ -188,18 +189,18 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                     };
 
                     if (sectionMap[key]) {
-                        const secMatches = sectionMap[key].get(item.sid);
+                        const secMatches = sectionMap[key].get(item.id);
                         if (secMatches) {
                             secMatches.push(tempObj);
                         } else {
-                            sectionMap[key].set(item.sid, [tempObj]);
+                            sectionMap[key].set(item.id, [tempObj]);
                         }
                     } else {
                         sectionMap[key] = new Map();
-                        sectionMap[key].set(item.sid, [tempObj]);
+                        sectionMap[key].set(item.id, [tempObj]);
                     }
 
-                    const secKey = `${item.key} ${item.sid}`;
+                    const secKey = `${item.key} ${item.id}`;
 
                     // if encounter a new section of a course, increment the number of section recorded
                     if (!sectionRecorder.has(secKey) && !last) {
@@ -221,7 +222,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             )
             .slice(0, 12);
 
-        const finalResults: CourseConstructorArguments[] = [];
+        const finalResults: RawAlgoCourse[] = [];
         const allMatches: SearchMatch[] = [];
 
         // merge course and section matches
@@ -229,8 +230,6 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             const courseMatch = courseMap[key];
             if (courseMatch) {
                 resolveOverlap(courseMatch);
-
-                const { item } = courseMatch[0].result;
 
                 const crsMatches: CourseMatch[] = courseMatch.map(
                     ({ match, result: { match: m } }) => ({
@@ -244,10 +243,10 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                 const s = sectionMap[key];
                 // if the section matches for this course exist
                 if (s) {
-                    for (const [sid, matches] of s) {
+                    for (const [id, matches] of s) {
                         resolveOverlap(matches);
                         secMatches.set(
-                            sid,
+                            id,
                             matches.map(({ match, result: { match: m } }) => ({
                                 match,
                                 start: m.index,
@@ -256,7 +255,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                 }
-                finalResults.push([item.raw, key, item.sids]);
+                finalResults.push([key, courseMatch[0].result.item.ids]);
                 allMatches.push([crsMatches, secMatches]);
 
                 // only section match exists
@@ -264,11 +263,11 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                 const secMatches = new Map<number, SectionMatch[]>();
                 const s = sectionMap[key];
                 if (s) {
-                    const sids = [...s.keys()];
-                    for (const [sid, matches] of s) {
+                    const ids = [...s.keys()];
+                    for (const [id, matches] of s) {
                         resolveOverlap(matches);
                         secMatches.set(
-                            sid,
+                            id,
                             matches.map(({ match, result: { match: m } }) => ({
                                 match,
                                 start: m.index,
@@ -277,9 +276,8 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                     finalResults.push([
-                        courseDict[s.get(sids[0])![0].result.item.key].raw,
                         key,
-                        sids
+                        ids
                     ]);
                     allMatches.push([[], secMatches]);
                 }

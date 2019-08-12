@@ -23,7 +23,7 @@
                                         highlightMatch(
                                             section.topic,
                                             'topic',
-                                            match[1].get(section.sid)
+                                            match[1].get(section.id)
                                         )
                                     "
                                 ></td>
@@ -32,7 +32,7 @@
                                         highlightMatch(
                                             section.instructors.join(', '),
                                             'instructors',
-                                            match[1].get(section.sid)
+                                            match[1].get(section.id)
                                         )
                                     "
                                 ></td>

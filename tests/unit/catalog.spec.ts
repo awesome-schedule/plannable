@@ -31,11 +31,6 @@ describe('catalog test', () => {
 
     it('other', () => {
         try {
-            window.catalog.getSection('asdasdasdasdas', 1);
-        } catch (e) {
-            expect(e.message).toBeTruthy();
-        }
-        try {
             window.catalog.initWorker();
         } catch (e) {
             // module not found

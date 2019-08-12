@@ -172,16 +172,16 @@ export default class Schedule {
                                     );
                                 }
                                 return sid < allSections.length;
-                            })
+                            }).map(idx => allSections[idx].id)
                         );
                     } else {
                         const set = new Set<number>();
                         for (const record of sections) {
                             // check whether the identifier of stored sections match with the existing sections
-                            const idx = allSections.findIndex(
+                            const target = allSections.find(
                                 sec => sec.id === record.id && sec.section === record.section
                             );
-                            if (idx !== -1) set.add(idx);
+                            if (target) set.add(target.id);
                             // if not, it possibly means that section is removed from SIS
                             else warnings.push(
                                 `Section ${
@@ -217,7 +217,7 @@ export default class Schedule {
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
      *
      * Note that if **section** is -1, it means that all sections are allowed.
-     * Otherwise, **section** should be a Set of integers
+     * Otherwise, **section** should be a Set of integers corresponding to the `id` field of each section
      *
      * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
      */
@@ -476,7 +476,7 @@ export default class Schedule {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
-                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.sid)))
+                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
                         );
                         for (const crs of combined) this.place(crs);
                     } else {
@@ -593,9 +593,9 @@ export default class Schedule {
                     if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
                         const date = temp.getMonth() + 1 + '/' + temp.getDate();
                         if (diffSecs[date]) {
-                            diffSecs[date].push(sec.sid);
+                            diffSecs[date].push(sec.id);
                         } else {
-                            diffSecs[date] = [sec.sid];
+                            diffSecs[date] = [sec.id];
                         }
                     }
                     if (end < sep) {
@@ -789,8 +789,8 @@ export default class Schedule {
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Set) {
-                All[key] = [...sections].map(sid => {
-                    const { id, section } = catalog.getSection(key, sid);
+                All[key] = [...sections].map(id => {
+                    const { section } = catalog.getSectionById(key, id)!;
                     return { id, section };
                 });
             } else All[key] = sections;

@@ -8,11 +8,11 @@
  */
 import { findBestMatch } from 'string-similarity';
 import { MeetingDate, TimeArray } from '../algorithm';
-import { hashCode, parseDate, parseTimeAll } from '../utils';
+import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { CourseStatus, dayToInt, STATUSES } from './Meta';
+import { CourseStatus, dayToInt } from './Meta';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,
@@ -26,6 +26,8 @@ export type ValidFlag = number;
 
 type SectionMatchFields = 'topic' | 'instructors';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
+
+export type SectionOwnPropertyNames = Exclude<NonFunctionPropertyNames<Section>, undefined | keyof CourseFields | 'validMsg'>
 
 /**
  * A section contains all the fields that a Course has,
@@ -41,54 +43,36 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: Some meetings have invalid start or end time.',
         'Fatal: This section has unknown start and end date.'
     ];
+    public readonly course!: Course;
     /**
      * Key of the course that this section belongs to; same for all sections.
      */
-    public readonly key: string;
+    public readonly key!: string;
     /**
      * the id of the section recorded in sis
      */
-    public readonly id: number;
+    public readonly id!: number;
     /**
      * the section number recorded in sis
      */
-    public readonly section: string;
+    public readonly section!: string;
     /**
      * the topic of this section, may be empty
      */
-    public readonly topic: string;
+    public readonly topic!: string;
     /**
      * one of "Open", "Closed" and "Wait List"
      */
-    public readonly status: CourseStatus;
-    public readonly enrollment: number;
-    public readonly enrollment_limit: number;
-    public readonly wait_list: number;
-    public readonly instructors: readonly string[];
-    public readonly dates: string;
-    public readonly meetings: readonly Meeting[];
+    public readonly status!: CourseStatus;
+    public readonly enrollment!: number;
+    public readonly enrollment_limit!: number;
+    public readonly wait_list!: number;
+    public readonly instructors!: readonly string[];
+    public readonly dates!: string;
+    public readonly meetings!: readonly Meeting[];
 
-    public readonly valid: ValidFlag;
+    public readonly valid!: ValidFlag;
     public readonly dateArray?: MeetingDate;
-    /**
-     * @param course a reference to the course that this section belongs to
-     * @param sid the index of the section
-     */
-    constructor(public readonly course: Course, public readonly sid: number) {
-        const raw = course.raw[6][sid];
-        this.key = course.key;
-        this.id = raw[0];
-        this.section = raw[1];
-        this.topic = raw[2];
-        this.status = STATUSES[raw[3]];
-        this.enrollment = raw[4];
-        this.enrollment_limit = raw[5];
-        this.wait_list = raw[6];
-        this.dateArray = parseDate((this.dates = raw[7]));
-        this.valid = raw[8];
-        this.meetings = raw[9].map(x => new Meeting(x));
-        this.instructors = Meeting.getInstructors(raw[9]);
-    }
 
     get department() {
         return this.course.department;
@@ -204,7 +188,7 @@ export default class Section implements CourseFields, Hashable {
     }
 
     public equals(sc: Section): boolean {
-        if (this.key === sc.key && this.sid === sc.sid) {
+        if (this.key === sc.key && this.id === sc.id) {
             return true;
         } else {
             return false;
@@ -222,7 +206,7 @@ export default class Section implements CourseFields, Hashable {
      */
     public has(sections: Set<number>, key: string): boolean;
     public has(element: Section | Set<number>, key?: string): boolean {
-        if (element instanceof Set) return this.key === key && element.has(this.sid);
+        if (element instanceof Set) return this.key === key && element.has(this.id);
         else return this.equals(element);
     }
 }

@@ -14,10 +14,10 @@ import { RawMeeting } from './Meta';
  * It has a reference back to the section that it belongs to
  */
 export default class Meeting {
-    public static getInstructors(meetings: RawMeeting[]) {
+    public static getInstructors(meetings: readonly Meeting[]) {
         const profs: string[] = [];
         for (const meeting of meetings) {
-            const meetingProfs = meeting[0].split(', ');
+            const meetingProfs = meeting.instructor.split(', ');
             for (const prof of meetingProfs) {
                 if (!profs.includes(prof)) profs.push(prof);
             }

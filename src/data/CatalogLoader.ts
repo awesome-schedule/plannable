@@ -105,24 +105,31 @@ export function parseSemesterData(csv_string: string) {
         let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
-            const a = data[start],
-                b = data[start + 1],
-                c = data[start + 2];
-            if (a || b || c) {
+            const instructor = data[start],
+                days = data[start + 1],
+                room = data[start + 2];
+            if (instructor || days || room) {
                 const meetingDate = data[start + 3];
                 if (!date) date = meetingDate;
                 // inconsistent date
                 if (meetingDate && meetingDate !== date) valid |= 2;
 
                 // incomplete information
-                if (!a || !c || a === 'TBA' || c === 'TBA' || a === 'TBD' || c === 'TBD')
+                if (
+                    !instructor ||
+                    !room ||
+                    instructor === 'TBA' ||
+                    room === 'TBA' ||
+                    instructor === 'TBD' ||
+                    room === 'TBD'
+                )
                     valid |= 1;
 
                 // unknown meeting time
-                if (!b || b === 'TBA' || b === 'TBD') {
+                if (!days || days === 'TBA' || days === 'TBD') {
                     valid |= 4;
                 } else {
-                    const [, startT, , endT] = b.split(' ');
+                    const [, startT, , endT] = days.split(' ');
                     // invalid meeting time
                     if (startT === endT) valid |= 4;
                 }
@@ -130,9 +137,9 @@ export function parseSemesterData(csv_string: string) {
                 // insertion sort
                 let k = 0;
                 for (; k < meetings.length; k++) {
-                    if (b < meetings[k][1]) break;
+                    if (days < meetings[k][1]) break;
                 }
-                meetings.splice(k, 0, [a, b, c]);
+                meetings.splice(k, 0, [instructor, days, room]);
             }
         }
         // unknown date

@@ -6,6 +6,7 @@
  *
  */
 import { requestSemesterData } from '@/data/CatalogLoader';
+import CatalogDB from '@/database/CatalogDB';
 import Catalog, { SemesterJSON } from '@/models/Catalog';
 import fs from 'fs';
 import path from 'path';
@@ -40,7 +41,7 @@ async function getData() {
         data = Catalog.fromJSON(JSON.parse(fs.readFileSync(filepath).toString()));
     } else {
         console.info('Local cache does not exist. Requesting data from remote..');
-        data = await requestSemesterData(semester);
+        data = await requestSemesterData(semester, new CatalogDB());
 
         // cache the data, if possible
         fs.writeFileSync(filepath, JSON.stringify(data));

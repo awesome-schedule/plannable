@@ -60,22 +60,20 @@ export async function getSemesterData(currentSemester: SemesterJSON, db: Catalog
         await db.courses.clear();
         await db.sections.clear();
         await db.meetings.clear();
-        const raw_data = await requestSemesterData(currentSemester);
-        const ctlg = parseSemesterData(raw_data, db, currentSemester);
-        return new Catalog(currentSemester, ctlg, new Date().toJSON());
+        const ctlg = await requestSemesterData(currentSemester, db);
+        return ctlg;
     } else {
         try {
             const ctlg = await retrieveFromDB(db);
             return new Catalog(currentSemester, ctlg, new Date(+t).toJSON());
         } catch (error) {
-            const raw_data = await requestSemesterData(currentSemester);
-            const ctlg = parseSemesterData(raw_data, db, currentSemester);
-            return new Catalog(currentSemester, ctlg, new Date().toJSON());
+            const ctlg = await requestSemesterData(currentSemester, db);
+            return ctlg;
         }
     }
 }
 
-export async function requestSemesterData(semester: SemesterJSON) {
+export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
@@ -97,7 +95,8 @@ export async function requestSemesterData(semester: SemesterJSON) {
         skipEmptyLines: true,
         header: false
     }).data;
-    return data;
+    const rawCatalog = parseSemesterData(data, db, semester);
+    return new Catalog(semester, rawCatalog, new Date().toJSON());
 }
 
 export function parseSemesterData(raw_data: string[][], db: CatalogDB, currentSemester: SemesterJSON) {

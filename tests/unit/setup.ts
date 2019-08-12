@@ -1,5 +1,6 @@
 import { requestBuildingList, requestTimeMatrix } from '@/data/BuildingLoader';
-import { requestSemesterData } from '@/data/CatalogLoader';
+import { getSemesterData, requestSemesterData } from '@/data/CatalogLoader';
+import CatalogDB from '@/database/CatalogDB';
 import Catalog from '@/models/Catalog';
 
 global.console.time = jest.fn();
@@ -22,7 +23,7 @@ global.queue = [];
 global.postMessage = msg => global.queue.push(msg);
 
 beforeAll(async () => {
-    const catalog = await requestSemesterData({ name: '', id: '1198' });
+    const catalog = await requestSemesterData({ name: '', id: '1198' }, new CatalogDB());
     catalog.raw_data.cs45015[6].push([
         19281,
         '001',

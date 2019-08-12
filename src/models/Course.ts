@@ -8,7 +8,7 @@
  */
 import { hashCode } from '../utils';
 import Hashable from './Hashable';
-import { CourseType, RawCourse, TYPES } from './Meta';
+import { CourseType } from './Meta';
 import Section from './Section';
 
 /**
@@ -121,6 +121,12 @@ export default class Course implements CourseFields, Hashable {
         return new Course(this, ids);
     }
 
+    public getSectionById(id: number) {
+        const sec = this.sections.find(s => s.id === id);
+        if (!sec) throw new Error('Non-existent id ' + id);
+        return sec;
+    }
+
     /**
      * whether all sections of this Course occur at the same time
      */
@@ -178,7 +184,7 @@ export default class Course implements CourseFields, Hashable {
     public has(sections: Set<number>, key: string): boolean;
     public has(element: Section | Set<number>, key?: string): boolean {
         if (element instanceof Set) {
-            return this.key === key && this.ids.some(sid => element.has(sid));
+            return this.key === key && this.ids.some(id => element.has(id));
         } else {
             return this.key === element.key && this.ids.includes(element.id);
         }

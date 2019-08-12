@@ -87,7 +87,7 @@ describe('Schedule Test', () => {
 
         expect(schedule.has('MoTu 12:00AM - 3:00AM')).toBe(true);
 
-        schedule.preview(window.catalog.getSection('cs21105', 0));
+        schedule.preview(window.catalog.getCourse('cs21105').sections[0]);
         schedule.computeSchedule();
         schedule.removePreview();
 
@@ -95,7 +95,7 @@ describe('Schedule Test', () => {
         expect(schedule.equals(schedule.copy())).toBe(true);
 
         // preview an already present one
-        schedule.preview(window.catalog.getSection('cs21504', 0));
+        schedule.preview(window.catalog.getCourse('cs21504').sections[0]);
         schedule.computeSchedule();
         schedule.removePreview();
 

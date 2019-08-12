@@ -137,10 +137,10 @@ export default class Catalog {
     }
 
     /**
-     * Get a Course associated with the given key and section index
+     * Get a Course associated with the given key and section id
      */
-    public getSection(key: string, idx = 0) {
-        return this.courseDict[key].sections[idx];
+    public getSectionById(key: string, id: number) {
+        return this.courseDict[key].getSectionById(id);
     }
 
     /**

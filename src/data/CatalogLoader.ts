@@ -7,25 +7,16 @@
 /**
  *
  */
-import Course from '@/models/Course';
+import Course, { CourseFields } from '@/models/Course';
 import Meeting from '@/models/Meeting';
 import Section, { ValidFlag } from '@/models/Section';
+import { parseDate } from '@/utils';
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
 import { getApi } from '.';
 import Catalog, { CatalogJSON, SemesterJSON } from '../models/Catalog';
-import {
-    CourseStatus,
-    CourseType,
-    RawCatalog,
-    RawCourse,
-    RawMeeting,
-    RawSection,
-    semesterDataExpirationTime,
-    STATUSES_PARSE,
-    TYPES_PARSE
-} from '../models/Meta';
+import { CourseType, semesterDataExpirationTime, TYPES_PARSE } from '../models/Meta';
 import { loadFromCache } from './Loader';
 
 /**
@@ -228,15 +219,15 @@ export function parseSemesterData(csv_string: string) {
                     enumerable: true
                 },
                 enrollment: {
-                    value: data[25],
+                    value: +data[25],
                     enumerable: true
                 },
                 enrollment_limit: {
-                    value: data[26],
+                    value: +data[26],
                     enumerable: true
                 },
                 wait_list: {
-                    value: data[27],
+                    value: +data[27],
                     enumerable: true
                 },
                 valid: {
@@ -250,8 +241,17 @@ export function parseSemesterData(csv_string: string) {
                 instructors: {
                     value: Meeting.getInstructors(meetings),
                     enumerable: true
+                },
+                dateArray: {
+                    value: parseDate(date),
+                    enumerable: true
+                },
+                dates: {
+                    value: date,
+                    enumerable: true
                 }
-            } as { [x in keyof NonFunctionPropertyNames<Section>]: TypedPropertyDescriptor<Section[x]> })
+                // tslint:disable-next-line: max-line-length
+            } as { [x in Exclude<NonFunctionPropertyNames<Section>, undefined | keyof CourseFields | 'validMsg'>]: TypedPropertyDescriptor<Section[x]> })
         );
     }
 

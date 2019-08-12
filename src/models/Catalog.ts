@@ -31,10 +31,12 @@ export interface SemesterJSON {
     readonly name: string;
 }
 
-export interface CatalogJSON extends Expirable {
-    readonly semester: SemesterJSON;
-    readonly raw_data: RawCatalog;
-}
+// export interface CatalogJSON extends Expirable {
+//     readonly semester: SemesterJSON;
+//     readonly raw_data: RawCatalog;
+// }
+
+export type CatalogJSON = any;
 
 interface SearchWorker extends Worker {
     onmessage(x: MessageEvent): void;
@@ -72,15 +74,12 @@ export default class Catalog {
      */
     constructor(
         public readonly semester: SemesterJSON,
-        public readonly raw_data: RawCatalog,
+        public readonly raw_data: { [x: string]: Course },
         public readonly modified: string
     ) {
         console.time('catalog prep data');
-        const courses: Course[] = [];
-        for (const key in raw_data)
-            courses.push((this.courseDict[key] = new Course(raw_data[key], key)));
-
-        this.courses = courses;
+        this.courseDict = raw_data;
+        this.courses = Object.values(raw_data);
         console.timeEnd('catalog prep data');
     }
 

@@ -76,8 +76,8 @@ export default class Course implements CourseFields, Hashable {
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: readonly number[];
-    public readonly sections: readonly Section[];
+    public readonly sids: number[];
+    public readonly sections: Section[];
 
     /**
      * @param raw the raw representation of this course

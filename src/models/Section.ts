@@ -87,7 +87,7 @@ export default class Section implements CourseFields, Hashable {
         this.dateArray = parseDate((this.dates = raw[7]));
         this.valid = raw[8];
         this.meetings = raw[9].map(x => new Meeting(x));
-        this.instructors = Meeting.getInstructors(raw[9]);
+        this.instructors = Meeting.getInstructors(this.meetings);
     }
 
     get department() {

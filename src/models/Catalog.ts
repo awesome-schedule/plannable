@@ -12,9 +12,8 @@
 /**
  *
  */
-import Expirable from '../data/Expirable';
-import Course, { CourseConstructorArguments, CourseMatch } from './Course';
-import { RawCatalog } from './Meta';
+import { RawAlgoCourse } from '@/algorithm';
+import Course, { CourseMatch } from './Course';
 import Schedule from './Schedule';
 import { SectionMatch } from './Section';
 /**
@@ -168,8 +167,8 @@ export default class Catalog {
             worker.onmessage = ({
                 data: [args, matches]
             }: {
-                data: [CourseConstructorArguments[], SearchMatch[]];
-            }) => resolve([args.map(x => new Course(...x)), matches]);
+                data: [RawAlgoCourse[], SearchMatch[]];
+            }) => resolve([args.map(x => this.getCourse(x[0], new Set(x[1]))), matches]);
             worker.onerror = err => reject(err);
         });
         worker.postMessage(query);

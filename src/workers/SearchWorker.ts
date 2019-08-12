@@ -10,9 +10,10 @@
 /**
  *
  */
+import { RawAlgoCourse } from '@/algorithm';
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseConstructorArguments, CourseFields, CourseMatch } from '../models/Course';
+import _Course, { CourseFields, CourseMatch } from '../models/Course';
 import _Meeting from '../models/Meeting';
 import _Section, { SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
@@ -30,7 +31,7 @@ interface Course extends Pick<_Course, Exclude<NonFunctionPropertyNames<_Course>
     readonly sections: readonly Section[];
 }
 
-declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] | 'ready'): void;
+declare function postMessage(msg: [RawAlgoCourse[], SearchMatch[]] | 'ready'): void;
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
@@ -221,7 +222,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             )
             .slice(0, 12);
 
-        const finalResults: CourseConstructorArguments[] = [];
+        const finalResults: RawAlgoCourse[] = [];
         const allMatches: SearchMatch[] = [];
 
         // merge course and section matches
@@ -256,7 +257,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                 }
-                finalResults.push([item.raw, key, item.ids]);
+                finalResults.push([key, item.ids]);
                 allMatches.push([crsMatches, secMatches]);
 
                 // only section match exists
@@ -277,7 +278,6 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                     finalResults.push([
-                        courseDict[s.get(sids[0])![0].result.item.key].raw,
                         key,
                         sids
                     ]);

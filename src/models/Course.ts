@@ -15,6 +15,7 @@ import Section from './Section';
  * represents all public information of a Course
  */
 export interface CourseFields {
+    readonly key: string;
     /**
      * department name, short form, all capitalized. e.g `CS`
      */
@@ -64,6 +65,7 @@ export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T
  * All course instances are immutable
  */
 export default class Course implements CourseFields, Hashable {
+    public readonly key: string;
     public readonly department: string;
     public readonly number: number;
     public readonly type: CourseType;
@@ -71,7 +73,6 @@ export default class Course implements CourseFields, Hashable {
     public readonly title: string;
     public readonly description: string;
 
-    public readonly key: string;
     /**
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections

@@ -27,7 +27,6 @@ class Modal {
     }
 
     showCourseModal(course: Course, match?: SearchMatch) {
-        console.log(arguments);
         this.course = course;
         this.match = match || [[], new Map()];
         $('#course-modal').modal();

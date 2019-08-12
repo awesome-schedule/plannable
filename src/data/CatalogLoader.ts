@@ -8,7 +8,7 @@
  *
  */
 import CatalogDB, { CourseTableItem, SectionTableItem } from '@/database/CatalogDB';
-import Section, { SectionOwnPropertyNames, ValidFlag } from '@/models/Section';
+import Section, { SectionFields, ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
@@ -21,7 +21,7 @@ import { CourseType, semesterDataExpirationTime, TYPES_PARSE } from '../models/M
 import { cancelablePromise, CancelablePromise, parseDate } from '../utils';
 
 type SectionPropertyDescriptors = {
-    [x in SectionOwnPropertyNames]: TypedPropertyDescriptor<Section[x]>
+    [x in keyof SectionFields]: TypedPropertyDescriptor<Section[x]>
 };
 
 /**

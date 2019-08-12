@@ -27,9 +27,44 @@ export type ValidFlag = number;
 type SectionMatchFields = 'topic' | 'instructors';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
 
-export type SectionOwnPropertyNames =
-Exclude<NonFunctionPropertyNames<Section>, undefined | keyof CourseFields | 'validMsg'>
+export interface SectionFields {
+    /**
+     * reference to the course that this section belongs to
+     */
+    readonly course: Course;
+    /**
+     * Key of the course that this section belongs to; same for all sections.
+     */
+     readonly key: string;
+    /**
+     * the id of the section recorded in sis
+     */
+     readonly id: number;
+    /**
+     * the section number recorded in sis
+     */
+     readonly section: string;
+    /**
+     * the topic of this section, may be empty
+     */
+     readonly topic: string;
+    /**
+     * one of "Open", "Closed" and "Wait List"
+     */
+     readonly status: CourseStatus;
+     readonly enrollment: number;
+     readonly enrollment_limit: number;
+     readonly wait_list: number;
+     readonly instructors: readonly string[];
+     readonly dates: string;
+     readonly meetings: readonly Meeting[];
 
+     readonly valid: ValidFlag;
+     readonly dateArray: MeetingDate;
+}
+
+// tslint:disable-next-line: no-empty-interface
+export default interface Section extends SectionFields {}
 /**
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
@@ -44,37 +79,7 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: Some meetings have invalid start or end time.',
         'Fatal: This section has unknown start and end date.'
     ];
-    public readonly course!: Course;
-    /**
-     * Key of the course that this section belongs to; same for all sections.
-     */
-    public readonly key!: string;
-    /**
-     * the id of the section recorded in sis
-     */
-    public readonly id!: number;
-    /**
-     * the section number recorded in sis
-     */
-    public readonly section!: string;
-    /**
-     * the topic of this section, may be empty
-     */
-    public readonly topic!: string;
-    /**
-     * one of "Open", "Closed" and "Wait List"
-     */
-    public readonly status!: CourseStatus;
-    public readonly enrollment!: number;
-    public readonly enrollment_limit!: number;
-    public readonly wait_list!: number;
-    public readonly instructors!: readonly string[];
-    public readonly dates!: string;
-    public readonly meetings!: readonly Meeting[];
-
-    public readonly valid!: ValidFlag;
-    public readonly dateArray?: MeetingDate;
-
+    // --------- getters for fields of the course ---------------------
     get department() {
         return this.course.department;
     }
@@ -96,6 +101,7 @@ export default class Section implements CourseFields, Hashable {
     get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
+    // --------- end getters for fields of the course ---------------------
 
     /**
      * convert [[Section.valid]] to human readable message

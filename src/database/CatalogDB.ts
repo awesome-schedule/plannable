@@ -1,16 +1,15 @@
 import { SemesterJSON } from '@/models/Catalog';
 import { CourseFields } from '@/models/Course';
 import Dexie from 'dexie';
-import Section, { SectionOwnPropertyNames } from '../models/Section';
+import { SectionFields } from '../models/Section';
 
 export interface CourseTableItem
     extends Pick<CourseFields, Exclude<keyof CourseFields, 'displayName'>> {
-    key: string;
     ids: number[];
 }
 
-export interface SectionTableItem
-    extends Pick<Section, Exclude<SectionOwnPropertyNames, 'course' | 'instructors' | 'key'>> {}
+export interface SectionTableItem  // no back ref in db
+    extends Pick<SectionFields, Exclude<keyof SectionFields, 'course'>> {}
 
 export default class CatalogDB extends Dexie {
     courses: Dexie.Table<CourseTableItem, string>;

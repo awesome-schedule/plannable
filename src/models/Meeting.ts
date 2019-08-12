@@ -5,8 +5,6 @@
 
 /**
  * A meeting represents a specific meeting time \w information about the instructor and location
- *
- * It has a reference back to the section that it belongs to
  */
 export default class Meeting {
     public static getInstructors(meetings: readonly Meeting[]) {

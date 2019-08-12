@@ -1,5 +1,5 @@
 import { requestBuildingList, requestTimeMatrix } from '@/data/BuildingLoader';
-import { getSemesterData, requestSemesterData } from '@/data/CatalogLoader';
+import { requestSemesterData } from '@/data/CatalogLoader';
 import CatalogDB from '@/database/CatalogDB';
 import Catalog from '@/models/Catalog';
 

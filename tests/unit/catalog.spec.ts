@@ -24,11 +24,6 @@ describe('catalog test', () => {
         expect(catalog.convertKey('MoFr 10:00AM - 11:30AM', schedule)).toBe('title asd');
     });
 
-    it('json', () => {
-        const catalog = window.catalog;
-        expect(catalog.fromJSON(catalog.toJSON()).raw_data).toEqual(catalog.raw_data);
-    });
-
     it('other', () => {
         try {
             window.catalog.initWorker();

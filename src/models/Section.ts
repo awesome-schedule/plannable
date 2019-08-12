@@ -116,7 +116,7 @@ export default class Section implements CourseFields, Hashable {
     public sameTimeAs(other: Section) {
         const len = this.meetings.length;
         if (len !== other.meetings.length) return false;
-        return this.meetings.every((x, i) => x.sameTimeAs(other.meetings[i]));
+        return this.meetings.every((x, i) => x.days === other.meetings[i].days);
     }
 
     /**

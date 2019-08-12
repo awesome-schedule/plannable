@@ -2,7 +2,6 @@ import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
 import { loadBuildingList, loadTimeMatrix } from '@/data/BuildingLoader';
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
-import data from './data';
 
 const store = new Store();
 
@@ -12,13 +11,6 @@ beforeAll(async () => {
 });
 
 describe('ScheduleGenerator Test', () => {
-    it('Data Validation', () => {
-        const allRecords = window.catalog;
-        expect(typeof data).toBe('object');
-        const course = allRecords.getCourse('cs11105');
-        expect(typeof course.sections[0].id).toBe('number');
-    });
-
     it('ScheduleGenerator', () => {
         const catalog = window.catalog;
         const buildingList = window.buildingList;

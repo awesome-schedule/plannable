@@ -7,7 +7,7 @@
 /**
  *
  */
-import CatalogDB, { CourseTableItem, SectionTableItem } from '@/database/CatalogDB';
+import CatalogDB, { SectionTableItem } from '@/database/CatalogDB';
 import Section, { SectionOwnPropertyNames, ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
@@ -17,8 +17,8 @@ import Catalog, { SemesterJSON } from '../models/Catalog';
 
 import Course from '@/models/Course';
 import Meeting from '@/models/Meeting';
-import { CourseType, RawCatalog, semesterDataExpirationTime, TYPES_PARSE } from '../models/Meta';
-import { cancelablePromise, CancelablePromise, errToStr, parseDate, timeout } from '../utils';
+import { CourseType, semesterDataExpirationTime, TYPES_PARSE } from '../models/Meta';
+import { cancelablePromise, CancelablePromise, parseDate } from '../utils';
 
 type SectionPropertyDescriptors = {
     [x in SectionOwnPropertyNames]: TypedPropertyDescriptor<Section[x]>
@@ -334,10 +334,6 @@ export async function retrieveFromDB(db: CatalogDB) {
                 secDesc[key].configurable = false;
                 secDesc[key].writable = false;
             }
-            const meetings: Meeting[] = secDesc.meetings.value!.map(m =>
-                Object.create(Meeting.prototype, Object.getOwnPropertyDescriptors(m))
-            );
-            secDesc.meetings.value = meetings;
             // add missing property descriptors
             secDesc.course = {
                 value: course,

@@ -19,6 +19,16 @@ Object.defineProperty(global, 'onmessage', {
         return global.msgHandler;
     }
 });
+declare global {
+    namespace NodeJS {
+        interface Global {
+            queue: any[];
+            postMessage: (msg: any) => void;
+            msgHandler(msg: any): void;
+        }
+    }
+}
+
 global.queue = [];
 global.postMessage = msg => global.queue.push(msg);
 
@@ -36,7 +46,7 @@ beforeAll(async () => {
     //     0,
     //     [['Comp. Vision', 'MoWe 5:00PM - 6:15PM', 'Thornton Hall E316']]
     // ]);
-    window.catalog = new Catalog(catalog.semester, catalog.raw_data, catalog.modified);
+    window.catalog = new Catalog(catalog.semester, catalog.courseDict, catalog.modified);
     window.timeMatrix = await requestTimeMatrix();
     window.buildingList = await requestBuildingList();
 });

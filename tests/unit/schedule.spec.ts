@@ -6,8 +6,8 @@ describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {
         const len = Schedule.bgColors.length;
         const frequencies = new Float32Array(len);
-        const raw_data = window.catalog.raw_data;
-        for (const key in raw_data) {
+        const courseDict = window.catalog.courseDict;
+        for (const key in courseDict) {
             const hash = Utils.hashCode(key) % len;
             frequencies[hash] += 1;
         }

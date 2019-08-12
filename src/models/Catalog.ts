@@ -30,13 +30,6 @@ export interface SemesterJSON {
     readonly name: string;
 }
 
-// export interface CatalogJSON extends Expirable {
-//     readonly semester: SemesterJSON;
-//     readonly raw_data: RawCatalog;
-// }
-
-export type CatalogJSON = any;
-
 interface SearchWorker extends Worker {
     onmessage(x: MessageEvent): void;
     postMessage(x: string | typeof window.catalog.courseDict): void;
@@ -54,30 +47,20 @@ export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
  */
 export default class Catalog {
-    /**
-     * Parse AllRecords from parsed JSON
-     */
-    public static fromJSON(data: CatalogJSON) {
-        return new Catalog(data.semester, data.raw_data, data.modified);
-    }
-
     public worker?: SearchWorker;
     public readonly courses: Course[];
-    public readonly courseDict: { [x: string]: Course } = {};
-
     /**
      * @param semester the semester corresponding to the catalog stored in this object
-     * @param raw_data the raw representation of the course catalog,
+     * @param courseDict mapping from course key to course itself
      * borrowing python's snake_case (not changed due to backward compatibility issues)
      * @param modified
      */
     constructor(
         public readonly semester: SemesterJSON,
-        public readonly raw_data: { [x: string]: Course },
+        public readonly courseDict: { [x: string]: Course },
         public readonly modified: string
     ) {
-        this.courseDict = raw_data;
-        this.courses = Object.values(raw_data);
+        this.courses = Object.values(courseDict);
     }
 
     /**
@@ -107,18 +90,6 @@ export default class Catalog {
             this.worker.terminate();
             delete this.worker;
         }
-    }
-
-    public fromJSON(data: CatalogJSON) {
-        return Catalog.fromJSON(data);
-    }
-
-    public toJSON(): CatalogJSON {
-        return {
-            semester: this.semester,
-            raw_data: {},
-            modified: this.modified
-        };
     }
 
     /**

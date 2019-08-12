@@ -165,53 +165,9 @@ export function parseSemesterData(csv_string: string) {
         if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
         if (typeof date !== 'string') date = '';
 
-        const section: Section = Object.create(Section.prototype, {
-            id: {
-                value: +data[0],
-                enumerable: true
-            },
-            section: {
-                value: data[3],
-                enumerable: true
-            },
-            topic: {
-                value: data[23],
-                enumerable: true
-            },
-            status: {
-                value: data[24],
-                enumerable: true
-            },
-            enrollment: {
-                value: data[25],
-                enumerable: true
-            },
-            enrollment_limit: {
-                value: data[26],
-                enumerable: true
-            },
-            wait_list: {
-                value: data[27],
-                enumerable: true
-            },
-            valid: {
-                value: valid,
-                enumerable: true
-            },
-            meetings: {
-                value: meetings,
-                enumerable: true
-            },
-            instructors: {
-                value: Meeting.getInstructors(meetings),
-                enumerable: true
-            }
-        } as { [x in keyof NonFunctionPropertyNames<Section>]: TypedPropertyDescriptor<Section[x]> });
-
-        if (rawCatalog[key]) {
-            rawCatalog[key].sections.push(section);
-        } else {
-            rawCatalog[key] = Object.create(Course.prototype, {
+        const course =
+            rawCatalog[key] ||
+            (rawCatalog[key] = Object.create(Course.prototype, {
                 department: {
                     value: data[1],
                     enumerable: true
@@ -241,11 +197,62 @@ export function parseSemesterData(csv_string: string) {
                     enumerable: true
                 },
                 sections: {
-                    value: [section],
+                    value: [] as Section[],
                     enumerable: true
                 }
-            } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> });
-        }
+            } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> }));
+        course.sections.push(
+            Object.create(Section.prototype, {
+                course: {
+                    value: course, // back ref to course
+                    enumerable: true
+                },
+                key: {
+                    value: key,
+                    enumerable: true
+                },
+                id: {
+                    value: +data[0],
+                    enumerable: true
+                },
+                section: {
+                    value: data[3],
+                    enumerable: true
+                },
+                topic: {
+                    value: data[23],
+                    enumerable: true
+                },
+                status: {
+                    value: data[24],
+                    enumerable: true
+                },
+                enrollment: {
+                    value: data[25],
+                    enumerable: true
+                },
+                enrollment_limit: {
+                    value: data[26],
+                    enumerable: true
+                },
+                wait_list: {
+                    value: data[27],
+                    enumerable: true
+                },
+                valid: {
+                    value: valid,
+                    enumerable: true
+                },
+                meetings: {
+                    value: meetings,
+                    enumerable: true
+                },
+                instructors: {
+                    value: Meeting.getInstructors(meetings),
+                    enumerable: true
+                }
+            } as { [x in keyof NonFunctionPropertyNames<Section>]: TypedPropertyDescriptor<Section[x]> })
+        );
     }
 
     console.timeEnd('reorganizing data');

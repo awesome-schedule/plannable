@@ -148,7 +148,7 @@ class ScheduleGenerator {
                     // filter out sections with unwanted status
                     if (this.options.status.includes(section.status)) continue;
 
-                    secIndices.push(section.sid);
+                    secIndices.push(section.id);
                 }
 
                 if (secIndices.length) {

@@ -476,7 +476,7 @@ export default class Schedule {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
-                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.sid)))
+                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
                         );
                         for (const crs of combined) this.place(crs);
                     } else {
@@ -593,9 +593,9 @@ export default class Schedule {
                     if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
                         const date = temp.getMonth() + 1 + '/' + temp.getDate();
                         if (diffSecs[date]) {
-                            diffSecs[date].push(sec.sid);
+                            diffSecs[date].push(sec.id);
                         } else {
-                            diffSecs[date] = [sec.sid];
+                            diffSecs[date] = [sec.id];
                         }
                     }
                     if (end < sep) {

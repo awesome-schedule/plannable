@@ -72,37 +72,35 @@ export default class Course implements CourseFields, Hashable {
     public readonly title: string;
     public readonly description: string;
 
+    public readonly key: string;
     /**
      * Array of section ids contained in this object, sorted in ascending order.
      * Can be all sections of a subset or the sections
      */
-    public readonly sids: number[];
     public readonly sections: Section[];
+    public readonly isSubset: boolean;
 
     /**
      * @param raw the raw representation of this course
      * @param key the key of this course, e.g. cs11105
      * equal to (department + number + `Meta.TYPES_PARSE`\[type\]). see [[Meta.TYPES_PARSE]]
-     * @param sids A list of section indices
+     * @param ids A list of section indices
      */
-    constructor(
-        public readonly raw: RawCourse,
-        public readonly key: string,
-        sids: readonly number[] = []
-    ) {
-        if (sids.length) {
-            this.sids = sids.slice().sort((a, b) => a - b);
-        } else {
-            this.sids = Array.from({ length: raw[6].length }, (_, i) => i);
-        }
-
-        this.department = raw[0];
-        this.number = raw[1];
-        this.type = TYPES[raw[2]];
-        this.units = raw[3];
-        this.title = raw[4];
-        this.description = raw[5];
-        this.sections = this.sids.map(sid => new Section(this, sid));
+    constructor(course: Course, public readonly ids: number[]) {
+        this.key = course.key;
+        this.department = course.department;
+        this.number = course.number;
+        this.type = course.type;
+        this.units = course.units;
+        this.title = course.title;
+        this.description = course.description;
+        this.sections = ids.reduce((acc: Section[], id) => {
+            const sec = course.sections.find(s => s.id === id);
+            if (!sec) throw new Error('Non-existent id ' + id);
+            acc.push(sec);
+            return acc;
+        }, []);
+        this.isSubset = true;
     }
 
     get displayName() {
@@ -119,8 +117,8 @@ export default class Course implements CourseFields, Hashable {
     /**
      * Get the Course containing only the given sections
      */
-    public getCourse(sids: number[]) {
-        return new Course(this.raw, this.key, sids);
+    public getCourse(ids: number[]) {
+        return new Course(this, ids);
     }
 
     /**
@@ -160,16 +158,9 @@ export default class Course implements CourseFields, Hashable {
         return hashCode(this.key);
     }
 
-    /**
-     * get copy of this course, with no match contained
-     */
-    public copy() {
-        return new Course(this.raw, this.key, this.sids);
-    }
-
     public equals(object: object) {
         if (object instanceof Course) {
-            return this.key === object.key && this.sids.toString() === object.sids.toString();
+            return this.key === object.key && this.ids.toString() === object.ids.toString();
         }
         return false;
     }
@@ -187,9 +178,9 @@ export default class Course implements CourseFields, Hashable {
     public has(sections: Set<number>, key: string): boolean;
     public has(element: Section | Set<number>, key?: string): boolean {
         if (element instanceof Set) {
-            return this.key === key && this.sids.some(sid => element.has(sid));
+            return this.key === key && this.ids.some(sid => element.has(sid));
         } else {
-            return this.key === element.key && this.sids.includes(element.sid);
+            return this.key === element.key && this.ids.includes(element.id);
         }
     }
 }

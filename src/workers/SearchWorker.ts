@@ -188,18 +188,18 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                     };
 
                     if (sectionMap[key]) {
-                        const secMatches = sectionMap[key].get(item.sid);
+                        const secMatches = sectionMap[key].get(item.id);
                         if (secMatches) {
                             secMatches.push(tempObj);
                         } else {
-                            sectionMap[key].set(item.sid, [tempObj]);
+                            sectionMap[key].set(item.id, [tempObj]);
                         }
                     } else {
                         sectionMap[key] = new Map();
-                        sectionMap[key].set(item.sid, [tempObj]);
+                        sectionMap[key].set(item.id, [tempObj]);
                     }
 
-                    const secKey = `${item.key} ${item.sid}`;
+                    const secKey = `${item.key} ${item.id}`;
 
                     // if encounter a new section of a course, increment the number of section recorded
                     if (!sectionRecorder.has(secKey) && !last) {
@@ -256,7 +256,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                 }
-                finalResults.push([item.raw, key, item.sids]);
+                finalResults.push([item.raw, key, item.ids]);
                 allMatches.push([crsMatches, secMatches]);
 
                 // only section match exists

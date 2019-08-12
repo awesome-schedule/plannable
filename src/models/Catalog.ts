@@ -47,7 +47,7 @@ interface SearchWorker extends Worker {
  *
  * 0: the array of matches for the fields of this Course
  *
- * 1: the Map that maps [[Section.sid]] to the array of matches for the fields of that section
+ * 1: the Map that maps [[Section.id]] to the array of matches for the fields of that section
  */
 export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
 
@@ -119,7 +119,7 @@ export default class Catalog {
     public toJSON(): CatalogJSON {
         return {
             semester: this.semester,
-            raw_data: this.raw_data,
+            raw_data: {},
             modified: this.modified
         };
     }
@@ -346,7 +346,7 @@ export default class Catalog {
         const prev = results.findIndex(x => x.key === course.key);
         if (prev !== -1) {
             results[prev] = course.getCourse([
-                ...new Set(course.sids.concat([...matches.keys()])) // merge sids and eliminate duplicates
+                ...new Set(course.ids.concat([...matches.keys()])) // merge sids and eliminate duplicates
             ]);
             // merge the section matches with the previously recorded section matches
             const combSecMatches = allMatches[prev][1];

@@ -7,7 +7,7 @@
 /**
  *
  */
-import CatalogDB, { SectionTableItem } from '@/database/CatalogDB';
+import CatalogDB, { CourseTableItem, SectionTableItem } from '@/database/CatalogDB';
 import Section, { SectionOwnPropertyNames, ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
@@ -41,14 +41,13 @@ export async function loadSemesterData(
     new: CancelablePromise<Catalog>;
     old?: Catalog;
 }> {
-    const time = localStorage.getItem('idb_time');
-    const semesterId = localStorage.getItem('idb_semester');
-    const db = new CatalogDB();
-    if (time && semesterId) {
-        const old = new Catalog(semester, await retrieveFromDB(db), new Date(+time).toJSON());
-        if (force || new Date().getTime() - +time > semesterDataExpirationTime) {
+    const db = new CatalogDB(semester);
+    if (!(await db.empty())) {
+        const time = await db.timestamp();
+        const old = new Catalog(semester, await retrieveFromDB(db), new Date(time).toJSON());
+        if (force || Date.now() - time > semesterDataExpirationTime) {
             return {
-                new: cancelablePromise(requestSemesterData(semester, new CatalogDB())),
+                new: cancelablePromise(requestSemesterData(semester, db)),
                 old
             };
         } else {
@@ -58,12 +57,12 @@ export async function loadSemesterData(
         }
     } else {
         return {
-            new: cancelablePromise(requestSemesterData(semester, new CatalogDB()))
+            new: cancelablePromise(requestSemesterData(semester, db))
         };
     }
 }
 
-export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB) {
+export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB, writeToDB = true) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
@@ -81,27 +80,30 @@ export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB)
               `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
           ));
     console.timeEnd(`request semester ${semester.name} data`);
-    const data: string[][] = parse(res.data, {
-        skipEmptyLines: true,
-        header: false
-    }).data;
-    const rawCatalog = parseSemesterData(data, db, semester);
-    return new Catalog(semester, rawCatalog, new Date().toJSON());
+    return new Catalog(
+        semester,
+        parseSemesterData(
+            parse(res.data, {
+                skipEmptyLines: true,
+                header: false
+            }).data,
+            db
+        ),
+        new Date().toJSON()
+    );
 }
 
-export function parseSemesterData(
-    raw_data: string[][],
-    db: CatalogDB,
-    currentSemester: SemesterJSON
-) {
-    console.time('parse semester data and store');
+export function parseSemesterData(rawData: string[][], db: CatalogDB) {
+    console.time('parse semester data');
+
     const CLASS_TYPES = TYPES_PARSE;
     const rawCatalog: { [x: string]: Course } = {};
 
-    const len = raw_data.length;
-    const sectionArr: SectionTableItem[] = [];
+    const len = rawData.length;
+    const allSections: SectionTableItem[] = [];
+    const allCourses: CourseTableItem[] = [];
     for (let j = 1; j < len; j++) {
-        const data = raw_data[j];
+        const data = rawData[j];
 
         // todo: robust data validation
         const type = CLASS_TYPES[data[4] as CourseType];
@@ -164,13 +166,13 @@ export function parseSemesterData(
                 meetings.splice(k, 0, meeting);
             }
         }
-        date = date || '';
         // unknown date
         if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
+        if (typeof date !== 'string') date = '';
 
-        const course =
-            rawCatalog[key] ||
-            (rawCatalog[key] = Object.create(Course.prototype, {
+        let course = rawCatalog[key];
+        if (!course) {
+            course = rawCatalog[key] = Object.create(Course.prototype, {
                 department: {
                     value: data[1],
                     enumerable: true
@@ -207,7 +209,11 @@ export function parseSemesterData(
                     value: [] as number[],
                     enumerable: true
                 }
-            } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> }));
+            } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> });
+
+            const { sections, ...o } = course;
+            allCourses.push(o);
+        }
 
         const section: Section = Object.create(Section.prototype, {
             course: {
@@ -270,28 +276,20 @@ export function parseSemesterData(
 
         course.ids.push(+data[0]);
         course.sections.push(section);
+
         const { course: _, ...others } = section;
-        sectionArr.push(others);
+        allSections.push(others);
     }
+    console.timeEnd('parse semester data');
     Promise.all([db.courses.clear(), db.sections.clear()])
         .then(() => {
             console.time('save to db');
-            Promise.all([
-                db.courses.bulkAdd(
-                    Object.values(rawCatalog).map(course => {
-                        const { sections, ...others } = course;
-                        return others;
-                    })
-                ),
-                db.sections.bulkAdd(sectionArr)
-            ]);
+            return Promise.all([db.courses.bulkAdd(allCourses), db.sections.bulkAdd(allSections)]);
         })
         .then(() => {
-            localStorage.setItem('idb_time', new Date().getTime().toString());
-            localStorage.setItem('idb_semester', currentSemester.id);
+            db.saveTimeStamp();
             console.timeEnd('save to db');
         });
-    console.timeEnd('parse semester data and store');
     return rawCatalog;
 }
 
@@ -299,14 +297,12 @@ export async function retrieveFromDB(db: CatalogDB) {
     const rawCatalog: { [x: string]: Course } = {};
 
     console.time('get courses from db');
-    const secMap: Map<number, SectionTableItem> = new Map();
-    const [courses] = await Promise.all([
+    const [courses, secMap] = await Promise.all([
         db.courses.toArray(),
         db.sections.toArray(arr => {
-            for (const item of arr) {
-                secMap.set(item.id, item);
-            }
-            return arr;
+            const map = new Map<number, SectionTableItem>();
+            for (const item of arr) map.set(item.id, item);
+            return map;
         })
     ]);
     console.timeEnd('get courses from db');

@@ -22,8 +22,8 @@ export default class DisplayView extends Store {
     async clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             window.localStorage.clear();
-            const db = new CatalogDB();
-            await Promise.all([db.courses.clear(), db.sections.clear()]);
+            const { currentSemester } = this.semester;
+            if (currentSemester) new CatalogDB(currentSemester).delete();
             window.location.reload(true);
         }
     }

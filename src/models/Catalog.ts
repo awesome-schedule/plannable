@@ -111,6 +111,10 @@ export default class Catalog {
         return this.courseDict[key].getSectionById(id);
     }
 
+    public getSection(key: string, idx: number) {
+        return this.courseDict[key].sections[idx];
+    }
+
     /**
      * convert `cs11105` style key to `CS 1110 Lecture`
      *

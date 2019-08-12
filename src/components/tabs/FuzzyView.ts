@@ -74,7 +74,6 @@ export default class FuzzyView extends Store {
         console.time('query');
         try {
             [this.inputCourses, this.inputMatches] = await window.catalog.fuzzySearch(query);
-            console.log(this.inputMatches);
         } catch (err) {
             this.noti.error(err.message);
             console.error(err);

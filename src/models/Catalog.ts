@@ -132,7 +132,7 @@ export default class Catalog {
     public getCourse(key: string, sections?: Set<number> | -1) {
         const course = this.courseDict[key];
         if (!sections || sections === -1) return course;
-        else return course.getCourse([...sections.values()]);
+        else return course.getCourse([...sections]);
     }
 
     /**
@@ -297,13 +297,11 @@ export default class Catalog {
     private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatches = new Map<number, [SectionMatch]>();
-        const sections = course.sections;
-        const len = sections.length;
-        for (let i = 0; i < len; i++) {
-            const topic = sections[i].topic;
+        for (const sec of course.sections) {
+            const topic = sec.topic;
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
-                topicMatches.set(i, [
+                topicMatches.set(sec.id, [
                     {
                         match: 'topic',
                         start: topicIdx,
@@ -318,13 +316,11 @@ export default class Catalog {
     private searchProf(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatches = new Map<number, [SectionMatch]>();
-        const sections = course.sections;
-        const len = sections.length;
-        for (let i = 0; i < len; i++) {
-            const profs = sections[i].instructors.join(', ').toLowerCase();
+        for (const sec of course.sections) {
+            const profs = sec.instructors.join(', ').toLowerCase();
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
-                profMatches.set(i, [
+                profMatches.set(sec.id, [
                     {
                         match: 'instructors',
                         start: profIdx,
@@ -349,10 +345,10 @@ export default class Catalog {
             ]);
             // merge the section matches with the previously recorded section matches
             const combSecMatches = allMatches[prev][1];
-            for (const [sid, mats] of matches) {
-                const prevMats = combSecMatches.get(sid);
+            for (const [id, mats] of matches) {
+                const prevMats = combSecMatches.get(id);
                 if (prevMats) prevMats.push(...mats);
-                else combSecMatches.set(sid, mats);
+                else combSecMatches.set(id, mats);
             }
         } else {
             results.push(course.getCourse([...matches.keys()]));

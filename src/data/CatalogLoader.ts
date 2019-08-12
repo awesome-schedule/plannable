@@ -190,8 +190,14 @@ export function parseSemesterData(csv_string: string) {
                 sections: {
                     value: [] as Section[],
                     enumerable: true
+                },
+                ids: {
+                    value: [] as number[],
+                    enumerable: true
                 }
             } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> }));
+
+        course.ids.push(+data[0]);
         course.sections.push(
             Object.create(Section.prototype, {
                 course: {

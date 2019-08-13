@@ -52,6 +52,7 @@
         "@vue/test-utils": "1.0.0-beta.29",
         "babel-core": "7.0.0-bridge.0",
         "babel-eslint": "^10.0.1",
+        "babel-plugin-transform-remove-console": "^6.9.4",
         "cheerio": "^1.0.0-rc.3",
         "css-loader": "^3.2.0",
         "eslint": "^5.16.0",

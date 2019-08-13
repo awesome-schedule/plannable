@@ -3,13 +3,11 @@ import { CourseFields } from '@/models/Course';
 import Dexie from 'dexie';
 import { SectionFields } from '../models/Section';
 
-export interface CourseTableItem
-    extends Pick<CourseFields, Exclude<keyof CourseFields, 'displayName'>> {
+export interface CourseTableItem extends Omit<CourseFields, 'displayName'> {
     ids: number[];
 }
-
-export interface SectionTableItem  // no back ref in db
-    extends Pick<SectionFields, Exclude<keyof SectionFields, 'course'>> {}
+// no back ref in db
+export interface SectionTableItem extends Omit<SectionFields, 'course'> {}
 
 export default class CatalogDB extends Dexie {
     courses: Dexie.Table<CourseTableItem, string>;

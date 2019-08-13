@@ -15,45 +15,66 @@
                     <h6 v-html="highlightMatch(course.title, 'title', match[0])"></h6>
                     <div style="width: 100%; overflow-x: auto;">
                         <table id="sec-table" class="m-color">
-                            <tr v-for="section in course.sections" :key="section.section">
-                                <td>Section&nbsp;{{ section.section }}</td>
-                                <td>ID:&nbsp;{{ section.id }}</td>
-                                <td
-                                    v-html="
-                                        highlightMatch(
-                                            section.topic,
-                                            'topic',
-                                            match[1].get(section.id)
-                                        )
-                                    "
-                                ></td>
-                                <td
-                                    v-html="
-                                        highlightMatch(
-                                            section.instructors.join(', '),
-                                            'instructors',
-                                            match[1].get(section.id)
-                                        )
-                                    "
-                                ></td>
-                                <td>
-                                    {{ section.dates }}
-                                </td>
-                                <td>
-                                    <template v-for="(meeting, idx) in section.meetings"
-                                        >{{ meeting.days }} <br :key="idx" />
-                                    </template>
-                                </td>
-                                <td>
-                                    <template v-for="(meeting, idx) in section.meetings"
-                                        >{{ meeting.room }} <br :key="idx" />
-                                    </template>
-                                </td>
-                                <td>{{ section.status }}</td>
-                                <td>
-                                    {{ section.enrollment + '/' + section.enrollment_limit }}
-                                </td>
-                            </tr>
+                            <!-- <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Section</th>
+                                    <th>Topic</th>
+                                    <th>Instructors</th>
+                                    <th>Dates</th>
+                                    <th>Days</th>
+                                    <th>Rooms</th>
+                                    <th>Status</th>
+                                    <th>Enrollment/Limit/Wait list</th>
+                                </tr>
+                            </thead> -->
+                            <tbody>
+                                <tr v-for="section in course.sections" :key="section.section">
+                                    <td>{{ section.id }}</td>
+                                    <td>{{ section.section }}</td>
+                                    <td
+                                        v-html="
+                                            highlightMatch(
+                                                section.topic,
+                                                'topic',
+                                                match[1].get(section.id)
+                                            )
+                                        "
+                                    ></td>
+                                    <td
+                                        v-html="
+                                            highlightMatch(
+                                                section.instructors.join(', '),
+                                                'instructors',
+                                                match[1].get(section.id)
+                                            )
+                                        "
+                                    ></td>
+                                    <td>
+                                        {{ section.dates }}
+                                    </td>
+                                    <td>
+                                        <template v-for="(meeting, idx) in section.meetings"
+                                            >{{ meeting.days }} <br :key="idx" />
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <template v-for="(meeting, idx) in section.meetings"
+                                            >{{ meeting.room }} <br :key="idx" />
+                                        </template>
+                                    </td>
+                                    <td>{{ section.status }}</td>
+                                    <td>
+                                        {{
+                                            section.enrollment +
+                                                '/' +
+                                                section.enrollment_limit +
+                                                '/' +
+                                                section.wait_list
+                                        }}
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
 

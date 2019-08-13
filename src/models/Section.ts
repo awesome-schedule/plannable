@@ -27,6 +27,9 @@ export type ValidFlag = number;
 type SectionMatchFields = 'topic' | 'instructors';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
 
+/**
+ * fields of the section that must be created via `Object.create`
+ */
 export interface SectionFields {
     /**
      * reference to the course that this section belongs to
@@ -35,41 +38,46 @@ export interface SectionFields {
     /**
      * Key of the course that this section belongs to; same for all sections.
      */
-     readonly key: string;
+    readonly key: string;
     /**
-     * the id of the section recorded in sis
+     * the id of the section, must be globally unique
      */
-     readonly id: number;
+    readonly id: number;
     /**
      * the section number recorded in sis
      */
-     readonly section: string;
+    readonly section: string;
     /**
      * the topic of this section, may be empty
      */
-     readonly topic: string;
+    readonly topic: string;
     /**
      * one of "Open", "Closed" and "Wait List"
      */
-     readonly status: CourseStatus;
-     readonly enrollment: number;
-     readonly enrollment_limit: number;
-     readonly wait_list: number;
-     readonly instructors: readonly string[];
-     readonly dates: string;
-     readonly meetings: readonly Meeting[];
+    readonly status: CourseStatus;
+    readonly enrollment: number;
+    readonly enrollment_limit: number;
+    readonly wait_list: number;
+    /**
+     * array of instructor names (computed from meeting)
+     */
+    readonly instructors: readonly string[];
+    readonly dates: string;
+    readonly meetings: readonly Meeting[];
 
-     readonly valid: ValidFlag;
-     readonly dateArray: MeetingDate;
+    readonly valid: ValidFlag;
+    readonly dateArray: MeetingDate;
 }
 
+// use class-interface merging
 // tslint:disable-next-line: no-empty-interface
 export default interface Section extends SectionFields {}
 /**
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
  *
- * All section instances are immutable
+ * All section instances are immutable. Additionally, they will never be duplicated.
+ * They will only created using `Object.create`
  */
 export default class Section implements CourseFields, Hashable {
     public static readonly Validity = [

@@ -13,20 +13,12 @@
 import { RawAlgoCourse } from '@/algorithm';
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseFields, CourseMatch } from '../models/Course';
+import _Course, {  CourseMatch } from '../models/Course';
 import _Meeting from '../models/Meeting';
-import _Section, { SectionMatch } from '../models/Section';
+import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-// functions cannot be cloned via structured cloning
-type Meeting = NonFunctionProperties<_Meeting>;
-interface Section extends Pick<
-    _Section,
-    // course fields are defined as getters which cannot be cloned
-    Exclude<NonFunctionPropertyNames<_Section>, keyof CourseFields | undefined | 'meetings'>
-> {
-    readonly meetings: readonly Meeting[];
-}
+type Section = SectionFields;
 interface Course extends Pick<_Course, Exclude<NonFunctionPropertyNames<_Course>, 'sections'>> {
     readonly sections: readonly Section[];
 }

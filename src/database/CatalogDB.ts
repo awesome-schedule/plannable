@@ -14,7 +14,7 @@ export interface SectionTableItem  // no back ref in db
 export default class CatalogDB extends Dexie {
     courses: Dexie.Table<CourseTableItem, string>;
     sections: Dexie.Table<SectionTableItem, number>;
-    meta: Dexie.Table<{ time: number; id: 0 }, number>;
+    meta: Dexie.Table<{ time: number; id: 0 }, 0>;
 
     constructor(semester: SemesterJSON) {
         super(`db_${semester.id}`);

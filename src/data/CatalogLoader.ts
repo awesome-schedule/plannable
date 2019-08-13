@@ -62,7 +62,7 @@ export async function loadSemesterData(
     }
 }
 
-export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB, writeToDB = true) {
+export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?

@@ -17,7 +17,10 @@
                         {{ meeting.days }} @ {{ meeting.room }}
                     </div>
                     <div class="m-color">
-                        {{ section.status }} {{ section.enrollment }}/{{ section.enrollment_limit }}
+                        {{ section.status }} {{ section.enrollment }}/{{
+                            section.enrollment_limit
+                        }}
+                        | Wait List: {{ section.wait_list }}
                     </div>
                     <br />
                     <div>{{ section.description }}</div>

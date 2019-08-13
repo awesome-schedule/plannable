@@ -2,9 +2,9 @@ import { CourseFields } from './models/Course';
 
 export const backend = {
     name: 'Hoosmyprofessor',
-    up: 'http://match.msnatuva.org/courses/api/save_plannable_profile/',
-    down: 'http://match.msnatuva.org/courses/api/get_plannable_profile/',
-    edit: 'http://match.msnatuva.org/courses/api/edit_plannable_profile/'
+    up: 'https://match.msnatuva.org/courses/api/save_plannable_profile/',
+    down: 'https://match.msnatuva.org/courses/api/get_plannable_profile/',
+    edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/'
 } as const;
 
 export const external = {

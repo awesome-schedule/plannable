@@ -185,10 +185,10 @@ export default class App extends Store {
         if (courseArray) {
             try {
                 const courses = JSON.parse(decodeURIComponent(courseArray));
-                if (courses && courses instanceof Array && courses.length) {
+                if (courses && courses instanceof Array) {
                     const schedule = this.schedule.getDefault();
                     courses.forEach(key => (schedule.currentSchedule.All[key] = -1));
-                    this.profile.addProfile(JSON.stringify({ schedule }), 'Li Hao');
+                    this.profile.addProfile(JSON.stringify({ schedule }), backend.name);
                     await this.loadProfile(undefined, !checkVersion());
 
                     this.noti.success('Courses loaded from ' + backend.name, 3, true);

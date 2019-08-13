@@ -98,7 +98,7 @@ export default class GridSchedule extends Store {
         return `${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 /
             numCol}% ${numCol === 7 ? 100 / numCol + '%' : ''} ${
             numCol === 7 ? 100 / numCol + '%' : ''
-        }`;
+            }`;
     }
 
     /**

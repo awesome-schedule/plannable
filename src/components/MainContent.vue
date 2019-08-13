@@ -24,44 +24,45 @@
 
         <slot></slot>
 
-        <v-footer id="app-footer" dark height="auto" class="w-100">
-            <v-card class="flex w-100" flat tile>
-                <v-card-title class="teal py-3">
-                    <strong class="subheading mr-auto"
-                        >Get connected with us and let us hear your voice!
-                    </strong>
+        <div id="footer" class="container">
+            <div class="row">
+                <div class="col" style="text-align: left">Get Connected with us:</div>
+                <div class="col" style="text-align: right">
                     <a
-                        style="color:inherit;text-decoration: none;"
+                        class="mx-3"
+                        style="color:inherit;text-decoration: none;font-size:24px;margin-bottom:3px"
                         target="_blank"
-                        href="https://github.com/awesome-schedule/plannable"
-                    >
-                        <v-btn
-                            class="mx-3"
-                            title="Checkout our GitHub site to watch/star/fork!"
-                            dark
-                            icon
-                        >
-                            <v-icon size="24px">fab fa-github</v-icon>
-                        </v-btn>
-                    </a>
-
+                        title="Checkout our GitHub site to watch/star/fork"
+                        href="https://github.com/awesome-schedule/plannable/"
+                        ><i class="fab fa-github"></i
+                    ></a>
                     <a
-                        style="color:inherit;text-decoration: none;"
+                        class="mx-5"
+                        style="color:inherit;text-decoration: none;font-size:24px;margin-bottom:3px"
                         target="_blank"
+                        title="File an issue on GitHub"
                         href="https://github.com/awesome-schedule/plannable/issues"
-                    >
-                        <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
-                            <v-icon size="24px">fas fa-exclamation-circle</v-icon>
-                        </v-btn>
-                    </a>
-                </v-card-title>
-
-                <v-card-actions class="grey darken-3 justify-content-center">
-                    &copy;2019 —&nbsp;<strong>Plannable</strong>
-                </v-card-actions>
-            </v-card>
-        </v-footer>
+                        ><i class="fas fa-exclamation-circle"></i
+                    ></a>
+                </div>
+            </div>
+        </div>
+        <div id="cr">&copy;2019 —&nbsp;<strong>Plannable</strong></div>
     </div>
 </template>
-
+<style scoped>
+#footer {
+    background-color: #019872;
+    color: white;
+    clear: both;
+    padding: 20px;
+}
+#cr {
+    background-color: grey;
+    color: white;
+    clear: both;
+    padding: 7px;
+    text-align: center;
+}
+</style>
 <script lang="ts" src="./MainContent.ts"></script>

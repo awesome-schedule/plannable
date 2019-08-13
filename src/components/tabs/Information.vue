@@ -359,72 +359,7 @@
                     popular courses or popular professors' sections.
                 </p>
 
-                <v-stepper non-linear class="mb-5">
-                    <v-stepper-header>
-                        <v-stepper-step color="blue-grey" editable step="1">
-                            Add Classes
-                        </v-stepper-step>
-
-                        <v-divider></v-divider>
-
-                        <v-stepper-step color="blue-grey" editable step="2">
-                            Generate Schedules
-                        </v-stepper-step>
-
-                        <v-divider></v-divider>
-
-                        <v-stepper-step color="blue-grey" editable step="3">
-                            Multiple Schedules
-                        </v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content step="1">
-                            <v-card class="mb-5">
-                                <v-img :src="imgPath('select_class.gif')">
-                                    <template v-slot:placeholder>
-                                        <v-layout fill-height align-center justify-center ma-0>
-                                            <v-progress-circular
-                                                indeterminate
-                                                color="purple"
-                                            ></v-progress-circular>
-                                        </v-layout>
-                                    </template>
-                                </v-img>
-                            </v-card>
-                        </v-stepper-content>
-
-                        <v-stepper-content step="2">
-                            <v-card class="mb-5">
-                                <v-img :src="imgPath('generate_class.gif')">
-                                    <template v-slot:placeholder>
-                                        <v-layout fill-height align-center justify-center ma-0>
-                                            <v-progress-circular
-                                                indeterminate
-                                                color="purple"
-                                            ></v-progress-circular>
-                                        </v-layout>
-                                    </template>
-                                </v-img>
-                            </v-card>
-                        </v-stepper-content>
-
-                        <v-stepper-content step="3">
-                            <v-card class="mb-5">
-                                <v-img :src="imgPath('multiple_schedule.gif')">
-                                    <template v-slot:placeholder>
-                                        <v-layout fill-height align-center justify-center ma-0>
-                                            <v-progress-circular
-                                                indeterminate
-                                                color="purple"
-                                            ></v-progress-circular>
-                                        </v-layout>
-                                    </template>
-                                </v-img>
-                            </v-card>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="scheduleSteps" :helper="true" :always-title="true"></stepper>
 
                 <h5 id="item-2-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -792,47 +727,7 @@
                     The instruction on how to export your schedule to a iCalendar file and import it
                     to your Google calendar is shown below.
                 </p>
-                <v-stepper v-model="e2" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in icalSteps.length"
-                            :key="idx"
-                            :complete="e2 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e2 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in icalSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="2.37"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e2 === icalSteps.length ? (e2 = 1) : e2++"
-                                >{{ e2 === icalSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e2 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e2--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="icalSteps" :helper="true" :always-title="false"></stepper>
 
                 <h5 id="item-7-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -845,94 +740,15 @@
                     information in your schedule, so it could only be used on our website. To
                     re-import a JSON file, simply click the file chooser, find the file and confirm.
                 </p>
-                <v-stepper v-model="e3" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in jsonSteps.length"
-                            :key="idx"
-                            :complete="e3 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e3 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
+                <stepper :info="jsonSteps" :helper="true" :always-title="true"> </stepper>
 
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in jsonSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e3 === jsonSteps.length ? (e3 = 1) : e3++"
-                                >{{ e3 === jsonSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e3 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e3--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
                 <p>
                     Alternatively, you can export your profile to an URL. We will encode and
                     compress all information contained in your current profile in the resulting URL,
                     which will be quite long. Exporting your profile to an URL makes it more
                     convenient to share your profile with your friends.
                 </p>
-                <v-stepper v-model="e4" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in urlSteps.length"
-                            :key="idx"
-                            :complete="e4 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e4 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in urlSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e4 === urlSteps.length ? (e4 = 1) : e4++"
-                                >{{ e4 === urlSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e4 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e4--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="urlSteps" :helper="true" :always-title="true"></stepper>
                 <h5 id="item-7-3" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i>
                     Multiple Profiles
@@ -974,47 +790,7 @@
                     features in the previous sections. You can share shedules with other people
                     using <strong> export/import </strong>, then compare the schedules here :)
                 </p>
-                <v-stepper v-model="e5" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in compareSteps.length"
-                            :key="idx"
-                            :complete="e5 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e5 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in compareSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e5 === compareSteps.length ? (e5 = 1) : e5++"
-                                >{{ e5 === compareSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e5 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e5--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="compareSteps" :helper="true" :always-title="true"></stepper>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

@@ -9,6 +9,8 @@
 import 'bootstrap';
 import $ from 'jquery';
 import { VueMathjax } from 'vue-mathjax';
+import Stepper from '../Stepper.vue';
+import { StepperInfo } from '../Stepper';
 import { Component, Vue } from 'vue-property-decorator';
 
 import {
@@ -46,7 +48,8 @@ import {
         VStepperHeader,
         VStepperStep,
         VStepperContent,
-        VStepperItems
+        VStepperItems,
+        Stepper
     }
 })
 export default class Information extends Vue {
@@ -71,6 +74,21 @@ export default class Information extends Vue {
 `;
 
     selected = 1;
+
+    readonly scheduleSteps = [
+        {
+            title: 'Add Classes',
+            src: this.imgPath('select_class.gif')
+        },
+        {
+            title: 'Generate Schedules',
+            src: this.imgPath('generate_class.gif')
+        },
+        {
+            title: 'Multiple Schedules',
+            src: this.imgPath('multiple_schedule.gif')
+        }
+    ];
 
     readonly compareSteps = [
         {
@@ -110,7 +128,7 @@ export default class Information extends Vue {
         }
     ];
 
-    readonly jsonSteps = [
+    readonly jsonSteps: StepperInfo = [
         {
             title: 'Download Json file',
             src: this.imgPath('exportJson1.png')

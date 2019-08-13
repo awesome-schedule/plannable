@@ -89,7 +89,7 @@ describe('Utility Tests', () => {
         try {
             // don't know how to test this one
             Utils.savePlain('sav', 'asv');
-            // tslint:disable-next-line: no-empty
+            // eslint-disable-next-line
         } catch (err) {}
 
         expect(config).toBeInstanceOf(Object);

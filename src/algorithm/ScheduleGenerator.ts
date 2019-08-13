@@ -87,8 +87,8 @@ class ScheduleGenerator {
     constructor(
         public readonly catalog: Readonly<Catalog>,
         public readonly buildingList: readonly string[],
-        public readonly options: GeneratorOptions,
-    ) { }
+        public readonly options: GeneratorOptions
+    ) {}
 
     /**
      * The entrance of the schedule generator
@@ -99,8 +99,11 @@ class ScheduleGenerator {
      *
      * @see [[ScheduleEvaluator]]
      */
-    public getSchedules(schedule: Schedule, sort = true, refSchedule?: ScheduleAll<Set<number>>)
-        : NotiMsg<ScheduleEvaluator> {
+    public getSchedules(
+        schedule: Schedule,
+        sort = true,
+        refSchedule: ScheduleAll<Set<number>> = {}
+    ): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
 
         // convert events to TimeArrays so that we can easily check for time conflict
@@ -162,16 +165,21 @@ class ScheduleGenerator {
             if (classes.length === 0) {
                 return {
                     level: 'error',
-                    msg: `No sections of ${courseRec.department} ${courseRec.number} ${
-                        courseRec.type
-                        } satisfy your filters and do not conflict with your events`
+                    msg: `No sections of ${courseRec.department} ${courseRec.number} ${courseRec.type} satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);
             timeArrayList.push(timeArrays);
             dateList.push(dates);
         }
-        const evaluator = this.createSchedule(classList, timeArrayList, dateList, schedule.events, refSchedule);
+        console.table(classList);
+        const evaluator = this.createSchedule(
+            classList,
+            timeArrayList,
+            dateList,
+            schedule.events,
+            refSchedule
+        );
         const size = evaluator.size;
         if (size > 0) {
             if (sort) evaluator.sort();
@@ -302,9 +310,11 @@ class ScheduleGenerator {
                         const i1 = m * numCourses + i, // courses are in the columns
                             i2 = n * numCourses + j;
                         // conflict is symmetric
-                        conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] =
-                            +((checkTimeConflict(arrs1[m], arrs2[n], 3, 3) &&
-                                calcOverlap(dates1[m][0], dates1[m][1], dates2[n][0], dates2[n][1]) !== -1));
+                        conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] = +(
+                            checkTimeConflict(arrs1[m], arrs2[n], 3, 3) &&
+                            calcOverlap(dates1[m][0], dates1[m][1], dates2[n][0], dates2[n][1]) !==
+                                -1
+                        );
                     }
                 }
             }
@@ -319,7 +329,9 @@ class ScheduleGenerator {
                 byteOffset += 8;
                 for (let i = 0; i < numCourses; i++)
                     // also assign currentChoices to allChoices
-                    byteOffset += timeArrLens[(allChoices[start + i] = currentChoices[i]) * numCourses + i] - 8;
+                    byteOffset +=
+                        timeArrLens[(allChoices[start + i] = currentChoices[i]) * numCourses + i] -
+                        8;
 
                 if (++count >= maxNumSchedules) break outer;
                 choiceNum = pathMemory[--classNum];
@@ -340,9 +352,13 @@ class ScheduleGenerator {
 
             // check conflict between the newly chosen section and the sections already in the schedule
             for (let i = 0; i < classNum; i++) {
-                if (conflictCache[
-                    (currentChoices[i] * numCourses + i) * sideLen + choiceNum * numCourses + classNum
-                ]) {
+                if (
+                    conflictCache[
+                        (currentChoices[i] * numCourses + i) * sideLen +
+                            choiceNum * numCourses +
+                            classNum
+                    ]
+                ) {
                     ++choiceNum;
                     continue outer;
                 }
@@ -374,7 +390,13 @@ class ScheduleGenerator {
             // record the current offset
             offsets[i] = byteOffset;
             // sort the time blocks in order
-            byteOffset += ScheduleEvaluator.sortBlocks(blocks, allChoices, timeArrayList, byteOffset, i);
+            byteOffset += ScheduleEvaluator.sortBlocks(
+                blocks,
+                allChoices,
+                timeArrayList,
+                byteOffset,
+                i
+            );
         }
         console.timeEnd('add to eval');
 

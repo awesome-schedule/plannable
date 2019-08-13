@@ -365,7 +365,6 @@ export default class Store extends Vue {
             if (profiles.includes(name)) {
                 if (
                     !confirm(
-                        // tslint:disable-next-line: max-line-length
                         `You already have a profile named ${name}. However, it does not correspond to the ${name} semester. Click Ok to overwrite, click Cancel to keep both.`
                     )
                 ) {
@@ -394,7 +393,6 @@ export default class Store extends Vue {
  * @param jsonString
  */
 export function compressJSON(jsonString: string) {
-    // tslint:disable-next-line: no-shadowed-variable
     const { name, modified, currentSemester, display, filter, schedule, palette } = JSON.parse(
         jsonString
     ) as SemesterStorage;

@@ -2,7 +2,6 @@
  * @author Hanzhi Zhou, Kaiying Shan
  * @module models
  */
-// tslint:disable: member-ordering
 
 /**
  *
@@ -77,10 +76,13 @@ export default class Schedule {
             shortAll[key] =
                 sections === -1
                     ? sections
-                    : (sections as SectionJSON[]).reduce((acc, { id, section }) => {
-                        acc.push(id, section);
-                        return acc;
-                    }, [] as SectionJSONShort);
+                    : (sections as SectionJSON[]).reduce(
+                          (acc, { id, section }) => {
+                              acc.push(id, section);
+                              return acc;
+                          },
+                          [] as SectionJSONShort
+                      );
         }
         return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
@@ -92,8 +94,8 @@ export default class Schedule {
             const entry = shortAll[key];
             const decompEntry: SectionJSON[] = [];
             if (entry instanceof Array) {
-                for (let i = 0; i < entry.length; i+=2) {
-                    decompEntry.push({ id: entry[i] as number, section: entry[i+1] as string });
+                for (let i = 0; i < entry.length; i += 2) {
+                    decompEntry.push({ id: entry[i] as number, section: entry[i + 1] as string });
                 }
                 All[key] = decompEntry;
             } else {
@@ -117,10 +119,11 @@ export default class Schedule {
      * 3. error: the object passed in is falsy
      */
     public static fromJSON(obj?: ScheduleJSON): NotiMsg<Schedule> {
-        if (!obj) return {
-            level: 'error',
-            msg: 'Invalid object'
-        };
+        if (!obj)
+            return {
+                level: 'error',
+                msg: 'Invalid object'
+            };
         const schedule = new Schedule();
         if (obj.events)
             schedule.events = obj.events.map(x =>
@@ -128,11 +131,12 @@ export default class Schedule {
             );
 
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
-        if (keys.length === 0) return {
-            level: 'success',
-            msg: 'Empty schedule',
-            payload: schedule
-        };
+        if (keys.length === 0)
+            return {
+                level: 'success',
+                msg: 'Empty schedule',
+                payload: schedule
+            };
 
         const warnings = [];
         const catalog = window.catalog;
@@ -164,15 +168,17 @@ export default class Schedule {
                     if (Schedule.isNumberArray(sections)) {
                         const secs = sections as number[];
                         schedule.All[key] = new Set(
-                            secs.filter(sid => {
-                                // sid >= length possibly implies that section is removed from SIS
-                                if (sid >= allSections.length) {
-                                    warnings.push(
-                                        `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
-                                    );
-                                }
-                                return sid < allSections.length;
-                            }).map(idx => allSections[idx].id)
+                            secs
+                                .filter(sid => {
+                                    // sid >= length possibly implies that section is removed from SIS
+                                    if (sid >= allSections.length) {
+                                        warnings.push(
+                                            `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
+                                        );
+                                    }
+                                    return sid < allSections.length;
+                                })
+                                .map(idx => allSections[idx].id)
                         );
                     } else {
                         const set = new Set<number>();
@@ -183,11 +189,10 @@ export default class Schedule {
                             );
                             if (target) set.add(target.id);
                             // if not, it possibly means that section is removed from SIS
-                            else warnings.push(
-                                `Section ${
-                                    record.section
-                                    } of ${convKey} does not exist anymore! It probably has been removed!`
-                            );
+                            else
+                                warnings.push(
+                                    `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
+                                );
                         }
                         schedule.All[key] = set;
                     }

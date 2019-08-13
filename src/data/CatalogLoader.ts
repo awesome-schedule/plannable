@@ -21,7 +21,7 @@ import { CourseType, semesterDataExpirationTime, TYPES_PARSE } from '../models/M
 import { cancelablePromise, CancelablePromise, parseDate } from '../utils';
 
 type SectionPropertyDescriptors = {
-    [x in keyof SectionFields]: TypedPropertyDescriptor<Section[x]>
+    [x in keyof SectionFields]: TypedPropertyDescriptor<Section[x]>;
 };
 
 /**

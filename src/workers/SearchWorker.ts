@@ -13,7 +13,7 @@
 import { RawAlgoCourse } from '@/algorithm';
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, {  CourseMatch } from '../models/Course';
+import _Course, { CourseMatch } from '../models/Course';
 import _Meeting from '../models/Meeting';
 import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
@@ -267,10 +267,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                             }))
                         );
                     }
-                    finalResults.push([
-                        key,
-                        ids
-                    ]);
+                    finalResults.push([key, ids]);
                     allMatches.push([[], secMatches]);
                 }
             }

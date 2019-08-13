@@ -51,7 +51,6 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
-// tslint:disable-next-line: no-empty-interface
 export interface ScheduleStore extends ScheduleState {}
 
 /**

@@ -118,7 +118,6 @@ class Profile {
         if (prevIdx !== -1) {
             if (
                 !confirm(
-                    // tslint:disable-next-line: max-line-length
                     `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both`
                 )
             ) {

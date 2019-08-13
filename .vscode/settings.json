@@ -11,6 +11,10 @@
         {
             "language": "vue",
             "autoFix": true
+        },
+        {
+            "language": "typescript",
+            "autoFix": true
         }
     ],
     "editor.codeActionsOnSave": {

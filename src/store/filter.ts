@@ -78,7 +78,17 @@ interface DetailedEvaluatorOptions extends EvaluatorOptions {
  *
  * 8: end time, of 24 hour format
  */
-export type TimeSlot = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, string, string];
+export type TimeSlot = [
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    boolean,
+    string,
+    string
+];
 export type TimeSlotShort = [number, string, string];
 
 /**
@@ -189,9 +199,9 @@ window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.tim
  * @author Hanzhi Zhou
  */
 export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
-    public static compressJSON(obj: FilterStateJSON): readonly [
-        number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort>
-    ] {
+    public static compressJSON(
+        obj: FilterStateJSON
+    ): readonly [number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort>] {
         // convert allowClosed, allowWaitlist, mode to binary
         let filterBits = 0;
         if (obj.allowClosed) filterBits += 2 ** 0;
@@ -213,9 +223,15 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             if (sortBy.reverse) sortBits |= mask;
             mask <<= 1;
         }
-        const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule, events: []});
+        const { payload: schedule, level, msg } = Schedule.fromJSON({
+            All: obj.refSchedule,
+            events: []
+        });
         if (level === 'warn')
-            noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
+            noti.warn(
+                'Warning: Reference schedule used in sort by similarity is removed because <br>' +
+                    msg
+            );
 
         return [
             filterBits,
@@ -237,7 +253,6 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     }
 
     public static decompressJSON(obj: ReturnType<typeof FilterStore.compressJSON>) {
-        // tslint:disable-next-line: no-shadowed-variable
         const filter = new FilterStore();
         const [filterBits, sortBits, initials, slots, ref] = obj;
 
@@ -248,7 +263,17 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
         // decode time slots
         filter.timeSlots = slots.map(slot => {
-            const timeSlot: TimeSlot = [false, false, false, false, false, false, false, slot[1], slot[2]];
+            const timeSlot: TimeSlot = [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                slot[1],
+                slot[2]
+            ];
             const bits = slot[0];
             let m = 1;
             for (let i = 0; i < 7; i++) {
@@ -375,10 +400,16 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
 
-        const { payload: schedule, level, msg } = Schedule.fromJSON({All: obj.refSchedule || {}, events: []});
+        const { payload: schedule, level, msg } = Schedule.fromJSON({
+            All: obj.refSchedule || {},
+            events: []
+        });
         if (level === 'warn')
-            noti.warn('Warning: Reference schedule used in sort by similarity is removed because <br>' + msg);
-        this.refSchedule = schedule && level !== 'warn' ? schedule.All : defaultVal.refSchedule ;
+            noti.warn(
+                'Warning: Reference schedule used in sort by similarity is removed because <br>' +
+                    msg
+            );
+        this.refSchedule = schedule && level !== 'warn' ? schedule.All : defaultVal.refSchedule;
     }
 
     toJSON(): FilterStateJSON {

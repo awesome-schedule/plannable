@@ -23,7 +23,6 @@ describe('url convertJsonToArray test', () => {
         const s = 's'.charCodeAt(0);
         const v = 'v'.charCodeAt(0);
         const I = 'I'.charCodeAt(0);
-        console.warn(urlCompressed);
 
         // display
         const display_test = urlCompressed[4];
@@ -85,7 +84,6 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
-        console.warn('fal2019', urlCompressed);
         // display
         const display_test = urlCompressed[4];
 
@@ -146,7 +144,6 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('test_filter');
-        console.warn('test_filter', urlCompressed);
 
         // display
         const display_test = urlCompressed[4];
@@ -209,7 +206,6 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('miscellaneousTest1');
-        console.warn('miscellaneousTest1', urlCompressed);
 
         // display
         const display_test = urlCompressed[4];
@@ -274,7 +270,6 @@ describe('url convertJsonToArray test', () => {
 
         // schedule length
         const schedules = schedule_test[4];
-        console.warn('schedules', schedules);
         expect(schedules.length).toEqual(3);
 
         // length with no events

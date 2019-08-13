@@ -17,16 +17,7 @@
         "paths": {
             "@/*": ["src/*"]
         },
-        "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
-        "plugins": [
-            {
-                "name": "typescript-tslint-plugin",
-                "alwaysShowRuleFailuresAsWarnings": false,
-                "ignoreDefinitionFiles": true,
-                "configFile": "./tslint.json",
-                "suppressWhileTypeErrorsPresent": false
-            }
-        ]
+        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
     },
     "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "tests/unit/*.ts"],
     "exclude": ["node_modules"]

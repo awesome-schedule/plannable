@@ -139,7 +139,8 @@ class ScheduleEvaluator {
             for (let i = offset; i < oEnd; i++) {
                 const start = blocks[i],
                     end = blocks[i + 1];
-                if (end > start) { // if this day is not empty
+                if (end > start) {
+                    // if this day is not empty
                     const time = blocks[start + offset];
                     total += Math.max(refTime - time, 0) ** 2;
                 }
@@ -186,8 +187,7 @@ class ScheduleEvaluator {
                 const key = sim[course[0]];
                 if (key) {
                     for (const sid of course[1]) {
-                        if ((key as Set<number>).has(sid))
-                            sum++;
+                        if ((key as Set<number>).has(sid)) sum++;
                     }
                 }
             }
@@ -210,8 +210,11 @@ class ScheduleEvaluator {
      * @param idx the index of the current schedule
      */
     public static sortBlocks(
-        blocks: Int16Array, allChoices: Uint8Array,
-        arrayList: TimeArray[][], offset: number, idx: number
+        blocks: Int16Array,
+        allChoices: Uint8Array,
+        arrayList: TimeArray[][],
+        offset: number,
+        idx: number
     ) {
         const numCourses = arrayList.length,
             start = idx * numCourses;
@@ -331,10 +334,11 @@ class ScheduleEvaluator {
             if (funcName === 'similarity') {
                 const evalFunc = ScheduleEvaluator.sortFunctions.similarity.bind(this);
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
-             } else if (funcName === 'distance') {
+            } else if (funcName === 'distance') {
                 const evalFunc = ScheduleEvaluator.sortFunctions.distance;
                 const timeMatrix = this.timeMatrix;
-                for (let i = 0; i < len; i++) newCache[i] = evalFunc(timeMatrix, blocks, offsets[i]);
+                for (let i = 0; i < len; i++)
+                    newCache[i] = evalFunc(timeMatrix, blocks, offsets[i]);
             } else {
                 const evalFunc = ScheduleEvaluator.sortFunctions[funcName];
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(blocks, offsets[i]);
@@ -539,9 +543,11 @@ class ScheduleEvaluator {
     public getSchedule(idx: number) {
         idx = this.indices[idx] * this.classList.length;
         return new Schedule(
-            Array.from(this.allChoices.slice(idx, idx + this.classList.length))
-                .map((choice, classNum) => this.classList[classNum][choice]),
-            this.events);
+            Array.from(this.allChoices.slice(idx, idx + this.classList.length)).map(
+                (choice, classNum) => this.classList[classNum][choice]
+            ),
+            this.events
+        );
     }
     /**
      * whether this evaluator contains an empty array of schedules

@@ -70,7 +70,7 @@ export interface SectionFields {
 }
 
 // use class-interface merging
-// tslint:disable-next-line: no-empty-interface
+
 export default interface Section extends SectionFields {}
 /**
  * A section contains all the fields that a Course has,
@@ -219,7 +219,9 @@ export default class Section implements CourseFields, Hashable {
      * @param sections
      * @param key
      */
+    // eslint-disable-next-line
     public has(sections: Set<number>, key: string): boolean;
+    // eslint-disable-next-line
     public has(element: Section | Set<number>, key?: string): boolean {
         if (element instanceof Set) return this.key === key && element.has(this.id);
         else return this.equals(element);

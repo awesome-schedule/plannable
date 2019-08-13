@@ -5,7 +5,7 @@
 /**
  *
  */
-// tslint:disable:max-line-length
+
 import 'bootstrap';
 import $ from 'jquery';
 import { VueMathjax } from 'vue-mathjax';

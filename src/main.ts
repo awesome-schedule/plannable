@@ -15,12 +15,10 @@ import { highlightMatch } from './utils';
 
 import Vuetify, {
     VApp, // required
-    VBtn,
     VCard,
     VCardActions,
     VCardText,
     VCardTitle,
-    VFooter,
     VIcon
 } from 'vuetify/lib';
 
@@ -31,13 +29,11 @@ Vue.use(Vuetify, {
     },
     components: {
         VApp, // required
-        VFooter,
         VCard,
         VCardTitle,
         VCardText,
         VCardActions,
-        VIcon,
-        VBtn
+        VIcon
     }
 });
 

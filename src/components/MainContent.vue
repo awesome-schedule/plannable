@@ -25,25 +25,27 @@
         <slot></slot>
 
         <div id="footer" class="container">
-            <div class="row">
-                <div class="col" style="text-align: left">Get Connected with us:</div>
-                <div class="col" style="text-align: right">
+            <div class="row justify-content-between">
+                <div class="col-xs-auto pl-3 align-self-center" style="font-size: 1.1rem">
+                    Get Connected With Us
+                </div>
+                <div class="col-xs-auto align-self-center">
                     <a
-                        class="mx-3"
-                        style="color:inherit;text-decoration: none;font-size:24px;margin-bottom:3px"
+                        class="mr-5 link-btn"
                         target="_blank"
                         title="Checkout our GitHub site to watch/star/fork"
                         href="https://github.com/awesome-schedule/plannable/"
-                        ><i class="fab fa-github"></i
-                    ></a>
+                    >
+                        <i class="fab fa-github"></i>
+                    </a>
                     <a
-                        class="mx-5"
-                        style="color:inherit;text-decoration: none;font-size:24px;margin-bottom:3px"
+                        class="ml-4 mr-5 link-btn"
                         target="_blank"
                         title="File an issue on GitHub"
                         href="https://github.com/awesome-schedule/plannable/issues"
-                        ><i class="fas fa-exclamation-circle"></i
-                    ></a>
+                    >
+                        <i class="fas fa-exclamation-circle"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -52,17 +54,23 @@
 </template>
 <style scoped>
 #footer {
-    background-color: #019872;
+    background-color: #009688;
     color: white;
     clear: both;
     padding: 20px;
 }
 #cr {
-    background-color: grey;
+    background-color: #424242;
     color: white;
     clear: both;
     padding: 7px;
     text-align: center;
+}
+.link-btn {
+    color: inherit;
+    text-decoration: none;
+    font-size: 24px;
+    margin-bottom: 3px;
 }
 </style>
 <script lang="ts" src="./MainContent.ts"></script>

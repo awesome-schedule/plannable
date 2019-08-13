@@ -51,9 +51,7 @@ export default class CompareView extends Store {
         this.compareSchedule.computeBlockPositions();
     }
     randColor(idx: number) {
-        this.compare[idx].color = randomColor({
-            luminosity: 'dark'
-        }) as string;
+        this.compare[idx].color = randomColor({ luminosity: 'dark' });
         this.renderSchedule();
     }
     deleteCompare(idx: number) {

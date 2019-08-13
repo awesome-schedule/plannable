@@ -21,9 +21,7 @@ export default class Palette extends Store {
         this.$set(this.palette.savedColors, key, color);
     }
     randColor(key: string) {
-        this.$set(this.palette.savedColors, key, randomColor({
-            luminosity: 'dark'
-        }) as string);
+        this.$set(this.palette.savedColors, key, randomColor({ luminosity: 'dark' }));
     }
 
     colorEntries() {

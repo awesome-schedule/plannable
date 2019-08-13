@@ -18,14 +18,7 @@ import {
     VDivider,
     VImg,
     VLayout,
-    VProgressCircular,
-
-    // steppers
-    VStepper,
-    VStepperContent,
-    VStepperHeader,
-    VStepperItems,
-    VStepperStep
+    VProgressCircular
 } from 'vuetify/lib';
 
 /**
@@ -44,11 +37,6 @@ import {
         VProgressCircular,
 
         // steppers
-        VStepper,
-        VStepperHeader,
-        VStepperStep,
-        VStepperContent,
-        VStepperItems,
         Stepper
     }
 })

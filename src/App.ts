@@ -284,9 +284,7 @@ export default class App extends Store {
         if (idx !== -1) {
             this.compare.splice(idx, 1);
         } else {
-            const color = randomColor({
-                luminosity: 'dark'
-            }) as string;
+            const color = randomColor({ luminosity: 'dark' });
             this.compare.push({
                 schedule: this.schedule.currentSchedule,
                 profileName: this.profile.current,

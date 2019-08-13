@@ -220,7 +220,7 @@
                         type="number"
                         min="1000"
                         step="1"
-                        max="1000000"
+                        max="2000000"
                         class="form-control form-control-sm"
                     />
                 </div>

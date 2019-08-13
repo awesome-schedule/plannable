@@ -172,7 +172,6 @@ class ScheduleGenerator {
             timeArrayList.push(timeArrays);
             dateList.push(dates);
         }
-        console.table(classList);
         const evaluator = this.createSchedule(
             classList,
             timeArrayList,

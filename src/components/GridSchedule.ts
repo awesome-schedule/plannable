@@ -95,10 +95,7 @@ export default class GridSchedule extends Store {
 
     get gridTemplateCols() {
         const numCol = this.numCol;
-        return `${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 / numCol}% ${100 /
-            numCol}% ${numCol === 7 ? 100 / numCol + '%' : ''} ${
-            numCol === 7 ? 100 / numCol + '%' : ''
-            }`;
+        return `${100 / numCol}% `.repeat(numCol);
     }
 
     /**

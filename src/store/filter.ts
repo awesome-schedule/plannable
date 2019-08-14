@@ -424,5 +424,4 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     }
 }
 
-export const filter = new FilterStore();
-export default filter;
+export default new FilterStore();

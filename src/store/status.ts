@@ -87,5 +87,4 @@ class Status {
     }
 }
 
-export const status = new Status();
-export default status;
+export default new Status();

@@ -144,5 +144,4 @@ class Profile {
     }
 }
 
-const profile = new Profile();
-export default profile;
+export default new Profile();

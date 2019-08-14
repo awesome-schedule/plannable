@@ -37,5 +37,4 @@ export class Palette implements StoreModule<PaletteState, PaletteState> {
     }
 }
 
-export const palette = new Palette();
-export default palette;
+export default new Palette();

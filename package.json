@@ -51,6 +51,8 @@
         "babel-plugin-transform-remove-console": "^6.9.4",
         "cheerio": "^1.0.0-rc.3",
         "eslint": "^5.16.0",
+        "eslint-import-resolver-typescript": "^1.1.1",
+        "eslint-plugin-import": "^2.18.2",
         "eslint-plugin-prettier": "^3.1.0",
         "eslint-plugin-vue": "^5.0.0",
         "prettier": "^1.18.2",

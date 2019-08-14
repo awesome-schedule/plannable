@@ -38,5 +38,4 @@ class Modal {
     }
 }
 
-export const modal = new Modal();
-export default modal;
+export default new Modal();

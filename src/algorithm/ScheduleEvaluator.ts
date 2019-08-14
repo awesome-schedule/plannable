@@ -56,6 +56,54 @@ export interface EvaluatorOptions {
 }
 
 /**
+ * sort the time blocks belonging to a schedule in order, return the length of the sorted block
+ * @param blocks the block
+ * @param allChoices complete array of choices for each schedule
+ * @param arrayList time arrays for sections of each course
+ * @param offset offset of the array
+ * @param idx the index of the current schedule
+ */
+export function sortBlocks(
+    blocks: Int16Array,
+    allChoices: Uint8Array,
+    arrayList: TimeArray[][],
+    offset: number,
+    idx: number
+) {
+    const numCourses = arrayList.length,
+        start = idx * numCourses;
+    let bound = 8; // size does not contain offset
+    // no offset in j because arr2 also needs it
+    for (let j = 0; j < 7; j++) {
+        // start of the current day
+        const s1 = (blocks[j + offset] = bound);
+        for (let k = 0; k < numCourses; k++) {
+            const arr2 = arrayList[k][allChoices[start + k]];
+            const e2 = arr2[j + 1];
+            // insertion sort, fast for small arrays
+            for (let n = arr2[j]; n < e2; n += 3, bound += 3) {
+                // p already contains offset
+                let p = s1 + offset;
+                const vToBeInserted = arr2[n],
+                    realBound = bound + offset; // the end of the current array
+                for (; p < realBound; p += 3) {
+                    if (vToBeInserted < blocks[p]) break;
+                }
+                // move elements 3 slots toward the end
+                // same as `blocks.copyWithin(p + 3, p, realBound);`, but faster
+                for (let m = realBound - 1; m >= p; m--) blocks[m + 3] = blocks[m];
+                // insert three elements at p
+                blocks[p] = vToBeInserted;
+                blocks[p + 1] = arr2[n + 1];
+                blocks[p + 2] = arr2[n + 2];
+            }
+        }
+    }
+    blocks[offset + 7] = bound;
+    return bound;
+}
+
+/**
  * The goal of the schedule evaluator is to efficiently sort the generated schedules
  * according to the set of the rules defined by the user
  */
@@ -201,53 +249,6 @@ class ScheduleEvaluator {
             return Math.random();
         }
     };
-    /**
-     * sort the time blocks belonging to a schedule in order, return the length of the sorted block
-     * @param blocks the block
-     * @param allChoices complete array of choices for each schedule
-     * @param arrayList time arrays for sections of each course
-     * @param offset offset of the array
-     * @param idx the index of the current schedule
-     */
-    public static sortBlocks(
-        blocks: Int16Array,
-        allChoices: Uint8Array,
-        arrayList: TimeArray[][],
-        offset: number,
-        idx: number
-    ) {
-        const numCourses = arrayList.length,
-            start = idx * numCourses;
-        let bound = 8; // size does not contain offset
-        // no offset in j because arr2 also needs it
-        for (let j = 0; j < 7; j++) {
-            // start of the current day
-            const s1 = (blocks[j + offset] = bound);
-            for (let k = 0; k < numCourses; k++) {
-                const arr2 = arrayList[k][allChoices[start + k]];
-                const e2 = arr2[j + 1];
-                // insertion sort
-                for (let n = arr2[j]; n < e2; n += 3, bound += 3) {
-                    // p already contains offset
-                    let p = s1 + offset;
-                    const vToBeInserted = arr2[n],
-                        realBound = bound + offset;
-                    for (; p < realBound; p += 3) {
-                        if (vToBeInserted < blocks[p]) break;
-                    }
-                    // move elements 3 slots toward the end
-                    // same as `blocks.copyWithin(p + 3, p, realBound);`, but faster
-                    for (let m = realBound - 1; m >= p; m--) blocks[m + 3] = blocks[m];
-                    // insert three elements at p
-                    blocks[p] = vToBeInserted;
-                    blocks[p + 1] = arr2[n + 1];
-                    blocks[p + 2] = arr2[n + 2];
-                }
-            }
-        }
-        blocks[offset + 7] = bound;
-        return bound;
-    }
     /**
      * the cache of coefficient array for each evaluating function
      */

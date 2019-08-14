@@ -12,7 +12,7 @@ import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
-import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
+import ScheduleEvaluator, { EvaluatorOptions, sortBlocks } from './ScheduleEvaluator';
 
 /**
  * The blocks is a condensed fixed-length array
@@ -33,14 +33,13 @@ import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
  *
  * a typical loop that visits these info is shown below
  * ```js
- * let dayStart, dayEnd;
  * for (let i = 0; i < 7; i++){
- *   dayStart = timeArr[i],
- *   dayEnd   = timeArr[i+1];
- *   for (let j = dayStart; j < dayEnd; j+=3) {
+ *   const dayEnd = timeArr[i+1];
+ *   for (let j = timeArr[i]; j < dayEnd; j+=3) {
  *     const timeStart = timeArr[j],
  *           timeEnd   = timeArr[j+1],
  *           roomIdx   = timeArr[j+2];
+ *     // do some processing
  *   }
  * }
  * ```
@@ -241,12 +240,16 @@ class ScheduleGenerator {
          */
         const sideLen = maxLen * numCourses;
         let byteOffset =
-            numCourses * 2 + // pathMemory + currentChoices
+            numCourses * 3 + // sectionLens + pathMemory + currentChoices
             maxLen * numCourses + // timeArrLens
             sideLen ** 2 + // conflictCache
             numCourses * maxNumSchedules; // allChoices
         const buffer = new ArrayBuffer(byteOffset);
         byteOffset = 0;
+
+        const sectionLens = new Uint8Array(buffer, 0, numCourses);
+        for (let i = 0; i < numCourses; i++) sectionLens[i] = classList[i].length;
+        byteOffset += numCourses;
         /**
          * record the index of sections that are already tested
          */
@@ -273,7 +276,7 @@ class ScheduleGenerator {
          * ```js
          * conflictCache[section1][course1][section2][course2]
          * ```
-         * which translates to
+         * which is in fact
          * ```js
          * conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
          * ```
@@ -320,6 +323,8 @@ class ScheduleGenerator {
         console.timeEnd('algorithm bootstrapping');
         console.time('running algorithm:');
         byteOffset = 0;
+        // the main loop of the algorithm, made extremely efficient
+        // by only operating on integers and typed integer arrays
         outer: while (true) {
             if (classNum >= numCourses) {
                 const start = count * numCourses;
@@ -340,12 +345,12 @@ class ScheduleGenerator {
              * explore the next possibilities in the nearest possible class
              * reset the memory path forward to zero
              */
-            while (choiceNum >= classList[classNum].length) {
+            while (choiceNum >= sectionLens[classNum]) {
                 // if all possibilities are exhausted, break out the loop
                 if (--classNum < 0) break outer;
 
                 choiceNum = pathMemory[classNum];
-                pathMemory.fill(0, classNum + 1);
+                for (let i = classNum + 1; i < numCourses; i++) pathMemory[i] = 0;
             }
 
             // check conflict between the newly chosen section and the sections already in the schedule
@@ -388,13 +393,7 @@ class ScheduleGenerator {
             // record the current offset
             offsets[i] = byteOffset;
             // sort the time blocks in order
-            byteOffset += ScheduleEvaluator.sortBlocks(
-                blocks,
-                allChoices,
-                timeArrayList,
-                byteOffset,
-                i
-            );
+            byteOffset += sortBlocks(blocks, allChoices, timeArrayList, byteOffset, i);
         }
         console.timeEnd('add to eval');
 

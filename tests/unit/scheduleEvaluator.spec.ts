@@ -1,4 +1,4 @@
-import ScheduleEvaluator, { EvaluatorOptions } from '@/algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, { EvaluatorOptions, sortBlocks } from '@/algorithm/ScheduleEvaluator';
 import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import filter from '@/store/filter';
 
@@ -38,14 +38,14 @@ describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
         const evaluator = new ScheduleEvaluator(filter.sortOptions, window.timeMatrix);
         const b = blocks.slice();
-        ScheduleEvaluator.sortBlocks(b, allChoices, classList, offset, 0);
+        sortBlocks(b, allChoices, classList, offset, 0);
         const func = ScheduleEvaluator.sortFunctions.compactness.bind(evaluator);
         expect(func(b, offset)).toBe(35 + 20 + 150 + 50 + 0 + 150);
     });
 
     it('Insertion Test', () => {
         const b = blocks.slice();
-        ScheduleEvaluator.sortBlocks(b, allChoices, classList, offset, 0);
+        sortBlocks(b, allChoices, classList, offset, 0);
         expect(Array.from(b.slice(8 + offset, 20 + offset))).toEqual([
             10,
             15,

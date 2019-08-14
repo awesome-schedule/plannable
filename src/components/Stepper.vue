@@ -11,12 +11,12 @@
                     </div>
                 </div>
             </div>
-            <p v-if="!alwaysTitle" class="mt-2 mb-0" style="font-size: 14px">
-                {{ info[curIdx].title }}
-            </p>
         </div>
         <div class="card-body text-center">
             <img :src="info[curIdx].src" :alt="info[curIdx].title" class="img-fluid" />
+            <p v-if="!alwaysTitle" class="mt-4 text-left" style="font-size: 14px">
+                {{ info[curIdx].title }}
+            </p>
         </div>
         <div v-if="helper" class="card-footer">
             <button class="btn btn-primary mr-3" @click="next()">Next</button>

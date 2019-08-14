@@ -1,6 +1,6 @@
 <template>
     <div class="card my-4">
-        <div class="card-header; container">
+        <div class="card-header container">
             <div class="row">
                 <div
                     v-for="(item, idx) in info"

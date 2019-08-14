@@ -86,7 +86,7 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: This section has several different meeting dates.',
         'Fatal: Some meetings have invalid start or end time.',
         'Fatal: This section has unknown start and end date.'
-    ];
+    ] as const;
     // --------- getters for fields of the course ---------------------
     get department() {
         return this.course.department;

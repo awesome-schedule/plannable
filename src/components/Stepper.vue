@@ -1,6 +1,6 @@
 <template>
     <div class="card my-4">
-        <div class="card-header; container">
+        <div class="card-header container">
             <div class="row">
                 <div
                     v-for="(item, idx) in info"
@@ -25,10 +25,12 @@
                     </div>
                 </div>
             </div>
-            <p v-if="!alwaysTitle" class="mt-4" style="font-size: 14px">{{ info[curIdx].title }}</p>
         </div>
         <div class="card-body" style="text-align: center">
             <img :src="info[curIdx].src" :alt="info[curIdx].title" class="img-fluid" />
+            <p v-if="!alwaysTitle" class="mt-4" style="font-size: 14px; text-align:left !important">
+                {{ info[curIdx].title }}
+            </p>
         </div>
         <div v-if="helper" class="card-footer">
             <button class="btn btn-primary mr-3" @click="next()">Next</button>

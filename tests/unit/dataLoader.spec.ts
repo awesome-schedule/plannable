@@ -1,4 +1,4 @@
-import { loadBuildingList, loadTimeMatrix } from '@/data/BuildingLoader';
+import { loadBuildingSearcher, loadTimeMatrix } from '@/data/BuildingLoader';
 import { fallback, loadFromCache } from '@/data/Loader';
 import { loadSemesterList } from '@/data/SemesterListLoader';
 
@@ -23,17 +23,15 @@ describe('Data loader test', () => {
     });
 
     it('building list', async () => {
-        let data = await loadBuildingList();
+        let data = await loadBuildingSearcher();
         let payload = data.payload!;
         expect(payload).toBeTruthy();
-        expect(typeof payload[0]).toBe('string');
+        expect(typeof payload).toBe('object');
 
-        data = await loadBuildingList();
+        data = await loadBuildingSearcher();
         payload = data.payload!;
         expect(payload).toBeTruthy();
-        expect(typeof payload[0]).toBe('string');
-
-        await loadBuildingList(true);
+        await loadBuildingSearcher(true);
     });
 
     it('semester data', async () => {

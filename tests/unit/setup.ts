@@ -1,4 +1,4 @@
-import { requestBuildingList, requestTimeMatrix } from '@/data/BuildingLoader';
+import { requestBuildingSearcher, requestTimeMatrix } from '@/data/BuildingLoader';
 import { requestSemesterData } from '@/data/CatalogLoader';
 import CatalogDB from '@/database/CatalogDB';
 import Catalog from '@/models/Catalog';
@@ -148,5 +148,5 @@ beforeAll(async () => {
     catalog.courseDict.cs45015.sections.push(section);
     window.catalog = new Catalog(catalog.semester, catalog.courseDict, catalog.modified);
     window.timeMatrix = await requestTimeMatrix();
-    window.buildingList = await requestBuildingList();
+    window.buildingSearcher = await requestBuildingSearcher();
 });

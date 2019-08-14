@@ -11,6 +11,8 @@ import axios from 'axios';
 import { getApi } from '.';
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
+import { Searcher } from 'fast-fuzzy';
+import { isStringArray } from '@/utils';
 
 export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
@@ -47,19 +49,27 @@ export function loadTimeMatrix(force = false) {
     );
 }
 
+type PromiseType<T> = T extends Promise<infer R> ? R : any;
+export type BuildingSearcher = PromiseType<ReturnType<typeof requestBuildingSearcher>>;
+
 /**
  * Try to load the array of the names of buildings from localStorage.
  * If it expires or does not exist,
  * load a fresh one from the data backend and store it in localStorage.
  *
+ * Then, construct and return a building searcher
  * storage key: "buildingList"
  */
-export function loadBuildingList(force = false) {
+export function loadBuildingSearcher(force = false) {
     return fallback(
-        loadFromCache<string[], BuildingListJSON>(
+        loadFromCache<BuildingSearcher, BuildingListJSON>(
             'buildingList',
-            requestBuildingList,
-            x => x.buildingList,
+            requestBuildingSearcher,
+            x =>
+                new Searcher(x.buildingList.map((name, idx) => [name, idx] as const), {
+                    keySelector: x => x[0],
+                    threshold: 0.4
+                }),
             {
                 expireTime: 1000 * 86400,
                 force
@@ -79,7 +89,7 @@ export function loadBuildingList(force = false) {
  */
 export async function requestTimeMatrix(): Promise<Int32Array> {
     const res = await axios.get(`${getApi()}/data/Distance/Time_Matrix.json`);
-    const data: number[][] = res.data;
+    const data = res.data;
 
     if (data instanceof Array && data.length) {
         const len = data.length;
@@ -101,12 +111,14 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
 }
 
 /**
- * request from remote and store in localStorage
+ * request the building list from remote and store in localStorage
+ *
+ * @returns a building searcher
  */
-export async function requestBuildingList(): Promise<string[]> {
+export async function requestBuildingSearcher() {
     const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
     const data = res.data;
-    if (data instanceof Array && typeof data[0] === 'string') {
+    if (isStringArray(data)) {
         localStorage.setItem(
             'buildingList',
             JSON.stringify({
@@ -114,8 +126,10 @@ export async function requestBuildingList(): Promise<string[]> {
                 buildingList: data
             })
         );
-
-        return data;
+        return new Searcher(data.map((name, idx) => [name, idx] as const), {
+            keySelector: x => x[0],
+            threshold: 0.4
+        });
     } else {
         throw new Error('Data format error');
     }

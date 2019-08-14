@@ -86,7 +86,6 @@ export interface GeneratorOptions {
 class ScheduleGenerator {
     constructor(
         public readonly catalog: Readonly<Catalog>,
-        public readonly buildingList: readonly string[],
         public readonly options: GeneratorOptions
     ) {}
 

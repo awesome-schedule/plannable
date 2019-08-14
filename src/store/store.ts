@@ -242,7 +242,7 @@ export default class Store extends Vue {
             Object.values(this.filter.sortOptions.sortBy).some(
                 x => x.name === 'distance' && x.enabled
             ) &&
-            (!window.buildingList || !window.timeMatrix)
+            (!window.buildingSearcher || !window.timeMatrix)
         ) {
             this.noti.error(
                 'Filter: Building list fails to load. Please disable "walking distance"'
@@ -283,7 +283,7 @@ export default class Store extends Vue {
         const options = this.getGeneratorOptions();
         if (!options) return;
 
-        const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
+        const generator = new ScheduleGenerator(window.catalog, options);
 
         console.time('schedule generation');
         const msg = generator.getSchedules(

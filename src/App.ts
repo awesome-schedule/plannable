@@ -62,7 +62,7 @@ async function triggerVersionModal() {
  */
 async function releaseNote() {
     try {
-        const res = await axios.get(
+        const res = await axios.get<{ body: string }[]>(
             'https://api.github.com/repos/awesome-schedule/plannable/releases'
         );
 
@@ -73,7 +73,7 @@ async function releaseNote() {
          * in .map()'s parameter.
          */
         let ul = -1;
-        note = (res.data[0].body as string)
+        note = res.data[0].body
             .split(/[\r\n]+/)
             .map(x => {
                 /**

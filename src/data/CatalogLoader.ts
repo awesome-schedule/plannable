@@ -66,7 +66,7 @@ export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB)
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
-        ? axios.post(
+        ? axios.post<string>(
               `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
               stringify({
                   Semester: semester.id,
@@ -76,7 +76,7 @@ export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB)
                   Extended: 'Yes'
               })
           ) // use the mirror/local dev server
-        : axios.get(
+        : axios.get<string>(
               `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
           ));
     console.timeEnd(`request semester ${semester.name} data`);

@@ -23,10 +23,10 @@
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
         "vue": "^2.6.10",
-        "vue-mathjax": "0.0.10",
-        "vuedraggable": "^2.23.0",
         "vue-class-component": "^7.1.0",
-        "vue-property-decorator": "^8.2.1"
+        "vue-mathjax": "0.0.10",
+        "vue-property-decorator": "^8.2.1",
+        "vuedraggable": "^2.23.0"
     },
     "devDependencies": {
         "@types/bootstrap": "^4.3.1",

@@ -27,7 +27,7 @@
             </div>
             <p v-if="!alwaysTitle" class="mt-4" style="font-size: 14px">{{ info[curIdx].title }}</p>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="text-align: center">
             <img :src="info[curIdx].src" :alt="info[curIdx].title" class="img-fluid" />
         </div>
         <div v-if="helper" class="card-footer">

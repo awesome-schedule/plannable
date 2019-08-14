@@ -3,11 +3,11 @@ export type StepperInfo = { title: string; src: string }[];
 
 @Component
 export default class Stepper extends Vue {
-    @Prop(Array) info!: StepperInfo;
+    @Prop(Array) readonly info!: StepperInfo;
     // show the "next" and "back" button or not
-    @Prop(Boolean) helper!: boolean;
+    @Prop(Boolean) readonly helper!: boolean;
     // always show title or show only when in current page
-    @Prop(Boolean) alwaysTitle!: boolean;
+    @Prop(Boolean) readonly alwaysTitle!: boolean;
 
     curItem = this.info.length ? this.info[0] : { title: '', src: '' };
     curIdx = 0;

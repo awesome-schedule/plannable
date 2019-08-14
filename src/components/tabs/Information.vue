@@ -262,9 +262,8 @@
                     input is a description match, which can be shown by clicking the
                     <i class="fas fa-info-circle"></i> icon.
                 </p>
-                <v-card class="mt-3 mb-5 mx-auto gif-center">
-                    <v-img :src="imgPath('match-desc.png')"></v-img>
-                </v-card>
+
+                <img :src="imgPath('match-desc.png')" class="img-fluid" />
 
                 <h5 id="item-2-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -273,83 +272,77 @@
 
                 <div class="row mt-3 mb-5">
                     <div class="col-sm">
-                        <v-card>
-                            <v-img :src="imgPath('search_class.png')" aspect-ratio="1.6"></v-img>
-
-                            <v-card-title primary-title>
+                        <div class="card">
+                            <img
+                                :src="imgPath('search_class.png')"
+                                class="card-img-top"
+                                alt="search_class.png"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Add Courses</h5>
                                 <div>
-                                    <h5 class="headline mb-3">Add Courses</h5>
-                                    <div>
-                                        You can add courses by
-                                        <font class="amber lighten-3">searching</font> department,
-                                        professor, class number, or keywords. Pick a section or
-                                        multiple sections that you want to take, or choose "<font
-                                            class="amber lighten-3"
-                                            >any section</font
-                                        >" if you don't have a particular preference. To clear your
-                                        search query, press
-                                        <font class="amber lighten-3">ESC</font> or click on the
-                                        <i class="fas fa-times click-icon"> </i> button at the right
-                                        end of the search box.
-                                    </div>
+                                    You can add courses by
+                                    <font style="background-color:#F2E890">searching</font>
+                                    department, professor, class number, or keywords. Pick a section
+                                    or multiple sections that you want to take, or choose "<font
+                                        style="background-color:#F2E890"
+                                        >any section</font
+                                    >" if you don't have a particular preference. To clear your
+                                    search query, press
+                                    <font style="background-color:#F2E890">ESC</font> or click on
+                                    the <i class="fas fa-times click-icon"> </i> button at the right
+                                    end of the search box.
                                 </div>
-                            </v-card-title>
-                        </v-card>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-sm">
-                        <v-card>
-                            <v-img
+                        <div class="card">
+                            <img
                                 :src="imgPath('generate_schedule.png')"
-                                aspect-ratio="1.6"
-                            ></v-img>
-
-                            <v-card-title primary-title>
+                                class="card-img-top"
+                                alt="search_class.png"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Generate Schedules</h5>
                                 <div>
-                                    <h5 class="headline mb-3">Generate Schedules</h5>
-                                    <div>
-                                        After you have finished selecting your courses, you can hit
-                                        the
-                                        <font class="lime lighten-3">generate</font> button to
-                                        generate all possibles schedules out of the sections you
-                                        selected. You can switch between the generated schedule and
-                                        your current selection by clicking the "<font
-                                            class="lime lighten-3"
-                                            >edit class</font
-                                        >/<font class="lime lighten-3">view schedule</font>" button
-                                        below the search bar.
-                                    </div>
+                                    After you have finished selecting your courses, you can hit the
+                                    <font style="background-color:#D9F290 ">generate</font> button
+                                    to generate all possibles schedules out of the sections you
+                                    selected. You can switch between the generated schedule and your
+                                    current selection by clicking the "<font
+                                        style="background-color:#D9F290"
+                                        >edit class</font
+                                    >/<font style="background-color:#D9F290 ">view schedule</font>"
+                                    button below the search bar.
                                 </div>
-                            </v-card-title>
-                        </v-card>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-sm">
-                        <v-card>
-                            <v-img
+                        <div class="card">
+                            <img
                                 :src="imgPath('multiple_schedule.png')"
-                                aspect-ratio="1.6"
-                            ></v-img>
-
-                            <v-card-title primary-title>
+                                class="card-img-top"
+                                alt="search_class.png"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Multiple Schedules</h5>
                                 <div>
-                                    <h5 class="headline mb-3">Multiple Schedules</h5>
-                                    <div>
-                                        You can plan multiple schedules at the same time. Click the
-                                        <i
-                                            class="far fa-calendar-plus click-icon teal lighten-4"
-                                        ></i>
-                                        icon, you will have a new empty schedule independent with
-                                        your existing schedules. Click
-                                        <i class="fas fa-long-arrow-alt-left teal lighten-4"></i> or
-                                        <i class="fas fa-long-arrow-alt-right teal lighten-4"></i>
-                                        to navigate through your schedules. Use
-                                        <i class="far fa-copy click-icon teal lighten-4"></i> to
-                                        make a copy of the current scheudle, and use
-                                        <i class="far fa-calendar-times teal lighten-4"></i> delete
-                                        the current schedule.
-                                    </div>
+                                    You can plan multiple schedules at the same time. Click the
+                                    <i class="far fa-calendar-plus click-icon"></i>
+                                    icon, you will have a new empty schedule independent with your
+                                    existing schedules. Click
+                                    <i class="fas fa-long-arrow-alt-left"></i> or
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                    to navigate through your schedules. Use
+                                    <i class="far fa-copy click-icon"></i> to make a copy of the
+                                    current scheudle, and use
+                                    <i class="far fa-calendar-times"></i> delete the current
+                                    schedule.
                                 </div>
-                            </v-card-title>
-                        </v-card>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -399,9 +392,7 @@
                     schedule at the bottom left corner under "Schedule Overview". These IDs can be
                     direcly entered into SIS, through the input box left to your shopping cart.
                 </p>
-                <v-card class="my-3 mx-auto gif-center">
-                    <v-img :src="imgPath('enroll-sis.png')"></v-img>
-                </v-card>
+                <img :src="imgPath('enroll-sis.png')" alt="enroll-sis.png" class="img-fluid" />
                 <p>
                     If some of the IDs are missing, it is likely that you are in "Edit class" mode
                     and you selected "Any section" for that course. If there is a "+1" (or a higher
@@ -411,9 +402,11 @@
                     schedule shown below, there are five available ENWR 1510 on Monday and Wednesday
                     from 5:00 to 6:15PM.
                 </p>
-                <v-card class="mt-3 mb-5 mx-auto gif-center">
-                    <v-img :src="imgPath('multi-section.png')"></v-img>
-                </v-card>
+                <img
+                    :src="imgPath('multi-section.png')"
+                    alt="multi-section.png"
+                    class="img-fluid"
+                />
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -438,18 +431,9 @@
                     That is, when you edit the event in your planned schedule 1, it does not affect
                     your planned schedule 2.
                 </p>
-                <v-card class="my-5 mx-auto gif-center">
-                    <v-img :src="imgPath('add_event.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
+                <div style="text-align: center">
+                    <img :src="imgPath('add_event.gif')" alt="add_event.gif" class="img-fluid" />
+                </div>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -472,18 +456,7 @@
                 <p>
                     You can select time and day at which you do not wish to have class.
                 </p>
-                <v-card class="my-4 mx-auto gif-center">
-                    <v-img :src="imgPath('no-class-time.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
+                <img :src="imgPath('no-class-time.gif')" alt="no-class-time.gif" />
                 <h5 id="item-4-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Allow Waitlist/Closed</strong>
@@ -544,20 +517,9 @@
                 If you want to balance between multiple sort options, try "combined". On the other
                 hand, if you want to prioritize a single sort option (such as No Early), then try
                 "fallback", as it will sort using options on top first.
-
-                <v-card class="my-5 mx-auto gif-center">
-                    <v-img :src="imgPath('sort.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
-
+                <div class="my-3" style="text-align:center">
+                    <img :src="imgPath('sort.gif')" alt="sort.gif" class="img-fluid" />
+                </div>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -766,9 +728,11 @@
                     profiles. If there is a conflict, you will be prompted to choose either
                     overwriting the existing profile or keep both.
                 </p>
-                <v-card class="mt-3 mb-5 mx-auto gif-center">
-                    <v-img :src="imgPath('multipleProfile.png')"></v-img>
-                </v-card>
+                <img
+                    :src="imgPath('multipleProfile.png')"
+                    alt="multipleProfile.png"
+                    class="img-fluid"
+                />
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

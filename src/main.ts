@@ -7,35 +7,10 @@
  *
  */
 import Vue from 'vue';
-import 'vuetify/src/stylus/app.styl';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
-
-import Vuetify, {
-    VApp, // required
-    VCard,
-    VCardActions,
-    VCardText,
-    VCardTitle,
-    VIcon
-} from 'vuetify/lib';
-
-Vue.use(Vuetify, {
-    iconfont: 'fa',
-    icons: {
-        complete: 'fas fa-check'
-    },
-    components: {
-        VApp, // required
-        VCard,
-        VCardTitle,
-        VCardText,
-        VCardActions,
-        VIcon
-    }
-});
 
 declare global {
     interface Window {

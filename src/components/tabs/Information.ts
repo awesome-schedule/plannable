@@ -13,14 +13,6 @@ import Stepper from '../Stepper.vue';
 import { StepperInfo } from '../Stepper';
 import { Component, Vue } from 'vue-property-decorator';
 
-import {
-    // used in information.vue
-    VDivider,
-    VImg,
-    VLayout,
-    VProgressCircular
-} from 'vuetify/lib';
-
 /**
  * tab for displaying user guide
  * @author Hanzhi Zhou, Kaiying Shan, Zichao Hu, Elena Long
@@ -29,12 +21,6 @@ import {
 @Component({
     components: {
         VueMathjax,
-
-        // used in information.vue
-        VDivider,
-        VImg,
-        VLayout,
-        VProgressCircular,
 
         // steppers
         Stepper

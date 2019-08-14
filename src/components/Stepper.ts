@@ -14,16 +14,11 @@ export default class Stepper extends Vue {
 
     goto(idx: number) {
         this.curIdx = idx;
-        this.$forceUpdate();
     }
     next() {
-        const idx = (this.curIdx + 1) % this.info.length;
-        this.curIdx = idx;
-        this.goto(idx);
+        this.goto((this.curIdx + 1) % this.info.length);
     }
     back() {
-        const idx = (this.curIdx + this.info.length - 1) % this.info.length;
-        this.curIdx = idx;
-        this.goto(idx);
+        this.goto((this.curIdx + this.info.length - 1) % this.info.length);
     }
 }

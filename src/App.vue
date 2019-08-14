@@ -273,8 +273,4 @@
     border-radius: 0;
     padding: 0.25rem 0.25rem;
 }
-/* Vuetify has overriden this, which is very annoying */
-[type='number'] {
-    width: inherit !important;
-}
 </style>

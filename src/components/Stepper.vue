@@ -2,32 +2,20 @@
     <div class="card my-4">
         <div class="card-header container">
             <div class="row">
-                <div
-                    v-for="(item, idx) in info"
-                    :key="item.title"
-                    class="col"
-                    style="cursor: pointer"
-                    @click="goto(idx)"
-                >
-                    <div
-                        :style="
-                            `height: 24px; width: 24px; border-radius: 12px; background-color: ${
-                                idx === curIdx ? '#019872' : 'grey'
-                            }; color: white; text-align: center`
-                        "
-                    >
-                        <div style="font-size: 12px; padding-top: 3px">
-                            {{ idx + 1 }}
-                        </div>
+                <div v-for="(item, idx) in info" :key="item.title" class="col" @click="goto(idx)">
+                    <div class="stepper-icon" :class="{ active: idx === curIdx }">
+                        {{ idx + 1 }}
                     </div>
                     <div v-if="alwaysTitle" class="mt-2" style="font-size: 12px">
                         {{ item.title }}
                     </div>
                 </div>
             </div>
-            <p v-if="!alwaysTitle" class="mt-4" style="font-size: 14px">{{ info[curIdx].title }}</p>
+            <p v-if="!alwaysTitle" class="mt-2 mb-0" style="font-size: 14px">
+                {{ info[curIdx].title }}
+            </p>
         </div>
-        <div class="card-body" style="text-align: center">
+        <div class="card-body text-center">
             <img :src="info[curIdx].src" :alt="info[curIdx].title" class="img-fluid" />
         </div>
         <div v-if="helper" class="card-footer">
@@ -37,3 +25,22 @@
     </div>
 </template>
 <script src="./Stepper.ts"></script>
+
+<style scoped>
+.stepper-icon {
+    height: 24px;
+    width: 24px;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    background-color: grey;
+    cursor: pointer;
+    font-size: 14px;
+}
+.stepper-icon:hover {
+    background-color: #019872;
+}
+.stepper-icon.active {
+    background-color: #019872;
+}
+</style>

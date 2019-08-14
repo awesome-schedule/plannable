@@ -11,7 +11,7 @@ function cb(err: NodeJS.ErrnoException | null) {
 }
 
 async function loadSemesterList(count = 5) {
-    const { data } = await axios.get('https://rabi.phys.virginia.edu/mySIS/CS2/index.php');
+    const { data } = await axios.get<string>('https://rabi.phys.virginia.edu/mySIS/CS2/index.php');
     const $ = cheerio.load(data);
     fs.writeFile(dataDir + 'index.html', data, cb);
     const records: SemesterJSON[] = [];
@@ -32,7 +32,7 @@ async function loadSemesterList(count = 5) {
 }
 
 async function loadSemesterData(semester: SemesterJSON) {
-    const { data } = await axios.post(
+    const { data } = await axios.post<string>(
         `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
         stringify({
             Semester: semester.id,

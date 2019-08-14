@@ -81,5 +81,4 @@ class Semesters implements SemesterState {
     }
 }
 
-export const semester = new Semesters();
-export default semester;
+export default new Semesters();

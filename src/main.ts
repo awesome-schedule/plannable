@@ -11,13 +11,14 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
+import { FastSearcher } from './algorithm/Searcher';
 
 declare global {
     interface Window {
         scheduleEvaluator: ScheduleEvaluator;
         catalog: Readonly<Catalog>;
         timeMatrix: Readonly<Int32Array>;
-        buildingList: readonly string[];
+        buildingSearcher: FastSearcher;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html

@@ -5,7 +5,6 @@
 /**
  *
  */
-
 import 'bootstrap';
 import $ from 'jquery';
 import { VueMathjax } from 'vue-mathjax';

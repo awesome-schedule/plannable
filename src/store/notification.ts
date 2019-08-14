@@ -157,5 +157,4 @@ class Notification implements NotiState {
     }
 }
 
-export const noti = new Notification();
-export default noti;
+export default new Notification();

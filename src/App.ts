@@ -32,7 +32,7 @@ import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
 import { backend } from './config';
-import { loadBuildingList, loadTimeMatrix } from './data/BuildingLoader';
+import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
 const version = '7.0';
@@ -62,7 +62,7 @@ async function triggerVersionModal() {
  */
 async function releaseNote() {
     try {
-        const res = await axios.get(
+        const res = await axios.get<{ body: string }[]>(
             'https://api.github.com/repos/awesome-schedule/plannable/releases'
         );
 
@@ -73,7 +73,7 @@ async function releaseNote() {
          * in .map()'s parameter.
          */
         let ul = -1;
-        note = (res.data[0].body as string)
+        note = res.data[0].body
             .split(/[\r\n]+/)
             .map(x => {
                 /**
@@ -245,7 +245,7 @@ export default class App extends Store {
         // note: these three can be executed in parallel, i.e. they are not inter-dependent
         const [pay1, pay2, pay3] = await Promise.all([
             loadTimeMatrix(),
-            loadBuildingList(),
+            loadBuildingSearcher(),
             this.semester.loadSemesters()
         ]);
 
@@ -253,7 +253,7 @@ export default class App extends Store {
         if (pay1.payload) window.timeMatrix = pay1.payload;
 
         this.noti.notify(pay2);
-        if (pay2.payload) window.buildingList = pay2.payload;
+        if (pay2.payload) window.buildingSearcher = pay2.payload;
 
         this.noti.notify(pay3);
         if (pay3.payload) {

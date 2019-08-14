@@ -115,3 +115,11 @@ export function errToStr(err: string | AxiosError) {
     else errStr += err.message;
     return errStr;
 }
+
+export function isNumberArray(x: any): x is number[] {
+    return Array.isArray(x) && typeof x[0] === 'number';
+}
+
+export function isStringArray(x: any): x is string[] {
+    return x instanceof Array && typeof x[0] === 'string';
+}

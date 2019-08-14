@@ -1,4 +1,4 @@
-import { noti } from '@/store/notification';
+import noti from '@/store/notification';
 
 describe('notification test', () => {
     it('basic', () => {

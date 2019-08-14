@@ -177,5 +177,4 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     }
 }
 
-export const display = new Display();
-export default display;
+export default new Display();

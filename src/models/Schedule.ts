@@ -16,6 +16,7 @@ import Hashable from './Hashable';
 import { Day, dayToInt, TYPES } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
+import { isNumberArray } from '../utils';
 
 export interface SectionJSON {
     id: number;
@@ -63,10 +64,6 @@ export default class Schedule {
     ];
 
     public static savedColors: { [x: string]: string } = {};
-
-    public static isNumberArray(x: any[]): x is number[] {
-        return typeof x[0] === 'number';
-    }
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
@@ -165,7 +162,7 @@ export default class Schedule {
                     schedule.All[key] = new Set();
                 } else {
                     // backward compatibility for version prior to v5.0 (inclusive)
-                    if (Schedule.isNumberArray(sections)) {
+                    if (isNumberArray(sections)) {
                         const secs = sections as number[];
                         schedule.All[key] = new Set(
                             secs

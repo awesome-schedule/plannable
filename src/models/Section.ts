@@ -6,7 +6,6 @@
 /**
  *
  */
-import { findBestMatch } from 'string-similarity';
 import { MeetingDate, TimeArray } from '../algorithm';
 import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
@@ -157,7 +156,7 @@ export default class Section implements CourseFields, Hashable {
         const dayArray: number[][] = [[], [], [], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them and add to tmp_dict
-        const buildingList = window.buildingList;
+        const searcher = window.buildingSearcher;
         for (const meeting of this.meetings) {
             const t = meeting.days;
             // skip empty string
@@ -177,14 +176,13 @@ export default class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
                 dayBlock.push(...timeBlock);
 
-                const { room } = meeting;
-                const roomMatch = findBestMatch(room.toLowerCase(), buildingList as string[]);
+                const [idx, rating] = searcher.search(meeting.room);
                 // we set the match threshold to 0.4
-                if (roomMatch.bestMatch.rating >= 0.4) {
-                    dayBlock.push(roomMatch.bestMatchIndex);
+                if (rating >= 0.4) {
+                    dayBlock.push(idx);
                 } else {
                     // mismatch!
-                    console.warn(room, 'match not found!');
+                    console.warn(meeting.room, 'match not found!');
                     dayBlock.push(-1);
                 }
             }

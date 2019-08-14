@@ -250,5 +250,4 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
     }
 }
 
-export const schedule = new ScheduleStore();
-export default schedule;
+export default new ScheduleStore();

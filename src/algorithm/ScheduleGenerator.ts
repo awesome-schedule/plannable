@@ -239,6 +239,8 @@ class ScheduleGenerator {
          * the side length of the conflict cache matrix
          */
         const sideLen = maxLen * numCourses;
+
+        // note: these are all Uint8Arrays so no byte alignment is needed
         let byteOffset =
             numCourses * 3 + // sectionLens + pathMemory + currentChoices
             maxLen * numCourses + // timeArrLens
@@ -261,7 +263,7 @@ class ScheduleGenerator {
         const currentChoices = new Uint8Array(buffer, byteOffset, numCourses);
         byteOffset += numCourses;
         /**
-         * the cache of the length of TimeArrays for each section
+         * the cache of the length of TimeArray for each section
          * | Sections | Course1 | Course 2 | ... |
          * | -------- | ------- | -------- | --- |
          * | Sec1     | 14      | 14       |     |

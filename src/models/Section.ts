@@ -176,10 +176,10 @@ export default class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
                 dayBlock.push(...timeBlock);
 
-                const roomMatch = searcher.search(meeting.room);
+                const [idx, rating] = searcher.search(meeting.room);
                 // we set the match threshold to 0.4
-                if (roomMatch.length) {
-                    dayBlock.push(roomMatch[0][1]);
+                if (rating >= 0.4) {
+                    dayBlock.push(idx);
                 } else {
                     // mismatch!
                     console.warn(meeting.room, 'match not found!');

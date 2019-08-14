@@ -11,8 +11,8 @@ import axios from 'axios';
 import { getApi } from '.';
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
-import { Searcher } from 'fast-fuzzy';
 import { isStringArray } from '@/utils';
+import { FastSearcher } from '@/algorithm/Searcher';
 
 export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
@@ -49,9 +49,6 @@ export function loadTimeMatrix(force = false) {
     );
 }
 
-type PromiseType<T> = T extends Promise<infer R> ? R : any;
-export type BuildingSearcher = PromiseType<ReturnType<typeof requestBuildingSearcher>>;
-
 /**
  * Try to load the array of the names of buildings from localStorage.
  * If it expires or does not exist,
@@ -62,14 +59,10 @@ export type BuildingSearcher = PromiseType<ReturnType<typeof requestBuildingSear
  */
 export function loadBuildingSearcher(force = false) {
     return fallback(
-        loadFromCache<BuildingSearcher, BuildingListJSON>(
+        loadFromCache<FastSearcher, BuildingListJSON>(
             'buildingList',
             requestBuildingSearcher,
-            x =>
-                new Searcher(x.buildingList.map((name, idx) => [name, idx] as const), {
-                    keySelector: x => x[0],
-                    threshold: 0.4
-                }),
+            x => new FastSearcher(x.buildingList),
             {
                 expireTime: 1000 * 86400,
                 force
@@ -126,10 +119,7 @@ export async function requestBuildingSearcher() {
                 buildingList: data
             })
         );
-        return new Searcher(data.map((name, idx) => [name, idx] as const), {
-            keySelector: x => x[0],
-            threshold: 0.4
-        });
+        return new FastSearcher(data);
     } else {
         throw new Error('Data format error');
     }

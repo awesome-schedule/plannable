@@ -9,7 +9,7 @@ module.exports = {
     rules: {
         'no-console': 'off',
         'no-debugger': 'error',
-        'prefer-const': 'error',
+        'prefer-const': 'warn',
         'vue/require-default-prop': 'off',
         'no-var': 'error',
         'vue/no-v-html': 'off',

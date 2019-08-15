@@ -8,7 +8,7 @@
  */
 import { NotiMsg } from '@/store/notification';
 import { colorDepthSearch, DFS, graphColoringExact, toNativeAdjList } from '../algorithm';
-import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
+import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -16,7 +16,6 @@ import Hashable from './Hashable';
 import { Day, dayToInt, TYPES } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import { isNumberArray } from '../utils';
 
 export interface SectionJSON {
     id: number;
@@ -162,7 +161,7 @@ export default class Schedule {
                     schedule.All[key] = new Set();
                 } else {
                     // backward compatibility for version prior to v5.0 (inclusive)
-                    if (isNumberArray(sections)) {
+                    if (Utils.isNumberArray(sections)) {
                         const secs = sections as number[];
                         schedule.All[key] = new Set(
                             secs
@@ -281,7 +280,7 @@ export default class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw: RawAlgoSchedule | ScheduleAll = [], public events: Event[] = []) {
+    constructor(raw: RawAlgoCourse[] | ScheduleAll = [], public events: Event[] = []) {
         this.All = {};
         this.days = [[], [], [], [], [], [], []];
         this._preview = null;

@@ -46,7 +46,7 @@ import ScheduleEvaluator, { EvaluatorOptions, sortBlocks } from './ScheduleEvalu
  */
 export type TimeArray = Int16Array;
 /**
- * Start and end date in millisecond (obtained via [[Date.getTime]])
+ * Start and end date in millisecond (obtained via `Date.getTime`)
  */
 export type MeetingDate = [number, number];
 
@@ -63,11 +63,6 @@ export type MeetingDate = [number, number];
  * ```
  */
 export type RawAlgoCourse = [string, number[]];
-
-/**
- * A schedule is an array of `RawAlgoCourse`
- */
-export type RawAlgoSchedule = RawAlgoCourse[];
 
 export interface GeneratorOptions {
     [x: string]: any;

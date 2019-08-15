@@ -10,14 +10,7 @@ import quickselect from 'quickselect';
 import Event from '../models/Event';
 import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap } from '../utils';
-import { RawAlgoCourse, RawAlgoSchedule, TimeArray } from './ScheduleGenerator';
-
-export interface CmpSchedule {
-    readonly schedule: RawAlgoSchedule;
-    readonly blocks: TimeArray;
-    readonly index: number;
-    coeff: number;
-}
+import { RawAlgoCourse, TimeArray } from './ScheduleGenerator';
 
 export type SortFunctions = typeof ScheduleEvaluator.sortFunctions;
 
@@ -542,9 +535,10 @@ class ScheduleEvaluator {
      * Get a `Schedule` object at idx
      */
     public getSchedule(idx: number) {
-        idx = this.indices[idx] * this.classList.length;
+        const numCourses = this.classList.length;
+        idx = this.indices[idx] * numCourses;
         return new Schedule(
-            Array.from(this.allChoices.slice(idx, idx + this.classList.length)).map(
+            Array.from(this.allChoices.slice(idx, idx + numCourses)).map(
                 (choice, classNum) => this.classList[classNum][choice]
             ),
             this.events

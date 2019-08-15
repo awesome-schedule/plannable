@@ -23,50 +23,46 @@
         </transition>
 
         <slot></slot>
-        <div id="footer">
-            <div class="container">
-                <div class="row justify-content-between">
-                    <div class="col-xs-auto pl-3 align-self-center" style="font-size: 1.1rem">
-                        Get Connected With Us
-                    </div>
-                    <div class="col-xs-auto align-self-center">
-                        <a
-                            class="mr-5 link-btn"
-                            target="_blank"
-                            title="Checkout our GitHub site to watch/star/fork"
-                            href="https://github.com/awesome-schedule/plannable/"
-                        >
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a
-                            class="ml-4 mr-5 link-btn"
-                            target="_blank"
-                            title="File an issue on GitHub"
-                            href="https://github.com/awesome-schedule/plannable/issues"
-                        >
-                            <i class="fas fa-exclamation-circle"></i>
-                        </a>
-                    </div>
+        <div id="footer-link">
+            <div class="row justify-content-between w-100">
+                <div class="col-xs-auto pl-3 align-self-center" style="font-size: 1.1rem">
+                    Get Connected With Us
+                </div>
+                <div class="col-xs-auto align-self-center">
+                    <a
+                        class="mr-5 link-btn"
+                        target="_blank"
+                        title="Checkout our GitHub site to watch/star/fork"
+                        href="https://github.com/awesome-schedule/plannable/"
+                    >
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a
+                        class="ml-4 mr-5 link-btn"
+                        target="_blank"
+                        title="File an issue on GitHub"
+                        href="https://github.com/awesome-schedule/plannable/issues"
+                    >
+                        <i class="fas fa-exclamation-circle"></i>
+                    </a>
                 </div>
             </div>
         </div>
-
-        <div id="cr" style="width: 100%">&copy;2019 —&nbsp;<strong>Plannable</strong></div>
+        <div id="footer-org">&copy;2019 —&nbsp;<strong>Plannable</strong></div>
     </div>
 </template>
 <style scoped>
-#footer {
+#footer-link {
     background-color: #009688;
     color: white;
-    clear: both;
     padding: 20px;
 }
-#cr {
+#footer-org {
     background-color: #424242;
     color: white;
-    clear: both;
-    padding: 7px;
+    padding: 8px;
     text-align: center;
+    width: 100%;
 }
 .link-btn {
     color: inherit;

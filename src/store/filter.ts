@@ -181,6 +181,8 @@ const defaultOptions: DetailedEvaluatorOptions = {
     }
 };
 
+const configs = { distance: { threshold: 30 } };
+
 /**
  * get a copy of the default options
  */
@@ -311,6 +313,11 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     allowClosed = true;
     sortOptions = getDefaultOptions();
     refSchedule: ScheduleAll = {};
+    configs: {
+        distance: {
+            threshold: number;
+        };
+    } = configs;
 
     readonly sortModes: readonly DetailedSortMode[] = [
         {

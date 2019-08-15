@@ -151,7 +151,12 @@ class ScheduleEvaluator {
         /**
          * compute the sum of walking distances between each consecutive pair of classes
          */
-        distance(timeMatrix: Readonly<Int32Array>, blocks: TimeArray, offset: number) {
+        distance(
+            timeMatrix: Readonly<Int32Array>,
+            blocks: TimeArray,
+            offset: number,
+            threshold: number
+        ) {
             // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
             const len = timeMatrix.length ** 0.5,
                 oEnd = offset + 7;
@@ -160,7 +165,7 @@ class ScheduleEvaluator {
                 const end = blocks[i + 1] + offset - 5;
                 for (let j = blocks[i] + offset; j < end; j += 3) {
                     // does not count the distance of the gap between two classes is greater than 45 minutes
-                    if (blocks[j + 3] - blocks[j + 1] < 45) {
+                    if (blocks[j + 3] - blocks[j + 1] < threshold) {
                         const r1 = blocks[j + 2],
                             r2 = blocks[j + 5];
 
@@ -172,9 +177,6 @@ class ScheduleEvaluator {
             return dist;
         },
 
-        /**
-         * need optimization (e.g. sort schedule and similarity schedule at first)
-         */
         similarity(this: ScheduleEvaluator, start: number) {
             const sim = this.refSchedule,
                 classList = this.classList,
@@ -285,7 +287,10 @@ class ScheduleEvaluator {
         public offsets = new Uint32Array(),
         public blocks = new Int16Array(),
         public allChoices = new Uint8Array(),
-        public refSchedule: ScheduleAll = {}
+        public refSchedule: ScheduleAll = {},
+        public configs: { [option in keyof Partial<SortFunctions>]: { [x: string]: number } } = {
+            distance: { threshold: 30 }
+        }
     ) {
         const len = offsets.length;
         // allocate two set of indices on the same array buffer
@@ -335,10 +340,11 @@ class ScheduleEvaluator {
                 const evalFunc = ScheduleEvaluator.sortFunctions.similarity.bind(this);
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
             } else if (funcName === 'distance') {
+                const thresh = this.configs.distance ? this.configs.distance.threshold : 30;
                 const evalFunc = ScheduleEvaluator.sortFunctions.distance;
                 const timeMatrix = this.timeMatrix;
                 for (let i = 0; i < len; i++)
-                    newCache[i] = evalFunc(timeMatrix, blocks, offsets[i]);
+                    newCache[i] = evalFunc(timeMatrix, blocks, offsets[i], thresh);
             } else {
                 const evalFunc = ScheduleEvaluator.sortFunctions[funcName];
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(blocks, offsets[i]);

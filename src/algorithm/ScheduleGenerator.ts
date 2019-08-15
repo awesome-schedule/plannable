@@ -12,7 +12,7 @@ import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
-import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
+import ScheduleEvaluator, { EvaluatorOptions, SortFunctions } from './ScheduleEvaluator';
 
 /**
  * The blocks is a condensed fixed-length array
@@ -101,7 +101,10 @@ class ScheduleGenerator {
     public getSchedules(
         schedule: Schedule,
         sort = true,
-        refSchedule: ScheduleAll<Set<number>> = {}
+        refSchedule: ScheduleAll<Set<number>> = {},
+        configs: { [option in keyof Partial<SortFunctions>]: { [x: string]: number } } = {
+            distance: { threshold: 30 }
+        }
     ): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
 
@@ -176,7 +179,8 @@ class ScheduleGenerator {
             timeArrayList,
             dateList,
             schedule.events,
-            refSchedule
+            refSchedule,
+            configs
         );
         const size = evaluator.size;
         if (size > 0) {
@@ -210,7 +214,8 @@ class ScheduleGenerator {
         timeArrayList: TimeArray[][],
         dateList: MeetingDate[][],
         events: Event[],
-        refSchedule: ScheduleAll = {}
+        refSchedule: ScheduleAll = {},
+        configs: { [option in keyof Partial<SortFunctions>]: { [x: string]: number } }
     ) {
         /**
          * current course index
@@ -407,7 +412,8 @@ class ScheduleGenerator {
             blocks,
             allChoices.slice(0, count * numCourses), // only COPY the needed part,
             // to allow the underlying buffer of the original array to be garbage collected
-            refSchedule
+            refSchedule,
+            configs
         );
     }
 }

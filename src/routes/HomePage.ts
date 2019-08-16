@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import VersionModal from '../components/VersionModal';
-import animate from 'animate.css';
 
 let note = 'loading release note...';
 

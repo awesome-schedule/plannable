@@ -1,7 +1,10 @@
 <template>
-    <div>
-        <transition name="fadeInDown">
-            <nav class="navbar navbar-expand navbar-light bd-navbar flex-column flex-md-row ">
+    <div class="text-center">
+        <transition name="slide-fade-down">
+            <nav
+                v-if="show"
+                class="navbar navbar-expand navbar-light bd-navbar flex-column flex-md-row "
+            >
                 <img class="img-fluid logo" src="../assets/cover.jpg" />
                 <div class="navbar-nav-scroll ml-auto">
                     <ul class="navbar-nav">
@@ -20,12 +23,11 @@
         </transition>
 
         <transition name="slide-fade">
-            <div v-if="show" class="jumbotron">
-                <h1 style="font-size:5vw">Welcome to Plannable</h1>
-                <p class="lead" style="font-size:3vw">
+            <div v-if="show" class="jumbotron float-left">
+                <h1 class="display-3">Welcome to Plannable</h1>
+                <p class="lead text-left">
                     Everything is Plannable
                 </p>
-                <!-- <hr class="my-4" /> -->
 
                 <div class="d-flex flex-row select-school">
                     <select v-model="currentSelect" class="py-0 mx-1">
@@ -40,15 +42,12 @@
                 </div>
             </div>
         </transition>
-        <div id="demo">
-            <button v-on:click="show = !show">
-                Toggle
-            </button>
-            <transition name="fade">
-                <p v-if="show">hello</p>
-            </transition>
+        <div v-if="show" class="float-left border">
+            <img class="img-fluid logo" src="../assets/cover.jpg" />
+            video here
         </div>
-        <div id="release-note" class="container"></div>
+
+        <!-- <div id="release-note" class="container"></div> -->
     </div>
 </template>
 
@@ -68,17 +67,18 @@
 .lead {
     margin-left: 20px;
 }
-.slide-fade-enter-active {
+.slide-fade-enter-active,
+.slide-fade-down-enter-active {
     transition: all 1.5s ease;
 }
-.fadeInDown-fade-enter-active {
-    transition: opacity 0.5s;
-}
-.fadeInDown-fade-enter {
-    opacity: 0;
-}
+
 .slide-fade-enter {
     transform: translateX(-75px);
+    opacity: 0;
+}
+
+.slide-fade-down-enter {
+    transform: translateY(-75px);
     opacity: 0;
 }
 </style>

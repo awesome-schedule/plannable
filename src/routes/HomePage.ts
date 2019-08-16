@@ -98,6 +98,7 @@ export default class Homepage extends Vue {
     schoolAbbr = ['uva'];
     currentSelect = 0;
     show = false;
+    navbarHeight = '10vh';
     redirection() {
         const index = this.currentSelect - 1;
         if (index < 0) {
@@ -111,5 +112,6 @@ export default class Homepage extends Vue {
         this.show = true;
         await releaseNote();
         $('#release-note').html(note);
+        this.navbarHeight = `margin-top: ${$('#navbar').outerHeight()}px`;
     }
 }

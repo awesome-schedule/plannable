@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import VersionModal from '../components/VersionModal';
+import animate from 'animate.css';
 
 let note = 'loading release note...';
 
@@ -97,7 +98,7 @@ export default class Homepage extends Vue {
     schoolNames = ['Select Your School', 'University Of Virginia'];
     schoolAbbr = ['uva'];
     currentSelect = 0;
-
+    show = false;
     redirection() {
         const index = this.currentSelect - 1;
         if (index < 0) {
@@ -108,6 +109,7 @@ export default class Homepage extends Vue {
         location.href = `/${url}`;
     }
     async mounted() {
+        this.show = true;
         await releaseNote();
         $('#release-note').html(note);
     }

@@ -262,9 +262,8 @@
                     input is a description match, which can be shown by clicking the
                     <i class="fas fa-info-circle"></i> icon.
                 </p>
-                <v-card class="mt-3 mb-5 mx-auto gif-center">
-                    <v-img :src="imgPath('match-desc.png')"></v-img>
-                </v-card>
+
+                <img :src="imgPath('match-desc.png')" class="img-fluid" />
 
                 <h5 id="item-2-1" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -273,83 +272,77 @@
 
                 <div class="row mt-3 mb-5">
                     <div class="col-sm">
-                        <v-card>
-                            <v-img :src="imgPath('search_class.png')" aspect-ratio="1.6"></v-img>
-
-                            <v-card-title primary-title>
+                        <div class="card">
+                            <img
+                                :src="imgPath('search_class.png')"
+                                class="card-img-top"
+                                alt="search_class.png"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Add Courses</h5>
                                 <div>
-                                    <h5 class="headline mb-3">Add Courses</h5>
-                                    <div>
-                                        You can add courses by
-                                        <font class="amber lighten-3">searching</font> department,
-                                        professor, class number, or keywords. Pick a section or
-                                        multiple sections that you want to take, or choose "<font
-                                            class="amber lighten-3"
-                                            >any section</font
-                                        >" if you don't have a particular preference. To clear your
-                                        search query, press
-                                        <font class="amber lighten-3">ESC</font> or click on the
-                                        <i class="fas fa-times click-icon"> </i> button at the right
-                                        end of the search box.
-                                    </div>
+                                    You can add courses by
+                                    <font style="background-color:#F2E890">searching</font>
+                                    department, professor, class number, or keywords. Pick a section
+                                    or multiple sections that you want to take, or choose "<font
+                                        style="background-color:#F2E890"
+                                        >any section</font
+                                    >" if you don't have a particular preference. To clear your
+                                    search query, press
+                                    <font style="background-color:#F2E890">ESC</font> or click on
+                                    the <i class="fas fa-times click-icon"> </i> button at the right
+                                    end of the search box.
                                 </div>
-                            </v-card-title>
-                        </v-card>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-sm">
-                        <v-card>
-                            <v-img
+                        <div class="card">
+                            <img
                                 :src="imgPath('generate_schedule.png')"
-                                aspect-ratio="1.6"
-                            ></v-img>
-
-                            <v-card-title primary-title>
+                                class="card-img-top"
+                                alt="search_class.png"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Generate Schedules</h5>
                                 <div>
-                                    <h5 class="headline mb-3">Generate Schedules</h5>
-                                    <div>
-                                        After you have finished selecting your courses, you can hit
-                                        the
-                                        <font class="lime lighten-3">generate</font> button to
-                                        generate all possibles schedules out of the sections you
-                                        selected. You can switch between the generated schedule and
-                                        your current selection by clicking the "<font
-                                            class="lime lighten-3"
-                                            >edit class</font
-                                        >/<font class="lime lighten-3">view schedule</font>" button
-                                        below the search bar.
-                                    </div>
+                                    After you have finished selecting your courses, you can hit the
+                                    <font style="background-color:#D9F290 ">generate</font> button
+                                    to generate all possibles schedules out of the sections you
+                                    selected. You can switch between the generated schedule and your
+                                    current selection by clicking the "<font
+                                        style="background-color:#D9F290"
+                                        >edit class</font
+                                    >/<font style="background-color:#D9F290 ">view schedule</font>"
+                                    button below the search bar.
                                 </div>
-                            </v-card-title>
-                        </v-card>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-sm">
-                        <v-card>
-                            <v-img
+                        <div class="card">
+                            <img
                                 :src="imgPath('multiple_schedule.png')"
-                                aspect-ratio="1.6"
-                            ></v-img>
-
-                            <v-card-title primary-title>
+                                class="card-img-top"
+                                alt="search_class.png"
+                            />
+                            <div class="card-body">
+                                <h5 class="card-title">Multiple Schedules</h5>
                                 <div>
-                                    <h5 class="headline mb-3">Multiple Schedules</h5>
-                                    <div>
-                                        You can plan multiple schedules at the same time. Click the
-                                        <i
-                                            class="far fa-calendar-plus click-icon teal lighten-4"
-                                        ></i>
-                                        icon, you will have a new empty schedule independent with
-                                        your existing schedules. Click
-                                        <i class="fas fa-long-arrow-alt-left teal lighten-4"></i> or
-                                        <i class="fas fa-long-arrow-alt-right teal lighten-4"></i>
-                                        to navigate through your schedules. Use
-                                        <i class="far fa-copy click-icon teal lighten-4"></i> to
-                                        make a copy of the current scheudle, and use
-                                        <i class="far fa-calendar-times teal lighten-4"></i> delete
-                                        the current schedule.
-                                    </div>
+                                    You can plan multiple schedules at the same time. Click the
+                                    <i class="far fa-calendar-plus click-icon"></i>
+                                    icon, you will have a new empty schedule independent with your
+                                    existing schedules. Click
+                                    <i class="fas fa-long-arrow-alt-left"></i> or
+                                    <i class="fas fa-long-arrow-alt-right"></i>
+                                    to navigate through your schedules. Use
+                                    <i class="far fa-copy click-icon"></i> to make a copy of the
+                                    current scheudle, and use
+                                    <i class="far fa-calendar-times"></i> delete the current
+                                    schedule.
                                 </div>
-                            </v-card-title>
-                        </v-card>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -359,72 +352,7 @@
                     popular courses or popular professors' sections.
                 </p>
 
-                <v-stepper non-linear class="mb-5">
-                    <v-stepper-header>
-                        <v-stepper-step color="blue-grey" editable step="1">
-                            Add Classes
-                        </v-stepper-step>
-
-                        <v-divider></v-divider>
-
-                        <v-stepper-step color="blue-grey" editable step="2">
-                            Generate Schedules
-                        </v-stepper-step>
-
-                        <v-divider></v-divider>
-
-                        <v-stepper-step color="blue-grey" editable step="3">
-                            Multiple Schedules
-                        </v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content step="1">
-                            <v-card class="mb-5">
-                                <v-img :src="imgPath('select_class.gif')">
-                                    <template v-slot:placeholder>
-                                        <v-layout fill-height align-center justify-center ma-0>
-                                            <v-progress-circular
-                                                indeterminate
-                                                color="purple"
-                                            ></v-progress-circular>
-                                        </v-layout>
-                                    </template>
-                                </v-img>
-                            </v-card>
-                        </v-stepper-content>
-
-                        <v-stepper-content step="2">
-                            <v-card class="mb-5">
-                                <v-img :src="imgPath('generate_class.gif')">
-                                    <template v-slot:placeholder>
-                                        <v-layout fill-height align-center justify-center ma-0>
-                                            <v-progress-circular
-                                                indeterminate
-                                                color="purple"
-                                            ></v-progress-circular>
-                                        </v-layout>
-                                    </template>
-                                </v-img>
-                            </v-card>
-                        </v-stepper-content>
-
-                        <v-stepper-content step="3">
-                            <v-card class="mb-5">
-                                <v-img :src="imgPath('multiple_schedule.gif')">
-                                    <template v-slot:placeholder>
-                                        <v-layout fill-height align-center justify-center ma-0>
-                                            <v-progress-circular
-                                                indeterminate
-                                                color="purple"
-                                            ></v-progress-circular>
-                                        </v-layout>
-                                    </template>
-                                </v-img>
-                            </v-card>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="scheduleSteps" :helper="true" :always-title="true"></stepper>
 
                 <h5 id="item-2-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -464,9 +392,7 @@
                     schedule at the bottom left corner under "Schedule Overview". These IDs can be
                     direcly entered into SIS, through the input box left to your shopping cart.
                 </p>
-                <v-card class="my-3 mx-auto gif-center">
-                    <v-img :src="imgPath('enroll-sis.png')"></v-img>
-                </v-card>
+                <img :src="imgPath('enroll-sis.png')" alt="enroll-sis.png" class="img-fluid" />
                 <p>
                     If some of the IDs are missing, it is likely that you are in "Edit class" mode
                     and you selected "Any section" for that course. If there is a "+1" (or a higher
@@ -476,9 +402,11 @@
                     schedule shown below, there are five available ENWR 1510 on Monday and Wednesday
                     from 5:00 to 6:15PM.
                 </p>
-                <v-card class="mt-3 mb-5 mx-auto gif-center">
-                    <v-img :src="imgPath('multi-section.png')"></v-img>
-                </v-card>
+                <img
+                    :src="imgPath('multi-section.png')"
+                    alt="multi-section.png"
+                    class="img-fluid"
+                />
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -503,18 +431,9 @@
                     That is, when you edit the event in your planned schedule 1, it does not affect
                     your planned schedule 2.
                 </p>
-                <v-card class="my-5 mx-auto gif-center">
-                    <v-img :src="imgPath('add_event.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
+                <div style="text-align: center">
+                    <img :src="imgPath('add_event.gif')" alt="add_event.gif" class="img-fluid" />
+                </div>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -537,18 +456,7 @@
                 <p>
                     You can select time and day at which you do not wish to have class.
                 </p>
-                <v-card class="my-4 mx-auto gif-center">
-                    <v-img :src="imgPath('no-class-time.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
+                <img :src="imgPath('no-class-time.gif')" alt="no-class-time.gif" />
                 <h5 id="item-4-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Allow Waitlist/Closed</strong>
@@ -609,20 +517,9 @@
                 If you want to balance between multiple sort options, try "combined". On the other
                 hand, if you want to prioritize a single sort option (such as No Early), then try
                 "fallback", as it will sort using options on top first.
-
-                <v-card class="my-5 mx-auto gif-center">
-                    <v-img :src="imgPath('sort.gif')">
-                        <template v-slot:placeholder>
-                            <v-layout fill-height align-center justify-center ma-0>
-                                <v-progress-circular
-                                    indeterminate
-                                    color="purple"
-                                ></v-progress-circular>
-                            </v-layout>
-                        </template>
-                    </v-img>
-                </v-card>
-
+                <div class="my-3" style="text-align:center">
+                    <img :src="imgPath('sort.gif')" alt="sort.gif" class="img-fluid" />
+                </div>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -792,47 +689,7 @@
                     The instruction on how to export your schedule to a iCalendar file and import it
                     to your Google calendar is shown below.
                 </p>
-                <v-stepper v-model="e2" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in icalSteps.length"
-                            :key="idx"
-                            :complete="e2 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e2 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in icalSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="2.37"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e2 === icalSteps.length ? (e2 = 1) : e2++"
-                                >{{ e2 === icalSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e2 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e2--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="icalSteps" :helper="true" :always-title="false"></stepper>
 
                 <h5 id="item-7-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -845,94 +702,15 @@
                     information in your schedule, so it could only be used on our website. To
                     re-import a JSON file, simply click the file chooser, find the file and confirm.
                 </p>
-                <v-stepper v-model="e3" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in jsonSteps.length"
-                            :key="idx"
-                            :complete="e3 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e3 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
+                <stepper :info="jsonSteps" :helper="true" :always-title="true"> </stepper>
 
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in jsonSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e3 === jsonSteps.length ? (e3 = 1) : e3++"
-                                >{{ e3 === jsonSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e3 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e3--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
                 <p>
                     Alternatively, you can export your profile to an URL. We will encode and
                     compress all information contained in your current profile in the resulting URL,
                     which will be quite long. Exporting your profile to an URL makes it more
                     convenient to share your profile with your friends.
                 </p>
-                <v-stepper v-model="e4" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in urlSteps.length"
-                            :key="idx"
-                            :complete="e4 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e4 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in urlSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e4 === urlSteps.length ? (e4 = 1) : e4++"
-                                >{{ e4 === urlSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e4 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e4--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="urlSteps" :helper="true" :always-title="true"></stepper>
                 <h5 id="item-7-3" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i>
                     Multiple Profiles
@@ -950,9 +728,11 @@
                     profiles. If there is a conflict, you will be prompted to choose either
                     overwriting the existing profile or keep both.
                 </p>
-                <v-card class="mt-3 mb-5 mx-auto gif-center">
-                    <v-img :src="imgPath('multipleProfile.png')"></v-img>
-                </v-card>
+                <img
+                    :src="imgPath('multipleProfile.png')"
+                    alt="multipleProfile.png"
+                    class="img-fluid"
+                />
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"
@@ -974,47 +754,7 @@
                     features in the previous sections. You can share shedules with other people
                     using <strong> export/import </strong>, then compare the schedules here :)
                 </p>
-                <v-stepper v-model="e5" class="my-5 mx-auto" style="width:60vw;">
-                    <v-stepper-header>
-                        <v-stepper-step
-                            v-for="idx in compareSteps.length"
-                            :key="idx"
-                            :complete="e5 > idx"
-                            :step="idx"
-                            style="margin:auto auto;cursor:pointer"
-                            color="blue-grey"
-                            :complete-icon="`fas fa-check`"
-                            @click="e5 = idx"
-                        ></v-stepper-step>
-                    </v-stepper-header>
-
-                    <v-stepper-items>
-                        <v-stepper-content v-for="(step, _) in compareSteps" :key="_" :step="_ + 1">
-                            <v-card class="mb-2 mx-auto" width="54vw">
-                                <v-img :src="step.src" aspect-ratio="1.78"></v-img>
-                            </v-card>
-                            <v-card-title class="mb-2" primary-title>
-                                <div>
-                                    <div>{{ step.title }}</div>
-                                </div>
-                            </v-card-title>
-                            <v-btn
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e5 === compareSteps.length ? (e5 = 1) : e5++"
-                                >{{ e5 === compareSteps.length ? 'Play Again' : 'Continue' }}
-                            </v-btn>
-                            <v-btn
-                                v-if="e5 !== 1"
-                                color="blue-grey"
-                                style="color:white"
-                                @click="e5--"
-                            >
-                                Back
-                            </v-btn>
-                        </v-stepper-content>
-                    </v-stepper-items>
-                </v-stepper>
+                <stepper :info="compareSteps" :helper="true" :always-title="true"></stepper>
                 <button
                     type="button"
                     class="btn btn-primary btn-lg my-5 float-right"

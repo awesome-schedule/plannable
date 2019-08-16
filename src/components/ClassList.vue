@@ -127,20 +127,20 @@
                             </ul>
                             <div
                                 v-for="sec in value.sections"
-                                :key="sec.sid"
+                                :key="sec.id"
                                 :class="{ show: isEntering && expandOnEntering }"
                             >
                                 <div
                                     class="list-group-item list-group-item-action container-fluid class-section"
                                     :class="{
-                                        active: isActive(crs.key, sec.sid)
+                                        active: isActive(crs.key, sec.id)
                                     }"
                                     :title="
-                                        isActive(crs.key, sec.sid)
+                                        isActive(crs.key, sec.id)
                                             ? 'click to unselect'
                                             : 'click to select'
                                     "
-                                    @click="select(crs.key, sec.sid)"
+                                    @click="select(crs.key, sec.id)"
                                     @mouseenter="schedule.preview(sec)"
                                     @mouseleave="schedule.removePreview()"
                                 >
@@ -158,7 +158,7 @@
                                                             highlightMatch(
                                                                 sec.topic,
                                                                 'topic',
-                                                                matches[idx][1].get(sec.sid)
+                                                                matches[idx][1].get(sec.id)
                                                             )
                                                         "
                                                     ></span>
@@ -187,7 +187,7 @@
                                                         highlightMatch(
                                                             sec.instructors.join(', '),
                                                             'instructors',
-                                                            matches[idx][1].get(sec.sid)
+                                                            matches[idx][1].get(sec.id)
                                                         )
                                                     "
                                                 ></li>
@@ -196,7 +196,7 @@
                                         </div>
                                         <div class="col col-sm-1 align-self-center">
                                             <i
-                                                v-if="isActive(crs.key, sec.sid)"
+                                                v-if="isActive(crs.key, sec.id)"
                                                 class="far fa-check-square"
                                             ></i>
                                             <i v-else class="far fa-square"></i>

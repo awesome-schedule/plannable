@@ -17,18 +17,26 @@
                         {{ meeting.days }} @ {{ meeting.room }}
                     </div>
                     <div class="m-color">
-                        {{ section.status }} {{ section.enrollment }}/{{ section.enrollment_limit }}
+                        {{ section.status }} {{ section.enrollment }}/{{
+                            section.enrollment_limit
+                        }}
+                        | Wait List: {{ section.wait_list }}
                     </div>
                     <br />
                     <div>{{ section.description }}</div>
                     <div v-if="semester" class="mt-2">
                         <button
+                            v-if="config.enableDetails"
                             class="btn btn-outline-info mr-2"
-                            @click="openLousList(semester.id, section.id)"
+                            @click="config.viewDetails(semester.id, section.id)"
                         >
                             More Details (Lou's List)
                         </button>
-                        <button class="btn btn-outline-info" @click="openVAGrade(section)">
+                        <button
+                            v-if="config.enableGrades"
+                            class="btn btn-outline-info"
+                            @click="config.viewGrades(section)"
+                        >
                             Grade Distribution
                         </button>
                     </div>

@@ -8,33 +8,7 @@
  */
 import { AxiosError } from 'axios';
 import { saveAs } from 'file-saver';
-import { CourseFields, Match } from '../models/Course';
-
-/**
- * open a course detail on Lou's list
- * @author Kaiying Shan
- */
-export function openLousList(semesterId: string, courseId: number) {
-    window.open(
-        'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
-            semesterId +
-            '&ClassNumber=' +
-            courseId,
-        '_blank',
-        'width=650,height=700,scrollbars=yes'
-    );
-}
-/**
- * view grade distribution of this course on vagrades
- * @author Hanzhi Zhou
- */
-export function openVAGrade(course: CourseFields) {
-    window.open(
-        `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
-        '_blank',
-        'width=650,height=700,scrollbars=yes'
-    );
-}
+import { Match } from '../models/Course';
 
 /**
  * highlight a matched part of a short string given that `match` is not undefined and `match.match === expMatch`
@@ -140,4 +114,12 @@ export function errToStr(err: string | AxiosError) {
     else if (err.request) errStr += `No internet`;
     else errStr += err.message;
     return errStr;
+}
+
+export function isNumberArray(x: any): x is number[] {
+    return Array.isArray(x) && typeof x[0] === 'number';
+}
+
+export function isStringArray(x: any): x is string[] {
+    return x instanceof Array && typeof x[0] === 'string';
 }

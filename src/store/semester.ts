@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import { fallback } from '@/data/Loader';
 import { loadSemesterList } from '@/data/SemesterListLoader';
 import { CancelablePromise } from '@/utils';
@@ -51,7 +55,7 @@ class Semesters implements SemesterState {
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
     async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
-        const temp = loadSemesterData(currentSemester, force);
+        const temp = await loadSemesterData(currentSemester, force);
 
         // allow one to cancel the pending promise if old data exists
         if (temp.old) this.pendingPromise = temp.new;
@@ -61,7 +65,7 @@ class Semesters implements SemesterState {
             errMsg: x => `Failed to fetch ${name} data: ${x}`,
             warnMsg: x => `Failed to fetch ${name} data: ${x}. Old data is used`,
             succMsg: `Successfully loaded ${name} data!`,
-            timeoutTime: 15000
+            timeoutTime: 1500000
         });
         //  if the a catalog object is returned
         if (result.payload) {
@@ -77,5 +81,4 @@ class Semesters implements SemesterState {
     }
 }
 
-export const semester = new Semesters();
-export default semester;
+export default new Semesters();

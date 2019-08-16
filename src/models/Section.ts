@@ -1,3 +1,4 @@
+/* eslint-disable import/export */
 /**
  * @author Hanzhi Zhou, Kaiying Cat
  * @module models
@@ -6,13 +7,12 @@
 /**
  *
  */
-import { findBestMatch } from 'string-similarity';
 import { MeetingDate, TimeArray } from '../algorithm';
-import { hashCode, parseDate, parseTimeAll } from '../utils';
+import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { CourseStatus, dayToInt, STATUSES } from './Meta';
+import { CourseStatus, dayToInt } from './Meta';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,
@@ -28,10 +28,56 @@ type SectionMatchFields = 'topic' | 'instructors';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
 
 /**
+ * fields of the section that must be created via `Object.create`
+ */
+export interface SectionFields {
+    /**
+     * reference to the course that this section belongs to
+     */
+    readonly course: Course;
+    /**
+     * Key of the course that this section belongs to; same for all sections.
+     */
+    readonly key: string;
+    /**
+     * the id of the section, must be globally unique
+     */
+    readonly id: number;
+    /**
+     * the section number recorded in sis
+     */
+    readonly section: string;
+    /**
+     * the topic of this section, may be empty
+     */
+    readonly topic: string;
+    /**
+     * one of "Open", "Closed" and "Wait List"
+     */
+    readonly status: CourseStatus;
+    readonly enrollment: number;
+    readonly enrollment_limit: number;
+    readonly wait_list: number;
+    /**
+     * array of instructor names (computed from meeting)
+     */
+    readonly instructors: readonly string[];
+    readonly dates: string;
+    readonly meetings: readonly Meeting[];
+
+    readonly valid: ValidFlag;
+    readonly dateArray: MeetingDate;
+}
+
+// use class-interface merging
+
+export default interface Section extends SectionFields {}
+/**
  * A section contains all the fields that a Course has,
  * and it holds additional information specific to that section.
  *
- * All section instances are immutable
+ * All section instances are immutable. Additionally, they will never be duplicated.
+ * They will only created using `Object.create`
  */
 export default class Section implements CourseFields, Hashable {
     public static readonly Validity = [
@@ -40,72 +86,30 @@ export default class Section implements CourseFields, Hashable {
         'Fatal: This section has several different meeting dates.',
         'Fatal: Some meetings have invalid start or end time.',
         'Fatal: This section has unknown start and end date.'
-    ];
-
-    public readonly department: string;
-    public readonly number: number;
-    public readonly type: string;
-    public readonly units: string;
-    public readonly title: string;
-    public readonly description: string;
-
-    /**
-     * Key of the course that this section belongs to; same for all sections.
-     */
-    public readonly key: string;
-    /**
-     * the id of the section recorded in sis
-     */
-    public readonly id: number;
-    /**
-     * the section number recorded in sis
-     */
-    public readonly section: string;
-    public readonly topic: string;
-    /**
-     * one of "Open", "Closed" and "Wait List"
-     */
-    public readonly status: CourseStatus;
-    public readonly enrollment: number;
-    public readonly enrollment_limit: number;
-    public readonly wait_list: number;
-    public readonly instructors: readonly string[];
-    public readonly dates: string;
-    public readonly meetings: readonly Meeting[];
-
-    public readonly valid: ValidFlag;
-    public readonly dateArray?: MeetingDate;
-    /**
-     * @param course a reference to the course that this section belongs to
-     * @param sid the index of the section
-     */
-    constructor(course: Course, public readonly sid: number) {
-        this.key = course.key;
-
-        this.department = course.department;
-        this.number = course.number;
-        this.type = course.type;
-        this.units = course.units;
-        this.title = course.title;
-        this.description = course.description;
-
-        const raw = course.raw[6][sid];
-        this.id = raw[0];
-        this.section = raw[1];
-        this.topic = raw[2];
-        this.status = STATUSES[raw[3]];
-        this.enrollment = raw[4];
-        this.enrollment_limit = raw[5];
-        this.wait_list = raw[6];
-        this.dateArray = parseDate((this.dates = raw[7]));
-        this.valid = raw[8];
-        this.meetings = raw[9].map(x => new Meeting(x));
-        this.instructors = Meeting.getInstructors(raw[9]);
+    ] as const;
+    // --------- getters for fields of the course ---------------------
+    get department() {
+        return this.course.department;
     }
-
-    public get displayName() {
+    get number() {
+        return this.course.number;
+    }
+    get type() {
+        return this.course.type;
+    }
+    get units() {
+        return this.course.units;
+    }
+    get title() {
+        return this.course.title;
+    }
+    get description() {
+        return this.course.description;
+    }
+    get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
+    // --------- end getters for fields of the course ---------------------
 
     /**
      * convert [[Section.valid]] to human readable message
@@ -126,7 +130,7 @@ export default class Section implements CourseFields, Hashable {
     public sameTimeAs(other: Section) {
         const len = this.meetings.length;
         if (len !== other.meetings.length) return false;
-        return this.meetings.every((x, i) => x.sameTimeAs(other.meetings[i]));
+        return this.meetings.every((x, i) => x.days === other.meetings[i].days);
     }
 
     /**
@@ -153,7 +157,7 @@ export default class Section implements CourseFields, Hashable {
         const dayArray: number[][] = [[], [], [], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them and add to tmp_dict
-        const buildingList = window.buildingList;
+        const searcher = window.buildingSearcher;
         for (const meeting of this.meetings) {
             const t = meeting.days;
             // skip empty string
@@ -173,14 +177,13 @@ export default class Section implements CourseFields, Hashable {
                 // the timeBlock is flattened
                 dayBlock.push(...timeBlock);
 
-                const { room } = meeting;
-                const roomMatch = findBestMatch(room.toLowerCase(), buildingList as string[]);
+                const [idx, rating] = searcher.search(meeting.room);
                 // we set the match threshold to 0.4
-                if (roomMatch.bestMatch.rating >= 0.4) {
-                    dayBlock.push(roomMatch.bestMatchIndex);
+                if (rating >= 0.4) {
+                    dayBlock.push(idx);
                 } else {
                     // mismatch!
-                    console.warn(room, 'match not found!');
+                    console.warn(meeting.room, 'match not found!');
                     dayBlock.push(-1);
                 }
             }
@@ -199,7 +202,7 @@ export default class Section implements CourseFields, Hashable {
     }
 
     public equals(sc: Section): boolean {
-        if (this.key === sc.key && this.sid === sc.sid) {
+        if (this.key === sc.key && this.id === sc.id) {
             return true;
         } else {
             return false;
@@ -215,9 +218,11 @@ export default class Section implements CourseFields, Hashable {
      * @param sections
      * @param key
      */
+    // eslint-disable-next-line
     public has(sections: Set<number>, key: string): boolean;
+    // eslint-disable-next-line
     public has(element: Section | Set<number>, key?: string): boolean {
-        if (element instanceof Set) return this.key === key && element.has(this.sid);
+        if (element instanceof Set) return this.key === key && element.has(this.id);
         else return this.equals(element);
     }
 }

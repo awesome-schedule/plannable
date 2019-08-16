@@ -1,22 +1,8 @@
-import { ValidFlag } from './Section';
-
 /**
  * Meta stores some constants and type definitions
  * @author Hanzhi Zhou
  * @module models
  */
-
-/**
- * the raw catalog is represented as a big dictionary
- *
- * key: department + number + type, e.g. cs11105
- *
- * value: raw record of the dictionary
- */
-export interface RawCatalog {
-    [key: string]: RawCourse;
-}
-
 export type CourseType =
     | 'Clinical'
     | 'Discussion'
@@ -31,66 +17,6 @@ export type CourseType =
     | '';
 
 export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
-
-/**
- * 0: department
- *
- * 1: number
- *
- * 2: type: 0 to 9. Use [[Meta.TYPES_PARSE]] to convert `Lecture` like string to number
- *
- * 3: units
- *
- * 4: title
- *
- * 5: description
- *
- * 6: RawSection[]
- */
-export type RawCourse = [string, number, number, string, string, string, RawSection[]];
-
-/**
- * 0: id
- *
- * 1: section
- *
- * 2: topic
- *
- * 3: status Use [[Meta.STATUSES_PARSE]] to parse string to number
- *
- * 4: enrollment
- *
- * 5: enrollment limit
- *
- * 6: wait_list
- *
- * 7: date
- *
- * 8: valid
- *
- * 9: meetings
- */
-export type RawSection = [
-    number,
-    string,
-    string,
-    number,
-    number,
-    number,
-    number,
-    string,
-    ValidFlag,
-    RawMeeting[]
-];
-
-/**
- * 0: instructor
- *
- * 1: days
- *
- * 2: room
- */
-export type RawMeeting = [string, string, string];
 
 export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
 
@@ -122,16 +48,6 @@ export const TYPES = Object.freeze({
     9: 'Workshop'
 }) as { [x: number]: CourseType };
 
-/**
- * status number => meaning
- */
-export const STATUSES = Object.freeze({
-    '-1': 'TBA',
-    1: 'Open',
-    0: 'Closed',
-    2: 'Wait List'
-}) as { [x: number]: CourseStatus };
-
 export const TYPES_PARSE: { readonly [x in CourseType]: number } = Object.freeze({
     '': -1,
     Clinical: 0,
@@ -144,13 +60,6 @@ export const TYPES_PARSE: { readonly [x in CourseType]: number } = Object.freeze
     Seminar: 7,
     Studio: 8,
     Workshop: 9
-});
-
-export const STATUSES_PARSE: { readonly [x in CourseStatus]: number } = Object.freeze({
-    Open: 1,
-    Closed: 0,
-    'Wait List': 2,
-    TBA: -1
 });
 
 export const semesterListExpirationTime = 86400 * 1000; // one day

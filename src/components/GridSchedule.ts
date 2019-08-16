@@ -1,6 +1,10 @@
 /**
  * @module components
  */
+
+/**
+ *
+ */
 import Schedule from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
 import { DAYS } from '../models/Meta';
@@ -11,6 +15,7 @@ import CourseBlock from './CourseBlock.vue';
 /**
  * the component for rendering a schedule (with courses and events) on a grid
  * @author Kaiying Cat
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -41,7 +46,7 @@ export default class GridSchedule extends Store {
         for (const blocks of schedule.days) {
             for (const course of blocks) {
                 const temp = timeToNum(course.start);
-                if (temp < earliest && course !== undefined && course !== null) {
+                if (temp < earliest) {
                     earliest = temp;
                 }
             }
@@ -57,7 +62,7 @@ export default class GridSchedule extends Store {
         for (const blocks of schedule.days) {
             for (const course of blocks) {
                 const temp = timeToNum(course.end);
-                if (temp > latest && course !== undefined && course !== null) {
+                if (temp > latest) {
                     latest = temp;
                 }
             }
@@ -68,8 +73,7 @@ export default class GridSchedule extends Store {
      * return the block in which the schedule starts with
      */
     get absoluteEarliest() {
-        const early = this.validate(this.display.earliest, '8:00');
-
+        const early = this.display.earliest;
         if (timeToNum(early) > this.earliestBlock) {
             return this.earliestBlock;
         } else {
@@ -80,7 +84,7 @@ export default class GridSchedule extends Store {
      * return the block in which the schedule ends with
      */
     get absoluteLatest() {
-        const late = this.validate(this.display.latest, '19:00');
+        const late = this.display.latest;
         if (timeToNum(late) < this.latestBlock) {
             return this.latestBlock;
         } else {
@@ -88,27 +92,19 @@ export default class GridSchedule extends Store {
         }
     }
 
-    get gridTemplateCols() {
-        const numCol = this.numCol;
-        return `${100 / numCol}% ${100 / numCol}% ${100 /
-            numCol}% ${100 / numCol}% ${100 / numCol}% ${
-            numCol === 7 ? 100 / numCol + '%' : ''
-            } ${numCol === 7 ? 100 / numCol + '%' : ''}`;
-    }
-
     /**
      * computes the number of rows we need
      */
     get numRow() {
-        let num = 0;
-        for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
-            num += 1;
-        }
-        return num;
+        return this.absoluteLatest + 1 - this.absoluteEarliest;
     }
 
     get numCol() {
         return this.display.showWeekend ? 7 : 5;
+    }
+
+    get gridTemplateCols() {
+        return `${100 / this.numCol}% `.repeat(this.numCol);
     }
 
     get hours() {
@@ -132,17 +128,8 @@ export default class GridSchedule extends Store {
 
         return window.screen.width > 450 ? (this.display.standard ? stdTime : time) : reducedTime;
     }
-    get items() {
-        const arr: number[] = [];
-        const numBlocks = (this.absoluteLatest - this.absoluteEarliest + 1) * this.numCol;
-        for (let i = 0; i < numBlocks; i++) {
-            arr.push(i + 1);
-        }
-        return arr;
-    }
     get heightInfo() {
-        const info: number[] = new Array(this.numRow);
-        info.fill(this.display.partialHeight);
+        const info: number[] = new Array(this.numRow).fill(this.display.partialHeight);
         const earliest = this.absoluteEarliest;
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
@@ -157,21 +144,7 @@ export default class GridSchedule extends Store {
         return info;
     }
     get mainHeight() {
-        let h = 0;
-        for (const i of this.heightInfo) {
-            h += i;
-        }
-        return h;
-    }
-    /**
-     * check whether a given time is valid. If invalid, returns the fallback
-     */
-    validate(time: string, fallback: string) {
-        if (time && time.length >= 3 && time.indexOf(':') > 0) {
-            return time;
-        } else {
-            return fallback;
-        }
+        return this.heightInfo.reduce((sum, h) => sum + h, 0);
     }
 
     increTime(time: string) {

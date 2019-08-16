@@ -41,8 +41,8 @@
                         </div>
                     </template>
                     <div
-                        v-for="item in items"
-                        :key="item"
+                        v-for="idx in numRow * numCol"
+                        :key="idx"
                         class="placeholder"
                         style="z-index:1"
                     ></div>

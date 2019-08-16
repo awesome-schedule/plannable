@@ -11,6 +11,8 @@ import axios from 'axios';
 import { getApi } from '.';
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
+import { isStringArray } from '@/utils';
+import { FastSearcher } from '@/algorithm/Searcher';
 
 export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
@@ -52,14 +54,15 @@ export function loadTimeMatrix(force = false) {
  * If it expires or does not exist,
  * load a fresh one from the data backend and store it in localStorage.
  *
+ * Then, construct and return a building searcher
  * storage key: "buildingList"
  */
-export function loadBuildingList(force = false) {
+export function loadBuildingSearcher(force = false) {
     return fallback(
-        loadFromCache<string[], BuildingListJSON>(
+        loadFromCache<FastSearcher, BuildingListJSON>(
             'buildingList',
-            requestBuildingList,
-            x => x.buildingList,
+            requestBuildingSearcher,
+            x => new FastSearcher(x.buildingList),
             {
                 expireTime: 1000 * 86400,
                 force
@@ -79,7 +82,7 @@ export function loadBuildingList(force = false) {
  */
 export async function requestTimeMatrix(): Promise<Int32Array> {
     const res = await axios.get(`${getApi()}/data/Distance/Time_Matrix.json`);
-    const data: number[][] = res.data;
+    const data = res.data;
 
     if (data instanceof Array && data.length) {
         const len = data.length;
@@ -101,12 +104,14 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
 }
 
 /**
- * request from remote and store in localStorage
+ * request the building list from remote and store in localStorage
+ *
+ * @returns a building searcher
  */
-export async function requestBuildingList(): Promise<string[]> {
+export async function requestBuildingSearcher() {
     const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
     const data = res.data;
-    if (data instanceof Array && typeof data[0] === 'string') {
+    if (isStringArray(data)) {
         localStorage.setItem(
             'buildingList',
             JSON.stringify({
@@ -114,8 +119,7 @@ export async function requestBuildingList(): Promise<string[]> {
                 buildingList: data
             })
         );
-
-        return data;
+        return new FastSearcher(data);
     } else {
         throw new Error('Data format error');
     }

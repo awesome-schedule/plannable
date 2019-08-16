@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
 
@@ -114,7 +118,6 @@ class Profile {
         if (prevIdx !== -1) {
             if (
                 !confirm(
-                    // tslint:disable-next-line: max-line-length
                     `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both`
                 )
             ) {
@@ -141,5 +144,4 @@ class Profile {
     }
 }
 
-const profile = new Profile();
-export default profile;
+export default new Profile();

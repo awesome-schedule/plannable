@@ -16,6 +16,7 @@ import ClassList from '../ClassList.vue';
 /**
  * component for editing classes and manipulating schedules
  * @author Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component({
     components: {

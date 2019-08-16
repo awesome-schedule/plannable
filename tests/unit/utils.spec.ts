@@ -64,10 +64,12 @@ describe('Utility Tests', () => {
         expect(Utils.errToStr(new Error('asd') as any)).toBe('asd');
     });
 
-    it('other', () => {
-        Utils.openLousList('1198', 1);
-        Utils.openVAGrade(window.catalog.getCourse('cs11105'));
+    it('dummy', () => {
+        config.external.viewDetails('1198', 1);
+        config.external.viewGrades(window.catalog.getCourse('cs11105'));
+    });
 
+    it('other', () => {
         expect(Utils.timeToNum('12:00')).toBeTruthy();
         expect(Utils.timeToNum('12:00')).toBe(8);
         expect(Utils.timeToNum('12:30')).toBe(9);
@@ -87,7 +89,7 @@ describe('Utility Tests', () => {
         try {
             // don't know how to test this one
             Utils.savePlain('sav', 'asv');
-            // tslint:disable-next-line: no-empty
+            // eslint-disable-next-line
         } catch (err) {}
 
         expect(config).toBeInstanceOf(Object);

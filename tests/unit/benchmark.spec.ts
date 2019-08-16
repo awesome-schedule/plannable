@@ -1,27 +1,20 @@
 import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
-import { loadBuildingList, loadTimeMatrix } from '@/data/BuildingLoader';
+import { loadBuildingSearcher, loadTimeMatrix } from '@/data/BuildingLoader';
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
 
 const store = new Store();
 store.display.maxNumSchedules = 200000;
 
-beforeAll(async () => {
-    window.timeMatrix = (await loadTimeMatrix()).payload!;
-    window.buildingList = (await loadBuildingList()).payload!;
-});
-
 test('algorithm benchmark', () => {
     const catalog = window.catalog;
-    const buildingList = window.buildingList;
     store.filter.timeSlots.push([true, false, true, false, true, false, false, '0:15', '0:50']);
     const options = store.getGeneratorOptions();
     if (!options) throw new Error('failed to get options');
 
-    const generator = new ScheduleGenerator(catalog, buildingList, options);
+    const generator = new ScheduleGenerator(catalog, options);
     expect(typeof generator.createSchedule).toBe('function');
-    const schedule = new Schedule();
-    schedule.All = {
+    const schedule = new Schedule({
         cs11105: -1,
         cs11104: -1,
         enwr15107: -1,
@@ -30,7 +23,7 @@ test('algorithm benchmark', () => {
         chem14105: -1,
         chem14101: -1,
         cs21025: -1
-    };
+    });
     // const sort = options.sortOptions;
     // sort.sortBy[0].enabled = true;
     // sort.sortBy[1].enabled = true;

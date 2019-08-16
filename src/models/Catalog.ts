@@ -12,9 +12,8 @@
 /**
  *
  */
-import Expirable from '../data/Expirable';
-import Course, { CourseConstructorArguments, CourseMatch } from './Course';
-import { RawCatalog } from './Meta';
+import { RawAlgoCourse } from '@/algorithm';
+import Course, { CourseMatch } from './Course';
 import Schedule from './Schedule';
 import { SectionMatch } from './Section';
 /**
@@ -31,11 +30,6 @@ export interface SemesterJSON {
     readonly name: string;
 }
 
-export interface CatalogJSON extends Expirable {
-    readonly semester: SemesterJSON;
-    readonly raw_data: RawCatalog;
-}
-
 interface SearchWorker extends Worker {
     onmessage(x: MessageEvent): void;
     postMessage(x: string | typeof window.catalog.courseDict): void;
@@ -45,7 +39,7 @@ interface SearchWorker extends Worker {
  *
  * 0: the array of matches for the fields of this Course
  *
- * 1: the Map that maps [[Section.sid]] to the array of matches for the fields of that section
+ * 1: the Map that maps [[Section.id]] to the array of matches for the fields of that section
  */
 export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
 
@@ -53,35 +47,20 @@ export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
  */
 export default class Catalog {
-    /**
-     * Parse AllRecords from parsed JSON
-     */
-    public static fromJSON(data: CatalogJSON) {
-        return new Catalog(data.semester, data.raw_data, data.modified);
-    }
-
     public worker?: SearchWorker;
     public readonly courses: Course[];
-    public readonly courseDict: { [x: string]: Course } = {};
-
     /**
      * @param semester the semester corresponding to the catalog stored in this object
-     * @param raw_data the raw representation of the course catalog,
+     * @param courseDict mapping from course key to course itself
      * borrowing python's snake_case (not changed due to backward compatibility issues)
      * @param modified
      */
     constructor(
         public readonly semester: SemesterJSON,
-        public readonly raw_data: RawCatalog,
+        public readonly courseDict: { [x: string]: Course },
         public readonly modified: string
     ) {
-        console.time('catalog prep data');
-        const courses: Course[] = [];
-        for (const key in raw_data)
-            courses.push((this.courseDict[key] = new Course(raw_data[key], key)));
-
-        this.courses = courses;
-        console.timeEnd('catalog prep data');
+        this.courses = Object.values(courseDict);
     }
 
     /**
@@ -113,18 +92,6 @@ export default class Catalog {
         }
     }
 
-    public fromJSON(data: CatalogJSON) {
-        return Catalog.fromJSON(data);
-    }
-
-    public toJSON(): CatalogJSON {
-        return {
-            semester: this.semester,
-            raw_data: this.raw_data,
-            modified: this.modified
-        };
-    }
-
     /**
      * Get a Course associated with the given key
      *
@@ -134,13 +101,17 @@ export default class Catalog {
     public getCourse(key: string, sections?: Set<number> | -1) {
         const course = this.courseDict[key];
         if (!sections || sections === -1) return course;
-        else return course.getCourse([...sections.values()]);
+        else return course.getCourse([...sections]);
     }
 
     /**
-     * Get a Course associated with the given key and section index
+     * Get a Course associated with the given key and section id
      */
-    public getSection(key: string, idx = 0) {
+    public getSectionById(key: string, id: number) {
+        return this.courseDict[key].getSectionById(id);
+    }
+
+    public getSection(key: string, idx: number) {
         return this.courseDict[key].sections[idx];
     }
 
@@ -169,8 +140,8 @@ export default class Catalog {
             worker.onmessage = ({
                 data: [args, matches]
             }: {
-                data: [CourseConstructorArguments[], SearchMatch[]];
-            }) => resolve([args.map(x => new Course(...x)), matches]);
+                data: [RawAlgoCourse[], SearchMatch[]];
+            }) => resolve([args.map(x => this.getCourse(x[0], new Set(x[1]))), matches]);
             worker.onerror = err => reject(err);
         });
         worker.postMessage(query);
@@ -299,13 +270,11 @@ export default class Catalog {
     private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const topicMatches = new Map<number, [SectionMatch]>();
-        const sections = course.sections;
-        const len = sections.length;
-        for (let i = 0; i < len; i++) {
-            const topic = sections[i].topic;
+        for (const sec of course.sections) {
+            const topic = sec.topic;
             const topicIdx = topic.toLowerCase().indexOf(query);
             if (topicIdx !== -1) {
-                topicMatches.set(i, [
+                topicMatches.set(sec.id, [
                     {
                         match: 'topic',
                         start: topicIdx,
@@ -320,13 +289,11 @@ export default class Catalog {
     private searchProf(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const profMatches = new Map<number, [SectionMatch]>();
-        const sections = course.sections;
-        const len = sections.length;
-        for (let i = 0; i < len; i++) {
-            const profs = sections[i].instructors.join(', ').toLowerCase();
+        for (const sec of course.sections) {
+            const profs = sec.instructors.join(', ').toLowerCase();
             const profIdx = profs.indexOf(query);
             if (profIdx !== -1) {
-                profMatches.set(i, [
+                profMatches.set(sec.id, [
                     {
                         match: 'instructors',
                         start: profIdx,
@@ -347,14 +314,14 @@ export default class Catalog {
         const prev = results.findIndex(x => x.key === course.key);
         if (prev !== -1) {
             results[prev] = course.getCourse([
-                ...new Set(course.sids.concat([...matches.keys()])) // merge sids and eliminate duplicates
+                ...new Set(course.ids.concat([...matches.keys()])) // merge sids and eliminate duplicates
             ]);
             // merge the section matches with the previously recorded section matches
             const combSecMatches = allMatches[prev][1];
-            for (const [sid, mats] of matches) {
-                const prevMats = combSecMatches.get(sid);
+            for (const [id, mats] of matches) {
+                const prevMats = combSecMatches.get(id);
                 if (prevMats) prevMats.push(...mats);
-                else combSecMatches.set(sid, mats);
+                else combSecMatches.set(id, mats);
             }
         } else {
             results.push(course.getCourse([...matches.keys()]));

@@ -15,7 +15,7 @@
                 :class="`alert-${noti.cls}`"
                 style="width: 85%"
             >
-                {{ noti.msg }}
+                <span v-html="noti.msg"></span>
                 <button type="button" class="close" style="align:center" @click="noti.clear()">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -23,45 +23,52 @@
         </transition>
 
         <slot></slot>
-
-        <v-footer id="app-footer" dark height="auto" class="w-100">
-            <v-card class="flex w-100" flat tile>
-                <v-card-title class="teal py-3">
-                    <strong class="subheading mr-auto"
-                        >Get connected with us and let us hear your voice!
-                    </strong>
+        <div id="footer-link">
+            <div class="row justify-content-between w-100">
+                <div class="col-xs-auto pl-3 align-self-center" style="font-size: 1.1rem">
+                    Get Connected With Us
+                </div>
+                <div class="col-xs-auto align-self-center">
                     <a
-                        style="color:inherit;text-decoration: none;"
+                        class="mr-5 link-btn"
                         target="_blank"
-                        href="https://github.com/awesome-schedule/plannable"
+                        title="Checkout our GitHub site to watch/star/fork"
+                        href="https://github.com/awesome-schedule/plannable/"
                     >
-                        <v-btn
-                            class="mx-3"
-                            title="Checkout our GitHub site to watch/star/fork!"
-                            dark
-                            icon
-                        >
-                            <v-icon size="24px">fab fa-github</v-icon>
-                        </v-btn>
+                        <i class="fab fa-github"></i>
                     </a>
-
                     <a
-                        style="color:inherit;text-decoration: none;"
+                        class="ml-4 mr-5 link-btn"
                         target="_blank"
+                        title="File an issue on GitHub"
                         href="https://github.com/awesome-schedule/plannable/issues"
                     >
-                        <v-btn class="mx-3" title="File an issue on GitHub" dark icon>
-                            <v-icon size="24px">fas fa-exclamation-circle</v-icon>
-                        </v-btn>
+                        <i class="fas fa-exclamation-circle"></i>
                     </a>
-                </v-card-title>
-
-                <v-card-actions class="grey darken-3 justify-content-center">
-                    &copy;2019 —&nbsp;<strong>Plannable</strong>
-                </v-card-actions>
-            </v-card>
-        </v-footer>
+                </div>
+            </div>
+        </div>
+        <div id="footer-org">&copy;2019 —&nbsp;<strong>Plannable</strong></div>
     </div>
 </template>
-
+<style scoped>
+#footer-link {
+    background-color: #009688;
+    color: white;
+    padding: 20px;
+}
+#footer-org {
+    background-color: #424242;
+    color: white;
+    padding: 8px;
+    text-align: center;
+    width: 100%;
+}
+.link-btn {
+    color: inherit;
+    text-decoration: none;
+    font-size: 24px;
+    margin-bottom: 3px;
+}
+</style>
 <script lang="ts" src="./MainContent.ts"></script>

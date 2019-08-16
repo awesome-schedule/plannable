@@ -222,7 +222,7 @@
         page-break-before: avoid;
         margin: 0.8cm 0.8cm 0.8cm 0.8cm;
     }
-    #pagination-container {
+    #pg {
         display: none !important;
     }
     nav {
@@ -233,13 +233,16 @@
     }
     div .schedule {
         width: calc(100vw - 1.6cm) !important;
-        height: calc(100vw - 0.8cm) !important;
-        margin: 0 0.8cm 0.8cm 0.8cm !important;
+        height: calc(100vw - 1.6cm) !important;
+        margin: 0.8cm 0.8cm 0.8cm 0.8cm !important;
     }
     div #noti {
         display: none !important;
     }
-    #app-footer {
+    #footer-link {
+        display: none !important;
+    }
+    #footer-org {
         display: none !important;
     }
 }
@@ -272,9 +275,5 @@
 .btn-days .btn {
     border-radius: 0;
     padding: 0.25rem 0.25rem;
-}
-/* Vuetify has overriden this, which is very annoying */
-[type='number'] {
-    width: inherit !important;
 }
 </style>

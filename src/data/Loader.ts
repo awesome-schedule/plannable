@@ -57,7 +57,7 @@ interface FallbackOptions {
  * The template function that helps to load data from cache/remote
  *
  * Example usage:
- * @see [[loadTimeMatrix]],[[loadBuildingList]],[[loadSemesterList]],[[loadSemesterData]]
+ * @see [[loadTimeMatrix]],[[loadBuildingSearcher]],[[loadSemesterList]],[[loadSemesterData]]
  *
  * @typeparam T the type of the object to construct
  * @typeparam T_JSON the JSON-serializable representation of the object T

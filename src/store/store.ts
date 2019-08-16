@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import lz from 'lz-string';
 
 import Expirable from '@/data/Expirable';
@@ -112,7 +116,7 @@ export function saveStatus() {
         modified: new Date().toJSON(),
         currentSemester,
         display,
-        filter,
+        filter: filter.toJSON(),
         schedule: schedule.toJSON(),
         palette
     };
@@ -184,12 +188,23 @@ export default class Store extends Vue {
                 console.error(e);
             }
         }
-        const msg = await this.semester.selectSemester(
-            parsed.currentSemester || this.semester.semesters[0],
-            force
-        );
-        this.noti.notify(msg);
-        if (!msg.payload) return;
+
+        // do not re-select current semester if it is already selected and this is not a force-update
+        if (
+            parsed.currentSemester &&
+            this.semester.currentSemester &&
+            parsed.currentSemester.id === this.semester.currentSemester.id &&
+            !force
+        ) {
+            console.warn('Semester data loading aborted');
+        } else {
+            const msg = await this.semester.selectSemester(
+                parsed.currentSemester || this.semester.semesters[0],
+                force
+            );
+            this.noti.notify(msg);
+            if (!msg.payload) return;
+        }
 
         if (isAncient(parsed)) {
             const ancient: AncientStorage = parsed || {};
@@ -221,24 +236,16 @@ export default class Store extends Vue {
      */
     validateSortOptions() {
         if (!Object.values(this.filter.sortOptions.sortBy).some(x => x.enabled)) {
-            this.noti.error('You must have at least one sort option!');
+            this.noti.error('Filter: You must have at least one sort option!');
             return false;
         } else if (
             Object.values(this.filter.sortOptions.sortBy).some(
                 x => x.name === 'distance' && x.enabled
             ) &&
-            (!window.buildingList || !window.timeMatrix)
-        ) {
-            this.noti.error('Building list fails to load. Please disable "walking distance"');
-            return false;
-        } else if (
-            Object.values(this.filter.sortOptions.sortBy).some(
-                x => x.name === 'similarity' && x.enabled
-            ) &&
-            !window.similaritySchedule
+            (!window.buildingSearcher || !window.timeMatrix)
         ) {
             this.noti.error(
-                'Please first set a reference schedule before using sort by similarity!'
+                'Filter: Building list fails to load. Please disable "walking distance"'
             );
             return false;
         }
@@ -273,17 +280,24 @@ export default class Store extends Vue {
 
         if (this.schedule.proposedSchedule.empty())
             return this.noti.warn(`There are no classes in your schedule!`);
-
         const options = this.getGeneratorOptions();
         if (!options) return;
 
-        const generator = new ScheduleGenerator(window.catalog, window.buildingList, options);
-        const msg = generator.getSchedules(this.schedule.proposedSchedule);
+        const generator = new ScheduleGenerator(window.catalog, options);
+
+        console.time('schedule generation');
+        const msg = generator.getSchedules(
+            this.schedule.proposedSchedule,
+            true,
+            this.filter.refSchedule
+        );
+        console.timeEnd('schedule generation');
+
         this.noti.notify(msg, 'info', 3, true);
         const evaluator = msg.payload;
         if (evaluator) {
             window.scheduleEvaluator = evaluator;
-            this.schedule.numGenerated = evaluator.size();
+            this.schedule.numGenerated = evaluator.size;
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } else {
@@ -351,7 +365,6 @@ export default class Store extends Vue {
             if (profiles.includes(name)) {
                 if (
                     !confirm(
-                        // tslint:disable-next-line: max-line-length
                         `You already have a profile named ${name}. However, it does not correspond to the ${name} semester. Click Ok to overwrite, click Cancel to keep both.`
                     )
                 ) {
@@ -380,7 +393,6 @@ export default class Store extends Vue {
  * @param jsonString
  */
 export function compressJSON(jsonString: string) {
-    // tslint:disable-next-line: no-shadowed-variable
     const { name, modified, currentSemester, display, filter, schedule, palette } = JSON.parse(
         jsonString
     ) as SemesterStorage;
@@ -399,19 +411,21 @@ export function compressJSON(jsonString: string) {
 
 /**
  * @author Zichao Hu, Hanzhi Zhou
- * @see [[convertJsonToArray]]
  * @param config
+ * @note JSON decompression requires the catalog of the semester to be pre-loaded,
+ * because the reference schedule conversion in filter requires it
  */
-export function parseFromURL(config: string): SemesterStorage {
+export async function parseFromURL(config: string): Promise<SemesterStorage> {
     // get URL and convert to JSON
     const data: ReturnType<typeof compressJSON> = JSON.parse(
         lz.decompressFromEncodedURIComponent(config.trim())
     );
-
+    const currentSemester = { id: data[2], name: data[3] };
+    await semester.selectSemester(currentSemester);
     return {
         name: data[0],
         modified: data[1],
-        currentSemester: { id: data[2], name: data[3] },
+        currentSemester,
         display: Display.decompressJSON(data[4]),
         filter: FilterStore.decompressJSON(data[5]),
         schedule: ScheduleStore.decompressJSON(data[6]),

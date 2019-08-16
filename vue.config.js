@@ -19,5 +19,5 @@ module.exports = {
         // }
     },
     // transpile dependencies that do not provide pre-built modules
-    transpileDependencies: ['string-similarity']
+    transpileDependencies: []
 };

@@ -15,11 +15,10 @@ import Expand from './Expand.vue';
 
 /**
  * A **pure** component for
- *
  * 1. displaying the list of courses that are match the query string when searching
  * 2. displaying the list of courses currently selected
- *
  * @author Hanzhi Zhou, Kaiying Cat
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -69,20 +68,20 @@ export default class ClassList extends Vue {
     selectAll(key: string, course: Course) {
         let notSelected = false;
         for (const sec of course.sections) {
-            if (!this.isActive(key, sec.sid)) {
+            if (!this.isActive(key, sec.id)) {
                 notSelected = true;
-                this.select(key, sec.sid);
+                this.select(key, sec.id);
             }
         }
         if (!notSelected) {
             for (const sec of course.sections) {
-                this.select(key, sec.sid);
+                this.select(key, sec.id);
             }
         }
     }
 
     allTimeSelected(key: string, time: string) {
-        return this.separatedCourses[key][time].sections.every(sec => this.isActive(key, sec.sid));
+        return this.separatedCourses[key][time].sections.every(sec => this.isActive(key, sec.id));
     }
 
     get separatedCourses() {
@@ -91,11 +90,11 @@ export default class ClassList extends Vue {
             const obj: { [date: string]: Set<number> } = Object.create(null);
             const sections = course.sections;
             // group sections by dates
-            for (const { dates, sid } of sections) {
+            for (const { dates, id } of sections) {
                 if (obj[dates]) {
-                    obj[dates].add(sid);
+                    obj[dates].add(id);
                 } else {
-                    obj[dates] = new Set<number>().add(sid);
+                    obj[dates] = new Set<number>().add(id);
                 }
             }
 

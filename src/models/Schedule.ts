@@ -2,14 +2,13 @@
  * @author Hanzhi Zhou, Kaiying Shan
  * @module models
  */
-// tslint:disable: member-ordering
 
 /**
  *
  */
-import noti from '@/store/notification';
-import { colorDepthSearch, DFS, graphColoringExact } from '../algorithm';
-import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
+import { NotiMsg } from '@/store/notification';
+import { colorDepthSearch, DFS, graphColoringExact, toNativeAdjList } from '../algorithm';
+import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -18,15 +17,19 @@ import { Day, dayToInt, TYPES } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 
-interface SectionJSON {
+export interface SectionJSON {
     id: number;
     section: string;
 }
 
-type SectionJSONShort = [number, string];
+export type SectionJSONShort = (number | string)[];
+
+export interface ScheduleAll<T = Set<number>> {
+    [x: string]: T | -1;
+}
 
 export interface ScheduleJSON {
-    All: { [x: string]: SectionJSON[] | number[] | -1 };
+    All: ScheduleAll<SectionJSON[]>;
     events: Event[];
 }
 
@@ -61,31 +64,39 @@ export default class Schedule {
 
     public static savedColors: { [x: string]: string } = {};
 
-    public static isNumberArray(x: any[]): x is number[] {
-        return typeof x[0] === 'number';
-    }
-
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: { [x: string]: SectionJSONShort[] | -1 } = {};
+        const shortAll: ScheduleAll<SectionJSONShort> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
                 sections === -1
                     ? sections
-                    : (sections as SectionJSON[]).map(({ id, section }) => [id, section]);
+                    : (sections as SectionJSON[]).reduce(
+                          (acc, { id, section }) => {
+                              acc.push(id, section);
+                              return acc;
+                          },
+                          [] as SectionJSONShort
+                      );
         }
-        return [shortAll, events.map(e => Event.prototype.toJSONShort.call(e))] as const;
+        return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
 
     public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
-        const All: { [x: string]: SectionJSON[] | -1 } = {};
-        const shortAll = obj[0] || {},
-            events = obj[1] || [];
+        const All: ScheduleAll<SectionJSON[]> = {};
+        const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
-            All[key] =
-                entry instanceof Array ? entry.map(e => ({ id: e[0], section: e[1] })) : entry;
+            const decompEntry: SectionJSON[] = [];
+            if (entry instanceof Array) {
+                for (let i = 0; i < entry.length; i += 2) {
+                    decompEntry.push({ id: entry[i] as number, section: entry[i + 1] as string });
+                }
+                All[key] = decompEntry;
+            } else {
+                All[key] = entry;
+            }
         }
         return {
             All,
@@ -95,10 +106,20 @@ export default class Schedule {
 
     /**
      * instantiate a `Schedule` object from its JSON representation.
-     * the `computeSchedule` method will be invoked
+     * the `computeSchedule` method will be invoked after instantiation
+     *
+     * @returns NotiMsg, whose level might be one of the following
+     * 1. success: a schedule is successfully parsed from the JSON object
+     * 2. warn: a schedule is successfully parsed, but some of the courses/sections recorded no longer exist
+     * in the catalog
+     * 3. error: the object passed in is falsy
      */
-    public static fromJSON(obj?: ScheduleJSON): Schedule | null {
-        if (!obj) return null;
+    public static fromJSON(obj?: ScheduleJSON): NotiMsg<Schedule> {
+        if (!obj)
+            return {
+                level: 'error',
+                msg: 'Invalid object'
+            };
         const schedule = new Schedule();
         if (obj.events)
             schedule.events = obj.events.map(x =>
@@ -106,10 +127,16 @@ export default class Schedule {
             );
 
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());
-        if (keys.length === 0) return schedule;
+        if (keys.length === 0)
+            return {
+                level: 'success',
+                msg: 'Empty schedule',
+                payload: schedule
+            };
 
+        const warnings = [];
         const catalog = window.catalog;
-        const regex = /([a-z]{1,5})([0-9]{4})(.*)/i;
+        const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
         // convert array to set
         for (const key of keys) {
             const sections = obj.All[key];
@@ -120,11 +147,12 @@ export default class Schedule {
             let convKey = key;
             if (parts && parts.length === 4) {
                 parts[3] = TYPES[+parts[3]];
+                parts[1] = parts[1].toUpperCase();
                 convKey = parts.slice(1).join(' ');
             }
             // non existent course
             if (!course) {
-                noti.warn(`${convKey} does not exist anymore! It probably has been removed!`);
+                warnings.push(`${convKey} does not exist anymore! It probably has been removed!`);
                 continue;
             }
             const allSections = course.sections;
@@ -133,32 +161,33 @@ export default class Schedule {
                     schedule.All[key] = new Set();
                 } else {
                     // backward compatibility for version prior to v5.0 (inclusive)
-                    if (Schedule.isNumberArray(sections)) {
+                    if (Utils.isNumberArray(sections)) {
+                        const secs = sections as number[];
                         schedule.All[key] = new Set(
-                            sections.filter(sid => {
-                                // sid >= length possibly implies that section is removed from SIS
-                                if (sid >= allSections.length) {
-                                    noti.warn(
-                                        `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
-                                    );
-                                }
-                                return sid < allSections.length;
-                            })
+                            secs
+                                .filter(sid => {
+                                    // sid >= length possibly implies that section is removed from SIS
+                                    if (sid >= allSections.length) {
+                                        warnings.push(
+                                            `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
+                                        );
+                                    }
+                                    return sid < allSections.length;
+                                })
+                                .map(idx => allSections[idx].id)
                         );
                     } else {
                         const set = new Set<number>();
                         for (const record of sections) {
                             // check whether the identifier of stored sections match with the existing sections
-                            const idx = allSections.findIndex(
+                            const target = allSections.find(
                                 sec => sec.id === record.id && sec.section === record.section
                             );
-                            if (idx !== -1) set.add(idx);
+                            if (target) set.add(target.id);
                             // if not, it possibly means that section is removed from SIS
                             else
-                                noti.warn(
-                                    `Section ${
-                                    record.section
-                                    } of ${convKey} does not exist anymore! It probably has been removed!`
+                                warnings.push(
+                                    `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
                         schedule.All[key] = set;
@@ -170,18 +199,30 @@ export default class Schedule {
         }
         schedule.constructDateSeparator();
         schedule.computeSchedule();
-        return schedule;
+        if (warnings.length) {
+            return {
+                level: 'warn',
+                payload: schedule,
+                msg: warnings.join('<br>')
+            };
+        } else {
+            return {
+                level: 'success',
+                payload: schedule,
+                msg: 'Success'
+            };
+        }
     }
 
     /**
      * represents all courses in this schedule, stored as `(key, set of sections)` pair
      *
      * Note that if **section** is -1, it means that all sections are allowed.
-     * Otherwise, **section** should be a Set of integers
+     * Otherwise, **section** should be a Set of integers corresponding to the `id` field of each section
      *
      * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
      */
-    public All: { [x: string]: Set<number> | -1 };
+    public All: ScheduleAll;
     /**
      * computed based on `this.All` by `computeSchedule`
      */
@@ -228,7 +269,7 @@ export default class Schedule {
      * ```
      */
     public dateSeparators: number[] = [];
-    public separatedAll: { [date: string]: { [x: string]: Set<number> | -1 } } = {};
+    public separatedAll: { [date: string]: ScheduleAll } = {};
     public dateSelector: number = -1;
 
     /**
@@ -239,7 +280,7 @@ export default class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw_schedule: RawAlgoSchedule = [], public events: Event[] = []) {
+    constructor(raw: RawAlgoCourse[] | ScheduleAll = [], public events: Event[] = []) {
         this.All = {};
         this.days = [[], [], [], [], [], [], []];
         this._preview = null;
@@ -247,8 +288,12 @@ export default class Schedule {
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
-        for (const [key, sections] of raw_schedule) {
-            this.All[key] = new Set(sections);
+        if (raw instanceof Array) {
+            for (const [key, sections] of raw) {
+                this.All[key] = new Set(sections);
+            }
+        } else {
+            this.All = raw;
         }
         this.constructDateSeparator();
         this.computeSchedule();
@@ -333,6 +378,7 @@ export default class Schedule {
             }
         }
         this.events.push(newEvent);
+        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -431,7 +477,7 @@ export default class Schedule {
                     if (Schedule.options.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
-                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.sid)))
+                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
                         );
                         for (const crs of combined) this.place(crs);
                     } else {
@@ -548,9 +594,9 @@ export default class Schedule {
                     if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
                         const date = temp.getMonth() + 1 + '/' + temp.getDate();
                         if (diffSecs[date]) {
-                            diffSecs[date].push(sec.sid);
+                            diffSecs[date].push(sec.id);
                         } else {
-                            diffSecs[date] = [sec.sid];
+                            diffSecs[date] = [sec.id];
                         }
                     }
                     if (end < sep) {
@@ -571,7 +617,7 @@ export default class Schedule {
      * for the array of schedule blocks provided, construct an adjacency list
      * to represent the conflicts between each pair of blocks
      */
-    public constructAdjList(blocks: ScheduleBlock[]) {
+    public constructAdjList(blocks: ScheduleBlock[], offset = 0) {
         blocks.sort((a, b) => b.duration - a.duration);
         const len = blocks.length;
         const adjList: number[][] = blocks.map(() => []);
@@ -585,13 +631,15 @@ export default class Schedule {
                 }
             }
         }
-        // convert to typed array so it will be much faster
-        return adjList.map(x => new Int16Array(x));
+        return toNativeAdjList(adjList, offset);
     }
 
+    /**
+     * compute the width and left of the blocks contained in each day
+     */
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            const fastGraph = this.constructAdjList(blocks);
+            const [fastGraph] = this.constructAdjList(blocks);
             const len = fastGraph.length;
             const visited = new Uint8Array(len);
             // find all connected components
@@ -613,10 +661,11 @@ export default class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const fastGraph = this.constructAdjList(blocks);
-        const colors = new Int16Array(fastGraph.length);
-        const _ = graphColoringExact(fastGraph, colors);
-        // const [colors, _] = dsatur(fastGraph);
+        const len = blocks.length;
+        // use offset because we will allocate the color array next to the adjList
+        const [fastGraph, buffer] = this.constructAdjList(blocks, len * 2);
+        const colors = new Int16Array(buffer, 0, len);
+        graphColoringExact(fastGraph, colors);
 
         const graph = colorDepthSearch(fastGraph, colors);
         for (const node of graph.keys()) {
@@ -735,14 +784,14 @@ export default class Schedule {
      * Serialize `this` to JSON
      */
     public toJSON(): ScheduleJSON {
-        const All: { [x: string]: SectionJSON[] | -1 } = {};
+        const All: ScheduleAll<SectionJSON[]> = {};
         const catalog = window.catalog;
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Set) {
-                All[key] = [...sections].map(sid => {
-                    const { id, section } = catalog.getSection(key, sid);
+                All[key] = [...sections].map(id => {
+                    const { section } = catalog.getSectionById(key, id)!;
                     return { id, section };
                 });
             } else All[key] = sections;
@@ -757,7 +806,7 @@ export default class Schedule {
      * get a copy of this schedule
      */
     public copy(deepCopyEvent = true) {
-        const AllCopy: { [x: string]: Set<number> | -1 } = {};
+        const AllCopy: ScheduleAll = {};
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Set) {
@@ -767,11 +816,7 @@ export default class Schedule {
             }
         }
         // note: is it desirable to deep-copy all the events?
-        const cpy = new Schedule([], deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
-        cpy.All = AllCopy;
-        cpy.constructDateSeparator();
-        cpy.computeSchedule();
-        return cpy;
+        return new Schedule(AllCopy, deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
     }
 
     /**
@@ -800,22 +845,6 @@ export default class Schedule {
     }
 
     public equals(s: Schedule) {
-        // const keys = Object.keys(this.All);
-        // // unequal length
-        // if (keys.length !== Object.keys(s.All).length) return false;
-        // for (const key of keys) {
-        //     const val1 = this.All[key],
-        //         val2 = s.All[key];
-        //     if (!val2) return false;
-        //     // unequal value
-        //     if (val1 === -1 || val2 === -1) {
-        //         if (val1 !== val2) return false;
-        //     } else {
-        //         if (val1.size !== val2.size) return false;
-        //         for (const v of val1) if (!val2.has(v)) return false;
-        //     }
-        // }
-
         const days1 = this.events.map(x => x.days).sort();
         const days2 = s.events.map(x => x.days).sort();
         if (days1.length !== days2.length) return false;
@@ -828,7 +857,7 @@ export default class Schedule {
      * returns if an "All" equals to another
      * @param b another "All"
      */
-    public allEquals(b: { [x: string]: Set<number> | -1; }) {
+    public allEquals(b: ScheduleAll) {
         const a = this.All;
         const keys = Object.keys(a);
         // unequal length

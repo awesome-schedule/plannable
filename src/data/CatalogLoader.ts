@@ -7,23 +7,22 @@
 /**
  *
  */
-import { ValidFlag } from '@/models/Section';
+import CatalogDB, { CourseTableItem, SectionTableItem } from '@/database/CatalogDB';
+import Section, { SectionFields, ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
 import { getApi } from '.';
-import Catalog, { CatalogJSON, SemesterJSON } from '../models/Catalog';
-import {
-    CourseStatus,
-    CourseType,
-    RawCatalog,
-    RawMeeting,
-    RawSection,
-    semesterDataExpirationTime,
-    STATUSES_PARSE,
-    TYPES_PARSE
-} from '../models/Meta';
-import { loadFromCache } from './Loader';
+import Catalog, { SemesterJSON } from '../models/Catalog';
+
+import Course from '@/models/Course';
+import Meeting from '@/models/Meeting';
+import { CourseType, semesterDataExpirationTime, TYPES_PARSE } from '../models/Meta';
+import { cancelablePromise, CancelablePromise, parseDate } from '../utils';
+
+type SectionPropertyDescriptors = {
+    [x in keyof SectionFields]: TypedPropertyDescriptor<Section[x]>;
+};
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -34,33 +33,40 @@ import { loadFromCache } from './Loader';
  * @param semester the semester to load data
  * @param force force update
  */
-export function loadSemesterData(semester: SemesterJSON, force = false) {
-    return loadFromCache<Catalog, CatalogJSON>(
-        `${semester.id}data`,
-        () => requestSemesterData(semester),
-        x => Catalog.fromJSON(x),
-        {
-            expireTime: semesterDataExpirationTime,
-            force
-        }
-    );
-}
 
-function saveCatalog(catalog: Catalog) {
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.endsWith('data')) {
-            localStorage.removeItem(key);
+export async function loadSemesterData(
+    semester: SemesterJSON,
+    force = false
+): Promise<{
+    new: CancelablePromise<Catalog>;
+    old?: Catalog;
+}> {
+    const db = new CatalogDB(semester);
+    if (!(await db.empty())) {
+        const time = await db.timestamp();
+        const old = new Catalog(semester, await retrieveFromDB(db), new Date(time).toJSON());
+        if (force || Date.now() - time > semesterDataExpirationTime) {
+            return {
+                new: cancelablePromise(requestSemesterData(semester, db)),
+                old
+            };
+        } else {
+            return {
+                new: cancelablePromise(Promise.resolve(old))
+            };
         }
+    } else {
+        return {
+            new: cancelablePromise(requestSemesterData(semester, db))
+        };
     }
-    localStorage.setItem(`${catalog.semester.id}data`, JSON.stringify(catalog.toJSON()));
 }
 
-export async function requestSemesterData(semester: SemesterJSON): Promise<Catalog> {
+export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
-        ? axios.post(
+        ? axios.post<string>(
               `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
               stringify({
                   Semester: semester.id,
@@ -70,59 +76,69 @@ export async function requestSemesterData(semester: SemesterJSON): Promise<Catal
                   Extended: 'Yes'
               })
           ) // use the mirror/local dev server
-        : axios.get(
+        : axios.get<string>(
               `${getApi()}/data/Semester%20Data/CS${semester.id}Data.csv?time=${Math.random()}`
           ));
     console.timeEnd(`request semester ${semester.name} data`);
-
-    const parsed = parseSemesterData(res.data);
-    const catalog = new Catalog(semester, parsed, new Date().toJSON());
-    saveCatalog(catalog);
-    return catalog;
+    return new Catalog(
+        semester,
+        parseSemesterData(
+            parse(res.data, {
+                skipEmptyLines: true,
+                header: false
+            }).data,
+            db
+        ),
+        new Date().toJSON()
+    );
 }
 
-export function parseSemesterData(csv_string: string) {
-    const CLASS_TYPES = TYPES_PARSE;
-    const STATUSES = STATUSES_PARSE;
-    console.time('parsing csv');
-    const raw_data: string[][] = parse(csv_string, {
-        skipEmptyLines: true,
-        header: false
-    }).data;
-    console.timeEnd('parsing csv');
-    console.time('reorganizing data');
+export function parseSemesterData(rawData: string[][], db: CatalogDB) {
+    console.time('parse semester data');
 
-    const rawCatalog: RawCatalog = Object.create(null);
-    const len = raw_data.length;
+    const CLASS_TYPES = TYPES_PARSE;
+    const rawCatalog: { [x: string]: Course } = {};
+
+    const len = rawData.length;
+    const allSections: SectionTableItem[] = [];
+    const allCourses: CourseTableItem[] = [];
     for (let j = 1; j < len; j++) {
-        const data = raw_data[j];
+        const data = rawData[j];
 
         // todo: robust data validation
         const type = CLASS_TYPES[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
-        const meetings: RawMeeting[] = [];
+
+        const meetings: Meeting[] = [];
         let date: string = data[6 + 3];
         let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
-            const a = data[start],
-                b = data[start + 1],
-                c = data[start + 2];
-            if (a || b || c) {
+            const instructor = data[start],
+                days = data[start + 1],
+                room = data[start + 2];
+            if (instructor || days || room) {
                 const meetingDate = data[start + 3];
                 if (!date) date = meetingDate;
                 // inconsistent date
                 if (meetingDate && meetingDate !== date) valid |= 2;
 
                 // incomplete information
-                if (!a || !c || a === 'TBA' || c === 'TBA' || a === 'TBD' || c === 'TBD')
+                if (
+                    !instructor ||
+                    !room ||
+                    instructor === 'TBA' ||
+                    room === 'TBA' ||
+                    instructor === 'TBD' ||
+                    room === 'TBD'
+                )
                     valid |= 1;
 
                 // unknown meeting time
-                if (!b || b === 'TBA' || b === 'TBD') {
+                if (!days || days === 'TBA' || days === 'TBD') {
                     valid |= 4;
                 } else {
-                    const [, startT, , endT] = b.split(' ');
+                    const [, startT, , endT] = days.split(' ');
                     // invalid meeting time
                     if (startT === endT) valid |= 4;
                 }
@@ -130,35 +146,199 @@ export function parseSemesterData(csv_string: string) {
                 // insertion sort
                 let k = 0;
                 for (; k < meetings.length; k++) {
-                    if (b < meetings[k][1]) break;
+                    if (days < meetings[k].days) break;
                 }
-                meetings.splice(k, 0, [a, b, c]);
+                const meeting: Meeting = Object.create(Meeting.prototype, {
+                    instructor: {
+                        value: instructor,
+                        enumerable: true
+                    },
+                    days: {
+                        value: days,
+                        enumerable: true
+                    },
+                    room: {
+                        value: room,
+                        enumerable: true
+                    }
+                } as { [x in keyof Meeting]: TypedPropertyDescriptor<Meeting[x]> });
+
+                meetings.splice(k, 0, meeting);
             }
         }
-        date = date || '';
         // unknown date
         if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
+        if (typeof date !== 'string') date = '';
 
-        const tempSection: RawSection = [
-            +data[0],
-            data[3],
-            data[23],
-            STATUSES[data[24] as CourseStatus],
-            +data[25],
-            +data[26],
-            +data[27],
-            date,
-            valid,
-            meetings
-        ];
+        let course = rawCatalog[key];
+        if (!course) {
+            course = rawCatalog[key] = Object.create(Course.prototype, {
+                department: {
+                    value: data[1],
+                    enumerable: true
+                },
+                number: {
+                    value: +data[2],
+                    enumerable: true
+                },
+                type: {
+                    value: data[4],
+                    enumerable: true
+                },
+                key: {
+                    value: key,
+                    enumerable: true
+                },
+                units: {
+                    value: data[5],
+                    enumerable: true
+                },
+                title: {
+                    value: data[22],
+                    enumerable: true
+                },
+                description: {
+                    value: data[28],
+                    enumerable: true
+                },
+                sections: {
+                    value: [] as Section[],
+                    enumerable: true
+                },
+                ids: {
+                    value: [] as number[],
+                    enumerable: true
+                }
+            } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> });
 
-        if (rawCatalog[key]) {
-            rawCatalog[key][6].push(tempSection);
-        } else {
-            rawCatalog[key] = [data[1], +data[2], type, data[5], data[22], data[28], [tempSection]];
+            const { sections, ...o } = course;
+            allCourses.push(o);
         }
-    }
 
-    console.timeEnd('reorganizing data');
+        const section: Section = Object.create(Section.prototype, {
+            course: {
+                value: course, // back ref to course
+                enumerable: true
+            },
+            key: {
+                value: key,
+                enumerable: true
+            },
+            id: {
+                value: +data[0],
+                enumerable: true
+            },
+            section: {
+                value: data[3],
+                enumerable: true
+            },
+            topic: {
+                value: data[23],
+                enumerable: true
+            },
+            status: {
+                value: data[24],
+                enumerable: true
+            },
+            enrollment: {
+                value: +data[25],
+                enumerable: true
+            },
+            enrollment_limit: {
+                value: +data[26],
+                enumerable: true
+            },
+            wait_list: {
+                value: +data[27],
+                enumerable: true
+            },
+            valid: {
+                value: valid,
+                enumerable: true
+            },
+            meetings: {
+                value: meetings,
+                enumerable: true
+            },
+            instructors: {
+                value: Meeting.getInstructors(meetings),
+                enumerable: true
+            },
+            dateArray: {
+                value: parseDate(date),
+                enumerable: true
+            },
+            dates: {
+                value: date,
+                enumerable: true
+            }
+        } as SectionPropertyDescriptors);
+
+        course.ids.push(+data[0]);
+        course.sections.push(section);
+
+        const { course: _, ...others } = section;
+        allSections.push(others);
+    }
+    console.timeEnd('parse semester data');
+    Promise.all([db.courses.clear(), db.sections.clear()])
+        .then(() => {
+            console.time('save to db');
+            return Promise.all([db.courses.bulkAdd(allCourses), db.sections.bulkAdd(allSections)]);
+        })
+        .then(() => {
+            db.saveTimeStamp();
+            console.timeEnd('save to db');
+        });
+    return rawCatalog;
+}
+
+export async function retrieveFromDB(db: CatalogDB) {
+    const rawCatalog: { [x: string]: Course } = {};
+
+    console.time('get courses from db');
+    const [courses, secMap] = await Promise.all([
+        db.courses.toArray(),
+        db.sections.toArray(arr => {
+            const map = new Map<number, SectionTableItem>();
+            for (const item of arr) map.set(item.id, item);
+            return map;
+        })
+    ]);
+    console.timeEnd('get courses from db');
+
+    console.time('retrieve from db');
+    for (const rawCourse of courses) {
+        // descriptors for this course
+        const desc = Object.getOwnPropertyDescriptors(rawCourse);
+        for (const key in desc) {
+            desc[key].configurable = false;
+            desc[key].writable = false;
+        }
+        const sections: Section[] = [];
+        desc.sections = {
+            value: sections,
+            enumerable: true
+        };
+        const course: Course = Object.create(Course.prototype, desc);
+        for (const id of rawCourse.ids) {
+            const sec = secMap.get(id);
+            if (!sec) continue;
+            // descriptor for this section
+            const secDesc = Object.getOwnPropertyDescriptors(sec);
+            for (const key in secDesc) {
+                secDesc[key].configurable = false;
+                secDesc[key].writable = false;
+            }
+            // add missing property descriptors
+            secDesc.course = {
+                value: course,
+                enumerable: true
+            };
+            sections.push(Object.create(Section.prototype, secDesc));
+        }
+        rawCatalog[rawCourse.key] = course;
+    }
+    console.timeEnd('retrieve from db');
     return rawCatalog;
 }

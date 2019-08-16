@@ -7,6 +7,7 @@
  */
 import { saveStatus, StoreModule } from '.';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
+import noti from './notification';
 
 interface ScheduleStateBase {
     /**
@@ -50,7 +51,6 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
-// tslint:disable-next-line: no-empty-interface
 export interface ScheduleStore extends ScheduleState {}
 
 /**
@@ -201,9 +201,12 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         const proposed = obj.proposedSchedules;
         if (proposed instanceof Array) {
             this.proposedSchedules = proposed.map(x => {
-                const temp = Schedule.fromJSON(x);
-                if (temp) return temp;
-                else return new Schedule();
+                const result = Schedule.fromJSON(x);
+                const temp = result.payload;
+                if (temp) {
+                    if (result.level === 'warn') noti.notify(result);
+                    return temp;
+                } else return new Schedule();
             });
         } else {
             this.proposedSchedules = defaultState.proposedSchedules;
@@ -229,8 +232,8 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
 
     toJSON() {
         // exclude numGenerated and currentSchedule
-        const { numGenerated, currentSchedule, ...others } = this as ScheduleStore;
-        return others as ScheduleStateJSON;
+        const { numGenerated, currentSchedule, ...others } = this;
+        return (others as any) as ScheduleStateJSON;
     }
 
     getDefault(): ScheduleState {
@@ -247,5 +250,4 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
     }
 }
 
-export const schedule = new ScheduleStore();
-export default schedule;
+export default new ScheduleStore();

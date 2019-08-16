@@ -36,7 +36,8 @@
                 { "name": "IamFeelingLucky", "enabled": false, "reverse": true }
             ],
             "mode": 1
-        }
+        },
+        "refSchedule": {}
     },
     "schedule": {
         "currentScheduleIndex": 0,

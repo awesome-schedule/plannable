@@ -110,7 +110,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     showWeekend = true;
 
     private _fullHeight: number = 40;
-    private _partialHeight: number = 25;
+    private _partialHeight: number = 30;
     private _maxNumSchedules: number = 100000;
     private _numSearchResults: number = 6;
     private _earliest = '08:00';
@@ -139,7 +139,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
         return this._maxNumSchedules;
     }
     set maxNumSchedules(x) {
-        this._maxNumSchedules = bound(x, 1000, 2000000);
+        this._maxNumSchedules = bound(x, 1000, 5000000);
     }
     get earliest() {
         return this._earliest;
@@ -177,5 +177,4 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     }
 }
 
-export const display = new Display();
-export default display;
+export default new Display();

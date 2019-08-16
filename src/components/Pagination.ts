@@ -1,12 +1,17 @@
 /**
  * @module components
  */
+
+/**
+ *
+ */
 import { Component, Watch } from 'vue-property-decorator';
 import Store from '../store';
 
 /**
  * The component for showing a list of pages, used for switching between generated schedules
  * @author Kaiying Cat, Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component
 export default class Pagination extends Store {
@@ -33,7 +38,12 @@ export default class Pagination extends Store {
      * zero based offset
      */
     start = 0;
-    goto = null;
+    goto: number | null = null;
+
+    @Watch('goto')
+    gotoWatch() {
+        this.switchPage((this.goto || 1) - 1);
+    }
 
     updateStart() {
         if (this.idx < this.start) {

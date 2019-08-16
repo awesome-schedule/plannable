@@ -1,43 +1,28 @@
 /**
  * @module components/tabs
  */
-// tslint:disable:max-line-length
+
+/**
+ *
+ */
 import 'bootstrap';
 import $ from 'jquery';
 import { VueMathjax } from 'vue-mathjax';
+import Stepper from '../Stepper.vue';
+import { StepperInfo } from '../Stepper';
 import { Component, Vue } from 'vue-property-decorator';
 
-import {
-    // used in information.vue
-    VDivider,
-    VImg,
-    VLayout,
-    VProgressCircular,
-
-    // steppers
-    VStepper,
-    VStepperContent,
-    VStepperHeader,
-    VStepperItems,
-    VStepperStep
-} from 'vuetify/lib';
-
+/**
+ * tab for displaying user guide
+ * @author Hanzhi Zhou, Kaiying Shan, Zichao Hu, Elena Long
+ * @noInheritDoc
+ */
 @Component({
     components: {
         VueMathjax,
 
-        // used in information.vue
-        VDivider,
-        VImg,
-        VLayout,
-        VProgressCircular,
-
         // steppers
-        VStepper,
-        VStepperHeader,
-        VStepperStep,
-        VStepperContent,
-        VStepperItems
+        Stepper
     }
 })
 export default class Information extends Vue {
@@ -62,6 +47,21 @@ export default class Information extends Vue {
 `;
 
     selected = 1;
+
+    readonly scheduleSteps = [
+        {
+            title: 'Add Classes',
+            src: this.imgPath('select_class.gif')
+        },
+        {
+            title: 'Generate Schedules',
+            src: this.imgPath('generate_class.gif')
+        },
+        {
+            title: 'Multiple Schedules',
+            src: this.imgPath('multiple_schedule.gif')
+        }
+    ];
 
     readonly compareSteps = [
         {
@@ -101,13 +101,13 @@ export default class Information extends Vue {
         }
     ];
 
-    readonly jsonSteps = [
+    readonly jsonSteps: StepperInfo = [
         {
             title: 'Download Json file',
             src: this.imgPath('exportJson1.png')
         },
         {
-            title: 'Save it somethere you can find',
+            title: 'Save it somewhere you can find',
             src: this.imgPath('exportJson2.png')
         },
         {
@@ -126,27 +126,27 @@ export default class Information extends Vue {
 
     readonly icalSteps = [
         {
-            title: 'Make Your Schedule and Export',
+            title: 'Make your schedule and export',
             src: this.imgPath('export1.png')
         },
         {
-            title: 'Save The File Somewhere You Can Find',
+            title: 'Save the file somewhere you can find',
             src: this.imgPath('export2.png')
         },
         {
-            title: 'Go to Google Calendar',
+            title: 'Go to Google calendar',
             src: this.imgPath('export3.png')
         },
         {
-            title: 'Click on Setting',
+            title: 'Click on setting',
             src: this.imgPath('export4.png')
         },
         {
-            title: 'Select Import and Export',
+            title: 'Select import and export',
             src: this.imgPath('export5.png')
         },
         {
-            title: 'Find and Open The File You Just Saved',
+            title: 'Find and open the file you just saved',
             src: this.imgPath('export6.png')
         },
         {
@@ -154,11 +154,11 @@ export default class Information extends Vue {
             src: this.imgPath('export7.png')
         },
         {
-            title: 'Import Successful!',
+            title: 'Import successful!',
             src: this.imgPath('export8.png')
         },
         {
-            title: 'Now You Can View Your Schedule On Google Calendar!',
+            title: 'Now you can view your schedule on Google calendar!',
             src: this.imgPath('export9.png')
         }
     ];

@@ -1,9 +1,9 @@
-import cheerio from 'cheerio';
-import { stringify } from 'querystring';
 import axios from 'axios';
-import { SemesterJSON } from '../src/models/Catalog';
-import fs from 'fs';
+import cheerio from 'cheerio';
 import { spawn } from 'child_process';
+import fs from 'fs';
+import { stringify } from 'querystring';
+import { SemesterJSON } from '../src/models/Catalog';
 
 const dataDir = './data/Semester Data/';
 function cb(err: NodeJS.ErrnoException | null) {
@@ -11,7 +11,7 @@ function cb(err: NodeJS.ErrnoException | null) {
 }
 
 async function loadSemesterList(count = 5) {
-    const { data } = await axios.get('https://rabi.phys.virginia.edu/mySIS/CS2/index.php');
+    const { data } = await axios.get<string>('https://rabi.phys.virginia.edu/mySIS/CS2/index.php');
     const $ = cheerio.load(data);
     fs.writeFile(dataDir + 'index.html', data, cb);
     const records: SemesterJSON[] = [];
@@ -32,7 +32,7 @@ async function loadSemesterList(count = 5) {
 }
 
 async function loadSemesterData(semester: SemesterJSON) {
-    const { data } = await axios.post(
+    const { data } = await axios.post<string>(
         `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
         stringify({
             Semester: semester.id,

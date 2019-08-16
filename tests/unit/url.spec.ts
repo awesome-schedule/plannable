@@ -13,7 +13,7 @@ import test_filter from './test_data/test_filter.json';
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty_schedule);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -23,7 +23,6 @@ describe('url convertJsonToArray test', () => {
         const s = 's'.charCodeAt(0);
         const v = 'v'.charCodeAt(0);
         const I = 'I'.charCodeAt(0);
-        console.warn(urlCompressed);
 
         // display
         const display_test = urlCompressed[4];
@@ -73,7 +72,7 @@ describe('url convertJsonToArray test', () => {
 
     it('mySchedule2019Fall', () => {
         const test1 = JSON.stringify(mySchedule2019Fall);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -85,7 +84,6 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
-        console.warn('fal2019', urlCompressed);
         // display
         const display_test = urlCompressed[4];
 
@@ -134,7 +132,7 @@ describe('url convertJsonToArray test', () => {
 
     it('test_filter', () => {
         const test1 = JSON.stringify(test_filter);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -146,7 +144,6 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('test_filter');
-        console.warn('test_filter', urlCompressed);
 
         // display
         const display_test = urlCompressed[4];
@@ -197,7 +194,7 @@ describe('url convertJsonToArray test', () => {
 
     it('miscellaneousTest1', () => {
         const test1 = JSON.stringify(miscellaneousTest1);
-        const urlCompressed: any = compressJSON(test1);
+        const urlCompressed = compressJSON(test1);
 
         // get filter name initial asciis
         const c = 'c'.charCodeAt(0);
@@ -209,7 +206,6 @@ describe('url convertJsonToArray test', () => {
         const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('miscellaneousTest1');
-        console.warn('miscellaneousTest1', urlCompressed);
 
         // display
         const display_test = urlCompressed[4];
@@ -274,11 +270,10 @@ describe('url convertJsonToArray test', () => {
 
         // schedule length
         const schedules = schedule_test[4];
-        console.warn('schedules', schedules);
         expect(schedules.length).toEqual(3);
 
-        // default length
-        expect(schedules[0].length).toEqual(2);
+        // length with no events
+        expect(schedules[0].length).toEqual(1);
 
         // schedule[0] length
         const schedule0 = schedules[0][0];
@@ -299,28 +294,28 @@ describe('url convertJsonToArray test', () => {
 });
 
 describe('parseFromURL', () => {
-    it('parse_empty_schedule', () => {
+    it('parse_empty_schedule', async () => {
         const urlCompressed = compressJSON(JSON.stringify(empty_schedule));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(empty_schedule);
     });
-    it('parse_mySchedule2019Fall', () => {
+    it('parse_mySchedule2019Fall', async () => {
         const urlCompressed = compressJSON(JSON.stringify(mySchedule2019Fall));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(mySchedule2019Fall);
     });
-    it('parse_test_filter', () => {
+    it('parse_test_filter', async () => {
         const urlCompressed = compressJSON(JSON.stringify(test_filter));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(test_filter);
     });
-    it('parse_miscellaneousTest1', () => {
+    it('parse_miscellaneousTest1', async () => {
         const urlCompressed = compressJSON(JSON.stringify(miscellaneousTest1));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
-        const json = parseFromURL(URL);
+        const json = await parseFromURL(URL);
         expect(JSON.parse(JSON.stringify(json))).toEqual(miscellaneousTest1);
     });
 });

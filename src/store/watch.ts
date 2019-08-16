@@ -1,6 +1,10 @@
 /**
  * @module store
  */
+
+/**
+ *
+ */
 import Schedule from '@/models/Schedule';
 import { Component, Watch } from 'vue-property-decorator';
 import Store from './store';
@@ -10,7 +14,6 @@ import Store from './store';
  * @author Hanzhi Zhou
  */
 @Component
-// tslint:disable-next-line: max-classes-per-file
 export default class WatchFactory extends Store {
     @Watch('status.loading')
     loadingWatch() {

@@ -10,20 +10,24 @@
 /**
  *
  */
+import { RawAlgoCourse } from '@/algorithm';
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
-import _Course, { CourseConstructorArguments, CourseMatch } from '../models/Course';
-import _Section, { SectionMatch } from '../models/Section';
+import _Course, { CourseMatch } from '../models/Course';
+import _Meeting from '../models/Meeting';
+import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-type Course = NonFunctionProperties<_Course>;
-type Section = NonFunctionProperties<_Section>;
+type Section = SectionFields;
+interface Course extends Omit<NonFunctionProperties<_Course>, 'sections'> {
+    readonly sections: readonly Section[];
+}
 
-declare function postMessage(msg: [CourseConstructorArguments[], SearchMatch[]] | 'ready'): void;
+declare function postMessage(msg: [RawAlgoCourse[], SearchMatch[]] | 'ready'): void;
 
 type _Searcher<T> = Searcher<T, SearchOptions<T> & ReturnMatchData>;
 let titleSearcher: _Searcher<Course>;
-let descripSearcher: _Searcher<Course>;
+let descriptionSearcher: _Searcher<Course>;
 let topicSearcher: _Searcher<Section>;
 let instrSearcher: _Searcher<Section>;
 const searcherOpts = {
@@ -69,6 +73,82 @@ function resolveOverlap<T, K extends keyof SearchResult<T>['item']>(arr: ResultE
     }
 }
 
+interface Scores {
+    /**
+     * elements in array:
+     * 1. score for courses,
+     * 2. score for sections,
+     * 3. number of distinct sections
+     */
+    [x: string]: [number, number, number];
+}
+interface CourseMap {
+    [x: string]: ResultEntry<Course, 'title' | 'description'>[];
+}
+interface SectionMap {
+    [x: string]: Map<number, ResultEntry<Section, 'topic' | 'instructors'>[]>;
+}
+
+function processCourseResults(
+    results: SearchResult<Course>[],
+    courseMap: CourseMap,
+    scores: Scores,
+    match: 'title' | 'description',
+    weight: number
+) {
+    for (const result of results) {
+        const key = result.item.key;
+        const score = result.score ** 3 * weight;
+        const tempObj = {
+            result,
+            match
+        };
+        if (courseMap[key]) {
+            scores[key][0] += score;
+            courseMap[key].push(tempObj);
+        } else {
+            // if encounter this course for the first time
+            scores[key] = [score, 0, 0];
+            courseMap[key] = [tempObj];
+        }
+    }
+}
+
+function processSectionResults(
+    results: SearchResult<Section>[],
+    sectionMap: SectionMap,
+    scores: Scores,
+    match: 'topic' | 'topic',
+    weight: number
+) {
+    for (const result of results) {
+        const item = result.item;
+        const key = item.key;
+        const score = result.score ** 3 * weight;
+
+        const scoreEntry = scores[key] || (scores[key] = [0, 0, 0]);
+        scoreEntry[1] += score;
+
+        const tempObj = {
+            result,
+            match
+        };
+        if (sectionMap[key]) {
+            const secMatches = sectionMap[key].get(item.id);
+            if (secMatches) {
+                secMatches.push(tempObj);
+            } else {
+                sectionMap[key].set(item.id, [tempObj]);
+                // if encounter a new section of a course, increment the number of section recorded
+                scoreEntry[2] += 1;
+            }
+        } else {
+            sectionMap[key] = new Map().set(item.id, [tempObj]);
+            scoreEntry[2] += 1;
+        }
+    }
+}
+
 /**
  * initialize the worker using `msg.data` which is assumed to be a `courseDict` on the first message,
  * posting the string literal 'ready' as the response
@@ -82,14 +162,16 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
         console.time('worker prep');
         courseDict = data;
         const courses = Object.values(courseDict);
-        const sections: Section[] = [];
-        for (const { sections: secs } of courses) sections.push(...secs);
+        const sections = courses.reduce((secs: Section[], course) => {
+            secs.push(...course.sections);
+            return secs;
+        }, []);
 
         titleSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.title
         });
-        descripSearcher = new Searcher(courses, {
+        descriptionSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.description
         });
@@ -109,96 +191,42 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
         const querySeg: string[] = query.split(/ +/).filter(x => x.length >= 3);
         querySeg.push(query);
 
-        // elements in array: 1. score for courses, 2. score for sections, 2. number of distinct sections
-        const courseScores: { [x: string]: [number, number, number] } = Object.create(null);
-
-        const courseMap: {
-            [x: string]: ResultEntry<Course, 'title' | 'description'>[];
-        } = Object.create(null);
-
-        const sectionMap: {
-            [x: string]: Map<number, ResultEntry<Section, 'topic' | 'instructors'>[]>;
-        } = Object.create(null);
-
-        const sectionRecorder: Set<string> = new Set();
+        const scores: Scores = Object.create(null);
+        const courseMap: CourseMap = Object.create(null);
+        const sectionMap: SectionMap = Object.create(null);
 
         for (let j = 0; j < querySeg.length; j++) {
             const q = querySeg[j];
-            const last = j === querySeg.length - 1;
-
-            const coursesResults = [titleSearcher.search(q), descripSearcher.search(q)];
-            const sectionsResults = [topicSearcher.search(q), instrSearcher.search(q)];
+            // matching the whole query sentence would result in a higher score
+            const weight = +(j === querySeg.length - 1) * 2;
 
             // map search result to course (or section) and record the match score
-            for (let i = 0; i < 2; i++) {
-                const r = coursesResults[i];
-                for (const result of r) {
-                    const { item } = result;
-                    const key = item.key;
-
-                    // calculate score based on search result
-                    // matching the whole query sentence would result in a higher score
-                    const score = result.score ** 3 * (i === 0 ? 1 : 0.6) * (last ? 2 : 1);
-
-                    const tempObj: ResultEntry<Course, 'title' | 'description'> = {
-                        result,
-                        match: i === 0 ? 'title' : 'description'
-                    };
-
-                    if (courseMap[key]) {
-                        courseScores[key][0] += score;
-                        courseMap[key].push(tempObj);
-                    } else {
-                        // if encounter this course for the first time
-                        courseScores[key] = [score, 0, 0];
-                        courseMap[key] = [tempObj];
-                    }
-                }
-            }
-
-            for (let i = 0; i < 2; i++) {
-                const r = sectionsResults[i];
-                for (const result of r) {
-                    const { item } = result;
-                    const key = item.key;
-                    const score = result.score ** 3 * (i === 0 ? 0.8 : 0.6) * (last ? 2 : 1);
-
-                    if (courseScores[key]) {
-                        courseScores[key][1] += score;
-                    } else {
-                        courseScores[key] = [0, score, 0];
-                    }
-
-                    const tempObj: ResultEntry<Section, 'topic' | 'instructors'> = {
-                        result,
-                        match: i === 0 ? 'topic' : 'instructors'
-                    };
-
-                    if (sectionMap[key]) {
-                        const secMatches = sectionMap[key].get(item.sid);
-                        if (secMatches) {
-                            secMatches.push(tempObj);
-                        } else {
-                            sectionMap[key].set(item.sid, [tempObj]);
-                        }
-                    } else {
-                        sectionMap[key] = new Map();
-                        sectionMap[key].set(item.sid, [tempObj]);
-                    }
-
-                    const secKey = `${item.key} ${item.sid}`;
-
-                    // if encounter a new section of a course, increment the number of section recorded
-                    if (!sectionRecorder.has(secKey) && !last) {
-                        courseScores[key][2] += 1;
-                        sectionRecorder.add(secKey);
-                    }
-                }
-            }
+            processCourseResults(titleSearcher.search(q), courseMap, scores, 'title', weight);
+            processCourseResults(
+                descriptionSearcher.search(q),
+                courseMap,
+                scores,
+                'description',
+                0.5 * weight
+            );
+            processSectionResults(
+                topicSearcher.search(q),
+                sectionMap,
+                scores,
+                'topic',
+                0.8 * weight
+            );
+            processSectionResults(
+                instrSearcher.search(q),
+                sectionMap,
+                scores,
+                'topic',
+                0.4 * weight
+            );
         }
 
         // sort courses in descending order; section score is normalized before added to course score
-        const scoreEntries = Object.entries(courseScores)
+        const scoreEntries = Object.entries(scores)
             .sort(
                 (a, b) =>
                     b[1][0] -
@@ -208,7 +236,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             )
             .slice(0, 12);
 
-        const finalResults: CourseConstructorArguments[] = [];
+        const finalResults: RawAlgoCourse[] = [];
         const allMatches: SearchMatch[] = [];
 
         // merge course and section matches
@@ -216,8 +244,6 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
             const courseMatch = courseMap[key];
             if (courseMatch) {
                 resolveOverlap(courseMatch);
-
-                const { item } = courseMatch[0].result;
 
                 const crsMatches: CourseMatch[] = courseMatch.map(
                     ({ match, result: { match: m } }) => ({
@@ -231,10 +257,10 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                 const s = sectionMap[key];
                 // if the section matches for this course exist
                 if (s) {
-                    for (const [sid, matches] of s) {
+                    for (const [id, matches] of s) {
                         resolveOverlap(matches);
                         secMatches.set(
-                            sid,
+                            id,
                             matches.map(({ match, result: { match: m } }) => ({
                                 match,
                                 start: m.index,
@@ -243,7 +269,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                         );
                     }
                 }
-                finalResults.push([item.raw, key, item.sids]);
+                finalResults.push([key, courseMatch[0].result.item.ids]);
                 allMatches.push([crsMatches, secMatches]);
 
                 // only section match exists
@@ -251,11 +277,11 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                 const secMatches = new Map<number, SectionMatch[]>();
                 const s = sectionMap[key];
                 if (s) {
-                    const sids = [...s.keys()];
-                    for (const [sid, matches] of s) {
+                    const ids = [...s.keys()];
+                    for (const [id, matches] of s) {
                         resolveOverlap(matches);
                         secMatches.set(
-                            sid,
+                            id,
                             matches.map(({ match, result: { match: m } }) => ({
                                 match,
                                 start: m.index,
@@ -263,11 +289,7 @@ onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
                             }))
                         );
                     }
-                    finalResults.push([
-                        courseDict[s.get(sids[0])![0].result.item.key].raw,
-                        key,
-                        sids
-                    ]);
+                    finalResults.push([key, ids]);
                     allMatches.push([[], secMatches]);
                 }
             }

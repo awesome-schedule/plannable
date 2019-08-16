@@ -1,6 +1,10 @@
 /**
  * @module components/tabs
  */
+
+/**
+ *
+ */
 import { SearchMatch } from '@/models/Catalog';
 import Course from '@/models/Course';
 import Store from '@/store';
@@ -10,6 +14,7 @@ import ClassList from '../ClassList.vue';
 /**
  * component for performing fuzzy-search against the catalog of courses
  * @author Hanzhi Zhou
+ * @noInheritDoc
  */
 @Component({
     components: {
@@ -69,7 +74,6 @@ export default class FuzzyView extends Store {
         console.time('query');
         try {
             [this.inputCourses, this.inputMatches] = await window.catalog.fuzzySearch(query);
-            console.log(this.inputMatches);
         } catch (err) {
             this.noti.error(err.message);
             console.error(err);

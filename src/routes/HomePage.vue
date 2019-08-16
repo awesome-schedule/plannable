@@ -1,12 +1,15 @@
 <template>
     <div>
-        <nav  class="navbar navbar-expand navbar-light bg-light flex-column flex-md-row bd-navbar">
-            <div class="navbar-nav-scroll">
-                <ul class="navbar-nav mr-auto">
+        <nav
+            class="navbar navbar-fixed-top navbar-expand navbar-light bd-navbar flex-column flex-md-row "
+        >
+            <img class="img-fluid logo" src="../assets/cover.jpg" />
+            <div class="navbar-nav-scroll ml-auto">
+                <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link" href="/contact">Contact/Join Us</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item mx-3">
                         <a class="nav-link" href="/contact">Advertise With Us</a>
                     </li>
                     <li class="nav-item">
@@ -16,27 +19,27 @@
             </div>
         </nav>
 
-        <div class="container">
-            <h1 class="display-2">Welcome to Plannable</h1>
-            <img class="img-fluid" src="../assets/cover.jpg" />
-            <hr class="my-4" />
-            <p>
-                Provide students with free and handy tools to schedule their classes more
-                efficiently.
+        <div class="jumbotron">
+            <h1 style="font-size:5vw">Welcome to Plannable</h1>
+            <p class="lead" style="font-size:3vw">
+                Everything is Plannable
             </p>
-            <div>
-                <select v-model="currentSelect" class="custom-select custom-select-sm py-0">
+            <!-- <hr class="my-4" /> -->
+
+            <div class="d-flex flex-row select-school">
+                <select v-model="currentSelect" class="py-0 mx-1">
                     <option v-for="(item, index) in schoolNames" :key="index" :value="index">{{
                         item
                     }}</option>
                 </select>
 
-                <button class="btn btn-primary" @click="redirection">
+                <button class="btn btn-primary mx-1" @click="redirection">
                     Go to
                 </button>
             </div>
-            <div id="release-note" class="container"></div>
         </div>
+
+        <div id="release-note" class="container"></div>
     </div>
 </template>
 
@@ -44,7 +47,20 @@
 </script>
 
 <style scoped>
-.bg {
-    background-color: rgb(99, 34, 34);
+.logo {
+    height: 15vh;
+}
+.jumbotron {
+    background-color: #ffffff;
+}
+.fixed-top {
+    background-color: #ffffff;
+}
+
+.select-school {
+    margin-top: 15vh;
+}
+.lead {
+    margin-left: 20px;
 }
 </style>

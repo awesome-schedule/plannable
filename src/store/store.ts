@@ -283,7 +283,7 @@ export default class Store extends Vue {
         const options = this.getGeneratorOptions();
         if (!options) return;
 
-        const generator = new ScheduleGenerator(window.catalog, options);
+        const generator = new ScheduleGenerator(window.catalog, window.timeMatrix, options);
 
         console.time('schedule generation');
         const msg = generator.getSchedules(

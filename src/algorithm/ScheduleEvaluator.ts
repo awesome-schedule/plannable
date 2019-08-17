@@ -37,6 +37,7 @@ export interface SortOption {
      * whether to sort in reverse
      */
     reverse: boolean;
+    weight: number;
 }
 
 /**
@@ -500,13 +501,14 @@ class ScheduleEvaluator {
 
             // if option[i] is reverse, ifReverse[i] will be -1
             const ifReverse = new Float32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
+            const weight = new Float32Array(len).map((_, i) => options[i].weight || 1);
             const fbCoeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: number, b: number) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {
                     const coeff = fbCoeffs[i];
                     // calculate the difference in coefficients
-                    r = ifReverse[i] * (coeff[a] - coeff[b]);
+                    r = ifReverse[i] * (coeff[a] - coeff[b]) * (weight[i] || 1);
 
                     // if non-zero, returns this coefficient
                     if (r) return r;

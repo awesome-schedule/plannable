@@ -144,6 +144,7 @@
                                     title="Enable this sorting option"
                                 ></label>
                             </div>
+                            <input v-model="option.weight" type="number" />
                         </div>
                     </div>
                 </div>

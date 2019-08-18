@@ -4,28 +4,27 @@
             <nav
                 v-if="show"
                 id="navbar"
-                class="navbar fixed-top navbar-expand navbar-light bd-navbar bg-white flex-column flex-md-row"
+                class="navbar sticky-top navbar-expand navbar-light bd-navbar bg-white flex-column flex-md-row"
             >
                 <img class="img-fluid logo" src="../assets/cover.jpg" />
                 <div class="navbar-nav-scroll ml-auto">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="#section1">Why Plannable</a>
+                            <a class="nav-link" @click="moveTo('#section1')" style='cursor:pointer'>Why Plannable</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/contact">Contact/Join Us</a>
+                            <a class="nav-link" @click="moveTo('#section5')" style='cursor:pointer'>Contact/Join Us</a>
                         </li>
                         <li class="nav-item mx-3">
                             <a class="nav-link" href="/contact">Advertise With Us</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/contact">Check Previous Updates</a>
+                            <a class="nav-link" @click="moveTo('#section6')" style='cursor:pointer'>Check Previous Updates</a>
                         </li>
                     </ul>
                 </div>
             </nav>
         </transition>
-
         <div class="clearfix" :style="navbarHeight" style="height: 90vh">
             <transition name="slide-fade">
                 <div v-if="show" class="jumbotron row no-gutters">
@@ -60,51 +59,53 @@
             </transition>
         </div>
 
-        <!-- <div id="release-note" class="container"></div> -->
-        <div data-spy="scroll" data-target="#navbar">
-            <section id="section1" class="row no-gutters text-center" >
-                <div class="col-md-6 bg-light">
-                    <span class="align-middle">Auto-Generating</span>
-                </div>
-                <div class="col-md-6">
-                    <img class="img-fluid " src="../assets/cover.jpg" />
-                </div>
-            </section>
-            <section class="row no-gutters text-center">
-                <div class="col-md-6">
-                    <img class="img-fluid " src="../assets/cover.jpg" />
-                </div>
-                <div class="col-md-6 bg-light">
-                    Auto-Generating
-                </div>
-            </section>
-            <section class="row no-gutters text-center" >
-                <div class="col-md-6 bg-light">
-                    <span class="align-middle">Auto-Generating</span>
-                </div>
-                <div class="col-md-6">
-                    <img class="img-fluid " src="../assets/cover.jpg" />
-                </div>
-            </section>
-            <section class="row no-gutters text-center">
-                <div class="col-md-6">
-                    <img class="img-fluid " src="../assets/cover.jpg" />
-                </div>
-                <div class="col-md-6 bg-light">
-                    Auto-Generating
-                </div>
-            </section>
-            <section class="jumbotron text-center">
-                <h1 class="display-4">Contact/Join Us</h1>
-                <p>
-                    Email Us At:<a id="sendEmail" href="mailto:team@coursicle.com"
-                        >zh2wc@virginia.edu
-                    </a>
-                </p>
 
-                <p>Join Us:</p>
-            </section>
-        </div>
+        <section id="section1" class="row no-gutters text-center">
+            <div class="col-md-6 bg-light">
+                <span class="align-middle">Auto-Generating</span>
+            </div>
+            <div class="col-md-6">
+                <img class="img-fluid " src="../assets/cover.jpg" />
+            </div>
+        </section>
+        <section id="section2" class="row no-gutters text-center">
+            <div class="col-md-6">
+                <img class="img-fluid " src="../assets/cover.jpg" />
+            </div>
+            <div class="col-md-6 bg-light">
+                Auto-Generating
+            </div>
+        </section>
+        <section id="section3" class="row no-gutters text-center">
+            <div class="col-md-6 bg-light">
+                <span class="align-middle">Auto-Generating</span>
+            </div>
+            <div class="col-md-6">
+                <img class="img-fluid " src="../assets/cover.jpg" />
+            </div>
+        </section>
+        <section id="section4" class="row no-gutters text-center">
+            <div class="col-md-6">
+                <img class="img-fluid " src="../assets/cover.jpg" />
+            </div>
+            <div class="col-md-6 bg-light">
+                Auto-Generating
+            </div>
+        </section>
+        <section id="section5" class="jumbotron text-center">
+            <h1 class="display-4">Contact/Join Us</h1>
+            <p>
+                Email Us At:<a id="sendEmail" href="mailto:team@coursicle.com"
+                    >zh2wc@virginia.edu
+                </a>
+            </p>
+
+            <p>Join Us:</p>
+        </section>
+        <section id="section6" class="jumbotron text-center">
+            <h1 class="display-4">Previous Updates</h1>
+            <div id="release-note" class="container"></div>
+        </section>
     </div>
 </template>
 

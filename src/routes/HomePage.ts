@@ -98,7 +98,8 @@ export default class Homepage extends Vue {
     schoolAbbr = ['uva'];
     currentSelect = 0;
     show = false;
-    navbarHeight = '50px';
+    // getnavBarHeight = $('#navbar').outerHeight() | 50;
+    navbarHeight = `margin-top: ${ $('#navbar').outerHeight() }px`;
     redirection() {
         const index = this.currentSelect - 1;
         if (index < 0) {
@@ -109,9 +110,16 @@ export default class Homepage extends Vue {
         location.href = `/${url}`;
     }
     async mounted() {
+        console.log('mounted', $('#navbar').outerHeight())
         this.show = true;
         await releaseNote();
         $('#release-note').html(note);
-        this.navbarHeight = `margin-top: ${$('#navbar').outerHeight()}px`;
+        // this.navbarHeight = `margin-top: ${$('#navbar').outerHeight()}px`;
+    }
+    moveTo(id: string) {
+        const moveTo = $(id).position().top - $('#navbar').outerHeight();
+        console.log('moveTo', moveTo)
+        console.log('nav h', $('#navbar').outerHeight())
+        window.scrollTo(0, moveTo);
     }
 }

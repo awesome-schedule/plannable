@@ -10,6 +10,9 @@
                 <div class="navbar-nav-scroll ml-auto">
                     <ul class="navbar-nav">
                         <li class="nav-item">
+                            <a class="nav-link" href="#section1">Why Plannable</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/contact">Contact/Join Us</a>
                         </li>
                         <li class="nav-item mx-3">
@@ -23,55 +26,85 @@
             </nav>
         </transition>
 
-        <div class="clearfix" :style="navbarHeight">
+        <div class="clearfix" :style="navbarHeight" style="height: 90vh">
             <transition name="slide-fade">
-                <div v-if="show" class="jumbotron float-left ">
-                    <h1 class="display-3 text-center">Welcome to Plannable</h1>
-                    <p class="lead text-left">
-                        Everything is Plannable
-                    </p>
+                <div v-if="show" class="jumbotron row no-gutters">
+                    <div class="col-md-7">
+                        <h1 class="display-3">Welcome to Plannable</h1>
+                        <p class="lead text-left">
+                            Everything is Plannable
+                        </p>
 
-                    <div class="d-flex flex-row select-school">
-                        <select v-model="currentSelect" class="py-0 mx-1">
-                            <option
-                                v-for="(item, index) in schoolNames"
-                                :key="index"
-                                :value="index"
-                                >{{ item }}</option
-                            >
-                        </select>
+                        <div class="d-flex flex-row select-school">
+                            <select v-model="currentSelect" class="py-0 mx-1">
+                                <option
+                                    v-for="(item, index) in schoolNames"
+                                    :key="index"
+                                    :value="index"
+                                    >{{ item }}</option
+                                >
+                            </select>
 
-                        <button class="btn btn-primary mx-1" @click="redirection">
-                            Go to
-                        </button>
+                            <button class="btn btn-primary mx-1" @click="redirection">
+                                Go to
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </transition>
-            <transition name="slide-fade-left">
-                <div v-if="show" class="float-left embed-responsive embed-responsive-21by9">
-                    <embed class="d-inline embed-responsive-item" />
-                    afdas
+                    <div class="col-md-4 embed-responsive embed-responsive-21by9">
+                        <iframe
+                            src="https://www.youtube.com/embed/GFKAmRvqwkg"
+                            class="embed-responsive-item"
+                        />
+                    </div>
                 </div>
             </transition>
         </div>
 
         <!-- <div id="release-note" class="container"></div> -->
-        <section class="row no-gutters text-center ">
-            <div class="col-md-6 bg-light">
-                <span class="align-middle">Auto-Generating</span>
-            </div>
-            <div class="col-md-6">
-                <img class="img-fluid " src="../assets/generate_class.gif" />
-            </div>
-        </section>
-        <section class="row no-gutters text-center">
-            <div class="col-md-6">
-                <img class="img-fluid " src="../assets/generate_class.gif" />
-            </div>
-            <div class="col-md-6 bg-light">
-                Auto-Generating
-            </div>
-        </section>
+        <div data-spy="scroll" data-target="#navbar">
+            <section id="section1" class="row no-gutters text-center" >
+                <div class="col-md-6 bg-light">
+                    <span class="align-middle">Auto-Generating</span>
+                </div>
+                <div class="col-md-6">
+                    <img class="img-fluid " src="../assets/cover.jpg" />
+                </div>
+            </section>
+            <section class="row no-gutters text-center">
+                <div class="col-md-6">
+                    <img class="img-fluid " src="../assets/cover.jpg" />
+                </div>
+                <div class="col-md-6 bg-light">
+                    Auto-Generating
+                </div>
+            </section>
+            <section class="row no-gutters text-center" >
+                <div class="col-md-6 bg-light">
+                    <span class="align-middle">Auto-Generating</span>
+                </div>
+                <div class="col-md-6">
+                    <img class="img-fluid " src="../assets/cover.jpg" />
+                </div>
+            </section>
+            <section class="row no-gutters text-center">
+                <div class="col-md-6">
+                    <img class="img-fluid " src="../assets/cover.jpg" />
+                </div>
+                <div class="col-md-6 bg-light">
+                    Auto-Generating
+                </div>
+            </section>
+            <section class="jumbotron text-center">
+                <h1 class="display-4">Contact/Join Us</h1>
+                <p>
+                    Email Us At:<a id="sendEmail" href="mailto:team@coursicle.com"
+                        >zh2wc@virginia.edu
+                    </a>
+                </p>
+
+                <p>Join Us:</p>
+            </section>
+        </div>
     </div>
 </template>
 

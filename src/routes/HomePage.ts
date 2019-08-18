@@ -98,7 +98,7 @@ export default class Homepage extends Vue {
     schoolAbbr = ['uva'];
     currentSelect = 0;
     show = false;
-    navbarHeight = '10vh';
+    navbarHeight = '50px';
     redirection() {
         const index = this.currentSelect - 1;
         if (index < 0) {

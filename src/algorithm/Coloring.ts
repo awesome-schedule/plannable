@@ -22,7 +22,7 @@ import { Graph, Vertex } from './Graph';
  * @param v the number of vertex already colored
  */
 function graphColorBackTrack(
-    graph: Int16Array[],
+    graph: Int16Array[] | number[][],
     colors: Int16Array,
     colorOrder: Int16Array,
     opCount: Int32Array,
@@ -55,7 +55,7 @@ function graphColorBackTrack(
  * length must equal to the length of adjList.
  * @param colorOrder an array used to record the order of coloring
  */
-export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: Int16Array): number {
+export function dsatur(adjList: number[][], colors: Int16Array, colorOrder: Int16Array): number {
     colors.fill(-1);
     const numNodes = adjList.length;
     if (!numNodes) return 0;
@@ -121,14 +121,13 @@ export function dsatur(adjList: Int16Array[], colors: Int16Array, colorOrder: In
  * length must equal to the length of adjList.
  * @returns total number of colors
  */
-export function graphColoringExact(adjList: Int16Array[], colors: Int16Array): number {
+export function graphColoringExact(adjList: number[][], colors: Int16Array): number {
     // get a good initial color order using the DSATUR algorithm
     const dsaturOrder = colors.slice();
     colors.fill(-1);
     dsatur(adjList, colors, dsaturOrder);
     const opCount = new Int32Array(1);
     let totalCount = 0;
-    // console.time('coloring');
     let numColors = 1;
     for (let i = 1; i < 19260817; i++) {
         if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, i, 0)) {
@@ -139,9 +138,7 @@ export function graphColoringExact(adjList: Int16Array[], colors: Int16Array): n
         totalCount += opCount[0];
         opCount[0] = 0;
     }
-    // colorSpread(adjList, colors);
     // console.log('op count', totalCount);
-    // console.timeEnd('coloring');
     return numColors;
 }
 
@@ -150,7 +147,7 @@ export function graphColoringExact(adjList: Int16Array[], colors: Int16Array): n
  * @param adjList
  * @param colors
  */
-export function colorDepthSearch(adjList: Int16Array[], colors: Int16Array): Graph<number> {
+export function colorDepthSearch(adjList: number[][], colors: Int16Array): Graph<number> {
     const graph: Graph<number> = new Map();
     const vertices: Vertex<number>[] = [];
 
@@ -161,7 +158,7 @@ export function colorDepthSearch(adjList: Int16Array[], colors: Int16Array): Gra
     }
 
     for (let i = 0; i < colors.length; i++) {
-        graph.set(vertices[i], Array.from(adjList[i]).map(x => vertices[x]));
+        graph.set(vertices[i], adjList[i].map(x => vertices[x]));
     }
 
     // start DFS at each root node
@@ -174,7 +171,7 @@ export function colorDepthSearch(adjList: Int16Array[], colors: Int16Array): Gra
     return graph;
 }
 
-export function recursiveLargestFirst(adjList: Int16Array[], colors: Int16Array): number {
+export function recursiveLargestFirst(adjList: number[][], colors: Int16Array): number {
     colors.fill(-1);
     const notColored = new Set(colors.keys());
     const degrees = adjList.map((x, i) => x.length);

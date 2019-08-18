@@ -61,7 +61,7 @@ export type Graph<T> = Map<Vertex<T>, Vertex<T>[]>;
  * @note the start node is not marked as visited
  * @returns node indices belonging to the connected component found
  */
-export function DFS(start: number, adjList: Int16Array[], visited: Uint8Array): number[] {
+export function DFS(start: number, adjList: number[][], visited: Uint8Array): number[] {
     const neighbors = adjList[start];
     const componentNodes = [start];
     for (const i of neighbors) {
@@ -71,24 +71,4 @@ export function DFS(start: number, adjList: Int16Array[], visited: Uint8Array): 
         }
     }
     return componentNodes;
-}
-
-/**
- * convert a adjacency list in nested JS array format to nested typed array views that are allocated on
- * top of a single contiguous array buffer
- * @param adjList
- * @param offset the offset for the array buffer
- */
-export function toNativeAdjList(adjList: number[][], offset = 0) {
-    const buff = new ArrayBuffer(adjList.reduce((acc, x) => acc + x.length, 0) * 2 + offset);
-    return [
-        adjList.map(x => {
-            const size = x.length;
-            const arr = new Int16Array(buff, offset, size);
-            arr.set(x);
-            offset += size * 2;
-            return arr;
-        }),
-        buff
-    ] as const;
 }

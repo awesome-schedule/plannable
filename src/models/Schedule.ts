@@ -7,7 +7,7 @@
  *
  */
 import { NotiMsg } from '@/store/notification';
-import { colorDepthSearch, DFS, graphColoringExact, toNativeAdjList } from '../algorithm';
+import { colorDepthSearch, DFS, graphColoringExact } from '../algorithm';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -625,7 +625,7 @@ export default class Schedule {
      * for the array of schedule blocks provided, construct an adjacency list
      * to represent the conflicts between each pair of blocks
      */
-    public constructAdjList(blocks: ScheduleBlock[], offset = 0) {
+    public constructAdjList(blocks: ScheduleBlock[]) {
         blocks.sort((a, b) => b.duration - a.duration);
         const len = blocks.length;
         const adjList: number[][] = blocks.map(() => []);
@@ -639,7 +639,7 @@ export default class Schedule {
                 }
             }
         }
-        return toNativeAdjList(adjList, offset);
+        return adjList;
     }
 
     /**
@@ -647,15 +647,15 @@ export default class Schedule {
      */
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            const [fastGraph] = this.constructAdjList(blocks);
-            const len = fastGraph.length;
+            const graph = this.constructAdjList(blocks);
+            const len = graph.length;
             const visited = new Uint8Array(len);
             // find all connected components
             const components: ScheduleBlock[][] = [];
             for (let i = 0; i < len; i++) {
                 if (!visited[i]) {
                     visited[i] = 1;
-                    components.push(DFS(i, fastGraph, visited).map(idx => blocks[idx]));
+                    components.push(DFS(i, graph, visited).map(idx => blocks[idx]));
                 }
             }
 
@@ -669,13 +669,11 @@ export default class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const len = blocks.length;
-        // use offset because we will allocate the color array next to the adjList
-        const [fastGraph, buffer] = this.constructAdjList(blocks, len * 2);
-        const colors = new Int16Array(buffer, 0, len);
-        graphColoringExact(fastGraph, colors);
+        const adjList = this.constructAdjList(blocks);
+        const colors = new Int16Array(blocks.length);
+        graphColoringExact(adjList, colors);
 
-        const graph = colorDepthSearch(fastGraph, colors);
+        const graph = colorDepthSearch(adjList, colors);
         for (const node of graph.keys()) {
             // skip any non-root node in the depth-first trees
             if (node.parent) continue;

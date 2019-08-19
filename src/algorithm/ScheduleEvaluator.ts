@@ -50,56 +50,6 @@ export interface EvaluatorOptions {
 }
 
 /**
- * sort the time blocks belonging to a schedule in order, return the length of the sorted block
- * @param blocks the block
- * @param allChoices complete array of choices for each schedule
- * @param timeArrayList time arrays for sections of each course
- * @param offset offset of the array
- * @param idx the index of the current schedule
- * @requires optimization
- * @remarks this is the performance bottleneck of the ScheduleGenerator/Evaluator complex
- */
-export function sortBlocks(
-    blocks: Int16Array,
-    allChoices: Uint8Array,
-    timeArrayList: TimeArray[][],
-    offset: number,
-    idx: number
-) {
-    const numCourses = timeArrayList.length,
-        start = idx * numCourses;
-    let bound = 8; // size does not contain offset
-    // no offset in j because arr2 also needs it
-    for (let j = 0; j < 7; j++) {
-        // start of the current day
-        const s1 = (blocks[j + offset] = bound);
-        for (let k = 0; k < numCourses; k++) {
-            const arr2 = timeArrayList[k][allChoices[start + k]];
-            const e2 = arr2[j + 1];
-            // insertion sort, fast for small arrays
-            for (let n = arr2[j]; n < e2; n += 3, bound += 3) {
-                // p already contains offset
-                let p = s1 + offset;
-                const vToBeInserted = arr2[n],
-                    realBound = bound + offset; // the end of the current array
-                for (; p < realBound; p += 3) {
-                    if (vToBeInserted < blocks[p]) break;
-                }
-                // move elements 3 slots toward the end
-                // same as `blocks.copyWithin(p + 3, p, realBound);`, but faster
-                for (let m = realBound - 1; m >= p; m--) blocks[m + 3] = blocks[m];
-                // insert three elements at p
-                blocks[p] = vToBeInserted;
-                blocks[p + 1] = arr2[n + 1];
-                blocks[p + 2] = arr2[n + 2];
-            }
-        }
-    }
-    blocks[offset + 7] = bound;
-    return bound;
-}
-
-/**
  * The goal of the schedule evaluator is to efficiently sort the generated schedules
  * according to the set of the rules defined by the user
  */
@@ -260,11 +210,6 @@ class ScheduleEvaluator {
      */
     private coeffs: Float32Array;
     /**
-     * the indices of the schedules in insertion order.
-     * It is simply a range from 0 to `this.size`
-     */
-    private _indices: Uint32Array;
-    /**
      * the cumulative length of the time arrays for each schedule.
      * `this.offsets[i]` is the start index of the time array of schedule `i` in `this.blocks`
      */
@@ -283,43 +228,72 @@ class ScheduleEvaluator {
      * @param timeMatrix see [[Window.timeMatrix]]
      * @param events the array of events kept, use to construct generated schedules
      * @param classList the 2d array of (combined) sections
-     * @param allChoices array of `currentChoices` concatenated together
+     * @param allChoices array of `currentChoices` (see [[ScheduleGenerator.createSchedules]])
+     * concatenated together
      * @param refSchedule the reference schedule used by the
      * [[ScheduleEvaluator.sortFunctions.similarity]] sort function
-     * @param timeArrayList the time arrays with one-to-one correspondence to classList
+     * @param timeArrays the time arrays with one-to-one correspondence to classList
      * @param count the number of schedules in total
      * @param timeLen see the return value of [[ScheduleGenerator.createSchedules]]
      */
     constructor(
-        public options: Readonly<EvaluatorOptions>,
-        public readonly timeMatrix: Readonly<Int32Array>,
+        public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },
+        public readonly timeMatrix: Readonly<Int32Array> = new Int32Array(),
         public events: Event[] = [],
         public classList: RawAlgoCourse[][] = [],
         public allChoices = new Uint8Array(),
         public refSchedule: ScheduleAll = {},
-        timeArrayList: TimeArray[][] = [],
+        timeArrays: Int32Array = new Int32Array(),
         count: number = 0,
         timeLen: number = 0
     ) {
-        /**
-         * the buffer which stores the `offsets` and `blocks`
-         */
-        this.buf = new ArrayBuffer(count * 4 * 4 + timeLen * 2);
-        const _indices = (this._indices = new Uint32Array(this.buf, 0, count));
-        for (let i = 0; i < count; i++) _indices[i] = i;
-        this.indices = new Uint32Array(this.buf, count * 4, count);
-        this.indices.set(_indices);
+        // note: timeLen is typically about 50*count
+        this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);
+        const indices = (this.indices = new Uint32Array(this.buf, 0, count));
+        for (let i = 0; i < count; i++) indices[i] = i;
 
-        this.coeffs = new Float32Array(this.buf, count * 8, count);
-        const offsets = (this.offsets = new Uint32Array(this.buf, count * 12, count));
-        const blocks = (this.blocks = new Int16Array(this.buf, count * 16));
+        this.coeffs = new Float32Array(this.buf, count * 4, count);
+        const offsets = (this.offsets = new Uint32Array(this.buf, count * 8, count));
+        const blocks = (this.blocks = new Int16Array(this.buf, count * 12));
 
-        let byteOffset = 0;
+        const numCourses = classList.length;
+
+        let offset = 0;
         for (let i = 0; i < count; i++) {
             // record the current offset
-            offsets[i] = byteOffset;
+            offsets[i] = offset;
+
             // sort the time blocks in order
-            byteOffset += sortBlocks(blocks, allChoices, timeArrayList, byteOffset, i);
+            const start = i * numCourses;
+            let bound = 8; // size does not contain offset
+            // no offset in j because arr2 also needs it
+            for (let j = 0; j < 7; j++) {
+                // start of the current day
+                const s1 = (blocks[j + offset] = bound);
+                for (let k = 0; k < numCourses; k++) {
+                    // offset of the time arrays
+                    const arrOffset = timeArrays[allChoices[start + k] * numCourses + k];
+                    const e2 = timeArrays[arrOffset + j + 1];
+                    // insertion sort, fast for small arrays
+                    for (let n = timeArrays[arrOffset + j]; n < e2; n += 3, bound += 3) {
+                        // p already contains offset
+                        let p = s1 + offset;
+                        const vToBeInserted = timeArrays[n],
+                            realBound = bound + offset; // the end of the current array
+                        for (; p < realBound; p += 3) {
+                            if (vToBeInserted < blocks[p]) break;
+                        }
+                        // move elements 3 slots toward the end
+                        // same as `blocks.copyWithin(p + 3, p, realBound);`, but faster
+                        for (let m = realBound - 1; m >= p; m--) blocks[m + 3] = blocks[m];
+                        // insert three elements at p
+                        blocks[p] = vToBeInserted;
+                        blocks[p + 1] = timeArrays[n + 1];
+                        blocks[p + 2] = timeArrays[n + 2];
+                    }
+                }
+            }
+            offset += blocks[offset + 7] = bound;
         }
     }
 
@@ -481,7 +455,12 @@ class ScheduleEvaluator {
         this.computeCoeff();
 
         console.time('sorting: ');
-        this.indices.set(this._indices);
+
+        // reset indices
+        const _size = this.size;
+        const _indices = this.indices;
+        for (let i = 0; i < _size; i++) _indices[i] = i;
+
         if (this.isRandom()) {
             this.shuffle(this.indices);
             console.timeEnd('sorting: ');
@@ -580,19 +559,6 @@ class ScheduleEvaluator {
      */
     public empty() {
         return this.size === 0;
-    }
-
-    public clear() {
-        this.sortCoeffCache = {};
-        this.events = [];
-        this.classList = [];
-
-        // empty buffer for all typed arrays
-        this.buf = new ArrayBuffer(0);
-        this.indices = this._indices = new Uint32Array(this.buf);
-        this.allChoices = new Uint8Array(this.buf);
-        this.coeffs = new Float32Array(this.buf);
-        this.blocks = new Int16Array(this.buf);
     }
 
     /**

@@ -35,15 +35,6 @@ export interface FilterStateJSON extends FilterStateBase {
 }
 
 /**
- * a sort mode with detailed description
- */
-interface DetailedSortMode {
-    readonly mode: SortMode;
-    readonly title: string;
-    readonly description: string;
-}
-
-/**
  * A sort option with detailed description
  * @see [[SortOption]]
  */
@@ -201,7 +192,7 @@ function getDefaultOptions() {
 
 // this property must be non-reactive,
 // otherwise the reactive observer will slow down execution significantly
-window.scheduleEvaluator = new ScheduleEvaluator(getDefaultOptions(), window.timeMatrix);
+window.scheduleEvaluator = new ScheduleEvaluator();
 
 /**
  * the filter module handles the storage and manipulation of filters
@@ -320,7 +311,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     allowClosed = true;
     sortOptions = getDefaultOptions();
     refSchedule: ScheduleAll = {};
-    readonly sortModes: readonly DetailedSortMode[] = [
+    readonly sortModes = [
         {
             mode: SortMode.combined,
             title: 'Combined',
@@ -333,7 +324,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                 'Sort using the options on top first. If compare equal, sort using the next option.' +
                 ' You can drag the sorting options to change their order.'
         }
-    ];
+    ] as const;
 
     get similarityEnabled() {
         return Object.keys(this.refSchedule).length !== 0;

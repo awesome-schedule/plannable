@@ -8,6 +8,7 @@
 import { saveStatus, StoreModule } from '.';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import noti from './notification';
+import ScheduleEvaluator from '@/algorithm/ScheduleEvaluator';
 
 interface ScheduleStateBase {
     /**
@@ -130,7 +131,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         // if the schedule to be deleted corresponds to generated schedules,
         // this deletion invalidates the generated schedules immediately.
         if (idx === this.cpIndex) {
-            window.scheduleEvaluator.clear();
+            window.scheduleEvaluator = new ScheduleEvaluator();
             this.numGenerated = 0;
             this.cpIndex = -1;
         }
@@ -188,7 +189,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         this.proposedSchedule.clean();
         if (this.cpIndex === this.proposedScheduleIndex) {
             this.cpIndex = -1;
-            window.scheduleEvaluator.clear();
+            window.scheduleEvaluator = new ScheduleEvaluator();
             this.numGenerated = 0;
         }
         this.switchSchedule(false);

@@ -169,12 +169,12 @@
                     </div>
                 </template>
             </li>
-            <li class="list-group-item">
+            <!-- <li class="list-group-item">
                 Sort configurations<br /><input
                     v-model="filter.configs.distance.threshold"
                     type="number"
                 />
-            </li>
+            </li> -->
         </ul>
     </nav>
 </template>

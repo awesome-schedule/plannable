@@ -9,7 +9,7 @@ import lz from 'lz-string';
 
 import Expirable from '@/data/Expirable';
 import { Component, Vue } from 'vue-property-decorator';
-import { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
+import ScheduleEvaluator, { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
 import { CourseStatus } from '../models/Meta';
@@ -178,7 +178,7 @@ export default class Store extends Vue {
         }
         if (!name) name = this.profile.current;
 
-        window.scheduleEvaluator.clear();
+        window.scheduleEvaluator = new ScheduleEvaluator();
         let parsed: Partial<AncientStorage> | Partial<LegacyStorage> | Partial<SemesterState> = {};
         const data = localStorage.getItem(name);
         if (data) {
@@ -301,7 +301,7 @@ export default class Store extends Vue {
             this.schedule.cpIndex = this.schedule.proposedScheduleIndex;
             this.schedule.switchSchedule(true);
         } else {
-            window.scheduleEvaluator.clear();
+            window.scheduleEvaluator = new ScheduleEvaluator();
             this.schedule.switchSchedule(false);
             this.schedule.cpIndex = -1;
             this.schedule.numGenerated = 0;

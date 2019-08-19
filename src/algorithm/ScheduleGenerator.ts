@@ -8,15 +8,10 @@
  */
 import { CourseStatus } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
-import Catalog from '../models/Catalog';
 import Event from '../models/Event';
 import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
-import ScheduleEvaluator, {
-    EvaluatorOptions,
-    sortBlocks,
-    SortFunctions
-} from './ScheduleEvaluator';
+import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
 /**
  * The blocks is a condensed fixed-length array
@@ -68,8 +63,85 @@ export type MeetingDate = [number, number];
  */
 export type RawAlgoCourse = [string, number[]];
 
+export function timeArrayToCompact(timeArrayList: TimeArray[][], timeArrLens: Uint8Array) {
+    const len = timeArrLens.length;
+    let offset = 0;
+    for (let i = 0; i < len; i++) offset += timeArrLens[i];
+    const compact = new Int32Array(len + offset);
+
+    const numCourses = timeArrayList.length;
+    offset = len;
+    for (let i = 0; i < numCourses; i++) {
+        const arr = timeArrayList[i];
+        for (let j = 0; j < arr.length; j++) {
+            const time = arr[j];
+            const size = time.length;
+            compact[j * numCourses + i] = offset;
+            let k = 0;
+            for (; k < 8; k++) {
+                compact[offset + k] = time[k] + offset; // add offset to the first 8 elements
+            }
+            for (; k < size; k++) {
+                compact[offset + k] = time[k];
+            }
+            offset += size;
+        }
+    }
+    return compact;
+}
+
+/**
+ * record the length of `timeArrayList[crs][sec]` at `timeArrLens[sec * numCourses + crs]`,
+ * exported for unit test purposes
+ * @param timeArrayList
+ * @param timeArrLens
+ */
+export function computeTimeArrLens(timeArrayList: TimeArray[][], timeArrLens: Uint8Array) {
+    const numCourses = timeArrayList.length;
+    for (let i = 0; i < numCourses; i++) {
+        const arrs = timeArrayList[i];
+        const len = arrs.length;
+        for (let j = 0; j < len; j++) {
+            timeArrLens[j * numCourses + i] = arrs[j].length;
+        }
+    }
+}
+
+/**
+ * pre-compute `timeArrLens` and `conflictCache` using `timeArrayList` and `dateList`
+ */
+function computeConflict(
+    timeArrayList: TimeArray[][],
+    dateList: MeetingDate[][],
+    conflictCache: Uint8Array,
+    sideLen: number
+) {
+    const numCourses = timeArrayList.length;
+    // pre-compute the conflict between each pair of sections
+    for (let i = 0; i < numCourses; i++) {
+        for (let j = i + 1; j < numCourses; j++) {
+            const arrs1 = timeArrayList[i],
+                arrs2 = timeArrayList[j],
+                dates1 = dateList[i],
+                dates2 = dateList[j],
+                len1 = arrs1.length,
+                len2 = arrs2.length;
+            for (let m = 0; m < len1; m++) {
+                for (let n = 0; n < len2; n++) {
+                    const i1 = m * numCourses + i, // courses are in the columns
+                        i2 = n * numCourses + j;
+                    // conflict is symmetric
+                    conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] = +(
+                        checkTimeConflict(arrs1[m], arrs2[n], 3, 3) &&
+                        calcOverlap(dates1[m][0], dates1[m][1], dates2[n][0], dates2[n][1]) !== -1
+                    );
+                }
+            }
+        }
+    }
+}
+
 export interface GeneratorOptions {
-    [x: string]: any;
     timeSlots: Event[];
     status: CourseStatus[];
     sortOptions: EvaluatorOptions;
@@ -198,7 +270,10 @@ class ScheduleGenerator {
          */
         const conflictCache = new Uint8Array(buffer, numCourses + sideLen, sideLen ** 2);
 
-        this.preCompute(timeArrayList, dateList, timeArrLens, conflictCache, numCourses, sideLen);
+        computeTimeArrLens(timeArrayList, timeArrLens);
+
+        computeConflict(timeArrayList, dateList, conflictCache, sideLen);
+
         const { maxNumSchedules } = this.options;
         // the array used to record all schedules generated
         const allChoices = new Uint8Array(numCourses * maxNumSchedules);
@@ -222,7 +297,7 @@ class ScheduleGenerator {
             classList,
             allChoices,
             refSchedule,
-            timeArrayList,
+            timeArrayToCompact(timeArrayList, timeArrLens),
             count,
             timeLen
         );
@@ -241,51 +316,6 @@ class ScheduleGenerator {
             level: 'error',
             msg: 'Given your filter, we cannot generate schedules without overlapping classes'
         };
-    }
-
-    /**
-     * pre-compute `timeArrLens` and `conflictCache` using `timeArrayList` and `dateList`
-     */
-    private preCompute(
-        timeArrayList: TimeArray[][],
-        dateList: MeetingDate[][],
-        timeArrLens: Uint8Array,
-        conflictCache: Uint8Array,
-        numCourses: number,
-        sideLen: number
-    ) {
-        // compute timeArrLens
-        for (let i = 0; i < numCourses; i++) {
-            const arrs = timeArrayList[i];
-            const len = arrs.length;
-            for (let j = 0; j < len; j++) {
-                timeArrLens[j * numCourses + i] = arrs[j].length;
-            }
-        }
-
-        // pre-compute the conflict between each pair of sections
-        for (let i = 0; i < numCourses; i++) {
-            for (let j = i + 1; j < numCourses; j++) {
-                const arrs1 = timeArrayList[i],
-                    arrs2 = timeArrayList[j],
-                    dates1 = dateList[i],
-                    dates2 = dateList[j],
-                    len1 = arrs1.length,
-                    len2 = arrs2.length;
-                for (let m = 0; m < len1; m++) {
-                    for (let n = 0; n < len2; n++) {
-                        const i1 = m * numCourses + i, // courses are in the columns
-                            i2 = n * numCourses + j;
-                        // conflict is symmetric
-                        conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] = +(
-                            checkTimeConflict(arrs1[m], arrs2[n], 3, 3) &&
-                            calcOverlap(dates1[m][0], dates1[m][1], dates2[n][0], dates2[n][1]) !==
-                                -1
-                        );
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -346,9 +376,9 @@ class ScheduleGenerator {
             for (let i = 0; i < classNum; i++) {
                 if (
                     conflictCache[
-                        (currentChoices[i] * numCourses + i) * sideLen +
-                            choiceNum * numCourses +
-                            classNum
+                        (choiceNum * numCourses + classNum) * sideLen +
+                            currentChoices[i] * numCourses +
+                            i
                     ]
                 ) {
                     ++choiceNum;

@@ -10,7 +10,7 @@ import test_filter from './test_data/test_filter.json';
 // "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
 
 // filter: allowClosed, allowWaitlist, mode from binary
-describe('url convertJsonToArray test', () => {
+describe.skip('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty_schedule);
         const urlCompressed = compressJSON(test1);
@@ -293,7 +293,7 @@ describe('url convertJsonToArray test', () => {
     });
 });
 
-describe('parseFromURL', () => {
+describe.skip('parseFromURL', () => {
     it('parse_empty_schedule', async () => {
         const urlCompressed = compressJSON(JSON.stringify(empty_schedule));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));

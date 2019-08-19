@@ -44,15 +44,20 @@ export async function loadSemesterData(
     const db = new CatalogDB(semester);
     if (!(await db.empty())) {
         const time = await db.timestamp();
-        const old = new Catalog(semester, await retrieveFromDB(db), new Date(time).toJSON());
         if (force || Date.now() - time > semesterDataExpirationTime) {
+            // send the request first, then fetch the local data
+            const newData = cancelablePromise(requestSemesterData(semester, db));
             return {
-                new: cancelablePromise(requestSemesterData(semester, db)),
-                old
+                new: newData,
+                old: new Catalog(semester, await retrieveFromDB(db), new Date(time).toJSON())
             };
         } else {
             return {
-                new: cancelablePromise(Promise.resolve(old))
+                new: cancelablePromise(
+                    retrieveFromDB(db).then(
+                        data => new Catalog(semester, data, new Date(time).toJSON())
+                    )
+                )
             };
         }
     } else {

@@ -9,7 +9,7 @@
         "test": "vue-cli-service test:unit",
         "fix": "eslint . --fix",
         "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
-        "exec": "ts-node -O {\\\"module\\\":\\\"commonjs\\\"}"
+        "exec": "ts-node -r tsconfig-paths/register --files -O {\\\"module\\\":\\\"commonjs\\\"}"
     },
     "dependencies": {
         "axios": "^0.19.0",

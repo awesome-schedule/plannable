@@ -19,17 +19,15 @@
 
 import { graphColoringExact } from '../../src/algorithm/Coloring';
 import { performance } from 'perf_hooks';
-import graph from './test_data/graph.json';
+import graph from './graph.json';
 
-test.skip('graph coloring bench', () => {
-    const colors = new Int16Array(graph.length);
-    let total = 0;
-    for (let i = 0; i < 15; i++) {
-        const start = performance.now();
-        graphColoringExact(graph, colors);
-        const t = performance.now() - start;
-        console.log('time:', t);
-        total += t;
-    }
-    console.log('Average:', total / 15);
-});
+const colors = new Int16Array(graph.length);
+let total = 0;
+for (let i = 0; i < 15; i++) {
+    const start = performance.now();
+    graphColoringExact(graph, colors);
+    const t = performance.now() - start;
+    console.log('time:', t);
+    total += t;
+}
+console.log('Average:', total / 15);

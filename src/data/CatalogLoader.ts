@@ -67,7 +67,7 @@ export async function loadSemesterData(
     }
 }
 
-export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB) {
+export async function requestSemesterData(semester: SemesterJSON, db?: CatalogDB) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
@@ -98,7 +98,7 @@ export async function requestSemesterData(semester: SemesterJSON, db: CatalogDB)
     );
 }
 
-export function parseSemesterData(rawData: string[][], db: CatalogDB) {
+export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
     console.time('parse semester data');
 
     const CLASS_TYPES = TYPES_PARSE;
@@ -286,15 +286,20 @@ export function parseSemesterData(rawData: string[][], db: CatalogDB) {
         allSections.push(others);
     }
     console.timeEnd('parse semester data');
-    Promise.all([db.courses.clear(), db.sections.clear()])
-        .then(() => {
-            console.time('save to db');
-            return Promise.all([db.courses.bulkAdd(allCourses), db.sections.bulkAdd(allSections)]);
-        })
-        .then(() => {
-            db.saveTimeStamp();
-            console.timeEnd('save to db');
-        });
+    if (db) {
+        Promise.all([db.courses.clear(), db.sections.clear()])
+            .then(() => {
+                console.time('save to db');
+                return Promise.all([
+                    db.courses.bulkAdd(allCourses),
+                    db.sections.bulkAdd(allSections)
+                ]);
+            })
+            .then(() => {
+                db.saveTimeStamp();
+                console.timeEnd('save to db');
+            });
+    }
     return rawCatalog;
 }
 

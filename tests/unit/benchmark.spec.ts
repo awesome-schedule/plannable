@@ -1,12 +1,11 @@
 import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
-import { loadBuildingSearcher, loadTimeMatrix } from '@/data/BuildingLoader';
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
 
 const store = new Store();
 store.display.maxNumSchedules = 200000;
 
-test('algorithm benchmark', () => {
+test.skip('algorithm benchmark', () => {
     const catalog = window.catalog;
     store.filter.timeSlots.push([true, false, true, false, true, false, false, '0:15', '0:50']);
     const options = store.getGeneratorOptions();

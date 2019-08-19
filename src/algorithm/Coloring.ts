@@ -30,7 +30,7 @@ function graphColorBackTrack(
     v: number
 ) {
     if (v === graph.length) return true;
-    if (opCount[0]++ > 100000) {
+    if (opCount[0]++ > 200000) {
         // console.warn('break at', numColors);
         return false;
     }
@@ -149,13 +149,11 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
  */
 export function colorDepthSearch(adjList: number[][], colors: Int16Array): Graph<number> {
     const graph: Graph<number> = new Map();
-    const vertices: Vertex<number>[] = [];
-
-    for (let i = 0; i < colors.length; i++) {
+    const vertices = adjList.map((_, i) => {
         const v = new Vertex(i);
         v.depth = colors[i];
-        vertices.push(v);
-    }
+        return v;
+    });
 
     for (let i = 0; i < colors.length; i++) {
         graph.set(vertices[i], adjList[i].map(x => vertices[x]));

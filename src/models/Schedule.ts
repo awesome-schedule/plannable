@@ -8,7 +8,7 @@
  */
 import { NotiMsg } from '@/store/notification';
 import { colorDepthSearch, DFS, graphColoringExact, toNativeAdjList } from '../algorithm';
-import { RawAlgoSchedule } from '../algorithm/ScheduleGenerator';
+import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -16,17 +16,32 @@ import Hashable from './Hashable';
 import { Day, dayToInt, TYPES } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import { isNumberArray } from '../utils';
 
+/**
+ * the structure of a Section in local storage
+ */
 export interface SectionJSON {
     id: number;
     section: string;
 }
 
+/**
+ * the compressed structure of a Section
+ */
 export type SectionJSONShort = (number | string)[];
 
+/**
+ * represents all courses in a schedule, stored as `(key, set of sections)` pair
+ *
+ * Note that if **section** is -1, it means that all sections are allowed.
+ * Otherwise, **section** should be a Set/array of object corresponding to each section
+ *
+ * @typeparam T the type of the container used for the set of sections.
+ * By default, this is a set of numbers, corresponding to the `id` field of each section
+ * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
+ */
 export interface ScheduleAll<T = Set<number>> {
-    [x: string]: T | -1;
+    [courseKey: string]: T | -1;
 }
 
 export interface ScheduleJSON {
@@ -162,7 +177,7 @@ export default class Schedule {
                     schedule.All[key] = new Set();
                 } else {
                     // backward compatibility for version prior to v5.0 (inclusive)
-                    if (isNumberArray(sections)) {
+                    if (Utils.isNumberArray(sections)) {
                         const secs = sections as number[];
                         schedule.All[key] = new Set(
                             secs
@@ -215,14 +230,6 @@ export default class Schedule {
         }
     }
 
-    /**
-     * represents all courses in this schedule, stored as `(key, set of sections)` pair
-     *
-     * Note that if **section** is -1, it means that all sections are allowed.
-     * Otherwise, **section** should be a Set of integers corresponding to the `id` field of each section
-     *
-     * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
-     */
     public All: ScheduleAll;
     /**
      * computed based on `this.All` by `computeSchedule`
@@ -281,7 +288,7 @@ export default class Schedule {
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw: RawAlgoSchedule | ScheduleAll = [], public events: Event[] = []) {
+    constructor(raw: RawAlgoCourse[] | ScheduleAll = [], public events: Event[] = []) {
         this.All = {};
         this.days = [[], [], [], [], [], [], []];
         this._preview = null;

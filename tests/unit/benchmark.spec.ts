@@ -12,8 +12,7 @@ test('algorithm benchmark', () => {
     const options = store.getGeneratorOptions();
     if (!options) throw new Error('failed to get options');
 
-    const generator = new ScheduleGenerator(catalog, options);
-    expect(typeof generator.createSchedule).toBe('function');
+    const generator = new ScheduleGenerator(catalog, window.timeMatrix, options);
     const schedule = new Schedule({
         cs11105: -1,
         cs11104: -1,

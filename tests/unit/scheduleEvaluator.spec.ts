@@ -1,5 +1,4 @@
 import ScheduleEvaluator, { EvaluatorOptions, sortBlocks } from '@/algorithm/ScheduleEvaluator';
-import { RawAlgoSchedule } from '@/algorithm/ScheduleGenerator';
 import filter from '@/store/filter';
 
 test('dummy', () => {

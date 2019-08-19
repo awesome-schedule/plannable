@@ -10,14 +10,7 @@ import quickselect from 'quickselect';
 import Event from '../models/Event';
 import Schedule, { ScheduleAll } from '../models/Schedule';
 import { calcOverlap } from '../utils';
-import { RawAlgoCourse, RawAlgoSchedule, TimeArray } from './ScheduleGenerator';
-
-export interface CmpSchedule {
-    readonly schedule: RawAlgoSchedule;
-    readonly blocks: TimeArray;
-    readonly index: number;
-    coeff: number;
-}
+import { RawAlgoCourse, TimeArray } from './ScheduleGenerator';
 
 export type SortFunctions = typeof ScheduleEvaluator.sortFunctions;
 
@@ -60,18 +53,20 @@ export interface EvaluatorOptions {
  * sort the time blocks belonging to a schedule in order, return the length of the sorted block
  * @param blocks the block
  * @param allChoices complete array of choices for each schedule
- * @param arrayList time arrays for sections of each course
+ * @param timeArrayList time arrays for sections of each course
  * @param offset offset of the array
  * @param idx the index of the current schedule
+ * @requires optimization
+ * @remarks this is the performance bottleneck of the ScheduleGenerator/Evaluator complex
  */
 export function sortBlocks(
     blocks: Int16Array,
     allChoices: Uint8Array,
-    arrayList: TimeArray[][],
+    timeArrayList: TimeArray[][],
     offset: number,
     idx: number
 ) {
-    const numCourses = arrayList.length,
+    const numCourses = timeArrayList.length,
         start = idx * numCourses;
     let bound = 8; // size does not contain offset
     // no offset in j because arr2 also needs it
@@ -79,7 +74,7 @@ export function sortBlocks(
         // start of the current day
         const s1 = (blocks[j + offset] = bound);
         for (let k = 0; k < numCourses; k++) {
-            const arr2 = arrayList[k][allChoices[start + k]];
+            const arr2 = timeArrayList[k][allChoices[start + k]];
             const e2 = arr2[j + 1];
             // insertion sort, fast for small arrays
             for (let n = arr2[j]; n < e2; n += 3, bound += 3) {
@@ -253,7 +248,7 @@ class ScheduleEvaluator {
         }
     };
     /**
-     * the cache of coefficient array for each evaluating function
+     * the cache of coefficient array for each sort function
      */
     public sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
     /**
@@ -263,48 +258,69 @@ class ScheduleEvaluator {
     /**
      * the coefficient array
      */
-    public coeffs: Float32Array;
+    private coeffs: Float32Array;
     /**
      * the indices of the schedules in insertion order.
      * It is simply a range from 0 to `this.size`
      */
     private _indices: Uint32Array;
+    /**
+     * the cumulative length of the time arrays for each schedule.
+     * `this.offsets[i]` is the start index of the time array of schedule `i` in `this.blocks`
+     */
+    private offsets: Uint32Array;
+    /**
+     * blocks array of [[TimeArray]]s concatenated together
+     */
+    private blocks: Int16Array;
+    /**
+     * the underlying buffer for the typed arrays above, except `sortCoeffCache`
+     */
+    private buf: ArrayBuffer;
 
     /**
      * @param options
      * @param timeMatrix see [[Window.timeMatrix]]
      * @param events the array of events kept, use to construct generated schedules
      * @param classList the 2d array of (combined) sections
-     * @param offsets the offsets into the `blocks`
-     * @param blocks array of [[TimeArray]]s concatenated together
      * @param allChoices array of `currentChoices` concatenated together
      * @param refSchedule the reference schedule used by the
      * [[ScheduleEvaluator.sortFunctions.similarity]] sort function
+     * @param timeArrayList the time arrays with one-to-one correspondence to classList
+     * @param count the number of schedules in total
+     * @param timeLen see the return value of [[ScheduleGenerator.createSchedules]]
      */
     constructor(
         public options: Readonly<EvaluatorOptions>,
         public readonly timeMatrix: Readonly<Int32Array>,
-        public readonly events: Event[] = [],
-        public readonly classList: RawAlgoCourse[][] = [],
-        public offsets = new Uint32Array(),
-        public blocks = new Int16Array(),
+        public events: Event[] = [],
+        public classList: RawAlgoCourse[][] = [],
         public allChoices = new Uint8Array(),
         public refSchedule: ScheduleAll = {},
-        public configs: { [option in keyof Partial<SortFunctions>]: { [x: string]: number } } = {
-            distance: { threshold: 30 }
-        }
+        timeArrayList: TimeArray[][] = [],
+        count: number = 0,
+        timeLen: number = 0
     ) {
-        const len = offsets.length;
-        // allocate two set of indices on the same array buffer
-        const buffer = new ArrayBuffer(len * 8);
-        const _indices = new Uint32Array(buffer, 0, len);
-        for (let i = 0; i < len; i++) _indices[i] = i;
-
-        this._indices = _indices;
-        this.indices = new Uint32Array(buffer, len * 4, len);
+        /**
+         * the buffer which stores the `offsets` and `blocks`
+         */
+        this.buf = new ArrayBuffer(count * 4 * 4 + timeLen * 2);
+        const _indices = (this._indices = new Uint32Array(this.buf, 0, count));
+        for (let i = 0; i < count; i++) _indices[i] = i;
+        this.indices = new Uint32Array(this.buf, count * 4, count);
         this.indices.set(_indices);
 
-        this.coeffs = new Float32Array(len);
+        this.coeffs = new Float32Array(this.buf, count * 8, count);
+        const offsets = (this.offsets = new Uint32Array(this.buf, count * 12, count));
+        const blocks = (this.blocks = new Int16Array(this.buf, count * 16));
+
+        let byteOffset = 0;
+        for (let i = 0; i < count; i++) {
+            // record the current offset
+            offsets[i] = byteOffset;
+            // sort the time blocks in order
+            byteOffset += sortBlocks(blocks, allChoices, timeArrayList, byteOffset, i);
+        }
     }
 
     get size() {
@@ -342,7 +358,7 @@ class ScheduleEvaluator {
                 const evalFunc = ScheduleEvaluator.sortFunctions.similarity.bind(this);
                 for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
             } else if (funcName === 'distance') {
-                const thresh = this.configs.distance ? this.configs.distance.threshold : 30;
+                const thresh = 45;
                 const evalFunc = ScheduleEvaluator.sortFunctions.distance;
                 const timeMatrix = this.timeMatrix;
                 for (let i = 0; i < len; i++)
@@ -550,9 +566,10 @@ class ScheduleEvaluator {
      * Get a `Schedule` object at idx
      */
     public getSchedule(idx: number) {
-        idx = this.indices[idx] * this.classList.length;
+        const numCourses = this.classList.length;
+        idx = this.indices[idx] * numCourses;
         return new Schedule(
-            Array.from(this.allChoices.slice(idx, idx + this.classList.length)).map(
+            Array.from(this.allChoices.slice(idx, idx + numCourses)).map(
                 (choice, classNum) => this.classList[classNum][choice]
             ),
             this.events
@@ -567,12 +584,15 @@ class ScheduleEvaluator {
 
     public clear() {
         this.sortCoeffCache = {};
-        this.events.length = 0;
-        this.classList.length = 0;
-        this.indices = this._indices = new Uint32Array();
-        this.allChoices = new Uint8Array();
-        this.coeffs = new Float32Array();
-        this.blocks = new Int16Array();
+        this.events = [];
+        this.classList = [];
+
+        // empty buffer for all typed arrays
+        this.buf = new ArrayBuffer(0);
+        this.indices = this._indices = new Uint32Array(this.buf);
+        this.allChoices = new Uint8Array(this.buf);
+        this.coeffs = new Float32Array(this.buf);
+        this.blocks = new Int16Array(this.buf);
     }
 
     /**

@@ -215,7 +215,7 @@ class ScheduleEvaluator {
      */
     private offsets: Uint32Array;
     /**
-     * blocks array of [[TimeArray]]s concatenated together
+     * array of [[TimeArray]]s concatenated together
      */
     private blocks: Int16Array;
     /**
@@ -247,7 +247,7 @@ class ScheduleEvaluator {
         count: number = 0,
         timeLen: number = 0
     ) {
-        // note: timeLen is typically about 50*count
+        // note: timeLen is typically about 50*count, which takes most space
         this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);
         const indices = (this.indices = new Uint32Array(this.buf, 0, count));
         for (let i = 0; i < count; i++) indices[i] = i;
@@ -257,7 +257,6 @@ class ScheduleEvaluator {
         const blocks = (this.blocks = new Int16Array(this.buf, count * 12));
 
         const numCourses = classList.length;
-
         let offset = 0;
         for (let i = 0; i < count; i++) {
             // record the current offset
@@ -399,16 +398,17 @@ class ScheduleEvaluator {
                     continue;
                 }
 
-                const normalizeRatio = range / 100;
+                const normalizeRatio = range / 100,
+                    weight = option.weight || 1;
 
                 // use Euclidean distance to combine multiple sorting coefficients
                 if (option.reverse) {
                     for (let i = 0; i < len; i++) {
-                        coeffs[i] += ((max - coeff[i]) / normalizeRatio) ** 2;
+                        coeffs[i] += weight * ((max - coeff[i]) / normalizeRatio) ** 2;
                     }
                 } else {
                     for (let i = 0; i < len; i++) {
-                        coeffs[i] += ((coeff[i] - min) / normalizeRatio) ** 2;
+                        coeffs[i] += weight * ((coeff[i] - min) / normalizeRatio) ** 2;
                     }
                 }
             }
@@ -471,7 +471,7 @@ class ScheduleEvaluator {
         const isCombined = this.options.mode === SortMode.combined;
 
         /**
-         * The comparator function when there's only one sorting option selected
+         * The comparator function used:
          *
          * if only one option is enabled, the sort direction depends on the `reversed` property of it
          *
@@ -494,16 +494,17 @@ class ScheduleEvaluator {
         } else {
             const len = options.length;
 
-            // if option[i] is reverse, ifReverse[i] will be -1
-            const ifReverse = new Float32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-            const weight = new Float32Array(len).map((_, i) => options[i].weight || 1);
+            // if option[i] is reverse, ifReverse[i] will be -1 * weight
+            const ifReverse = new Float32Array(len).map(
+                (_, i) => (options[i].weight || 1) * (options[i].reverse ? -1 : 1)
+            );
             const fbCoeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: number, b: number) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {
                     const coeff = fbCoeffs[i];
                     // calculate the difference in coefficients
-                    r = ifReverse[i] * (coeff[a] - coeff[b]) * (weight[i] || 1);
+                    r = ifReverse[i] * (coeff[a] - coeff[b]);
 
                     // if non-zero, returns this coefficient
                     if (r) return r;
@@ -531,7 +532,7 @@ class ScheduleEvaluator {
     public partialSort(arr: Uint32Array, compare: (x: number, y: number) => number, num: number) {
         const len = arr.length;
 
-        // no point to use quick sort if num of elements to be selected is greater than half of the length
+        // no point to use quick select if num of elements to be selected is greater than half of the length
         if (num >= len / 2) {
             arr.sort(compare);
         } else {

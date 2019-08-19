@@ -1,7 +1,8 @@
 import HomePage from './HomePage.vue';
 import App from '../App.vue';
+import { VueConstructor } from 'vue';
 
-export const routes : any= {
+export const routes: { [x: string]: VueConstructor } = {
     '/': HomePage,
-    '/uva':App
+    '/uva': App
 };

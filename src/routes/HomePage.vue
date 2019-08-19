@@ -10,16 +10,22 @@
                 <div class="navbar-nav-scroll ml-auto">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" @click="moveTo('#section1')" style='cursor:pointer'>Why Plannable</a>
+                            <a class="nav-link" style="cursor:pointer" @click="moveTo('#section1')"
+                                >Why Plannable
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" @click="moveTo('#section5')" style='cursor:pointer'>Contact/Join Us</a>
+                            <a class="nav-link" style="cursor:pointer" @click="moveTo('#section5')"
+                                >Contact/Join Us
+                            </a>
                         </li>
                         <li class="nav-item mx-3">
                             <a class="nav-link" href="/contact">Advertise With Us</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" @click="moveTo('#section6')" style='cursor:pointer'>Check Previous Updates</a>
+                            <a class="nav-link" style="cursor:pointer" @click="moveTo('#section6')"
+                                >Check Previous Updates
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -59,7 +65,6 @@
             </transition>
         </div>
 
-
         <section id="section1" class="row no-gutters text-center">
             <div class="col-md-6 bg-light">
                 <span class="align-middle">Auto-Generating</span>
@@ -94,23 +99,18 @@
         </section>
         <section id="section5" class="jumbotron text-center">
             <h1 class="display-4">Contact/Join Us</h1>
-            <p>
-                Email Us At:<a id="sendEmail" href="mailto:team@coursicle.com"
-                    >zh2wc@virginia.edu
-                </a>
-            </p>
+            <p>Email Us At:<a id="sendEmail">zh2wc@virginia.edu </a></p>
 
             <p>Join Us:</p>
         </section>
         <section id="section6" class="jumbotron text-center">
             <h1 class="display-4">Previous Updates</h1>
-            <div id="release-note" class="container"></div>
+            <div id="release-note" class="container text-left"></div>
         </section>
     </div>
 </template>
 
-<script lang="ts" src='./HomePage.ts'>
-</script>
+<script lang="ts" src="./HomePage.ts"></script>
 
 <style scoped>
 /* .navbar {

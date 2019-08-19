@@ -63,6 +63,10 @@ export type MeetingDate = [number, number];
  */
 export type RawAlgoCourse = [string, number[]];
 
+/**
+ * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
+ * of time array of section `i` of course `j` is at `i * numCourse + j` position of the resulting array.
+ */
 export function timeArrayToCompact(timeArrayList: TimeArray[][], timeArrLens: Uint8Array) {
     const len = timeArrLens.length;
     let offset = 0;

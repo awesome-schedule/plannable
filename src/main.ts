@@ -11,7 +11,7 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
 import { FastSearcher } from './algorithm/Searcher';
-import {routes} from './routes/index';
+import { routes } from './routes';
 import HomePage from './routes/HomePage.vue';
 declare global {
     interface Window {
@@ -50,11 +50,12 @@ Vue.prototype.highlightMatch = highlightMatch;
 new Vue({
     data: {
         currentRoute: window.location.pathname
-      },
-    render(h){
-        const matchingView = routes[this.currentRoute]
-        const component = matchingView ? matchingView : HomePage
+    },
+    render(h) {
+        const matchingView = routes[this.currentRoute];
+        const component = matchingView ? matchingView : HomePage;
 
-        console.log('route',this.currentRoute)
-        return h(component)}
+        console.log('route', this.currentRoute);
+        return h(component);
+    }
 }).$mount('#app');

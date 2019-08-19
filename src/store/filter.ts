@@ -100,6 +100,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'distance',
             enabled: true,
             reverse: false,
+            weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Walking Distance',
             description: 'Avoid long distance walking between classes'
@@ -108,6 +109,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'variance',
             enabled: true,
             reverse: false,
+            weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Variance',
             description: 'Balance the class time each day'
@@ -116,6 +118,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'compactness',
             enabled: false,
             reverse: false,
+            weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Vertical compactness',
             description: 'Make classes back-to-back'
@@ -124,6 +127,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'lunchTime',
             enabled: false,
             reverse: false,
+            weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Lunch Time',
             description: 'Leave spaces for lunch'
@@ -132,6 +136,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'noEarly',
             enabled: false,
             reverse: false,
+            weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'No Early',
             description: 'Start my day as late as possible'
@@ -140,6 +145,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'similarity',
             enabled: false,
             reverse: false,
+            weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'similarity',
             description: 'Similar to a selected schedule'
@@ -148,6 +154,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'IamFeelingLucky',
             enabled: false,
             reverse: false,
+            weight: 1,
             exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
             title: `I'm Feeling Lucky`,
             description: 'Sort randomly'
@@ -159,7 +166,8 @@ const defaultOptions: DetailedEvaluatorOptions = {
             sortBy: this.sortBy.map(x => ({
                 name: x.name,
                 enabled: x.enabled,
-                reverse: x.reverse
+                reverse: x.reverse,
+                weight: x.weight
             })),
             mode: this.mode
         };
@@ -172,6 +180,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
                     if (sort.name === raw_sort.name) {
                         sort.enabled = raw_sort.enabled;
                         sort.reverse = raw_sort.reverse;
+                        sort.weight = raw_sort.weight || 1;
                         break;
                     }
                 }
@@ -311,7 +320,6 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     allowClosed = true;
     sortOptions = getDefaultOptions();
     refSchedule: ScheduleAll = {};
-
     readonly sortModes: readonly DetailedSortMode[] = [
         {
             mode: SortMode.combined,

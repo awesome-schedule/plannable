@@ -144,6 +144,7 @@
                                     title="Enable this sorting option"
                                 ></label>
                             </div>
+                            <input v-model="option.weight" type="number" />
                         </div>
                     </div>
                 </div>
@@ -167,6 +168,12 @@
                         </label>
                     </div>
                 </template>
+            </li>
+            <li class="list-group-item">
+                Sort configurations<br /><input
+                    v-model="filter.configs.distance.threshold"
+                    type="number"
+                />
             </li>
         </ul>
     </nav>

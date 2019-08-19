@@ -8,11 +8,11 @@
  */
 import Vue from 'vue';
 import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
-import App from './App.vue';
 import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
 import { FastSearcher } from './algorithm/Searcher';
-
+import {routes} from './routes/index';
+import HomePage from './routes/HomePage.vue';
 declare global {
     interface Window {
         scheduleEvaluator: ScheduleEvaluator;
@@ -48,5 +48,13 @@ Vue.config.devtools = true;
 Vue.prototype.highlightMatch = highlightMatch;
 
 new Vue({
-    render: h => h(App)
+    data: {
+        currentRoute: window.location.pathname
+      },
+    render(h){
+        const matchingView = routes[this.currentRoute]
+        const component = matchingView ? matchingView : HomePage
+
+        console.log('route',this.currentRoute)
+        return h(component)}
 }).$mount('#app');

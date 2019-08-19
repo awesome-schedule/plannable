@@ -228,13 +228,13 @@ class ScheduleEvaluator {
      * @param timeMatrix see [[Window.timeMatrix]]
      * @param events the array of events kept, use to construct generated schedules
      * @param classList the 2d array of (combined) sections
-     * @param allChoices array of `currentChoices` (see [[ScheduleGenerator.createSchedules]])
+     * @param allChoices array of `currentChoices` (see [[ScheduleGenerator.computeSchedules]])
      * concatenated together
      * @param refSchedule the reference schedule used by the
      * [[ScheduleEvaluator.sortFunctions.similarity]] sort function
      * @param timeArrays the time arrays with one-to-one correspondence to classList
      * @param count the number of schedules in total
-     * @param timeLen see the return value of [[ScheduleGenerator.createSchedules]]
+     * @param timeLen see the return value of [[ScheduleGenerator.computeSchedules]]
      */
     constructor(
         public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },

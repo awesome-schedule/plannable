@@ -5,7 +5,7 @@
 /**
  *
  */
-import config from '@/config';
+import { external } from '@/config';
 import { SearchMatch } from '@/models/Catalog';
 import Course from '@/models/Course';
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -17,7 +17,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
 export default class CourseModal extends Vue {
     get config() {
-        return config.external;
+        return external;
     }
     @Prop(Course) readonly course!: Course;
     @Prop({ type: Array, default: [] }) readonly match!: SearchMatch;

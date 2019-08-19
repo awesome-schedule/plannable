@@ -181,7 +181,9 @@ export default class Course implements CourseFields, Hashable {
      * @param sections the Set of section indices
      * @param key the key of the section
      */
+    // eslint-disable-next-line no-dupe-class-members
     public has(sections: Set<number>, key: string): boolean;
+    // eslint-disable-next-line no-dupe-class-members
     public has(element: Section | Set<number>, key?: string): boolean {
         if (element instanceof Set) {
             return this.key === key && this.ids.some(id => element.has(id));

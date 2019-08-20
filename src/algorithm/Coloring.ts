@@ -8,6 +8,7 @@
  *
  */
 import { Graph, Vertex } from './Graph';
+import { calcOverlap } from '@/utils';
 
 /**
  * An exact graph coloring algorithm using backtracking
@@ -138,7 +139,26 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
+    colorSpread(adjList, colors);
+    verifyColoring(adjList, colors);
     return numColors;
+}
+
+function verifyColoring(adjList: number[][], colors: Int16Array) {
+    for (let i = 0; i < adjList.length; i++) {
+        const curCol = colors[i];
+        for (const adj of adjList[i]) {
+            if (curCol === colors[adj]) {
+                console.warn(i, 'and', adj, 'have the same color', curCol);
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function colorSpread(adjList: number[][], colors: Int16Array) {
+    // ...
 }
 
 /**
@@ -159,11 +179,18 @@ export function colorDepthSearch(adjList: number[][], colors: Int16Array): Graph
     }
 
     // start DFS at each root node
-    vertices
-        .filter(x => x.depth === 0)
-        .forEach(root => {
-            depthFirstSearchRec(root, graph);
-        });
+    const roots = vertices.filter(x => x.depth === 0);
+    for (const root of roots) depthFirstSearchRec(root, graph);
+
+    // calculate the pathDepth
+    for (const root of roots) {
+        for (const path of root.path) {
+            const len = path.length - 1;
+            for (const node of path) {
+                node.pathDepth = Math.max(node.pathDepth, len);
+            }
+        }
+    }
 
     return graph;
 }
@@ -219,14 +246,13 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
     }
 
     // if no more nodes can be visited from the current node, it is the end of this DFS path.
-    // trace the parent pointer to update parent nodes' maximum path depth until we reach the root
+    // trace the parent pointer to until we reach the root. add the path to the root node.
     if (!hasUnvisited) {
-        let curParent: Vertex<T> | undefined = start;
+        let curParent: Vertex<T> = start;
         const path: Vertex<T>[] = [];
 
         while (true) {
             path.unshift(curParent);
-            curParent.pathDepth = Math.max(start.depth, curParent.pathDepth);
 
             // root node of the tree
             if (!curParent.parent) {

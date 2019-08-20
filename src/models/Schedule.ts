@@ -376,16 +376,12 @@ export default class Schedule {
         room?: string,
         description?: string
     ) {
-        const newEvent = new Event(days, display, title, description, room);
         for (const e of this.events) {
-            if (
-                e.days === days ||
-                Utils.checkTimeConflict(newEvent.toTimeArray(), e.toTimeArray())
-            ) {
-                throw new Error(`Your new event conflicts with ${e.title}`);
+            if (e.days === days) {
+                throw new Error(`Your new event's time is identical to ${e.title}`);
             }
         }
-        this.events.push(newEvent);
+        this.events.push(new Event(days, display, title, description, room));
         this.constructDateSeparator();
         this.computeSchedule();
     }

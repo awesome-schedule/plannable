@@ -36,10 +36,11 @@ function graphColorBackTrack(
     }
     const vertex = colorOrder[v];
     const neighbors = graph[vertex];
-    const len = neighbors.length;
 
     outer: for (let color = 0; color < numColors; color++) {
-        for (let i = 0; i < len; i++) if (colors[neighbors[i]] === color) continue outer;
+        for (let i = 0; i < neighbors.length; i++) {
+            if (colors[neighbors[i]] === color) continue outer;
+        }
 
         colors[vertex] = color;
         if (graphColorBackTrack(graph, colors, colorOrder, opCount, numColors, v + 1)) return true;
@@ -129,11 +130,9 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
     const opCount = new Int32Array(1);
     let totalCount = 0;
     let numColors = 1;
-    for (let i = 1; i < 19260817; i++) {
-        if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, i, 0)) {
-            numColors = i;
-            break;
-        }
+    for (; numColors < 19260817; numColors++) {
+        if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, numColors, 0)) break;
+
         colors.fill(-1);
         totalCount += opCount[0];
         opCount[0] = 0;

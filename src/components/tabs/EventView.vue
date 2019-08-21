@@ -1,7 +1,7 @@
 <template>
     <nav class="bg-light sidebar">
         <div id="semester" class="btn bg-info nav-btn mt-0">
-            <div v-if="currentSelectedEvent">Edit Event</div>
+            <div v-if="status.eventToEdit">Edit Event</div>
             <div v-else>Add Event</div>
         </div>
         <form class="mt-2 mx-2">
@@ -70,7 +70,7 @@
             style="width: 98%"
             placeholder="Description"
         ></textarea>
-        <div v-if="currentSelectedEvent" class="btn-group" role="group" style="width:100%">
+        <div v-if="status.eventToEdit" class="btn-group" role="group" style="width:100%">
             <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
                 Update
             </button>
@@ -95,21 +95,29 @@
                     {{ schedule.currentSchedule.events.length }}
                 </th>
                 <th></th>
+                <th></th>
             </thead>
             <tbody>
                 <tr
-                    v-for="event in schedule.currentSchedule.events"
-                    :key="event.key"
-                    :class="{ 'table-primary': event === currentSelectedEvent }"
-                    @click="editEvent(event)"
+                    v-for="ev in schedule.currentSchedule.events"
+                    :key="ev.key"
+                    :class="{ 'table-primary': ev === status.eventToEdit }"
+                    @mouseenter="schedule.currentSchedule.hoverEvent(ev.key)"
+                    @mouseleave="schedule.currentSchedule.unhoverEvent(ev.key)"
                 >
-                    <td>{{ event.title }}</td>
-                    <td>
+                    <td @click="status.eventToEdit = ev">{{ ev.title }}</td>
+                    <td class="pl-0 pr-2" @click="copyEvent(ev)">
                         <i
+                            title="copy the current event to a new event"
+                            class="far fa-copy click-icon"
+                            style="font-size: 20px"
+                        ></i>
+                    </td>
+                    <td class="pl-0 pr-2" @click="status.eventToEdit = ev">
+                        <i
+                            class="click-icon"
                             :class="
-                                event === currentSelectedEvent
-                                    ? 'far fa-check-square'
-                                    : 'far fa-square'
+                                status.eventToEdit === ev ? 'far fa-check-square' : 'far fa-square'
                             "
                             style="font-size: 20px"
                         ></i>

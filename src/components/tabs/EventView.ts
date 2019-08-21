@@ -18,10 +18,6 @@ import { Component, Watch } from 'vue-property-decorator';
  */
 @Component
 export default class EventView extends Store {
-    get event() {
-        return this.status.eventToEdit;
-    }
-
     // event related fields
     eventWeek = [false, false, false, false, false, false, false];
     eventTimeFrom = '';
@@ -30,17 +26,16 @@ export default class EventView extends Store {
     eventRoom? = '';
     eventDescription? = '';
 
-    // rendering selected event
-    currentSelectedEvent: Event | null = null;
     toBeModifiedDays = '';
 
     get days() {
         return DAYS;
     }
 
-    @Watch('event', { immediate: true })
+    @Watch('status.eventToEdit', { immediate: true })
     eventWatch() {
-        if (this.event) this.editEvent(this.event);
+        const { eventToEdit } = this.status;
+        if (eventToEdit) this.editEvent(eventToEdit);
     }
     // need to remove eventToEdit before switching other tabs
     beforeDestroy() {
@@ -49,6 +44,10 @@ export default class EventView extends Store {
     updateDay(idx: number) {
         this.$set(this.eventWeek, idx, !this.eventWeek[idx]);
     }
+    /**
+     * validate the days, start time and end time of this event, and then parse them
+     * to desired format. emit notification on error.
+     */
     getEventDays() {
         let days = this.eventWeek.reduce((acc, x, i) => acc + (x ? this.days[i] : ''), '');
 
@@ -69,6 +68,11 @@ export default class EventView extends Store {
         days += ` ${to12hr(this.eventTimeFrom)} - ${to12hr(this.eventTimeTo)}`;
         return days;
     }
+    copyEvent(ev: Event) {
+        this.status.eventToEdit = null;
+        this.editEvent(ev);
+        this.eventTitle += '-copy';
+    }
     addEvent() {
         // fold sidebar on mobile
         this.status.foldView();
@@ -84,13 +88,16 @@ export default class EventView extends Store {
                 this.eventDescription ? this.eventDescription.split('\n').join('<br />') : ''
             );
             // note: we don't need to regenerate schedules if the days property is not changed
-            this.cancelEvent(this.toBeModifiedDays !== days && this.schedule.generated);
+            this.cleanup(this.toBeModifiedDays !== days && this.schedule.generated);
         } catch (err) {
             this.noti.error(err.message);
         }
     }
+    /**
+     * bind the properties of this event to input fields
+     * @param event
+     */
     editEvent(event: Event) {
-        this.currentSelectedEvent = event;
         this.eventTitle = event.title;
         this.eventRoom = event.room;
         this.eventDescription = event.description
@@ -108,32 +115,29 @@ export default class EventView extends Store {
         this.eventTimeTo = to24hr(end);
         this.toBeModifiedDays = event.days;
     }
+    /**
+     * apply the edit
+     */
     endEditEvent() {
         this.schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.addEvent();
     }
     deleteEvent() {
         this.schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
-        this.cancelEvent(this.schedule.generated);
+        this.cleanup(this.schedule.generated);
     }
     /**
-     * this method is called after deleteEvent, endEditEvent and addEvent
-     *
-     * clear all properties of this component and force re-computation of the current schedule
-     *
+     * Clear all properties of this component and force re-computation of the current schedule,
+     * called after deleteEvent, endEditEvent and addEvent.
      * @param regenerate re-run algorithm if true
      */
-    cancelEvent(regenerate = false) {
+    cleanup(regenerate = false) {
         // fold sidebar on mobile
         this.status.foldView();
 
-        this.eventTitle = '';
-        this.eventRoom = '';
+        this.eventRoom = this.eventTimeFrom = this.eventTimeTo = this.eventDescription = this.eventTitle =
+            '';
         this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));
-        this.eventTimeFrom = '';
-        this.eventTimeTo = '';
-        this.eventDescription = '';
-        this.currentSelectedEvent = null;
         this.status.eventToEdit = null;
         if (regenerate) this.generateSchedules();
         else this.schedule.currentSchedule.computeSchedule();

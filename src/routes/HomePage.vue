@@ -99,13 +99,12 @@
         </section>
         <section id="section5" class="jumbotron text-center">
             <h1 class="display-4">Contact/Join Us</h1>
-            <p>Email Us At:<a id="sendEmail">zh2wc@virginia.edu </a></p>
-
+            <p>Email Us at: <a id="sendEmail">zh2wc@virginia.edu </a></p>
             <p>Join Us:</p>
         </section>
         <section id="section6" class="jumbotron text-center">
             <h1 class="display-4">Previous Updates</h1>
-            <div id="release-note" class="container text-left"></div>
+            <div id="release-note" class="container text-left">Loading release note...</div>
         </section>
     </div>
 </template>

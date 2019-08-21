@@ -244,8 +244,8 @@ class ScheduleEvaluator {
         public allChoices = new Uint8Array(),
         public refSchedule: ScheduleAll = {},
         timeArrays: Int32Array = new Int32Array(),
-        count: number = 0,
-        timeLen: number = 0
+        count = 0,
+        timeLen = 0
     ) {
         // note: timeLen is typically about 50*count, which takes most space
         this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);

@@ -115,7 +115,7 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
         const key = (data[1] + data[2] + type).toLowerCase();
 
         const meetings: Meeting[] = [];
-        let date: string = data[6 + 3];
+        let date = data[6 + 3];
         let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6

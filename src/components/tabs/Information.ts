@@ -26,11 +26,11 @@ import { Component, Vue } from 'vue-property-decorator';
     }
 })
 export default class Information extends Vue {
-    e1: number = 0;
-    e2: number = 0;
-    e3: number = 0;
-    e4: number = 0;
-    e5: number = 0;
+    e1 = 0;
+    e2 = 0;
+    e3 = 0;
+    e4 = 0;
+    e5 = 0;
     formula = `
     $$
     \\begin{align*}

@@ -83,7 +83,7 @@ const LEVELS: { [x in NotiClass]: number } = Object.freeze({
  * inform user about the results of certain actions
  */
 class Notification implements NotiState {
-    public msg: string = '';
+    public msg = '';
     public cls: NotiClass | '' = '';
     /**
      * history of the notification states. index 0 corresponds to the most recent one

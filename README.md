@@ -71,9 +71,9 @@ Then you can visit the development server at [http://127.0.0.1:8080](http://127.
 
 ## Built With
 
--   [Vue.js](https://vuejs.org) - Front-end framework
--   [Bootstrap](https://getbootstrap.com/) - Front-end component library
--   [Vuetify](https://vuetifyjs.com/en/) - Front-end component library
+-   [TypeScript](https://typescriptlang.org)
+-   [Vue.js](https://vuejs.org)
+-   [Bootstrap](https://getbootstrap.com/)
 
 ## Contributors
 

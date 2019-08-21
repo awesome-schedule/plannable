@@ -28,22 +28,22 @@ export default class WatchFactory extends Store {
         }
     }
 
-    @Watch('display.multiSelect')
+    @Watch('display.multiSelect', { immediate: true })
     private w0() {
         Schedule.options.multiSelect = this.display.multiSelect;
-        this.schedule.currentSchedule.computeSchedule();
+        this.schedule.currentSchedule.computeSchedule(false, 100);
     }
 
-    @Watch('display.combineSections')
+    @Watch('display.combineSections', { immediate: true })
     private a() {
         Schedule.options.combineSections = this.display.combineSections;
-        this.schedule.currentSchedule.computeSchedule();
+        this.schedule.currentSchedule.computeSchedule(false, 100);
     }
 
-    @Watch('palette.savedColors', { deep: true })
+    @Watch('palette.savedColors', { deep: true, immediate: true })
     private b() {
         Schedule.savedColors = this.palette.savedColors;
-        this.schedule.currentSchedule.computeSchedule();
+        this.schedule.currentSchedule.computeSchedule(false, 100);
     }
 
     @Watch('profile.current')

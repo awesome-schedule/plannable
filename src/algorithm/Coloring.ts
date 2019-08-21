@@ -162,14 +162,20 @@ function colorSpread(adjList: number[][], colors: Int16Array) {
 }
 
 /**
+ * calculate the actual path depth of the nodes
  * @requires optimization
  * @param adjList
  * @param colors
+ * @param values the array of things contained in each node
  */
-export function colorDepthSearch(adjList: number[][], colors: Int16Array): Graph<number> {
-    const graph: Graph<number> = new Map();
+export function colorDepthSearch<T = number>(
+    adjList: number[][],
+    colors: Int16Array,
+    values: T[]
+): Graph<T> {
+    const graph: Graph<T> = new Map();
     const vertices = adjList.map((_, i) => {
-        const v = new Vertex(i);
+        const v = new Vertex(values[i]);
         v.depth = colors[i];
         return v;
     });

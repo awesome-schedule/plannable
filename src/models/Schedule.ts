@@ -418,18 +418,21 @@ export default class Schedule {
      * Compute the schedule view based on `this.All` and `this.preview`.
      * If there is a pending compute task, remove that pending task.
      * @param sync if true, synchronously execute this function, otherwise use setTimeout
+     * @param time the delay of setTimeout, in milliseconds
      * @remarks this method has a very high time complexity.
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.
      */
-    public computeSchedule(sync = true) {
+    public computeSchedule(sync = true, time = 10) {
         window.clearTimeout(this.pendingCompute);
         if (sync) {
+            console.time('compute schedule');
             this._computeSchedule();
+            console.timeEnd('compute schedule');
         } else {
             this.pendingCompute = window.setTimeout(() => {
                 this._computeSchedule();
-            }, 10);
+            }, time);
         }
     }
 
@@ -669,32 +672,43 @@ export default class Schedule {
         const colors = new Int16Array(blocks.length);
         graphColoringExact(adjList, colors);
 
-        const graph = colorDepthSearch(adjList, colors);
+        // note: blocks are contained in nodes
+        const graph = colorDepthSearch(adjList, colors, blocks);
         for (const node of graph.keys()) {
             // skip any non-root node in the depth-first trees
             if (node.parent) continue;
 
             // traverse all the paths starting from the root
-            const paths = node.path;
-            for (const path of paths) {
+            for (const path of node.path) {
                 // compute the left and width of the root node if they're not computed
-                const firstBlock = blocks[path[0].val];
-                if (firstBlock.left === -1) {
-                    firstBlock.left = 0;
-                    firstBlock.width = 1 / (path[0].pathDepth + 1);
-                }
+                path[0].val.left = 0;
+                path[0].val.width = 1 / (path[0].pathDepth + 1);
 
                 // computed the left and width of the remaining nodes based on
                 // the already computed information of the previous node
                 for (let i = 1; i < path.length; i++) {
-                    const block = blocks[path[i].val];
-                    const previousBlock = blocks[path[i - 1].val];
+                    const block = path[i].val;
+                    const prevBlock = path[i - 1].val;
 
-                    block.left = Math.max(block.left, previousBlock.left + previousBlock.width);
+                    block.left = Math.max(block.left, prevBlock.left + prevBlock.width);
 
                     // remaining width / number of remaining path length
                     block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
                 }
+            }
+        }
+        // auto-expansion
+        for (const [node, neighbors] of graph) {
+            // minimum left of the block that has greater depth than the current block
+            let minLeft = Infinity;
+            for (const v of neighbors) {
+                if (v.depth > node.depth) {
+                    const left = v.val.left;
+                    if (left < minLeft) minLeft = left;
+                }
+            }
+            if (minLeft !== Infinity) {
+                node.val.width = minLeft - node.val.left;
             }
         }
         graph.clear();

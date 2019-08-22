@@ -64,7 +64,7 @@ class ScheduleEvaluator {
          *
          * returns a higher value when the class times are unbalanced
          */
-        variance(blocks: TimeArray, offset: number) {
+        variance(blocks: Readonly<TimeArray>, offset: number) {
             let sum = 0,
                 sumSq = 0;
             const oEnd = offset + 7;
@@ -86,7 +86,7 @@ class ScheduleEvaluator {
          *
          * The greater the time gap between classes, the greater the return value will be
          */
-        compactness(blocks: TimeArray, offset: number) {
+        compactness(blocks: Readonly<TimeArray>, offset: number) {
             let compact = 0;
             const oEnd = offset + 7;
             for (let i = offset; i < oEnd; i++) {
@@ -104,7 +104,7 @@ class ScheduleEvaluator {
          *
          * The greater the overlap, the greater the return value will be
          */
-        lunchTime(blocks: TimeArray, offset: number) {
+        lunchTime(blocks: Readonly<TimeArray>, offset: number) {
             // 11:00 to 14:00
             let totalOverlap = 0;
             const oEnd = offset + 7;
@@ -126,7 +126,7 @@ class ScheduleEvaluator {
          *
          * For a schedule that has earlier classes, this method will return a higher number
          */
-        noEarly(blocks: TimeArray, offset: number) {
+        noEarly(blocks: Readonly<TimeArray>, offset: number) {
             const refTime = 12 * 60,
                 oEnd = offset + 7;
             let total = 0;
@@ -147,7 +147,7 @@ class ScheduleEvaluator {
          */
         distance(
             timeMatrix: Readonly<Int32Array>,
-            blocks: TimeArray,
+            blocks: Readonly<TimeArray>,
             offset: number,
             threshold: number
         ) {
@@ -213,11 +213,11 @@ class ScheduleEvaluator {
      * the cumulative length of the time arrays for each schedule.
      * `this.offsets[i]` is the start index of the time array of schedule `i` in `this.blocks`
      */
-    private offsets: Uint32Array;
+    private offsets: Readonly<Uint32Array>;
     /**
      * array of [[TimeArray]]s concatenated together
      */
-    private blocks: Int16Array;
+    private blocks: Readonly<Int16Array>;
     /**
      * the underlying buffer for the typed arrays above, except `sortCoeffCache`
      */
@@ -232,18 +232,18 @@ class ScheduleEvaluator {
      * concatenated together
      * @param refSchedule the reference schedule used by the
      * [[ScheduleEvaluator.sortFunctions.similarity]] sort function
-     * @param timeArrays the time arrays with one-to-one correspondence to classList
+     * @param timeArrays the time arrays constructed by [[timeArrayToCompact]]
      * @param count the number of schedules in total
      * @param timeLen see the return value of [[ScheduleGenerator.computeSchedules]]
      */
     constructor(
         public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },
         public readonly timeMatrix: Readonly<Int32Array> = new Int32Array(),
-        public events: Event[] = [],
-        public classList: RawAlgoCourse[][] = [],
-        public allChoices = new Uint8Array(),
+        public readonly events: Event[] = [],
+        public readonly classList: RawAlgoCourse[][] = [],
+        public readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
         public refSchedule: ScheduleAll = {},
-        timeArrays: Int32Array = new Int32Array(),
+        readonly timeArrays: Readonly<Int32Array> = new Int32Array(),
         count = 0,
         timeLen = 0
     ) {

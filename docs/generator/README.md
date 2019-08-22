@@ -47,7 +47,7 @@ However, these is a lot of overhead in storing these small arrays, as the JS eng
 
 _Time and Room Representation After v7.0_
 
-We concatenate all these small arrays together, and we keep track of the start and end indices of each day using the first 8 values<sup>note 1</sup>. Monday is stored at range `arr[0]` to `arr[1]`, Tuesday is stored at range `arr[1]` to `arr[2]`, etc. If `arr[i]` is the same as `arr[i+1]`, that means day `i` is empty. Because each day only has 1440 minutes and probably no college has more than 32767 available buildings, we can store the entire array in int16, using `Int16Array`, which saves even more memory.
+We concatenate all these small arrays together, and we keep track of the start and end indices of each day using the first 8 values<sup>note 1</sup>. Monday is stored at range `arr[0]` to `arr[1]` exclusive, Tuesday is stored at range `arr[1]` to `arr[2]`, etc. If `arr[i]` is the same as `arr[i+1]`, that means day `i` is empty. Because each day only has 1440 minutes and probably no college has more than 32767 available buildings, we can store the entire array in int16, using `Int16Array`, which saves even more memory. Note that we use signed int16 because unknown buildings are represented as -1.
 
 The code example that loops through each of the meeting is shown below.
 
@@ -65,7 +65,7 @@ for (let i = 0; i < 7; i++) {
 
 ### Time Conflict Cache
 
-When developing version 7.0, we discovered that it is much more efficient to pre-compute the conflict between all pairs of sections in different courses than computing them on-the-fly.
+When developing version 7.0, we discovered that it is much more efficient to pre-compute the conflict between all pairs of sections in different courses than computing them on-the-fly. The reasons are outlined below.
 
 #### Pre-computation
 
@@ -77,7 +77,7 @@ We build each schedule incrementally. When we try a new section, the first thing
 
 #### The Cache Tensor
 
-The conflict cache is a 4d boolean tensor, stored as a `Uint8Array`.
+The conflict cache is a 4d boolean tensor, stored as an `Uint8Array`.
 
 ```js
 const conflictCache = new Uint8Array(buffer, byteOffset, sideLen ** 2);
@@ -92,11 +92,11 @@ conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCours
 
 where `sideLen = numCourses * maxNumOfSectionsInEachCourse`
 
-### Main Loop
+Although in theory we can do bit-packing to further reduce the memory footprint of the conflict cache, it degrades the performance due to the usage of bitwise operations and integer division/modulo.
 
 #### Schedule Representation
 
-The main loop is where we build schedules. Prior to v7.0, we store each schedule as an array of `RawAlgoCourse`, and we later store all the schedules generated in an array in `ScheduleEvaluator`.
+Prior to v7.0, we store each schedule as an array of `RawAlgoCourse`, and we later store all the schedules generated in an array in `ScheduleEvaluator`.
 
 ```ts
 const schedules: RawAlgoCourse[][] = [
@@ -126,7 +126,15 @@ Array.from(allChoices.slice(idx, idx + numCourses)).map(
 );
 ```
 
+### Main Loop
+
+The main loop is where we build schedules.
+
 #### Path Memory
+
+#### Current Choices
+
+#### Time Len Computation
 
 ## Schedule Evaluation and Sorting
 
@@ -141,8 +149,24 @@ To sort schedules, we first need to compute a numeric coefficient for each one o
 
 The computation of coefficient for each schedule is not very straightforward, because most of the sort options rely on the spacial and temporal correlation between pairs of meetings. More specifically, `compactness` and `distance` require calculation if time/distance between consecutive pairs of meetings, and `noEarly` requires us to know which meeting is the earliest one. Therefore, it is necessary to sort the meetings in each day by their start time.
 
+This part is currently implemented in the constructor of the ScheduleEvaluator
+
 #### Coefficient Cache
+
+Because it is costly to compute the coefficient for each schedule with each sort option, we created cache array for each of the already-computed option. This is the key to the high-responsiveness of interactive sorting.
+
+For example, if the sort option `distance` is enabled, then the `distance` coefficient for each schedule is computed upon generation, stored in an object called `sortCoeffCache` as Float32Array, with `distance` as its key. If the user alters other sort options or flip the sort direction, we can just use the cached Float32Array to do the rest of the computation, without recomputing the distance coefficient for each schedule.
 
 #### Coefficient Normalization
 
+For the `combined` sort mode, we need to combine the sort options selected by the user. An naive approach is to do element-wise addition on the coefficient arrays produced by each sort option. However, the problem is that different sort options produce values of different order of magnitudes. For example, the `variance` option usually produces values that is several order of magnitudes greater than that produced by the `compactness` option.
+
+To address this issue, we _normalize_ the coefficients produced by each sort option to range `0 - 100`, which is done by subtracting the `min`, dividing `max - min` and multiplying by 100 for each value.
+
 ### Sort
+
+#### Fisher–Yates Shuffle Algorithm
+
+#### Complete Sorting
+
+#### Floyd–Rivest Selection (Quickselect)

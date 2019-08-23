@@ -378,7 +378,9 @@ export default class Schedule {
     ) {
         for (const e of this.events) {
             if (e.days === days) {
-                throw new Error(`Your new event's time is identical to ${e.title}`);
+                throw new Error(
+                    `Your new event's time is identical to ${e.title}. Please consider merging these two events.`
+                );
             }
         }
         this.events.push(new Event(days, display, title, description, room));
@@ -396,7 +398,19 @@ export default class Schedule {
         this.computeSchedule();
     }
 
-    public hover(key: string, strong: boolean = true) {
+    public hoverEvent(key: string, strong = true) {
+        for (const blocks of this.days) {
+            for (const block of blocks) {
+                if (block.section.key === key) block.strong = strong;
+            }
+        }
+    }
+
+    public unhoverEvent(key: string) {
+        this.hoverEvent(key, false);
+    }
+
+    public hover(key: string, strong = true) {
         const sections = this.All[key];
         if (sections instanceof Set) {
             this.days.forEach(blocks => {

@@ -14,7 +14,7 @@
                 <div class="modal-body">
                     <h6 v-html="highlightMatch(course.title, 'title', match[0])"></h6>
                     <div style="width: 100%; overflow-x: auto;">
-                        <table id="sec-table" class="m-color">
+                        <table id="sec-table" class="m-color w-100">
                             <!-- <thead>
                                 <tr>
                                     <th>ID</th>

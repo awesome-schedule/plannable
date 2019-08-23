@@ -3,22 +3,22 @@
  * @module models
  */
 
+export function getInstructors(meetings: readonly Meeting[]) {
+    const profs: string[] = [];
+    for (const meeting of meetings) {
+        const meetingProfs = meeting.instructor.split(', ');
+        for (const prof of meetingProfs) {
+            if (!profs.includes(prof)) profs.push(prof);
+        }
+    }
+    return profs;
+}
+
 /**
  * A meeting represents a specific meeting time \w information about the instructor and location
  */
-export default class Meeting {
-    public static getInstructors(meetings: readonly Meeting[]) {
-        const profs: string[] = [];
-        for (const meeting of meetings) {
-            const meetingProfs = meeting.instructor.split(', ');
-            for (const prof of meetingProfs) {
-                if (!profs.includes(prof)) profs.push(prof);
-            }
-        }
-        return profs;
-    }
-
-    public readonly instructor!: string;
-    public readonly days!: string;
-    public readonly room!: string;
+export default interface Meeting {
+    readonly instructor: string;
+    readonly days: string;
+    readonly room: string;
 }

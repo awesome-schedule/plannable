@@ -165,7 +165,7 @@ export default class Catalog {
          * is special search
          */
         const spec = query.startsWith(':') && temp.length > 1;
-        let field: string = '';
+        let field = '';
         /**
          * query no space
          */

@@ -3,7 +3,7 @@ import Section from '@/models/Section';
 describe('section test', () => {
     it('basic', () => {
         const catalog = window.catalog;
-        const sec: Section = catalog.getCourse('cs11105').sections[0];
+        const sec = catalog.getCourse('cs11105').sections[0];
         const sec2 = catalog.getCourse('cs11105').sections[0];
         expect(sec).toBeTruthy();
         expect(sec.sameTimeAs(sec2)).toBe(true);
@@ -21,13 +21,13 @@ describe('section test', () => {
 
     it('multiple meetings', () => {
         const catalog = window.catalog;
-        const sec: Section = catalog.getCourse('comm30105').sections[0];
+        const sec = catalog.getCourse('comm30105').sections[0];
 
         const timeRoom = sec.getTimeRoom()!;
         const num = timeRoom.length - 8;
         expect(num / 3).toBe(Math.floor(num / 3));
 
-        const s2: Section = catalog.getCourse('cs99993').sections[0];
+        const s2 = catalog.getCourse('cs99993').sections[0];
         expect(s2.getTimeRoom()).toBe(null);
         expect(s2.sameTimeAs(sec)).toBe(false);
         expect(s2.displayName).toBeTruthy();

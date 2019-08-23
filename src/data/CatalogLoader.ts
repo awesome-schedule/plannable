@@ -16,7 +16,7 @@ import { getApi } from '.';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 
 import Course from '@/models/Course';
-import Meeting from '@/models/Meeting';
+import Meeting, { getInstructors } from '@/models/Meeting';
 import { CourseType, semesterDataExpirationTime, TYPES_PARSE } from '../models/Meta';
 import { cancelablePromise, CancelablePromise, parseDate } from '../utils';
 
@@ -115,7 +115,7 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
         const key = (data[1] + data[2] + type).toLowerCase();
 
         const meetings: Meeting[] = [];
-        let date: string = data[6 + 3];
+        let date = data[6 + 3];
         let valid: ValidFlag = 0;
         for (let i = 0; i < 4; i++) {
             const start = 6 + i * 4; // meeting information starts at index 6
@@ -153,22 +153,11 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
                 for (; k < meetings.length; k++) {
                     if (days < meetings[k].days) break;
                 }
-                const meeting: Meeting = Object.create(Meeting.prototype, {
-                    instructor: {
-                        value: instructor,
-                        enumerable: true
-                    },
-                    days: {
-                        value: days,
-                        enumerable: true
-                    },
-                    room: {
-                        value: room,
-                        enumerable: true
-                    }
-                } as { [x in keyof Meeting]: TypedPropertyDescriptor<Meeting[x]> });
-
-                meetings.splice(k, 0, meeting);
+                meetings.splice(k, 0, {
+                    instructor,
+                    days,
+                    room
+                });
             }
         }
         // unknown date
@@ -266,7 +255,7 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
                 enumerable: true
             },
             instructors: {
-                value: Meeting.getInstructors(meetings),
+                value: getInstructors(meetings),
                 enumerable: true
             },
             dateArray: {

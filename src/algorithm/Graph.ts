@@ -9,15 +9,15 @@
  * It holds many attributes that are modified **in-place** when running a graph algorithm
  */
 export class Vertex<T> {
-    public visited: boolean = false;
+    public visited = false;
     /**
      * depth of the node relative to the root
      */
-    public depth: number = 0;
+    public depth = 0;
     /**
      * the maximum depth of the path starting from the root that the current node is on
      */
-    public pathDepth: number = 0;
+    public pathDepth = 0;
     /**
      * the parent of this vertex in the depth first tree
      */

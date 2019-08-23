@@ -1,7 +1,6 @@
 import axios from 'axios';
 import $ from 'jquery';
 import { Component, Vue } from 'vue-property-decorator';
-import VersionModal from '../components/VersionModal';
 import { StringifyOptions } from 'querystring';
 
 type GithubResponseData = {
@@ -31,11 +30,7 @@ type GithubResponseData = {
  * @author Kaiying Cat
  */
 
-@Component({
-    components: {
-        VersionModal
-    }
-})
+@Component
 export default class Homepage extends Vue {
     schoolNames = ['Select Your School', 'University Of Virginia'];
     schoolAbbr = ['uva'];

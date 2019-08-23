@@ -28,7 +28,6 @@ import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
 import SectionModal from './components/SectionModal.vue';
 import URLModal from './components/URLModal.vue';
-import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
 import { backend } from './config';
@@ -36,7 +35,6 @@ import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 
 const version = '7.0';
-let note = 'loading release note...';
 /**
  * returns whether the version stored in localStorage matches the current version
  * then, override localStorage with the current version
@@ -44,100 +42,7 @@ let note = 'loading release note...';
 function checkVersion() {
     const match = localStorage.getItem('version') === version;
     localStorage.setItem('version', version);
-    // if (!match) {
-    //     triggerVersionModal();
-    // }
     return match;
-}
-
-async function triggerVersionModal() {
-    await releaseNote();
-    $('#versionModal').modal();
-}
-
-/**
- * Get release note for current version && render.
- * Part of this function can be seen as an extremely-lightweight MarkDown renderer.
- * @author Kaiying Cat
- */
-async function releaseNote() {
-    try {
-        const res = await axios.get<{ body: string }[]>(
-            'https://api.github.com/repos/awesome-schedule/plannable/releases'
-        );
-
-        /**
-         * Records the # of layers (of "ul") that this line is at.
-         * Denoted by the number of spaces before a "- " in the front of the current line.
-         * If this line is not in an "ul", it will be set to -1 at the end of the callback function
-         * in .map()'s parameter.
-         */
-        let ul = -1;
-        note = res.data[0].body
-            .split(/[\r\n]+/)
-            .map(x => {
-                /**
-                 * Records the number corresponds to the largeness of header.
-                 * It is 0 if this line is not a header.
-                 */
-                let head = 0;
-                /**
-                 * Records if this line is in an "ul" or not by checking if this line starts with "- ";
-                 */
-                let li = 0;
-                let result =
-                    x
-                        .replace(/^(#*)(\s)/, (s1: string, match1: string, match2: string) => {
-                            /**
-                             * Replace # to <h1> (and so on...) and set the variable "header",
-                             * so that "header" can be used
-                             * to close this element (give it a "</h1>")
-                             */
-                            return match1.length === 0
-                                ? match2
-                                : '<h' + (head = match1.length) + '>';
-                        })
-                        .replace(/^(\s*)-\s/, (s: string, match: string) => {
-                            /**
-                             * Replace "- Cats are the best" with "<li>Cats are the best</li>"
-                             * Set appropriate list group information
-                             */
-                            if (head !== 0) return match + '- ';
-                            let tag = '';
-                            if (match.length > ul) {
-                                tag = '<ul>';
-                            } else if (match.length < ul) {
-                                tag = '</ul>';
-                            }
-                            ul = match.length;
-                            li = 1;
-                            return `${tag}<li>`;
-                        })
-                        .replace(/!\[([\w -]+)\]\(([\w -/:]+)\)/, (s, match1: string, match2) => {
-                            // convert md image to html
-                            return `<img src=${match2} alt=${match1}></img>`;
-                        })
-                        .replace('<img', '<img class="img-fluid my-3" ') +
-                    (head === 0
-                        ? li === 0
-                            ? /<\/?\w+>/.exec(x)
-                                ? ''
-                                : '<br />'
-                            : '</li>'
-                        : `</h${head}>`);
-                if (li === 0 && ul !== -1) {
-                    // append "</ul>"s according to the variable "ul"
-                    result = '</ul>'.repeat(ul / 4 + 1) + result;
-                    ul = -1;
-                }
-                return result;
-            })
-            .join(' ');
-    } catch (err) {
-        note =
-            'Failed to obtain release note.' +
-            ' See https://github.com/awesome-schedule/plannable/releases instead.';
-    }
 }
 
 @Component({
@@ -155,7 +60,6 @@ async function releaseNote() {
         SectionModal,
         CourseModal,
         URLModal,
-        VersionModal,
         External,
         DateSeparator,
         // use dynamic component for this one because it is relatively large in size
@@ -166,18 +70,12 @@ async function releaseNote() {
     }
 })
 export default class App extends Store {
-    note: string = note;
-
     get sideBar() {
         return this.status.sideBar;
     }
 
     get version() {
         return version;
-    }
-
-    refreshNote() {
-        $('#release-note-body').html(note);
     }
 
     async loadCoursesFromURL() {

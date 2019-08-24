@@ -27,13 +27,13 @@
         "allowClosed": false,
         "sortOptions": {
             "sortBy": [
-                { "name": "distance", "enabled": true, "reverse": false },
-                { "name": "variance", "enabled": false, "reverse": false },
-                { "name": "compactness", "enabled": true, "reverse": false },
-                { "name": "lunchTime", "enabled": false, "reverse": false },
-                { "name": "noEarly", "enabled": true, "reverse": false },
-                { "name": "similarity", "enabled": false, "reverse": false },
-                { "name": "IamFeelingLucky", "enabled": false, "reverse": true }
+                { "name": "distance", "enabled": true, "reverse": false, "weight": 1 },
+                { "name": "variance", "enabled": false, "reverse": false, "weight": 1 },
+                { "name": "compactness", "enabled": true, "reverse": false, "weight": 1 },
+                { "name": "lunchTime", "enabled": false, "reverse": false, "weight": 1 },
+                { "name": "noEarly", "enabled": true, "reverse": false, "weight": 1 },
+                { "name": "similarity", "enabled": false, "reverse": false, "weight": 1 },
+                { "name": "IamFeelingLucky", "enabled": false, "reverse": true, "weight": 1 }
             ],
             "mode": 1
         },

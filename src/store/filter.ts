@@ -7,7 +7,7 @@
  */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
-import Schedule, { ScheduleAll, SectionJSON, SectionJSONShort } from '@/models/Schedule';
+import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
 import { to12hr } from '@/utils';
 import { StoreModule } from '.';
 import ScheduleEvaluator, {
@@ -199,9 +199,7 @@ window.scheduleEvaluator = new ScheduleEvaluator();
  * @author Hanzhi Zhou
  */
 export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
-    public static compressJSON(
-        obj: FilterStateJSON
-    ): readonly [number, number, number[], TimeSlotShort[], ScheduleAll<SectionJSONShort>] {
+    public static compressJSON(obj: FilterStateJSON) {
         // convert allowClosed, allowWaitlist, mode to binary
         let filterBits = 0;
         if (obj.allowClosed) filterBits += 2 ** 0;
@@ -216,12 +214,14 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
         // name_initial ascii code :[c,d,l,n,s,v,I] --> could change in order
         const initials: number[] = [];
+        const weights: number[] = [];
         for (const sortBy of obj.sortOptions.sortBy) {
             initials.push(sortBy.name.charCodeAt(0));
             if (sortBy.enabled) sortBits |= mask;
             mask <<= 1;
             if (sortBy.reverse) sortBits |= mask;
             mask <<= 1;
+            weights.push(sortBy.weight);
         }
         const { payload: schedule, level, msg } = Schedule.fromJSON({
             All: obj.refSchedule,
@@ -237,6 +237,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             filterBits,
             sortBits,
             initials,
+            weights,
             // use 7 bits to represent the 7 days
             obj.timeSlots.map(timeSlot => {
                 let m = 1,
@@ -245,16 +246,16 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                     if (timeSlot[i]) flag |= m;
                     m <<= 1;
                 }
-                return [flag, timeSlot[7], timeSlot[8]];
+                return [flag, timeSlot[7], timeSlot[8]] as const;
             }),
             // we ignore the events
             schedule && level !== 'warn' ? Schedule.compressJSON(schedule.toJSON())[0] : {}
-        ];
+        ] as const;
     }
 
     public static decompressJSON(obj: ReturnType<typeof FilterStore.compressJSON>) {
         const filter = new FilterStore();
-        const [filterBits, sortBits, initials, slots, ref] = obj;
+        const [filterBits, sortBits, initials, weights, slots, ref] = obj;
 
         // get allowClosed, allowWaitlist, mode from binary
         filter.allowClosed = Boolean(filterBits & 1);
@@ -288,7 +289,8 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         const sortCopy = [];
         // loop through the ascii initials and match to the object name
         let mask = 1;
-        for (const initial of initials) {
+        for (let i = 0; i < initials.length; i++) {
+            const initial = initials[i];
             const sortOpt = sortBy.find(s => s.name.charCodeAt(0) === initial)!;
 
             // if matched, decode the enabled and reverse info from the binary
@@ -297,6 +299,8 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
             sortOpt.reverse = Boolean(sortBits & mask);
             mask <<= 1;
+
+            sortOpt.weight = weights[i];
 
             sortCopy.push(sortOpt);
         }

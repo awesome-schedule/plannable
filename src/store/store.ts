@@ -279,7 +279,7 @@ export default class Store extends Vue {
         this.status.foldView();
 
         if (this.schedule.proposedSchedule.empty())
-            return this.noti.warn(`There are no classes in your schedule!`);
+            return this.noti.warn(`There are no classes in your schedule!`) as undefined;
         const options = this.getGeneratorOptions();
         if (!options) return;
 
@@ -306,6 +306,7 @@ export default class Store extends Vue {
             this.schedule.cpIndex = -1;
             this.schedule.numGenerated = 0;
         }
+        return evaluator;
     }
 
     /**

@@ -23,6 +23,9 @@ module.exports = {
         // don't know how to test components
         '!**/components/**/*.ts',
 
+        // don't know how to test components
+        '!**/routes/**/*.ts',
+
         // no need to test the entry point
         '!**/App.ts',
         '!**/main.ts',

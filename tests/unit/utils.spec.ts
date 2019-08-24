@@ -73,8 +73,6 @@ describe('Utility Tests', () => {
         expect(Utils.timeToNum('12:00')).toBeTruthy();
         expect(Utils.timeToNum('12:00')).toBe(8);
         expect(Utils.timeToNum('12:30')).toBe(9);
-        console.info(Utils.timeToNum('12:00'));
-
         expect(Utils.highlightMatch('asd', 'asd')).toBe('asd');
         expect(
             Utils.highlightMatch('01234567890', 'topic', [

@@ -6,6 +6,7 @@ describe('course test', () => {
         expect(course.has(course.sections[0]));
         expect(course.has(new Set([course.sections[0].id]), 'cs11105'));
         expect(course.equals({})).toBe(false);
+        expect(course.equals(course)).toBe(true);
     });
 
     it('subset', () => {

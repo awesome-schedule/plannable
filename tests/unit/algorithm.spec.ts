@@ -1,19 +1,29 @@
 import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
-import { loadBuildingSearcher, loadTimeMatrix } from '@/data/BuildingLoader';
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
+import { compareTwoStrings } from '@/algorithm/Searcher';
 
 const store = new Store();
 
 describe('ScheduleGenerator Test', () => {
+    it('Searcher', () => {
+        expect(compareTwoStrings('1', '1')).toBe(1);
+        expect(compareTwoStrings('1', '0')).toBe(0);
+        expect(compareTwoStrings('', '')).toBe(1);
+        expect(compareTwoStrings('', '0')).toBe(0);
+        expect(compareTwoStrings('12', '0')).toBe(0);
+    });
     it('ScheduleGenerator', () => {
-        const catalog = window.catalog;
+        store.filter.addTimeSlot();
+        store.filter.removeTimeSlot(0);
+        store.filter.timeSlots.length = 0;
         store.filter.timeSlots.push([true, false, true, false, true, false, false, '0:15', '0:50']);
         const options = store.getGeneratorOptions();
         if (!options) throw new Error('failed to get options');
 
-        const generator = new ScheduleGenerator(catalog, window.timeMatrix, options);
-        const schedule = new Schedule(
+        const schedule = (store.schedule.proposedSchedules[
+            store.schedule.proposedScheduleIndex
+        ] = new Schedule(
             global.convertAll({
                 cs11105: -1,
                 cs11104: -1,
@@ -24,7 +34,7 @@ describe('ScheduleGenerator Test', () => {
                 phys24194: -1,
                 kine11005: -1
             })
-        );
+        ));
         let sort = options.sortOptions;
         sort.sortBy[0].enabled = true;
         sort.sortBy[1].enabled = true;
@@ -32,7 +42,7 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[2].reverse = true;
         sort.sortBy[3].enabled = true;
         sort.sortBy[4].enabled = true;
-        const { payload: result } = generator.getSchedules(schedule);
+        const result = store.generateSchedules();
         expect(result!.empty()).toBeFalsy();
 
         schedule.addEvent('MoFr 10:00AM - 10:15AM', false);
@@ -40,18 +50,18 @@ describe('ScheduleGenerator Test', () => {
 
         sort.mode = 0;
         options.combineSections = false;
-        const { payload: result2 } = generator.getSchedules(schedule);
+        const result2 = store.generateSchedules();
         expect(result2!.empty()).toBeFalsy();
 
         sort.sortBy[6].enabled = true;
-        const { payload: result3 } = generator.getSchedules(schedule);
+        const result3 = store.generateSchedules();
         expect(result3!.empty()).toBeFalsy();
 
         sort = store.filter.getDefault().sortOptions;
         sort.sortBy[1].enabled = false;
-        const result4 = generator.getSchedules(schedule).payload!;
-        expect(result4.empty()).toBeFalsy();
-
+        const temp = store.generateSchedules();
+        expect(temp).toBeTruthy();
+        const result4 = temp!;
         sort.mode = 0;
         result4.sort({ newOptions: sort });
         expect(result4.getSchedule(0)).toBeInstanceOf(Schedule);
@@ -72,8 +82,18 @@ describe('ScheduleGenerator Test', () => {
         schedule.events.length = 0;
         schedule.addEvent('MoTuWeThFr 8:00AM - 8:00PM', false);
 
-        const r = generator.getSchedules(schedule);
-        expect(r.payload).toBeFalsy();
-        expect(r.level).toBe('error');
+        let r = store.generateSchedules();
+        expect(r).toBeFalsy();
+
+        schedule.events.length = 0;
+        // similarity
+        store.filter.refSchedule = {
+            cs11105: -1
+        };
+        expect(store.filter.similarityEnabled).toBe(true);
+        expect(sort.sortBy[5].name).toBe('similarity');
+        sort.sortBy[5].enabled = true;
+        r = store.generateSchedules();
+        expect(r).toBeTruthy();
     });
 });

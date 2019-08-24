@@ -157,16 +157,17 @@ function verifyColoring(adjList: number[][], colors: Int16Array) {
     return true;
 }
 
+/**
+ * @requires optimization
+ */
 function colorSpread(adjList: number[][], colors: Int16Array, numColors: number) {
-    // return;
-    // sort nodes with ascending number of connections
-    // eslint-disable-next-line no-unreachable
+    // sort nodes with ascending number of conflicts
     const rank = adjList
         .map((x: number[], i) => [x.length, i])
         .sort((a: number[], b: number[]) => a[0] - b[0])
         .map(x => x[1]);
     /**
-     *
+     * Records the nodes that correspond to each color
      */
     const col2nodes: number[][] = new Array(numColors);
     for (let i = 0; i < col2nodes.length; i++) {
@@ -176,14 +177,19 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
         col2nodes[colors[i]].push(i);
     }
     for (let i = 0; i < rank.length; i++) {
-        const cur = rank[i]; // node
-        let maxCol = colors[cur]; // color
-        let maxLen = 0;
-        let curCol = maxCol;
-        let curLen = maxLen;
-        let curColStart = maxCol;
+        const cur = rank[i]; // current node
+        let maxCol = -1; // original color
+        let maxLen = 0; // maximum number of colors that current block spreads
+        let curCol = maxCol; // current color
+        let curLen = maxLen; // current number of colors that current block spreads
+        let curColStart = maxCol; // the start of the spread of colors
         let changed = false;
         if (adjList[rank[i]].length === 0) continue;
+        /**
+         * This loop goes through each color to figure out which color would make the node
+         * spread the widest without conflicting any other nodes in the color and colors that
+         * it spreads
+         */
         nextColor: for (let j = 0; j < col2nodes.length; j++) {
             for (let k = 0; k < col2nodes[j].length; k++) {
                 if (adjList[cur].indexOf(col2nodes[j][k]) !== -1) {
@@ -203,11 +209,18 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
                 changed = true;
             }
         }
-        if (changed) {
+        if (changed && maxLen > 1) {
+            /**
+             * Between the original color and the new color, there must be
+             * color(s) in which ALL of the nodes that have conflict with the
+             * current node have conflict with at least one nodes
+             * of of the nodes in the new color or the color that current node
+             * spreads
+             */
             let flip = false;
             const nodesAfter = col2nodes[maxCol];
             const start = colors[cur] < maxCol ? colors[cur] + 1 : maxCol + 1;
-            const end = colors[cur] < maxCol ? maxCol + 1 : colors[cur];
+            const end = colors[cur] < maxCol ? maxCol : colors[cur];
             for (let c = start; c < end; c++) {
                 const nodesBetween = col2nodes[c].filter(x => adjList[cur].indexOf(x) !== -1);
                 if (nodesBetween.length > 1) {
@@ -225,6 +238,7 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
             }
 
             if (flip) {
+                // change the color of node
                 col2nodes[colors[cur]].splice(col2nodes[colors[cur]].indexOf(cur), 1);
                 colors[cur] = maxCol;
                 col2nodes[colors[maxCol]].push(cur);
@@ -232,34 +246,6 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
         }
     }
 }
-
-// function compressColor(adjList: number[][], color: Int16Array, p: number, visited: boolean[]) {
-//     let col = color[p];
-//     let maxCol = -1;
-//     const list = [];
-//     for (let i = 0; i < adjList[p].length; i++) {
-//         if (!visited[adjList[p][i]]) {
-//             // visited[adjList[p][i]] = true;
-//             list.push(adjList[p][i]);
-//             // if (color[adjList[p][i]] != color[p] + 1) {
-//             //     color[adjList[p][i]] = color[p] + 1;
-//             // }
-//             // compressColor(adjList, color, adjList[p][i], visited);
-//         } else {
-//             if (color[adjList[p][i]] > maxCol) {
-//                 maxCol = color[adjList[p][i]];
-//             }
-//         }
-//     }
-//     if (color[p] > maxCol + 1 && maxCol !== -1) {
-//         col = maxCol + 1;
-//         color[p] = maxCol + 1;
-//     }
-//     for (const i of list) {
-//         visited[i] = true;
-//         compressColor(adjList, color, i, visited);
-//     }
-// }
 
 /**
  * calculate the actual path depth of the nodes

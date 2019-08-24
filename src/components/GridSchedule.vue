@@ -55,8 +55,16 @@
                             :height-info="heightInfo"
                             :absolute-earliest="absoluteEarliest"
                             :style="{
-                                left: (+idx + scheduleBlock.left) * (100 / numCol) + '%',
-                                width: (100 / numCol) * scheduleBlock.width + '%'
+                                left:
+                                    (+idx + (scheduleBlock.left > 0 ? scheduleBlock.left : 0)) *
+                                        (100 / numCol) +
+                                    '%',
+                                width:
+                                    (100 / numCol) *
+                                        (scheduleBlock.width > 1
+                                            ? scheduleBlock.width - 1
+                                            : scheduleBlock.width) +
+                                    '%'
                             }"
                             :day="day"
                         ></course-block>

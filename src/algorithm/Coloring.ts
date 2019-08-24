@@ -139,7 +139,7 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
-    colorSpread(adjList, colors);
+    colorSpread(adjList, colors, numColors);
     verifyColoring(adjList, colors);
     return numColors;
 }
@@ -157,9 +157,109 @@ function verifyColoring(adjList: number[][], colors: Int16Array) {
     return true;
 }
 
-function colorSpread(adjList: number[][], colors: Int16Array) {
-    // ...
+function colorSpread(adjList: number[][], colors: Int16Array, numColors: number) {
+    // return;
+    // sort nodes with ascending number of connections
+    // eslint-disable-next-line no-unreachable
+    const rank = adjList
+        .map((x: number[], i) => [x.length, i])
+        .sort((a: number[], b: number[]) => a[0] - b[0])
+        .map(x => x[1]);
+    /**
+     *
+     */
+    const col2nodes: number[][] = new Array(numColors);
+    for (let i = 0; i < col2nodes.length; i++) {
+        col2nodes[i] = [];
+    }
+    for (let i = 0; i < colors.length; i++) {
+        col2nodes[colors[i]].push(i);
+    }
+    for (let i = 0; i < rank.length; i++) {
+        const cur = rank[i]; // node
+        let maxCol = colors[cur]; // color
+        let maxLen = 0;
+        let curCol = maxCol;
+        let curLen = maxLen;
+        let curColStart = maxCol;
+        let changed = false;
+        if (adjList[rank[i]].length === 0) continue;
+        nextColor: for (let j = 0; j < col2nodes.length; j++) {
+            for (let k = 0; k < col2nodes[j].length; k++) {
+                if (adjList[cur].indexOf(col2nodes[j][k]) !== -1) {
+                    continue nextColor;
+                }
+            }
+            if (j != curCol + 1) {
+                curColStart = j;
+                curLen = 1;
+            } else {
+                curLen++;
+            }
+            curCol = j;
+            if (curLen > maxLen) {
+                maxLen = curLen;
+                maxCol = curColStart;
+                changed = true;
+            }
+        }
+        if (changed) {
+            let flip = false;
+            const nodesAfter = col2nodes[maxCol];
+            const start = colors[cur] < maxCol ? colors[cur] + 1 : maxCol + 1;
+            const end = colors[cur] < maxCol ? maxCol + 1 : colors[cur];
+            for (let c = start; c < end; c++) {
+                const nodesBetween = col2nodes[c].filter(x => adjList[cur].indexOf(x) !== -1);
+                if (nodesBetween.length > 1) {
+                    flip = false;
+                    break;
+                }
+                for (let j = 0; j < nodesBetween.length; j++) {
+                    for (let k = 0; k < nodesAfter.length; k++) {
+                        if (adjList[nodesAfter[k]].indexOf(nodesBetween[j]) !== -1) {
+                            flip = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (flip) {
+                col2nodes[colors[cur]].splice(col2nodes[colors[cur]].indexOf(cur), 1);
+                colors[cur] = maxCol;
+                col2nodes[colors[maxCol]].push(cur);
+            }
+        }
+    }
 }
+
+// function compressColor(adjList: number[][], color: Int16Array, p: number, visited: boolean[]) {
+//     let col = color[p];
+//     let maxCol = -1;
+//     const list = [];
+//     for (let i = 0; i < adjList[p].length; i++) {
+//         if (!visited[adjList[p][i]]) {
+//             // visited[adjList[p][i]] = true;
+//             list.push(adjList[p][i]);
+//             // if (color[adjList[p][i]] != color[p] + 1) {
+//             //     color[adjList[p][i]] = color[p] + 1;
+//             // }
+//             // compressColor(adjList, color, adjList[p][i], visited);
+//         } else {
+//             if (color[adjList[p][i]] > maxCol) {
+//                 maxCol = color[adjList[p][i]];
+//             }
+//         }
+//     }
+//     if (color[p] > maxCol + 1 && maxCol !== -1) {
+//         col = maxCol + 1;
+//         color[p] = maxCol + 1;
+//     }
+//     for (const i of list) {
+//         visited[i] = true;
+//         compressColor(adjList, color, i, visited);
+//     }
+// }
 
 /**
  * calculate the actual path depth of the nodes

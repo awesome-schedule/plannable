@@ -1,5 +1,3 @@
-import Section from '@/models/Section';
-
 describe('section test', () => {
     it('basic', () => {
         const catalog = window.catalog;
@@ -9,6 +7,8 @@ describe('section test', () => {
         expect(sec.sameTimeAs(sec2)).toBe(true);
         expect(sec.equals(sec2)).toBe(true);
         expect(sec.hash()).toEqual(sec2.hash());
+        expect(sec.units).toBeTruthy();
+        expect(sec.description).toBeTruthy();
 
         const timeRoom = sec.getTimeRoom()!;
         expect((timeRoom.length - 8) / 3).toBe(Math.floor((timeRoom.length - 8) / 3));

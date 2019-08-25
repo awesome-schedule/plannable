@@ -10,7 +10,7 @@ import test_filter from './test_data/test_filter.json';
 // "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
 
 // filter: allowClosed, allowWaitlist, mode from binary
-describe.skip('url convertJsonToArray test', () => {
+describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty_schedule);
         const urlCompressed = compressJSON(test1);
@@ -67,7 +67,7 @@ describe.skip('url convertJsonToArray test', () => {
         expect(ascii_test[6]).toEqual(I);
 
         // time slots
-        expect(filter_test[3]).toEqual([]);
+        expect(filter_test[4]).toEqual([]);
     });
 
     it('mySchedule2019Fall', () => {
@@ -127,7 +127,7 @@ describe.skip('url convertJsonToArray test', () => {
         expect(ascii_test[6]).toEqual(I);
 
         // time slots
-        expect(filter_test[3]).toEqual([]);
+        expect(filter_test[4]).toEqual([]);
     });
 
     it('test_filter', () => {
@@ -189,7 +189,7 @@ describe.skip('url convertJsonToArray test', () => {
         expect(ascii_test[6]).toEqual(c);
 
         // time slots
-        expect(filter_test[3]).toEqual([]);
+        expect(filter_test[4]).toEqual([]);
     });
 
     it('miscellaneousTest1', () => {
@@ -251,7 +251,7 @@ describe.skip('url convertJsonToArray test', () => {
         expect(ascii_test[6]).toEqual(n);
 
         // time slots
-        expect(filter_test[3]).toEqual([]);
+        expect(filter_test[4]).toEqual([]);
 
         // schedule
         const schedule_test = urlCompressed[6];
@@ -293,7 +293,7 @@ describe.skip('url convertJsonToArray test', () => {
     });
 });
 
-describe.skip('parseFromURL', () => {
+describe('parseFromURL', () => {
     it('parse_empty_schedule', async () => {
         const urlCompressed = compressJSON(JSON.stringify(empty_schedule));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));

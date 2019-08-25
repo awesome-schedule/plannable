@@ -1,4 +1,5 @@
-import schedule from '@/store/schedule';
+import Store from '@/store';
+const { schedule } = new Store();
 
 beforeAll(() => {
     window.confirm = () => true;

@@ -8,7 +8,7 @@
  * @param first
  * @param second
  */
-function compareTwoStrings(first: string, second: string) {
+export function compareTwoStrings(first: string, second: string) {
     const len1 = first.length,
         len2 = second.length;
     if (!len1 && !len2) return 1; // if both are empty strings

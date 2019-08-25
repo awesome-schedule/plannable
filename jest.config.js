@@ -12,7 +12,7 @@ module.exports = {
     },
     setupTestFrameworkScriptFile: '<rootDir>/tests/unit/setup.ts',
     snapshotSerializers: ['jest-serializer-vue'],
-    testMatch: ['**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
+    testMatch: ['<rootDir>/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)'],
     testURL: 'http://localhost/',
     collectCoverage: true,
     collectCoverageFrom: [
@@ -22,6 +22,9 @@ module.exports = {
 
         // don't know how to test components
         '!**/components/**/*.ts',
+
+        // don't know how to test components
+        '!**/routes/**/*.ts',
 
         // no need to test the entry point
         '!**/App.ts',

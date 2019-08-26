@@ -100,6 +100,23 @@
                     <div class="row no-gutters w-100">
                         <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
                             <span class="sort-option"> {{ option.title }}</span>
+                            <div
+                                v-if="filter.sortOptions.mode === 1 && option.enabled"
+                                class="input-group input-group-sm"
+                                style="width: 90%"
+                            >
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Weight</span>
+                                </div>
+                                <input
+                                    v-model="option.weight"
+                                    class="form-control"
+                                    type="number"
+                                    min="0.1"
+                                    max="10"
+                                    step="0.1"
+                                />
+                            </div>
                         </div>
                         <div class="col col-sm-3">
                             <i
@@ -143,16 +160,6 @@
                                     :for="option.name"
                                     title="Enable this sorting option"
                                 ></label>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="option.enabled" class="row no-gutters w-100 mt-3">
-                        <div class="col-8">
-                            <div class="input-group mb-3">
-                                <div class="input-group-prepend">
-                                    <span id="basic-addon1" class="input-group-text">Weight: </span>
-                                </div>
-                                <input v-model="option.weight" class="form-control" type="number" />
                             </div>
                         </div>
                     </div>

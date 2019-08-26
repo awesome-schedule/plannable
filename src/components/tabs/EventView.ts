@@ -126,15 +126,6 @@ export default class EventView extends Store {
         this.schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.cleanup(this.schedule.generated);
     }
-    cancelEvent() {
-        this.eventDescription = '';
-        this.eventRoom = '';
-        this.eventTimeFrom = '';
-        this.eventTimeTo = '';
-        this.eventTitle = '';
-        this.eventWeek = [false, false, false, false, false, false, false];
-        this.status.eventToEdit = null;
-    }
     /**
      * Clear all properties of this component and force re-computation of the current schedule,
      * called after deleteEvent, endEditEvent and addEvent.

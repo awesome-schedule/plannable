@@ -74,7 +74,7 @@
             <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
                 Update
             </button>
-            <button type="button" class="btn btn-outline-info" @click="cancelEvent()">
+            <button type="button" class="btn btn-outline-info" @click="cleanup()">
                 Cancel
             </button>
             <button type="button" class="btn btn-outline-danger" @click="deleteEvent()">

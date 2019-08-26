@@ -183,7 +183,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
     }
 
     /**
-     * clear the currently active schedules and generated schedules
+     * clear the currently active schedules and its corresponding generated schedules, if applicable
      */
     clear() {
         this.proposedSchedule.clean();

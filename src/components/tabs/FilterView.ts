@@ -21,11 +21,6 @@ import draggable from 'vuedraggable';
     }
 })
 export default class FilterView extends Store {
-    created() {
-        console.log('weight: ' + this.filter.sortOptions.sortBy[0].weight);
-        // JSON.stringify(this.filter.sortOptions.sortBy[0])
-    }
-
     get days() {
         return DAYS;
     }

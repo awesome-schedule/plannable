@@ -144,7 +144,16 @@
                                     title="Enable this sorting option"
                                 ></label>
                             </div>
-                            <input v-model="option.weight" type="number" />
+                        </div>
+                    </div>
+                    <div v-if="option.enabled" class="row no-gutters w-100 mt-3">
+                        <div class="col-8">
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span id="basic-addon1" class="input-group-text">Weight: </span>
+                                </div>
+                                <input v-model="option.weight" class="form-control" type="number" />
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -139,7 +139,7 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
-    colorSpread(adjList, colors, numColors);
+    // colorSpread(adjList, colors, numColors);
     verifyColoring(adjList, colors);
     return numColors;
 }
@@ -273,13 +273,16 @@ export function colorDepthSearch<T = number>(
     // start DFS at each root node
     const roots = vertices.filter(x => x.depth === 0);
     for (const root of roots) depthFirstSearchRec(root, graph);
+    // vertices.forEach(v => (v.depth = 0));
 
     // calculate the pathDepth
     for (const root of roots) {
         for (const path of root.path) {
             const len = path.length - 1;
-            for (const node of path) {
+            for (let i = 0; i <= len; i++) {
+                const node = path[i];
                 node.pathDepth = Math.max(node.pathDepth, len);
+                // node.depth = Math.max(node.depth, i);
             }
         }
     }

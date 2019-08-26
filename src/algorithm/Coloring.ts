@@ -192,11 +192,11 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
          */
         nextColor: for (let j = 0; j < col2nodes.length; j++) {
             for (let k = 0; k < col2nodes[j].length; k++) {
-                if (adjList[cur].indexOf(col2nodes[j][k]) !== -1) {
+                if (adjList[cur].includes(col2nodes[j][k])) {
                     continue nextColor;
                 }
             }
-            if (j != curCol + 1) {
+            if (j !== curCol + 1) {
                 curColStart = j;
                 curLen = 1;
             } else {
@@ -222,14 +222,14 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
             const start = colors[cur] < maxCol ? colors[cur] + 1 : maxCol + 1;
             const end = colors[cur] < maxCol ? maxCol : colors[cur];
             for (let c = start; c < end; c++) {
-                const nodesBetween = col2nodes[c].filter(x => adjList[cur].indexOf(x) !== -1);
+                const nodesBetween = col2nodes[c].filter(x => adjList[cur].includes(x));
                 if (nodesBetween.length > 1) {
                     flip = false;
                     break;
                 }
                 for (let j = 0; j < nodesBetween.length; j++) {
                     for (let k = 0; k < nodesAfter.length; k++) {
-                        if (adjList[nodesAfter[k]].indexOf(nodesBetween[j]) !== -1) {
+                        if (adjList[nodesAfter[k]].includes(nodesBetween[j])) {
                             flip = true;
                             break;
                         }
@@ -242,26 +242,42 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
                 col2nodes[colors[cur]].splice(col2nodes[colors[cur]].indexOf(cur), 1);
                 colors[cur] = maxCol;
                 col2nodes[colors[maxCol]].push(cur);
+                /**
+                 * In the following context, "color rule" refers to that every node n has
+                 * a color c, and either c is 0 or n is connected to a node with color c - 1.
+                 */
+                /**
+                 * Loop through every node connected to the node that changes color because
+                 * only nodes connected to the node that changes color would possibly break
+                 * the color rule.
+                 */
                 nextNode: for (const a of adjList[cur]) {
                     const original = colors[a];
                     if (colors[a] === 0) continue;
-                    let min = colors.length;
+                    /**
+                     * whether a's color is less than its connected nodes'
+                     */
+                    let min = true;
+                    /**
+                     * the largest node less than a's original color
+                     */
                     let max = 0;
                     for (const b of adjList[a]) {
+                        // does not break the color rule; check the next node
                         if (colors[b] === colors[a] - 1) {
                             continue nextNode;
                         } else {
-                            if (colors[b] < min) {
-                                min = colors[b];
+                            if (colors[b] < original) {
+                                min = false;
                             }
                             if (colors[b] > max && colors[b] < original) {
                                 max = colors[b];
                             }
                         }
                     }
-                    // break the rule
+                    // if break the color rule
                     col2nodes[colors[a]].splice(col2nodes[colors[a]].indexOf(a), 1);
-                    colors[a] = min > original ? 0 : max + 1;
+                    colors[a] = min ? 0 : max + 1;
                     col2nodes[colors[a]].push(a);
                 }
             }

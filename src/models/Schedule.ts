@@ -13,7 +13,7 @@ import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
 import Hashable from './Hashable';
-import { Day, dayToInt, TYPES } from './Meta';
+import { Day, dayToInt, TYPES, DAYS } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 
@@ -384,7 +384,6 @@ export default class Schedule {
             }
         }
         this.events.push(new Event(days, display, title, description, room));
-        this.constructDateSeparator();
         this.computeSchedule();
     }
 
@@ -868,6 +867,7 @@ export default class Schedule {
         this.cleanSchedule();
         this.All = {};
         this._preview = null;
+        this.events = [];
     }
 
     public empty() {
@@ -906,5 +906,37 @@ export default class Schedule {
         }
 
         return true;
+    }
+
+    private randEvents(num = 20, maxDuration = 120, minDuration = 20) {
+        for (let i = 0; i < num; i++) {
+            let days = '';
+            for (let j = 0; j < 7; j++) {
+                if (Math.random() < 0.5) {
+                    days += DAYS[j];
+                }
+            }
+            if (!days) {
+                i--;
+                continue;
+            }
+            const start = Math.floor(Math.random() * (1440 - maxDuration));
+            const end =
+                start +
+                minDuration +
+                Math.floor(Math.random() * Math.min(1440 - start, maxDuration));
+
+            days +=
+                ' ' +
+                Utils.to12hr(Utils.intTo24hr(start)) +
+                ' - ' +
+                Utils.to12hr(Utils.intTo24hr(end));
+            try {
+                this.addEvent(days, true, 'rand ' + i);
+            } catch (e) {
+                console.log(e);
+                i--;
+            }
+        }
     }
 }

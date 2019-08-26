@@ -139,7 +139,7 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
-    // colorSpread(adjList, colors, numColors);
+    colorSpread(adjList, colors, numColors);
     verifyColoring(adjList, colors);
     return numColors;
 }
@@ -242,6 +242,28 @@ function colorSpread(adjList: number[][], colors: Int16Array, numColors: number)
                 col2nodes[colors[cur]].splice(col2nodes[colors[cur]].indexOf(cur), 1);
                 colors[cur] = maxCol;
                 col2nodes[colors[maxCol]].push(cur);
+                nextNode: for (const a of adjList[cur]) {
+                    const original = colors[a];
+                    if (colors[a] === 0) continue;
+                    let min = colors.length;
+                    let max = 0;
+                    for (const b of adjList[a]) {
+                        if (colors[b] === colors[a] - 1) {
+                            continue nextNode;
+                        } else {
+                            if (colors[b] < min) {
+                                min = colors[b];
+                            }
+                            if (colors[b] > max && colors[b] < original) {
+                                max = colors[b];
+                            }
+                        }
+                    }
+                    // break the rule
+                    col2nodes[colors[a]].splice(col2nodes[colors[a]].indexOf(a), 1);
+                    colors[a] = min > original ? 0 : max + 1;
+                    col2nodes[colors[a]].push(a);
+                }
             }
         }
     }

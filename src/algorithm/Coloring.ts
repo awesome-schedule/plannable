@@ -8,7 +8,6 @@
  *
  */
 import { Graph, Vertex } from './Graph';
-import { calcOverlap } from '@/utils';
 
 /**
  * An exact graph coloring algorithm using backtracking
@@ -385,11 +384,11 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
         const path: Vertex<T>[] = [];
 
         while (true) {
-            path.unshift(curParent);
+            path.push(curParent);
 
             // root node of the tree
             if (!curParent.parent) {
-                curParent.path.push(path);
+                curParent.path.push(path.reverse());
                 break;
             }
             curParent = curParent.parent;

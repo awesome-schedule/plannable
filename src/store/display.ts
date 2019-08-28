@@ -5,7 +5,7 @@
 /**
  *
  */
-import { hr24toInt } from '@/utils';
+import { hr24toInt, intTo24hr } from '@/utils';
 import { StoreModule } from '.';
 
 export interface DisplayState {
@@ -38,12 +38,6 @@ export interface DisplayState {
 
 function bound(num: number, low: number, high: number) {
     return Math.min(Math.max(low, num), high);
-}
-
-function intTo24hr(num: number) {
-    return `${Math.floor(num / 60)
-        .toString()
-        .padStart(2, '0')}:${(num % 60).toString().padStart(2, '0')}`;
 }
 
 export type DisplayJSONShort = [number, ...any[]];

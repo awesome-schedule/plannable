@@ -81,10 +81,18 @@ export function loadFromCache<T, T_JSON extends Expirable>(
     if (validator(data)) {
         // expired
         if (new Date().getTime() - new Date(data.modified).getTime() > expireTime || force) {
-            return {
-                new: cancelablePromise(request()),
-                old: construct(data)
-            };
+            const newData = cancelablePromise(request());
+            try {
+                return {
+                    new: newData,
+                    old: construct(data)
+                };
+            } catch (err) {
+                console.error(err);
+                return {
+                    new: newData
+                };
+            }
         } else {
             return {
                 new: cancelablePromise(Promise.resolve(construct(data)))

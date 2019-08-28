@@ -495,9 +495,7 @@ class ScheduleEvaluator {
             const len = options.length;
 
             // if option[i] is reverse, ifReverse[i] will be -1 * weight
-            const ifReverse = new Float32Array(len).map(
-                (_, i) => (options[i].weight || 1) * (options[i].reverse ? -1 : 1)
-            );
+            const ifReverse = new Float32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
             const fbCoeffs = options.map(x => this.sortCoeffCache[x.name]!);
             const func = (a: number, b: number) => {
                 let r = 0;

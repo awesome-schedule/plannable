@@ -240,3 +240,9 @@ export function timeToNum(time: string) {
     const t = (parseInt(sep[0]) - 8) * 2;
     return min >= 30 ? t + 1 : t;
 }
+
+export function intTo24hr(num: number) {
+    return `${Math.floor(num / 60)
+        .toString()
+        .padStart(2, '0')}:${(num % 60).toString().padStart(2, '0')}`;
+}

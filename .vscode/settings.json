@@ -13,7 +13,6 @@
     "[typescriptreact]": {
         "editor.formatOnSave": false
     },
-    "eslint.autoFixOnSave": true,
     "vetur.format.defaultFormatter.html": "prettier",
     "vetur.format.options.tabSize": 4,
     "vetur.experimental.templateInterpolationService": true,
@@ -30,7 +29,5 @@
             "autoFix": true
         }
     ],
-    "editor.codeActionsOnSave": {
-        "source.fixAll.tslint": true
-    }
+    "eslint.autoFixOnSave": true
 }

@@ -30,6 +30,47 @@ function verifyColoring(adjList: number[][], colors: Int16Array) {
 }
 
 describe('graph verifier', () => {
+    it('afds', () => {
+        const adjList: number[][] = [];
+        const numNodes = Math.floor(Math.random() * 20 + 1);
+        for (let i = 0; i < numNodes; i++) {
+            adjList.push([]);
+        }
+        for (let i = 0; i < numNodes; i++) {
+            for (let j = i + 1; j < numNodes; j++) {
+                if (Math.random() < 0.5) {
+                    adjList[i].push(j);
+                    adjList[j].push(i);
+                }
+            }
+        }
+
+        const colors: Int16Array = new Int16Array(adjList.length);
+
+        const dsaturOrder = colors.slice();
+        colors.fill(-1);
+        Coloring.dsatur(adjList, colors, dsaturOrder);
+        const opCount = new Int32Array(1);
+        let totalCount = 0;
+        let numColors = 1;
+        for (; numColors < 19260817; numColors++) {
+            if (Coloring.graphColorBackTrack(adjList, colors, dsaturOrder, opCount, numColors, 0))
+                break;
+
+            colors.fill(-1);
+            totalCount += opCount[0];
+            opCount[0] = 0;
+        }
+
+        Coloring.colorSpread(adjList, colors, numColors);
+        nextNode: for (let i = 0; i < adjList.length; i++) {
+            if (colors[i] === 0) continue;
+            for (let j = 0; j < adjList[i].length; j++) {
+                if (colors[j] === colors[i] - 1) continue nextNode;
+            }
+            expect('猫').toBe('cat');
+        }
+    });
     it('color algorithm tests', () => {
         const numNodes = Array.from({ length: 5 }, (_, i) => (i + 1) * 20);
         const probConn = Array.from({ length: 4 }, (_, i) => (i + 1) * 0.2);

@@ -22,7 +22,7 @@ import { calcOverlap } from '@/utils';
  * @param numColors number of colors
  * @param v the number of vertex already colored
  */
-function graphColorBackTrack(
+export function graphColorBackTrack(
     graph: Int16Array[] | number[][],
     colors: Int16Array,
     colorOrder: Int16Array,
@@ -160,7 +160,7 @@ function verifyColoring(adjList: number[][], colors: Int16Array) {
 /**
  * @requires optimization
  */
-function colorSpread(adjList: number[][], colors: Int16Array, numColors: number) {
+export function colorSpread(adjList: number[][], colors: Int16Array, numColors: number) {
     // sort nodes with ascending number of conflicts
     const rank = adjList
         .map((x: number[], i) => [x.length, i])

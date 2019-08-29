@@ -75,7 +75,7 @@ export default class Course implements CourseFields, Hashable {
 
     /**
      * Array of section ids contained in this object, sorted in ascending order.
-     * Can be all sections of a subset or the sections
+     * Can be all sections of a subset or the sections. This property is **non-enumerable**
      */
     public readonly sections: Section[];
     public readonly isSubset: boolean;

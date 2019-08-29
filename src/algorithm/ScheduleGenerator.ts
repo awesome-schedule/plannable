@@ -97,8 +97,6 @@ export function timeArrayToCompact(timeArrayList: TimeArray[][], timeArrLens: Ui
 /**
  * record the length of `timeArrayList[crs][sec]` at `timeArrLens[sec * numCourses + crs]`,
  * exported for unit test purposes
- * @param timeArrayList
- * @param timeArrLens
  */
 export function computeTimeArrLens(timeArrayList: TimeArray[][], timeArrLens: Uint8Array) {
     const numCourses = timeArrayList.length;
@@ -112,7 +110,7 @@ export function computeTimeArrLens(timeArrayList: TimeArray[][], timeArrLens: Ui
 }
 
 /**
- * pre-compute `timeArrLens` and `conflictCache` using `timeArrayList` and `dateList`
+ * pre-compute `conflictCache` using `timeArrayList` and `dateList`
  */
 function computeConflict(
     timeArrayList: TimeArray[][],

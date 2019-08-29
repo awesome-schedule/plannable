@@ -7,7 +7,7 @@
 /**
  *
  */
-import CatalogDB, { CourseTableItem, SectionTableItem } from '@/database/CatalogDB';
+import CatalogDB, { SectionTableItem } from '@/database/CatalogDB';
 import Section, { SectionFields, ValidFlag } from '@/models/Section';
 import axios from 'axios';
 import { parse } from 'papaparse';
@@ -102,11 +102,10 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
     console.time('parse semester data');
 
     const CLASS_TYPES = TYPES_PARSE;
-    const rawCatalog: { [x: string]: Course } = {};
+    const courseDict: { [x: string]: Course } = {};
 
     const len = rawData.length;
     const allSections: SectionTableItem[] = [];
-    const allCourses: CourseTableItem[] = [];
     for (let j = 1; j < len; j++) {
         const data = rawData[j];
 
@@ -164,9 +163,9 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
         if (!date || date === 'TBD' || date === 'TBA') valid |= 8;
         if (typeof date !== 'string') date = '';
 
-        let course = rawCatalog[key];
+        let course = courseDict[key];
         if (!course) {
-            course = rawCatalog[key] = Object.create(Course.prototype, {
+            course = courseDict[key] = Object.create(Course.prototype, {
                 department: {
                     value: data[1],
                     enumerable: true
@@ -196,23 +195,18 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
                     enumerable: true
                 },
                 sections: {
-                    value: [] as Section[],
-                    enumerable: true
+                    value: [] as Section[] // non-enumerable
                 },
                 ids: {
                     value: [] as number[],
                     enumerable: true
                 }
             } as { [x in keyof Course]: TypedPropertyDescriptor<Course[x]> });
-
-            const { sections, ...o } = course;
-            allCourses.push(o);
         }
 
         const section: Section = Object.create(Section.prototype, {
             course: {
-                value: course, // back ref to course
-                enumerable: true
+                value: course // back ref to course, non-enumerable
             },
             key: {
                 value: key,
@@ -270,9 +264,7 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
 
         course.ids.push(+data[0]);
         course.sections.push(section);
-
-        const { course: _, ...others } = section;
-        allSections.push(others);
+        allSections.push(section);
     }
     console.timeEnd('parse semester data');
     if (db) {
@@ -280,7 +272,7 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
             .then(() => {
                 console.time('save to db');
                 return Promise.all([
-                    db.courses.bulkAdd(allCourses),
+                    db.courses.bulkAdd(Object.values(courseDict)),
                     db.sections.bulkAdd(allSections)
                 ]);
             })
@@ -289,11 +281,11 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
                 console.timeEnd('save to db');
             });
     }
-    return rawCatalog;
+    return courseDict;
 }
 
 export async function retrieveFromDB(db: CatalogDB) {
-    const rawCatalog: { [x: string]: Course } = {};
+    const courseDict: { [x: string]: Course } = {};
 
     console.time('get courses from db');
     const [courses, secMap] = await Promise.all([
@@ -316,8 +308,7 @@ export async function retrieveFromDB(db: CatalogDB) {
         }
         const sections: Section[] = [];
         desc.sections = {
-            value: sections,
-            enumerable: true
+            value: sections // non-enumerable
         };
         const course: Course = Object.create(Course.prototype, desc);
         for (const id of rawCourse.ids) {
@@ -331,13 +322,12 @@ export async function retrieveFromDB(db: CatalogDB) {
             }
             // add missing property descriptors
             secDesc.course = {
-                value: course,
-                enumerable: true
+                value: course // non-enumerable
             };
             sections.push(Object.create(Section.prototype, secDesc));
         }
-        rawCatalog[rawCourse.key] = course;
+        courseDict[rawCourse.key] = course;
     }
     console.timeEnd('retrieve from db');
-    return rawCatalog;
+    return courseDict;
 }

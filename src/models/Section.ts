@@ -32,7 +32,7 @@ export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Ma
  */
 export interface SectionFields {
     /**
-     * reference to the course that this section belongs to
+     * reference to the course that this section belongs to. This property is **non-enumerable**
      */
     readonly course: Course;
     /**

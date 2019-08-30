@@ -138,7 +138,7 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
-    colorSpread(adjList, colors, numColors);
+    // colorSpread(adjList, colors, numColors);
     verifyColoring(adjList, colors);
     return numColors;
 }
@@ -313,16 +313,16 @@ export function colorDepthSearch<T = number>(
     // vertices.forEach(v => (v.depth = 0));
 
     // calculate the pathDepth
-    for (const root of roots) {
-        for (const path of root.path) {
-            const len = path.length - 1;
-            for (let i = 0; i <= len; i++) {
-                const node = path[i];
-                node.pathDepth = Math.max(node.pathDepth, len);
-                // node.depth = Math.max(node.depth, i);
-            }
-        }
-    }
+    // for (const root of roots) {
+    //     for (const path of root.path) {
+    //         const len = path.length - 1;
+    //         for (let i = 0; i <= len; i++) {
+    //             const node = path[i];
+    //             node.pathDepth = Math.max(node.pathDepth, len);
+    //             // node.depth = Math.max(node.depth, i);
+    //         }
+    //     }
+    // }
 
     return graph;
 }
@@ -388,7 +388,13 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>) {
 
             // root node of the tree
             if (!curParent.parent) {
-                curParent.path.push(path.reverse());
+                const len = path.length;
+                for (let i = 0; i < len; i++) {
+                    const node = path[i];
+                    if (len > node.curPath.length) {
+                        node.curPath = path.reverse();
+                    }
+                }
                 break;
             }
             curParent = curParent.parent;

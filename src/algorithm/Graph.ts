@@ -17,20 +17,11 @@ export class Vertex<T> {
     /**
      * the maximum depth of the path starting from the root that the current node is on
      */
-    // public pathDepth = 0;
-    get pathDepth() {
-        return this.curPath.length;
-    }
+    public pathDepth = 0;
     /**
      * the parent of this vertex in the depth first tree
      */
-    public parent?: Vertex<T>;
-    /**
-     * the all of the paths starting at the root and ending at one of the leaves.
-     * if this vertex is not the root, then `path` will be empty
-     */
-    // public readonly path: Vertex<T>[][] = [];
-    public curPath: Vertex<T>[] = [];
+    public parent?: Vertex<T> = undefined;
     /**
      * @param val the value contained in this node
      */

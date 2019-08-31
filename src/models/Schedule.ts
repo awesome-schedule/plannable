@@ -7,7 +7,7 @@
  *
  */
 import { NotiMsg } from '@/store/notification';
-import { colorDepthSearch, DFS, graphColoringExact } from '../algorithm';
+import { colorDepthSearch, DFS, graphColoringExact, Vertex } from '../algorithm';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -683,86 +683,57 @@ export default class Schedule {
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
         const adjList = this.constructAdjList(blocks);
         const colors = new Int16Array(blocks.length);
-        graphColoringExact(adjList, colors);
+        const numColors = graphColoringExact(adjList, colors);
 
         // note: blocks are contained in nodes
         const graph = colorDepthSearch(adjList, colors, blocks);
-        // const temp = [];
-        // for (const node of graph.keys()) {
-        //     if (node.curPath.length) temp.push(node.curPath);
-        // }
-        // const paths = [...new Set(temp)].sort((a, b) => b.length - a.length);
-        // for (const path of paths) {
-        //     path[0].val.left = 0;
-        //     path[0].val.width = 1 / path[0].pathDepth;
 
-        //     // computed the left and width of the remaining nodes based on
-        //     // the already computed information of the previous node
-        //     for (let i = 1; i < path.length; i++) {
-        //         const block = path[i].val;
-        //         const prevBlock = path[i - 1].val;
-
-        //         block.left = Math.max(block.left, prevBlock.left + prevBlock.width);
-
-        //         // remaining width / number of remaining path length
-        //         block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth);
-        //     }
-        // }
-
+        const slots: Vertex<ScheduleBlock>[][] = Array.from({ length: numColors }, () => []);
         for (const node of graph.keys()) {
-            const { curPath } = node;
-            let sum = 0;
-            let left = 0;
-            for (const v of curPath) {
-                if (v === node) {
-                    left = sum;
-                }
-                sum += 1 / v.curPath.length;
-            }
-            sum = sum || 1;
-            node.val.left = left / sum;
-            node.val.width = 1 / node.curPath.length / sum;
-            console.log(node.val.left, node.val.width, sum);
+            slots[node.depth].push(node);
+            node.val.left = node.depth / node.pathDepth;
+            node.val.width = 1 / node.pathDepth;
         }
 
-        // for (const node of graph.keys()) {
-        //     // skip any non-root node in the depth-first trees
-        //     if (node.parent) continue;
+        // auto-expansion
+        // no need to expand for the first slot
+        for (let i = 1; i < slots.length; i++) {
+            const slot = slots[i];
+            for (const node of slot) {
+                // maximum left that the current block can possibly obtain
+                let maxLeft = 0;
+                const neighbors = graph.get(node)!;
+                for (const v of neighbors) {
+                    if (v.depth < node.depth) {
+                        const { left, width } = v.val;
+                        const newLeft = left + width;
+                        if (newLeft >= maxLeft) {
+                            maxLeft = newLeft;
+                        }
+                    }
+                }
+                // distribute deltas to remaining nodes
+                const delta = (node.val.left - maxLeft) / (node.pathDepth - node.depth);
+                if (delta <= 0) continue;
+                node.val.left = maxLeft;
+                node.val.width += delta;
+            }
+        }
 
-        //     // traverse all the paths starting from the root
-        //     for (const path of node.path) {
-        //         // compute the left and width of the root node if they're not computed
-        //         path[0].val.left = 0;
-        //         path[0].val.width = 1 / (path[0].pathDepth + 1);
-
-        //         // computed the left and width of the remaining nodes based on
-        //         // the already computed information of the previous node
-        //         for (let i = 1; i < path.length; i++) {
-        //             const block = path[i].val;
-        //             const prevBlock = path[i - 1].val;
-
-        //             block.left = Math.max(block.left, prevBlock.left + prevBlock.width);
-
-        //             // remaining width / number of remaining path length
-        //             block.width = (1 - block.left) / (path[i].pathDepth - path[i].depth + 1);
-        //         }
-        //     }
-        // }
-        // // auto-expansion
-        // for (const [node, neighbors] of graph) {
-        //     // minimum left of the block that has greater depth than the current block
-        //     let minLeft = Infinity;
-        //     for (const v of neighbors) {
-        //         if (v.depth > node.depth) {
-        //             const left = v.val.left;
-        //             if (left < minLeft) minLeft = left;
-        //         }
-        //     }
-        //     if (minLeft !== Infinity) {
-        //         node.val.width = minLeft - node.val.left;
-        //     }
-        // }
-        // graph.clear();
+        for (const [node, neighbors] of graph) {
+            // minimum left of the block that has greater depth than the current block
+            let minLeft = Infinity;
+            for (const v of neighbors) {
+                if (v.depth > node.depth) {
+                    const left = v.val.left;
+                    if (left < minLeft) minLeft = left;
+                }
+            }
+            if (minLeft !== Infinity) {
+                node.val.width = minLeft - node.val.left;
+            }
+        }
+        graph.clear();
     }
 
     /**

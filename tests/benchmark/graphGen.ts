@@ -16,4 +16,4 @@ function randGraph(numNodes: number, probConn: number) {
     return graph;
 }
 
-fs.writeFileSync(__dirname + '/graph_smaller.json', JSON.stringify(randGraph(80, 0.25)));
+fs.writeFileSync(__dirname + '/graph_smaller.json', JSON.stringify(randGraph(80, 0.3)));

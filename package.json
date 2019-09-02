@@ -1,6 +1,6 @@
 {
     "name": "awesome-schedule",
-    "version": "7.0.0",
+    "version": "7.1.0",
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",

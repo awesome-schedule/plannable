@@ -22,7 +22,7 @@ import Section from '../models/Section';
  * @return a string of iCalendar format
  */
 export function toICal(schedule: Schedule) {
-    let ical = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:UVa-Awesome-Schedule\r\n';
+    let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:UVa-Awesome-Schedule\r\n';
 
     let startWeekDay: number = 0;
     let startDate: Date = new Date(2019, 7, 27, 0, 0, 0),
@@ -34,15 +34,12 @@ export function toICal(schedule: Schedule) {
             if (section instanceof Section) {
                 const { dates } = section;
                 if (!dates || dates === 'TBD' || dates === 'TBA') continue;
-                for (const m of section.meetings) {
-                    const [sd, , ed] = dates.split(' ');
-                    const [sl, sm, sr] = sd.split('/');
-                    startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
-                    const [el, em, er] = ed.split('/');
-                    endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
-                    startWeekDay = startDate.getDay();
-                    break;
-                }
+                const [sd, , ed] = dates.split(' ');
+                const [sl, sm, sr] = sd.split('/');
+                startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
+                const [el, em, er] = ed.split('/');
+                endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
+                startWeekDay = startDate.getDay();
             }
         }
     }
@@ -55,9 +52,9 @@ export function toICal(schedule: Schedule) {
                     section = section.getFirstSection();
                 }
                 for (const m of section.meetings) {
-                    if (m.days === 'TBD' || m.days === 'TBA') continue;
-                    if (m.days.indexOf(DAYS[d]) === -1) continue;
-                    const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
+                    if (m.days === 'TBD' || m.days === 'TBA' || m.days.indexOf(DAYS[d]) === -1)
+                        continue;
+                    const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
                     const [, start, , end] = m.days.split(' ');
                     const startMin = Utils.hr12toInt(start),
                         endMin = Utils.hr12toInt(end);
@@ -123,9 +120,10 @@ export function toICal(schedule: Schedule) {
                     ((endMin - startMin) % 60) +
                     'M' +
                     '\r\n';
-                ical += 'SUMMARY:' + sb.section.title + '\r\n';
-                ical += 'DESCRIPTION:' + sb.section.description + '\r\n';
-                ical += 'LOCATION:' + sb.section.room + '\r\n';
+                if (sb.section.title) ical += 'SUMMARY:' + sb.section.title + '\r\n';
+                if (sb.section.description)
+                    ical += 'DESCRIPTION:' + sb.section.description + '\r\n';
+                if (sb.section.room) ical += 'LOCATION:' + sb.section.room + '\r\n';
                 ical += 'COLOR:' + sb.backgroundColor + '\r\n';
                 ical += 'END:VEVENT\r\n';
             }
@@ -137,14 +135,21 @@ export function toICal(schedule: Schedule) {
 
 function dateToICalString(date: Date) {
     return (
-        date.getFullYear().toString() +
-        (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString()) +
-        (date.getDate() < 10 ? '0' + date.getDate().toString() : date.getDate().toString()) +
+        date.getFullYear() +
+        (date.getMonth() + 1).toString().padStart(2, '0') +
+        date
+            .getDate()
+            .toString()
+            .padStart(2, '0') +
         'T' +
-        (date.getHours() < 10 ? '0' + date.getHours().toString() : date.getHours().toString()) +
-        (date.getMinutes() < 10
-            ? '0' + date.getMinutes().toString()
-            : date.getMinutes().toString()) +
+        date
+            .getHours()
+            .toString()
+            .padStart(2, '0') +
+        date
+            .getMinutes()
+            .toString()
+            .padStart(2, '0') +
         '00'
     );
 }

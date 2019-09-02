@@ -122,15 +122,21 @@ export function dsatur(adjList: number[][], colors: Int16Array, colorOrder: Int1
  * length must equal to the length of adjList.
  * @returns total number of colors
  */
-export function graphColoringExact(adjList: number[][], colors: Int16Array): number {
+export function graphColoringExact(adjList: number[][], colors: Int16Array, fallback = true) {
     // get a good initial color order using the DSATUR algorithm
-    console.warn(adjList.length);
     const dsaturOrder = colors.slice();
     colors.fill(-1);
-    dsatur(adjList, colors, dsaturOrder);
+    let numColors = dsatur(adjList, colors, dsaturOrder);
+
+    // fallback to dsatur algorithm if too many nodes
+    if (fallback && adjList.length >= 40) {
+        console.warn('Fallback to dsatur');
+        return numColors;
+    }
+    colors.fill(-1);
     const opCount = new Int32Array(1);
     let totalCount = 0;
-    let numColors = 1;
+    numColors = 1;
     for (; numColors < 19260817; numColors++) {
         if (graphColorBackTrack(adjList, colors, dsaturOrder, opCount, numColors, 0)) break;
 
@@ -139,7 +145,7 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array): num
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
-    // colorSpread(adjList, colors, numColors);
+    colorSpread(adjList, colors, numColors);
     verifyColoring(adjList, colors);
     return numColors;
 }
@@ -308,10 +314,29 @@ export function colorDepthSearch<T = number>(
         graph.set(vertices[i], adjList[i].map(x => vertices[x]));
     }
 
-    // start DFS at each root node
-    vertices.filter(x => x.depth === 0).forEach(root => depthFirstSearchRec(root, graph, 0));
+    vertices.sort((v1, v2) => v2.depth - v1.depth);
+    for (const start of vertices)
+        if (!start.visited) depthFirstSearchRec(start, graph, start.depth + 1);
 
     return graph;
+}
+
+/**
+ * A special implementation of depth first search on a single connected component,
+ * used to find the maximum depth of the path that the current node is on.
+ *
+ * The depth of all nodes are known beforehand.
+ * @requires optimization
+ */
+function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>, depth: number) {
+    const neighbors = graph.get(start)!;
+    start.visited = true;
+    start.pathDepth = depth;
+
+    for (const adj of neighbors) {
+        // we only visit nodes of greater depth
+        if (!adj.visited && adj.depth < start.depth) depthFirstSearchRec(adj, graph, depth);
+    }
 }
 
 export function recursiveLargestFirst(adjList: number[][], colors: Int16Array): number {
@@ -342,39 +367,4 @@ export function recursiveLargestFirst(adjList: number[][], colors: Int16Array): 
         color++;
     }
     return color;
-}
-/**
- * A special implementation of depth first search on a single connected component,
- * used to find the maximum depth of the path that the current node is on.
- *
- * The depth of all nodes are known beforehand.
- * @requires optimization
- */
-function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>, depth: number) {
-    const neighbors = graph.get(start)!;
-    let hasUnvisited = false;
-
-    for (const adj of neighbors) {
-        // we only visit nodes of greater depth
-        if (adj.depth > start.depth) {
-            adj.parent = start;
-            depthFirstSearchRec(adj, graph, depth + 1);
-            hasUnvisited = true;
-        }
-    }
-
-    // if no more nodes can be visited from the current node, it is the end of this DFS path.
-    // trace the parent pointer to until we reach the root. add the path to the root node.
-    if (!hasUnvisited) {
-        let curParent = start;
-        const len = depth + 1;
-        while (true) {
-            curParent.pathDepth = Math.max(curParent.pathDepth, len);
-            // root node of the tree
-            if (!curParent.parent) {
-                break;
-            }
-            curParent = curParent.parent;
-        }
-    }
 }

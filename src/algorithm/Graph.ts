@@ -19,31 +19,9 @@ export class Vertex<T> {
      */
     public pathDepth = 0;
     /**
-     * the parent of this vertex in the depth first tree
-     */
-    public parent?: Vertex<T> = undefined;
-    /**
      * @param val the value contained in this node
      */
     constructor(public readonly val: T) {}
-
-    // the following code is for debug purposes only
-    // /**
-    //  * represent this node without creating cyclic reference
-    //  */
-    // data() {
-    //     const data: any = {
-    //         visited: this.visited,
-    //         val: this.val,
-    //         path: this.path.map(x => x.map(y => y.val)),
-    //         depth: this.depth,
-    //         pathDepth: this.pathDepth
-    //     };
-    //     if (this.parent) {
-    //         data.parent = this.parent.val;
-    //     }
-    //     return data;
-    // }
 }
 
 /**

@@ -792,7 +792,7 @@ export default class Schedule {
             }
         }
 
-        for (let i = slots.length - 1; i >= 1; i--) {
+        for (let i = slots.length - 1; i >= 0; i--) {
             for (const node of slots[i]) {
                 if (!node.needToChangeFromBack) continue;
                 let minRight = 1;

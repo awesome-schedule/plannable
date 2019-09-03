@@ -7,7 +7,7 @@
  *
  */
 import { NotiMsg } from '@/store/notification';
-import { colorDepthSearch, DFS, graphColoringExact, Vertex } from '../algorithm';
+import { colorDepthSearch, DFS, graphColoringExact, Vertex, Graph } from '../algorithm';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -695,11 +695,59 @@ export default class Schedule {
             node.val.width = 1 / node.pathDepth;
         }
 
-        // auto-expansion
-        // no need to expand for the first slot
+        // const col2nodes: number[][] = [];
+        // for (let i = 0; i < numColors; i++) {
+        //     col2nodes.push([]);
+        // }
+
+        // for (let i = 0; i < colors.length; i++) {
+        //     col2nodes[colors[i]].push(i);
+        // }
+
+        // const changable: boolean[] = new Array(adjList.length).fill(true);
+
+        // col2nodes[0].map(x => (changable[x] = false));
+
+        // for (let i = 1; i < col2nodes.length; i++) {
+        //     for (let j = 0; j < col2nodes[i].length; j++) {
+        //         changable[col2nodes[i][j]] = adjList[col2nodes[i][j]]
+        //             .map(x => changable[x])
+        //             .reduce((x, a) => x || a);
+        //     }
+        // }
+
+        for (let i = 1; i < slots.length; i++) {
+            for (const node of slots[i]) {
+                if (node.depth === node.pathDepth - 1) {
+                    node.needToChangeFromBack = false;
+                }
+                const neighbors = graph.get(node)!;
+                let maxLeft = 0;
+                let needToChange = false;
+                for (const n of neighbors) {
+                    if (n.depth === node.depth - 1) {
+                        if (n.val.left + n.val.width > maxLeft) {
+                            maxLeft = n.val.left + n.val.width;
+                            needToChange = n.needToChange;
+                        } else if (n.val.left + n.val.width === maxLeft) {
+                            needToChange = needToChange && n.needToChange;
+                        }
+                    }
+                }
+                if (maxLeft < node.val.left || needToChange) {
+                    node.needToChange = true;
+                } else {
+                    node.needToChange = false;
+                }
+            }
+        }
+
         for (let i = 1; i < slots.length; i++) {
             const slot = slots[i];
             for (const node of slot) {
+                if (!node.needToChange) {
+                    continue;
+                }
                 // maximum left that the current block can possibly obtain
                 let maxLeft = 0;
                 const neighbors = graph.get(node)!;
@@ -713,27 +761,96 @@ export default class Schedule {
                     }
                 }
                 // distribute deltas to remaining nodes
-                const delta = (node.val.left - maxLeft) / (node.pathDepth - node.depth);
+
+                const res = this.maxNeedExpand(node, graph, true);
+
+                const delta = (node.val.left - maxLeft) / res;
                 if (delta <= 0) continue;
                 node.val.left = maxLeft;
                 node.val.width += delta;
+
+                // console.log(node.val.left + ', ' + node.val.width + ', ' + res[1]);
             }
         }
 
-        for (const [node, neighbors] of graph) {
-            // minimum left of the block that has greater depth than the current block
-            let minLeft = Infinity;
-            for (const v of neighbors) {
-                if (v.depth > node.depth) {
-                    const left = v.val.left;
-                    if (left < minLeft) minLeft = left;
+        for (let i = slots.length - 1; i >= 0; i--) {
+            nextNode: for (const node of slots[i]) {
+                if (!node.needToChangeFromBack) continue;
+                const neighbors = graph.get(node);
+                for (const n of neighbors!) {
+                    if (n.depth > node.depth) {
+                        if (
+                            n.val.left <= node.val.left + node.val.width &&
+                            !n.needToChangeFromBack
+                        ) {
+                            node.needToChangeFromBack = false;
+                            continue nextNode;
+                        }
+                    }
                 }
-            }
-            if (minLeft !== Infinity) {
-                node.val.width = minLeft - node.val.left;
+                node.needToChangeFromBack = true;
             }
         }
+
+        for (let i = slots.length - 1; i >= 1; i--) {
+            for (const node of slots[i]) {
+                if (!node.needToChangeFromBack) continue;
+                let minRight = 1;
+                const neighbors = graph.get(node);
+                for (const n of neighbors!) {
+                    if (n.depth < node.depth) continue;
+                    if (n.val.left < minRight) {
+                        minRight = n.val.left;
+                    }
+                }
+                const res = this.maxNeedExpand(node, graph, false);
+                const delta = (minRight - (node.val.left + node.val.width)) / res;
+                // if (delta <= 0) continue;
+                node.val.width += delta;
+                node.val.left = minRight - node.val.width;
+            }
+        }
+
+        // auto-expansion
+        // no need to expand for the first slot
+
+        // for (const [node, neighbors] of graph) {
+        //     // minimum left of the block that has greater depth than the current block
+        //     let minLeft = Infinity;
+        //     for (const v of neighbors) {
+        //         if (v.depth > node.depth) {
+        //             const left = v.val.left;
+        //             if (left < minLeft) minLeft = left;
+        //         }
+        //     }
+        //     if (minLeft !== Infinity) {
+        //         node.val.width = minLeft - node.val.left;
+        //     }
+        // }
+
         graph.clear();
+    }
+
+    /**
+     * return a tuple [right, # of blocks]
+     */
+    private maxNeedExpand(
+        node: Vertex<ScheduleBlock>,
+        graph: Graph<ScheduleBlock>,
+        forward: boolean
+    ) {
+        if (forward && !node.needToChange) {
+            return 0;
+        } else if (!forward && !node.needToChangeFromBack) {
+            return 0;
+        }
+        const neighbors = graph.get(node);
+        let res = 1;
+        for (const n of neighbors!) {
+            if (n.depth < node.depth !== !forward) continue;
+            res = this.maxNeedExpand(n, graph, forward) + 1;
+        }
+        return res;
     }
 
     /**

@@ -145,7 +145,7 @@ export function graphColoringExact(adjList: number[][], colors: Int16Array, fall
         opCount[0] = 0;
     }
     // console.log('op count', totalCount);
-    colorSpread(adjList, colors, numColors);
+    // colorSpread(adjList, colors, numColors);
     verifyColoring(adjList, colors);
     return numColors;
 }

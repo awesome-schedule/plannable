@@ -165,8 +165,16 @@ To address this issue, we _normalize_ the coefficients produced by each sort opt
 
 ### Sort
 
+Depending on the user configuration and the number of schedules generated, we will employ one of the following methods to sort our schedules.
+
 #### Fisher–Yates Shuffle Algorithm
 
-#### Complete Sorting
+This shuffle algorithm will only be applied if the user enabled the `I am Feeling Lucky` (AKA Random sort) option. There is no cache for this option, nor will a _real_ sort occurs, since shuffle takes linear time while sorting takes linear-logarithmic time.
 
 #### Floyd–Rivest Selection (Quickselect)
+
+When there are many schedules generated, sorting may take a considerable amount of time due to its `n log n` complexity. Therefore, it is necessary to employ some techniques to optimize for performance. With the observation that the user will usually examine the first few batches of schedules, it is unnecessary to sort all of them in order. In fact, we only need to pick, say, the best 100 schedules and place them in front.
+
+After some research, we used an implementation of the Floyd–Rivest selection algorithm, which can select the k max/min elements from the array, consuming only linear time. When there are more than 10 thousand schedules generated, we use it to select the 1000 best schedules and then sort them in order. Sorting these 1000 schedules only adds a tiny overhead.
+
+#### Complete Sorting

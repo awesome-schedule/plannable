@@ -444,7 +444,7 @@ class ScheduleEvaluator {
      */
     public sort({
         newOptions,
-        quick = true,
+        quick = false,
         quickThresh = 10000
     }: {
         newOptions?: EvaluatorOptions;

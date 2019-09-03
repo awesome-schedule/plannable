@@ -253,11 +253,11 @@ export default class Schedule {
     public currentCourses: Course[];
     /**
      * a computed dictionary that's updated by the `computeSchedule` method.
-     * If a Course has multiple sections selected, a `+x` will be appended.
+     * keys are courses' `displayName`s, and values are the array of ids (as strings).
      *
      * Example:
      * ```js
-     * {"CS 2110 Lecture": "16436", "Chem 1410 Laboratory": "13424+2"}
+     * {"CS 2110 Lecture": ["16436"], "Chem 1410 Laboratory": ["13424", "17596"]}
      * ```
      */
     public currentIds: { [x: string]: string[] };
@@ -270,10 +270,10 @@ export default class Schedule {
 
     /**
      * The separator of sections in different time periods,
-     * representing different end times of **sections**
+     * representing different end times of sections. Elements are dates in milliseconds
      * Example:
      * ```js
-     * [[10, 17], [12, 28]]
+     * [1567457860885, 1567458860885]
      * ```
      */
     public dateSeparators: number[] = [];
@@ -466,16 +466,10 @@ export default class Schedule {
 
         for (const key in all) {
             const sections = all[key];
-            /**
-             * we need a full course record of key `key`
-             */
+            // we need a full course record of key `key`
             this.currentCourses.push(catalog.getCourse(key));
-
-            /**
-             * a "partial" course with only selected sections
-             */
+            // a "partial" course with only selected sections
             const course = catalog.getCourse(key, sections);
-
             // skip placing empty courses
             if (!course.sections.length) continue;
 
@@ -536,99 +530,71 @@ export default class Schedule {
     }
 
     public constructDateSeparator() {
-        const catalog = window.catalog;
-        this.dateSeparators.length = 0;
-        const tempSeparator: [number, number][] = [];
+        const sections: Section[] = [];
+        for (const key in this.All) {
+            if (this.All[key] === -1) continue;
+            const course = window.catalog.getCourse(key, this.All[key]);
+            // skip invalid dates
+            for (const section of course.sections) {
+                if (section.dateArray) {
+                    sections.push(section);
+                }
+            }
+        }
 
         // record all start and end points
-        for (const key in this.All) {
-            if (this.All[key] === -1) {
-                continue;
+        const tempSeparator: [number, number][] = [];
+        for (const { dateArray } of sections) {
+            const start = dateArray[0];
+            let i = 0; // index for insertion
+            outer: for (; i < tempSeparator.length; i++) {
+                const target = tempSeparator[i][0];
+                if (start < target) break;
+                else if (start === target) continue outer; // remove repeated
             }
-            const course = catalog.getCourse(key, this.All[key]);
-            for (const { dateArray } of course.sections) {
-                if (dateArray)
-                    tempSeparator.push([dateArray[0], dateArray[1] + 24 * 60 * 60 * 1000]);
-            }
+            // add one day to the end
+            tempSeparator.splice(i, 0, [start, dateArray[1] + 24 * 60 * 60 * 1000]);
         }
 
-        tempSeparator.sort((a, b) => a[0] - b[0]);
-
-        for (let i = 1; i < tempSeparator.length; i++) {
-            if (
-                tempSeparator[i - 1][0] === tempSeparator[i][0] &&
-                tempSeparator[i - 1][1] === tempSeparator[i][1]
-            ) {
-                tempSeparator.splice(i, 1);
-                i--;
-            }
-        }
-
+        const _temp = new Set<number>();
         // abandon start points that are the same as some end points
         // e.g. in [[8/26 - 10.17], [10.17 - 12.6]], one 10.17 would be abandoned
         outer: for (let i = 0; i < tempSeparator.length; i++) {
             for (let j = 0; j < i; j++) {
                 if (tempSeparator[i][0] === tempSeparator[j][1]) {
-                    this.dateSeparators.push(tempSeparator[i][1]);
+                    _temp.add(tempSeparator[i][1]);
                     continue outer;
                 }
             }
-            this.dateSeparators.push(tempSeparator[i][0], tempSeparator[i][1]);
+            _temp.add(tempSeparator[i][0]).add(tempSeparator[i][1]);
         }
-
-        this.dateSeparators.sort((a, b) => a - b);
-
-        // discard repeated separators
-        for (let i = 1; i < this.dateSeparators.length; i++) {
-            const a = this.dateSeparators[i - 1];
-            const b = this.dateSeparators[i];
-            if (a - b === 0) {
-                this.dateSeparators.splice(i, 1);
-                i--;
-            }
-        }
+        this.dateSeparators = [..._temp].sort((a, b) => a - b);
 
         // create empty objects for separated "All"
+        this.separatedAll = Object.create(null);
         for (let i = 1; i < this.dateSeparators.length; i++) {
             const dts = this.dateSeparators[i];
             const temp = new Date(dts);
             this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
 
-        for (const key in this.All) {
-            if (this.All[key] === -1) {
-                continue;
-            }
-            const course = catalog.getCourse(key, this.All[key]);
-            // eg. { 12/6 : [1, 3, 4] }
-            const diffSecs: { [dt: string]: number[] } = {};
-            // separate sections based of different meeting dates
-            for (const sec of course.sections) {
-                // skip invalid dates
-                if (!sec.dateArray) continue;
-
-                const [start, end] = sec.dateArray;
-                for (let i = 0; i < this.dateSeparators.length; i++) {
-                    const sep = this.dateSeparators[i];
-                    const temp = new Date(sep);
-                    if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
-                        const date = temp.getMonth() + 1 + '/' + temp.getDate();
-                        if (diffSecs[date]) {
-                            diffSecs[date].push(sec.id);
-                        } else {
-                            diffSecs[date] = [sec.id];
-                        }
+        for (const sec of sections) {
+            const [start, end] = sec.dateArray;
+            for (let i = 0; i < this.dateSeparators.length; i++) {
+                const sep = this.dateSeparators[i];
+                const temp = new Date(sep);
+                if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
+                    const date = temp.getMonth() + 1 + '/' + temp.getDate();
+                    const all = this.separatedAll[date] || Object.create(null);
+                    const sections = all[sec.key];
+                    if (sections instanceof Set) {
+                        sections.add(sec.id);
+                    } else {
+                        all[sec.key] = new Set<number>().add(sec.id);
                     }
-                    if (end < sep) {
-                        break;
-                    }
+                    this.separatedAll[date] = all;
                 }
-            }
-            // put each group of sections into corresponding separated "All"
-            for (const diffTime in diffSecs) {
-                const secIds = diffSecs[diffTime];
-                const secNum = new Set(secIds);
-                this.separatedAll[diffTime][key] = secNum;
+                if (end < sep) break;
             }
         }
     }

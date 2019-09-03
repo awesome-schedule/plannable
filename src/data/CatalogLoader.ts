@@ -102,11 +102,9 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
     console.time('parse semester data');
 
     const CLASS_TYPES = TYPES_PARSE;
-    const courseDict: { [x: string]: Course } = {};
-
-    const len = rawData.length;
+    const courseDict: { [x: string]: Course } = Object.create(null);
     const allSections: SectionTableItem[] = [];
-    for (let j = 1; j < len; j++) {
+    for (let j = 1; j < rawData.length; j++) {
         const data = rawData[j];
 
         // todo: robust data validation

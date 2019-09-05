@@ -329,7 +329,7 @@ export default class Schedule {
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty
      */
-    public update(key: string, section: number, remove: boolean = true) {
+    public update(key: string, section: number, remove = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];

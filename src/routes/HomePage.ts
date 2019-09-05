@@ -1,7 +1,6 @@
 import axios from 'axios';
 import $ from 'jquery';
 import { Component, Vue } from 'vue-property-decorator';
-import { StringifyOptions } from 'querystring';
 
 type GithubResponseData = {
     url: string;

@@ -6,10 +6,6 @@
  */
 
 /**
- * @author Hanzhi Zhou
- */
-
-/**
  *
  */
 import { RawAlgoCourse } from '@/algorithm';
@@ -45,6 +41,7 @@ export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
 
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
+ * @author Hanzhi Zhou
  */
 export default class Catalog {
     public worker?: SearchWorker;

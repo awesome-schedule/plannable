@@ -150,5 +150,8 @@ describe('Schedule Test', () => {
         schedule.deleteEvent('MoTu 12:00AM - 3:00AM');
         schedule.remove('cs21105');
         schedule.clean();
+
+        // dummy test
+        schedule['randEvents']();
     });
 });

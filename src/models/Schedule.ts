@@ -768,6 +768,10 @@ export default class Schedule {
         this.computeSchedule();
     }
 
+    /**
+     * clean the computed properties of the schedule. They can be recovered by calling the
+     * `computeSchedule method`
+     */
     public cleanSchedule() {
         this.days = [[], [], [], [], [], [], []];
         this.colorSlots.forEach(x => x.clear());
@@ -882,6 +886,9 @@ export default class Schedule {
         return true;
     }
 
+    /**
+     * add some random event to the schedule. For testing purposes only
+     */
     private randEvents(num = 20, maxDuration = 120, minDuration = 20) {
         for (let i = 0; i < num; i++) {
             let days = '';

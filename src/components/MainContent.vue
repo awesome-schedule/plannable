@@ -2,7 +2,7 @@
     <div
         class="schedule mt-2"
         :style="{
-            width: status.isMobile ? (scrollable ? '200%' : '85%') : scheduleWidth + 'vw',
+            width: scheduleWidth + 'vw',
             'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
         }"
     >

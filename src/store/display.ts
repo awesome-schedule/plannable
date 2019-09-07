@@ -109,6 +109,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     private _numSearchResults: number = 6;
     private _earliest = '08:00';
     private _latest = '19:00';
+    private _width = 100;
 
     // validators
     get fullHeight() {
@@ -146,6 +147,12 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     }
     set latest(e) {
         this._latest = intTo24hr(bound(hr24toInt(e || '22:00'), 12 * 60, 24 * 60 - 1));
+    }
+    get width() {
+        return this._width;
+    }
+    set width(e) {
+        this._width = bound(e, 10, 1000);
     }
 
     // when doing serialization, we only record the enumerable properties, excluding the getters

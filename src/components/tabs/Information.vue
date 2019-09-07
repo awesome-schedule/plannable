@@ -708,7 +708,9 @@
                     Alternatively, you can export your profile to an URL. We will encode and
                     compress all information contained in your current profile in the resulting URL,
                     which will be quite long. Exporting your profile to an URL makes it more
-                    convenient to share your profile with your friends.
+                    convenient to share your profile with your friends. However, the URLs generated
+                    by different versions of Plannable are <strong>not</strong> guaranteed to be
+                    compatible. Only JSON files have compatibility guaranted.
                 </p>
                 <stepper :info="urlSteps" :helper="true" :always-title="true"></stepper>
                 <h5 id="item-7-3" class="mt-4">

@@ -16,7 +16,6 @@ import Store from '../store';
  */
 @Component
 export default class MainContent extends Store {
-    scrollable = false;
     get scheduleWidth() {
         return this.status.sideBarActive
             ? 100 - config.sideBarWidth - config.tabBarWidth - config.sideMargin

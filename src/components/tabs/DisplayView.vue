@@ -72,6 +72,23 @@
                     />
                 </div>
             </div>
+            <div
+                class="form-group row no-gutters mb-0"
+                title="Width of the schedule as a percentage relative to the parent container"
+            >
+                <label for="schedule-width" class="col-lg-6 col-form-label">Width</label>
+                <div class="col-lg-6">
+                    <input
+                        id="schedule-width"
+                        v-model.number="display.width"
+                        min="10"
+                        step="1"
+                        max="1000"
+                        type="number"
+                        class="form-control form-control-sm"
+                    />
+                </div>
+            </div>
             <div class="form-group row no-gutters mt-0 mb-1">
                 <div class="col-md-6">
                     <label for="displayWeekend" class="m-0">Show Weekends</label>
@@ -160,16 +177,10 @@
                 </div>
             </div>
         </form>
-        <!-- <div v-if="mobile" class="custom-control custom-checkbox mb-3 ml-3">
-            <input id="scroll" v-model="scrollable" type="checkbox" class="custom-control-input" />
-            <label for="scroll" class="custom-control-label">
-                scrollable
-            </label>
-        </div> -->
         <div class="btn bg-info nav-btn">
             Course Search
         </div>
-        <li class="list-group-item mb-0" style="border-bottom: 0">
+        <li class="list-group-item mb-0 pt-1" style="border-bottom: 0">
             <label for="num-search-results">
                 Max number of search results
             </label>

@@ -10,7 +10,8 @@ import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 
 /**
- * component for editing display settings
+ * component for editing settings. This component should really be named as `SettingsView`,
+ * but it is called `DisplayView` for historical reasons.
  * @author Kaiying Shan, Hanzhi Zhou
  * @noInheritDoc
  */

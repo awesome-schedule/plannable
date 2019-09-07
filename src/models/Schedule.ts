@@ -650,9 +650,9 @@ export default class Schedule {
         const adjList = this.constructAdjList(blocks);
         const colors = new Int16Array(blocks.length);
         const numColors = graphColoringExact(adjList, colors);
+
         // note: blocks are contained in nodes
         const graph = colorDepthSearch(adjList, colors, blocks);
-
         const slots: Vertex<ScheduleBlock>[][] = Array.from({ length: numColors }, () => []);
         for (const node of graph.keys()) {
             slots[node.depth].push(node);

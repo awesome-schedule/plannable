@@ -329,7 +329,7 @@ export default class Schedule {
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty
      */
-    public update(key: string, section: number, remove: boolean = true) {
+    public update(key: string, section: number, remove = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
@@ -653,7 +653,6 @@ export default class Schedule {
 
         // note: blocks are contained in nodes
         const graph = colorDepthSearch(adjList, colors, blocks);
-
         const slots: Vertex<ScheduleBlock>[][] = Array.from({ length: numColors }, () => []);
         for (const node of graph.keys()) {
             slots[node.depth].push(node);
@@ -715,6 +714,7 @@ export default class Schedule {
         for (let i = 1; i < slots.length; i++) {
             // default "needToChange" is false
             nextNode: for (const node of slots[i]) {
+                if (node.needToChange) continue;
                 const neighbors = graph.get(node);
                 for (const n of neighbors!) {
                     if (n.depth < node.depth) {
@@ -724,6 +724,7 @@ export default class Schedule {
                         }
                     }
                     node.needToChange = true;
+                    this.maxNeedExpand(node, graph);
                 }
             }
         }
@@ -731,6 +732,7 @@ export default class Schedule {
         slots[0].map(x => {
             if (x.val.left > 0.001) {
                 x.needToChange = true;
+                this.maxNeedExpand(x, graph);
             }
         });
 
@@ -754,9 +756,9 @@ export default class Schedule {
                 }
                 // distribute deltas to remaining nodes
 
-                const res = this.maxNeedExpand(node, graph);
+                // const res = this.maxNeedExpand(node, graph);
 
-                const delta = (node.val.left - maxLeft) / res;
+                const delta = (node.val.left - maxLeft) / node.numberFollow;
                 if (delta <= 0) continue;
                 node.val.left = maxLeft;
                 node.val.width += delta;
@@ -801,23 +803,6 @@ export default class Schedule {
         //     }
         // }
 
-        // auto-expansion
-        // no need to expand for the first slot
-
-        // for (const [node, neighbors] of graph) {
-        //     // minimum left of the block that has greater depth than the current block
-        //     let minLeft = Infinity;
-        //     for (const v of neighbors) {
-        //         if (v.depth > node.depth) {
-        //             const left = v.val.left;
-        //             if (left < minLeft) minLeft = left;
-        //         }
-        //     }
-        //     if (minLeft !== Infinity) {
-        //         node.val.width = minLeft - node.val.left;
-        //     }
-        // }
-
         graph.clear();
     }
 
@@ -829,11 +814,16 @@ export default class Schedule {
             return 0;
         }
         const neighbors = graph.get(node);
-        let res = 1;
+        let res = 0;
         for (const n of neighbors!) {
             if (n.depth <= node.depth) continue;
-            res = this.maxNeedExpand(n, graph) + 1;
+            const temp = this.maxNeedExpand(n, graph);
+            if (temp > res) {
+                res = temp;
+            }
         }
+        res += 1;
+        node.needToChange = true;
         node.numberFollow = res;
         return res;
     }

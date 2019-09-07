@@ -19,8 +19,15 @@ Each combined section is a tuple of the course key and the array of section ids 
 ```ts
 type RawAlgoCourse = [string, number[]];
 const classList: RawAlgoCourse[][] = [
-    [['cs11105', [11156]], ['cs11105', [12333]], ['cs11105', [10583]]], // course 1
-    [['enwr15105', [11346, 12525]], ['enwr15105', [23512, 11001]]], // course 2
+    [
+        ['cs11105', [11156]],
+        ['cs11105', [12333]],
+        ['cs11105', [10583]]
+    ], // course 1
+    [
+        ['enwr15105', [11346, 12525]],
+        ['enwr15105', [23512, 11001]]
+    ], // course 2
     [...], // course 3
 ];
 /**
@@ -100,8 +107,8 @@ Prior to v7.0, we store each schedule as an array of `RawAlgoCourse`, and we lat
 
 ```ts
 const schedules: RawAlgoCourse[][] = [
-    [['cs11105', [11156], ...], // schedule 1
-    [['cs11105', [14574], ...] // schedule 2
+    [['cs11105', [11156]], ...], // schedule 1
+    [['cs11105', [14574]], ...] // schedule 2
     [...],
     ...
 ]
@@ -132,9 +139,15 @@ The main loop is where we build schedules.
 
 #### Path Memory
 
+Under Construction
+
 #### Current Choices
 
+Under Construction
+
 #### Time Len Computation
+
+Under Construction
 
 ## Schedule Evaluation and Sorting
 
@@ -159,9 +172,15 @@ For example, if the sort option `distance` is enabled, then the `distance` coeff
 
 #### Coefficient Normalization
 
+> Note: This part is not applicable to the fallback sort mode.
+
 For the `combined` sort mode, we need to combine the sort options selected by the user. An naive approach is to do element-wise addition on the coefficient arrays produced by each sort option. However, the problem is that different sort options produce values of different order of magnitudes. For example, the `variance` option usually produces values that is several order of magnitudes greater than that produced by the `compactness` option.
 
-To address this issue, we _normalize_ the coefficients produced by each sort option to range `0 - 100`, which is done by subtracting the `min`, dividing `max - min` and multiplying by 100 for each value.
+To address this issue, we _normalize_ the coefficients produced by each sort option to range `0 - 100`, which is done by subtracting the `min`, dividing `max - min` and multiplying by 100 for each value. Then, the coefficients produced by each sort option are combined using Euclidean distance, but without the square root.
+
+```ts
+combined[i] = coeffs1[i] ** 2 + coeffs2[i] ** 2 + coeffs3[i] ** 2;
+```
 
 ### Sort
 
@@ -178,3 +197,5 @@ When there are many schedules generated, sorting may take a considerable amount 
 After some research, we used an implementation of the Floyd–Rivest selection algorithm, which can select the k max/min elements from the array, consuming only linear time. When there are more than 10 thousand schedules generated, we use it to select the 1000 best schedules and then sort them in order. Sorting these 1000 schedules only adds a tiny overhead.
 
 #### Complete Sorting
+
+As mentioned in the previous section, complete sorting will only be used when there are less than 10000 schedules.

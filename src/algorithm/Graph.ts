@@ -18,9 +18,6 @@ export class Vertex<T> {
      * the maximum depth of the path starting from the root that the current node is on
      */
     public pathDepth = 0;
-
-    public needToChange = true;
-    public needToChangeFromBack = true;
     /**
      * @param val the value contained in this node
      */

@@ -334,7 +334,7 @@ function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>, depth: number
     start.pathDepth = depth;
 
     for (const adj of neighbors) {
-        // we only visit nodes of greater depth
+        // we only visit nodes of lower depth
         if (!adj.visited && adj.depth < start.depth) depthFirstSearchRec(adj, graph, depth);
     }
 }

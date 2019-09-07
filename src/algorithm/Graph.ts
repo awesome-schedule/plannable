@@ -19,8 +19,9 @@ export class Vertex<T> {
      */
     public pathDepth = 0;
 
+    public numberFollow = 0;
+
     public needToChange = true;
-    public needToChangeFromBack = true;
     /**
      * @param val the value contained in this node
      */

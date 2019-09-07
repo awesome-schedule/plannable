@@ -682,33 +682,59 @@ export default class Schedule {
         //     }
         // }
 
-        for (let i = 1; i < slots.length; i++) {
-            for (const node of slots[i]) {
+        // slots[0].map(x => {
+        //     if (x.val.left !== 0) {
+        //         x.needToChange = true;
+        //     } else {
+        //         x.needToChange = false;
+        //     }
+        // });
+
+        slots[0].map(x => (x.needToChange = false));
+
+        for (let i = slots.length - 1; i >= 0; i--) {
+            nextNode: for (const node of slots[i]) {
                 if (node.depth === node.pathDepth - 1) {
-                    node.needToChangeFromBack = false;
+                    continue;
                 }
-                const neighbors = graph.get(node)!;
-                let maxLeft = 0;
-                let needToChange = false;
-                for (const n of neighbors) {
-                    if (n.depth === node.depth - 1) {
-                        if (n.val.left + n.val.width > maxLeft) {
-                            maxLeft = n.val.left + n.val.width;
-                            needToChange = n.needToChange;
-                        } else if (n.val.left + n.val.width === maxLeft) {
-                            needToChange = needToChange && n.needToChange;
+                const neighbors = graph.get(node);
+                let minRight = 1;
+                for (const n of neighbors!) {
+                    if (n.depth > node.depth) {
+                        if (n.val.left === node.val.left + node.val.width) {
+                            continue nextNode;
+                        } else if (n.val.left < minRight) {
+                            minRight = n.val.left;
                         }
                     }
-                }
-                if (maxLeft < node.val.left || needToChange) {
-                    node.needToChange = true;
-                } else {
-                    node.needToChange = false;
+                    node.val.left = minRight - node.val.width;
                 }
             }
         }
 
         for (let i = 1; i < slots.length; i++) {
+            // default "needToChange" is false
+            nextNode: for (const node of slots[i]) {
+                const neighbors = graph.get(node);
+                for (const n of neighbors!) {
+                    if (n.depth < node.depth) {
+                        if (n.val.left + n.val.width >= node.val.left && !n.needToChange) {
+                            node.needToChange = false;
+                            continue nextNode;
+                        }
+                    }
+                    node.needToChange = true;
+                }
+            }
+        }
+
+        slots[0].map(x => {
+            if (x.val.left > 0.001) {
+                x.needToChange = true;
+            }
+        });
+
+        for (let i = 0; i < slots.length; i++) {
             const slot = slots[i];
             for (const node of slot) {
                 if (!node.needToChange) {
@@ -728,54 +754,52 @@ export default class Schedule {
                 }
                 // distribute deltas to remaining nodes
 
-                const res = this.maxNeedExpand(node, graph, true);
+                const res = this.maxNeedExpand(node, graph);
 
                 const delta = (node.val.left - maxLeft) / res;
                 if (delta <= 0) continue;
                 node.val.left = maxLeft;
                 node.val.width += delta;
-
-                // console.log(node.val.left + ', ' + node.val.width + ', ' + res[1]);
             }
         }
 
-        for (let i = slots.length - 1; i >= 0; i--) {
-            nextNode: for (const node of slots[i]) {
-                if (!node.needToChangeFromBack) continue;
-                const neighbors = graph.get(node);
-                for (const n of neighbors!) {
-                    if (n.depth > node.depth) {
-                        if (
-                            n.val.left <= node.val.left + node.val.width &&
-                            !n.needToChangeFromBack
-                        ) {
-                            node.needToChangeFromBack = false;
-                            continue nextNode;
-                        }
-                    }
-                }
-                node.needToChangeFromBack = true;
-            }
-        }
+        // for (let i = slots.length - 1; i >= 0; i--) {
+        //     nextNode: for (const node of slots[i]) {
+        //         if (!node.needToChangeFromBack) continue;
+        //         const neighbors = graph.get(node);
+        //         for (const n of neighbors!) {
+        //             if (n.depth > node.depth) {
+        //                 if (
+        //                     n.val.left <= node.val.left + node.val.width &&
+        //                     !n.needToChangeFromBack
+        //                 ) {
+        //                     node.needToChangeFromBack = false;
+        //                     continue nextNode;
+        //                 }
+        //             }
+        //         }
+        //         node.needToChangeFromBack = true;
+        //     }
+        // }
 
-        for (let i = slots.length - 1; i >= 0; i--) {
-            for (const node of slots[i]) {
-                if (!node.needToChangeFromBack) continue;
-                let minRight = 1;
-                const neighbors = graph.get(node);
-                for (const n of neighbors!) {
-                    if (n.depth < node.depth) continue;
-                    if (n.val.left < minRight) {
-                        minRight = n.val.left;
-                    }
-                }
-                const res = this.maxNeedExpand(node, graph, false);
-                const delta = (minRight - (node.val.left + node.val.width)) / res;
-                // if (delta <= 0) continue;
-                node.val.width += delta;
-                node.val.left = minRight - node.val.width;
-            }
-        }
+        // for (let i = slots.length - 1; i >= 0; i--) {
+        //     for (const node of slots[i]) {
+        //         if (!node.needToChangeFromBack) continue;
+        //         let minRight = 1;
+        //         const neighbors = graph.get(node);
+        //         for (const n of neighbors!) {
+        //             if (n.depth < node.depth) continue;
+        //             if (n.val.left < minRight) {
+        //                 minRight = n.val.left;
+        //             }
+        //         }
+        //         const res = this.maxNeedExpand(node, graph, false);
+        //         const delta = (minRight - (node.val.left + node.val.width)) / res;
+        //         // if (delta <= 0) continue;
+        //         node.val.width += delta;
+        //         node.val.left = minRight - node.val.width;
+        //     }
+        // }
 
         // auto-expansion
         // no need to expand for the first slot
@@ -800,22 +824,17 @@ export default class Schedule {
     /**
      * return a tuple [right, # of blocks]
      */
-    private maxNeedExpand(
-        node: Vertex<ScheduleBlock>,
-        graph: Graph<ScheduleBlock>,
-        forward: boolean
-    ) {
-        if (forward && !node.needToChange) {
-            return 0;
-        } else if (!forward && !node.needToChangeFromBack) {
+    private maxNeedExpand(node: Vertex<ScheduleBlock>, graph: Graph<ScheduleBlock>) {
+        if (!node.needToChange) {
             return 0;
         }
         const neighbors = graph.get(node);
         let res = 1;
         for (const n of neighbors!) {
-            if (n.depth < node.depth !== !forward) continue;
-            res = this.maxNeedExpand(n, graph, forward) + 1;
+            if (n.depth <= node.depth) continue;
+            res = this.maxNeedExpand(n, graph) + 1;
         }
+        node.numberFollow = res;
         return res;
     }
 

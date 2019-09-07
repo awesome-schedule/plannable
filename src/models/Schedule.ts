@@ -660,35 +660,6 @@ export default class Schedule {
             node.val.width = 1 / node.pathDepth;
         }
 
-        // const col2nodes: number[][] = [];
-        // for (let i = 0; i < numColors; i++) {
-        //     col2nodes.push([]);
-        // }
-
-        // for (let i = 0; i < colors.length; i++) {
-        //     col2nodes[colors[i]].push(i);
-        // }
-
-        // const changable: boolean[] = new Array(adjList.length).fill(true);
-
-        // col2nodes[0].map(x => (changable[x] = false));
-
-        // for (let i = 1; i < col2nodes.length; i++) {
-        //     for (let j = 0; j < col2nodes[i].length; j++) {
-        //         changable[col2nodes[i][j]] = adjList[col2nodes[i][j]]
-        //             .map(x => changable[x])
-        //             .reduce((x, a) => x || a);
-        //     }
-        // }
-
-        // slots[0].map(x => {
-        //     if (x.val.left !== 0) {
-        //         x.needToChange = true;
-        //     } else {
-        //         x.needToChange = false;
-        //     }
-        // });
-
         slots[0].map(x => (x.needToChange = false));
 
         for (let i = slots.length - 1; i >= 0; i--) {
@@ -714,7 +685,6 @@ export default class Schedule {
         for (let i = 1; i < slots.length; i++) {
             // default "needToChange" is false
             nextNode: for (const node of slots[i]) {
-                if (node.needToChange) continue;
                 const neighbors = graph.get(node);
                 for (const n of neighbors!) {
                     if (n.depth < node.depth) {
@@ -724,7 +694,6 @@ export default class Schedule {
                         }
                     }
                     node.needToChange = true;
-                    this.maxNeedExpand(node, graph);
                 }
             }
         }
@@ -735,6 +704,15 @@ export default class Schedule {
                 this.maxNeedExpand(x, graph);
             }
         });
+
+        for (let i = 0; i < slots.length; i++) {
+            for (const node of slots[i]) {
+                if (node.numberFollow !== 0) continue;
+                if (node.needToChange) {
+                    this.maxNeedExpand(node, graph);
+                }
+            }
+        }
 
         for (let i = 0; i < slots.length; i++) {
             const slot = slots[i];
@@ -765,44 +743,6 @@ export default class Schedule {
             }
         }
 
-        // for (let i = slots.length - 1; i >= 0; i--) {
-        //     nextNode: for (const node of slots[i]) {
-        //         if (!node.needToChangeFromBack) continue;
-        //         const neighbors = graph.get(node);
-        //         for (const n of neighbors!) {
-        //             if (n.depth > node.depth) {
-        //                 if (
-        //                     n.val.left <= node.val.left + node.val.width &&
-        //                     !n.needToChangeFromBack
-        //                 ) {
-        //                     node.needToChangeFromBack = false;
-        //                     continue nextNode;
-        //                 }
-        //             }
-        //         }
-        //         node.needToChangeFromBack = true;
-        //     }
-        // }
-
-        // for (let i = slots.length - 1; i >= 0; i--) {
-        //     for (const node of slots[i]) {
-        //         if (!node.needToChangeFromBack) continue;
-        //         let minRight = 1;
-        //         const neighbors = graph.get(node);
-        //         for (const n of neighbors!) {
-        //             if (n.depth < node.depth) continue;
-        //             if (n.val.left < minRight) {
-        //                 minRight = n.val.left;
-        //             }
-        //         }
-        //         const res = this.maxNeedExpand(node, graph, false);
-        //         const delta = (minRight - (node.val.left + node.val.width)) / res;
-        //         // if (delta <= 0) continue;
-        //         node.val.width += delta;
-        //         node.val.left = minRight - node.val.width;
-        //     }
-        // }
-
         graph.clear();
     }
 
@@ -823,7 +763,6 @@ export default class Schedule {
             }
         }
         res += 1;
-        node.needToChange = true;
         node.numberFollow = res;
         return res;
     }

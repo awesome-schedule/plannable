@@ -21,7 +21,7 @@ export default class ScheduleBlock {
     /**
      * duration of the block, in minutes
      */
-    public readonly duration: number = 0;
+    public readonly duration: number;
     /**
      * the left of the block relative to the column, a decimal between 0 and 1
      */
@@ -60,7 +60,7 @@ export default class ScheduleBlock {
      * @param other
      * @param includeEnd whether to treat end-point touch as conflict
      */
-    public conflict(other: ScheduleBlock, includeEnd: boolean = false) {
+    public conflict(other: ScheduleBlock, includeEnd = false) {
         const olap = calcOverlap(this.startMin, this.endMin, other.startMin, other.endMin);
         if (includeEnd) {
             return olap >= 0;

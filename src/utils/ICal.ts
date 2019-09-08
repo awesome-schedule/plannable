@@ -24,9 +24,9 @@ import Section from '../models/Section';
 export function toICal(schedule: Schedule) {
     let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:UVa-Awesome-Schedule\r\n';
 
-    let startWeekDay: number = 0;
-    let startDate: Date = new Date(2019, 7, 27, 0, 0, 0),
-        endDate: Date = new Date(2019, 11, 6, 0, 0, 0);
+    let startWeekDay = 0;
+    let startDate = new Date(2019, 7, 27, 0, 0, 0),
+        endDate = new Date(2019, 11, 6, 0, 0, 0);
 
     for (const blocks of schedule.days) {
         for (const sb of blocks) {
@@ -90,7 +90,7 @@ export function toICal(schedule: Schedule) {
                     ical += 'END:VEVENT\r\n';
                 }
             } else if (sb.section instanceof Event) {
-                const dayoffset: number = ((d + 7 - startWeekDay) % 7) + 1;
+                const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
 
                 const [, start, , end] = sb.section.days.split(' ');
                 const startMin = Utils.hr12toInt(start),

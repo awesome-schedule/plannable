@@ -278,7 +278,7 @@ export default class Schedule {
      */
     public dateSeparators: number[] = [];
     public separatedAll: { [date: string]: ScheduleAll } = {};
-    public dateSelector: number = -1;
+    public dateSelector = -1;
 
     /**
      * the currently previewed (hovered) section
@@ -730,7 +730,7 @@ export default class Schedule {
                     for (const meeting of firstSec.meetings)
                         this.placeHelper(color, meeting.days, course);
                 } else {
-                    // if we don't combined the sections, we call place each section
+                    // if we don't combined the sections, we call place for each section
                     for (const section of courseSec) {
                         // note: sections belonging to the same course will have the same color
                         const color = this.getColor(section);

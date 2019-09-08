@@ -75,7 +75,7 @@ export default class ClassView extends Store {
     /**
      * @see Schedule.update
      */
-    updateCourse(key: string, section: number, remove: boolean = false) {
+    updateCourse(key: string, section: number, remove = false) {
         this.schedule.currentSchedule.update(key, section, remove);
         if (this.schedule.generated) this.noti.warn(`You're editing the generated schedule!`);
 

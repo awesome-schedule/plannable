@@ -103,10 +103,10 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     enableFuzzy = false;
     showWeekend = true;
 
-    private _fullHeight: number = 40;
-    private _partialHeight: number = 30;
-    private _maxNumSchedules: number = 100000;
-    private _numSearchResults: number = 6;
+    private _fullHeight = 40;
+    private _partialHeight = 30;
+    private _maxNumSchedules = 200000;
+    private _numSearchResults = 6;
     private _earliest = '08:00';
     private _latest = '19:00';
     private _width = 100;

@@ -18,7 +18,7 @@ import Section from '../models/Section';
 class Modal {
     section: Section | null = null;
     course: Course | null = null;
-    url: string = '';
+    url = '';
     match: SearchMatch = [[], new Map()];
 
     showSectionModal(section: Section) {

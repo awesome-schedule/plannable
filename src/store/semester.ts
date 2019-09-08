@@ -25,7 +25,7 @@ export interface SemesterState {
 class Semesters implements SemesterState {
     semesters: SemesterJSON[] = [];
     currentSemester: SemesterJSON | null = null;
-    lastUpdate: string = '';
+    lastUpdate = '';
     pendingPromise: CancelablePromise<Catalog> | null = null;
 
     /**

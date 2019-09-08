@@ -91,7 +91,7 @@ export default class FuzzyView extends Store {
     /**
      * @see Schedule.update
      */
-    updateCourse(key: string, section: number, remove: boolean = false) {
+    updateCourse(key: string, section: number, remove = false) {
         this.schedule.currentSchedule.update(key, section, remove);
 
         // note: adding a course to schedule.All cannot be detected by Vue.

@@ -11,8 +11,8 @@ import ScheduleEvaluator from './algorithm/ScheduleEvaluator';
 import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
 import { FastSearcher } from './algorithm/Searcher';
-import { routes } from './routes';
-import HomePage from './routes/HomePage.vue';
+import App from './App.vue';
+
 declare global {
     interface Window {
         scheduleEvaluator: ScheduleEvaluator;
@@ -37,7 +37,7 @@ declare module 'vue/types/vue' {
 
 Vue.directive('top', {
     // When the bound element is inserted into the DOM...
-    inserted: () => {
+    inserted() {
         // scroll to top
         window.scrollTo(0, 0);
     }
@@ -52,10 +52,8 @@ new Vue({
         currentRoute: window.location.pathname
     },
     render(h) {
-        const matchingView = routes[this.currentRoute];
-        const component = matchingView ? matchingView : HomePage;
-
-        console.log('route', this.currentRoute);
-        return h(component);
+        // const matchingView = routes[this.currentRoute];
+        // const component = matchingView ? matchingView : HomePage;
+        return h(App);
     }
 }).$mount('#app');

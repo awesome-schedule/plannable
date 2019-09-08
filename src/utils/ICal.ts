@@ -56,8 +56,8 @@ export function toICal(schedule: Schedule) {
                         continue;
                     const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
                     const [, start, , end] = m.days.split(' ');
-                    const startMin = Utils.hr12toInt(start),
-                        endMin = Utils.hr12toInt(end);
+                    const startMin = Utils.hr12toInt(start);
+                    const duration = Utils.hr12toInt(end) - startMin;
 
                     const startTime = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
@@ -78,9 +78,9 @@ export function toICal(schedule: Schedule) {
                         '\r\n';
                     ical +=
                         'DURATION=P' +
-                        Math.floor((endMin - startMin) / 60) +
+                        Math.floor(duration / 60) +
                         'H' +
-                        ((endMin - startMin) % 60) +
+                        (duration % 60) +
                         'M' +
                         '\r\n';
                     ical += 'SUMMARY:' + section.department + ' ' + section.number + '\r\n';
@@ -93,8 +93,8 @@ export function toICal(schedule: Schedule) {
                 const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
 
                 const [, start, , end] = sb.section.days.split(' ');
-                const startMin = Utils.hr12toInt(start),
-                    endMin = Utils.hr12toInt(end);
+                const startMin = Utils.hr12toInt(start);
+                const duration = Utils.hr12toInt(end) - startMin;
 
                 const startTime = new Date(
                     startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
@@ -114,12 +114,7 @@ export function toICal(schedule: Schedule) {
                     dateToICalString(endDate) +
                     '\r\n';
                 ical +=
-                    'DURATION=P' +
-                    Math.floor((endMin - startMin) / 60) +
-                    'H' +
-                    ((endMin - startMin) % 60) +
-                    'M' +
-                    '\r\n';
+                    'DURATION=P' + Math.floor(duration / 60) + 'H' + (duration % 60) + 'M' + '\r\n';
                 if (sb.section.title) ical += 'SUMMARY:' + sb.section.title + '\r\n';
                 if (sb.section.description)
                     ical += 'DESCRIPTION:' + sb.section.description + '\r\n';

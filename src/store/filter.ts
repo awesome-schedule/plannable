@@ -138,7 +138,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             reverse: false,
             weight: 1,
             exclusive: ['IamFeelingLucky'],
-            title: 'similarity',
+            title: 'Similarity',
             description: 'Similar to a selected schedule'
         },
         {

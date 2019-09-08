@@ -604,7 +604,6 @@ export default class Schedule {
      * to represent the conflicts between each pair of blocks
      */
     public constructAdjList(blocks: ScheduleBlock[]) {
-        blocks.sort((a, b) => b.duration - a.duration);
         const len = blocks.length;
         const adjList: number[][] = blocks.map(() => []);
 
@@ -647,6 +646,7 @@ export default class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
+        blocks.sort((a, b) => b.duration - a.duration);
         const adjList = this.constructAdjList(blocks);
         const colors = new Int16Array(blocks.length);
         const numColors = graphColoringExact(adjList, colors);

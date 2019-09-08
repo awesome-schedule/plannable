@@ -1,9 +1,9 @@
 <template>
     <div class="card my-4">
         <div class="card-header container">
-            <div class="row">
+            <div class="row no-gutters justify-content-between text-center">
                 <div v-for="(item, idx) in info" :key="item.title" class="col" @click="goto(idx)">
-                    <div class="stepper-icon" :class="{ active: idx === curIdx }">
+                    <div class="stepper-icon mx-auto" :class="{ active: idx === curIdx }">
                         {{ idx + 1 }}
                     </div>
                     <div v-if="alwaysTitle" class="mt-2" style="font-size: 12px">

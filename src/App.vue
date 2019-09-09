@@ -195,6 +195,7 @@
     width: 19vw;
     scrollbar-width: thin !important;
 }
+.sidebar,
 .sidebar .list-group-item:not(.list-group-item-action) {
     background-color: #f8f8f8;
 }

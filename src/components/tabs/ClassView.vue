@@ -51,7 +51,6 @@
         <ClassList
             v-if="isEntering"
             ref="enteringClassList"
-            class="p-1"
             :courses="inputCourses"
             :matches="inputMatches"
             :schedule="schedule.currentSchedule"
@@ -135,7 +134,6 @@
         </div>
         <ClassList
             ref="selectedClassList"
-            class="mx-1"
             :courses="schedule.currentSchedule.currentCourses"
             :schedule="schedule.currentSchedule"
             :show-any="!schedule.generated"

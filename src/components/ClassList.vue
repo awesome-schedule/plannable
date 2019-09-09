@@ -1,5 +1,5 @@
 <template>
-    <div id="class-list" class="card-body p-0 w-100" tabindex="-1" @keyup.esc="$emit('close')">
+    <div class="card-body p-1 w-100" tabindex="-1" @keyup.esc="$emit('close')">
         <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
         <div
             v-for="(crs, idx) in courses"

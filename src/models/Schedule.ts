@@ -671,14 +671,14 @@ export default class Schedule {
                 let minRight = 1;
                 for (const n of neighbors!) {
                     if (n.depth > node.depth) {
-                        if (n.val.left === node.val.left + node.val.width) {
+                        if (Math.abs(n.val.left - (node.val.left + node.val.width)) < 0.01) {
                             continue nextNode;
                         } else if (n.val.left < minRight) {
                             minRight = n.val.left;
                         }
                     }
-                    node.val.left = minRight - node.val.width;
                 }
+                node.val.left = minRight - node.val.width;
             }
         }
 

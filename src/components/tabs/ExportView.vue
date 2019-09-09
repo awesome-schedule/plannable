@@ -3,62 +3,59 @@
         <div class="btn bg-info nav-btn">
             Import Profile
         </div>
-        <ul class="list-group list-group-flush mx-1">
-            <li class="list-group-item px-1">
-                <div class="custom-file">
-                    <input
-                        id="customFile"
-                        type="file"
-                        class="custom-file-input"
-                        accept="text/json"
-                        style="width:100%"
-                        @change="onUploadJson($event)"
-                    />
-                    <label class="custom-file-label" for="customFile">Import From..</label>
-                </div>
-                <small class="text-center form-text text-muted">
-                    Import a .json file exported by our website
-                </small>
-            </li>
-        </ul>
+        <div class="m-3">
+            <div class="custom-file">
+                <input
+                    id="customFile"
+                    type="file"
+                    class="custom-file-input"
+                    accept="text/json"
+                    style="width:100%"
+                    @change="onUploadJson($event)"
+                />
+                <label class="custom-file-label" for="customFile">Import From..</label>
+            </div>
+            <small class="text-center form-text text-muted">
+                Import a .json file exported by our website
+            </small>
+        </div>
         <div class="btn bg-info nav-btn">
             Export Profile
         </div>
-        <ul class="list-group list-group-flush mx-1">
-            <li class="list-group-item">
-                <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
-                    <button class="btn btn-outline-dark px-0" @click="saveToJson()">
-                        Export JSON
-                    </button>
-                    <button class="btn btn-outline-dark px-0" @click="saveToIcal()">
-                        Export iCal
-                    </button>
-                </div>
-                <small class="text-center form-text text-muted">
-                    JSON: Can be imported later
-                </small>
-                <small class="form-text text-muted text-center">
-                    iCal: Supported by most calendar apps
-                </small>
-            </li>
-            <li class="list-group-item">
-                <div class="btn-group w-100" role="group" aria-label="Basic example">
-                    <button class="btn btn-outline-primary" @click="exportToURL()">
-                        Export URL
-                    </button>
-                    <button class="btn btn-outline-primary" @click="print()">
-                        Print
-                    </button>
-                </div>
-                <small class="text-center form-text text-muted">
-                    URL can be shared easily
-                </small>
-                <small class="form-text text-muted text-center">
-                    Print your currently rendered schedule
-                </small>
-            </li>
-        </ul>
-        <div class="btn bg-info nav-btn mt-2">
+        <div class="mx-3 my-2">
+            <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
+                <button class="btn btn-outline-dark px-0" @click="saveToJson()">
+                    Export JSON
+                </button>
+                <button class="btn btn-outline-dark px-0" @click="saveToIcal()">
+                    Export iCal
+                </button>
+            </div>
+            <small class="text-center form-text text-muted">
+                JSON: Can be imported later
+            </small>
+            <small class="form-text text-muted text-center">
+                iCal: Supported by most calendar apps
+            </small>
+        </div>
+        <hr />
+        <div class="mx-3 my-2">
+            <div class="btn-group w-100" role="group" aria-label="Basic example">
+                <button class="btn btn-outline-primary" @click="exportToURL()">
+                    Export URL
+                </button>
+                <button class="btn btn-outline-primary" @click="print()">
+                    Print
+                </button>
+            </div>
+            <small class="text-center form-text text-muted">
+                URL can be shared easily
+            </small>
+            <small class="form-text text-muted text-center">
+                Print your currently rendered schedule
+            </small>
+        </div>
+        <div class="btn bg-info nav-btn">
             Local Profiles
         </div>
         <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">

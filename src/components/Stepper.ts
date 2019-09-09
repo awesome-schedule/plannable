@@ -1,5 +1,5 @@
 import { Vue, Prop, Component } from 'vue-property-decorator';
-export type StepperInfo = { title: string; src: string }[];
+type StepperInfo = { title: string; src: string }[];
 
 @Component
 export default class Stepper extends Vue {

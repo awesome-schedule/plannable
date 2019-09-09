@@ -9,7 +9,6 @@ import 'bootstrap';
 import $ from 'jquery';
 import { VueMathjax } from 'vue-mathjax';
 import Stepper from '../Stepper.vue';
-import { StepperInfo } from '../Stepper';
 import { Component, Vue } from 'vue-property-decorator';
 
 /**
@@ -61,7 +60,7 @@ export default class Information extends Vue {
             title: 'Multiple Schedules',
             src: this.imgPath('multiple_schedule.gif')
         }
-    ];
+    ] as const;
 
     readonly compareSteps = [
         {
@@ -76,7 +75,7 @@ export default class Information extends Vue {
             title: '',
             src: this.imgPath('compare3.png')
         }
-    ];
+    ] as const;
 
     readonly urlSteps = [
         {
@@ -99,9 +98,9 @@ export default class Information extends Vue {
             title: 'There! Your schedule is loaded',
             src: this.imgPath('exportURL5.png')
         }
-    ];
+    ] as const;
 
-    readonly jsonSteps: StepperInfo = [
+    readonly jsonSteps = [
         {
             title: 'Download Json file',
             src: this.imgPath('exportJson1.png')
@@ -122,7 +121,7 @@ export default class Information extends Vue {
             title: 'Boom!! Your schedule is loaded',
             src: this.imgPath('exportJson5.png')
         }
-    ];
+    ] as const;
 
     readonly icalSteps = [
         {
@@ -161,7 +160,7 @@ export default class Information extends Vue {
             title: 'Now you can view your schedule on Google calendar!',
             src: this.imgPath('export9.png')
         }
-    ];
+    ] as const;
 
     showGuide(num: number) {
         this.selected = num;
@@ -178,7 +177,7 @@ export default class Information extends Vue {
         $('body').scrollspy({ target: '#navbar-scrollspy', offset: 50 });
     }
 
-    imgPath(name: string) {
+    imgPath(name: string): string {
         return require('@/assets/' + name);
     }
 }

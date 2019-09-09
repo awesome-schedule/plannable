@@ -24,12 +24,15 @@ export default class ExportView extends Store {
     remoteNewName: (string | null)[] = [];
     remoteProfiles: SemesterStorage[] = [];
 
+    _cre() {
+        return [localStorage.getItem('username'), localStorage.getItem('credential')];
+    }
+
     /**
      * return whether the credentials in the localStorage exist
      */
     canSync() {
-        const username = localStorage.getItem('username');
-        const credential = localStorage.getItem('credential');
+        const [username, credential] = this._cre();
         return username && credential;
     }
 
@@ -38,8 +41,7 @@ export default class ExportView extends Store {
         if (this.canSync()) this.fetchRemoteProfiles();
     }
     async fetchRemoteProfiles() {
-        const username = localStorage.getItem('username');
-        const credential = localStorage.getItem('credential');
+        const [username, credential] = this._cre();
         this.remoteProfiles = (await axios.post(backend.down, {
             username,
             credential
@@ -151,8 +153,7 @@ export default class ExportView extends Store {
     async deleteRemote(name: string, idx: number, msg?: string) {
         if (!msg) msg = `Are you sure to delete the remote profile ${name}?`;
         if (confirm(msg)) {
-            const username = localStorage.getItem('username'),
-                credential = localStorage.getItem('credential');
+            const [username, credential] = this._cre();
             await axios.post(backend.edit, {
                 username,
                 credential,
@@ -206,8 +207,7 @@ export default class ExportView extends Store {
             if (this.remoteProfiles.find(p => p.name === newName))
                 return this.noti.error('Duplicated name!');
         }
-        const username = localStorage.getItem('username'),
-            credential = localStorage.getItem('credential');
+        const [username, credential] = this._cre();
         const profile = this.remoteProfiles[idx];
         profile.name = newName;
         try {
@@ -233,9 +233,7 @@ export default class ExportView extends Store {
         const local = localStorage.getItem(name);
         if (!local) return Promise.reject('No local profile present!');
 
-        const username = localStorage.getItem('username'),
-            credential = localStorage.getItem('credential');
-
+        const [username, credential] = this._cre();
         const remote = this.remoteProfiles.find(p => p.name === name);
         if (remote) {
             if (

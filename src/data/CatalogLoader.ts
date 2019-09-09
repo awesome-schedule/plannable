@@ -49,14 +49,12 @@ export async function loadSemesterData(
             const newData = cancelablePromise(requestSemesterData(semester, db));
             return {
                 new: newData,
-                old: new Catalog(semester, await retrieveFromDB(db), new Date(time).toJSON())
+                old: new Catalog(semester, await retrieveFromDB(db), time)
             };
         } else {
             return {
                 new: cancelablePromise(
-                    retrieveFromDB(db).then(
-                        data => new Catalog(semester, data, new Date(time).toJSON())
-                    )
+                    retrieveFromDB(db).then(data => new Catalog(semester, data, time))
                 )
             };
         }
@@ -94,7 +92,7 @@ export async function requestSemesterData(semester: SemesterJSON, db?: CatalogDB
             }).data,
             db
         ),
-        new Date().toJSON()
+        Date.now()
     );
 }
 
@@ -103,7 +101,7 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
 
     const CLASS_TYPES = TYPES_PARSE;
     const courseDict: { [x: string]: Course } = Object.create(null);
-    const allSections: SectionTableItem[] = [];
+    const allSections: Section[] = [];
     for (let j = 1; j < rawData.length; j++) {
         const data = rawData[j];
 
@@ -264,13 +262,14 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
         course.sections.push(section);
         allSections.push(section);
     }
+    const allCourses = Object.values(courseDict);
     console.timeEnd('parse semester data');
     if (db) {
         Promise.all([db.courses.clear(), db.sections.clear()])
             .then(() => {
                 console.time('save to db');
                 return Promise.all([
-                    db.courses.bulkAdd(Object.values(courseDict)),
+                    db.courses.bulkAdd(allCourses),
                     db.sections.bulkAdd(allSections)
                 ]);
             })
@@ -279,10 +278,10 @@ export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
                 console.timeEnd('save to db');
             });
     }
-    return courseDict;
+    return [courseDict, allCourses, allSections] as const;
 }
 
-export async function retrieveFromDB(db: CatalogDB) {
+async function retrieveFromDB(db: CatalogDB) {
     const courseDict: { [x: string]: Course } = {};
 
     console.time('get courses from db');
@@ -297,6 +296,7 @@ export async function retrieveFromDB(db: CatalogDB) {
     console.timeEnd('get courses from db');
 
     console.time('retrieve from db');
+    const allSections: Section[] = [];
     for (const rawCourse of courses) {
         // descriptors for this course
         const desc = Object.getOwnPropertyDescriptors(rawCourse);
@@ -322,10 +322,12 @@ export async function retrieveFromDB(db: CatalogDB) {
             secDesc.course = {
                 value: course // non-enumerable
             };
-            sections.push(Object.create(Section.prototype, secDesc));
+            const section = Object.create(Section.prototype, secDesc);
+            sections.push(section);
+            allSections.push(section);
         }
         courseDict[rawCourse.key] = course;
     }
     console.timeEnd('retrieve from db');
-    return courseDict;
+    return [courseDict, Object.values(courseDict), allSections] as const;
 }

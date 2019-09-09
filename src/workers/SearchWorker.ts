@@ -18,10 +18,8 @@ import _Meeting from '../models/Meeting';
 import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '../utils/time';
 
-type Section = SectionFields;
-interface Course extends Omit<NonFunctionProperties<_Course>, 'sections'> {
-    readonly sections: readonly Section[];
-}
+type Section = Omit<SectionFields, 'course'>;
+interface Course extends Omit<NonFunctionProperties<_Course>, 'sections'> {}
 
 declare function postMessage(msg: [RawAlgoCourse[], SearchMatch[]] | 'ready'): void;
 
@@ -36,8 +34,6 @@ const searcherOpts = {
     ignoreSymbols: true,
     normalizeWhitespace: true
 } as const;
-
-let courseDict: { [x: string]: Course };
 
 interface ResultEntry<T, K extends keyof SearchResult<T>['item']> {
     result: SearchResult<T>;
@@ -156,17 +152,11 @@ function processSectionResults(
  * start fuzzy search using `msg.data` which is assumed to be a string for the following messages,
  * posting the array of tuples (used to construct [[Course]] instances) as the response
  */
-onmessage = ({ data }: { data: { [x: string]: Course } | string }) => {
+onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
     // initialize the searchers and store them
     if (typeof data !== 'string') {
         console.time('worker prep');
-        courseDict = data;
-        const courses = Object.values(courseDict);
-        const sections = courses.reduce((secs: Section[], course) => {
-            secs.push(...course.sections);
-            return secs;
-        }, []);
-
+        const [courses, sections] = data;
         titleSearcher = new Searcher(courses, {
             ...searcherOpts,
             keySelector: obj => obj.title

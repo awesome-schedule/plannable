@@ -11,7 +11,7 @@
 import { RawAlgoCourse } from '@/algorithm';
 import Course, { CourseMatch } from './Course';
 import Schedule from './Schedule';
-import { SectionMatch } from './Section';
+import Section, { SectionMatch } from './Section';
 /**
  * represents a semester
  */
@@ -28,7 +28,7 @@ export interface SemesterJSON {
 
 interface SearchWorker extends Worker {
     onmessage(x: MessageEvent): void;
-    postMessage(x: string | typeof window.catalog.courseDict): void;
+    postMessage(x: [readonly Course[], readonly Section[]] | string): void;
 }
 /**
  * the match indices for a [[Course]]
@@ -45,7 +45,9 @@ export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
  */
 export default class Catalog {
     public worker?: SearchWorker;
-    public readonly courses: Course[];
+    public readonly courseDict: { readonly [courseKey: string]: Course };
+    public readonly courses: readonly Course[];
+    private readonly sections: readonly Section[];
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param courseDict mapping from course key to course itself
@@ -54,10 +56,17 @@ export default class Catalog {
      */
     constructor(
         public readonly semester: SemesterJSON,
-        public readonly courseDict: { [x: string]: Course },
-        public readonly modified: string
+        data: ReturnType<Catalog['data']>,
+        public readonly modified: number
     ) {
-        this.courses = Object.values(courseDict);
+        [this.courseDict, this.courses, this.sections] = data;
+    }
+
+    /**
+     * only for type reflection and testing
+     */
+    private data() {
+        return [this.courseDict, this.courses, this.sections] as const;
     }
 
     /**
@@ -72,7 +81,7 @@ export default class Catalog {
                     resolve(data);
                 };
             });
-            worker.postMessage(this.courseDict);
+            worker.postMessage([this.courses, this.sections]);
             this.worker = worker;
             return prom;
         }

@@ -146,7 +146,7 @@ beforeAll(async () => {
         }
     });
     catalog.courseDict.cs45015.sections.push(section);
-    window.catalog = new Catalog(catalog.semester, catalog.courseDict, catalog.modified);
+    window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
     window.timeMatrix = await requestTimeMatrix();
     window.buildingSearcher = await requestBuildingSearcher();
 });

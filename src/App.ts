@@ -7,7 +7,6 @@
 /**
  *
  */
-import axios from 'axios';
 import { Component } from 'vue-property-decorator';
 import MainContent from './components/MainContent.vue';
 
@@ -22,17 +21,21 @@ import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
 
 // other components
-import CourseModal from './components/CourseModal.vue';
 import DateSeparator from './components/DateSeparator.vue';
 import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
+
+// modals
+import CourseModal from './components/CourseModal.vue';
 import SectionModal from './components/SectionModal.vue';
 import URLModal from './components/URLModal.vue';
+import VersionModal from './components/VersionModal.vue';
 
 import randomColor from 'randomcolor';
 import { backend } from './config';
 import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
+import { getReleaseNote } from './utils';
 
 const version = '7.0';
 /**
@@ -42,6 +45,10 @@ const version = '7.0';
 function checkVersion() {
     const match = localStorage.getItem('version') === version;
     localStorage.setItem('version', version);
+    if (!match) {
+        getReleaseNote().then(note => $('#release-note-body').html(note));
+        $('#versionModal').modal();
+    }
     return match;
 }
 
@@ -55,18 +62,21 @@ function checkVersion() {
         PaletteView,
         ExportView,
         CompareView,
+        External,
+        // use dynamic component for this one because it is relatively large in size
+        Information: () => import('./components/tabs/Information.vue'),
+        // opt-in tabs
+        FuzzyView: () => import('./components/tabs/FuzzyView.vue'),
+        LogView: () => import('./components/tabs/LogView.vue'),
+
         Pagination,
         GridSchedule,
+        DateSeparator,
+
         SectionModal,
         CourseModal,
         URLModal,
-        External,
-        DateSeparator,
-        // use dynamic component for this one because it is relatively large in size
-        Information: () => import('./components/tabs/Information.vue'),
-        // opt-in components
-        FuzzyView: () => import('./components/tabs/FuzzyView.vue'),
-        LogView: () => import('./components/tabs/LogView.vue')
+        VersionModal
     }
 })
 export default class App extends Store {

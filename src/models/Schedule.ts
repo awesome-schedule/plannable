@@ -22,7 +22,12 @@ import Section from './Section';
  */
 export interface SectionJSON {
     id: number;
-    section: string;
+    /**
+     * This property is
+     * - not present if parsed from URL,
+     * - present if parsed from JSON
+     */
+    section?: string;
 }
 
 /**
@@ -44,7 +49,7 @@ export interface ScheduleJSON {
     events: Event[];
 }
 
-export interface ScheduleOptions {
+interface ScheduleOptions {
     multiSelect: boolean;
     combineSections: boolean;
 }
@@ -96,17 +101,7 @@ export default class Schedule {
         const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
-            const course = window.catalog.getCourse(key);
-            const decompEntry: SectionJSON[] = [];
-            if (entry instanceof Array) {
-                for (let i = 0; i < entry.length; i++) {
-                    const section = course.getSectionById(entry[i]);
-                    decompEntry.push({ id: entry[i], section: section.section });
-                }
-                All[key] = decompEntry;
-            } else {
-                All[key] = entry;
-            }
+            All[key] = entry instanceof Array ? entry.map(e => ({ id: e })) : entry;
         }
         return {
             All,
@@ -190,11 +185,15 @@ export default class Schedule {
                         const set = new Set<number>();
                         for (const record of sections) {
                             // check whether the identifier of stored sections match with the existing sections
-                            const target = allSections.find(
-                                sec => sec.id === record.id && sec.section === record.section
-                            );
+                            const target =
+                                typeof record.section === 'undefined' // "section" property may not be recorded
+                                    ? allSections.find(sec => sec.id === record.id) // in that case we only compare id
+                                    : allSections.find(
+                                          sec =>
+                                              sec.id === record.id && sec.section === record.section
+                                      );
                             if (target) set.add(target.id);
-                            // if not, it possibly means that section is removed from SIS
+                            // if not exist, it possibly means that section is removed from SIS
                             else
                                 warnings.push(
                                     `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`

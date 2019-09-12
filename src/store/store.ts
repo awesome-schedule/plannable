@@ -143,6 +143,7 @@ const compare: CompareCandidate[] = [];
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
  * It gathers all children modules and store their references in a single store class, which is provided as a Mixin
+ * @noInheritDoc
  */
 @Component
 export default class Store extends Vue {

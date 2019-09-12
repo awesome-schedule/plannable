@@ -44,8 +44,8 @@ export default class Palette extends Store {
     courseColors() {
         return this.colorEntries()
             .concat(
-                this.schedule.currentSchedule.colorSlots.reduce(
-                    (arr: [string, string][], bucket, i) =>
+                this.schedule.currentSchedule.colorSlots.reduce<[string, string][]>(
+                    (arr, bucket, i) =>
                         arr.concat(
                             [...bucket]
                                 .filter(
@@ -53,7 +53,7 @@ export default class Palette extends Store {
                                         this.schedule.currentSchedule.has(key, true) &&
                                         !(key in this.palette.savedColors)
                                 )
-                                .map(x => [x, Schedule.bgColors[i]] as [string, string])
+                                .map(x => [x, Schedule.bgColors[i]])
                         ),
                     []
                 )

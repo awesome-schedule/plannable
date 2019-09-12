@@ -26,11 +26,6 @@ export interface SectionJSON {
 }
 
 /**
- * the compressed structure of a Section
- */
-export type SectionJSONShort = (number | string)[];
-
-/**
  * represents all courses in a schedule, stored as `(key, set of sections)` pair
  *
  * Note that if **section** is -1, it means that all sections are allowed.
@@ -82,19 +77,16 @@ export default class Schedule {
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: ScheduleAll<SectionJSONShort> = {};
+        const shortAll: ScheduleAll<number[]> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
                 sections === -1
                     ? sections
-                    : (sections as SectionJSON[]).reduce(
-                          (acc, { id, section }) => {
-                              acc.push(id, section);
-                              return acc;
-                          },
-                          [] as SectionJSONShort
-                      );
+                    : sections.reduce<number[]>((acc, { id }) => {
+                          acc.push(id);
+                          return acc;
+                      }, []);
         }
         return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
@@ -104,10 +96,12 @@ export default class Schedule {
         const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
+            const course = window.catalog.getCourse(key);
             const decompEntry: SectionJSON[] = [];
             if (entry instanceof Array) {
-                for (let i = 0; i < entry.length; i += 2) {
-                    decompEntry.push({ id: entry[i] as number, section: entry[i + 1] as string });
+                for (let i = 0; i < entry.length; i++) {
+                    const section = course.getSectionById(entry[i]);
+                    decompEntry.push({ id: entry[i], section: section.section });
                 }
                 All[key] = decompEntry;
             } else {

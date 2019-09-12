@@ -94,7 +94,7 @@ export default class Course implements CourseFields, Hashable {
         this.units = course.units;
         this.title = course.title;
         this.description = course.description;
-        this.sections = ids.reduce((acc: Section[], id) => {
+        this.sections = ids.reduce<Section[]>((acc, id) => {
             const sec = course.sections.find(s => s.id === id);
             if (!sec) throw new Error('Non-existent id ' + id);
             acc.push(sec);

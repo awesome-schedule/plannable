@@ -47,7 +47,7 @@ export default class Catalog {
     public worker?: SearchWorker;
     public readonly courseDict: { readonly [courseKey: string]: Course };
     public readonly courses: readonly Course[];
-    private readonly sections: readonly Section[];
+    public readonly sections: readonly Section[];
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param courseDict mapping from course key to course itself

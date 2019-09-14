@@ -1,6 +1,6 @@
 <template>
     <div class="card my-4">
-        <div class="card-header container">
+        <div class="card-header w-100">
             <div class="row no-gutters justify-content-between text-center">
                 <div v-for="(item, idx) in info" :key="item.title" class="col" @click="goto(idx)">
                     <div class="stepper-icon mx-auto" :class="{ active: idx === curIdx }">

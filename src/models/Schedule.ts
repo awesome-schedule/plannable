@@ -504,21 +504,16 @@ export default class Schedule {
             let found = false;
             for (const blocks of this.days) {
                 for (const block of blocks) {
-                    if (!(block.section instanceof Event) && block.section.has(section)) {
+                    if (!(block.section instanceof Event) && block.section.has(section))
                         found = block.strong = true;
-                    }
                 }
             }
-            if (!found) {
-                this.place(section);
-            }
+            if (!found) this.place(section);
         }
 
         // sort currentCourses in alphabetical order
         this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
-
         for (const event of this.events) if (event.display) this.place(event);
-
         this.computeBlockPositions();
     }
 
@@ -566,8 +561,7 @@ export default class Schedule {
         // create empty objects for separated "All"
         this.separatedAll = Object.create(null);
         for (let i = 1; i < this.dateSeparators.length; i++) {
-            const dts = this.dateSeparators[i];
-            const temp = new Date(dts);
+            const temp = new Date(this.dateSeparators[i]);
             this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
 

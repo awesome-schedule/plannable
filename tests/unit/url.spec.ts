@@ -9,20 +9,20 @@ import test_filter from './test_data/test_filter.json';
 // display_keys: "combineSections","enableFuzzy","enableLog","expandOnEntering","multiSelect",
 // "showClasslistTitle","showInstructor","showRoom","showTime","showWeekend","standard"
 
+// get filter name initial asciis
+const c = 'c'.charCodeAt(0);
+const d = 'd'.charCodeAt(0);
+const l = 'l'.charCodeAt(0);
+const n = 'n'.charCodeAt(0);
+const s = 's'.charCodeAt(0);
+const v = 'v'.charCodeAt(0);
+const I = 'I'.charCodeAt(0);
+
 // filter: allowClosed, allowWaitlist, mode from binary
 describe('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty_schedule);
         const urlCompressed = compressJSON(test1);
-
-        // get filter name initial asciis
-        const c = 'c'.charCodeAt(0);
-        const d = 'd'.charCodeAt(0);
-        const l = 'l'.charCodeAt(0);
-        const n = 'n'.charCodeAt(0);
-        const s = 's'.charCodeAt(0);
-        const v = 'v'.charCodeAt(0);
-        const I = 'I'.charCodeAt(0);
 
         // display
         const display_test = urlCompressed[4];
@@ -74,15 +74,6 @@ describe('url convertJsonToArray test', () => {
         const test1 = JSON.stringify(mySchedule2019Fall);
         const urlCompressed = compressJSON(test1);
 
-        // get filter name initial asciis
-        const c = 'c'.charCodeAt(0);
-        const d = 'd'.charCodeAt(0);
-        const l = 'l'.charCodeAt(0);
-        const n = 'n'.charCodeAt(0);
-        const s = 's'.charCodeAt(0);
-        const v = 'v'.charCodeAt(0);
-        const I = 'I'.charCodeAt(0);
-
         expect(urlCompressed[0]).toEqual('mySchedule2019Fall');
         // display
         const display_test = urlCompressed[4];
@@ -133,15 +124,6 @@ describe('url convertJsonToArray test', () => {
     it('test_filter', () => {
         const test1 = JSON.stringify(test_filter);
         const urlCompressed = compressJSON(test1);
-
-        // get filter name initial asciis
-        const c = 'c'.charCodeAt(0);
-        const d = 'd'.charCodeAt(0);
-        const l = 'l'.charCodeAt(0);
-        const n = 'n'.charCodeAt(0);
-        const s = 's'.charCodeAt(0);
-        const v = 'v'.charCodeAt(0);
-        const I = 'I'.charCodeAt(0);
 
         expect(urlCompressed[0]).toEqual('test_filter');
 

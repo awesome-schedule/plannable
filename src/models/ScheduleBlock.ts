@@ -39,16 +39,18 @@ export default class ScheduleBlock {
     private readonly endMin: number;
 
     /**
-     * @param backgroundColor background color in hex, e.g. `#ffffff`
+     * @param background background color in hex, e.g. `#ffffff`
      * @param start start time in 24hr format: `13:00`
      * @param end end time in 24hr format: `15:00`
      * @param section the stuff contained in this block
      */
     constructor(
-        public readonly backgroundColor: string,
+        public readonly background: string,
         public readonly start: string,
         public readonly end: string,
-        public readonly section: Section | Course | Event
+        public readonly section: Section | Course | Event,
+        public readonly foreground = '#000',
+        public readonly foregroundLight = '#333'
     ) {
         this.startMin = hr24toInt(start);
         this.endMin = hr24toInt(end);

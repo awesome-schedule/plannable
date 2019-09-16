@@ -102,7 +102,7 @@
                         <li
                             v-if="Object.keys(separatedCourses[crs.key]).length > 1"
                             :key="key"
-                            class="list-group-item list-group-item-action class-section py-2"
+                            class="list-group-item list-group-item-action py-2 pl-3 pr-0"
                             title="click to select all sections in this time period"
                             @click="selectAll(value.key, value)"
                         >
@@ -216,6 +216,5 @@
 .class-section {
     padding: 0.1rem 0 0.1rem 1rem;
     margin: 0;
-    cursor: pointer;
 }
 </style>

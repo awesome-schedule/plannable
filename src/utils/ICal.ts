@@ -86,7 +86,7 @@ export function toICal(schedule: Schedule) {
                     ical += 'SUMMARY:' + section.department + ' ' + section.number + '\r\n';
                     ical += 'DESCRIPTION:' + section.title + '\r\n';
                     ical += 'LOCATION:' + m.room + '\r\n';
-                    ical += 'COLOR:' + sb.backgroundColor + '\r\n';
+                    ical += 'COLOR:' + sb.background + '\r\n';
                     ical += 'END:VEVENT\r\n';
                 }
             } else if (sb.section instanceof Event) {
@@ -119,7 +119,7 @@ export function toICal(schedule: Schedule) {
                 if (sb.section.description)
                     ical += 'DESCRIPTION:' + sb.section.description + '\r\n';
                 if (sb.section.room) ical += 'LOCATION:' + sb.section.room + '\r\n';
-                ical += 'COLOR:' + sb.backgroundColor + '\r\n';
+                ical += 'COLOR:' + sb.background + '\r\n';
                 ical += 'END:VEVENT\r\n';
             }
         }

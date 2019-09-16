@@ -199,6 +199,9 @@
 .sidebar .list-group-item:not(.list-group-item-action) {
     background-color: #f8f8f8;
 }
+.list-group-item-action {
+    cursor: pointer;
+}
 .tab-bar {
     position: fixed;
     top: 0;

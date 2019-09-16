@@ -1,6 +1,30 @@
 <template>
     <nav class="bg-light sidebar">
         <div class="btn bg-info nav-btn">
+            Color Schemes
+        </div>
+        <ul class="list-group list-group-flush mx-1 text-center">
+            <li
+                v-for="(scheme, idx) in colorSchemes"
+                :key="scheme.name"
+                class="list-group-item list-group-item-action px-1"
+                :title="scheme.description"
+                @click="selectScheme(+idx)"
+            >
+                <strong>{{ scheme.name }}</strong>
+                <div class="row no-gutters">
+                    <div
+                        v-for="color in scheme.colors"
+                        :key="color"
+                        class="col"
+                        :style="'background-color:' + color"
+                    >
+                        &nbsp;
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <div class="btn bg-info nav-btn">
             Palette
         </div>
         <ul class="list-group list-group-flush mx-1">

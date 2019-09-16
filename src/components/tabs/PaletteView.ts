@@ -65,4 +65,14 @@ export default class Palette extends Store {
     convertKey(key: string) {
         return window.catalog.convertKey(key, this.schedule.currentSchedule);
     }
+    get colorSchemes() {
+        return Schedule.bgColors;
+    }
+    selectScheme(scheme: number) {
+        Schedule.options.colorScheme = scheme;
+        this.schedule.currentSchedule.computeSchedule();
+    }
+    get currentScheme() {
+        return Schedule.options.colorScheme;
+    }
 }

@@ -66,7 +66,7 @@ export default class Schedule {
 
     public static readonly bgColors = [
         {
-            name: 'light',
+            name: 'light-13',
             description: '',
             colors: [
                 '#7ef7f3',
@@ -85,7 +85,7 @@ export default class Schedule {
             ]
         },
         {
-            name: '',
+            name: 'dark-11',
             description: '',
             colors: [
                 '#f7867e',

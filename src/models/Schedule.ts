@@ -49,36 +49,61 @@ export interface ScheduleJSON {
     events: Event[];
 }
 
-interface ScheduleOptions {
-    multiSelect: boolean;
-    combineSections: boolean;
-}
-
 /**
  * Schedule handles the storage, access, mutation and render of courses and events.
  * @requires window.catalog
  */
 export default class Schedule {
-    public static readonly options: ScheduleOptions = Object.seal({
+    public static readonly options = Object.seal({
         combineSections: true,
-        multiSelect: true
+        multiSelect: true,
+        colorScheme: 0
     });
 
-    public static readonly bgColors: readonly string[] = [
-        '#f7867e',
-        '#ffb74c',
-        '#82677E',
-        '#2C577C',
-        '#6D838A',
-        '#00a0a0',
-        '#355dff',
-        '#7790ff',
-        '#9B5656',
-        '#CC9393',
-        '#993D5F'
-    ];
+    public static get colors() {
+        return Schedule.bgColors[Schedule.options.colorScheme].colors;
+    }
 
-    public static savedColors: { [x: string]: string } = {};
+    public static readonly bgColors = [
+        {
+            name: 'light',
+            description: '',
+            colors: [
+                '#7ef7f3',
+                '#f9acb4',
+                '#bdfc8f',
+                '#749afc',
+                '#f49ffc',
+                '#acd7f9',
+                '#b5fcff',
+                '#f4af9c',
+                '#ff8ca7',
+                '#ef73d4',
+                '#aef495',
+                '#74c9e0',
+                '#ffe396'
+            ]
+        },
+        {
+            name: '',
+            description: '',
+            colors: [
+                '#f7867e',
+                '#ffb74c',
+                '#82677E',
+                '#2C577C',
+                '#6D838A',
+                '#00a0a0',
+                '#355dff',
+                '#7790ff',
+                '#9B5656',
+                '#CC9393',
+                '#993D5F'
+            ]
+        }
+    ] as const;
+
+    public static savedColors: { [key: string]: string } = {};
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
@@ -285,7 +310,7 @@ export default class Schedule {
         this.All = {};
         this.days = [[], [], [], [], [], [], []];
         this._preview = null;
-        this.colorSlots = Array.from({ length: Schedule.bgColors.length }, () => new Set<string>());
+        this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set<string>());
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};
@@ -311,9 +336,10 @@ export default class Schedule {
         if (userColor) {
             return userColor;
         }
-        const idx = obj.hash() % Schedule.bgColors.length;
+        const colors = Schedule.colors;
+        const idx = obj.hash() % colors.length;
         this.colorSlots[idx].add(obj.key);
-        return Schedule.bgColors[idx];
+        return colors[idx];
     }
 
     /**
@@ -908,3 +934,5 @@ export default class Schedule {
         }
     }
 }
+
+(window as any).Schedule = Schedule;

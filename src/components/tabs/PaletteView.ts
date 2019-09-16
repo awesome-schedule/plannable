@@ -42,19 +42,21 @@ export default class Palette extends Store {
      * @note colors must always be recomputed because `Schedule.savedColors` is not a reactive property
      */
     courseColors() {
+        const colors = Schedule.colors;
         return this.colorEntries()
             .concat(
                 this.schedule.currentSchedule.colorSlots.reduce<[string, string][]>(
-                    (arr, bucket, i) =>
-                        arr.concat(
-                            [...bucket]
-                                .filter(
-                                    key =>
-                                        this.schedule.currentSchedule.has(key, true) &&
-                                        !(key in this.palette.savedColors)
-                                )
-                                .map(x => [x, Schedule.bgColors[i]])
-                        ),
+                    (arr, bucket, i) => {
+                        for (const key of bucket) {
+                            if (
+                                !(key in this.palette.savedColors) &&
+                                this.schedule.currentSchedule.has(key, true)
+                            ) {
+                                arr.push([key, colors[i]]);
+                            }
+                        }
+                        return arr;
+                    },
                     []
                 )
             )

@@ -16,6 +16,7 @@ import Hashable from './Hashable';
 import { Day, dayToInt, TYPES, DAYS } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
+import ColorSchemes from '../data/ColorSchemes';
 
 /**
  * the structure of a Section in local storage
@@ -61,47 +62,8 @@ export default class Schedule {
     });
 
     public static get colors() {
-        return Schedule.bgColors[Schedule.options.colorScheme].colors;
+        return ColorSchemes[Schedule.options.colorScheme].colors;
     }
-
-    public static readonly bgColors = [
-        {
-            name: 'light-13',
-            description: '',
-            colors: [
-                '#7ef7f3',
-                '#f9acb4',
-                '#bdfc8f',
-                '#749afc',
-                '#f49ffc',
-                '#acd7f9',
-                '#b5fcff',
-                '#f4af9c',
-                '#ff8ca7',
-                '#ef73d4',
-                '#aef495',
-                '#74c9e0',
-                '#ffe396'
-            ]
-        },
-        {
-            name: 'dark-11',
-            description: '',
-            colors: [
-                '#f7867e',
-                '#ffb74c',
-                '#82677E',
-                '#2C577C',
-                '#6D838A',
-                '#00a0a0',
-                '#355dff',
-                '#7790ff',
-                '#9B5656',
-                '#CC9393',
-                '#993D5F'
-            ]
-        }
-    ] as const;
 
     public static savedColors: { [key: string]: string } = {};
 
@@ -787,7 +749,7 @@ export default class Schedule {
      */
     public cleanSchedule() {
         this.days = [[], [], [], [], [], [], []];
-        this.colorSlots.forEach(x => x.clear());
+        this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set());
         this.totalCredit = 0;
         this.currentCourses = [];
         this.currentIds = {};

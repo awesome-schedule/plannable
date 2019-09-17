@@ -49,8 +49,8 @@ export default class ScheduleBlock {
         public readonly start: string,
         public readonly end: string,
         public readonly section: Section | Course | Event,
-        public readonly foreground = '#000',
-        public readonly foregroundLight = '#333'
+        public readonly foreground = '#fff',
+        public readonly foregroundLight = '#eee'
     ) {
         this.startMin = hr24toInt(start);
         this.endMin = hr24toInt(end);

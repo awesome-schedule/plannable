@@ -28,9 +28,14 @@ export default class CourseBlock extends Store {
     get startPx() {
         return this.getPx(this.scheduleBlock.start);
     }
-
     get endPx() {
         return this.getPx(this.scheduleBlock.end);
+    }
+    get style() {
+        return {
+            'font-size': '11px',
+            color: this.scheduleBlock.foregroundLight
+        } as const;
     }
 
     getPx(time: string) {

@@ -148,6 +148,22 @@
                 </div>
             </div>
         </div>
+        <div class="form-group row no-gutters mt-0 mb-1 mx-2">
+            <div class="col-md-6">
+                <label for="showSuffix" class="m-0">Show Suffix</label>
+            </div>
+            <div class="col-md-6">
+                <div class="custom-control custom-checkbox ml-1">
+                    <input
+                        id="showSuffix"
+                        v-model="display.showSuffix"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label for="showSuffix" class="custom-control-label"></label>
+                </div>
+            </div>
+        </div>
         <div class="form-group row no-gutters mt-0 mb-2 mx-2">
             <div class="col-lg-6">
                 <label for="displayInstructor" class="m-0">Time Options</label>

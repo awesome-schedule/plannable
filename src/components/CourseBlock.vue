@@ -8,21 +8,25 @@
             'background-color': scheduleBlock.background,
             color: scheduleBlock.foreground
         }"
-        @click="showModal"
+        @click="showModal()"
     >
         <template v-if="!status.isMobile">
             <div v-if="isSection" class="ml-2">
                 <div class="mt-2" style="font-size:13px">
-                    {{ firstSec.displayName }}
+                    {{
+                        display.showSuffix
+                            ? firstSec.displayName
+                            : `${firstSec.department} ${firstSec.number}-${firstSec.section}`
+                    }}
                 </div>
-                <div v-if="display.showInstructor" class="crs-info">
+                <div v-if="display.showInstructor" :style="style">
                     {{ firstSec.instructors.join(', ') }}
                 </div>
-                <div v-if="display.showRoom && room" class="crs-info">
+                <div v-if="display.showRoom && room" :style="style">
                     {{ room }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" class="crs-info">
+                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" :style="style">
                         {{ meeting.days }}
                     </div>
                 </template>
@@ -36,11 +40,11 @@
                     {{ firstSec.type }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" class="crs-info">
+                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" :style="style">
                         {{ meeting.days }}
                     </div>
                 </template>
-                <div v-if="display.showInstructor" class="crs-info">
+                <div v-if="display.showInstructor" :style="style">
                     {{ firstSec.instructors.join(', ') }} and
                     {{
                         scheduleBlock.section.sections.reduce(
@@ -50,7 +54,7 @@
                     }}
                     more
                 </div>
-                <div v-if="display.showRoom" class="crs-info">
+                <div v-if="display.showRoom" :style="style">
                     {{ firstSec.meetings[0].room }} and
                     {{ scheduleBlock.section.sections.length - 1 }} more
                 </div>
@@ -59,11 +63,11 @@
                 <div class="mt-2">
                     {{ scheduleBlock.section.title }}
                 </div>
-                <div class="crs-info">
+                <div :style="style">
                     {{ scheduleBlock.section.days }}<br />
                     {{ scheduleBlock.section.room }}
                 </div>
-                <div class="crs-info" v-html="scheduleBlock.section.description"></div>
+                <div :style="style" v-html="scheduleBlock.section.description"></div>
             </div>
         </template>
         <template v-else class="mt-2 ml-2" style="font-size:10px">
@@ -102,10 +106,5 @@
 
 .courseBlock:hover {
     box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
-}
-
-.crs-info {
-    /* color: #eaeaea; */
-    font-size: 11px;
 }
 </style>

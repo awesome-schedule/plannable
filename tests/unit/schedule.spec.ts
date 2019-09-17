@@ -1,10 +1,12 @@
 import Schedule from '@/models/Schedule';
 import Section from '@/models/Section';
 import * as Utils from '@/utils';
+import ColorSchemes from '@/data/ColorSchemes';
 
 describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {
-        const len = Schedule.bgColors.length;
+        const colors = ColorSchemes[0].colors;
+        const len = colors.length;
         const frequencies = new Float32Array(len);
         const courseDict = window.catalog.courseDict;
         for (const key in courseDict) {

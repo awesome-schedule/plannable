@@ -15,6 +15,7 @@ export interface DisplayState {
     showRoom: boolean;
     showInstructor: boolean;
     showClasslistTitle: boolean;
+    showSuffix: boolean;
 
     // grid schedule options
     fullHeight: number;
@@ -95,6 +96,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     showRoom = true;
     showInstructor = true;
     showClasslistTitle = true;
+    showSuffix = true;
     standard = false;
     multiSelect = true;
     combineSections = true;

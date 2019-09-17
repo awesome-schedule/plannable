@@ -3,7 +3,7 @@
         <div class="btn bg-info nav-btn">
             Color Schemes
         </div>
-        <ul class="list-group list-group-flush mx-1 text-center">
+        <ul class="list-group list-group-flush ml-1 text-center schemes">
             <li
                 v-for="(scheme, idx) in colorSchemes"
                 :key="scheme.name"
@@ -70,3 +70,18 @@
 </template>
 
 <script lang="ts" src="./PaletteView.ts"></script>
+
+<style scoped>
+.schemes {
+    max-height: 30vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+.schemes::-webkit-scrollbar {
+    width: 5px;
+}
+.schemes::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #ccc;
+}
+</style>

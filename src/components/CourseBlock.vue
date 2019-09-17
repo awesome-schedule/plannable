@@ -98,6 +98,8 @@
     overflow-y: hidden;
     overflow-x: hidden;
     position: absolute;
+    text-shadow: 0px 0px 4px #555;
+    /* text-shadow: -1px 0 #222, 0 1px black, 1px 0 black, 0 -1px black; */
 }
 
 .block-strong {

@@ -125,6 +125,18 @@ export function isStringArray(x: any): x is string[] {
     return x instanceof Array && typeof x[0] === 'string';
 }
 
+export function rgb2hex(r: number, g: number, b: number) {
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).substring(1);
+}
+
+export function hex2rgb(hex: string): [number, number, number] {
+    const a = [];
+    for (let i = 1; i < 7; i += 2) {
+        a.push(parseInt(hex.substring(i, i + 2), 16));
+    }
+    return a as any;
+}
+
 type GithubResponseData = {
     url: string;
     assets_url: string;

@@ -47,7 +47,7 @@ export function highlightMatch<T extends string>(
 export function hashCode(str: string): number {
     let hval = 0x811c9dc5;
 
-    for (let i = 0, l = str.length; i < l; i++) {
+    for (let i = 0; i < str.length; i++) {
         hval ^= str.charCodeAt(i);
         hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
     }

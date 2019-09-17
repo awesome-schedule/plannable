@@ -102,8 +102,7 @@ export function computeTimeArrLens(timeArrayList: TimeArray[][], timeArrLens: Ui
     const numCourses = timeArrayList.length;
     for (let i = 0; i < numCourses; i++) {
         const arrs = timeArrayList[i];
-        const len = arrs.length;
-        for (let j = 0; j < len; j++) {
+        for (let j = 0; j < arrs.length; j++) {
             timeArrLens[j * numCourses + i] = arrs[j].length;
         }
     }
@@ -125,11 +124,9 @@ function computeConflict(
             const arrs1 = timeArrayList[i],
                 arrs2 = timeArrayList[j],
                 dates1 = dateList[i],
-                dates2 = dateList[j],
-                len1 = arrs1.length,
-                len2 = arrs2.length;
-            for (let m = 0; m < len1; m++) {
-                for (let n = 0; n < len2; n++) {
+                dates2 = dateList[j];
+            for (let m = 0; m < arrs1.length; m++) {
+                for (let n = 0; n < arrs2.length; n++) {
                     const i1 = m * numCourses + i, // courses are in the columns
                         i2 = n * numCourses + j;
                     // conflict is symmetric

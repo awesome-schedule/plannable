@@ -247,12 +247,15 @@ class ScheduleEvaluator {
         count = 0,
         timeLen = 0
     ) {
-        // note: timeLen is typically about 50*count, which takes most space
-        this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);
-        const indices = (this.indices = new Uint32Array(this.buf, 0, count));
-        for (let i = 0; i < count; i++) indices[i] = i;
+        {
+            // note: timeLen is typically about 50*count, which takes the most space
+            // previous three arrays are 32-bit typed arrays, so no byte alignment is needed
+            this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);
+            const indices = (this.indices = new Uint32Array(this.buf, 0, count));
+            for (let i = 0; i < count; i++) indices[i] = i;
+            this.coeffs = new Float32Array(this.buf, count * 4, count);
+        }
 
-        this.coeffs = new Float32Array(this.buf, count * 4, count);
         const offsets = (this.offsets = new Uint32Array(this.buf, count * 8, count));
         const blocks = (this.blocks = new Int16Array(this.buf, count * 12));
 

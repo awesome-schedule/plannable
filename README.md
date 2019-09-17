@@ -1,9 +1,9 @@
 <p align="center"><img src="./src/assets/cover.jpg" width="560px" alt="cover"/></p>
 
 <p align="center">
-    <a href="https://app.codacy.com/app/hanzhi713/plannable?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=awesome-schedule/plannable&amp;utm_campaign=Badge_Grade_Dashboard"
+    <a href="https://www.codacy.com/manual/hanzhi713/plannable?utm_source=github.com&utm_medium=referral&utm_content=awesome-schedule/plannable&utm_campaign=Badge_Grade"
         rel="nofollow">
-        <img src="https://api.codacy.com/project/badge/Grade/b323d65880a148aa85e5a811e4791d53" alt="Codacy Badge" />
+        <img src="https://api.codacy.com/project/badge/Grade/255cd2c2c4d4459f81bbd9c685471ef8" alt="Codacy Badge" />
     </a>
     <a href="https://www.gnu.org/licenses/gpl-3.0" rel="nofollow">
         <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3" />

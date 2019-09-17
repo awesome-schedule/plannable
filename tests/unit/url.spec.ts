@@ -19,7 +19,7 @@ const v = 'v'.charCodeAt(0);
 const I = 'I'.charCodeAt(0);
 
 // filter: allowClosed, allowWaitlist, mode from binary
-describe('url convertJsonToArray test', () => {
+describe.skip('url convertJsonToArray test', () => {
     it('empty_schedules', () => {
         const test1 = JSON.stringify(empty_schedule);
         const urlCompressed = compressJSON(test1);

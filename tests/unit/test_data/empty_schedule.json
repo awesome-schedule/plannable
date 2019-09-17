@@ -14,12 +14,14 @@
         "enableLog": false,
         "enableFuzzy": false,
         "showWeekend": true,
+        "showSuffix": true,
         "_fullHeight": 40,
         "_partialHeight": 25,
         "_maxNumSchedules": 100000,
         "_numSearchResults": 6,
         "_earliest": "08:00",
-        "_latest": "19:00"
+        "_latest": "19:00",
+        "_colorScheme": 0
     },
     "filter": {
         "timeSlots": [],

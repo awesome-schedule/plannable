@@ -104,7 +104,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     expandOnEntering = false;
     enableLog = false;
     enableFuzzy = false;
-    showWeekend = true;
+    showWeekend = false;
 
     private _fullHeight = 40;
     private _partialHeight = 30;

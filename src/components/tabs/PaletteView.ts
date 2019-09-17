@@ -18,6 +18,10 @@ import ColorSchemes from '@/data/ColorSchemes';
  */
 @Component
 export default class Palette extends Store {
+    get colorSchemes() {
+        return ColorSchemes;
+    }
+
     set(key: string, color: string) {
         this.$set(this.palette.savedColors, key, color);
     }
@@ -66,14 +70,7 @@ export default class Palette extends Store {
     convertKey(key: string) {
         return window.catalog.convertKey(key, this.schedule.currentSchedule);
     }
-    get colorSchemes() {
-        return ColorSchemes;
-    }
-    selectScheme(scheme: number) {
-        Schedule.options.colorScheme = scheme;
-        this.schedule.currentSchedule.computeSchedule();
-    }
-    get currentScheme() {
+    currentScheme() {
         return Schedule.options.colorScheme;
     }
 }

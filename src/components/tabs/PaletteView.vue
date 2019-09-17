@@ -3,13 +3,14 @@
         <div class="btn bg-info nav-btn">
             Color Schemes
         </div>
-        <ul class="list-group list-group-flush ml-1 text-center schemes">
+        <ul class="list-group list-group-flush ml-2 mr-1 my-2 text-center schemes">
             <li
                 v-for="(scheme, idx) in colorSchemes"
                 :key="scheme.name"
                 class="list-group-item list-group-item-action px-1"
+                :class="{ active: +idx === currentScheme() }"
                 :title="scheme.description"
-                @click="selectScheme(+idx)"
+                @click="display.colorScheme = idx"
             >
                 <strong>{{ scheme.name }}</strong>
                 <div class="row no-gutters">

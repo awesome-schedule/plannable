@@ -28,6 +28,7 @@ export interface DisplayState {
     multiSelect: boolean;
     combineSections: boolean;
     maxNumSchedules: number;
+    colorScheme: number;
 
     // search options
     expandOnEntering: boolean;
@@ -112,6 +113,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     private _earliest = '08:00';
     private _latest = '19:00';
     private _width = 100;
+    private _colorScheme = 0;
 
     // validators
     get fullHeight() {
@@ -155,6 +157,12 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
     }
     set width(e) {
         this._width = bound(e, 10, 1000);
+    }
+    get colorScheme() {
+        return this._colorScheme;
+    }
+    set colorScheme(e) {
+        this._colorScheme = e;
     }
 
     // when doing serialization, we only record the enumerable properties, excluding the getters

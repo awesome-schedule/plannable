@@ -196,6 +196,15 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         saveStatus();
     }
 
+    /**
+     * recompute all of the proposed schedules. meaning of params see [[Schedule.computeSchedule]]
+     * @param sync
+     * @param time
+     */
+    recomputeAll(sync = true, time = 10) {
+        this.proposedSchedules.forEach(s => s.computeSchedule(sync, time));
+    }
+
     fromJSON(obj: Partial<ScheduleStateJSON>) {
         const defaultState = this.getDefault();
 

@@ -55,18 +55,15 @@ export interface ScheduleJSON {
  * @requires window.catalog
  */
 export default class Schedule {
-    public static readonly options = Object.seal({
+    public static readonly options = {
         combineSections: true,
         multiSelect: true,
         colorScheme: 0
-    });
-
+    };
+    public static savedColors: { [key: string]: string } = {};
     public static get colors() {
         return ColorSchemes[Schedule.options.colorScheme].colors;
     }
-
-    public static savedColors: { [key: string]: string } = {};
-
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
         const shortAll: ScheduleAll<number[]> = {};
@@ -193,8 +190,6 @@ export default class Schedule {
                 schedule.All[key] = sections;
             }
         }
-        schedule.constructDateSeparator();
-        schedule.computeSchedule();
         if (warnings.length) {
             return {
                 level: 'warn',
@@ -256,8 +251,8 @@ export default class Schedule {
      * [1567457860885, 1567458860885]
      * ```
      */
-    public dateSeparators: number[] = [];
-    public separatedAll: { [date: string]: ScheduleAll } = {};
+    private dateSeparators: number[] = [];
+    private separatedAll: { [date: string]: ScheduleAll } = {};
     public dateSelector = -1;
 
     /**
@@ -283,8 +278,10 @@ export default class Schedule {
         } else {
             this.All = raw;
         }
-        this.constructDateSeparator();
-        this.computeSchedule();
+        if (!this.empty()) {
+            this.constructDateSeparator();
+            this.computeSchedule();
+        }
     }
 
     /**
@@ -505,7 +502,10 @@ export default class Schedule {
         this.computeBlockPositions();
     }
 
-    public constructDateSeparator() {
+    /**
+     * need to be called before `computeSchedule` if the `All` property is updated.
+     */
+    private constructDateSeparator() {
         const sections: Section[] = [];
         for (const key in this.All) {
             if (this.All[key] === -1) continue;
@@ -578,7 +578,7 @@ export default class Schedule {
      * for the array of schedule blocks provided, construct an adjacency list
      * to represent the conflicts between each pair of blocks
      */
-    public constructAdjList(blocks: ScheduleBlock[]) {
+    private constructAdjList(blocks: ScheduleBlock[]) {
         const len = blocks.length;
         const adjList: number[][] = blocks.map(() => []);
 
@@ -680,7 +680,7 @@ export default class Schedule {
      * place a `Section`/`Course`/`Event`/ into one of the `Mo` to `Su` array according to its `days` property
      * @remarks we can place a Course instance if all of its sections occur at the same time
      */
-    public place(course: Section | Course | Event) {
+    private place(course: Section | Course | Event) {
         if (course instanceof Section) {
             const color = this.getColor(course);
             for (const meeting of course.meetings) {

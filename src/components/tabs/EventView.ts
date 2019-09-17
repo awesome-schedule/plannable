@@ -140,7 +140,7 @@ export default class EventView extends Store {
         this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));
         this.status.eventToEdit = null;
         if (regenerate) this.generateSchedules();
-        else this.schedule.currentSchedule.computeSchedule();
+        else this.schedule.recomputeAll();
         this.saveStatus();
     }
 }

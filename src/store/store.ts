@@ -228,6 +228,10 @@ export default class Store extends Vue {
             this.schedule.fromJSON(newStore.schedule || {});
             this.palette.fromJSON(newStore.palette || {});
         }
+        Schedule.options.colorScheme = this.display.colorScheme;
+        Schedule.options.combineSections = this.display.combineSections;
+        Schedule.options.multiSelect = this.display.multiSelect;
+        this.schedule.recomputeAll();
         if (this.schedule.generated) this.generateSchedules();
         else this.schedule.switchSchedule(false);
     }

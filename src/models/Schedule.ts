@@ -241,6 +241,9 @@ export default class Schedule {
      * keep track of used colors to avoid color collision
      */
     public colorSlots: Set<string>[];
+    /**
+     * the `computeSchedule` handle returned by `setTimeout`
+     */
     public pendingCompute = 0;
 
     /**
@@ -251,14 +254,17 @@ export default class Schedule {
      * [1567457860885, 1567458860885]
      * ```
      */
-    private dateSeparators: number[] = [];
-    private separatedAll: { [date: string]: ScheduleAll } = {};
+    public dateSeparators: number[] = [];
+    /**
+     * the index of the currently selected separator (in `dateSeparators`)
+     */
     public dateSelector = -1;
 
     /**
      * the currently previewed (hovered) section
      */
     private _preview: Section | null;
+    private separatedAll: { [date: string]: ScheduleAll } = {};
 
     /**
      * Construct a `Schedule` object from its raw representation

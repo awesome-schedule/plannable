@@ -26,10 +26,10 @@ import GridSchedule from './components/GridSchedule.vue';
 import Pagination from './components/Pagination.vue';
 
 // modals
-import CourseModal from './components/CourseModal.vue';
-import SectionModal from './components/SectionModal.vue';
-import URLModal from './components/URLModal.vue';
-import VersionModal from './components/VersionModal.vue';
+import CourseModal from './components/modals/CourseModal.vue';
+import SectionModal from './components/modals/SectionModal.vue';
+import URLModal from './components/modals/URLModal.vue';
+import VersionModal from './components/modals/VersionModal.vue';
 
 import randomColor from 'randomcolor';
 import { backend } from './config';

@@ -10,7 +10,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <img class="img-fluid" src="../assets/cover.jpg" alt="cover.jpg" />
+                <img class="img-fluid" src="../../assets/cover.jpg" alt="cover.jpg" />
                 <div id="release-note-body" class="mx-4 my-4">
                     Loading release note...
                 </div>

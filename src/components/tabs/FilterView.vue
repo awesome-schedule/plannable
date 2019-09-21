@@ -22,7 +22,7 @@
                         :key="j"
                         :class="'btn btn-outline-secondary' + (value[j] ? ' active' : '')"
                         type="button"
-                        @click="updateFilterDay(i, j)"
+                        @click="updateFilterDay(i, +j)"
                     >
                         {{ day }}
                     </button>

@@ -62,7 +62,7 @@
                 <div :style="style" v-html="section.description"></div>
             </div>
         </template>
-        <template v-else class="mt-2 ml-2" style="font-size:10px">
+        <div v-else class="mt-2 ml-2" style="font-size:10px">
             <div v-if="isSection(section)">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
@@ -76,7 +76,7 @@
             <div v-else-if="isEvent(section)">
                 {{ section.days }}
             </div>
-        </template>
+        </div>
     </div>
 </template>
 

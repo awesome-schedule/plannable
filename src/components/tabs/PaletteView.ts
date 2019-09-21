@@ -9,7 +9,7 @@ import Schedule from '@/models/Schedule';
 import Store from '@/store';
 import randomColor from 'randomcolor';
 import { Component } from 'vue-property-decorator';
-import ColorSchemes from '@/data/ColorSchemes';
+import colorSchemes from '@/data/ColorSchemes';
 
 /**
  * the component for customizing colors of classes and events
@@ -19,7 +19,7 @@ import ColorSchemes from '@/data/ColorSchemes';
 @Component
 export default class Palette extends Store {
     get colorSchemes() {
-        return ColorSchemes;
+        return colorSchemes;
     }
 
     set(key: string, color: string) {
@@ -69,8 +69,5 @@ export default class Palette extends Store {
     }
     convertKey(key: string) {
         return window.catalog.convertKey(key, this.schedule.currentSchedule);
-    }
-    currentScheme() {
-        return Schedule.options.colorScheme;
     }
 }

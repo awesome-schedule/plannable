@@ -26,7 +26,8 @@
         <div id="footer-link">
             <div class="row justify-content-between w-100">
                 <div class="col-xs-auto pl-3 align-self-center" style="font-size: 1.1rem">
-                    Get Connected With Us
+                    Follow us on GitHub, submit a bug report by opening an issue or filling the
+                    google form.
                 </div>
                 <div class="col-xs-auto align-self-center">
                     <a
@@ -40,8 +41,8 @@
                     <a
                         class="ml-4 mr-5 link-btn"
                         target="_blank"
-                        title="File an issue on GitHub"
-                        href="https://github.com/awesome-schedule/plannable/issues"
+                        title="Submit a bug report"
+                        href="https://forms.gle/z8pNs8JtYbZ9dveC8"
                     >
                         <i class="fas fa-exclamation-circle"></i>
                     </a>

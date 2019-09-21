@@ -11,32 +11,30 @@
         @click="showModal()"
     >
         <template v-if="!status.isMobile">
-            <div v-if="isSection" class="ml-2">
+            <div v-if="isSection(section)" class="ml-2">
                 <div class="mt-2" style="font-size:13px">
                     {{
                         display.showSuffix
-                            ? firstSec.displayName
-                            : `${firstSec.department} ${firstSec.number}-${firstSec.section}`
+                            ? section.displayName
+                            : `${section.department} ${section.number}-${section.section}`
                     }}
                 </div>
                 <div v-if="display.showInstructor" :style="style">
-                    {{ firstSec.instructors.join(', ') }}
+                    {{ section.instructors.join(', ') }}
                 </div>
                 <div v-if="display.showRoom && room" :style="style">
                     {{ room }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" :style="style">
+                    <div v-for="meeting in section.meetings" :key="meeting.days" :style="style">
                         {{ meeting.days }}
                     </div>
                 </template>
             </div>
-            <div v-if="isCourse" class="ml-2">
+            <div v-else-if="isCourse(section)" class="ml-2">
                 <div class="mt-2" style="font-size:13px">
                     {{ firstSec.department }}
-                    {{ firstSec.number }}-{{ firstSec.section }} +{{
-                        scheduleBlock.section.sections.length - 1
-                    }}
+                    {{ firstSec.number }}-{{ firstSec.section }} +{{ section.sections.length - 1 }}
                     {{ firstSec.type }}
                 </div>
                 <template v-if="display.showTime">
@@ -46,43 +44,37 @@
                 </template>
                 <div v-if="display.showInstructor" :style="style">
                     {{ firstSec.instructors.join(', ') }} and
-                    {{
-                        scheduleBlock.section.sections.reduce(
-                            (acc, x) => acc + x.instructors.length,
-                            0
-                        ) - 1
-                    }}
+                    {{ section.sections.reduce((acc, x) => acc + x.instructors.length, 0) - 1 }}
                     more
                 </div>
                 <div v-if="display.showRoom" :style="style">
-                    {{ firstSec.meetings[0].room }} and
-                    {{ scheduleBlock.section.sections.length - 1 }} more
+                    {{ firstSec.meetings[0].room }} and {{ section.sections.length - 1 }} more
                 </div>
             </div>
-            <div v-if="isEvent" class="ml-2">
+            <div v-else-if="isEvent(section)" class="ml-2">
                 <div class="mt-2">
-                    {{ scheduleBlock.section.title }}
+                    {{ section.title }}
                 </div>
                 <div :style="style">
-                    {{ scheduleBlock.section.days }}<br />
-                    {{ scheduleBlock.section.room }}
+                    {{ section.days }}<br />
+                    {{ section.room }}
                 </div>
-                <div :style="style" v-html="scheduleBlock.section.description"></div>
+                <div :style="style" v-html="section.description"></div>
             </div>
         </template>
         <template v-else class="mt-2 ml-2" style="font-size:10px">
-            <div v-if="isSection">
+            <div v-if="isSection(section)">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
                 {{ firstSec.section }}
             </div>
-            <div v-if="isCourse">
+            <div v-else-if="isCourse(section)">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />
-                {{ firstSec.section }} +{{ scheduleBlock.section.length - 1 }}
+                {{ firstSec.section }} + {{ section.sections.length - 1 }}
             </div>
-            <div v-if="isEvent">
-                {{ scheduleBlock.section.days }}
+            <div v-else-if="isEvent(section)">
+                {{ section.days }}
             </div>
         </template>
     </div>

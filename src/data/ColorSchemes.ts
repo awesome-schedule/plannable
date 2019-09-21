@@ -204,4 +204,4 @@ export default [
             '#ffe396'
         ]
     }
-];
+] as const;

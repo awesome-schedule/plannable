@@ -24,7 +24,9 @@ export default class CourseBlock extends Store {
     @Prop(Array) readonly heightInfo!: number[];
     @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
-
+    get section() {
+        return this.scheduleBlock.section;
+    }
     get startPx() {
         return this.getPx(this.scheduleBlock.start);
     }
@@ -55,7 +57,7 @@ export default class CourseBlock extends Store {
         const section = this.scheduleBlock.section;
         if (section instanceof Course) return section.getFirstSection();
         else if (section instanceof Section) return section;
-        return (section as any) as Section;
+        return section as any;
     }
 
     get room() {
@@ -73,25 +75,25 @@ export default class CourseBlock extends Store {
         }
         return null;
     }
-    get isSection() {
-        return this.scheduleBlock.section instanceof Section;
+    isSection(a: any): a is Section {
+        return a instanceof Section;
     }
-    get isEvent() {
-        return this.scheduleBlock.section instanceof Event;
+    isEvent(a: any): a is Event {
+        return a instanceof Event;
     }
-    get isCourse() {
-        return this.scheduleBlock.section instanceof Course;
+    isCourse(a: any): a is Course {
+        return a instanceof Course;
     }
 
     showModal() {
-        const section = this.scheduleBlock.section;
-        if (this.isSection) {
-            this.modal.showSectionModal(section as Section);
-        } else if (this.isCourse) {
-            this.modal.showCourseModal(section as Course);
-        } else if (this.isEvent) {
+        const section = this.section;
+        if (this.isSection(section)) {
+            this.modal.showSectionModal(section);
+        } else if (this.isCourse(section)) {
+            this.modal.showCourseModal(section);
+        } else if (this.isEvent(section)) {
             if (!this.status.sideBar.showEvent) this.status.switchSideBar('showEvent');
-            this.status.eventToEdit = section as Event;
+            this.status.eventToEdit = section;
         }
     }
 }

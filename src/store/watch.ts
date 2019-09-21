@@ -8,6 +8,7 @@
 import Schedule from '@/models/Schedule';
 import { Component, Watch } from 'vue-property-decorator';
 import Store from './store';
+import colorSchemes from '@/data/ColorSchemes';
 /**
  * the watch factory defines some watchers on the members in `Store`.
  * these watchers are defined outside of the `Store` class because they should only be registered once.
@@ -30,19 +31,19 @@ export default class WatchFactory extends Store {
 
     @Watch('display.multiSelect')
     private w0() {
-        Schedule.options.multiSelect = this.display.multiSelect;
+        Schedule.multiSelect = this.display.multiSelect;
         this.schedule.recomputeAll(false, 100);
     }
 
     @Watch('display.combineSections')
     private a() {
-        Schedule.options.combineSections = this.display.combineSections;
+        Schedule.combineSections = this.display.combineSections;
         this.schedule.recomputeAll(false, 100);
     }
 
     @Watch('display.colorScheme')
     private e() {
-        Schedule.options.colorScheme = this.display.colorScheme;
+        Schedule.colors = colorSchemes[this.display.colorScheme].colors;
         this.schedule.recomputeAll(false, 100);
     }
 

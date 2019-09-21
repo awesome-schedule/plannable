@@ -1,11 +1,11 @@
 import Schedule from '@/models/Schedule';
 import Section from '@/models/Section';
 import * as Utils from '@/utils';
-import ColorSchemes from '@/data/ColorSchemes';
+import colorSchemes from '@/data/ColorSchemes';
 
 describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {
-        const colors = ColorSchemes[0].colors;
+        const colors = colorSchemes[0].colors;
         const len = colors.length;
         const frequencies = new Float32Array(len);
         const courseDict = window.catalog.courseDict;
@@ -110,7 +110,7 @@ describe('Schedule Test', () => {
         const chem14105 = window.catalog.getCourse('chem14105');
         for (const i of chem14105.ids) schedule.update('chem14105', i);
         for (const i of window.catalog.getCourse('chem14114').ids) schedule.update('chem14114', i);
-        Schedule.options.combineSections = false;
+        Schedule.combineSections = false;
         schedule.computeSchedule();
         schedule.computeSchedule(false);
         expect(Object.values(schedule.days).reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(
@@ -135,7 +135,7 @@ describe('Schedule Test', () => {
         schedule.unhover('cs21105');
         schedule.unhover('cs21504');
 
-        Schedule.options.multiSelect = false;
+        Schedule.multiSelect = false;
         schedule.computeSchedule();
 
         schedule.update('cs21105', -1);

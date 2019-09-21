@@ -16,7 +16,6 @@ import Hashable from './Hashable';
 import { Day, dayToInt, TYPES, DAYS } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
-import ColorSchemes from '../data/ColorSchemes';
 
 /**
  * the structure of a Section in local storage
@@ -55,15 +54,11 @@ export interface ScheduleJSON {
  * @requires window.catalog
  */
 export default class Schedule {
-    public static readonly options = {
-        combineSections: true,
-        multiSelect: true,
-        colorScheme: 0
-    };
+    public static combineSections = true;
+    public static multiSelect = true;
     public static savedColors: { [key: string]: string } = {};
-    public static get colors() {
-        return ColorSchemes[Schedule.options.colorScheme].colors;
-    }
+    public static colors: readonly string[] = [];
+
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
         const shortAll: ScheduleAll<number[]> = {};
@@ -472,7 +467,7 @@ export default class Schedule {
                     this.currentIds[currentIdKey] = [sec.id.toString()];
                     this.place(sec);
                 } else if (sections.size > 0) {
-                    if (Schedule.options.multiSelect) {
+                    if (Schedule.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
                             catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
@@ -706,7 +701,7 @@ export default class Schedule {
                 for (const meeting of firstSec.meetings)
                     this.placeHelper(color, meeting.days, firstSec);
             } else {
-                if (Schedule.options.combineSections) {
+                if (Schedule.combineSections) {
                     const color = this.getColor(course);
                     for (const meeting of firstSec.meetings)
                         this.placeHelper(color, meeting.days, course);

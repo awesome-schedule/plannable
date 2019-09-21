@@ -23,6 +23,7 @@ import profile from './profile';
 import schedule, { ScheduleStateJSON, ScheduleStore } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
+import colorSchemes from '@/data/ColorSchemes';
 
 export interface SemesterStorage extends Expirable {
     name: string;
@@ -228,9 +229,9 @@ export default class Store extends Vue {
             this.schedule.fromJSON(newStore.schedule || {});
             this.palette.fromJSON(newStore.palette || {});
         }
-        Schedule.options.colorScheme = this.display.colorScheme;
-        Schedule.options.combineSections = this.display.combineSections;
-        Schedule.options.multiSelect = this.display.multiSelect;
+        Schedule.colors = colorSchemes[this.display.colorScheme].colors;
+        Schedule.combineSections = this.display.combineSections;
+        Schedule.multiSelect = this.display.multiSelect;
         this.schedule.recomputeAll();
         if (this.schedule.generated) this.generateSchedules();
         else this.schedule.switchSchedule(false);

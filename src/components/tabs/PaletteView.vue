@@ -8,9 +8,9 @@
                 v-for="(scheme, idx) in colorSchemes"
                 :key="scheme.name"
                 class="list-group-item list-group-item-action px-1"
-                :class="{ active: +idx === currentScheme() }"
+                :class="{ active: +idx === display.colorScheme }"
                 :title="scheme.description"
-                @click="display.colorScheme = idx"
+                @click="display.colorScheme = +idx"
             >
                 <strong>{{ scheme.name }}</strong>
                 <div class="row no-gutters">

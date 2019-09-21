@@ -202,6 +202,8 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
      * @param time
      */
     recomputeAll(sync = true, time = 10) {
+        if (this.currentSchedule !== this.proposedSchedule)
+            this.currentSchedule.computeSchedule(sync, time);
         this.proposedSchedules.forEach(s => s.computeSchedule(sync, time));
     }
 

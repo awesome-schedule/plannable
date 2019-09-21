@@ -81,7 +81,7 @@
                     id="schedule-width"
                     v-model.number="display.width"
                     min="10"
-                    step="1"
+                    step="5"
                     max="1000"
                     type="number"
                     class="form-control form-control-sm"

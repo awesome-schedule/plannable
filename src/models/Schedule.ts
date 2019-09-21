@@ -16,6 +16,7 @@ import Hashable from './Hashable';
 import { Day, dayToInt, TYPES, DAYS } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
+import colorSchemes from '@/data/ColorSchemes';
 
 /**
  * the structure of a Section in local storage
@@ -57,7 +58,7 @@ export default class Schedule {
     public static combineSections = true;
     public static multiSelect = true;
     public static savedColors: { [key: string]: string } = {};
-    public static colors: readonly string[] = [];
+    public static colors: readonly string[] = colorSchemes[0].colors;
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
@@ -293,9 +294,8 @@ export default class Schedule {
      */
     public getColor(obj: Hashable): string {
         const userColor = Schedule.savedColors[obj.key];
-        if (userColor) {
-            return userColor;
-        }
+        if (userColor) return userColor;
+
         const colors = Schedule.colors;
         const idx = obj.hash() % colors.length;
         this.colorSlots[idx].add(obj.key);

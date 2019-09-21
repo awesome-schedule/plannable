@@ -91,7 +91,7 @@
             >
                 Sort According to
             </li>
-            <draggable v-model="filter.sortOptions.sortBy" handle=".drag-handle" @end="dragEnd()">
+            <draggable v-model="filter.sortOptions.sortBy" @end="dragEnd()">
                 <div
                     v-for="(option, optIdx) in filter.sortOptions.sortBy"
                     :key="option.name"

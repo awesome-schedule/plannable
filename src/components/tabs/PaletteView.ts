@@ -21,7 +21,10 @@ export default class Palette extends Store {
     get colorSchemes() {
         return colorSchemes;
     }
-
+    mounted() {
+        document.getElementById('scheme-active')!.scrollIntoView();
+        document.getElementById('palette-nav')!.scroll(0, 0);
+    }
     set(key: string, color: string) {
         this.$set(this.palette.savedColors, key, color);
     }

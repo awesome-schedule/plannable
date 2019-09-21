@@ -1,11 +1,12 @@
 <template>
-    <nav class="bg-light sidebar">
+    <nav id="palette-nav" class="bg-light sidebar">
         <div class="btn bg-info nav-btn">
             Color Schemes
         </div>
         <ul class="list-group list-group-flush ml-2 mr-1 my-2 text-center schemes">
             <li
                 v-for="(scheme, idx) in colorSchemes"
+                :id="+idx === display.colorScheme ? 'scheme-active' : 'scheme-' + idx"
                 :key="scheme.name"
                 class="list-group-item list-group-item-action px-1"
                 :class="{ active: +idx === display.colorScheme }"

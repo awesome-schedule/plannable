@@ -55,10 +55,12 @@ export interface ScheduleJSON {
  * @requires window.catalog
  */
 export default class Schedule {
+    // ------------------- schedule options -----------------------
     public static combineSections = true;
     public static multiSelect = true;
     public static savedColors: { [key: string]: string } = {};
     public static colors: readonly string[] = colorSchemes[0].colors;
+    // ------------------- end schedule options -------------------
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
@@ -69,6 +71,7 @@ export default class Schedule {
                 sections === -1
                     ? sections
                     : sections.reduce<number[]>((acc, { id }) => {
+                          // only record ids, omit sections
                           acc.push(id);
                           return acc;
                       }, []);

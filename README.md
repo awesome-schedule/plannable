@@ -46,7 +46,7 @@ To facilitate access in China, we provide a mirror: https://cn.plannable.org/. I
 
 ### Install Dependencies
 
--   Node.js >= 8.10
+-   Node.js >= 10.16
 
 Clone the repository and data
 
@@ -71,7 +71,7 @@ Then you can visit the development server at [http://127.0.0.1:8080](http://127.
 
 ## Built With
 
--   [TypeScript](https://typescriptlang.org)
+-   [TypeScript](https://www.typescriptlang.org)
 -   [Vue.js](https://vuejs.org)
 -   [Bootstrap](https://getbootstrap.com/)
 

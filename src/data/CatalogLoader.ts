@@ -99,14 +99,13 @@ export async function requestSemesterData(semester: SemesterJSON, db?: CatalogDB
 export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
     console.time('parse semester data');
 
-    const CLASS_TYPES = TYPES_PARSE;
     const courseDict: { [x: string]: Course } = Object.create(null);
     const allSections: Section[] = [];
     for (let j = 1; j < rawData.length; j++) {
         const data = rawData[j];
 
         // todo: robust data validation
-        const type = CLASS_TYPES[data[4] as CourseType];
+        const type = TYPES_PARSE[data[4] as CourseType];
         const key = (data[1] + data[2] + type).toLowerCase();
 
         const meetings: Meeting[] = [];

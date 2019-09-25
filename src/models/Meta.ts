@@ -3,18 +3,11 @@
  * @author Hanzhi Zhou
  * @module models
  */
-export type CourseType =
-    | 'Clinical'
-    | 'Discussion'
-    | 'Drill'
-    | 'Independent Study'
-    | 'Laboratory'
-    | 'Lecture'
-    | 'Practicum'
-    | 'Seminar'
-    | 'Studio'
-    | 'Workshop'
-    | '';
+
+/**
+ *
+ */
+export type CourseType = keyof typeof TYPES_PARSE;
 
 export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
 
@@ -46,20 +39,30 @@ export const TYPES = Object.freeze({
     7: 'Seminar',
     8: 'Studio',
     9: 'Workshop'
-}) as { [x: number]: CourseType };
+});
 
-export const TYPES_PARSE: { readonly [x in CourseType]: number } = Object.freeze({
+export const TYPES_PARSE = Object.freeze({
     '': -1,
     Clinical: 0,
+    CLN: 0,
     Discussion: 1,
+    DIS: 1,
     Drill: 2,
+    DRL: 2,
     'Independent Study': 3,
+    IND: 3,
     Laboratory: 4,
+    LAB: 4,
     Lecture: 5,
+    LEC: 5,
     Practicum: 6,
+    PRA: 6,
     Seminar: 7,
+    SEM: 7,
     Studio: 8,
-    Workshop: 9
+    STO: 8,
+    Workshop: 9,
+    WKS: 9
 });
 
 export const semesterListExpirationTime = 86400 * 1000; // one day

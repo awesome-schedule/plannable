@@ -31,7 +31,7 @@ async function loadSemesterList(count = 5) {
     return records;
 }
 
-async function loadSemesterData(semester: SemesterJSON) {
+export async function loadSemesterData(semester: SemesterJSON) {
     const { data } = await axios.post<string>(
         `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
         stringify({
@@ -43,6 +43,7 @@ async function loadSemesterData(semester: SemesterJSON) {
         })
     );
     fs.writeFile(`./data/Semester Data/CS${semester.id}Data.csv`, data, cb);
+    return data;
 }
 
 async function main() {

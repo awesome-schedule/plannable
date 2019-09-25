@@ -208,11 +208,12 @@ export function to12hr(time: string) {
  * ```
  */
 export function to24hr(time: string) {
-    const len = time.length;
-    const pre = time.substring(0, len - 2);
+    const pre = time.substring(0, time.length - 2);
     const [hour, minute] = pre.split(':');
+
     const numHour = +hour;
-    if (time.substring(len - 2) === 'AM') {
+    const suffix = time.substring(time.length - 2);
+    if (suffix === 'AM' || suffix == 'am') {
         if (numHour === 12) {
             return '00:' + minute;
         } else {

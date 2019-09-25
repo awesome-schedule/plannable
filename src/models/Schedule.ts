@@ -134,7 +134,7 @@ export default class Schedule {
             // converted key
             let convKey = key;
             if (parts && parts.length === 4) {
-                parts[3] = TYPES[+parts[3]];
+                parts[3] = TYPES[+parts[3] as 1];
                 parts[1] = parts[1].toUpperCase();
                 convKey = parts.slice(1).join(' ');
             }

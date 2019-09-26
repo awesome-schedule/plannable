@@ -55,7 +55,7 @@ export default class CourseBlock extends Store {
 
     get firstSec(): Section {
         const section = this.scheduleBlock.section;
-        if (section instanceof Course) return section.getFirstSection();
+        if (section instanceof Course) return section.sections[0];
         else if (section instanceof Section) return section;
         return section as any;
     }

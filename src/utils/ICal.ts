@@ -49,7 +49,7 @@ export function toICal(schedule: Schedule) {
             if (sb.section instanceof Section || sb.section instanceof Course) {
                 let section = sb.section;
                 if (section instanceof Course) {
-                    section = section.getFirstSection();
+                    section = section.sections[0];
                 }
                 for (const m of section.meetings) {
                     if (m.days === 'TBD' || m.days === 'TBA' || m.days.indexOf(DAYS[d]) === -1)

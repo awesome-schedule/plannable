@@ -37,8 +37,10 @@ import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import { getReleaseNote } from './utils';
 
-// need to change for every release
-const version = '7.2';
+/**
+ * need to change for every release
+ */
+const version = '7.3';
 /**
  * returns whether the version stored in localStorage matches the current version
  * then, override localStorage with the current version

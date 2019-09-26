@@ -14,9 +14,5 @@ describe('course test', () => {
         const c = catalog.getCourse('cs11105');
         const course = catalog.getCourse('cs11105', new Set([c.sections[0].id]));
         expect(course.allSameTime()).toBe(true);
-        expect(course.has(course.getFirstSection())).toBe(true);
-        expect(Object.values(course.getCombined())[0][0].equals(course.getFirstSection())).toBe(
-            true
-        );
     });
 });

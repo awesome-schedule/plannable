@@ -466,7 +466,7 @@ export default class Schedule {
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
-                    const sec = course.getFirstSection();
+                    const sec = course.sections[0];
                     this.currentIds[currentIdKey] = [sec.id.toString()];
                     this.place(sec);
                 } else if (sections.size > 0) {

@@ -15,7 +15,7 @@
         "axios": "^0.19.0",
         "bootstrap": "^4.3.1",
         "dexie": "^2.0.4",
-        "fast-fuzzy": "^1.8.6",
+        "fast-fuzzy": "^1.8.8",
         "file-saver": "^2.0.2",
         "jquery": "^3.4.1",
         "lz-string": "^1.4.4",
@@ -25,8 +25,8 @@
         "vue": "^2.6.10",
         "vue-class-component": "^7.1.0",
         "vue-mathjax": "0.0.10",
-        "vue-property-decorator": "^8.2.1",
-        "vuedraggable": "^2.23.0"
+        "vue-property-decorator": "^8.2.2",
+        "vuedraggable": "^2.23.1"
     },
     "devDependencies": {
         "@types/bootstrap": "^4.3.1",

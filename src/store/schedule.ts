@@ -207,6 +207,11 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         this.proposedSchedules.forEach(s => s.computeSchedule(sync, time));
     }
 
+    /**
+     * @note the schedules parsed from JSON are **not** computed (i.e. the `computeSchedule` method is not called)
+     * @note the `currentSchedule` is not assigned.
+     * @param obj
+     */
     fromJSON(obj: Partial<ScheduleStateJSON>) {
         const defaultState = this.getDefault();
 

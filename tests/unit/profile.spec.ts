@@ -9,8 +9,8 @@ test('profile basic', async () => {
     s.profile.initProfiles(s.semester.semesters);
 
     s.profile.addProfile(JSON.stringify({ name: 'prof1' }), '');
-    expect(s.profile.profiles).toEqual(['Fall 2019', 'prof1']);
-    s.profile.deleteProfile('Fall 2019', 0);
+    expect(s.profile.profiles).toEqual(['Spring 2020', 'prof1']);
+    s.profile.deleteProfile('Spring 2020', 0);
 
     s.profile.addProfile(JSON.stringify({ name: 'prof2' }), '');
     expect(s.profile.current).toBe('prof2');

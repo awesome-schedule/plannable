@@ -11,7 +11,7 @@ import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Store from '../store';
-import { timeToNum, to12hr } from '../utils';
+import { timeToNum, hr24toInt, hr12toInt } from '../utils';
 
 /**
  * the component for rendering a course on GridSchedule
@@ -60,15 +60,19 @@ export default class CourseBlock extends Store {
         return section as any;
     }
 
+    /**
+     * parse the room from the section contained in this scheduleBlock
+     */
     get room() {
         if (!(this.firstSec instanceof Section)) return null;
 
         for (const meeting of this.firstSec.meetings) {
-            if (meeting.days.indexOf(this.day) !== -1) {
-                const convedStart = to12hr(this.scheduleBlock.start);
-                const convedEnd = to12hr(this.scheduleBlock.end);
+            if (meeting.days.includes(this.day)) {
                 const [, start, , end] = meeting.days.split(' ');
-                if (convedStart === start && convedEnd === end) {
+                if (
+                    hr24toInt(this.scheduleBlock.start) === hr12toInt(start) &&
+                    hr24toInt(this.scheduleBlock.end) === hr12toInt(end)
+                ) {
                     return meeting.room;
                 }
             }

@@ -198,15 +198,17 @@ class ScheduleEvaluator {
         }
     };
     /**
-     * the cache of coefficient array for each sort function
+     * the cache of coefficient array, min and max for each sort function
      */
-    public sortCoeffCache: { [x in keyof SortFunctions]?: Float32Array } = {};
+    public sortCoeffCache: {
+        [x in keyof SortFunctions]?: readonly [Float32Array, number, number];
+    } = {};
     /**
      * the indices of the sorted schedules
      */
     public indices: Uint32Array;
     /**
-     * the coefficient array
+     * the coefficient array used when performing a sort
      */
     private coeffs: Float32Array;
     /**
@@ -312,41 +314,53 @@ class ScheduleEvaluator {
 
     /**
      * compute the coefficient array for a specific sorting option.
-     * if it exists, don't do anything
+     * if it exists (i.e. already computed), don't do anything
      *
      * @requires optimization
      * @param funcName the name of the sorting option
-     * @param assign whether assign to the `coeff` field of each `CmpSchedule`
+     * @param assign whether assign to the values to `this.coeffs`
      * @returns the computed/cached array of coefficients
      */
-    public computeCoeffFor(funcName: keyof SortFunctions, assign: boolean): Float32Array {
+    public computeCoeffFor(funcName: keyof SortFunctions, assign: boolean) {
         const len = this.size;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {
-            if (assign) this.coeffs.set(cache);
+            if (assign) this.coeffs.set(cache[0]);
             return cache;
         } else {
             console.time(funcName);
             const newCache = new Float32Array(len);
             const blocks = this.blocks,
                 offsets = this.offsets;
+            let max = -Infinity,
+                min = Infinity;
             if (funcName === 'similarity') {
                 const evalFunc = ScheduleEvaluator.sortFunctions.similarity.bind(this);
-                for (let i = 0; i < len; i++) newCache[i] = evalFunc(i);
+                for (let i = 0; i < len; i++) {
+                    const val = (newCache[i] = evalFunc(i));
+                    if (val > max) max = val;
+                    if (val < min) min = val;
+                }
             } else if (funcName === 'distance') {
                 const thresh = 45;
                 const evalFunc = ScheduleEvaluator.sortFunctions.distance;
                 const timeMatrix = this.timeMatrix;
-                for (let i = 0; i < len; i++)
-                    newCache[i] = evalFunc(timeMatrix, blocks, offsets[i], thresh);
+                for (let i = 0; i < len; i++) {
+                    const val = (newCache[i] = evalFunc(timeMatrix, blocks, offsets[i], thresh));
+                    if (val > max) max = val;
+                    if (val < min) min = val;
+                }
             } else {
                 const evalFunc = ScheduleEvaluator.sortFunctions[funcName];
-                for (let i = 0; i < len; i++) newCache[i] = evalFunc(blocks, offsets[i]);
+                for (let i = 0; i < len; i++) {
+                    const val = (newCache[i] = evalFunc(blocks, offsets[i]));
+                    if (val > max) max = val;
+                    if (val < min) min = val;
+                }
             }
-            this.sortCoeffCache[funcName] = newCache;
             if (assign) this.coeffs.set(newCache);
             console.timeEnd(funcName);
-            return newCache;
+            return (this.sortCoeffCache[funcName] = [newCache, max, min] as const);
         }
     }
 
@@ -383,35 +397,28 @@ class ScheduleEvaluator {
 
             // finding the minimum and maximum is quite fast for 1e6 elements, so not cached.
             for (const option of options) {
-                const coeff = this.computeCoeffFor(option.name, false);
-
-                let max = -Infinity,
-                    min = Infinity;
-                for (let i = 0; i < len; i++) {
-                    const val = coeff[i];
-                    if (val > max) max = val;
-                    if (val < min) min = val;
-                }
+                const [coeff, max, min] = this.computeCoeffFor(option.name, false);
 
                 const range = max - min;
-
                 // if all of the values are the same, skip this sorting coefficient
                 if (!range) {
                     console.warn(range, option.name);
                     continue;
                 }
 
-                const normalizeRatio = range / 100,
+                const normalizeRatio = 64 / range,
                     weight = option.weight || 1;
 
                 // use Euclidean distance to combine multiple sorting coefficients
                 if (option.reverse) {
                     for (let i = 0; i < len; i++) {
-                        coeffs[i] += weight * ((max - coeff[i]) / normalizeRatio) ** 2;
+                        const val = (max - coeff[i]) * normalizeRatio;
+                        coeffs[i] += weight * val * val;
                     }
                 } else {
                     for (let i = 0; i < len; i++) {
-                        coeffs[i] += weight * ((coeff[i] - min) / normalizeRatio) ** 2;
+                        const val = (coeff[i] - min) * normalizeRatio;
+                        coeffs[i] += weight * val * val;
                     }
                 }
             }
@@ -499,7 +506,8 @@ class ScheduleEvaluator {
 
             // if option[i] is reverse, ifReverse[i] will be -1 * weight
             const ifReverse = new Float32Array(len).map((_, i) => (options[i].reverse ? -1 : 1));
-            const fbCoeffs = options.map(x => this.sortCoeffCache[x.name]!);
+            // cached array of coefficients for each enabled sort function
+            const fbCoeffs = options.map(x => this.sortCoeffCache[x.name]![0]);
             const func = (a: number, b: number) => {
                 let r = 0;
                 for (let i = 0; i < len; i++) {

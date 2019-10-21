@@ -19,6 +19,13 @@ export default class DateSeparator extends Vue {
 
     public convDate(n: number, offset = 0) {
         const date = new Date(n + offset * 24 * 60 * 60 * 1000);
-        return date.getMonth() + 1 + '/' + date.getDate();
+        return (
+            (date.getMonth() + 1).toString().padStart(2, '0') +
+            '/' +
+            date
+                .getDate()
+                .toString()
+                .padStart(2, '0')
+        );
     }
 }

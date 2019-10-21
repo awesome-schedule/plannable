@@ -217,9 +217,6 @@
     width: 100%;
     color: white !important;
 }
-.sort-option {
-    cursor: pointer;
-}
 @media print {
     @page {
         size: A4 portrait;

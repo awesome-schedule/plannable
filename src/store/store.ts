@@ -107,6 +107,11 @@ function isLegacy(parsed: any): parsed is LegacyStorage {
     return !!parsed.currentSchedule && !!parsed.proposedSchedules;
 }
 
+/**
+ * save all store modules to localStorage
+ * @note this function needs to be separated from the [[Store]] class because it is used in the [[schedule]] sub-module,
+ * and the [[schedule]] sub-module does not have access to the [[Store]] class
+ */
 export function saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;

@@ -9,6 +9,7 @@ import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
+import { SortFunctions } from '@/algorithm';
 
 /**
  * the component for editing and applying filters
@@ -38,6 +39,11 @@ export default class FilterView extends Store {
         this.$set(this.filter.timeSlots[i], j, !this.filter.timeSlots[i][j]);
     }
 
+    getSortOptRange(name: keyof SortFunctions) {
+        const cache = window.scheduleEvaluator.sortCoeffCache[name];
+        return cache ? cache[1] - cache[2] : -1; // max - min
+    }
+
     /**
      * get called when the sort mode changed or sort option at `optIdx` changed.
      * call [[ScheduleEvaluator.sort]]. Moreover,
@@ -53,7 +59,10 @@ export default class FilterView extends Store {
             if (option.enabled) {
                 for (const key of option.exclusive) {
                     for (const opt of this.filter.sortOptions.sortBy) {
-                        if (opt.name === key) opt.enabled = false;
+                        if (opt.name === key) {
+                            opt.enabled = false; // option names are unique
+                            break;
+                        }
                     }
                 }
             }

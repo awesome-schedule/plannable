@@ -78,17 +78,16 @@ export function timeArrayToCompact(timeArrayList: TimeArray[][], timeArrLens: Ui
     for (let i = 0; i < numCourses; i++) {
         const arr = timeArrayList[i];
         for (let j = 0; j < arr.length; j++) {
-            const time = arr[j];
-            const size = time.length;
             compact[j * numCourses + i] = offset;
+            const time = arr[j];
             let k = 0;
             for (; k < 8; k++) {
                 compact[offset + k] = time[k] + offset; // add offset to the first 8 elements
             }
-            for (; k < size; k++) {
+            for (; k < time.length; k++) {
                 compact[offset + k] = time[k];
             }
-            offset += size;
+            offset += time.length;
         }
     }
     return compact;

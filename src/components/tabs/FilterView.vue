@@ -98,12 +98,21 @@
                     class="list-group-item py-1 pl-3 pr-0"
                 >
                     <div class="row no-gutters w-100">
-                        <div class="col col-sm-9 pr-1 drag-handle" :title="option.description">
-                            <span class="sort-option"> {{ option.title }}</span>
+                        <div class="col col-sm-10 drag-handle" :title="option.description">
+                            <span style="cursor: pointer"> {{ option.title }} </span>
+                            <span
+                                v-if="!getSortOptRange(option.name)"
+                                class="ml-1 text-warning"
+                                :title="
+                                    `Enabling this sort option has no effect, because all schedules have the same '${option.title.toLowerCase()}'`
+                                "
+                            >
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
                             <div
                                 v-if="filter.sortOptions.mode === 1 && option.enabled"
                                 class="input-group input-group-sm"
-                                style="width: 90%"
+                                style="width: 80%"
                             >
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Weight</span>
@@ -118,7 +127,7 @@
                                 />
                             </div>
                         </div>
-                        <div class="col col-sm-3">
+                        <div class="col col-sm-2">
                             <i
                                 class="fas mr-2 click-icon"
                                 :class="option.reverse ? 'fa-arrow-down' : 'fa-arrow-up'"
@@ -129,8 +138,8 @@
                                 "
                             ></i>
                             <div
-                                class="custom-control custom-checkbox sort-option "
-                                style="display: inline-block"
+                                class="custom-control custom-checkbox"
+                                style="display: inline-block; cursor: pointer"
                             >
                                 <input
                                     v-if="option.name === 'similarity' && !filter.similarityEnabled"

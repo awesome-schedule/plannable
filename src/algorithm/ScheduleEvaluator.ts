@@ -198,7 +198,7 @@ class ScheduleEvaluator {
         }
     };
     /**
-     * the cache of coefficient array, min and max for each sort function
+     * the cache of [coefficient array, max, min] for each sort function
      */
     public sortCoeffCache: {
         [x in keyof SortFunctions]?: readonly [Float32Array, number, number];

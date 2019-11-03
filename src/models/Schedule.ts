@@ -7,7 +7,7 @@
  *
  */
 import { NotiMsg } from '@/store/notification';
-import { colorDepthSearch, DFS, graphColoringExact, Vertex } from '../algorithm';
+import { colorDepthSearch, DFS, Vertex } from '../algorithm';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
@@ -625,9 +625,7 @@ export default class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        // blocks.sort((a, b) => b.duration - a.duration);
         const colors = new Int16Array(blocks.length);
-        // const numColors = graphColoringExact(adjList, colors);
         const numColors = intervalScheduling(blocks, colors);
         console.log(blocks, colors);
         const adjList = this.constructAdjList(blocks);

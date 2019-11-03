@@ -22,6 +22,7 @@
         "papaparse": "^5.1.0",
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
+        "tinyqueue": "^2.0.3",
         "vue": "^2.6.10",
         "vue-class-component": "^7.1.0",
         "vue-mathjax": "0.0.10",

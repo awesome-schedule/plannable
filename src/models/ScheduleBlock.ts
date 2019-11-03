@@ -35,8 +35,8 @@ export default class ScheduleBlock {
      */
     public strong = false;
 
-    private readonly startMin: number;
-    private readonly endMin: number;
+    public readonly startMin: number;
+    public readonly endMin: number;
 
     /**
      * @param background background color in hex, e.g. `#ffffff`

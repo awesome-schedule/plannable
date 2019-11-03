@@ -625,10 +625,12 @@ export default class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        blocks.sort((a, b) => b.duration - a.duration);
-        const adjList = this.constructAdjList(blocks);
+        // blocks.sort((a, b) => b.duration - a.duration);
         const colors = new Int16Array(blocks.length);
-        const numColors = graphColoringExact(adjList, colors);
+        // const numColors = graphColoringExact(adjList, colors);
+        const numColors = intervalScheduling(blocks, colors);
+        console.log(blocks, colors);
+        const adjList = this.constructAdjList(blocks);
 
         // note: blocks are contained in nodes
         const graph = colorDepthSearch(adjList, colors, blocks);
@@ -901,4 +903,27 @@ export default class Schedule {
     }
 }
 
-(window as any).Schedule = Schedule;
+import PriorityQueue from 'tinyqueue';
+export function intervalScheduling(blocks: ScheduleBlock[], colors: Int16Array) {
+    if (blocks.length === 0) return 0;
+
+    blocks.sort((b1, b2) => b1.startMin - b2.startMin);
+    const queue = new PriorityQueue([[blocks[0].endMin, 0]], (r1, r2) => r1[0] - r2[0]);
+    let numSlot = 0;
+    colors[0] = 0;
+    for (let i = 1; i < blocks.length; i++) {
+        const block = blocks[i];
+        const [earliestEnd, slotIdx] = queue.peek()!;
+        if (earliestEnd > block.startMin) {
+            // conflict
+            numSlot += 1;
+            queue.push([block.endMin, numSlot]);
+            colors[i] = numSlot;
+        } else {
+            queue.pop();
+            queue.push([block.endMin, slotIdx]);
+            colors[i] = slotIdx;
+        }
+    }
+    return numSlot + 1;
+}

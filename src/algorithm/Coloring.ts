@@ -7,9 +7,36 @@
 /**
  *
  */
+import ScheduleBlock from '@/models/ScheduleBlock';
+import PriorityQueue from 'tinyqueue';
 import { Graph, Vertex } from './Graph';
 
+export function intervalScheduling(blocks: ScheduleBlock[], colors: Int16Array) {
+    if (blocks.length === 0) return 0;
+
+    blocks.sort((b1, b2) => b1.startMin - b2.startMin);
+    const queue = new PriorityQueue([[blocks[0].endMin, 0]], (r1, r2) => r1[0] - r2[0]);
+    let numSlot = 0;
+    colors[0] = 0;
+    for (let i = 1; i < blocks.length; i++) {
+        const { startMin, endMin } = blocks[i];
+        const [earliestEnd, slotIdx] = queue.peek()!;
+        if (earliestEnd > startMin) {
+            // conflict
+            numSlot += 1;
+            queue.push([endMin, numSlot]);
+            colors[i] = numSlot;
+        } else {
+            queue.pop();
+            queue.push([endMin, slotIdx]);
+            colors[i] = slotIdx;
+        }
+    }
+    return numSlot + 1;
+}
+
 /**
+ * @todo
  * @requires optimization
  */
 export function colorSpread(adjList: number[][], colors: Int16Array, numColors: number) {

@@ -192,6 +192,13 @@ class ScheduleGenerator {
             // get course with specific sections specified by Schedule
             const courseRec = this.catalog.getCourse(key, courses[key]);
 
+            if (courseRec.sections.length === 0) {
+                return {
+                    level: 'error',
+                    msg: `No sections of ${courseRec.displayName} are selected!`
+                };
+            }
+
             // combine all sections of this course occurring at the same time, if enabled
             const combined = this.options.combineSections
                 ? Object.values(courseRec.getCombined())
@@ -232,7 +239,7 @@ class ScheduleGenerator {
             if (classes.length === 0) {
                 return {
                     level: 'error',
-                    msg: `No sections of ${courseRec.department} ${courseRec.number} ${courseRec.type} satisfy your filters and do not conflict with your events`
+                    msg: `No sections of ${courseRec.displayName} satisfy your filters and do not conflict with your events`
                 };
             }
             classList.push(classes);

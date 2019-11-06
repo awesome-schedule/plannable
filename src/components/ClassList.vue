@@ -31,8 +31,8 @@
                             <span v-else>{{ crs.displayName }}</span>
                             <span
                                 v-if="emptyCourse(crs)"
-                                class="ml-1 text-warning"
-                                title="No sections are selected! Any Section will be selected implicitly"
+                                class="ml-1 text-danger"
+                                title="No sections are selected! You won't be able to generate schedules"
                             >
                                 <i class="fas fa-exclamation-triangle"></i>
                             </span>

@@ -23,7 +23,10 @@ export function intervalScheduling(blocks: ScheduleBlock[], assignment: Int16Arr
     blocks.sort((b1, b2) => b1.startMin - b2.startMin); // sort by start time
     // min heap, the top element is the room whose end time is minimal
     // a room is represented as a pair: [end time, room index]
-    const queue = new PriorityQueue([[blocks[0].endMin, 0]], (r1, r2) => r1[0] - r2[0]);
+    const queue = new PriorityQueue<readonly [number, number]>(
+        [[blocks[0].endMin, 0]],
+        (r1, r2) => r1[0] - r2[0]
+    );
     let numRooms = 0;
     assignment[0] = 0;
     for (let i = 1; i < blocks.length; i++) {

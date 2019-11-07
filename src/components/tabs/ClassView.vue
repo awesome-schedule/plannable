@@ -134,7 +134,7 @@
         </div>
         <ClassList
             ref="selectedClassList"
-            :courses="schedule.currentSchedule.currentCourses"
+            :courses="current.courses"
             :schedule="schedule.currentSchedule"
             :show-any="!schedule.generated"
             :show-classlist-title="display.showClasslistTitle"
@@ -184,11 +184,11 @@
                 </span>
             </li>
             <table class="ml-2 mr-0 mt-2 mb-2">
-                <tr v-for="item in currentIds" :key="item[0]">
-                    <td>{{ item[0] }}</td>
+                <tr v-for="idx in current.ids.length" :key="idx">
+                    <td>{{ current.courses[idx - 1].displayName }}</td>
                     <td>
                         <select class="custom-select custom-select-sm py-0">
-                            <option v-for="id in item[1]" :key="id">{{ id }}</option>
+                            <option v-for="id in current.ids[idx - 1]" :key="id">{{ id }}</option>
                         </select>
                     </td>
                 </tr>

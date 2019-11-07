@@ -24,18 +24,14 @@ import ClassList from '../ClassList.vue';
     }
 })
 export default class ClassView extends Store {
-    /**
-     * get the list of current ids, sorted in alphabetical order of the keys
-     */
-    get currentIds() {
-        return Object.entries(this.schedule.currentSchedule.currentIds).sort((a, b) =>
-            a[0] === b[0] ? 0 : a[0] < b[0] ? -1 : 1
-        );
-    }
     // autocompletion related fields
     isEntering = false;
     inputCourses: Course[] = [];
     inputMatches: SearchMatch[] = [];
+
+    get current() {
+        return this.schedule.currentSchedule.current;
+    }
 
     /**
      * get classes that match the input query.

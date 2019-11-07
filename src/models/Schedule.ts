@@ -55,7 +55,7 @@ export interface ScheduleJSON {
  * @requires window.catalog
  */
 export default class Schedule {
-    // ------------------- schedule options -----------------------
+    // ----------------- global schedule options ------------------
     public static combineSections = true;
     public static multiSelect = true;
     public static savedColors: { [key: string]: string } = {};
@@ -222,20 +222,11 @@ export default class Schedule {
      */
     public totalCredit: number;
     /**
-     * a computed list that's updated by the `computeSchedule` method
-     */
-    public currentCourses: Course[];
-    /**
-     * a computed dictionary that's updated by the `computeSchedule` method.
-     * keys are courses' `displayName`s, and values are the array of ids (as strings).
+     * a computed object that's updated by the `computeSchedule` method
      *
-     * Example:
-     * ```js
-     * {"CS 2110 Lecture": ["16436"], "Chem 1410 Laboratory": ["13424", "17596"]}
-     * ```
+     * ids are the list of ids selected for a given course
      */
-    public currentIds: { [x: string]: string[] };
-
+    public current: { courses: Course[]; ids: string[][] };
     /**
      * keep track of used colors to avoid color collision
      */
@@ -274,8 +265,7 @@ export default class Schedule {
         this._preview = null;
         this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set<string>());
         this.totalCredit = 0;
-        this.currentCourses = [];
-        this.currentIds = {};
+        this.current = { courses: [], ids: [] };
         if (raw instanceof Array) {
             for (const [key, sections] of raw) {
                 this.All[key] = new Set(sections);
@@ -446,28 +436,30 @@ export default class Schedule {
                 ? this.All
                 : this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()];
 
+        const current: [Course, string[]][] = [];
         for (const key in all) {
             const sections = all[key];
             // we need a full course record of key `key`
-            this.currentCourses.push(catalog.getCourse(key));
+            const fullCourse = catalog.getCourse(key);
             // a "partial" course with only selected sections
             const course = catalog.getCourse(key, sections);
             // skip placing empty courses
-            if (!course.sections.length) continue;
+            if (!course.sections.length) {
+                current.push([fullCourse, [' - ']]);
+                continue;
+            }
 
             const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
-
-            const currentIdKey = course.displayName;
             // if any section
             if (sections === -1) {
-                this.currentIds[currentIdKey] = [' - '];
+                current.push([fullCourse, [' - ']]);
                 this.place(course);
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
                     const sec = course.sections[0];
-                    this.currentIds[currentIdKey] = [sec.id.toString()];
+                    current.push([fullCourse, [sec.id.toString()]]);
                     this.place(sec);
                 } else if (sections.size > 0) {
                     if (Schedule.multiSelect) {
@@ -480,7 +472,7 @@ export default class Schedule {
                         // a subset of the sections
                         this.place(course);
                     }
-                    this.currentIds[currentIdKey] = course.sections.map(sec => sec.id.toString());
+                    current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
                 }
             }
         }
@@ -501,7 +493,10 @@ export default class Schedule {
         }
 
         // sort currentCourses in alphabetical order
-        this.currentCourses.sort((a, b) => (a.key === b.key ? 0 : a.key < b.key ? -1 : 1));
+        current.sort();
+        this.current.courses = current.map(x => x[0]);
+        this.current.ids = current.map(x => x[1]);
+
         for (const event of this.events) if (event.display) this.place(event);
         this.computeBlockPositions();
     }
@@ -754,8 +749,8 @@ export default class Schedule {
         this.days = [[], [], [], [], [], [], []];
         this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set());
         this.totalCredit = 0;
-        this.currentCourses = [];
-        this.currentIds = {};
+        this.current.ids = [];
+        this.current.courses = [];
     }
 
     /**

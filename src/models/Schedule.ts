@@ -493,7 +493,7 @@ export default class Schedule {
         }
 
         // sort currentCourses in alphabetical order
-        current.sort();
+        current.sort((a, b) => -(a[0].key < b[0].key));
         this.current.courses = current.map(x => x[0]);
         this.current.ids = current.map(x => x[1]);
 

@@ -16,18 +16,21 @@
     "vetur.format.defaultFormatter.html": "prettier",
     "vetur.format.options.tabSize": 4,
     "vetur.experimental.templateInterpolationService": true,
-    "eslint.options": { "extensions": [".html", ".js", ".vue", ".jsx"] },
+    "eslint.options": {
+        "extensions": [
+            ".html",
+            ".js",
+            ".vue",
+            ".jsx"
+        ]
+    },
     "eslint.validate": [
         "javascript",
         "javascriptreact",
-        {
-            "language": "vue",
-            "autoFix": true
-        },
-        {
-            "language": "typescript",
-            "autoFix": true
-        }
+        "vue",
+        "typescript"
     ],
-    "eslint.autoFixOnSave": true
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
 }

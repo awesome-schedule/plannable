@@ -236,4 +236,13 @@ export default class ProposedSchedule extends Schedule {
             }
         }
     }
+
+    /**
+     * Remove a course (and all its sections) from the schedule
+     */
+    public remove(key: string) {
+        delete this.All[key];
+        this.constructDateSeparator();
+        this.computeSchedule();
+    }
 }

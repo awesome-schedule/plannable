@@ -16,6 +16,10 @@ export default class GeneratedSchedule extends Schedule {
         throw new Error();
     }
 
+    public remove() {
+        throw new Error();
+    }
+
     /**
      * get a copy of this schedule
      */

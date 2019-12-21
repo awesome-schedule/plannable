@@ -13,6 +13,8 @@ import Store from '@/store';
 import { Component, Vue } from 'vue-property-decorator';
 import ClassList from '../ClassList.vue';
 
+const generatedWarning = `You're editing the generated schedule! You should do 'change to proposed' if you want to add on this particular generated schedule.`;
+
 /**
  * component for editing classes and manipulating schedules
  * @author Hanzhi Zhou
@@ -75,9 +77,7 @@ export default class ClassView extends Store {
         try {
             this.schedule.currentSchedule.update(key, section, remove);
         } catch (Error) {
-            this.noti.warn(
-                `You're editing the generated schedule! You should do 'change to proposed' if you want to add on this particular generated schedule.`
-            );
+            this.noti.warn(generatedWarning);
         }
 
         // note: adding a course to schedule.All cannot be detected by Vue.
@@ -89,8 +89,11 @@ export default class ClassView extends Store {
     }
 
     removeCourse(key: string) {
-        if (this.schedule.generated) this.noti.warn(`You're editing the generated schedule!`);
-        this.schedule.currentSchedule.remove(key);
+        try {
+            this.schedule.currentSchedule.remove(key);
+        } catch (Error) {
+            this.noti.warn(generatedWarning);
+        }
         this.saveStatus();
     }
 }

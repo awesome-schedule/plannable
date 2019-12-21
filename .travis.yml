@@ -1,13 +1,40 @@
+sudo: false
+
 language: node_js
 node_js:
     - stable
-script: bash ./scripts/deploy.sh
-env:
-    global:
-        - ENCRYPTION_LABEL: '60d7449a1baf'
-        - COMMIT_AUTHOR_EMAIL: '21034047+hanzhi713@users.noreply.github.com'
 install:
     - npm install -g codecov http-server
     - npm ci
 after_success:
     - codecov
+
+cache:
+    directories:
+        - node_modules
+        - $HOME/.cache/electron
+        - $HOME/.cache/electron-builder
+
+env:
+    global:
+        - ELECTRON_CACHE=$HOME/.cache/electron
+        - ELECTRON_BUILDER_CACHE=$HOME/.cache/electron-builder
+        - ENCRYPTION_LABEL=60d7449a1baf
+        - COMMIT_AUTHOR_EMAIL="21034047+hanzhi713@users.noreply.github.com"
+
+jobs:
+    include:
+        - stage: Deploy to GitHub pages & Build Electron Linux
+          os: linux
+          dist: xenial
+          script:
+              - bash ./scripts/deploy.sh # tests run here
+              - npx electron-builder --linux
+        - stage: Build Electron Windows & Mac
+          os: osx
+          osx_image: xcode10.2
+          script:
+              - npm run build
+              - npx electron-builder --mac --win
+          before_cache:
+              - rm -rf $HOME/.cache/electron-builder/wine

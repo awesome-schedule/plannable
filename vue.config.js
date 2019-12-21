@@ -19,5 +19,6 @@ module.exports = {
         // }
     },
     // transpile dependencies that do not provide pre-built modules
-    transpileDependencies: []
+    transpileDependencies: [],
+    publicPath: process.env.NODE_ENV === 'production' ? './' : '/'
 };

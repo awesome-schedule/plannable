@@ -35,7 +35,8 @@
         "vue-class-component": "^7.1.0",
         "vue-mathjax": "0.0.10",
         "vue-property-decorator": "^8.2.2",
-        "vuedraggable": "^2.23.2"
+        "vuedraggable": "^2.23.2",
+        "electron-prompt": "^1.4.0"
     },
     "devDependencies": {
         "@types/bootstrap": "^4.3.1",
@@ -61,7 +62,6 @@
         "cheerio": "^1.0.0-rc.3",
         "electron": "^7.1.7",
         "electron-builder": "^21.2.0",
-        "electron-prompt": "^1.4.0",
         "eslint": "^5.16.0",
         "eslint-import-resolver-typescript": "^1.1.1",
         "eslint-plugin-import": "^2.18.2",
@@ -104,6 +104,7 @@
         },
         "files": [
             "dist/**",
+            "node_modules",
             "electron.js"
         ],
         "directories": {

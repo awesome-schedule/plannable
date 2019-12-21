@@ -42,7 +42,7 @@ export interface SectionJSON {
  * By default, this is a set of numbers, corresponding to the `id` field of each section
  * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
  */
-export interface ScheduleAll<T = Set<number>> {
+export interface ScheduleAll<T = Set<number>[]> {
     [courseKey: string]: T | -1;
 }
 

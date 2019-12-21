@@ -1,7 +1,15 @@
 {
-    "name": "awesome-schedule",
+    "name": "plannable",
+    "author": {
+        "email": "",
+        "name": "plannable",
+        "url": "https://github.com/awesome-schedule/plannable"
+    },
+    "repository": "https://github.com/awesome-schedule/plannable",
+    "description": "A website that helps UVa students schedule their classes more efficiently.",
     "version": "7.6.0",
     "private": true,
+    "main": "electron.js",
     "scripts": {
         "serve": "vue-cli-service serve",
         "build": "vue-cli-service build --modern",
@@ -51,6 +59,9 @@
         "babel-eslint": "^10.0.1",
         "babel-plugin-transform-remove-console": "^6.9.4",
         "cheerio": "^1.0.0-rc.3",
+        "electron": "^7.1.7",
+        "electron-builder": "^21.2.0",
+        "electron-prompt": "^1.4.0",
         "eslint": "^5.16.0",
         "eslint-import-resolver-typescript": "^1.1.1",
         "eslint-plugin-import": "^2.18.2",
@@ -65,5 +76,38 @@
         "typescript": "^3.6.4",
         "vue-template-compiler": "^2.6.10",
         "worker-loader": "^2.0.0"
+    },
+    "build": {
+        "appId": "plannable",
+        "win": {
+            "target": "portable",
+            "icon": "public/favicon.ico"
+        },
+        "mac": {
+            "target": "dmg"
+        },
+        "linux": {
+            "target": [
+                {
+                    "target": "AppImage",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                }
+            ],
+            "category": "productivity"
+        },
+        "appImage": {},
+        "dmg": {
+            "icon": "public/favicon.ico"
+        },
+        "files": [
+            "dist/**",
+            "electron.js"
+        ],
+        "directories": {
+            "output": "dist-electron"
+        }
     }
 }

@@ -57,3 +57,6 @@ new Vue({
         return h(App);
     }
 }).$mount('#app');
+
+import axios from 'axios';
+(window as any).axios = axios;

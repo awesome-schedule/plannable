@@ -72,8 +72,13 @@ export default class ClassView extends Store {
      * @see Schedule.update
      */
     updateCourse(key: string, section: number, remove = false) {
-        this.schedule.currentSchedule.update(key, section, remove);
-        if (this.schedule.generated) this.noti.warn(`You're editing the generated schedule!`);
+        try {
+            this.schedule.currentSchedule.update(key, section, remove);
+        } catch (Error) {
+            this.noti.warn(
+                `You're editing the generated schedule! You should do 'change to proposed' if you want to add on this particular generated schedule.`
+            );
+        }
 
         // note: adding a course to schedule.All cannot be detected by Vue.
         // Must use forceUpdate to re-render component

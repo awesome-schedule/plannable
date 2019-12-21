@@ -11,7 +11,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component
 export default class DateSeparator extends Vue {
-    @Prop(Schedule) curSchedule!: Schedule;
+    @Prop(Object) curSchedule!: Schedule;
     public selectInterval(idx: number) {
         this.curSchedule.dateSelector = idx;
         this.curSchedule.computeSchedule();

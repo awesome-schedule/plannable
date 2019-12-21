@@ -12,6 +12,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
+import ProposedSchedule from '@/models/ProposedSchedule';
+import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 /**
  * A **pure** component for
@@ -37,7 +39,7 @@ export default class ClassList extends Vue {
     /**
      * the schedule used to extract the already selected sections of the courses given above
      */
-    @Prop(Schedule) readonly schedule!: Schedule;
+    @Prop(Object) readonly schedule!: Schedule;
     /**
      * whether in Entering mode. when true, no **close** buttons (for removing courses) will be shown
      */

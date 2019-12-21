@@ -7,6 +7,7 @@
  */
 import { saveStatus, StoreModule } from '.';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
+import ProposedSchedule from '../models/ProposedSchedule';
 import noti from './notification';
 import ScheduleEvaluator from '@/algorithm/ScheduleEvaluator';
 
@@ -36,7 +37,7 @@ interface ScheduleStateBase {
 }
 
 export interface ScheduleState extends ScheduleStateBase {
-    proposedSchedules: Schedule[];
+    proposedSchedules: ProposedSchedule[];
     /**
      * currently rendered schedule
      */
@@ -104,7 +105,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
      * create a new empty schedule at the end of the proposedSchedules array and immediately switch to it
      */
     newProposed() {
-        this.proposedSchedules.push(new Schedule());
+        this.proposedSchedules.push(new ProposedSchedule());
         this.switchProposed(this.proposedSchedules.length - 1);
         saveStatus();
     }
@@ -218,12 +219,12 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         const proposed = obj.proposedSchedules;
         if (proposed instanceof Array) {
             this.proposedSchedules = proposed.map(x => {
-                const result = Schedule.fromJSON(x);
+                const result = ProposedSchedule.fromJSON(x);
                 const temp = result.payload;
                 if (temp) {
                     if (result.level === 'warn') noti.notify(result);
                     return temp;
-                } else return new Schedule();
+                } else return new ProposedSchedule();
             });
         } else {
             this.proposedSchedules = defaultState.proposedSchedules;
@@ -254,7 +255,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
     }
 
     getDefault(): ScheduleState {
-        const currentSchedule = new Schedule();
+        const currentSchedule = new ProposedSchedule();
         return {
             currentScheduleIndex: 0,
             currentSchedule,

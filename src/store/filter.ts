@@ -8,6 +8,7 @@
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
 import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
+import ProposedSchedule from '@/models/ProposedSchedule';
 import { to12hr } from '@/utils';
 import { StoreModule } from '.';
 import ScheduleEvaluator, {
@@ -223,7 +224,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             mask <<= 1;
             weights.push(sortBy.weight);
         }
-        const { payload: schedule, level, msg } = Schedule.fromJSON({
+        const { payload: schedule, level, msg } = ProposedSchedule.fromJSON({
             All: obj.refSchedule,
             events: []
         });
@@ -305,7 +306,9 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             sortCopy.push(sortOpt);
         }
         filter.sortOptions.sortBy = sortCopy;
-        const { payload: schedule, level } = Schedule.fromJSON(Schedule.decompressJSON([ref]));
+        const { payload: schedule, level } = ProposedSchedule.fromJSON(
+            Schedule.decompressJSON([ref])
+        );
         if (schedule && level !== 'warn') filter.refSchedule = schedule.All;
         return filter.toJSON();
     }
@@ -403,7 +406,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
             typeof obj.allowWaitlist === 'boolean' ? obj.allowWaitlist : defaultVal.allowWaitlist;
         this.sortOptions = defaultVal.sortOptions.fromJSON(obj.sortOptions);
 
-        const { payload: schedule, level, msg } = Schedule.fromJSON({
+        const { payload: schedule, level, msg } = ProposedSchedule.fromJSON({
             All: obj.refSchedule || {},
             events: []
         });
@@ -418,7 +421,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     toJSON(): FilterStateJSON {
         // exclude sort modes
         const { sortModes, refSchedule: ref, ...others } = this;
-        const refSchedule = new Schedule(ref).toJSON().All;
+        const refSchedule = new ProposedSchedule(ref).toJSON().All;
         return { refSchedule, ...others };
     }
 

@@ -90,7 +90,6 @@ export default class ExportView extends Store {
                     // unequal length: new profile name added
                     if (prevLen !== profiles.length) this.newName.push(null);
                 } catch (err) {
-                    console.error(err);
                     this.noti.error(err.message + ': Parsing error');
                 }
                 await this.loadProfile();
@@ -122,7 +121,6 @@ export default class ExportView extends Store {
         if (json) {
             const url = new URL(window.location.href);
             const compressed = compressJSON(json);
-            console.log(compressed);
             url.searchParams.set(
                 'config',
                 lz.compressToEncodedURIComponent(JSON.stringify(compressed))

@@ -560,14 +560,7 @@ export default abstract class Schedule {
         }
     }
 
-    /**
-     * Remove a course (and all its sections) from the schedule
-     */
-    public remove(key: string) {
-        delete this.All[key];
-        this.constructDateSeparator();
-        this.computeSchedule();
-    }
+    public abstract remove(key: string): void;
 
     /**
      * clean the computed properties of the schedule. They can be recovered by calling the

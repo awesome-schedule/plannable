@@ -2,6 +2,7 @@
     "name": "awesome-schedule",
     "version": "7.6.0",
     "private": true,
+    "main": "electron.js",
     "scripts": {
         "serve": "vue-cli-service serve",
         "build": "vue-cli-service build --modern",
@@ -51,6 +52,7 @@
         "babel-eslint": "^10.0.1",
         "babel-plugin-transform-remove-console": "^6.9.4",
         "cheerio": "^1.0.0-rc.3",
+        "electron": "^7.1.7",
         "eslint": "^5.16.0",
         "eslint-import-resolver-typescript": "^1.1.1",
         "eslint-plugin-import": "^2.18.2",

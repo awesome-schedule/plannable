@@ -68,7 +68,7 @@ export async function loadSemesterData(
 export async function requestSemesterData(semester: SemesterJSON, db?: CatalogDB) {
     console.time(`request semester ${semester.name} data`);
 
-    const res = await (window.location.host === 'plannable.org' // Running on GitHub pages (primary address)?
+    const res = await (location.host === 'plannable.org' || location.protocol === 'file:' // Running on GitHub pages or Electron (primary address)?
         ? axios.post<string>(
               `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
               stringify({

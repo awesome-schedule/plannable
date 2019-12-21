@@ -179,10 +179,9 @@ export async function getReleaseNote() {
         console.log(Object.keys(res.data[0]));
         const notes: string[] = res.data.map(
             (x: GithubResponseData) =>
-                '<h5>' +
-                'Release note for ' +
+                '<div class="card"> <div class="card-body"> <div class="card-title"> <h6 style="list-style:none; padding-left: 0">' +
                 x.tag_name +
-                '</h5><hr />' +
+                '</h6> <hr> </div>' +
                 (x.body as string)
                     .split(/[\r\n]+/)
                     .map(x => {
@@ -207,7 +206,7 @@ export async function getReleaseNote() {
                                          */
                                         return match1.length === 0
                                             ? match2
-                                            : '<h' + (head = match1.length) + '>';
+                                            : '<h' + (head = match1.length + 2) + '>';
                                     }
                                 )
                                 .replace(/^(\s*)-\s/, (s: string, match: string) => {
@@ -248,10 +247,11 @@ export async function getReleaseNote() {
                         }
                         return result;
                     })
-                    .join(' ')
+                    .join(' ') +
+                '</div> </div>'
         );
 
-        return notes.join('<hr />');
+        return notes.join('<br>');
     } catch (err) {
         return (
             'Failed to obtain release note.' +

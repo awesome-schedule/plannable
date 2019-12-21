@@ -8,7 +8,8 @@
  */
 import quickselect from 'quickselect';
 import Event from '../models/Event';
-import Schedule, { ScheduleAll } from '../models/Schedule';
+import { ScheduleAll } from '../models/Schedule';
+import GeneratedSchedule from '../models/GeneratedSchedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoCourse, TimeArray } from './ScheduleGenerator';
 
@@ -557,7 +558,7 @@ class ScheduleEvaluator {
     public getSchedule(idx: number) {
         const numCourses = this.classList.length;
         idx = this.indices[idx] * numCourses;
-        return new Schedule(
+        return new GeneratedSchedule(
             Array.from(this.allChoices.slice(idx, idx + numCourses)).map(
                 (choice, classNum) => this.classList[classNum][choice]
             ),

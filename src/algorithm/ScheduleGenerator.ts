@@ -10,6 +10,7 @@ import { CourseStatus } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import Event from '../models/Event';
 import Schedule, { ScheduleAll } from '../models/Schedule';
+import ProposedSchedule from '../models/ProposedSchedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
@@ -167,7 +168,7 @@ class ScheduleGenerator {
      * 2. Each section meets no more than 82 times in a week
      */
     public getSchedules(
-        schedule: Schedule,
+        schedule: ProposedSchedule,
         sort = true,
         refSchedule: ScheduleAll<Set<number>> = {}
     ): NotiMsg<ScheduleEvaluator> {

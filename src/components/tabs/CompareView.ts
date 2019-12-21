@@ -6,6 +6,7 @@
  *
  */
 import Schedule, { ScheduleAll } from '@/models/Schedule';
+import GeneratedSchedule from '@/models/GeneratedSchedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';
 import randomColor from 'randomcolor';
@@ -25,7 +26,7 @@ import MainContent from '../MainContent.vue';
     }
 })
 export default class CompareView extends Store {
-    compareSchedule = new Schedule();
+    compareSchedule = new GeneratedSchedule();
     highlightIdx = -1;
 
     created() {
@@ -37,7 +38,7 @@ export default class CompareView extends Store {
     }
 
     renderSchedule() {
-        this.compareSchedule = new Schedule();
+        this.compareSchedule = new GeneratedSchedule();
         for (let i = 0; i < this.compare.length; i++) {
             const { schedule, color } = this.compare[i];
             for (let j = 0; j < 7; j++) {

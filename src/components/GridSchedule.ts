@@ -23,7 +23,7 @@ import CourseBlock from './CourseBlock.vue';
     }
 })
 export default class GridSchedule extends Store {
-    @Prop(Schedule) readonly currentSchedule!: Schedule;
+    @Prop(Object) readonly currentSchedule!: Schedule;
 
     df = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 

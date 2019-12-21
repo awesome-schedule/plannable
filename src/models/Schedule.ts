@@ -6,17 +6,18 @@
 /**
  *
  */
-import { NotiMsg } from '@/store/notification';
 import { colorDepthSearch, DFS, Vertex, intervalScheduling } from '../algorithm';
+// import ProposedSchedule from './ProposedSchedule';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
 import Hashable from './Hashable';
-import { Day, dayToInt, TYPES, DAYS } from './Meta';
+import { Day, dayToInt, DAYS } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
+import ProposedSchedule from './ProposedSchedule';
 
 /**
  * the structure of a Section in local storage
@@ -54,7 +55,7 @@ export interface ScheduleJSON {
  * Schedule handles the storage, access, mutation and render of courses and events.
  * @requires window.catalog
  */
-export default class Schedule {
+export default abstract class Schedule {
     // ----------------- global schedule options ------------------
     public static combineSections = true;
     public static multiSelect = true;
@@ -92,119 +93,7 @@ export default class Schedule {
         };
     }
 
-    /**
-     * instantiate a `Schedule` object from its JSON representation.
-     * the `computeSchedule` method will be invoked after instantiation
-     *
-     * @returns NotiMsg, whose level might be one of the following
-     * 1. success: a schedule is successfully parsed from the JSON object
-     * 2. warn: a schedule is successfully parsed, but some of the courses/sections recorded no longer exist
-     * in the catalog
-     * 3. error: the object passed in is falsy
-     */
-    public static fromJSON(obj?: ScheduleJSON): NotiMsg<Schedule> {
-        if (!obj)
-            return {
-                level: 'error',
-                msg: 'Invalid object'
-            };
-        const schedule = new Schedule();
-        if (obj.events)
-            schedule.events = obj.events.map(x =>
-                x instanceof Event ? x : Object.setPrototypeOf(x, Event.prototype)
-            );
-
-        const keys = Object.keys(obj.All).map(x => x.toLowerCase());
-        if (keys.length === 0)
-            return {
-                level: 'success',
-                msg: 'Empty schedule',
-                payload: schedule
-            };
-
-        const warnings = [];
-        const catalog = window.catalog;
-        const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
-        // convert array to set
-        for (const key of keys) {
-            const sections = obj.All[key];
-            const course = catalog.getCourse(key);
-            const parts = key.match(regex);
-
-            // converted key
-            let convKey = key;
-            if (parts && parts.length === 4) {
-                parts[3] = TYPES[+parts[3] as 1];
-                parts[1] = parts[1].toUpperCase();
-                convKey = parts.slice(1).join(' ');
-            }
-            // non existent course
-            if (!course) {
-                warnings.push(`${convKey} does not exist anymore! It probably has been removed!`);
-                continue;
-            }
-            const allSections = course.sections;
-            if (sections instanceof Array) {
-                if (!sections.length) {
-                    schedule.All[key] = new Set();
-                } else {
-                    // backward compatibility for version prior to v5.0 (inclusive)
-                    if (Utils.isNumberArray(sections)) {
-                        const secs = sections as number[];
-                        schedule.All[key] = new Set(
-                            secs
-                                .filter(sid => {
-                                    // sid >= length possibly implies that section is removed from SIS
-                                    if (sid >= allSections.length) {
-                                        warnings.push(
-                                            `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
-                                        );
-                                    }
-                                    return sid < allSections.length;
-                                })
-                                .map(idx => allSections[idx].id)
-                        );
-                    } else {
-                        const set = new Set<number>();
-                        for (const record of sections) {
-                            // check whether the identifier of stored sections match with the existing sections
-                            const target =
-                                typeof record.section === 'undefined' // "section" property may not be recorded
-                                    ? allSections.find(sec => sec.id === record.id) // in that case we only compare id
-                                    : allSections.find(
-                                          sec =>
-                                              sec.id === record.id && sec.section === record.section
-                                      );
-                            if (target) set.add(target.id);
-                            // if not exist, it possibly means that section is removed from SIS
-                            else
-                                warnings.push(
-                                    `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
-                                );
-                        }
-                        schedule.All[key] = set;
-                    }
-                }
-            } else {
-                schedule.All[key] = sections;
-            }
-        }
-        if (warnings.length) {
-            return {
-                level: 'warn',
-                payload: schedule,
-                msg: warnings.join('<br>')
-            };
-        } else {
-            return {
-                level: 'success',
-                payload: schedule,
-                msg: 'Success'
-            };
-        }
-    }
-
-    public All: ScheduleAll;
+    public All: ScheduleAll = {};
     /**
      * computed based on `this.All` by `computeSchedule`
      */
@@ -216,21 +105,24 @@ export default class Schedule {
         ScheduleBlock[],
         ScheduleBlock[],
         ScheduleBlock[] // Sunday
-    ];
+    ] = [[], [], [], [], [], [], []];
     /**
      * total credits stored in this schedule, computed based on `this.All`
      */
-    public totalCredit: number;
+    public totalCredit: number = 0;
     /**
      * a computed object that's updated by the `computeSchedule` method
      *
      * ids are the list of ids selected for a given course
      */
-    public current: { courses: Course[]; ids: string[][] };
+    public current: { courses: Course[]; ids: string[][] } = { courses: [], ids: [] };
     /**
      * keep track of used colors to avoid color collision
      */
-    public colorSlots: Set<string>[];
+    public colorSlots: Set<string>[] = Array.from(
+        { length: Schedule.colors.length },
+        () => new Set<string>()
+    );
     /**
      * the `computeSchedule` handle returned by `setTimeout`
      */
@@ -253,26 +145,21 @@ export default class Schedule {
     /**
      * the currently previewed (hovered) section
      */
-    private _preview: Section | null;
+    private _preview: Section | null = null;
     private separatedAll: { [date: string]: ScheduleAll } = {};
 
     /**
      * Construct a `Schedule` object from its raw representation
      */
-    constructor(raw: RawAlgoCourse[] | ScheduleAll = [], public events: Event[] = []) {
-        this.All = {};
-        this.days = [[], [], [], [], [], [], []];
-        this._preview = null;
-        this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set<string>());
-        this.totalCredit = 0;
-        this.current = { courses: [], ids: [] };
-        if (raw instanceof Array) {
-            for (const [key, sections] of raw) {
-                this.All[key] = new Set(sections);
-            }
-        } else {
-            this.All = raw;
-        }
+    constructor(raw: ScheduleAll = {}, public events: Event[] = []) {
+        // if (raw instanceof Array) {
+        //     for (const [key, sections] of raw) {
+        //         this.All[key] = new Set(sections);
+        //     }
+        // } else {
+        //     this.All = raw;
+        // }
+        this.All = raw;
         if (!this.empty()) {
             this.constructDateSeparator();
             this.computeSchedule();
@@ -295,34 +182,7 @@ export default class Schedule {
         return colors[idx];
     }
 
-    /**
-     * Update a section in the schedule
-     * - If the section is **already in** the schedule, delete it from the schedule
-     * - If the section is **not** in the schedule, add it to the schedule
-     * @param remove whether to remove the key if the set of sections is empty
-     */
-    public update(key: string, section: number, remove = true) {
-        if (section === -1) {
-            if (this.All[key] === -1) {
-                if (remove) delete this.All[key];
-                // empty set if remove is false
-                else this.All[key] = new Set();
-            } else this.All[key] = -1;
-        } else {
-            const sections = this.All[key];
-            if (sections instanceof Set) {
-                if (sections.delete(section)) {
-                    if (sections.size === 0 && remove) delete this.All[key];
-                } else {
-                    sections.add(section);
-                }
-            } else {
-                this.All[key] = new Set([section]);
-            }
-        }
-        this.constructDateSeparator();
-        this.computeSchedule();
-    }
+    public abstract update(key: string, section: number, remove: boolean): void;
 
     /**
      * preview and remove preview need to use the async version of compute
@@ -335,38 +195,6 @@ export default class Schedule {
     public preview(section: Section) {
         this._preview = section;
         this.computeSchedule(false);
-    }
-
-    /**
-     * add an event to this schedule
-     * @throws error if an existing event conflicts with this event
-     */
-    public addEvent(
-        days: string,
-        display: boolean,
-        title?: string,
-        room?: string,
-        description?: string
-    ) {
-        for (const e of this.events) {
-            if (e.days === days) {
-                throw new Error(
-                    `Your new event's time is identical to ${e.title}. Please consider merging these two events.`
-                );
-            }
-        }
-        this.events.push(new Event(days, display, title, description, room));
-        this.computeSchedule();
-    }
-
-    public deleteEvent(days: string) {
-        for (let i = 0; i < this.events.length; i++) {
-            if (this.events[i].days === days) {
-                this.events.splice(i, 1);
-                break;
-            }
-        }
-        this.computeSchedule();
     }
 
     public hoverEvent(key: string, strong = true) {
@@ -504,7 +332,7 @@ export default class Schedule {
     /**
      * need to be called before `computeSchedule` if the `All` property is updated.
      */
-    private constructDateSeparator() {
+    protected constructDateSeparator() {
         const sections: Section[] = [];
         for (const key in this.All) {
             if (this.All[key] === -1) continue;
@@ -754,13 +582,6 @@ export default class Schedule {
     }
 
     /**
-     * instantiate a `Schedule` object from its JSON representation
-     */
-    public fromJSON(obj?: ScheduleJSON) {
-        return Schedule.fromJSON(obj);
-    }
-
-    /**
      * Serialize `this` to JSON
      */
     public toJSON(): ScheduleJSON {
@@ -782,22 +603,7 @@ export default class Schedule {
         };
     }
 
-    /**
-     * get a copy of this schedule
-     */
-    public copy(deepCopyEvent = true) {
-        const AllCopy: ScheduleAll = {};
-        for (const key in this.All) {
-            const sections = this.All[key];
-            if (sections instanceof Set) {
-                AllCopy[key] = new Set(sections);
-            } else {
-                AllCopy[key] = sections;
-            }
-        }
-        // note: is it desirable to deep-copy all the events?
-        return new Schedule(AllCopy, deepCopyEvent ? this.events.map(e => e.copy()) : this.events);
-    }
+    public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
 
     /**
      * Check whether the given key exists in the Schedule.
@@ -822,7 +628,7 @@ export default class Schedule {
     }
 
     public empty() {
-        return Object.keys(this.All).length === 0;
+        return Object.keys(this.All).length === 0 && this.events.length === 0;
     }
 
     public equals(s: Schedule) {
@@ -857,40 +663,5 @@ export default class Schedule {
         }
 
         return true;
-    }
-
-    /**
-     * add some random event to the schedule. For testing purposes only
-     */
-    private randEvents(num = 20, maxDuration = 120, minDuration = 20) {
-        for (let i = 0; i < num; i++) {
-            let days = '';
-            for (let j = 0; j < 7; j++) {
-                if (Math.random() < 0.5) {
-                    days += DAYS[j];
-                }
-            }
-            if (!days) {
-                i--;
-                continue;
-            }
-            const start = Math.floor(Math.random() * (1440 - maxDuration));
-            const end =
-                start +
-                minDuration +
-                Math.floor(Math.random() * Math.min(1440 - start, maxDuration));
-
-            days +=
-                ' ' +
-                Utils.to12hr(Utils.intTo24hr(start)) +
-                ' - ' +
-                Utils.to12hr(Utils.intTo24hr(end));
-            try {
-                this.addEvent(days, true, 'rand ' + i);
-            } catch (e) {
-                console.log(e);
-                i--;
-            }
-        }
     }
 }

@@ -389,18 +389,18 @@
                 </h5>
                 <p>
                     For convenience, we provide a list of course IDs for your currently active
-                    schedule at the bottom left corner under "Schedule Overview". These IDs can be
-                    direcly entered into SIS, through the input box left to your shopping cart.
+                    schedule at the bottom left corner under "Schedule Overview". To add class to
+                    your shopping cart, use the "Add class by number" button and enter the IDs we
+                    provided.
                 </p>
-                <img :src="imgPath('enroll-sis.png')" alt="enroll-sis.png" class="img-fluid" />
+                <img :src="imgPath('enroll-sis.png')" alt="enroll-sis.png" class="img-fluid mb-3" />
                 <p>
                     If some of the IDs are missing, it is likely that you are in "Edit class" mode
-                    and you selected "Any section" for that course. If there is a "+1" (or a higher
-                    number) after an ID, it means that course has more than one sections available
-                    at the given time shown in your schedule. To view the list of sections, click
-                    the corresponding course block rendered in the grid. For example, in the
-                    schedule shown below, there are five available ENWR 1510 on Monday and Wednesday
-                    from 5:00 to 6:15PM.
+                    and you selected "Any section" for that course. If there are more than one ID,
+                    it means that course has more than one sections available at the given time
+                    shown in your schedule. To view the list of sections, click the corresponding
+                    course block rendered in the grid. For example, in the schedule shown below,
+                    there are 14 ECON 2010 Discussion sections on Friday 8am.
                 </p>
                 <img
                     :src="imgPath('multi-section.png')"

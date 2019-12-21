@@ -77,27 +77,50 @@
             <Expand>
                 <div v-if="expanded(crs.key)" :id="`${crs.key}trans`" class="trans">
                     <!-- no "Any Section" for engagement due to some strange requests -->
-                    <a
-                        v-if="showAny && crs.department !== 'EGMT'"
-                        style="font-size: 1rem; padding: 0.5rem 0 0.5rem 1rem"
-                        class="list-group-item list-group-item-action class-section"
-                        :class="{ active: schedule.All[crs.key] === -1 }"
+                    <div
+                        class="row no-gutters justify-content-center"
+                        style="font-size: 0.9rem"
                         :title="
                             schedule.All[crs.key] === -1 ? 'click to unselect' : 'click to select'
                         "
                         @click="select(crs.key, -1)"
                     >
-                        <div class="row no-gutters justify-content-between">
-                            <div class="col-md-auto">Any Section</div>
-                            <div class="col col-sm-1 align-self-center">
-                                <i
-                                    v-if="schedule.All[crs.key] === -1"
-                                    class="far fa-check-square"
-                                ></i>
-                                <i v-else class="far fa-square"></i>
+                        <div class="col col-6">
+                            <div
+                                class="list-group-item list-group-item-action"
+                                :class="{ active: schedule.All[crs.key] === -1 }"
+                            >
+                                <div class="row no-gutters justify-content-between">
+                                    <div class="col col-11">Any Section</div>
+                                    <div class="col col-1 align-self-center">
+                                        <i
+                                            v-if="schedule.All[crs.key] === -1"
+                                            class="far fa-check-square"
+                                        ></i>
+                                        <i v-else class="far fa-square"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </a>
+
+                        <div class="col col-6">
+                            <div
+                                class="list-group-item list-group-item-action"
+                                :class="{ active: schedule.All[crs.key] === -1 }"
+                            >
+                                <div class="row no-gutters justify-content-between">
+                                    <div class="col col-11">Groups</div>
+                                    <div class="col col-1 align-self-center">
+                                        <i
+                                            v-if="schedule.All[crs.key] === -1"
+                                            class="far fa-check-square"
+                                        ></i>
+                                        <i v-else class="far fa-square"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <template v-for="(value, key) in separatedCourses[crs.key]">
                         <li
                             v-if="Object.keys(separatedCourses[crs.key]).length > 1"
@@ -123,19 +146,18 @@
                         <div
                             v-for="sec in value.sections"
                             :key="sec.id"
-                            class="list-group-item list-group-item-action container-fluid class-section"
+                            class="list-group-item list-group-item-action class-section"
                             :class="{
                                 active: isActive(crs.key, sec.id)
                             }"
                             :title="
                                 isActive(crs.key, sec.id) ? 'click to unselect' : 'click to select'
                             "
-                            @click="select(crs.key, sec.id)"
                             @mouseenter="schedule.preview(sec)"
                             @mouseleave="schedule.removePreview()"
                         >
                             <div class="row no-gutters justify-content-between">
-                                <div class="col-md-auto">
+                                <div class="col-md-auto mr-auto" @click="select(crs.key, sec.id)">
                                     <ul class="list-unstyled m-0" style="font-size: 0.75rem;">
                                         <li>
                                             Section {{ sec.section }}
@@ -176,7 +198,19 @@
                                         <li v-else>{{ sec.instructors.join(', ') }}</li>
                                     </ul>
                                 </div>
-                                <div class="col col-sm-1 align-self-center">
+                                <div class="col col-sm-auto align-self-center">
+                                    <input
+                                        type="number"
+                                        value="0"
+                                        class="form-control form-control-sm"
+                                        style="width: 50px"
+                                        @click="1"
+                                    />
+                                </div>
+                                <div
+                                    class="col col-sm-auto mx-3 align-self-center"
+                                    @click="select(crs.key, sec.id)"
+                                >
                                     <i
                                         v-if="isActive(crs.key, sec.id)"
                                         class="far fa-check-square"

@@ -70,7 +70,7 @@ export default class ClassList extends Vue {
     selectAll(key: string, course: Course) {
         let notSelected = false;
         for (const sec of course.sections) {
-            if (!this.isActive(key, sec.id)) {
+            if (!this.schedule.hasSection(key, sec.id)) {
                 notSelected = true;
                 this.select(key, sec.id);
             }
@@ -83,7 +83,9 @@ export default class ClassList extends Vue {
     }
 
     allTimeSelected(key: string, time: string) {
-        return this.separatedCourses[key][time].sections.every(sec => this.isActive(key, sec.id));
+        return this.separatedCourses[key][time].sections.every(sec =>
+            this.schedule.hasSection(key, sec.id)
+        );
     }
 
     get separatedCourses() {
@@ -128,26 +130,11 @@ export default class ClassList extends Vue {
         }
     }
     /**
-     * returns whether the `idx` section of the course with key `key` is selected
-     */
-    isActive(key: string, idx: number) {
-        const sections = this.schedule.All[key];
-        if (sections instanceof Set) return sections.has(idx);
-        return false;
-    }
-    /**
      * returns whether course with key=`key` is expanded
      * @param key
      */
     expanded(key: string) {
         const status = this.collapsed[key];
         return (status === undefined && this.isEntering && this.expandOnEntering) || status;
-    }
-    /**
-     * @returns true if none of the sections of this course is selected
-     */
-    emptyCourse(course: Course) {
-        const sections = this.schedule.All[course.key];
-        return sections instanceof Set && sections.size === 0;
     }
 }

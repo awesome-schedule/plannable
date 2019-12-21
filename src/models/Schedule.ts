@@ -152,19 +152,16 @@ export default abstract class Schedule {
      * Construct a `Schedule` object from its raw representation
      */
     constructor(raw: ScheduleAll = {}, public events: Event[] = []) {
-        // if (raw instanceof Array) {
-        //     for (const [key, sections] of raw) {
-        //         this.All[key] = new Set(sections);
-        //     }
-        // } else {
-        //     this.All = raw;
-        // }
         this.All = raw;
         if (!this.empty()) {
             this.constructDateSeparator();
             this.computeSchedule();
         }
     }
+
+    public abstract update(key: string, section: number, remove?: boolean): void;
+    public abstract remove(key: string): void;
+    public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
 
     /**
      * Get the background color of a hashable object
@@ -181,8 +178,6 @@ export default abstract class Schedule {
         this.colorSlots[idx].add(obj.key);
         return colors[idx];
     }
-
-    public abstract update(key: string, section: number, remove: boolean): void;
 
     /**
      * preview and remove preview need to use the async version of compute
@@ -560,8 +555,6 @@ export default abstract class Schedule {
         }
     }
 
-    public abstract remove(key: string): void;
-
     /**
      * clean the computed properties of the schedule. They can be recovered by calling the
      * `computeSchedule method`
@@ -596,8 +589,6 @@ export default abstract class Schedule {
         };
     }
 
-    public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
-
     /**
      * Check whether the given key exists in the Schedule.
      * @param key
@@ -611,6 +602,19 @@ export default abstract class Schedule {
                 this.days.some(blocks => blocks.some(block => block.section.key === key))
             );
         else return key in this.All || this.events.some(x => x.days === key);
+    }
+
+    public hasSection(key: string, section: number) {
+        const s = this.All[key];
+        return s instanceof Set && s.has(section);
+    }
+
+    /**
+     * @returns true if none of the sections of this course is selected
+     */
+    public isCourseEmpty(key: string) {
+        const s = this.All[key];
+        return s instanceof Set && s.size === 0;
     }
 
     public clean() {

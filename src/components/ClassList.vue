@@ -30,9 +30,9 @@
                             </span>
                             <span v-else>{{ crs.displayName }}</span>
                             <span
-                                v-if="emptyCourse(crs)"
+                                v-if="schedule.isCourseEmpty(crs.key)"
                                 class="ml-1 text-danger"
-                                title="No sections are selected! You won't be able to generate schedules"
+                                title="No sections are selected! You won't be able to generate schedules. If you want to remove this course, click x"
                             >
                                 <i class="fas fa-exclamation-triangle"></i>
                             </span>
@@ -148,10 +148,12 @@
                             :key="sec.id"
                             class="list-group-item list-group-item-action class-section"
                             :class="{
-                                active: isActive(crs.key, sec.id)
+                                active: schedule.hasSection(crs.key, sec.id)
                             }"
                             :title="
-                                isActive(crs.key, sec.id) ? 'click to unselect' : 'click to select'
+                                schedule.hasSection(crs.key, sec.id)
+                                    ? 'click to unselect'
+                                    : 'click to select'
                             "
                             @mouseenter="schedule.preview(sec)"
                             @mouseleave="schedule.removePreview()"
@@ -212,7 +214,7 @@
                                     @click="select(crs.key, sec.id)"
                                 >
                                     <i
-                                        v-if="isActive(crs.key, sec.id)"
+                                        v-if="schedule.hasSection(crs.key, sec.id)"
                                         class="far fa-check-square"
                                     ></i>
                                     <i v-else class="far fa-square"></i>

@@ -24,6 +24,7 @@ import schedule, { ScheduleStateJSON, ScheduleStore } from './schedule';
 import semester, { SemesterState } from './semester';
 import status from './status';
 import colorSchemes from '@/data/ColorSchemes';
+import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 export interface SemesterStorage extends Expirable {
     name: string;
@@ -132,7 +133,7 @@ export function saveStatus() {
 }
 
 interface CompareCandidate {
-    schedule: Schedule;
+    schedule: GeneratedSchedule;
     profileName: string;
     /**
      * index of the generated schedule

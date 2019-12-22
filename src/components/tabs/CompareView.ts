@@ -79,7 +79,13 @@ export default class CompareView extends Store {
         const catalog = window.catalog;
         return Object.entries(All)
             .map(x => {
-                const course = catalog.getCourse(...x);
+                const course = catalog.getCourse(
+                    x[0],
+                    (x[1] as Set<number>[]).reduce((acc, x) => {
+                        acc.add(1);
+                        return acc;
+                    }, new Set<number>())
+                );
                 return `${course.department} ${course.number}-${course.sections
                     .map(y => y.section)
                     .reduce((a, z) => a + '/' + z)} ${course.title}`;

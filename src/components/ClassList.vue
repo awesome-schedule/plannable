@@ -81,20 +81,20 @@
                         class="row no-gutters justify-content-center"
                         style="font-size: 0.9rem"
                         :title="
-                            schedule.All[crs.key] === -1 ? 'click to unselect' : 'click to select'
+                            schedule.isAnySection(crs.key) ? 'click to unselect' : 'click to select'
                         "
                         @click="select(crs.key, -1)"
                     >
                         <div class="col col-6">
                             <div
                                 class="list-group-item list-group-item-action"
-                                :class="{ active: schedule.All[crs.key] === -1 }"
+                                :class="{ active: schedule.isAnySection(crs.key) }"
                             >
                                 <div class="row no-gutters justify-content-between">
                                     <div class="col col-11">Any Section</div>
                                     <div class="col col-1 align-self-center">
                                         <i
-                                            v-if="schedule.All[crs.key] === -1"
+                                            v-if="schedule.isAnySection(crs.key)"
                                             class="far fa-check-square"
                                         ></i>
                                         <i v-else class="far fa-square"></i>
@@ -106,13 +106,13 @@
                         <div class="col col-6">
                             <div
                                 class="list-group-item list-group-item-action"
-                                :class="{ active: schedule.All[crs.key] === -1 }"
+                                :class="{ active: schedule.isAnySection(crs.key) }"
                             >
                                 <div class="row no-gutters justify-content-between">
                                     <div class="col col-11">Groups</div>
                                     <div class="col col-1 align-self-center">
                                         <i
-                                            v-if="schedule.All[crs.key] === -1"
+                                            v-if="schedule.isAnySection(crs.key)"
                                             class="far fa-check-square"
                                         ></i>
                                         <i v-else class="far fa-square"></i>

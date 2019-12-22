@@ -9,10 +9,11 @@
 import { CourseStatus } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import Event from '../models/Event';
-import Schedule, { ScheduleAll } from '../models/Schedule';
+import { ScheduleAll } from '../models/Schedule';
 import ProposedSchedule from '../models/ProposedSchedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
+import Course from '@/models/Course';
 
 /**
  * The blocks is a condensed fixed-length array
@@ -170,7 +171,7 @@ class ScheduleGenerator {
     public getSchedules(
         schedule: ProposedSchedule,
         sort = true,
-        refSchedule: ScheduleAll<Set<number>> = {}
+        refSchedule: ScheduleAll = {}
     ): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
 
@@ -186,66 +187,30 @@ class ScheduleGenerator {
 
         // for each course selected, form an array of sections
         for (const key in courses) {
-            const classes: RawAlgoCourse[] = [],
-                timeArrays: TimeArray[] = [],
-                dates: MeetingDate[] = [];
+            const temp = courses[key];
+            const allSections = temp === -1 ? ([-1] as const) : temp;
 
-            // get course with specific sections specified by Schedule
-            const courseRec = this.catalog.getCourse(key, courses[key]);
-
-            if (courseRec.sections.length === 0) {
-                return {
-                    level: 'error',
-                    msg: `No sections of ${courseRec.displayName} are selected!`
-                };
-            }
-
-            // combine all sections of this course occurring at the same time, if enabled
-            const combined = this.options.combineSections
-                ? Object.values(courseRec.getCombined())
-                : courseRec.sections.map(s => [s]);
-
-            // for each combined section, form a RawAlgoCourse
-            outer: for (const sections of combined) {
-                // only take the time and room info of the first section
-                // time will be the same for sections in this array
-                // but rooms..., well this is a compromise
-                const date = parseDate(sections[0].dates);
-                if (!date) continue;
-
-                const timeArray = sections[0].getTimeRoom();
-                if (!timeArray) continue;
-
-                // don't include this combined section if it conflicts with any time filter or event.
-                for (const td of timeSlots) {
-                    if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;
+            for (const subgroup of allSections) {
+                const courseRec = this.catalog.getCourse(key, subgroup);
+                if (courseRec.sections.length === 0) {
+                    return {
+                        level: 'error',
+                        msg: `No sections of ${courseRec.displayName} are selected!`
+                    };
                 }
 
-                const secIndices: number[] = [];
-                for (const section of sections) {
-                    // filter out sections with unwanted status
-                    if (this.options.status.includes(section.status)) continue;
-
-                    secIndices.push(section.id);
+                const [classes, timeArrays, dates] = this.filterSections(courseRec, timeSlots);
+                // throw an error of none of the sections pass the filter
+                if (classes.length === 0) {
+                    return {
+                        level: 'error',
+                        msg: `No sections of ${courseRec.displayName} satisfy your filters and do not conflict with your events`
+                    };
                 }
-
-                if (secIndices.length) {
-                    classes.push([key, secIndices]);
-                    timeArrays.push(timeArray);
-                    dates.push(date);
-                }
+                classList.push(classes);
+                timeArrayList.push(timeArrays);
+                dateList.push(dates);
             }
-
-            // throw an error of none of the sections pass the filter
-            if (classes.length === 0) {
-                return {
-                    level: 'error',
-                    msg: `No sections of ${courseRec.displayName} satisfy your filters and do not conflict with your events`
-                };
-            }
-            classList.push(classes);
-            timeArrayList.push(timeArrays);
-            dateList.push(dates);
         }
 
         const numCourses = classList.length; // number of courses
@@ -322,6 +287,50 @@ class ScheduleGenerator {
             level: 'error',
             msg: 'Given your filter, we cannot generate schedules without overlapping classes'
         };
+    }
+
+    private filterSections(courseRec: Course, timeSlots: TimeArray[]) {
+        const classes: RawAlgoCourse[] = [],
+            timeArrays: TimeArray[] = [],
+            dates: MeetingDate[] = [];
+
+        // combine all sections of this course occurring at the same time, if enabled
+        const combined = this.options.combineSections
+            ? Object.values(courseRec.getCombined())
+            : courseRec.sections.map(s => [s]);
+
+        // for each combined section, form a RawAlgoCourse
+        outer: for (const sections of combined) {
+            // only take the time and room info of the first section
+            // time will be the same for sections in this array
+            // but rooms..., well this is a compromise
+            const date = parseDate(sections[0].dates);
+            if (!date) continue;
+
+            const timeArray = sections[0].getTimeRoom();
+            if (!timeArray) continue;
+
+            // don't include this combined section if it conflicts with any time filter or event.
+            for (const td of timeSlots) {
+                if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;
+            }
+
+            const secIndices: number[] = [];
+            for (const section of sections) {
+                // filter out sections with unwanted status
+                if (this.options.status.includes(section.status)) continue;
+
+                secIndices.push(section.id);
+            }
+
+            if (secIndices.length) {
+                classes.push([courseRec.key, secIndices]);
+                timeArrays.push(timeArray);
+                dates.push(date);
+            }
+        }
+
+        return [classes, timeArrays, dates] as const;
     }
 
     /**

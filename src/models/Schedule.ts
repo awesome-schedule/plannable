@@ -109,7 +109,7 @@ export default abstract class Schedule {
     /**
      * total credits stored in this schedule, computed based on `this.All`
      */
-    public totalCredit: number = 0;
+    public totalCredit = 0;
     /**
      * a computed object that's updated by the `computeSchedule` method
      *
@@ -119,10 +119,7 @@ export default abstract class Schedule {
     /**
      * keep track of used colors to avoid color collision
      */
-    public colorSlots: Set<string>[] = Array.from(
-        { length: Schedule.colors.length },
-        () => new Set<string>()
-    );
+    public colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set<string>());
     /**
      * the `computeSchedule` handle returned by `setTimeout`
      */
@@ -615,6 +612,16 @@ export default abstract class Schedule {
     public isCourseEmpty(key: string) {
         const s = this.All[key];
         return s instanceof Set && s.size === 0;
+    }
+
+    public isAnySection(key: string) {
+        return this.All[key] === -1;
+    }
+
+    public getSectionGroup(key: string, section: number) {
+        const sections = this.All[key];
+        if (sections === -1) return -1;
+        return sections.findIndex(s => s.has(section));
     }
 
     public clean() {

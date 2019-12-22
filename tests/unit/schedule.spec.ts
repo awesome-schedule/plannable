@@ -2,6 +2,7 @@ import Schedule from '@/models/Schedule';
 import Section from '@/models/Section';
 import * as Utils from '@/utils';
 import colorSchemes from '@/data/ColorSchemes';
+import ProposedSchedule from '@/models/ProposedSchedule';
 
 describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {
@@ -24,7 +25,7 @@ describe('Schedule Test', () => {
         const json = `{"All":{"cs21505":[0],"cs21504":[1], "cs11105": -1},
         "id":1,"title":"Schedule","events":[],"savedColors":{"cs21505":"#af2007","cs21504":"#068239"}}`;
         const parsed = JSON.parse(json);
-        const schedule = Schedule.fromJSON(parsed).payload!;
+        const schedule = ProposedSchedule.fromJSON(parsed).payload!;
         expect(schedule).toBeTruthy();
         expect(schedule.All).toEqual(
             global.convertAll({
@@ -34,14 +35,12 @@ describe('Schedule Test', () => {
             })
         );
 
-        expect(schedule.fromJSON().payload).toBeFalsy();
+        expect(ProposedSchedule.fromJSON().payload).toBeFalsy();
         expect(
-            schedule
-                .fromJSON({
-                    All: {},
-                    events: []
-                })
-                .payload!.empty()
+            ProposedSchedule.fromJSON({
+                All: {},
+                events: []
+            }).payload!.empty()
         ).toBe(true);
     });
 
@@ -50,7 +49,7 @@ describe('Schedule Test', () => {
         let json = `
         {"All":{"cs21025":-1,"cs21105":[{"id":15486,"section":"001"}]},"id":0,"title":"Schedule","events":[]}`;
         let parsed = JSON.parse(json);
-        let schedule = Schedule.fromJSON(parsed).payload!;
+        let schedule = ProposedSchedule.fromJSON(parsed).payload!;
         expect(schedule).toBeTruthy();
         expect(schedule.empty()).toBeFalsy();
 
@@ -60,11 +59,11 @@ describe('Schedule Test', () => {
         "cs213123123": [1], "cs11105": [999],
         "cs21505": [{"id": "asd", "section": "invalid section"}]},"id":0,"title":"Schedule","events":[]}`;
         parsed = JSON.parse(json);
-        schedule = Schedule.fromJSON(parsed).payload!;
+        schedule = ProposedSchedule.fromJSON(parsed).payload!;
     });
 
     it('add/update course/events', () => {
-        const schedule = new Schedule();
+        const schedule = new ProposedSchedule();
         const cs11105 = window.catalog.getCourse('cs11105');
         const id0 = cs11105.sections[1].id;
         expect(schedule.All).toEqual({});
@@ -143,8 +142,7 @@ describe('Schedule Test', () => {
         schedule.update('cs21105', -1);
         schedule.update('cs21105', -1, false);
         expect(schedule.All).toHaveProperty('cs21105');
-        expect(schedule.All.cs21105).toBeInstanceOf(Set);
-        expect((schedule.All.cs21105 as Set<number>).size).toBe(0);
+        expect(schedule.All.cs21105).toBeInstanceOf(Array);
         expect(schedule.has('cs21105', false)).toBe(true);
         expect(schedule.has('cs21105', true)).toBe(false);
 

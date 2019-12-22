@@ -181,10 +181,10 @@ class ScheduleEvaluator {
             start *= numCourses;
             for (let j = 0; j < numCourses; j++) {
                 const course = classList[j][allChoices[start + j]];
-                const key = sim[course[0]];
+                const key = sim[course[0]] as Set<number>[];
                 if (key) {
                     for (const sid of course[1]) {
-                        if ((key as Set<number>).has(sid)) sum++;
+                        sum += +(key.find(s => s.has(sid)) !== undefined);
                     }
                 }
             }

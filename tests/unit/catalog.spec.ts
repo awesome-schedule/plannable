@@ -1,4 +1,4 @@
-import Schedule from '@/models/Schedule';
+import ProposedSchedule from '@/models/ProposedSchedule';
 
 describe('catalog test', () => {
     it('search', () => {
@@ -17,7 +17,7 @@ describe('catalog test', () => {
 
     it('convert key', () => {
         const catalog = window.catalog;
-        const schedule = new Schedule();
+        const schedule = new ProposedSchedule();
         schedule.addEvent('MoFr 10:00AM - 11:30AM', true, 'title asd');
         expect(catalog.convertKey('cs11105', schedule)).toBe('CS 1110 Lecture');
         expect(catalog.convertKey('123213213', schedule)).toBe('123213213');

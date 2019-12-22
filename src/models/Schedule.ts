@@ -606,6 +606,9 @@ export default abstract class Schedule {
         else return key in this.All || this.events.some(x => x.days === key);
     }
 
+    /**
+     * returns whether a given section exists in this schedule (All)
+     */
     public hasSection(key: string, section: number) {
         const s = this.All[key];
         return s instanceof Array && s.findIndex(g => g.has(section)) !== -1;
@@ -619,14 +622,47 @@ export default abstract class Schedule {
         return s instanceof Array && s.every(g => g.size === 0);
     }
 
+    /**
+     * @returns whether the given course has `Any Section` selected
+     */
     public isAnySection(key: string) {
         return this.All[key] === -1;
     }
 
+    /**
+     * @returns the group index corresponding to the given section
+     */
     public getSectionGroup(key: string, section: number) {
         const sections = this.All[key];
-        if (sections === -1) return -1;
+        if (sections === -1 || !(sections instanceof Array)) return -1;
         return sections.findIndex(s => s.has(section));
+    }
+
+    /**
+     * whether multiple groups exist for a given course
+     * @param key
+     */
+    public isGroup(key: string) {
+        const s = this.All[key];
+        return s instanceof Array && s.length > 1;
+    }
+
+    /**
+     * combine all groups
+     */
+    public ungroup(key: string) {
+        const s = this.All[key];
+        if (s instanceof Array && s.length > 1) {
+            const first = s[0];
+            for (let i = 1; i < s.length; i++) {
+                for (const v of s[i]) {
+                    first.add(v);
+                }
+            }
+            s.splice(1);
+            this.constructDateSeparator();
+            this.computeSchedule();
+        }
     }
 
     public clean() {

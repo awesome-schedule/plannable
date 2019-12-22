@@ -24,20 +24,44 @@ export default class ProposedSchedule extends Schedule {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
                 // empty set if remove is false
-                else this.All[key] = [new Set()];
-            } else this.All[key] = -1;
+                else this.All[key] = [];
+            } else {
+                this.All[key] = -1;
+            }
         } else {
-            const sections = this.All[key];
+            let sections = this.All[key];
             if (sections instanceof Array) {
+                const prev = sections.find(g => g.has(section));
+                if (groupIdx < 0) groupIdx = 0;
                 const group = sections[groupIdx] || new Set();
-                if (group.delete(section)) {
-                    if (this.isCourseEmpty(key)) delete this.All[key];
+                if (prev === group) {
+                    // this section exists and is in the same group, remove
+                    if (group.delete(section)) {
+                        if (remove && this.isCourseEmpty(key)) delete this.All[key];
+                    } else {
+                        group.add(section);
+                    }
+                } else if (prev === undefined) {
+                    // does not exists previously, so just add
+                    group.add(section);
                 } else {
+                    // remove previous and add current
+                    prev.delete(section);
                     group.add(section);
                 }
                 sections[groupIdx] = group;
             } else {
-                this.All[key] = [new Set([section])];
+                // this is a new key
+                this.All[key] = sections = [new Set<number>().add(section)];
+            }
+            // remove trailing empty groups
+            for (let i = sections.length - 1; i >= 0 && sections[i].size === 0; i--) sections.pop();
+
+            // fill in empty values
+            for (let i = 0; i < sections.length; i++) {
+                if (!(sections[i] instanceof Set)) {
+                    sections[i] = new Set();
+                }
             }
         }
         this.constructDateSeparator();
@@ -202,8 +226,8 @@ export default class ProposedSchedule extends Schedule {
         const AllCopy: ScheduleAll = {};
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) {
-                AllCopy[key] = new Set(sections);
+            if (sections instanceof Array) {
+                AllCopy[key] = sections.map(s => new Set(s));
             } else {
                 AllCopy[key] = sections;
             }

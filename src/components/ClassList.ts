@@ -59,6 +59,7 @@ export default class ClassList extends Vue {
      * value: true for collapsed, false otherwise
      */
     collapsed: { [x: string]: boolean } = {};
+    group: { [x: string]: boolean } = {};
 
     select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
@@ -66,9 +67,17 @@ export default class ClassList extends Vue {
             'update_course',
             key,
             idx,
-            +(document.getElementById(key + '-' + idx) as HTMLInputElement).value,
+            idx === -1 ? 0 : +(document.getElementById(key + '-' + idx) as HTMLInputElement).value,
             this.isEntering
         );
+    }
+
+    updateGroup(key: string) {
+        if (this.group[key]) {
+            this.$set(this.group, key, false);
+        } else {
+            this.$set(this.group, key, true);
+        }
     }
 
     selectAll(key: string, course: Course) {

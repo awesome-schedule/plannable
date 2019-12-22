@@ -347,13 +347,21 @@ export default abstract class Schedule {
 
         for (const key in this.All) {
             const all = this.All[key];
-            if (all === -1) continue;
-            for (const a of all) {
-                const course = window.catalog.getCourse(key, a);
-                // skip invalid dates
+            if (all === -1) {
+                const course = window.catalog.getCourse(key, -1);
                 for (const section of course.sections) {
                     if (section.dateArray) {
                         sections.push(section);
+                    }
+                }
+            } else {
+                for (const a of all) {
+                    const course = window.catalog.getCourse(key, a);
+                    // skip invalid dates
+                    for (const section of course.sections) {
+                        if (section.dateArray) {
+                            sections.push(section);
+                        }
                     }
                 }
             }
@@ -402,7 +410,16 @@ export default abstract class Schedule {
             const date = sep.getMonth() + 1 + '/' + sep.getDate();
             for (const key in this.All) {
                 const course = this.All[key];
-                if (course === -1) continue;
+                if (course === -1) {
+                    const sections = window.catalog.getCourse(key, -1);
+                    for (const sec of sections.sections) {
+                        const [start, end] = sec.dateArray;
+                        if (start < lower && end >= upper) {
+                            this.separatedAll[date][key] = -1;
+                        }
+                    }
+                    continue;
+                }
                 // one set for each group
                 for (const group of course) {
                     const sections = window.catalog.getCourse(key, group);

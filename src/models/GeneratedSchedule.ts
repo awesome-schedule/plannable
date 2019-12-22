@@ -1,5 +1,4 @@
 import Schedule, { ScheduleAll } from './Schedule';
-import ProposedSchedule from './ProposedSchedule';
 import Event from './Event';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 
@@ -27,7 +26,7 @@ export default class GeneratedSchedule extends Schedule {
         throw new Error();
     }
 
-    public copy(): ProposedSchedule {
+    public copy(): any {
         throw new Error();
     }
 }

@@ -88,7 +88,7 @@ describe('ScheduleGenerator Test', () => {
         schedule.events.length = 0;
         // similarity
         store.filter.refSchedule = {
-            cs11105: -1
+            cs11105: [new Set<number>().add(window.catalog.getCourse('cs11105').sections[0].id)]
         };
         expect(store.filter.similarityEnabled).toBe(true);
         expect(sort.sortBy[5].name).toBe('similarity');

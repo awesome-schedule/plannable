@@ -60,6 +60,7 @@
         "babel-eslint": "^10.0.1",
         "babel-plugin-transform-remove-console": "^6.9.4",
         "cheerio": "^1.0.0-rc.3",
+        "circular-dependency-plugin": "^5.2.0",
         "electron": "^7.1.7",
         "electron-builder": "^21.2.0",
         "eslint": "^5.16.0",

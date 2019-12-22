@@ -1,6 +1,6 @@
 import ScheduleEvaluator, { EvaluatorOptions } from '@/algorithm/ScheduleEvaluator';
 import filter from '@/store/filter';
-import { computeTimeArrLens, timeArrayToCompact } from '@/algorithm';
+import { computeTimeArrLens, timeArrayToCompact } from '@/algorithm/ScheduleGenerator';
 
 test('dummy', () => {
     expect(1).toBe(1);

@@ -9,7 +9,7 @@ import { DAYS } from '@/models/Meta';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import { SortFunctions } from '@/algorithm';
+import { SortFunctions } from '@/algorithm/ScheduleEvaluator';
 
 /**
  * the component for editing and applying filters

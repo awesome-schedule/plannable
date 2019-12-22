@@ -8,12 +8,12 @@
 /**
  *
  */
-import * as Utils from '.';
 import Course from '../models/Course';
 import Event from '../models/Event';
 import { DAYS } from '../models/Meta';
 import Schedule from '../models/Schedule';
 import Section from '../models/Section';
+import { hr12toInt } from './time';
 
 /**
  * Convert a schedule to iCalendar format.
@@ -56,8 +56,8 @@ export function toICal(schedule: Schedule) {
                         continue;
                     const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
                     const [, start, , end] = m.days.split(' ');
-                    const startMin = Utils.hr12toInt(start);
-                    const duration = Utils.hr12toInt(end) - startMin;
+                    const startMin = hr12toInt(start);
+                    const duration = hr12toInt(end) - startMin;
 
                     const startTime = new Date(
                         startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
@@ -93,8 +93,8 @@ export function toICal(schedule: Schedule) {
                 const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
 
                 const [, start, , end] = sb.section.days.split(' ');
-                const startMin = Utils.hr12toInt(start);
-                const duration = Utils.hr12toInt(end) - startMin;
+                const startMin = hr12toInt(start);
+                const duration = hr12toInt(end) - startMin;
 
                 const startTime = new Date(
                     startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000

@@ -6,7 +6,8 @@
 /**
  *
  */
-import { colorDepthSearch, DFS, Vertex, intervalScheduling } from '../algorithm';
+import { DFS, Vertex } from '../algorithm/Graph';
+import { intervalScheduling, colorDepthSearch } from '../algorithm/Coloring';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';

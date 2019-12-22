@@ -6,10 +6,9 @@
 /**
  *
  */
+import GeneratedSchedule from '../models/GeneratedSchedule';
 import quickselect from 'quickselect';
 import Event from '../models/Event';
-import { ScheduleAll } from '../models/Schedule';
-import GeneratedSchedule from '../models/GeneratedSchedule';
 import { calcOverlap } from '../utils';
 import { RawAlgoCourse, TimeArray } from './ScheduleGenerator';
 

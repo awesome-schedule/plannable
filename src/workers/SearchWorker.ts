@@ -10,7 +10,7 @@
 /**
  *
  */
-import { RawAlgoCourse } from '@/algorithm';
+import { RawAlgoCourse } from '@/algorithm/ScheduleGenerator';
 import { SearchMatch } from '@/models/Catalog';
 import { ReturnMatchData, Searcher, SearchOptions, SearchResult } from 'fast-fuzzy';
 import _Course, { CourseMatch } from '../models/Course';

@@ -7,7 +7,7 @@
 /**
  *
  */
-import { MeetingDate, TimeArray } from '../algorithm';
+import { MeetingDate, TimeArray } from '../algorithm/ScheduleGenerator';
 import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';

@@ -6,7 +6,7 @@
 /**
  *
  */
-import { TimeArray } from '../algorithm';
+import { TimeArray } from '../algorithm/ScheduleGenerator';
 import { hashCode, parseTimeAsTimeArray } from '../utils';
 import Hashable from './Hashable';
 

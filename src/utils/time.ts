@@ -7,7 +7,7 @@
  *
  */
 import { Day, dayToInt } from '@/models/Meta';
-import { TimeArray } from '../algorithm';
+import { TimeArray } from '../algorithm/ScheduleGenerator';
 /**
  * @author Hanzhi Zhou
  * @param time

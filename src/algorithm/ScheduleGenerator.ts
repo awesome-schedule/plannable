@@ -6,6 +6,7 @@
 /**
  *
  */
+import GeneratedSchedule from '@/models/GeneratedSchedule';
 import { CourseStatus } from '../models/Meta';
 import { NotiMsg } from '../store/notification';
 import Event from '../models/Event';
@@ -13,7 +14,6 @@ import ProposedSchedule from '../models/ProposedSchedule';
 import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 import Course from '@/models/Course';
-import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 /**
  * The blocks is a condensed fixed-length array

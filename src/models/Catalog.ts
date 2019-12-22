@@ -8,7 +8,7 @@
 /**
  *
  */
-import { RawAlgoCourse } from '@/algorithm';
+import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import Course, { CourseMatch } from './Course';
 import Schedule from './Schedule';
 import Section, { SectionMatch } from './Section';

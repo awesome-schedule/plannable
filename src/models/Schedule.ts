@@ -265,37 +265,61 @@ export default abstract class Schedule {
             // we need a full course record of key `key`
             const fullCourse = catalog.getCourse(key);
             // a "partial" course with only selected sections
-            const course = catalog.getCourse(key, sections);
+
+            const courses: Course[] = [];
+
+            let emptyCourse = true;
+
+            if (sections === -1) {
+                const course = catalog.getCourse(key, sections);
+                courses.push(course);
+                if (course.sections.length !== 0) {
+                    emptyCourse = false;
+                }
+            } else {
+                for (const sec of sections) {
+                    const course = catalog.getCourse(key, sec);
+                    courses.push(course);
+                    if (course.sections.length !== 0) {
+                        emptyCourse = false;
+                    }
+                }
+            }
+
             // skip placing empty courses
-            if (!course.sections.length) {
+            if (emptyCourse) {
                 current.push([fullCourse, [' - ']]);
                 continue;
             }
 
-            const credit = parseFloat(course.units);
+            const credit = parseFloat(courses[0].units) * courses.length;
             this.totalCredit += isNaN(credit) ? 0 : credit;
             // if any section
             if (sections === -1) {
                 current.push([fullCourse, [' - ']]);
-                this.place(course);
+                this.place(courses[0]);
             } else {
-                // only one section: place that section
-                if (sections.size === 1) {
-                    const sec = course.sections[0];
-                    current.push([fullCourse, [sec.id.toString()]]);
-                    this.place(sec);
-                } else if (sections.size > 0) {
-                    if (Schedule.multiSelect) {
-                        // try to combine sections even if we're in multi-select mode
-                        const combined = Object.values(course.getCombined()).map(secs =>
-                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
-                        );
-                        for (const crs of combined) this.place(crs);
-                    } else {
-                        // a subset of the sections
-                        this.place(course);
+                for (const course of courses) {
+                    const sections = course.sections;
+
+                    // only one section: place that section
+                    if (sections.length === 1) {
+                        const sec = course.sections[0];
+                        current.push([fullCourse, [sec.id.toString()]]);
+                        this.place(sec);
+                    } else if (sections.length > 0) {
+                        if (Schedule.multiSelect) {
+                            // try to combine sections even if we're in multi-select mode
+                            const combined = Object.values(course.getCombined()).map(secs =>
+                                catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
+                            );
+                            for (const crs of combined) this.place(crs);
+                        } else {
+                            // a subset of the sections
+                            this.place(course);
+                        }
+                        current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
                     }
-                    current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
                 }
             }
         }
@@ -329,13 +353,17 @@ export default abstract class Schedule {
      */
     protected constructDateSeparator() {
         const sections: Section[] = [];
+
         for (const key in this.All) {
-            if (this.All[key] === -1) continue;
-            const course = window.catalog.getCourse(key, this.All[key]);
-            // skip invalid dates
-            for (const section of course.sections) {
-                if (section.dateArray) {
-                    sections.push(section);
+            const all = this.All[key];
+            if (all === -1) continue;
+            for (const a of all) {
+                const course = window.catalog.getCourse(key, a);
+                // skip invalid dates
+                for (const section of course.sections) {
+                    if (section.dateArray) {
+                        sections.push(section);
+                    }
                 }
             }
         }
@@ -387,7 +415,7 @@ export default abstract class Schedule {
                     if (sections instanceof Set) {
                         sections.add(sec.id);
                     } else {
-                        all[sec.key] = new Set<number>().add(sec.id);
+                        all[sec.key] = [new Set<number>().add(sec.id)];
                     }
                     this.separatedAll[date] = all;
                 }
@@ -576,7 +604,7 @@ export default abstract class Schedule {
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) {
+            if (sections instanceof Array) {
                 All[key] = [...sections].map(id => {
                     const { section } = catalog.getSectionById(key, id)!;
                     return { id, section };
@@ -654,8 +682,25 @@ export default abstract class Schedule {
             if (val1 === -1 || val2 === -1) {
                 if (val1 !== val2) return false;
             } else {
-                if (val1.size !== val2.size) return false;
-                for (const v of val1) if (!val2.has(v)) return false;
+                if (val1.length !== val2.length) return false;
+                for (let i = 0; i < val1.length; i++) {
+                    let bigFlag = false;
+                    for (let j = 0; j < val2.length; j++) {
+                        const v1 = val1[i];
+                        const v2 = val2[j];
+                        let flag = true;
+                        for (const v of v1)
+                            if (!v2.has(v)) {
+                                flag = false;
+                                break;
+                            }
+                        if (flag) {
+                            bigFlag = true;
+                            break;
+                        }
+                    }
+                    if (!bigFlag) return false;
+                }
             }
         }
 

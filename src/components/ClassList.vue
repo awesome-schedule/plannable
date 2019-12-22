@@ -83,9 +83,8 @@
                         :title="
                             schedule.isAnySection(crs.key) ? 'click to unselect' : 'click to select'
                         "
-                        @click="select(crs.key, -1)"
                     >
-                        <div class="col col-6">
+                        <div class="col col-6" @click="select(crs.key, -1)">
                             <div
                                 class="list-group-item list-group-item-action"
                                 :class="{ active: schedule.isAnySection(crs.key) }"
@@ -103,16 +102,22 @@
                             </div>
                         </div>
 
-                        <div class="col col-6">
+                        <div
+                            class="col col-6"
+                            @click="
+                                schedule.ungroup(crs.key);
+                                updateGroup(crs.key);
+                            "
+                        >
                             <div
                                 class="list-group-item list-group-item-action"
-                                :class="{ active: schedule.isAnySection(crs.key) }"
+                                :class="{ active: schedule.isGroup(crs.key) || group[crs.key] }"
                             >
                                 <div class="row no-gutters justify-content-between">
                                     <div class="col col-11">Groups</div>
                                     <div class="col col-1 align-self-center">
                                         <i
-                                            v-if="schedule.isAnySection(crs.key)"
+                                            v-if="schedule.isGroup(crs.key) || group[crs.key]"
                                             class="far fa-check-square"
                                         ></i>
                                         <i v-else class="far fa-square"></i>
@@ -201,12 +206,17 @@
                                     </ul>
                                 </div>
                                 <div class="col col-sm-auto align-self-center">
+                                    <!-- only shown if in group mode -->
                                     <input
+                                        v-show="schedule.isGroup(crs.key) || group[crs.key]"
+                                        :id="crs.key + '-' + sec.id"
                                         type="number"
-                                        value="0"
                                         class="form-control form-control-sm"
                                         style="width: 50px"
-                                        @click="1"
+                                        :disabled="!schedule.hasSection(crs.key, sec.id)"
+                                        :value="schedule.getSectionGroup(crs.key, sec.id)"
+                                        min="0"
+                                        @change="select(crs.key, sec.id)"
                                     />
                                 </div>
                                 <div

@@ -191,6 +191,8 @@ class ScheduleGenerator {
             const allSections = temp === -1 ? ([-1] as const) : temp;
 
             for (const subgroup of allSections) {
+                if (subgroup instanceof Set && subgroup.size === 0) continue;
+
                 const courseRec = this.catalog.getCourse(key, subgroup);
                 if (courseRec.sections.length === 0) {
                     return {

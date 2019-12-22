@@ -47,7 +47,7 @@ export interface ScheduleAll<T = Set<number>[]> {
 }
 
 export interface ScheduleJSON {
-    All: ScheduleAll<SectionJSON[]>;
+    All: ScheduleAll<SectionJSON[][]>;
     events: Event[];
 }
 
@@ -65,27 +65,22 @@ export default abstract class Schedule {
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: ScheduleAll<number[]> = {};
+        const shortAll: ScheduleAll<number[][]> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
-                sections === -1
-                    ? sections
-                    : sections.reduce<number[]>((acc, { id }) => {
-                          // only record ids, omit sections
-                          acc.push(id);
-                          return acc;
-                      }, []);
+                sections === -1 ? sections : sections.map(group => group.map(({ id }) => id));
         }
         return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
 
     public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
-        const All: ScheduleAll<SectionJSON[]> = {};
+        const All: ScheduleJSON['All'] = {};
         const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
-            All[key] = entry instanceof Array ? entry.map(e => ({ id: e })) : entry;
+            All[key] =
+                entry instanceof Array ? entry.map(group => group.map(id => ({ id }))) : entry;
         }
         return {
             All,
@@ -156,7 +151,7 @@ export default abstract class Schedule {
         }
     }
 
-    public abstract update(key: string, section: number, remove?: boolean): void;
+    public abstract update(key: string, section: number, group?: number, remove?: boolean): void;
     public abstract remove(key: string): void;
     public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
 
@@ -241,9 +236,6 @@ export default abstract class Schedule {
         }
     }
 
-    /**
-     * synchronous version of `computeSchedule`
-     */
     private _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
@@ -258,65 +250,48 @@ export default abstract class Schedule {
 
         const current: [Course, string[]][] = [];
         for (const key in all) {
-            const sections = all[key];
+            const temp = all[key];
+            const sections =
+                temp === -1
+                    ? -1
+                    : temp.reduce((acc, group) => {
+                          group.forEach(x => acc.add(x));
+                          return acc;
+                      }, new Set<number>());
             // we need a full course record of key `key`
             const fullCourse = catalog.getCourse(key);
             // a "partial" course with only selected sections
-
-            const courses: Course[] = [];
-
-            let emptyCourse = true;
-
-            if (sections === -1) {
-                const course = catalog.getCourse(key, sections);
-                courses.push(course);
-                if (course.sections.length !== 0) {
-                    emptyCourse = false;
-                }
-            } else {
-                for (const sec of sections) {
-                    const course = catalog.getCourse(key, sec);
-                    courses.push(course);
-                    if (course.sections.length !== 0) {
-                        emptyCourse = false;
-                    }
-                }
-            }
-
+            const course = catalog.getCourse(key, sections);
             // skip placing empty courses
-            if (emptyCourse) {
+            if (!course.sections.length) {
                 current.push([fullCourse, [' - ']]);
                 continue;
             }
 
-            const credit = parseFloat(courses[0].units) * courses.length;
+            const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
             // if any section
             if (sections === -1) {
                 current.push([fullCourse, [' - ']]);
-                this.place(courses[0]);
+                this.place(course);
             } else {
-                for (const course of courses) {
-                    const sections = course.sections;
-
-                    // only one section: place that section
-                    if (sections.length === 1) {
-                        const sec = course.sections[0];
-                        current.push([fullCourse, [sec.id.toString()]]);
-                        this.place(sec);
-                    } else if (sections.length > 0) {
-                        if (Schedule.multiSelect) {
-                            // try to combine sections even if we're in multi-select mode
-                            const combined = Object.values(course.getCombined()).map(secs =>
-                                catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
-                            );
-                            for (const crs of combined) this.place(crs);
-                        } else {
-                            // a subset of the sections
-                            this.place(course);
-                        }
-                        current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
+                // only one section: place that section
+                if (sections.size === 1) {
+                    const sec = course.sections[0];
+                    current.push([fullCourse, [sec.id.toString()]]);
+                    this.place(sec);
+                } else if (sections.size > 0) {
+                    if (Schedule.multiSelect) {
+                        // try to combine sections even if we're in multi-select mode
+                        const combined = Object.values(course.getCombined()).map(secs =>
+                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
+                        );
+                        for (const crs of combined) this.place(crs);
+                    } else {
+                        // a subset of the sections
+                        this.place(course);
                     }
+                    current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
                 }
             }
         }
@@ -395,7 +370,7 @@ export default abstract class Schedule {
 
         // create empty objects for separated "All"
         this.separatedAll = Object.create(null);
-        for (let i = 1; i < this.dateSeparators.length; i++) {
+        for (let i = 0; i < this.dateSeparators.length; i++) {
             const temp = new Date(this.dateSeparators[i]);
             this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
@@ -417,6 +392,7 @@ export default abstract class Schedule {
                             s.add(sec.id);
                         }
                     }
+                    console.log(this.separatedAll[date]);
                     if (this.separatedAll[date][key]) {
                         (this.separatedAll[date][key] as Set<number>[]).push(s);
                     } else {
@@ -425,6 +401,7 @@ export default abstract class Schedule {
                 }
             }
         }
+        console.log(this.separatedAll);
 
         // for (const sec of sections) {
         //     const [start, end] = sec.dateArray;
@@ -622,16 +599,18 @@ export default abstract class Schedule {
      * Serialize `this` to JSON
      */
     public toJSON(): ScheduleJSON {
-        const All: ScheduleAll<SectionJSON[]> = {};
+        const All: ScheduleJSON['All'] = {};
         const catalog = window.catalog;
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Array) {
-                All[key] = [...sections].map(id => {
-                    const { section } = catalog.getSectionById(key, id)!;
-                    return { id, section };
-                });
+                All[key] = sections.map(group =>
+                    [...group].map(_id => {
+                        const { id, section } = catalog.getSectionById(key, _id);
+                        return { id, section };
+                    })
+                );
             } else All[key] = sections;
         }
         return {
@@ -655,9 +634,12 @@ export default abstract class Schedule {
         else return key in this.All || this.events.some(x => x.days === key);
     }
 
+    /**
+     * returns whether a given section exists in this schedule (All)
+     */
     public hasSection(key: string, section: number) {
         const s = this.All[key];
-        return s instanceof Set && s.has(section);
+        return s instanceof Array && s.findIndex(g => g.has(section)) !== -1;
     }
 
     /**
@@ -665,17 +647,50 @@ export default abstract class Schedule {
      */
     public isCourseEmpty(key: string) {
         const s = this.All[key];
-        return s instanceof Set && s.size === 0;
+        return s instanceof Array && s.every(g => g.size === 0);
     }
 
+    /**
+     * @returns whether the given course has `Any Section` selected
+     */
     public isAnySection(key: string) {
         return this.All[key] === -1;
     }
 
+    /**
+     * @returns the group index corresponding to the given section
+     */
     public getSectionGroup(key: string, section: number) {
         const sections = this.All[key];
-        if (sections === -1) return -1;
+        if (sections === -1 || !(sections instanceof Array)) return -1;
         return sections.findIndex(s => s.has(section));
+    }
+
+    /**
+     * whether multiple groups exist for a given course
+     * @param key
+     */
+    public isGroup(key: string) {
+        const s = this.All[key];
+        return s instanceof Array && s.length > 1;
+    }
+
+    /**
+     * combine all groups
+     */
+    public ungroup(key: string) {
+        const s = this.All[key];
+        if (s instanceof Array && s.length > 1) {
+            const first = s[0];
+            for (let i = 1; i < s.length; i++) {
+                for (const v of s[i]) {
+                    first.add(v);
+                }
+            }
+            s.splice(1);
+            this.constructDateSeparator();
+            this.computeSchedule();
+        }
     }
 
     public clean() {

@@ -12,8 +12,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-import ProposedSchedule from '@/models/ProposedSchedule';
-import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 /**
  * A **pure** component for
@@ -61,10 +59,25 @@ export default class ClassList extends Vue {
      * value: true for collapsed, false otherwise
      */
     collapsed: { [x: string]: boolean } = {};
+    group: { [x: string]: boolean } = {};
 
     select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
-        this.$emit('update_course', key, idx, this.isEntering);
+        this.$emit(
+            'update_course',
+            key,
+            idx,
+            idx === -1 ? 0 : +(document.getElementById(key + '-' + idx) as HTMLInputElement).value,
+            this.isEntering
+        );
+    }
+
+    updateGroup(key: string) {
+        if (this.group[key]) {
+            this.$set(this.group, key, false);
+        } else {
+            this.$set(this.group, key, true);
+        }
     }
 
     selectAll(key: string, course: Course) {

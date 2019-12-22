@@ -7,7 +7,7 @@
  */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
-import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
+import Schedule, { ScheduleAll, ScheduleJSON } from '@/models/Schedule';
 import ProposedSchedule from '@/models/ProposedSchedule';
 import { to12hr } from '@/utils';
 import { StoreModule } from '.';
@@ -32,7 +32,7 @@ export interface FilterState extends FilterStateBase {
 
 export interface FilterStateJSON extends FilterStateBase {
     sortOptions: EvaluatorOptions;
-    refSchedule: ScheduleAll<SectionJSON[]>;
+    refSchedule: ScheduleJSON['All'];
 }
 
 /**

@@ -1,8 +1,12 @@
-import Schedule, { ScheduleJSON, ScheduleAll } from './Schedule';
+import Schedule, { ScheduleJSON, ScheduleAll, SectionJSON } from './Schedule';
 import Event from './Event';
 import { NotiMsg } from '@/store/notification';
 import * as Utils from '../utils';
 import { TYPES, DAYS } from './Meta';
+
+function isv5_v7(arr: any[]): arr is SectionJSON[] {
+    return typeof arr[0].id === 'number';
+}
 
 export default class ProposedSchedule extends Schedule {
     constructor(raw: ScheduleAll = {}, events: Event[] = []) {
@@ -15,23 +19,49 @@ export default class ProposedSchedule extends Schedule {
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty
      */
-    public update(key: string, section: number, remove = true) {
+    public update(key: string, section: number, groupIdx = 0, remove = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
                 // empty set if remove is false
-                else this.All[key] = new Set();
-            } else this.All[key] = -1;
-        } else {
-            const sections = this.All[key];
-            if (sections instanceof Set) {
-                if (sections.delete(section)) {
-                    if (sections.size === 0 && remove) delete this.All[key];
-                } else {
-                    sections.add(section);
-                }
+                else this.All[key] = [];
             } else {
-                this.All[key] = new Set([section]);
+                this.All[key] = -1;
+            }
+        } else {
+            let sections = this.All[key];
+            if (sections instanceof Array) {
+                const prev = sections.find(g => g.has(section));
+                if (groupIdx < 0) groupIdx = 0;
+                const group = sections[groupIdx] || new Set();
+                if (prev === group) {
+                    // this section exists and is in the same group, remove
+                    if (group.delete(section)) {
+                        if (remove && this.isCourseEmpty(key)) delete this.All[key];
+                    } else {
+                        group.add(section);
+                    }
+                } else if (prev === undefined) {
+                    // does not exists previously, so just add
+                    group.add(section);
+                } else {
+                    // remove previous and add current
+                    prev.delete(section);
+                    group.add(section);
+                }
+                sections[groupIdx] = group;
+            } else {
+                // this is a new key
+                this.All[key] = sections = [new Set<number>().add(section)];
+            }
+            // remove trailing empty groups
+            for (let i = sections.length - 1; i >= 0 && sections[i].size === 0; i--) sections.pop();
+
+            // fill in empty values
+            for (let i = 0; i < sections.length; i++) {
+                if (!(sections[i] instanceof Set)) {
+                    sections[i] = new Set();
+                }
             }
         }
         this.constructDateSeparator();
@@ -105,7 +135,7 @@ export default class ProposedSchedule extends Schedule {
         const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
         // convert array to set
         for (const key of keys) {
-            const sections = obj.All[key];
+            const sections = obj.All[key] as any;
             const course = catalog.getCourse(key);
             const parts = key.match(regex);
 
@@ -121,28 +151,30 @@ export default class ProposedSchedule extends Schedule {
                 warnings.push(`${convKey} does not exist anymore! It probably has been removed!`);
                 continue;
             }
+            // all of the existing sections
             const allSections = course.sections;
             if (sections instanceof Array) {
                 if (!sections.length) {
-                    schedule.All[key] = new Set();
+                    schedule.All[key] = [];
                 } else {
                     // backward compatibility for version prior to v5.0 (inclusive)
                     if (Utils.isNumberArray(sections)) {
-                        const secs = sections as number[];
-                        schedule.All[key] = new Set(
-                            secs
-                                .filter(sid => {
-                                    // sid >= length possibly implies that section is removed from SIS
-                                    if (sid >= allSections.length) {
-                                        warnings.push(
-                                            `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
-                                        );
-                                    }
-                                    return sid < allSections.length;
-                                })
-                                .map(idx => allSections[idx].id)
-                        );
-                    } else {
+                        schedule.All[key] = [
+                            new Set(
+                                sections
+                                    .filter(sid => {
+                                        // sid >= length possibly implies that section is removed from SIS
+                                        if (sid >= allSections.length) {
+                                            warnings.push(
+                                                `Invalid section id ${sid} for ${convKey}. It probably has been removed!`
+                                            );
+                                        }
+                                        return sid < allSections.length;
+                                    })
+                                    .map(idx => allSections[idx].id)
+                            )
+                        ];
+                    } else if (isv5_v7(sections)) {
                         const set = new Set<number>();
                         for (const record of sections) {
                             // check whether the identifier of stored sections match with the existing sections
@@ -160,7 +192,12 @@ export default class ProposedSchedule extends Schedule {
                                     `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
                                 );
                         }
-                        schedule.All[key] = set;
+                        schedule.All[key] = [set];
+                    } else {
+                        // TODO: robust check
+                        schedule.All[key] = sections.map(
+                            group => new Set(group.map(item => item.id))
+                        );
                     }
                 }
             } else {
@@ -189,8 +226,8 @@ export default class ProposedSchedule extends Schedule {
         const AllCopy: ScheduleAll = {};
         for (const key in this.All) {
             const sections = this.All[key];
-            if (sections instanceof Set) {
-                AllCopy[key] = new Set(sections);
+            if (sections instanceof Array) {
+                AllCopy[key] = sections.map(s => new Set(s));
             } else {
                 AllCopy[key] = sections;
             }

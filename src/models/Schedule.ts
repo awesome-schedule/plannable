@@ -375,6 +375,7 @@ export default abstract class Schedule {
             this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
 
+        // add the section ids to the separated all
         for (let i = 0; i < this.dateSeparators.length; i++) {
             const lower = this.dateSeparators[i];
             const upper = i === 0 ? -1 : this.dateSeparators[i - 1];
@@ -383,6 +384,7 @@ export default abstract class Schedule {
             for (const key in this.All) {
                 const course = this.All[key];
                 if (course === -1) continue;
+                // one set for each group
                 for (const group of course) {
                     const sections = window.catalog.getCourse(key, group);
                     const s = new Set<number>();
@@ -392,7 +394,7 @@ export default abstract class Schedule {
                             s.add(sec.id);
                         }
                     }
-                    console.log(this.separatedAll[date]);
+                    // if the **course** already exists in this time block
                     if (this.separatedAll[date][key]) {
                         (this.separatedAll[date][key] as Set<number>[]).push(s);
                     } else {
@@ -402,26 +404,6 @@ export default abstract class Schedule {
             }
         }
         console.log(this.separatedAll);
-
-        // for (const sec of sections) {
-        //     const [start, end] = sec.dateArray;
-        //     for (let i = 0; i < this.dateSeparators.length; i++) {
-        //         const sep = this.dateSeparators[i];
-        //         const temp = new Date(sep);
-        //         if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
-        //             const date = temp.getMonth() + 1 + '/' + temp.getDate();
-        //             const all = this.separatedAll[date] || Object.create(null);
-        //             const sections = all[sec.key];
-        //             if (sections instanceof Set) {
-        //                 sections.add(sec.id);
-        //             } else {
-        //                 all[sec.key] = [new Set<number>().add(sec.id)];
-        //             }
-        //             this.separatedAll[date] = all;
-        //         }
-        //         if (end < sep) break;
-        //     }
-        // }
     }
 
     /**

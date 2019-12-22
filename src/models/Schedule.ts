@@ -400,25 +400,51 @@ export default abstract class Schedule {
             this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
         }
 
-        for (const sec of sections) {
-            const [start, end] = sec.dateArray;
-            for (let i = 0; i < this.dateSeparators.length; i++) {
-                const sep = this.dateSeparators[i];
-                const temp = new Date(sep);
-                if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
-                    const date = temp.getMonth() + 1 + '/' + temp.getDate();
-                    const all = this.separatedAll[date] || Object.create(null);
-                    const sections = all[sec.key];
-                    if (sections instanceof Set) {
-                        sections.add(sec.id);
-                    } else {
-                        all[sec.key] = [new Set<number>().add(sec.id)];
+        for (let i = 0; i < this.dateSeparators.length; i++) {
+            const lower = this.dateSeparators[i];
+            const upper = i === 0 ? -1 : this.dateSeparators[i - 1];
+            const sep = new Date(lower);
+            const date = sep.getMonth() + 1 + '/' + sep.getDate();
+            for (const key in this.All) {
+                const course = this.All[key];
+                if (course === -1) continue;
+                for (const group of course) {
+                    const sections = window.catalog.getCourse(key, group);
+                    const s = new Set<number>();
+                    for (const sec of sections.sections) {
+                        const [start, end] = sec.dateArray;
+                        if (start < lower && end >= upper) {
+                            s.add(sec.id);
+                        }
                     }
-                    this.separatedAll[date] = all;
+                    if (this.separatedAll[date][key]) {
+                        (this.separatedAll[date][key] as Set<number>[]).push(s);
+                    } else {
+                        this.separatedAll[date][key] = [s];
+                    }
                 }
-                if (end < sep) break;
             }
         }
+
+        // for (const sec of sections) {
+        //     const [start, end] = sec.dateArray;
+        //     for (let i = 0; i < this.dateSeparators.length; i++) {
+        //         const sep = this.dateSeparators[i];
+        //         const temp = new Date(sep);
+        //         if (start < sep && (i === 0 || end >= this.dateSeparators[i - 1])) {
+        //             const date = temp.getMonth() + 1 + '/' + temp.getDate();
+        //             const all = this.separatedAll[date] || Object.create(null);
+        //             const sections = all[sec.key];
+        //             if (sections instanceof Set) {
+        //                 sections.add(sec.id);
+        //             } else {
+        //                 all[sec.key] = [new Set<number>().add(sec.id)];
+        //             }
+        //             this.separatedAll[date] = all;
+        //         }
+        //         if (end < sep) break;
+        //     }
+        // }
     }
 
     /**

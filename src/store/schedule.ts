@@ -115,7 +115,12 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
      */
     copyCurrent() {
         const len = this.proposedSchedules.length;
-        this.proposedSchedules.push(this.proposedSchedule.copy());
+        if (this.currentSchedule instanceof ProposedSchedule) {
+            this.proposedSchedules.push(this.proposedSchedule.copy());
+        } else {
+            const p = new ProposedSchedule(this.currentSchedule.All, this.currentSchedule.events);
+            this.proposedSchedules.push(p);
+        }
         this.switchProposed(len);
         saveStatus();
     }

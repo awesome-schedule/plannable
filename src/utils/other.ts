@@ -259,3 +259,10 @@ export async function getReleaseNote() {
         );
     }
 }
+
+export class GeneratedError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'GeneratedError';
+    }
+}

@@ -153,7 +153,22 @@ export default abstract class Schedule {
 
     public abstract update(key: string, section: number, group?: number, remove?: boolean): void;
     public abstract remove(key: string): void;
+
+    // abstracting the copy() method is to prevent circular dependency
     public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
+
+    protected _copy() {
+        const AllCopy: ScheduleAll = {};
+        for (const key in this.All) {
+            const sections = this.All[key];
+            if (sections instanceof Array) {
+                AllCopy[key] = sections.map(s => new Set(s));
+            } else {
+                AllCopy[key] = sections;
+            }
+        }
+        return AllCopy;
+    }
 
     /**
      * Get the background color of a hashable object

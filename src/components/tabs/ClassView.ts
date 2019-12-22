@@ -77,7 +77,7 @@ export default class ClassView extends Store {
         try {
             this.schedule.currentSchedule.update(key, section, groupIdx, remove);
         } catch (e) {
-            this.noti.warn(generatedWarning);
+            this.noti.warn(e.message ? e.message : generatedWarning);
         }
 
         // note: adding a course to schedule.All cannot be detected by Vue.
@@ -91,8 +91,8 @@ export default class ClassView extends Store {
     removeCourse(key: string) {
         try {
             this.schedule.currentSchedule.remove(key);
-        } catch (Error) {
-            this.noti.warn(generatedWarning);
+        } catch (e) {
+            this.noti.warn(e.message ? e.message : generatedWarning);
         }
         this.saveStatus();
     }

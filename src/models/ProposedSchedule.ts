@@ -3,6 +3,7 @@ import Event from './Event';
 import { NotiMsg } from '@/store/notification';
 import * as Utils from '../utils';
 import { TYPES, DAYS } from './Meta';
+import { GeneratedError } from '../utils/other';
 
 function isv5_v7(arr: any[]): arr is SectionJSON[] {
     return typeof arr[0].id === 'number';
@@ -223,15 +224,7 @@ export default class ProposedSchedule extends Schedule {
      * get a copy of this schedule
      */
     public copy(deepCopyEvent = true) {
-        const AllCopy: ScheduleAll = {};
-        for (const key in this.All) {
-            const sections = this.All[key];
-            if (sections instanceof Array) {
-                AllCopy[key] = sections.map(s => new Set(s));
-            } else {
-                AllCopy[key] = sections;
-            }
-        }
+        const AllCopy = this._copy();
         // note: is it desirable to deep-copy all the events?
         return new ProposedSchedule(
             AllCopy,

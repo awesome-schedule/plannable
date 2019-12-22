@@ -2,6 +2,10 @@ import Schedule, { ScheduleAll } from './Schedule';
 import ProposedSchedule from './ProposedSchedule';
 import Event from './Event';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
+import { GeneratedError } from '../utils/other';
+
+const generatedMsg =
+    'You are editing a generated schedule, please edit the proposed schedule instead. If you want to keep this particular generated schedule, click "copy" to do so.';
 
 export default class GeneratedSchedule extends Schedule {
     public All: ScheduleAll<Set<number>[]>;
@@ -20,14 +24,19 @@ export default class GeneratedSchedule extends Schedule {
     }
 
     public update() {
-        throw new Error();
+        throw new GeneratedError(generatedMsg);
     }
 
     public remove() {
-        throw new Error();
+        throw new GeneratedError(generatedMsg);
     }
 
-    public copy(): ProposedSchedule {
-        throw new Error();
+    public copy(deepCopyEvent = true): ProposedSchedule {
+        const AllCopy = this._copy();
+        // note: is it desirable to deep-copy all the events?
+        return new ProposedSchedule(
+            AllCopy,
+            deepCopyEvent ? this.events.map(e => e.copy()) : this.events
+        );
     }
 }

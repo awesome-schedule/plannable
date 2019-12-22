@@ -202,6 +202,7 @@
                                 </div>
                                 <div class="col col-sm-auto align-self-center">
                                     <input
+                                        :id="crs.key + '-' + sec.id"
                                         type="number"
                                         value="0"
                                         class="form-control form-control-sm"

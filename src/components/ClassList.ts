@@ -62,7 +62,13 @@ export default class ClassList extends Vue {
 
     select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
-        this.$emit('update_course', key, idx, this.isEntering);
+        this.$emit(
+            'update_course',
+            key,
+            idx,
+            +(document.getElementById(key + '-' + idx) as HTMLInputElement).value,
+            this.isEntering
+        );
     }
 
     selectAll(key: string, course: Course) {

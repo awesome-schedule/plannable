@@ -19,23 +19,25 @@ export default class ProposedSchedule extends Schedule {
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty
      */
-    public update(key: string, section: number, remove = true) {
+    public update(key: string, section: number, groupIdx = 0, remove = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
                 // empty set if remove is false
-                else this.All[key] = new Set();
+                else this.All[key] = [new Set()];
             } else this.All[key] = -1;
         } else {
             const sections = this.All[key];
-            if (sections instanceof Set) {
-                if (sections.delete(section)) {
-                    if (sections.size === 0 && remove) delete this.All[key];
+            if (sections instanceof Array) {
+                const group = sections[groupIdx] || new Set();
+                if (group.delete(section)) {
+                    if (this.isCourseEmpty(key)) delete this.All[key];
                 } else {
-                    sections.add(section);
+                    group.add(section);
                 }
+                sections[groupIdx] = group;
             } else {
-                this.All[key] = new Set([section]);
+                this.All[key] = [new Set([section])];
             }
         }
         this.constructDateSeparator();
@@ -125,6 +127,7 @@ export default class ProposedSchedule extends Schedule {
                 warnings.push(`${convKey} does not exist anymore! It probably has been removed!`);
                 continue;
             }
+            // all of the existing sections
             const allSections = course.sections;
             if (sections instanceof Array) {
                 if (!sections.length) {
@@ -168,7 +171,9 @@ export default class ProposedSchedule extends Schedule {
                         schedule.All[key] = [set];
                     } else {
                         // TODO: robust check
-                        schedule.All[key] = sections.map(group => new Set(group));
+                        schedule.All[key] = sections.map(
+                            group => new Set(group.map(item => item.id))
+                        );
                     }
                 }
             } else {

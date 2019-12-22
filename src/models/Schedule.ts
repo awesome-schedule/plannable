@@ -151,7 +151,7 @@ export default abstract class Schedule {
         }
     }
 
-    public abstract update(key: string, section: number, remove?: boolean): void;
+    public abstract update(key: string, section: number, group?: number, remove?: boolean): void;
     public abstract remove(key: string): void;
     public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
 
@@ -608,7 +608,7 @@ export default abstract class Schedule {
 
     public hasSection(key: string, section: number) {
         const s = this.All[key];
-        return s instanceof Set && s.has(section);
+        return s instanceof Array && s.findIndex(g => g.has(section)) !== -1;
     }
 
     /**
@@ -616,7 +616,7 @@ export default abstract class Schedule {
      */
     public isCourseEmpty(key: string) {
         const s = this.All[key];
-        return s instanceof Set && s.size === 0;
+        return s instanceof Array && s.every(g => g.size === 0);
     }
 
     public isAnySection(key: string) {

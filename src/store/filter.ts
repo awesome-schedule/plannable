@@ -7,7 +7,7 @@
  */
 import Event from '@/models/Event';
 import { DAYS } from '@/models/Meta';
-import Schedule, { ScheduleAll, ScheduleJSON } from '@/models/Schedule';
+import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
 import ProposedSchedule from '@/models/ProposedSchedule';
 import { to12hr } from '@/utils';
 import { StoreModule } from '.';
@@ -18,6 +18,7 @@ import ScheduleEvaluator, {
     SortOption
 } from '../algorithm/ScheduleEvaluator';
 import noti, { NotiMsg } from './notification';
+import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 interface FilterStateBase {
     readonly timeSlots: TimeSlot[];
@@ -27,12 +28,12 @@ interface FilterStateBase {
 
 export interface FilterState extends FilterStateBase {
     sortOptions: DetailedEvaluatorOptions;
-    refSchedule: ScheduleAll;
+    refSchedule: GeneratedSchedule['All'];
 }
 
 export interface FilterStateJSON extends FilterStateBase {
     sortOptions: EvaluatorOptions;
-    refSchedule: ScheduleJSON['All'];
+    refSchedule: ScheduleAll<SectionJSON[][]>;
 }
 
 /**
@@ -309,7 +310,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
         const { payload: schedule, level } = ProposedSchedule.fromJSON(
             Schedule.decompressJSON([ref])
         );
-        if (schedule && level !== 'warn') filter.refSchedule = schedule.All;
+        if (schedule && level !== 'warn') filter.refSchedule = schedule.All as any; // this guarantees to be a generated schedule
         return filter.toJSON();
     }
 
@@ -317,7 +318,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
     allowWaitlist = true;
     allowClosed = true;
     sortOptions = getDefaultOptions();
-    refSchedule: ScheduleAll = {};
+    refSchedule: GeneratedSchedule['All'] = {};
     readonly sortModes = [
         {
             mode: SortMode.combined,
@@ -415,13 +416,15 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
                 'Warning: Reference schedule used in sort by similarity is removed because <br>' +
                     msg
             );
-        this.refSchedule = schedule && level !== 'warn' ? schedule.All : defaultVal.refSchedule;
+        // this guarantees to be a generated schedule
+        this.refSchedule =
+            schedule && level !== 'warn' ? (schedule.All as any) : defaultVal.refSchedule;
     }
 
     toJSON(): FilterStateJSON {
         // exclude sort modes
         const { sortModes, refSchedule: ref, ...others } = this;
-        const refSchedule = new ProposedSchedule(ref).toJSON().All;
+        const refSchedule = new ProposedSchedule(ref).toJSON().All as any; // this guarantees to be a generated schedule
         return { refSchedule, ...others };
     }
 

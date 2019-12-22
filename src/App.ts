@@ -36,6 +36,7 @@ import { backend } from './config';
 import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import { getReleaseNote } from './utils';
+import GeneratedSchedule from './models/GeneratedSchedule';
 
 /**
  * need to change for every release
@@ -190,6 +191,9 @@ export default class App extends Store {
         return this.compare.findIndex(c => c.schedule.equals(this.schedule.currentSchedule));
     }
 
+    /**
+     * @note compare button will be shown iff in generated mode, so currentSchedule must be a GeneratedSchedule
+     */
     addToCompare() {
         const idx = this.indexOfCompare();
         if (idx !== -1) {
@@ -197,7 +201,7 @@ export default class App extends Store {
         } else {
             const color = randomColor({ luminosity: 'dark' });
             this.compare.push({
-                schedule: this.schedule.currentSchedule,
+                schedule: this.schedule.currentSchedule as GeneratedSchedule,
                 profileName: this.profile.current,
                 index: this.schedule.currentScheduleIndex,
                 color,

@@ -4,10 +4,11 @@ import Event from './Event';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 
 export default class GeneratedSchedule extends Schedule {
+    public All: ScheduleAll<Set<number>[]>;
     constructor(raw: RawAlgoCourse[] = [], events: Event[] = []) {
-        const tempAll: ScheduleAll = {};
+        const tempAll: GeneratedSchedule['All'] = {};
         for (const [key, sections] of raw) {
-            const secs = tempAll[key] as Set<number>[];
+            const secs = tempAll[key];
             if (secs) {
                 secs.push(new Set(sections));
             } else {
@@ -15,6 +16,7 @@ export default class GeneratedSchedule extends Schedule {
             }
         }
         super(tempAll, events);
+        this.All = tempAll;
     }
 
     public update() {

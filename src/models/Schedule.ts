@@ -212,15 +212,18 @@ export default abstract class Schedule {
 
     public hover(key: string, strong = true) {
         const sections = this.All[key];
-        if (sections instanceof Set) {
-            this.days.forEach(blocks => {
-                for (const block of blocks) {
-                    const container = block.section;
-                    if (!(container instanceof Event)) {
-                        if (container.has(sections, key)) block.strong = strong;
-                    }
-                }
-            });
+        if (sections instanceof Array) {
+            for (const group of sections) {
+                if (group.size > 0)
+                    this.days.forEach(blocks => {
+                        for (const block of blocks) {
+                            const container = block.section;
+                            if (!(container instanceof Event)) {
+                                if (container.has(group, key)) block.strong = strong;
+                            }
+                        }
+                    });
+            }
         }
     }
 

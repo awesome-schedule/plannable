@@ -196,9 +196,29 @@ export default class ProposedSchedule extends Schedule {
                         schedule.All[key] = [set];
                     } else {
                         // TODO: robust check
-                        schedule.All[key] = sections.map(
-                            group => new Set(group.map((item: any) => item.id))
-                        );
+                        schedule.All[key] = sections.map(group => {
+                            const set = new Set<number>();
+                            if (group instanceof Array) {
+                                for (const record of group) {
+                                    // check whether the identifier of stored sections match with the existing sections
+                                    const target =
+                                        typeof record.section === 'undefined' // "section" property may not be recorded
+                                            ? allSections.find(sec => sec.id === record.id) // in that case we only compare id
+                                            : allSections.find(
+                                                  sec =>
+                                                      sec.id === record.id &&
+                                                      sec.section === record.section
+                                              );
+                                    if (target) set.add(target.id);
+                                    // if not exist, it possibly means that section is removed from SIS
+                                    else
+                                        warnings.push(
+                                            `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
+                                        );
+                                }
+                            }
+                            return set;
+                        });
                     }
                 }
             } else {

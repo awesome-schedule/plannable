@@ -68,12 +68,12 @@ describe('Schedule Test', () => {
         const id0 = cs11105.sections[1].id;
         expect(schedule.All).toEqual({});
         schedule.update('cs11105', id0);
-        expect(schedule.All).toEqual({ cs11105: new Set([id0]) });
+        expect(schedule.All).toEqual({ cs11105: [new Set([id0])] });
         schedule.update('cs11105', id0);
         expect(schedule.All).toEqual({});
         schedule.update('cs11105', id0);
         schedule.update('cs11105', id0, 0, false);
-        expect(schedule.All).toEqual({ cs11105: new Set() });
+        expect(schedule.All).toEqual({ cs11105: [] });
 
         const cs21105 = window.catalog.getCourse('cs21105');
         const cs21504 = window.catalog.getCourse('cs21504');

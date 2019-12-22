@@ -354,6 +354,38 @@
 
                 <stepper :info="scheduleSteps" :helper="true" :always-title="true"></stepper>
 
+                <div class="ml-4 float-right text-center">
+                    <figure>
+                        <img :src="imgPath('group-selection.png')" width="260px" />
+                        <figcaption>Group Selection Mode</figcaption>
+                    </figure>
+                </div>
+
+                <h5 id="item-2-2" class="mt-4">
+                    <i class="fa fa-university" aria-hidden="true"></i
+                    ><strong>Group Selection Mode</strong>
+                </h5>
+
+                <p>
+                    While usually not necessary for most classes, group selection mode is useful if
+                    you want to take more than 1 sections of a given class. For example, you can
+                    take multiple sections under special-topic courses like CS4501 which offer
+                    courses on different topics all under the same course number. To enable group
+                    selection mode, click the Groups button, and the group indices will be shown.
+                    You can adjust the group index for each of the section.
+                    <strong>One</strong> section will be chosen from <strong>each</strong> of the
+                    set of the sections that share the same group index. When group selection mode
+                    is not enabled, all of the sections you selected go into the default group of
+                    zero, so only one section will be chosen from your selections.
+                </p>
+
+                <p>
+                    In the example shown right, section 002 and 003 belong to the same group, so
+                    <strong>one</strong> of them will be chosen in each generated schedule. Section
+                    005 belongs to group 0, and since it is the only one in the group, it will
+                    always be chosen in each generated schedule.
+                </p>
+
                 <h5 id="item-2-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Schedule Rendering</strong>

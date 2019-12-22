@@ -79,7 +79,6 @@
                     <!-- no "Any Section" for engagement due to some strange requests -->
                     <div
                         class="row no-gutters justify-content-center"
-                        style="font-size: 0.9rem"
                         :title="
                             schedule.isAnySection(crs.key) ? 'click to unselect' : 'click to select'
                         "
@@ -167,11 +166,22 @@
                             @mouseenter="schedule.preview(sec)"
                             @mouseleave="schedule.removePreview()"
                         >
-                            <div class="row no-gutters justify-content-between">
-                                <div class="col-md-auto mr-auto" @click="select(crs.key, sec.id)">
+                            <div class="row no-gutters flex-nowrap justify-content-between">
+                                <div class="col col-8 mr-auto" @click="select(crs.key, sec.id)">
                                     <ul class="list-unstyled m-0" style="font-size: 0.75rem;">
                                         <li>
                                             Section {{ sec.section }}
+                                            <!-- 14 = 0b1110, i.e. validity > 1 -->
+                                            <i
+                                                v-if="sec.valid"
+                                                :title="sec.validMsg"
+                                                class="fas fa-exclamation-triangle"
+                                                :class="
+                                                    sec.valid & 14 ? `text-danger` : `text-warning`
+                                                "
+                                            ></i>
+                                        </li>
+                                        <li>
                                             <span
                                                 v-if="matches.length"
                                                 v-html="
@@ -183,15 +193,6 @@
                                                 "
                                             ></span>
                                             <span v-else> {{ sec.topic }}</span>
-                                            <!-- 14 = 0b1110, i.e. validity > 1 -->
-                                            <i
-                                                v-if="sec.valid"
-                                                :title="sec.validMsg"
-                                                class="fas fa-exclamation-triangle"
-                                                :class="
-                                                    sec.valid & 14 ? `text-danger` : `text-warning`
-                                                "
-                                            ></i>
                                         </li>
                                         <li v-for="meeting in sec.meetings" :key="meeting.days">
                                             {{ meeting.days }}
@@ -216,7 +217,7 @@
                                         :id="crs.key + '-' + sec.id"
                                         type="number"
                                         class="form-control form-control-sm"
-                                        style="width: 50px"
+                                        style="width: 45px"
                                         :disabled="!schedule.hasSection(crs.key, sec.id)"
                                         :value="schedule.getSectionGroup(crs.key, sec.id)"
                                         min="0"
@@ -224,7 +225,7 @@
                                     />
                                 </div>
                                 <div
-                                    class="col col-sm-auto mx-3 align-self-center"
+                                    class="col col-1 ml-3 mr-2 align-self-center"
                                     @click="select(crs.key, sec.id)"
                                 >
                                     <i

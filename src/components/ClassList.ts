@@ -63,13 +63,19 @@ export default class ClassList extends Vue {
 
     select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
-        this.$emit(
-            'update_course',
-            key,
-            idx,
-            idx === -1 ? 0 : +(document.getElementById(key + '-' + idx) as HTMLInputElement).value,
-            this.isEntering
-        );
+        if (idx === -1) {
+            // if select AnySection, disable group
+            if (!this.schedule.isAnySection(key)) this.$set(this.group, key, false);
+            this.$emit('update_course', key, idx, 0, this.isEntering);
+        } else {
+            this.$emit(
+                'update_course',
+                key,
+                idx,
+                +(document.getElementById(key + '-' + idx) as HTMLInputElement).value,
+                this.isEntering
+            );
+        }
     }
 
     updateGroup(key: string) {
@@ -77,6 +83,8 @@ export default class ClassList extends Vue {
             this.$set(this.group, key, false);
         } else {
             this.$set(this.group, key, true);
+            if (this.schedule.isAnySection(key))
+                this.$emit('update_course', key, -1, 0, this.isEntering);
         }
     }
 

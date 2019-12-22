@@ -6,12 +6,11 @@ env:
 extends:
     - plugin:vue/recommended
     - "@vue/prettier"
-    - "@vue/typescript"
+    - "@vue/typescript/recommended"
+    - "@vue/prettier/@typescript-eslint"
     - plugin:import/errors
     - plugin:import/warnings
     - plugin:import/typescript
-    - "prettier/@typescript-eslint"
-    # - plugin:@typescript-eslint/recommended
 rules:
     no-console: 0
     no-debugger: 2
@@ -20,6 +19,8 @@ rules:
     no-var: 2
     vue/no-v-html: 0
     no-constant-condition: 0
+    \@typescript-eslint/explicit-member-accessibility: 0
+    \@typescript-eslint/no-explicit-any: 0
 parserOptions:
     parser: "@typescript-eslint/parser"
 settings:

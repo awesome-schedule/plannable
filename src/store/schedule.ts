@@ -33,7 +33,7 @@ interface ScheduleStateBase {
     /**
      * the array of proposed schedules
      */
-    proposedSchedules: any[];
+    proposedSchedules: object[];
 }
 
 export interface ScheduleState extends ScheduleStateBase {
@@ -53,6 +53,7 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
     proposedSchedules: ScheduleJSON[];
 }
 
+// eslint-disable-next-line
 export interface ScheduleStore extends ScheduleState {}
 
 /**
@@ -255,6 +256,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
 
     toJSON() {
         // exclude numGenerated and currentSchedule
+        // eslint-disable-next-line
         const { numGenerated, currentSchedule, ...others } = this;
         return (others as any) as ScheduleStateJSON;
     }

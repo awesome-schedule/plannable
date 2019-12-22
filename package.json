@@ -1,118 +1,119 @@
 {
+  "name": "plannable",
+  "version": "7.7.0",
+  "private": true,
+  "description": "A website that helps UVa students schedule their classes more efficiently.",
+  "author": {
+    "email": "",
     "name": "plannable",
-    "author": {
-        "email": "",
-        "name": "plannable",
-        "url": "https://github.com/awesome-schedule/plannable"
+    "url": "https://github.com/awesome-schedule/plannable"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --modern",
+    "lint": "vue-cli-service lint",
+    "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}",
+    "fix": "eslint . --fix",
+    "test": "vue-cli-service test:unit",
+    "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\""
+  },
+  "main": "electron.js",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "bootstrap": "^4.3.1",
+    "core-js": "^3.4.3",
+    "dexie": "^2.0.4",
+    "electron-prompt": "^1.4.0",
+    "fast-fuzzy": "^1.8.8",
+    "file-saver": "^2.0.2",
+    "jquery": "^3.4.1",
+    "lz-string": "^1.4.4",
+    "papaparse": "^5.1.0",
+    "quickselect": "^2.0.0",
+    "randomcolor": "^0.5.4",
+    "tinyqueue": "^2.0.3",
+    "vue": "^2.6.10",
+    "vue-class-component": "^7.1.0",
+    "vue-mathjax": "0.0.10",
+    "vue-property-decorator": "^8.2.2",
+    "vuedraggable": "^2.23.2"
+  },
+  "devDependencies": {
+    "@types/bootstrap": "^4.3.1",
+    "@types/cheerio": "^0.22.15",
+    "@types/file-saver": "^2.0.1",
+    "@types/jquery": "^3.3.31",
+    "@types/lz-string": "^1.3.33",
+    "@types/node": "^12.12.21",
+    "@types/papaparse": "^5.0.1",
+    "@types/randomcolor": "^0.5.3",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
+    "@vue/cli-plugin-babel": "^4.1.1",
+    "@vue/cli-plugin-eslint": "^4.1.1",
+    "@vue/cli-plugin-typescript": "^4.1.1",
+    "@vue/cli-plugin-unit-jest": "^4.1.1",
+    "@vue/cli-service": "^4.1.1",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^5.0.1",
+    "@vue/test-utils": "1.0.0-beta.29",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "cheerio": "^1.0.0-rc.3",
+    "circular-dependency-plugin": "^5.2.0",
+    "electron": "^7.1.7",
+    "electron-builder": "^21.2.0",
+    "eslint": "^5.16.0",
+    "eslint-import-resolver-typescript": "^1.1.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-vue": "^5.0.0",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.4.1",
+    "typedoc": "^0.15.5",
+    "typedoc-plugin-external-module-name": "^2.1.0",
+    "typedoc-plugin-no-inherit": "^1.1.10",
+    "typescript": "^3.7.4",
+    "vue-template-compiler": "^2.6.10",
+    "worker-loader": "^2.0.0"
+  },
+  "build": {
+    "appId": "plannable",
+    "win": {
+      "target": "portable",
+      "icon": "public/favicon.ico"
     },
-    "repository": "https://github.com/awesome-schedule/plannable",
-    "description": "A website that helps UVa students schedule their classes more efficiently.",
-    "version": "7.7.0",
-    "private": true,
-    "main": "electron.js",
-    "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build --modern",
-        "lint": "vue-cli-service lint",
-        "test": "vue-cli-service test:unit",
-        "fix": "eslint . --fix",
-        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
-        "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}"
+    "mac": {
+      "target": "dmg"
     },
-    "dependencies": {
-        "axios": "^0.19.0",
-        "bootstrap": "^4.3.1",
-        "dexie": "^2.0.4",
-        "fast-fuzzy": "^1.8.8",
-        "file-saver": "^2.0.2",
-        "jquery": "^3.4.1",
-        "lz-string": "^1.4.4",
-        "papaparse": "^5.1.0",
-        "quickselect": "^2.0.0",
-        "randomcolor": "^0.5.4",
-        "tinyqueue": "^2.0.3",
-        "vue": "^2.6.10",
-        "vue-class-component": "^7.1.0",
-        "vue-mathjax": "0.0.10",
-        "vue-property-decorator": "^8.2.2",
-        "vuedraggable": "^2.23.2",
-        "electron-prompt": "^1.4.0"
-    },
-    "devDependencies": {
-        "@types/bootstrap": "^4.3.1",
-        "@types/cheerio": "^0.22.13",
-        "@types/file-saver": "^2.0.1",
-        "@types/jest": "^23.1.4",
-        "@types/jquery": "^3.3.31",
-        "@types/lz-string": "^1.3.33",
-        "@types/node": "^12.7.12",
-        "@types/papaparse": "^5.0.1",
-        "@types/randomcolor": "^0.5.3",
-        "@vue/cli-plugin-babel": "^3.12.0",
-        "@vue/cli-plugin-eslint": "^3.12.0",
-        "@vue/cli-plugin-typescript": "^3.12.0",
-        "@vue/cli-plugin-unit-jest": "^3.12.0",
-        "@vue/cli-service": "^3.12.0",
-        "@vue/eslint-config-prettier": "^5.0.0",
-        "@vue/eslint-config-typescript": "^4.0.0",
-        "@vue/test-utils": "1.0.0-beta.29",
-        "babel-core": "7.0.0-bridge.0",
-        "babel-eslint": "^10.0.1",
-        "babel-plugin-transform-remove-console": "^6.9.4",
-        "cheerio": "^1.0.0-rc.3",
-        "circular-dependency-plugin": "^5.2.0",
-        "electron": "^7.1.7",
-        "electron-builder": "^21.2.0",
-        "eslint": "^5.16.0",
-        "eslint-import-resolver-typescript": "^1.1.1",
-        "eslint-plugin-import": "^2.18.2",
-        "eslint-plugin-prettier": "^3.1.1",
-        "eslint-plugin-vue": "^5.0.0",
-        "prettier": "^1.18.2",
-        "ts-jest": "^23.10.5",
-        "ts-node": "^8.4.1",
-        "typedoc": "^0.15.0",
-        "typedoc-plugin-external-module-name": "^2.1.0",
-        "typedoc-plugin-no-inherit": "^1.1.10",
-        "typescript": "^3.6.4",
-        "vue-template-compiler": "^2.6.10",
-        "worker-loader": "^2.0.0"
-    },
-    "build": {
-        "appId": "plannable",
-        "win": {
-            "target": "portable",
-            "icon": "public/favicon.ico"
-        },
-        "mac": {
-            "target": "dmg"
-        },
-        "linux": {
-            "target": [
-                {
-                    "target": "AppImage",
-                    "arch": [
-                        "x64",
-                        "arm64"
-                    ]
-                }
-            ],
-            "category": "productivity"
-        },
-        "appImage": {},
-        "dmg": {
-            "icon": "public/favicon.ico"
-        },
-        "files": [
-            "dist/**",
-            "node_modules",
-            "electron.js"
-        ],
-        "directories": {
-            "output": "dist-electron"
-        },
-        "publish": {
-            "provider": "github"
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
+      ],
+      "category": "productivity"
+    },
+    "appImage": {},
+    "dmg": {
+      "icon": "public/favicon.ico"
+    },
+    "files": [
+      "dist/**",
+      "node_modules",
+      "electron.js"
+    ],
+    "directories": {
+      "output": "dist-electron"
+    },
+    "publish": {
+      "provider": "github"
     }
+  },
+  "repository": "https://github.com/awesome-schedule/plannable"
 }

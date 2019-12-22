@@ -54,7 +54,7 @@ class Semesters implements SemesterState {
     /**
      * DO NOT call this method. call [[Store.selectSemester]] instead.
      */
-    async selectSemester(currentSemester: SemesterJSON, force: boolean = false) {
+    async selectSemester(currentSemester: SemesterJSON, force = false) {
         const temp = await loadSemesterData(currentSemester, force);
 
         // allow one to cancel the pending promise if old data exists

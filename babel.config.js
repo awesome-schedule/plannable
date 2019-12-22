@@ -1,5 +1,5 @@
 module.exports = {
-    presets: ['@vue/app'],
+    presets: ['@vue/cli-plugin-babel/preset'],
     env: {
         production: {
             plugins: [['transform-remove-console', { exclude: ['info', 'error', 'warn'] }]]

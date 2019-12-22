@@ -154,7 +154,7 @@ export default abstract class Schedule {
     public abstract remove(key: string): void;
 
     // abstracting the copy() method is to prevent circular dependency
-    public abstract copy(deepCopyEvent?: Boolean): ProposedSchedule;
+    public abstract copy(deepCopyEvent?: boolean): ProposedSchedule;
 
     protected _copy() {
         const AllCopy: ScheduleAll = {};

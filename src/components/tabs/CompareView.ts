@@ -72,16 +72,16 @@ export default class CompareView extends Store {
     }
     /**
      * get description for a schedule
-     * @param All the `All variable` of a schedule
+     * @param All the `All variable` of a generated schedule
      * @see [[Schedule.All]]
      */
-    getDesc(All: ScheduleAll) {
+    getDesc(All: GeneratedSchedule['All']) {
         const catalog = window.catalog;
         return Object.entries(All)
             .map(x => {
                 const course = catalog.getCourse(
                     x[0],
-                    (x[1] as Set<number>[]).reduce((acc, x) => {
+                    x[1].reduce((acc, x) => {
                         acc.add(1);
                         return acc;
                     }, new Set<number>())

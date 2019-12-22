@@ -42,12 +42,12 @@ export interface SectionJSON {
  * By default, this is a set of numbers, corresponding to the `id` field of each section
  * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
  */
-export interface ScheduleAll<T = Set<number>[]> {
-    [courseKey: string]: T | -1;
+export interface ScheduleAll<T = Set<number>[] | -1> {
+    [courseKey: string]: T;
 }
 
 export interface ScheduleJSON {
-    All: ScheduleAll<SectionJSON[][]>;
+    All: ScheduleAll<SectionJSON[][] | -1>;
     events: Event[];
 }
 
@@ -65,7 +65,7 @@ export default abstract class Schedule {
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: ScheduleAll<number[][]> = {};
+        const shortAll: ScheduleAll<number[][] | -1> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
@@ -251,6 +251,8 @@ export default abstract class Schedule {
         const current: [Course, string[]][] = [];
         for (const key in all) {
             const temp = all[key];
+
+            // combine all groups because groups don't affect display
             const sections =
                 temp === -1
                     ? -1

@@ -245,7 +245,7 @@ class ScheduleEvaluator {
         public readonly events: Event[] = [],
         public readonly classList: RawAlgoCourse[][] = [],
         public readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
-        public refSchedule: ScheduleAll = {},
+        public refSchedule: GeneratedSchedule['All'] = {},
         readonly timeArrays: Readonly<Int32Array> = new Int32Array(),
         count = 0,
         timeLen = 0

@@ -197,7 +197,7 @@ export default class ProposedSchedule extends Schedule {
                     } else {
                         // TODO: robust check
                         schedule.All[key] = sections.map(
-                            group => new Set(group.map(item => item.id))
+                            group => new Set(group.map((item: any) => item.id))
                         );
                     }
                 }

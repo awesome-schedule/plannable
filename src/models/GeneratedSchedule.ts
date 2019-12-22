@@ -1,6 +1,6 @@
 import Schedule, { ScheduleAll } from './Schedule';
-import ProposedSchedule from './ProposedSchedule';
 import Event from './Event';
+import ProposedSchedule from './ProposedSchedule';
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import { GeneratedError } from '../utils/other';
 

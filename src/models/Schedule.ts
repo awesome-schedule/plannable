@@ -7,13 +7,11 @@
  *
  */
 import { colorDepthSearch, DFS, Vertex, intervalScheduling } from '../algorithm';
-// import ProposedSchedule from './ProposedSchedule';
-import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
 import Hashable from './Hashable';
-import { Day, dayToInt, DAYS } from './Meta';
+import { Day, dayToInt } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';

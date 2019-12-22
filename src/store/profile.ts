@@ -112,8 +112,8 @@ class Profile {
      * by setting `current` to the name of the newly added profile
      */
     addProfile(raw: string, fallbackName: string, sw = true) {
-        const raw_data: SemesterStorage = JSON.parse(raw);
-        let profileName = raw_data.name || fallbackName;
+        const rawData: SemesterStorage = JSON.parse(raw);
+        let profileName = rawData.name || fallbackName;
         const prevIdx = this.profiles.findIndex(p => p === profileName);
         if (prevIdx !== -1) {
             if (
@@ -125,18 +125,18 @@ class Profile {
                 while (this.profiles.includes(`${profileName} (${idx})`)) idx++;
                 profileName = `${profileName} (${idx})`;
 
-                raw_data.name = profileName;
-                localStorage.setItem(profileName, JSON.stringify(raw_data));
+                rawData.name = profileName;
+                localStorage.setItem(profileName, JSON.stringify(rawData));
                 this.profiles.push(profileName);
             }
         } else {
             this.profiles.push(profileName);
         }
 
-        if (!raw_data.name) {
+        if (!rawData.name) {
             // backward compatibility
-            raw_data.name = profileName;
-            localStorage.setItem(profileName, JSON.stringify(raw_data));
+            rawData.name = profileName;
+            localStorage.setItem(profileName, JSON.stringify(rawData));
         } else {
             localStorage.setItem(profileName, raw);
         }

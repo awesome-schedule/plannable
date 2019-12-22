@@ -175,7 +175,7 @@ export default abstract class Schedule {
      *
      * @remarks color collision is handled by separate chaining
      */
-    public getColor(obj: Hashable): string {
+    private getColor(obj: Hashable): string {
         const userColor = Schedule.savedColors[obj.key];
         if (userColor) return userColor;
 
@@ -342,7 +342,7 @@ export default abstract class Schedule {
     /**
      * need to be called before `computeSchedule` if the `All` property is updated.
      */
-    protected constructDateSeparator() {
+    public constructDateSeparator() {
         const sections: Section[] = [];
 
         for (const key in this.All) {

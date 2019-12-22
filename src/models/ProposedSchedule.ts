@@ -3,10 +3,46 @@ import Event from './Event';
 import { NotiMsg } from '@/store/notification';
 import * as Utils from '../utils';
 import { TYPES, DAYS } from './Meta';
-import { GeneratedError } from '../utils/other';
+import Section from './Section';
 
-function isv5_v7(arr: any[]): arr is SectionJSON[] {
-    return typeof arr[0].id === 'number';
+/**
+ * check whether the array is the correct JSON format for plannable v5.x to v7.x
+ * @param arr
+ */
+// eslint-disable-next-line
+function is_v5_v7(arr: any[]): arr is SectionJSON[] {
+    return typeof arr[0] === 'object' && typeof arr[0].id === 'number';
+}
+/**
+ * check whether the array is the correct JSON format for plannable v8.x
+ * @param arr
+ */
+// eslint-disable-next-line
+function is_v8(arr: any[]): arr is SectionJSON[][] {
+    return arr[0] instanceof Array && is_v5_v7(arr[0]);
+}
+
+function filterSections(
+    group: SectionJSON[],
+    allSections: Section[],
+    warnings: string[],
+    convKey: string
+) {
+    const set = new Set<number>();
+    for (const record of group) {
+        // check whether the identifier of stored sections match with the existing sections
+        const target =
+            typeof record.section === 'undefined' // "section" property may not be recorded
+                ? allSections.find(sec => sec.id === record.id) // in that case we only compare id
+                : allSections.find(sec => sec.id === record.id && sec.section === record.section);
+        if (target) set.add(target.id);
+        // if not exist, it possibly means that section is removed from SIS
+        else
+            warnings.push(
+                `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
+            );
+    }
+    return set;
 }
 
 export default class ProposedSchedule extends Schedule {
@@ -103,7 +139,7 @@ export default class ProposedSchedule extends Schedule {
 
     /**
      * instantiate a `Schedule` object from its JSON representation.
-     * the `computeSchedule` method will be invoked after instantiation
+     * the `computeSchedule` method will **not** be invoked after instantiation
      *
      * @returns NotiMsg, whose level might be one of the following
      * 1. success: a schedule is successfully parsed from the JSON object
@@ -131,12 +167,14 @@ export default class ProposedSchedule extends Schedule {
                 payload: schedule
             };
 
-        const warnings = [];
+        const warnings: string[] = [];
         const catalog = window.catalog;
         const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
         // convert array to set
         for (const key of keys) {
             const sections = obj.All[key] as any;
+
+            // try to find the course corresponding to the recorded key
             const course = catalog.getCourse(key);
             const parts = key.match(regex);
 
@@ -175,50 +213,19 @@ export default class ProposedSchedule extends Schedule {
                                     .map(idx => allSections[idx].id)
                             )
                         ];
-                    } else if (isv5_v7(sections)) {
-                        const set = new Set<number>();
-                        for (const record of sections) {
-                            // check whether the identifier of stored sections match with the existing sections
-                            const target =
-                                typeof record.section === 'undefined' // "section" property may not be recorded
-                                    ? allSections.find(sec => sec.id === record.id) // in that case we only compare id
-                                    : allSections.find(
-                                          sec =>
-                                              sec.id === record.id && sec.section === record.section
-                                      );
-                            if (target) set.add(target.id);
-                            // if not exist, it possibly means that section is removed from SIS
-                            else
-                                warnings.push(
-                                    `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
-                                );
-                        }
-                        schedule.All[key] = [set];
+                        console.log('< v5 json detected');
+                    } else if (is_v5_v7(sections)) {
+                        schedule.All[key] = [
+                            filterSections(sections, allSections, warnings, convKey)
+                        ];
+                        console.log('v5-v7 json detected');
+                    } else if (is_v8(sections)) {
+                        schedule.All[key] = sections.map(group =>
+                            filterSections(group, allSections, warnings, convKey)
+                        );
+                        console.log('v8 json detected');
                     } else {
-                        // TODO: robust check
-                        schedule.All[key] = sections.map(group => {
-                            const set = new Set<number>();
-                            if (group instanceof Array) {
-                                for (const record of group) {
-                                    // check whether the identifier of stored sections match with the existing sections
-                                    const target =
-                                        typeof record.section === 'undefined' // "section" property may not be recorded
-                                            ? allSections.find(sec => sec.id === record.id) // in that case we only compare id
-                                            : allSections.find(
-                                                  sec =>
-                                                      sec.id === record.id &&
-                                                      sec.section === record.section
-                                              );
-                                    if (target) set.add(target.id);
-                                    // if not exist, it possibly means that section is removed from SIS
-                                    else
-                                        warnings.push(
-                                            `Section ${record.section} of ${convKey} does not exist anymore! It probably has been removed!`
-                                        );
-                                }
-                            }
-                            return set;
-                        });
+                        schedule.All[key] = [new Set()];
                     }
                 }
             } else {

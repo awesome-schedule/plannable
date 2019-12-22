@@ -168,12 +168,12 @@ const defaultOptions: DetailedEvaluatorOptions = {
     fromJSON(raw?: EvaluatorOptions) {
         if (raw && raw.mode !== undefined && raw.sortBy) {
             this.mode = raw.mode;
-            for (const raw_sort of raw.sortBy) {
+            for (const rawSort of raw.sortBy) {
                 for (const sort of this.sortBy) {
-                    if (sort.name === raw_sort.name) {
-                        sort.enabled = raw_sort.enabled;
-                        sort.reverse = raw_sort.reverse;
-                        sort.weight = raw_sort.weight || 1;
+                    if (sort.name === rawSort.name) {
+                        sort.enabled = rawSort.enabled;
+                        sort.reverse = rawSort.reverse;
+                        sort.weight = rawSort.weight || 1;
                         break;
                     }
                 }
@@ -423,6 +423,7 @@ export class FilterStore implements StoreModule<FilterState, FilterStateJSON> {
 
     toJSON(): FilterStateJSON {
         // exclude sort modes
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sortModes, refSchedule: ref, ...others } = this;
         const refSchedule = new ProposedSchedule(ref).toJSON().All as any; // this guarantees to be a generated schedule
         return { refSchedule, ...others };

@@ -54,7 +54,7 @@ export interface ScheduleStateJSON extends ScheduleStateBase {
 }
 
 // eslint-disable-next-line
-export interface ScheduleStore extends ScheduleState {}
+export interface ScheduleStore extends ScheduleState { }
 
 /**
  * the schedule module provides methods to manipulate schedules
@@ -209,9 +209,14 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
      * @param time
      */
     recomputeAll(sync = true, time = 10) {
-        if (this.currentSchedule !== this.proposedSchedule)
+        if (this.currentSchedule !== this.proposedSchedule) {
+            this.currentSchedule.constructDateSeparator();
             this.currentSchedule.computeSchedule(sync, time);
-        this.proposedSchedules.forEach(s => s.computeSchedule(sync, time));
+        }
+        this.proposedSchedules.forEach(s => {
+            s.constructDateSeparator();
+            s.computeSchedule(sync, time);
+        });
     }
 
     /**

@@ -74,6 +74,9 @@ export default class Catalog {
      */
     public initWorker(): Promise<'ready'> {
         if (!this.worker) {
+            // use require because we don't want this in unit-tests
+            // this if branch will not tested in unit-tests because there's no web worker
+            // eslint-disable-next-line @typescript-eslint/no-var-requires
             const Worker = require('worker-loader!../workers/SearchWorker');
             const worker: SearchWorker = new Worker();
             const prom: Promise<'ready'> = new Promise(resolve => {

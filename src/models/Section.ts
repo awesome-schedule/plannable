@@ -70,7 +70,7 @@ export interface SectionFields {
 }
 
 // use class-interface merging
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export default interface Section extends SectionFields {}
 /**
  * A section contains all the fields that a Course has,

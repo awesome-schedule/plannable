@@ -7,7 +7,7 @@ export interface CourseTableItem extends Omit<CourseFields, 'displayName'> {
     ids: number[];
 }
 // no back ref in db
-export interface SectionTableItem extends Omit<SectionFields, 'course'> {}
+export type SectionTableItem = Omit<SectionFields, 'course'>;
 
 export default class CatalogDB extends Dexie {
     courses: Dexie.Table<CourseTableItem, string>;

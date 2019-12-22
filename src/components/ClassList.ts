@@ -12,8 +12,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import Course from '../models/Course';
 import Schedule from '../models/Schedule';
 import Expand from './Expand.vue';
-import ProposedSchedule from '@/models/ProposedSchedule';
-import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 /**
  * A **pure** component for

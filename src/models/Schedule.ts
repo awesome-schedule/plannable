@@ -47,7 +47,7 @@ export interface ScheduleAll<T = Set<number>[]> {
 }
 
 export interface ScheduleJSON {
-    All: ScheduleAll<SectionJSON[]>;
+    All: ScheduleAll<SectionJSON[][]>;
     events: Event[];
 }
 
@@ -65,27 +65,22 @@ export default abstract class Schedule {
 
     public static compressJSON(obj: ScheduleJSON) {
         const { All, events } = obj;
-        const shortAll: ScheduleAll<number[]> = {};
+        const shortAll: ScheduleAll<number[][]> = {};
         for (const key in All) {
             const sections = All[key];
             shortAll[key] =
-                sections === -1
-                    ? sections
-                    : sections.reduce<number[]>((acc, { id }) => {
-                          // only record ids, omit sections
-                          acc.push(id);
-                          return acc;
-                      }, []);
+                sections === -1 ? sections : sections.map(group => group.map(({ id }) => id));
         }
         return [shortAll, ...events.map(e => Event.prototype.toJSONShort.call(e))] as const;
     }
 
     public static decompressJSON(obj: ReturnType<typeof Schedule.compressJSON>): ScheduleJSON {
-        const All: ScheduleAll<SectionJSON[]> = {};
+        const All: ScheduleJSON['All'] = {};
         const [shortAll, ...events] = obj;
         for (const key in shortAll) {
             const entry = shortAll[key];
-            All[key] = entry instanceof Array ? entry.map(e => ({ id: e })) : entry;
+            All[key] =
+                entry instanceof Array ? entry.map(group => group.map(id => ({ id }))) : entry;
         }
         return {
             All,
@@ -241,9 +236,6 @@ export default abstract class Schedule {
         }
     }
 
-    /**
-     * synchronous version of `computeSchedule`
-     */
     private _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
@@ -258,65 +250,48 @@ export default abstract class Schedule {
 
         const current: [Course, string[]][] = [];
         for (const key in all) {
-            const sections = all[key];
+            const temp = all[key];
+            const sections =
+                temp === -1
+                    ? -1
+                    : temp.reduce((acc, group) => {
+                          group.forEach(x => acc.add(x));
+                          return acc;
+                      }, new Set<number>());
             // we need a full course record of key `key`
             const fullCourse = catalog.getCourse(key);
             // a "partial" course with only selected sections
-
-            const courses: Course[] = [];
-
-            let emptyCourse = true;
-
-            if (sections === -1) {
-                const course = catalog.getCourse(key, sections);
-                courses.push(course);
-                if (course.sections.length !== 0) {
-                    emptyCourse = false;
-                }
-            } else {
-                for (const sec of sections) {
-                    const course = catalog.getCourse(key, sec);
-                    courses.push(course);
-                    if (course.sections.length !== 0) {
-                        emptyCourse = false;
-                    }
-                }
-            }
-
+            const course = catalog.getCourse(key, sections);
             // skip placing empty courses
-            if (emptyCourse) {
+            if (!course.sections.length) {
                 current.push([fullCourse, [' - ']]);
                 continue;
             }
 
-            const credit = parseFloat(courses[0].units) * courses.length;
+            const credit = parseFloat(course.units);
             this.totalCredit += isNaN(credit) ? 0 : credit;
             // if any section
             if (sections === -1) {
                 current.push([fullCourse, [' - ']]);
-                this.place(courses[0]);
+                this.place(course);
             } else {
-                for (const course of courses) {
-                    const sections = course.sections;
-
-                    // only one section: place that section
-                    if (sections.length === 1) {
-                        const sec = course.sections[0];
-                        current.push([fullCourse, [sec.id.toString()]]);
-                        this.place(sec);
-                    } else if (sections.length > 0) {
-                        if (Schedule.multiSelect) {
-                            // try to combine sections even if we're in multi-select mode
-                            const combined = Object.values(course.getCombined()).map(secs =>
-                                catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
-                            );
-                            for (const crs of combined) this.place(crs);
-                        } else {
-                            // a subset of the sections
-                            this.place(course);
-                        }
-                        current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
+                // only one section: place that section
+                if (sections.size === 1) {
+                    const sec = course.sections[0];
+                    current.push([fullCourse, [sec.id.toString()]]);
+                    this.place(sec);
+                } else if (sections.size > 0) {
+                    if (Schedule.multiSelect) {
+                        // try to combine sections even if we're in multi-select mode
+                        const combined = Object.values(course.getCombined()).map(secs =>
+                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
+                        );
+                        for (const crs of combined) this.place(crs);
+                    } else {
+                        // a subset of the sections
+                        this.place(course);
                     }
+                    current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
                 }
             }
         }
@@ -596,16 +571,18 @@ export default abstract class Schedule {
      * Serialize `this` to JSON
      */
     public toJSON(): ScheduleJSON {
-        const All: ScheduleAll<SectionJSON[]> = {};
+        const All: ScheduleJSON['All'] = {};
         const catalog = window.catalog;
         // convert set to array
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Array) {
-                All[key] = [...sections].map(id => {
-                    const { section } = catalog.getSectionById(key, id)!;
-                    return { id, section };
-                });
+                All[key] = sections.map(group =>
+                    [...group].map(_id => {
+                        const { id, section } = catalog.getSectionById(key, _id);
+                        return { id, section };
+                    })
+                );
             } else All[key] = sections;
         }
         return {

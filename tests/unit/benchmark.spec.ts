@@ -1,6 +1,6 @@
 import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
-import Schedule from '@/models/Schedule';
 import Store from '@/store';
+import ProposedSchedule from '@/models/ProposedSchedule';
 
 const store = new Store();
 store.display.maxNumSchedules = 200000;
@@ -12,7 +12,7 @@ test.skip('algorithm benchmark', () => {
     if (!options) throw new Error('failed to get options');
 
     const generator = new ScheduleGenerator(catalog, window.timeMatrix, options);
-    const schedule = new Schedule({
+    const schedule = new ProposedSchedule({
         cs11105: -1,
         cs11104: -1,
         enwr15107: -1,

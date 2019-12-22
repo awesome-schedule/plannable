@@ -76,7 +76,7 @@ export default class ClassView extends Store {
     updateCourse(key: string, section: number, remove = false) {
         try {
             this.schedule.currentSchedule.update(key, section, remove);
-        } catch (Error) {
+        } catch (e) {
             this.noti.warn(generatedWarning);
         }
 

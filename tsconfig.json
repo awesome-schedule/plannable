@@ -15,16 +15,25 @@
         "resolveJsonModule": true,
         "baseUrl": ".",
         "paths": {
-            "@/*": ["src/*"]
+            "@/*": [
+                "src/*"
+            ]
         },
-        "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+        "lib": [
+            "esnext",
+            "dom",
+            "dom.iterable",
+            "scripthost"
+        ]
     },
     "include": [
         "src/**/*.ts",
         "src/**/*.tsx",
         "src/**/*.vue",
-        // "tests/unit/*.ts",
+        "tests/unit/*.ts",
         "tests/benchmark/*.ts"
     ],
-    "exclude": ["node_modules"]
+    "exclude": [
+        "node_modules"
+    ]
 }

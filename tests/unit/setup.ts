@@ -45,7 +45,7 @@ jest.mock('dexie', () => {
 // God knows why sometimes request takes so long
 jest.setTimeout(50000);
 
-function convertAll(all: ScheduleAll) {
+function convertAll(all: { [x: string]: Set<number> | -1 }) {
     const converted: ScheduleAll = {};
     for (const key in all) {
         const val = all[key];
@@ -54,7 +54,7 @@ function convertAll(all: ScheduleAll) {
             for (const idx of val) {
                 a.add(window.catalog.getSection(key, idx).id);
             }
-            converted[key] = a;
+            converted[key] = [a];
         } else {
             converted[key] = val;
         }

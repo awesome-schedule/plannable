@@ -1,7 +1,7 @@
-import ScheduleGenerator from '@/algorithm/ScheduleGenerator';
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
 import { compareTwoStrings } from '@/algorithm/Searcher';
+import ProposedSchedule from '@/models/ProposedSchedule';
 
 const store = new Store();
 
@@ -23,7 +23,7 @@ describe('ScheduleGenerator Test', () => {
 
         const schedule = (store.schedule.proposedSchedules[
             store.schedule.proposedScheduleIndex
-        ] = new Schedule(
+        ] = new ProposedSchedule(
             global.convertAll({
                 cs11105: -1,
                 cs11104: -1,

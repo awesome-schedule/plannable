@@ -75,14 +75,9 @@
                 </div>
             </div>
             <Expand>
-                <div v-if="expanded(crs.key)" :id="`${crs.key}trans`" class="trans">
+                <div v-if="expanded(crs.key)" class="trans">
                     <!-- no "Any Section" for engagement due to some strange requests -->
-                    <div
-                        class="row no-gutters justify-content-center"
-                        :title="
-                            schedule.isAnySection(crs.key) ? 'click to unselect' : 'click to select'
-                        "
-                    >
+                    <div v-if="showAny" class="row no-gutters justify-content-center">
                         <div
                             class="col col-6"
                             style="border-right: thin solid #eeeeee;"
@@ -150,7 +145,6 @@
                                 </div>
                             </div>
                         </li>
-
                         <div
                             v-for="sec in value.sections"
                             :key="sec.id"
@@ -165,9 +159,10 @@
                             "
                             @mouseenter="schedule.preview(sec)"
                             @mouseleave="schedule.removePreview()"
+                            @click="select(crs.key, sec.id, $event)"
                         >
                             <div class="row no-gutters flex-nowrap justify-content-between">
-                                <div class="col col-8 mr-auto" @click="select(crs.key, sec.id)">
+                                <div class="col col-8 mr-auto">
                                     <ul class="list-unstyled m-0" style="font-size: 0.75rem;">
                                         <li>
                                             Section {{ sec.section }}
@@ -221,13 +216,11 @@
                                         :disabled="!schedule.hasSection(crs.key, sec.id)"
                                         :value="schedule.getSectionGroup(crs.key, sec.id)"
                                         min="0"
+                                        max="8"
                                         @change="select(crs.key, sec.id)"
                                     />
                                 </div>
-                                <div
-                                    class="col col-1 ml-3 mr-2 align-self-center"
-                                    @click="select(crs.key, sec.id)"
-                                >
+                                <div class="col col-1 ml-3 mr-2 align-self-center">
                                     <i
                                         v-if="schedule.hasSection(crs.key, sec.id)"
                                         class="far fa-check-square"

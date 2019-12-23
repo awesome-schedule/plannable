@@ -8,7 +8,11 @@ const generatedMsg =
     'You are editing a generated schedule, please edit the proposed schedule instead. If you want to keep this particular generated schedule, click "copy" to do so.';
 
 export default class GeneratedSchedule extends Schedule {
+    /**
+     * A generated schedule's All can never contain -1 (Any Section)
+     */
     public All: ScheduleAll<Set<number>[]>;
+
     constructor(raw: RawAlgoCourse[] = [], events: Event[] = []) {
         const tempAll: GeneratedSchedule['All'] = {};
         for (const [key, sections] of raw) {

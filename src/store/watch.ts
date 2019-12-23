@@ -5,10 +5,10 @@
 /**
  *
  */
+import colorSchemes from '@/data/ColorSchemes';
 import Schedule from '@/models/Schedule';
 import { Component, Watch } from 'vue-property-decorator';
 import Store from './store';
-import colorSchemes from '@/data/ColorSchemes';
 /**
  * the watch factory defines some watchers on the members in `Store`.
  * these watchers are defined outside of the `Store` class because they should only be registered once.

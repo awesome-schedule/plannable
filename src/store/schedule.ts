@@ -5,11 +5,11 @@
 /**
  *
  */
+import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
 import { saveStatus, StoreModule } from '.';
-import Schedule, { ScheduleJSON } from '../models/Schedule';
 import ProposedSchedule from '../models/ProposedSchedule';
+import Schedule, { ScheduleJSON } from '../models/Schedule';
 import noti from './notification';
-import ScheduleEvaluator from '@/algorithm/ScheduleEvaluator';
 
 interface ScheduleStateBase {
     /**
@@ -152,9 +152,9 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
     }
     /**
      * @param generated
-     * if **true**, try to switch to generated schedules if none of the following conditions are met,
-     * - there are no generated schedules
-     * - or the generated schedules do not correspond to the current schedule
+     * if **true**, try to switch to generated schedules if the following conditions are met,
+     * - generated schedules exist ([[ScheduleEvaluator]] is not empty), and
+     * - generated schedules correspond to the current schedule
      *
      * switch to current proposed schedule if **false**
      */

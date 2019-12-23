@@ -82,7 +82,7 @@ export default class CompareView extends Store {
                 const course = catalog.getCourse(
                     x[0],
                     x[1].reduce((acc, x) => {
-                        acc.add(1);
+                        for (const v of x) acc.add(v);
                         return acc;
                     }, new Set<number>())
                 );

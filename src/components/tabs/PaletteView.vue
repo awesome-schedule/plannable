@@ -14,14 +14,17 @@
                 @click="display.colorScheme = +idx"
             >
                 <strong>{{ scheme.name }}</strong>
-                <div class="row no-gutters">
+                <div class="row flex-nowrap no-gutters">
                     <div
                         v-for="color in scheme.colors"
                         :key="color"
                         class="col"
-                        :style="'background-color:' + color"
+                        :style="{
+                            'background-color': color,
+                            color: color
+                        }"
                     >
-                        &nbsp;
+                        1
                     </div>
                 </div>
             </li>

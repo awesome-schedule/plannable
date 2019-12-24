@@ -296,8 +296,12 @@ function matchPartial(input: SemesterStorage, target: SemesterStorage) {
             if (secs instanceof Array) {
                 expect(T_secs).toBeInstanceOf(Array);
                 if (T_secs === -1) throw new Error(); // can never be -1
-                for (const sec of secs) {
-                    expect(T_secs.find(s => s.id === sec.id)).toBeTruthy(); // expect to find in T_secs
+                for (let i = 0; i < secs.length; i++) {
+                    const sec = secs[i];
+                    const T_sec = T_secs[i];
+                    for (const g of sec) {
+                        expect(T_sec.find(s => s.id === g.id)).toBeTruthy(); // expect to find in T_secs
+                    }
                 }
             } else {
                 expect(secs).toBe(T_secs); // -1 case
@@ -311,7 +315,7 @@ describe('parseFromURL', () => {
         const urlCompressed = compressJSON(JSON.stringify(empty_schedule));
         const URL = lz.compressToEncodedURIComponent(JSON.stringify(urlCompressed));
         const json = await parseFromURL(URL);
-        matchPartial(JSON.parse(JSON.stringify(json)), empty_schedule as any);
+        expect(json).toMatchObject(empty_schedule);
     });
     it('parse_mySchedule2019Fall', async () => {
         const urlCompressed = compressJSON(JSON.stringify(mySchedule2019Fall));

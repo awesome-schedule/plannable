@@ -1,7 +1,10 @@
 {
     "name": "miscellaneousTest1",
     "modified": "2019-08-06T21:27:21.299Z",
-    "currentSemester": { "id": "1198", "name": "Fall 2019" },
+    "currentSemester": {
+        "id": "1198",
+        "name": "Fall 2019"
+    },
     "display": {
         "showTime": true,
         "showRoom": true,
@@ -29,13 +32,48 @@
         "allowClosed": true,
         "sortOptions": {
             "sortBy": [
-                { "name": "IamFeelingLucky", "enabled": false, "reverse": true, "weight": 1 },
-                { "name": "distance", "enabled": true, "reverse": true, "weight": 1 },
-                { "name": "variance", "enabled": true, "reverse": true, "weight": 1 },
-                { "name": "similarity", "enabled": false, "reverse": true, "weight": 1 },
-                { "name": "compactness", "enabled": false, "reverse": true, "weight": 1 },
-                { "name": "lunchTime", "enabled": false, "reverse": true, "weight": 1 },
-                { "name": "noEarly", "enabled": false, "reverse": true, "weight": 1 }
+                {
+                    "name": "IamFeelingLucky",
+                    "enabled": false,
+                    "reverse": true,
+                    "weight": 1
+                },
+                {
+                    "name": "distance",
+                    "enabled": true,
+                    "reverse": true,
+                    "weight": 1
+                },
+                {
+                    "name": "variance",
+                    "enabled": true,
+                    "reverse": true,
+                    "weight": 1
+                },
+                {
+                    "name": "similarity",
+                    "enabled": false,
+                    "reverse": true,
+                    "weight": 1
+                },
+                {
+                    "name": "compactness",
+                    "enabled": false,
+                    "reverse": true,
+                    "weight": 1
+                },
+                {
+                    "name": "lunchTime",
+                    "enabled": false,
+                    "reverse": true,
+                    "weight": 1
+                },
+                {
+                    "name": "noEarly",
+                    "enabled": false,
+                    "reverse": true,
+                    "weight": 1
+                }
             ],
             "mode": 0
         },
@@ -47,23 +85,72 @@
             {
                 "All": {
                     "egmt15105": [
-                        { "id": 12892, "section": "100" },
-                        { "id": 12893, "section": "101" },
-                        { "id": 12894, "section": "102" },
-                        { "id": 12895, "section": "103" },
-                        { "id": 18464, "section": "104" },
-                        { "id": 13123, "section": "105" },
-                        { "id": 18465, "section": "106" },
-                        { "id": 18466, "section": "107" },
-                        { "id": 18467, "section": "108" }
+                        [
+                            {
+                                "id": 12892,
+                                "section": "100"
+                            },
+                            {
+                                "id": 12893,
+                                "section": "101"
+                            },
+                            {
+                                "id": 12894,
+                                "section": "102"
+                            },
+                            {
+                                "id": 12895,
+                                "section": "103"
+                            },
+                            {
+                                "id": 18464,
+                                "section": "104"
+                            },
+                            {
+                                "id": 13123,
+                                "section": "105"
+                            },
+                            {
+                                "id": 18465,
+                                "section": "106"
+                            },
+                            {
+                                "id": 18466,
+                                "section": "107"
+                            },
+                            {
+                                "id": 18467,
+                                "section": "108"
+                            }
+                        ]
                     ],
                     "egmt15205": [
-                        { "id": 12897, "section": "101" },
-                        { "id": 12898, "section": "102" },
-                        { "id": 12899, "section": "103" },
-                        { "id": 18833, "section": "105" },
-                        { "id": 18834, "section": "106" },
-                        { "id": 19988, "section": "108" }
+                        [
+                            {
+                                "id": 12897,
+                                "section": "101"
+                            },
+                            {
+                                "id": 12898,
+                                "section": "102"
+                            },
+                            {
+                                "id": 12899,
+                                "section": "103"
+                            },
+                            {
+                                "id": 18833,
+                                "section": "105"
+                            },
+                            {
+                                "id": 18834,
+                                "section": "106"
+                            },
+                            {
+                                "id": 19988,
+                                "section": "108"
+                            }
+                        ]
                     ],
                     "math33545": -1,
                     "fren20105": -1,
@@ -71,8 +158,19 @@
                 },
                 "events": []
             },
-            { "All": { "math33105": -1, "span20105": -1 }, "events": [] },
-            { "All": { "fren10105": -1 }, "events": [] }
+            {
+                "All": {
+                    "math33105": -1,
+                    "span20105": -1
+                },
+                "events": []
+            },
+            {
+                "All": {
+                    "fren10105": -1
+                },
+                "events": []
+            }
         ],
         "proposedScheduleIndex": 2,
         "cpIndex": 1,

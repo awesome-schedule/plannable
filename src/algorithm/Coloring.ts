@@ -195,7 +195,10 @@ export function colorDepthSearch<T = number>(
     });
 
     for (let i = 0; i < colors.length; i++) {
-        graph.set(vertices[i], adjList[i].map(x => vertices[x]));
+        graph.set(
+            vertices[i],
+            adjList[i].map(x => vertices[x])
+        );
     }
 
     vertices.sort((v1, v2) => v2.depth - v1.depth);

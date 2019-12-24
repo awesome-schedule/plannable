@@ -308,7 +308,7 @@ export default class Store extends Vue {
         );
         console.timeEnd('schedule generation');
 
-        this.noti.notify(msg, 'info', 3, true);
+        this.noti.notify(msg, 'info', 5, true);
         const evaluator = msg.payload;
         if (evaluator) {
             window.scheduleEvaluator = evaluator;

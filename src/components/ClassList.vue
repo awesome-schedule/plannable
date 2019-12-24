@@ -77,18 +77,18 @@
             <Expand>
                 <div v-if="expanded(crs.key)" class="trans">
                     <!-- no "Any Section" for engagement due to some strange requests -->
-                    <div v-if="showAny" class="row no-gutters justify-content-center">
+                    <div v-if="showAny" class="row no-gutters flex-nowrap justify-content-center">
                         <div
                             class="col col-6"
                             style="border-right: thin solid #eeeeee;"
                             @click="select(crs.key, -1)"
                         >
                             <div
-                                class="list-group-item list-group-item-action pl-3 pr-2"
+                                class="list-group-item list-group-item-action px-3"
                                 :class="{ active: schedule.isAnySection(crs.key) }"
                             >
-                                <div class="row no-gutters justify-content-between">
-                                    <div class="col-xs-auto">Any Section</div>
+                                <div class="row no-gutters flex-nowrap justify-content-between">
+                                    <div class="col-xs-auto mr-auto">Any Section</div>
                                     <div class="col-xs-auto align-self-center">
                                         <i
                                             v-if="schedule.isAnySection(crs.key)"
@@ -108,11 +108,11 @@
                             "
                         >
                             <div
-                                class="list-group-item list-group-item-action pl-2"
+                                class="list-group-item list-group-item-action px-3"
                                 :class="{ active: schedule.isGroup(crs.key) || group[crs.key] }"
                             >
-                                <div class="row no-gutters justify-content-between">
-                                    <div class="col-xs-auto">Groups</div>
+                                <div class="row no-gutters flex-nowrap justify-content-between">
+                                    <div class="col-xs-auto mr-auto">Groups</div>
                                     <div class="col-xs-auto align-self-center">
                                         <i
                                             v-if="schedule.isGroup(crs.key) || group[crs.key]"

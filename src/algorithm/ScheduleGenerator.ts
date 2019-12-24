@@ -190,28 +190,38 @@ class ScheduleGenerator {
             const temp = courses[key];
             const allSections = temp === -1 ? ([-1] as const) : temp;
 
-            for (const subgroup of allSections) {
+            let allEmpty = true;
+            for (let i = 0; i < allSections.length; i++) {
+                const subgroup = allSections[i];
+
+                // ignore empty group
                 if (subgroup instanceof Set && subgroup.size === 0) continue;
 
                 const courseRec = this.catalog.getCourse(key, subgroup);
-                if (courseRec.sections.length === 0) {
-                    return {
-                        level: 'error',
-                        msg: `No sections of ${courseRec.displayName} are selected!`
-                    };
-                }
 
                 const [classes, timeArrays, dates] = this.filterSections(courseRec, timeSlots);
                 // throw an error of none of the sections pass the filter
                 if (classes.length === 0) {
                     return {
                         level: 'error',
-                        msg: `No sections of ${courseRec.displayName} satisfy your filters and do not conflict with your events`
+                        msg: `No sections of ${courseRec.displayName} ${
+                            i === 0 || subgroup === -1 ? '' : 'belonging to group ' + i // don't show group idx for default group or Any Section
+                        } satisfy your filters and do not conflict with your events`
                     };
                 }
                 classList.push(classes);
                 timeArrayList.push(timeArrays);
                 dateList.push(dates);
+
+                allEmpty = false;
+            }
+            if (allEmpty) {
+                return {
+                    level: 'error',
+                    msg: `No sections of ${
+                        this.catalog.getCourse(key, -1).displayName
+                    } are selected!`
+                };
             }
         }
 

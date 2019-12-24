@@ -39,7 +39,7 @@ export interface SectionJSON {
  *
  * @typeparam T the type of the container used for the set of sections.
  * By default, this is a set of numbers, corresponding to the `id` field of each section
- * @remarks This field is called `All` (yes, with the first letter capitalized) since the very beginning
+ * @remarks This field is called `All` (yes, with the first letter capitalized) due to historical reasons
  */
 export interface ScheduleAll<T = Set<number>[] | -1> {
     [courseKey: string]: T;
@@ -277,6 +277,7 @@ export default abstract class Schedule {
                           group.forEach(x => acc.add(x));
                           return acc;
                       }, new Set<number>());
+
             // we need a full course record of key `key`
             const fullCourse = catalog.getCourse(key);
             // a "partial" course with only selected sections
@@ -346,53 +347,27 @@ export default abstract class Schedule {
         const sections: Section[] = [];
 
         for (const key in this.All) {
-            const all = this.All[key];
-            if (all === -1) {
-                const course = window.catalog.getCourse(key, -1);
-                for (const section of course.sections) {
-                    if (section.dateArray) {
-                        sections.push(section);
-                    }
-                }
-            } else {
-                for (const a of all) {
-                    const course = window.catalog.getCourse(key, a);
-                    // skip invalid dates
-                    for (const section of course.sections) {
-                        if (section.dateArray) {
-                            sections.push(section);
-                        }
-                    }
-                }
-            }
-        }
+            const temp = this.All[key];
 
-        // record all start and end points
-        const tempSeparator: [number, number][] = [];
-        for (const { dateArray } of sections) {
-            const start = dateArray[0];
-            let i = 0; // index for insertion
-            outer: for (; i < tempSeparator.length; i++) {
-                const target = tempSeparator[i][0];
-                if (start < target) break;
-                else if (start === target) continue outer; // remove repeated
+            // combine sections from different group
+            const all =
+                temp instanceof Array
+                    ? temp.reduce((acc, x) => {
+                          for (const v of x) acc.add(v);
+                          return acc;
+                      }, new Set<number>())
+                    : -1;
+
+            const course = window.catalog.getCourse(key, all);
+            for (const section of course.sections) {
+                if (section.dateArray) sections.push(section);
             }
-            // add one day to the end
-            tempSeparator.splice(i, 0, [start, dateArray[1] + 24 * 60 * 60 * 1000]);
         }
 
         const _temp = new Set<number>();
-        // abandon start points that are the same as some end points
-        // e.g. in [[8/26 - 10.17], [10.17 - 12.6]], one 10.17 would be abandoned
-        outer: for (let i = 0; i < tempSeparator.length; i++) {
-            for (let j = 0; j < i; j++) {
-                if (tempSeparator[i][0] === tempSeparator[j][1]) {
-                    _temp.add(tempSeparator[i][1]);
-                    continue outer;
-                }
-            }
-            _temp.add(tempSeparator[i][0]).add(tempSeparator[i][1]);
-        }
+        for (const { dateArray } of sections)
+            _temp.add(dateArray[0]).add(dateArray[1] + 24 * 60 * 60 * 1000);
+
         this.dateSeparators = [..._temp].sort((a, b) => a - b);
 
         // create empty objects for separated "All"
@@ -439,7 +414,6 @@ export default abstract class Schedule {
                 }
             }
         }
-        console.log(this.separatedAll);
     }
 
     /**

@@ -42,10 +42,12 @@ export default class ExportView extends Store {
     }
     async fetchRemoteProfiles() {
         const [username, credential] = this._cre();
-        this.remoteProfiles = (await axios.post(backend.down, {
-            username,
-            credential
-        })).data.map((s: string) => JSON.parse(s));
+        this.remoteProfiles = (
+            await axios.post(backend.down, {
+                username,
+                credential
+            })
+        ).data.map((s: string) => JSON.parse(s));
         this.remoteNewName = this.remoteProfiles.map(() => null);
     }
     /**

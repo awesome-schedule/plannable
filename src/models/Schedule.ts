@@ -198,31 +198,10 @@ export default abstract class Schedule {
         this.computeSchedule(false);
     }
 
-    public hoverEvent(key: string, strong = true) {
+    public hover(key: string, strong = true) {
         for (const blocks of this.days) {
             for (const block of blocks) {
                 if (block.section.key === key) block.strong = strong;
-            }
-        }
-    }
-
-    public unhoverEvent(key: string) {
-        this.hoverEvent(key, false);
-    }
-
-    public hover(key: string, strong = true) {
-        const sections = this.All[key];
-        if (sections instanceof Array) {
-            for (const group of sections) {
-                if (group.size > 0)
-                    this.days.forEach(blocks => {
-                        for (const block of blocks) {
-                            const container = block.section;
-                            if (!(container instanceof Event)) {
-                                if (container.has(group, key)) block.strong = strong;
-                            }
-                        }
-                    });
             }
         }
     }

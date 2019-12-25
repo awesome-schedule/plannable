@@ -3,6 +3,7 @@ import Section from '@/models/Section';
 import * as Utils from '@/utils';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from '@/models/ProposedSchedule';
+import GeneratedSchedule from '@/models/GeneratedSchedule';
 
 describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {
@@ -46,6 +47,7 @@ describe('Schedule Test', () => {
 
     // todo
     it('From Json new', () => {
+        // plannable v7 format
         let json = `
         {"All":{"cs21025":-1,"cs21105":[{"id":15486,"section":"001"}]},"id":0,"title":"Schedule","events":[]}`;
         let parsed = JSON.parse(json);
@@ -53,9 +55,10 @@ describe('Schedule Test', () => {
         expect(schedule).toBeTruthy();
         expect(schedule.empty()).toBeFalsy();
 
+        // plannable v7-8 mixed format
         // test for invalid section, invalid key
         json = `
-        {"All":{"cs21025":[],"cs21105":[{"id":15486,"section":"001"}],
+        {"All":{"cs21025":[],"cs21105":[[{"id":15486,"section":"001"}]],
         "cs213123123": [1], "cs11105": [999],
         "cs21505": [{"id": "asd", "section": "invalid section"}]},"id":0,"title":"Schedule","events":[]}`;
         parsed = JSON.parse(json);
@@ -91,8 +94,6 @@ describe('Schedule Test', () => {
         } catch (err) {
             expect(err.message).toBe(`Your new event conflicts with title1`);
         }
-
-        expect(schedule.has('MoTu 12:00AM - 3:00AM')).toBe(true);
 
         schedule.preview(cs21105.sections[0]);
         schedule.computeSchedule();
@@ -153,5 +154,26 @@ describe('Schedule Test', () => {
 
         // dummy test
         schedule['randEvents']();
+    });
+
+    it('Generated schedules', () => {
+        const schedule = new GeneratedSchedule();
+        try {
+            schedule.update();
+        } catch (e) {
+            expect(e).toBeInstanceOf(Utils.GeneratedError);
+        }
+        try {
+            schedule.remove();
+        } catch (e) {
+            expect(e).toBeInstanceOf(Utils.GeneratedError);
+        }
+
+        const copied = schedule.copy();
+        expect(copied).toBeInstanceOf(ProposedSchedule);
+        expect(copied.equals(schedule)).toBe(true);
+        const course = window.catalog.search('cs2102')[0][0];
+        copied.update(course.key, course.sections[0].id, 1);
+        expect(copied.equals(schedule)).toBe(false);
     });
 });

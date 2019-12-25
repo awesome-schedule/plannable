@@ -27,7 +27,19 @@
         "_colorScheme": 0
     },
     "filter": {
-        "timeSlots": [],
+        "timeSlots": [
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                "13:00",
+                "14:00"
+            ]
+        ],
         "allowWaitlist": true,
         "allowClosed": true,
         "sortOptions": {

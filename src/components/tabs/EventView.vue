@@ -102,8 +102,8 @@
                     v-for="ev in schedule.currentSchedule.events"
                     :key="ev.key"
                     :class="{ 'table-primary': ev === status.eventToEdit }"
-                    @mouseenter="schedule.currentSchedule.hoverEvent(ev.key)"
-                    @mouseleave="schedule.currentSchedule.unhoverEvent(ev.key)"
+                    @mouseenter="schedule.currentSchedule.hover(ev.key)"
+                    @mouseleave="schedule.currentSchedule.unhover(ev.key)"
                 >
                     <td @click="status.eventToEdit = ev">{{ ev.title }}</td>
                     <td class="pl-0 pr-2" @click="copyEvent(ev)">

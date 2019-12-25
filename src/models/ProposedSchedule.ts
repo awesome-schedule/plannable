@@ -123,8 +123,10 @@ export default class ProposedSchedule extends Schedule {
                 );
             }
         }
-        this.events.push(new Event(days, display, title, description, room));
+        const ev = new Event(days, display, title, description, room);
+        this.events.push(ev);
         this.computeSchedule();
+        return ev;
     }
 
     public deleteEvent(days: string) {

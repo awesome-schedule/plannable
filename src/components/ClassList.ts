@@ -61,12 +61,10 @@ export default class ClassList extends Vue {
     collapsed: { [x: string]: boolean } = {};
     group: { [x: string]: boolean } = {};
 
-    select(key: string, idx: number, event?: MouseEvent) {
+    select(key: string, idx: number) {
         // need to pass this event to parent because the parent needs to update some other stuff
         const numInput = document.getElementById(key + '-' + idx) as HTMLInputElement;
-        if (event && event.target === numInput) {
-            return;
-        }
+
         if (idx === -1) {
             // if select AnySection, disable group
             if (!this.schedule.isAnySection(key)) this.$set(this.group, key, false);

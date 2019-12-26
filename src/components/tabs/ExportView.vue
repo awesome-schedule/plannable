@@ -65,12 +65,11 @@
                 class="list-group-item list-group-item-action pl-3 pr-2"
                 :class="{ sel: name === profile.current }"
             >
-                <div class="form-row no-gutters justify-content-between">
-                    <div
-                        class="col-sm-auto mr-auto"
-                        style="cursor: pointer"
-                        @click="selectProfile(name)"
-                    >
+                <div
+                    class="form-row no-gutters justify-content-between"
+                    @click="selectProfile(name)"
+                >
+                    <div :id="'1' + idx" class="col-sm-auto mr-auto" style="cursor: pointer">
                         <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
                             <span>{{ name }}</span> <br />
                             <small v-for="field in getMeta(name)" :key="field" class="text-muted"
@@ -88,36 +87,36 @@
                     </div>
                     <div class="col-sm-auto text-right" style="font-size: 16px">
                         <i
+                            :id="'2' + idx"
                             class="click-icon mr-2"
                             :class="
                                 name === profile.current ? 'far fa-check-square' : 'far fa-square'
                             "
                             title="select this profile"
-                            @click="selectProfile(name)"
                         ></i>
                         <i
                             v-if="newName[idx] === null"
                             class="fas fa-edit click-icon"
                             title="rename this profile"
-                            @click="$set(newName, idx, name)"
+                            @click.stop="$set(newName, idx, name)"
                         ></i>
                         <i
                             v-else
                             class="fas fa-check ml-1 click-icon"
                             title="confirm renaming"
-                            @click="renameProfile(name, idx)"
+                            @click.stop="renameProfile(name, idx)"
                         ></i>
                         <i
                             v-if="profile.profiles.length > 1"
                             class="fa fa-times ml-1 click-icon"
                             title="delete this profile"
-                            @click="deleteProfile(name, idx)"
+                            @click.stop="deleteProfile(name, idx)"
                         ></i>
                         <i
                             v-if="canSync()"
                             class="fas fa-upload ml-1 click-icon"
                             title="upload this profile to remote"
-                            @click="uploadProfile(name)"
+                            @click.stop="uploadProfile(name)"
                         ></i>
                     </div>
                 </div>

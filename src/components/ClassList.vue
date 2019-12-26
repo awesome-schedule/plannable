@@ -9,19 +9,19 @@
             @mouseleave="schedule.unhover(crs.key)"
         >
             <div class="list-group-item py-1 px-0 w-100">
-                <div class="row flex-nowrap no-gutters justify-content-between">
-                    <div class="col col-1 pl-1 align-self-center" @click="collapse(crs.key)">
+                <div
+                    class="row flex-nowrap no-gutters justify-content-between"
+                    style="cursor: pointer"
+                    @click="collapse(crs.key)"
+                >
+                    <div class="col col-1 pl-1 align-self-center">
                         <i
                             class="fas click-icon"
                             :class="expanded(crs.key) ? 'fa-chevron-down' : 'fa-chevron-right'"
                         ></i>
                     </div>
                     <!-- push the last column to the right by mr-auto -->
-                    <div
-                        class="col-xs-auto mr-auto align-self-center my-0"
-                        style="cursor: pointer"
-                        @click="collapse(crs.key)"
-                    >
+                    <div class="col-xs-auto mr-auto align-self-center my-0">
                         <h6 class="mb-1">
                             <span
                                 v-if="matches.length"
@@ -61,7 +61,7 @@
                             class="fas fa-info-circle click-icon"
                             :class="{ 'pr-2': !showClasslistTitle }"
                             title="View class description"
-                            @click="$emit('course_modal', { crs, match: matches[idx] })"
+                            @click.stop="$emit('course_modal', { crs, match: matches[idx] })"
                         ></i>
                         <br v-if="showClasslistTitle" />
                         <i
@@ -69,7 +69,7 @@
                             class="fas fa-times click-icon"
                             :class="{ 'pr-1': !showClasslistTitle }"
                             title="Remove this class and all its sections from your schedule"
-                            @click="$emit('remove_course', crs.key)"
+                            @click.stop="$emit('remove_course', crs.key)"
                         ></i>
                     </div>
                 </div>
@@ -77,9 +77,13 @@
             <Expand>
                 <div v-if="expanded(crs.key)" class="trans">
                     <!-- no "Any Section" for engagement due to some strange requests -->
-                    <div v-if="showAny" class="row no-gutters flex-nowrap justify-content-center">
+                    <div
+                        v-if="showAny"
+                        class="row no-gutters flex-nowrap justify-content-between"
+                        style="font-size: 0.95rem"
+                    >
                         <div
-                            class="col col-6"
+                            class="col col-7"
                             style="border-right: thin solid #eeeeee;"
                             @click="select(crs.key, -1)"
                         >
@@ -101,14 +105,14 @@
                         </div>
 
                         <div
-                            class="col col-6"
+                            class="col col-5"
                             @click="
                                 schedule.ungroup(crs.key);
                                 updateGroup(crs.key);
                             "
                         >
                             <div
-                                class="list-group-item list-group-item-action px-3"
+                                class="list-group-item list-group-item-action pl-2 pr-3"
                                 :class="{ active: schedule.isGroup(crs.key) || group[crs.key] }"
                             >
                                 <div class="row no-gutters flex-nowrap justify-content-between">
@@ -159,7 +163,7 @@
                             "
                             @mouseenter="schedule.preview(sec)"
                             @mouseleave="schedule.removePreview()"
-                            @click="select(crs.key, sec.id, $event)"
+                            @click="select(crs.key, sec.id)"
                         >
                             <div class="row no-gutters flex-nowrap justify-content-between">
                                 <div class="col col-8 mr-auto">
@@ -218,6 +222,7 @@
                                         min="0"
                                         max="8"
                                         @change="select(crs.key, sec.id)"
+                                        @click.stop=""
                                     />
                                 </div>
                                 <div class="col col-1 ml-3 mr-2 align-self-center">

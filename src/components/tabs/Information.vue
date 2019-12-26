@@ -25,8 +25,9 @@
                         <a class="nav-link ml-3 my-1 py-1" href="#item-2-1"
                             >Schedule Manipulation</a
                         >
-                        <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Schedule Rendering</a>
-                        <a class="nav-link ml-3 my-1 py-1" href="#item-2-3">Enroll in SIS</a>
+                        <a class="nav-link ml-3 my-1 py-1" href="#item-2-2">Group Selection Mode</a>
+                        <a class="nav-link ml-3 my-1 py-1" href="#item-2-3">Schedule Rendering</a>
+                        <a class="nav-link ml-3 my-1 py-1" href="#item-2-4">Enroll in SIS</a>
                     </nav>
                 </div>
                 <div @click="showGuide(3)">
@@ -369,14 +370,14 @@
                 <p>
                     While usually not necessary for most classes, group selection mode is useful if
                     you want to take more than 1 sections of a given class. For example, you can
-                    take multiple sections under special-topic courses like CS4501 which offer
+                    take multiple sections under special-topic courses like CS4501, which offer
                     courses on different topics all under the same course number. To enable group
                     selection mode, click the Groups button, and the group indices will be shown.
                     You can adjust the group index for each of the section.
-                    <strong>One</strong> section will be chosen from <strong>each</strong> of the
-                    set of the sections that share the same group index. When group selection mode
-                    is not enabled, all of the sections you selected go into the default group of
-                    zero, so only one section will be chosen from your selections.
+                    <strong>One</strong> section will be chosen from <strong>each</strong>set of the
+                    sections that share the same group index. When group selection mode is not
+                    enabled, all of the sections you selected go into the default group of zero, so
+                    only one section will be chosen from your selections.
                 </p>
 
                 <p>
@@ -386,7 +387,7 @@
                     always be chosen in each generated schedule.
                 </p>
 
-                <h5 id="item-2-2" class="mt-4">
+                <h5 id="item-2-3" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Schedule Rendering</strong>
                 </h5>
@@ -415,7 +416,7 @@
                     rendered.
                 </p>
 
-                <h5 id="item-2-3" class="mt-4">
+                <h5 id="item-2-4" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Enroll in SIS</strong>
                 </h5>

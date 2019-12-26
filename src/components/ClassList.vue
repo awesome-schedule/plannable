@@ -80,7 +80,7 @@
                     <div
                         v-if="showAny"
                         class="row no-gutters flex-nowrap justify-content-between"
-                        style="font-size: 0.95rem"
+                        style="font-size: 0.90rem"
                     >
                         <div
                             class="col col-7"

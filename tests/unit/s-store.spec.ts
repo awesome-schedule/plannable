@@ -1,5 +1,6 @@
 import Store from '@/store';
-const { schedule } = new Store();
+const store = new Store();
+const { schedule } = store;
 
 beforeAll(() => {
     window.confirm = () => true;
@@ -27,4 +28,29 @@ test('schedule basic', () => {
 
     schedule.fromJSON({});
     expect(schedule).toEqual(schedule.getDefault());
+});
+
+test('generated', () => {
+    schedule.clear();
+    schedule.switchPage(0);
+
+    schedule.newProposed();
+    expect(schedule.proposedSchedules.length).toBe(2);
+    schedule.currentSchedule.update('cs21105', -1);
+    store.generateSchedules();
+    expect(schedule.cpIndex).toBe(1);
+    schedule.recomputeAll();
+
+    schedule.copyCurrent();
+    schedule.switchPage(-1);
+    schedule.switchPage(10000);
+    schedule.deleteProposed();
+    schedule.deleteProposed();
+    expect(schedule.cpIndex).toBe(-1);
+
+    schedule.currentSchedule.update('cs21105', -1);
+    store.generateSchedules();
+    expect(schedule.cpIndex).toBe(0);
+    schedule.clear();
+    expect(schedule.currentSchedule.empty()).toBe(true);
 });

@@ -6,8 +6,7 @@
 /**
  *
  */
-import { DFS, Vertex } from '../algorithm/Graph';
-import { intervalScheduling, colorDepthSearch } from '../algorithm/Coloring';
+import { Vertex, intervalScheduling, colorDepthSearch } from '../algorithm/Graph';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -420,20 +419,7 @@ export default abstract class Schedule {
      */
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            const graph = this.constructAdjList(blocks);
-            const len = graph.length;
-            const visited = new Uint8Array(len);
-            // find all connected components
-            const components: ScheduleBlock[][] = [];
-            for (let i = 0; i < len; i++) {
-                if (!visited[i]) {
-                    visited[i] = 1;
-                    components.push(DFS(i, graph, visited).map(idx => blocks[idx]));
-                }
-            }
-
-            // we run coloring for each component
-            for (const bls of components) this._computeBlockPositions(bls);
+            this._computeBlockPositions(blocks);
         }
     }
 

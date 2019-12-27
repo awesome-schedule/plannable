@@ -10,7 +10,7 @@ import { NotiMsg } from '../store/notification';
 import { cancelablePromise, CancelablePromise, errToStr, timeout } from '../utils';
 import Expirable from './Expirable';
 
-interface LoaderOptions<T_JSON extends Expirable> {
+interface LoaderOptions<T, T_JSON extends Expirable> {
     /**
      * the expiration time of this T_JSON
      */
@@ -20,6 +20,10 @@ interface LoaderOptions<T_JSON extends Expirable> {
      * stored in local storage into T_JSON or null
      */
     parse?: (x: string | null) => T_JSON | null;
+    /**
+     * the function to store x in localStorage
+     */
+    store?: (x: T) => T;
     /**
      * The validator that checks whether the return value of the parser is a valid T_JSON object
      */
@@ -72,16 +76,26 @@ export function loadFromCache<T, T_JSON extends Expirable>(
     {
         expireTime = Infinity,
         parse = x => (x ? JSON.parse(x) : null),
+        store = x => {
+            localStorage.setItem(
+                key,
+                JSON.stringify({
+                    modified: new Date().toJSON(),
+                    [key]: x
+                })
+            );
+            return x;
+        },
         validator = defaultValidator,
         force = false
-    }: LoaderOptions<T_JSON>
+    }: LoaderOptions<T, T_JSON>
 ): { new: CancelablePromise<T>; old?: T } {
     const storage = localStorage.getItem(key);
-    const data: T_JSON | null = parse(storage);
+    const data = parse(storage);
     if (validator(data)) {
-        // expired
+        // if expired, request data from remote
         if (new Date().getTime() - new Date(data.modified).getTime() > expireTime || force) {
-            const newData = cancelablePromise(request());
+            const newData = cancelablePromise(request().then(store));
             try {
                 return {
                     new: newData,
@@ -101,7 +115,7 @@ export function loadFromCache<T, T_JSON extends Expirable>(
         // data invalid or does not exist
     } else {
         return {
-            new: cancelablePromise(request())
+            new: cancelablePromise(request().then(store))
         };
     }
 }

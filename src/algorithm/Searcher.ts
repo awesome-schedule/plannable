@@ -60,4 +60,7 @@ export class FastSearcher {
     public search(query: string) {
         return findBestMatch(query.toLowerCase().replace(/\s+/g, ''), this.targets);
     }
+    public toJSON() {
+        return this.targets;
+    }
 }

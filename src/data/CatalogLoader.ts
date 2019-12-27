@@ -96,7 +96,7 @@ export async function requestSemesterData(semester: SemesterJSON, db?: CatalogDB
     );
 }
 
-export function parseSemesterData(rawData: string[][], db?: CatalogDB) {
+function parseSemesterData(rawData: string[][], db?: CatalogDB) {
     console.time('parse semester data');
 
     const courseDict: { [x: string]: Course } = Object.create(null);

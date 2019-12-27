@@ -76,13 +76,5 @@ export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
         }
     }
 
-    localStorage.setItem(
-        'semesters',
-        JSON.stringify({
-            modified: new Date().toJSON(),
-            semesterList: records
-        })
-    );
-
     return records;
 }

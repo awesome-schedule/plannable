@@ -89,14 +89,6 @@ export async function requestTimeMatrix(): Promise<Int32Array> {
         const flattened = new Int32Array(len ** 2);
         for (let i = 0; i < len; i++) flattened.set(data[i], i * len);
 
-        localStorage.setItem(
-            'timeMatrix',
-            JSON.stringify({
-                modified: new Date().toJSON(),
-                timeMatrix: Array.from(flattened)
-            })
-        );
-
         return flattened;
     } else {
         throw new Error('Data format error');
@@ -112,13 +104,6 @@ export async function requestBuildingSearcher() {
     const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
     const data = res.data;
     if (isStringArray(data)) {
-        localStorage.setItem(
-            'buildingList',
-            JSON.stringify({
-                modified: new Date().toJSON(),
-                buildingList: data
-            })
-        );
         return new FastSearcher(data);
     } else {
         throw new Error('Data format error');

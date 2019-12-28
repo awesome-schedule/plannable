@@ -80,7 +80,7 @@ export function loadFromCache<T, T_JSON extends Expirable>(
             localStorage.setItem(
                 key,
                 JSON.stringify({
-                    modified: new Date().toJSON(),
+                    modified: new Date(),
                     [key]: x
                 })
             );

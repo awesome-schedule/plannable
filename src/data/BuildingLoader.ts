@@ -35,7 +35,17 @@ export function loadTimeMatrix(force = false) {
             x => Int32Array.from(x.timeMatrix),
             {
                 expireTime: 1000 * 86400,
-                force
+                force,
+                store(x) {
+                    localStorage.setItem(
+                        'timeMatrix',
+                        JSON.stringify({
+                            modified: new Date(),
+                            timeMatrix: Array.from(x)
+                        })
+                    );
+                    return x;
+                }
             }
         ),
         {

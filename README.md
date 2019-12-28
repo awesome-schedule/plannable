@@ -99,6 +99,8 @@ Some efforts have been made to make it easier to integrate plannable with other 
 4. Make some tweaks to the source code in other places if needed. 
 5. Build and deploy to some other places
 
+If you have questions when integrating plannable with other schools or want to deploy your favor of plannable to a subdomain of plannable (e.g. yourschool.plannable.org), feel free to contact us by GitHub issue or email. 
+
 ## License
 
 This project is licensed under GPL-3.0 - see the [LICENSE](LICENSE) file for details

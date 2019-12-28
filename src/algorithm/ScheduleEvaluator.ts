@@ -402,7 +402,7 @@ class ScheduleEvaluator {
                 const range = max - min;
                 // if all of the values are the same, skip this sorting coefficient
                 if (!range) {
-                    console.warn(range, option.name);
+                    console.warn(range, coeff, option.name);
                     continue;
                 }
 

@@ -12,7 +12,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import ScheduleEvaluator, { EvaluatorOptions } from '../algorithm/ScheduleEvaluator';
 import ScheduleGenerator, { GeneratorOptions } from '../algorithm/ScheduleGenerator';
 import { SemesterJSON } from '../models/Catalog';
-import { CourseStatus } from '../models/Meta';
+import { CourseStatus } from '../config';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import display, { Display, DisplayState } from './display';
 import filter, { FilterStateJSON, FilterStore, TimeSlot } from './filter';

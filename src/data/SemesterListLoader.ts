@@ -8,10 +8,9 @@
  *
  */
 import { SemesterJSON } from '../models/Catalog';
-import { semesterListExpirationTime } from '../models/Meta';
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
-import { dataend } from '@/config';
+import { dataend, semesterListExpirationTime } from '@/config';
 
 interface SemesterListJSON extends Expirable {
     semesters: SemesterJSON[];

@@ -6,9 +6,9 @@
 /**
  *
  */
+import { CourseType } from '../config';
 import { hashCode } from '../utils';
 import Hashable from './Hashable';
-import { CourseType } from './Meta';
 import Section from './Section';
 
 /**

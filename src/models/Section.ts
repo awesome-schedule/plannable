@@ -12,7 +12,8 @@ import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { CourseStatus, dayToInt } from './Meta';
+import { dayToInt } from './Meta';
+import { CourseStatus } from '../config';
 
 /**
  * last three bits of this number correspond to the three types of invalid sections,

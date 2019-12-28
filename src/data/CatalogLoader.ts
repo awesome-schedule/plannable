@@ -12,9 +12,8 @@ import Section from '@/models/Section';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 
 import Course from '@/models/Course';
-import { semesterDataExpirationTime } from '../models/Meta';
 import { cancelablePromise, CancelablePromise } from '../utils';
-import { dataend } from '@/config';
+import { dataend, semesterDataExpirationTime } from '@/config';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh

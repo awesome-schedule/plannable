@@ -1,8 +1,9 @@
-import Schedule, { ScheduleJSON, ScheduleAll, SectionJSON } from './Schedule';
-import Event from './Event';
 import { NotiMsg } from '@/store/notification';
+import { TYPES } from '../config';
 import * as Utils from '../utils';
-import { TYPES, DAYS } from './Meta';
+import Event from './Event';
+import { DAYS } from './Meta';
+import Schedule, { ScheduleAll, ScheduleJSON, SectionJSON } from './Schedule';
 import Section from './Section';
 
 /**

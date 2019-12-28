@@ -45,13 +45,24 @@ export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
  */
 export default class Catalog {
     public worker?: SearchWorker;
+    /**
+     * a mapping from course key to course itself
+     */
     public readonly courseDict: { readonly [courseKey: string]: Course };
+    /**
+     * array of all courses. equal to `Object.values(this.courseDict)`
+     */
     public readonly courses: readonly Course[];
+    /**
+     * array of all sections. equal to
+     * ```js
+     * this.courses.flatMap(c => c.sections)
+     * ```
+     */
     public readonly sections: readonly Section[];
     /**
      * @param semester the semester corresponding to the catalog stored in this object
-     * @param courseDict mapping from course key to course itself
-     * borrowing python's snake_case (not changed due to backward compatibility issues)
+     * @param data
      * @param modified
      */
     constructor(

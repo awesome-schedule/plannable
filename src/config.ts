@@ -9,35 +9,76 @@ import { CourseType, TYPES_PARSE } from './models/Meta';
 import Section, { SectionFields, ValidFlag } from './models/Section';
 import { parseDate } from './utils';
 
+/**
+ * Configuration of the backend. Not recommended to use anymore due to some security concerns
+ */
 export const backend = {
+    /**
+     * Name of the backend
+     */
     name: 'Hoosmyprofessor',
+    /**
+     * API endpoint for uploading/overwriting profiles on remote
+     */
     up: 'https://match.msnatuva.org/courses/api/save_plannable_profile/',
+    /**
+     * API endpoint for downloading profiles from remote
+     */
     down: 'https://match.msnatuva.org/courses/api/get_plannable_profile/',
+    /**
+     * API endpoint for editing the properties of the profile (e.g. name)
+     */
     edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/'
 } as const;
 
+/**
+ * Functions for fetching data
+ */
 export const dataend = {
+    /**
+     * an async function that fetches the array of buildings
+     * @returns a FastSearcher instance constructed from the array of buildings
+     */
     buildings: requestBuildingSearcher,
+    /**
+     * an async function that fetches the distance matrix (equivalently, the walking time) between the buildings.
+     * matrix[i * len + j] represents the distance between the ith building and jth building in the array of buildings fetched by dataend.buildings
+     * @returns the distance matrix, in Int32Array
+     */
     distances: requestTimeMatrix,
+    /**
+     * an async function that fetches the list of the semesters
+     */
     semesters: requestSemesterList,
+    /**
+     * an async function that fetches all courses corresponding to the given semester
+     * @returns a catalog object built from the courses
+     */
     courses: requestCourses
 } as const;
 
-type B = typeof dataend;
-
+/**
+ * functions for opening external webpages
+ */
 export const external = {
     enableDetails: true,
-    viewDetails(semesterId: string, courseId: number) {
+    /**
+     * for the given semester id and section id, open an external webpage showing the detail of that section
+     */
+    viewDetails(semesterId: string, secId: number) {
         window.open(
             'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
                 semesterId +
                 '&ClassNumber=' +
-                courseId,
+                secId,
             '_blank',
             'width=650,height=700,scrollbars=yes'
         );
     },
     enableGrades: true,
+    /**
+     * for the given course, open an external webpage showing the past grades of that course
+     */
     viewGrades(course: CourseFields) {
         window.open(
             `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
@@ -47,7 +88,10 @@ export const external = {
     }
 } as const;
 
-export default {
+/**
+ * some default UI configurations. Usually no need to change
+ */
+export const ui = {
     sideBarWidth: 19,
     sideMargin: 3,
     tabBarWidthMobile: 10,

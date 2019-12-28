@@ -1,4 +1,4 @@
-import config from '@/config';
+import { external } from '@/config';
 import * as Utils from '@/utils';
 import axios from 'axios';
 
@@ -65,8 +65,8 @@ describe('Utility Tests', () => {
     });
 
     it('dummy', () => {
-        config.external.viewDetails('1198', 1);
-        config.external.viewGrades(window.catalog.getCourse('cs11105'));
+        external.viewDetails('1198', 1);
+        external.viewGrades(window.catalog.getCourse('cs11105'));
     });
 
     it('other', () => {
@@ -89,8 +89,6 @@ describe('Utility Tests', () => {
             Utils.savePlain('sav', 'asv');
             // eslint-disable-next-line
         } catch (err) {}
-
-        expect(config).toBeInstanceOf(Object);
     });
 
     it('timeout', async () => {

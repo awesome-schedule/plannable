@@ -6,7 +6,7 @@
  *
  */
 import { Component } from 'vue-property-decorator';
-import config from '../config';
+import { ui as config } from '../config';
 import Store from '../store';
 
 /**

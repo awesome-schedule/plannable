@@ -18,6 +18,8 @@ module.exports = {
     collectCoverageFrom: [
         '<rootDir>/src/**/*.ts',
 
+        // why testing the example config?
+        '!**/config.example.ts',
         '!**/*.d.ts',
 
         // don't know how to test components

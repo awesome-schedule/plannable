@@ -54,6 +54,9 @@ function findBestMatch(mainString: string, targetStrings: string[]) {
 
 export class FastSearcher {
     public targets: string[];
+    /**
+     * @param targets the list of strings to search from
+     */
     constructor(targets: string[]) {
         this.targets = targets.map(t => t.toLowerCase().replace(/\s+/g, ''));
     }

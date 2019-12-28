@@ -4,7 +4,10 @@ const prompt = require('electron-prompt');
 let win;
 
 function createWindow() {
-    win = new BrowserWindow({ width: 1280, height: 720 });
+    win = new BrowserWindow({
+        width: 1280,
+        height: 720
+    });
     const contents = win.webContents;
     win.setMenu(
         Menu.buildFromTemplate([

@@ -12,6 +12,10 @@ import Catalog from './models/Catalog';
 import { highlightMatch } from './utils';
 import { FastSearcher } from './algorithm/Searcher';
 import App from './App.vue';
+import axios from 'axios';
+
+axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
+axios.defaults.xsrfCookieName = 'csrftoken';
 
 declare global {
     interface Window {
@@ -58,5 +62,4 @@ new Vue({
     }
 }).$mount('#app');
 
-import axios from 'axios';
 (window as any).axios = axios;

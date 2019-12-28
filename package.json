@@ -82,10 +82,11 @@
     "appId": "plannable",
     "win": {
       "target": "portable",
-      "icon": "public/favicon.ico"
+      "icon": "src/assets/logo-800x800.png"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "src/assets/logo-800x800.png"
     },
     "linux": {
       "target": [
@@ -95,13 +96,16 @@
             "x64",
             "arm64"
           ]
+        },
+        {
+          "target": "snap",
+          "arch": [
+            "x64"
+          ]
         }
       ],
-      "category": "productivity"
-    },
-    "appImage": {},
-    "dmg": {
-      "icon": "public/favicon.ico"
+      "category": "productivity",
+      "icon": "src/assets/logo-800x800.png"
     },
     "files": [
       "dist/**",

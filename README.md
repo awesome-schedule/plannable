@@ -40,6 +40,30 @@ Our website consists of only front-end components, i.e. all the scripts run in y
 
 To facilitate access in China, we provide a mirror: https://cn.plannable.org/. It is synchronized with https://plannable.org/ once per hour.
 
+## Desktop App
+
+> powered by electron
+
+The desktop app of plannable can be downloaded from [releases](https://github.com/awesome-schedule/plannable/releases). 
+
+### Note for Windows and MacOS users
+
+Your operating system may block the execution of the app because it is unrecognized/unsigned. We do not have the signed certificates which cost at least 200$ per year. You can proceed safely because there is no security risk. 
+
+### Note for Linux users
+
+If you use AppImage, you need to add execution permission before launching the file
+
+```bash
+chmod +x plannable-x.x.x.AppImage
+```
+
+If you use snap, you need to add the `--dangerous` flag when installing the snap package
+
+```
+sudo snap install --dangerous plannable_x.x.x_amd64.snap
+```
+
 ## Development
 
 > Note: We recommend [VS Code](https://code.visualstudio.com/) for development

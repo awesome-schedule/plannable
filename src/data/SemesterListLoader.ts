@@ -7,15 +7,14 @@
 /**
  *
  */
-import axios from 'axios';
-import { getApi } from '.';
 import { SemesterJSON } from '../models/Catalog';
 import { semesterListExpirationTime } from '../models/Meta';
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
+import { dataend } from '@/config';
 
 interface SemesterListJSON extends Expirable {
-    semesterList: SemesterJSON[];
+    semesters: SemesterJSON[];
 }
 
 /**
@@ -29,10 +28,13 @@ export function loadSemesterList(count = 5) {
     return fallback(
         loadFromCache<SemesterJSON[], SemesterListJSON>(
             'semesters',
-            () => requestSemesterList(count),
-            x => x.semesterList,
+            () => dataend.semesters(count),
+            x => x.semesters,
             {
-                expireTime: semesterListExpirationTime
+                expireTime: semesterListExpirationTime,
+                validator(x): x is SemesterListJSON {
+                    return !!x && !!x.modified && !!x.semesters;
+                }
             }
         ),
         {
@@ -42,39 +44,4 @@ export function loadSemesterList(count = 5) {
             timeoutTime: 10000
         }
     );
-}
-
-/**
- * Fetch the list of semesters from Lou's list
- */
-export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
-    console.time('get semester list');
-    const response = await (location.host === 'plannable.org' || location.protocol === 'file:'
-        ? axios.get<string>(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/index.php?time=${Math.random()}`
-          )
-        : axios.get<string>(`${getApi()}/data/Semester Data/index.html?time=${Math.random()}`));
-    console.timeEnd('get semester list');
-
-    const element = document.createElement('html');
-    element.innerHTML = response.data;
-    const options = element.getElementsByTagName('option');
-    const records: SemesterJSON[] = [];
-    for (let i = 0; i < Math.min(count, options.length); i++) {
-        const option = options[i];
-        const key = option.getAttribute('value');
-        if (key) {
-            const semesterId = key.substr(-4);
-            const html = option.innerHTML;
-            records.push({
-                id: semesterId,
-                name: html
-                    .split(' ')
-                    .splice(0, 2)
-                    .join(' ')
-            });
-        }
-    }
-
-    return records;
 }

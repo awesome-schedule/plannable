@@ -7,12 +7,10 @@
 /**
  *
  */
-import axios from 'axios';
-import { getApi } from '.';
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
-import { isStringArray } from '@/utils';
 import { FastSearcher } from '@/algorithm/Searcher';
+import { dataend } from '@/config';
 
 export interface TimeMatrixJSON extends Expirable {
     timeMatrix: number[];
@@ -33,7 +31,7 @@ export function loadTimeMatrix(force = false) {
     return fallback(
         loadFromCache<Int32Array, TimeMatrixJSON>(
             'timeMatrix',
-            requestTimeMatrix,
+            dataend.distances,
             x => Int32Array.from(x.timeMatrix),
             {
                 expireTime: 1000 * 86400,
@@ -61,7 +59,7 @@ export function loadBuildingSearcher(force = false) {
     return fallback(
         loadFromCache<FastSearcher, BuildingListJSON>(
             'buildingList',
-            requestBuildingSearcher,
+            dataend.buildings,
             x => new FastSearcher(x.buildingList),
             {
                 expireTime: 1000 * 86400,
@@ -75,37 +73,4 @@ export function loadBuildingSearcher(force = false) {
             timeoutTime: 10000
         }
     );
-}
-
-/**
- * request from remote and store in localStorage
- */
-export async function requestTimeMatrix(): Promise<Int32Array> {
-    const res = await axios.get(`${getApi()}/data/Distance/Time_Matrix.json`);
-    const data = res.data;
-
-    if (data instanceof Array && data.length) {
-        const len = data.length;
-        const flattened = new Int32Array(len ** 2);
-        for (let i = 0; i < len; i++) flattened.set(data[i], i * len);
-
-        return flattened;
-    } else {
-        throw new Error('Data format error');
-    }
-}
-
-/**
- * request the building list from remote and store in localStorage
- *
- * @returns a building searcher
- */
-export async function requestBuildingSearcher() {
-    const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
-    const data = res.data;
-    if (isStringArray(data)) {
-        return new FastSearcher(data);
-    } else {
-        throw new Error('Data format error');
-    }
 }

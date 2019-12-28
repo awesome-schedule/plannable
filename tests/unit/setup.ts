@@ -1,5 +1,4 @@
-import { requestBuildingSearcher, requestTimeMatrix } from '@/data/BuildingLoader';
-import { requestSemesterData } from '@/data/CatalogLoader';
+import { dataend } from '@/config';
 import CatalogDB from '@/database/CatalogDB';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
@@ -87,10 +86,7 @@ global.convertAll = convertAll;
 global.postMessage = msg => global.queue.push(msg);
 
 beforeAll(async () => {
-    const catalog = await requestSemesterData(
-        { name: '', id: '1198' },
-        new CatalogDB({ name: '', id: '' })
-    );
+    const catalog = await dataend.courses({ name: '', id: '1198' });
     const section = Object.create(Section.prototype, {
         course: {
             value: catalog.courseDict.cs45015, // back ref to course
@@ -147,6 +143,6 @@ beforeAll(async () => {
     });
     catalog.courseDict.cs45015.sections.push(section);
     window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
-    window.timeMatrix = await requestTimeMatrix();
-    window.buildingSearcher = await requestBuildingSearcher();
+    window.timeMatrix = await dataend.distances();
+    window.buildingSearcher = await dataend.buildings();
 });

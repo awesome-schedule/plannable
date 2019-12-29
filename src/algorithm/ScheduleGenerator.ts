@@ -349,76 +349,165 @@ class ScheduleGenerator {
      * the main algorithm loop: generate all possible schedules based on the pre-computed information
      * @remarks this method does the most computation. It is made extremely efficient
      * by only operating on integers and typed integer arrays. Can be easily ported to C++
+     * @param sectionNums number of sections of each course
+     * @param timeArrLens length of time array of each section, indexed by `timeArrLens[i * numCourse + j]`, where `i` is course number, `j` is section number
+     * @param allChoices all current choices concatenated together
      * @returns [number of schedules generated, the length of time arrays of schedules in total]
      */
     private computeSchedules(
-        sectionLens: Uint8Array,
+        sectionNums: Uint8Array,
         timeArrLens: Uint8Array,
         conflictCache: Uint8Array,
         allChoices: Uint8Array,
         maxNumSchedules: number
     ) {
-        const numCourses = sectionLens.length;
+        const numCourses = sectionNums.length;
         const sideLen = timeArrLens.length;
-
-        const buffer = new ArrayBuffer(numCourses * 2);
-        // record the index of sections that are already tested
-        const pathMemory = new Uint8Array(buffer, 0, numCourses);
-        // the choiceNum array corresponding to the currentSchedule
-        const currentChoices = new Uint8Array(buffer, numCourses, numCourses);
 
         // the total length of the time array that we need to allocate for schedules generated
         let timeLen = 0;
-        let classNum = 0; // current course index
-        let choiceNum = 0; // the index of the section of the current course
-        let count = 0; // the total number of schedules already generated
 
-        outer: while (true) {
-            if (classNum >= numCourses) {
-                const start = count * numCourses;
-                // accumulate the length of the time arrays combined in each schedule
-                // also append currentChoices to allChoices
-                for (let i = 0; i < numCourses; i++)
-                    timeLen +=
-                        timeArrLens[(allChoices[start + i] = currentChoices[i]) * numCourses + i];
+        let count = sectionNums[0]; // the total number of schedules already generated
 
-                if (++count >= maxNumSchedules) break outer;
-                choiceNum = pathMemory[--classNum];
-            }
+        const allChoicesLen = allChoices.length;
+        const choices = new Uint8Array(2 * allChoicesLen);
 
-            /**
-             * when all possibilities in on class have exhausted, retract one class
-             * explore the next possibilities in the previous class
-             * reset the memory path forward to zero
-             */
-            while (choiceNum >= sectionLens[classNum]) {
-                // if all possibilities are exhausted, break out the loop
-                if (--classNum < 0) break outer;
+        for (let j = 0; j < sectionNums[0]; j++) {
+            choices[j * numCourses] = j;
+        }
 
-                choiceNum = pathMemory[classNum];
-                for (let i = classNum + 1; i < numCourses; i++) pathMemory[i] = 0;
-            }
+        let preCounter = sectionNums[0];
+        let curCounter = preCounter;
+        let flag = 1;
 
-            // check conflict between the newly chosen section and the sections already in the schedule
-            for (let i = 0; i < classNum; i++) {
-                if (
-                    conflictCache[
-                        (choiceNum * numCourses + classNum) * sideLen +
-                            currentChoices[i] * numCourses +
-                            i
-                    ]
-                ) {
-                    ++choiceNum;
-                    continue outer;
+        outer: for (let i = 1; i < numCourses; i++) {
+            curCounter = 0;
+            for (let j = 0; j < sectionNums[i]; j++) {
+                // copy number_of_choices * number_of_courses
+                nextChoice: for (let k = 0; k < preCounter; k++) {
+                    let time = 0;
+                    for (let m = 0; m < i; m++) {
+                        const sec = choices[(1 - flag) * allChoicesLen + k * numCourses + m];
+                        if (
+                            !conflictCache[(sec * numCourses + m) * sideLen + (j * numCourses + i)]
+                        ) {
+                            choices[flag * allChoicesLen + curCounter * numCourses + m] = sec;
+                            if (i === numCourses - 1) time += timeArrLens[sec * numCourses + m];
+                        } else {
+                            continue nextChoice;
+                        }
+                    }
+                    choices[flag * allChoicesLen + curCounter * numCourses + i] = j;
+                    curCounter++;
+
+                    if (i === numCourses - 1) {
+                        timeLen += time + timeArrLens[j * numCourses + i];
+                    }
+
+                    if (curCounter >= maxNumSchedules && i === numCourses - 1) {
+                        flag = 1 - flag;
+                        break outer;
+                    }
                 }
             }
-
-            // if the section does not conflict with any previously chosen sections,
-            // increment the path memory and go to the next class, reset the choiceNum = 0
-            currentChoices[classNum] = choiceNum;
-            pathMemory[classNum++] = choiceNum + 1;
-            choiceNum = 0;
+            preCounter = curCounter;
+            flag = 1 - flag;
         }
+
+        allChoices.set(choices.subarray((1 - flag) * allChoicesLen, (2 - flag) * allChoicesLen));
+        count = Math.min(curCounter, maxNumSchedules);
+
+        // timeLen = 100000000;
+
+        // for (let j = 0; j < sectionNums[0]; j++) {
+        //     allChoices[numCourses * j] = j;
+        // }
+
+        // for (let i = 1; i < numCourses; i++) {
+        //     let subCount = 0; // current # of generated (sub)schedules
+        //     const offset = 0; // valid schedule count after adding this course
+        //     for (let j = 0; j < sectionNums[i]; j++) {
+        //         const copySize = count * numCourses;
+
+        //         // copy number_of_choices * number_of_courses
+        //         nextSec: for (let k = 0; k < count; k++) {
+        //             // copy
+        //             for (let m = 0; m < i; m++) {
+        //                 const sec = allChoices[k * numCourses + m];
+        //                 if (
+        //                     !conflictCache[(sec * numCourses + m) * sideLen + (j * numCourses + i)]
+        //                 ) {
+        //                     if (jj[k] !== 0) {
+        //                         allChoices[jj[k] * copySize + k * numCourses + m] = sec;
+        //                     }
+
+        //                     if (i === numCourses - 1) {
+        //                         timeLen += timeArrLens[sec + numCourses * m];
+        //                     }
+        //                 } else {
+        //                     continue nextSec;
+        //                 }
+        //             }
+
+        //             if (i === numCourses - 1) {
+        //                 timeLen += timeArrLens[i * numCourses + j];
+        //             }
+
+        //             allChoices[jj[k] * copySize + k * numCourses + i] = j;
+        //             subCount++;
+        //             jj[k]++;
+        //         }
+        //     }
+
+        //     count = subCount;
+        // }
+
+        // outer: while (true) {
+        //     if (classNum >= numCourses) {
+        //         const start = count * numCourses;
+        //         // accumulate the length of the time arrays combined in each schedule
+        //         // also append currentChoices to allChoices
+        //         for (let i = 0; i < numCourses; i++)
+        //             timeLen +=
+        //                 timeArrLens[(allChoices[start + i] = currentChoices[i]) * numCourses + i];
+
+        //         if (++count >= maxNumSchedules) break outer;
+        //         choiceNum = pathMemory[--classNum];
+        //     }
+
+        //     /**
+        //      * when all possibilities in on class have exhausted, retract one class
+        //      * explore the next possibilities in the previous class
+        //      * reset the memory path forward to zero
+        //      */
+        //     while (choiceNum >= sectionNums[classNum]) {
+        //         // if all possibilities are exhausted, break out the loop
+        //         if (--classNum < 0) break outer;
+
+        //         choiceNum = pathMemory[classNum];
+        //         for (let i = classNum + 1; i < numCourses; i++) pathMemory[i] = 0;
+        //     }
+
+        //     // check conflict between the newly chosen section and the sections already in the schedule
+        //     for (let i = 0; i < classNum; i++) {
+        //         if (
+        //             conflictCache[
+        //                 (choiceNum * numCourses + classNum) * sideLen +
+        //                     currentChoices[i] * numCourses +
+        //                     i
+        //             ]
+        //         ) {
+        //             ++choiceNum;
+        //             continue outer;
+        //         }
+        //     }
+
+        //     // if the section does not conflict with any previously chosen sections,
+        //     // increment the path memory and go to the next class, reset the choiceNum = 0
+        //     currentChoices[classNum] = choiceNum;
+        //     pathMemory[classNum++] = choiceNum + 1;
+        //     choiceNum = 0;
+        // }
         return [count, timeLen - (numCourses - 1) * 8 * count] as const;
     }
 }

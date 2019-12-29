@@ -386,18 +386,19 @@ class ScheduleGenerator {
                 // copy number_of_choices * number_of_courses
                 nextChoice: for (let k = 0; k < preCounter; k++) {
                     let time = 0;
+                    const offset = flag * allChoicesLen + curCounter * numCourses;
                     for (let m = 0; m < i; m++) {
                         const sec = choices[(1 - flag) * allChoicesLen + k * numCourses + m];
                         if (
                             !conflictCache[(sec * numCourses + m) * sideLen + (j * numCourses + i)]
                         ) {
-                            choices[flag * allChoicesLen + curCounter * numCourses + m] = sec;
+                            choices[offset + m] = sec;
                             if (i === numCourses - 1) time += timeArrLens[sec * numCourses + m];
                         } else {
                             continue nextChoice;
                         }
                     }
-                    choices[flag * allChoicesLen + curCounter * numCourses + i] = j;
+                    choices[offset + i] = j;
                     curCounter++;
 
                     if (i === numCourses - 1) {

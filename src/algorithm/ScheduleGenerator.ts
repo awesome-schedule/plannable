@@ -378,7 +378,7 @@ class ScheduleGenerator {
 
         let preCounter = sectionNums[0];
         let curCounter = preCounter;
-        let flag = 1;
+        let flag = -1;
 
         outer: for (let i = 1; i < numCourses; i++) {
             curCounter = 0;
@@ -386,12 +386,10 @@ class ScheduleGenerator {
                 // copy number_of_choices * number_of_courses
                 nextChoice: for (let k = 0; k < preCounter; k++) {
                     let time = 0;
-                    const offset = flag * allChoicesLen + curCounter * numCourses;
+                    const offset = (flag & allChoicesLen) + curCounter * numCourses;
                     for (let m = 0; m < i; m++) {
-                        const sec = choices[(1 - flag) * allChoicesLen + k * numCourses + m];
-                        if (
-                            !conflictCache[(sec * numCourses + m) * sideLen + (j * numCourses + i)]
-                        ) {
+                        const sec = choices[(~flag & allChoicesLen) + k * numCourses + m];
+                        if (!conflictCache[sec * numCourses + m + (j * numCourses + i) * sideLen]) {
                             choices[offset + m] = sec;
                             if (i === numCourses - 1) time += timeArrLens[sec * numCourses + m];
                         } else {
@@ -406,14 +404,16 @@ class ScheduleGenerator {
                     }
 
                     if (curCounter >= maxNumSchedules && i === numCourses - 1) {
-                        flag = 1 - flag;
+                        flag = ~flag;
                         break outer;
                     }
                 }
             }
             preCounter = curCounter;
-            flag = 1 - flag;
+            flag = ~flag;
         }
+
+        flag = -1 * flag;
 
         allChoices.set(choices.subarray((1 - flag) * allChoicesLen, (2 - flag) * allChoicesLen));
         count = Math.min(curCounter, maxNumSchedules);

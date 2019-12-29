@@ -27,6 +27,10 @@ jobs:
         - stage: Deploy to GitHub pages & Build Electron Linux
           os: linux
           dist: xenial
+          addons:
+              snaps:
+                  - name: snapcraft
+                    confinement: classic
           script:
               - bash ./scripts/deploy.sh # tests run here
               - npx electron-builder --linux

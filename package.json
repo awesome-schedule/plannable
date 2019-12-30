@@ -91,7 +91,8 @@
     "worker-loader": "^2.0.0"
   },
   "build": {
-    "appId": "plannable",
+    "appId": "org.plannable",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "win": {
       "target": "portable",
       "icon": "src/assets/logo-800x800.png"
@@ -106,7 +107,8 @@
           "target": "AppImage",
           "arch": [
             "x64",
-            "arm64"
+            "arm64",
+            "armv7l"
           ]
         },
         {

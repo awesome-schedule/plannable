@@ -57,7 +57,7 @@ export default class ProposedSchedule extends Schedule {
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty
      */
-    public update(key: string, section: number, groupIdx = 0, remove = true) {
+    public update(key: string, section: number, groupIdx = 0, remove = true, update = true) {
         if (section === -1) {
             if (this.All[key] === -1) {
                 if (remove) delete this.All[key];
@@ -102,8 +102,10 @@ export default class ProposedSchedule extends Schedule {
                 }
             }
         }
-        this.constructDateSeparator();
-        this.computeSchedule();
+        if (update) {
+            this.constructDateSeparator();
+            this.computeSchedule();
+        }
     }
 
     /**

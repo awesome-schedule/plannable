@@ -18,6 +18,20 @@
             <small class="text-center form-text text-muted">
                 Import a .json file exported by our website
             </small>
+            <div class="custom-file">
+                <input
+                    id="customFile"
+                    type="file"
+                    class="custom-file-input"
+                    accept="text/ics"
+                    style="width:100%"
+                    @change="onUploadICS($event)"
+                />
+                <label class="custom-file-label" for="customFile">Add Class From ICS..</label>
+            </div>
+            <small class="text-center form-text text-muted">
+                Import a .ics file exported by UVA SIS
+            </small>
         </div>
         <div class="btn bg-info nav-btn">
             Export Profile

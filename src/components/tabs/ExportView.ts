@@ -108,6 +108,50 @@ export default class ExportView extends Store {
             this.noti.error(error.message);
         }
     }
+
+    onUploadICS(event: { target: EventTarget | null }) {
+        const input = event.target as HTMLInputElement;
+        const { files } = input;
+        if (!files) return;
+
+        const reader = new FileReader();
+        reader.onload = async () => {
+            if (reader.result) {
+                const str = reader.result.toString();
+                const arr = str.split('UID:class-number-');
+                arr.splice(0, 1);
+                const map = new Map<number, string>();
+                arr.map(str => {
+                    const n = parseInt(str.split('\nDESCRIPTION')[0]);
+                    map.set(n, '');
+                });
+
+                for (const sec of window.catalog.sections) {
+                    const a = map.get(sec.id);
+                    if (a === '') {
+                        map.set(sec.id, sec.key);
+                    }
+                }
+
+                for (const [key, val] of map) {
+                    this.schedule.proposedSchedule.update(val, key, undefined, undefined, false);
+                }
+
+                this.schedule.proposedSchedule.constructDateSeparator();
+                this.schedule.proposedSchedule.computeSchedule();
+            } else {
+                this.noti.warn('File is empty!');
+            }
+            input.value = '';
+        };
+
+        try {
+            reader.readAsText(files[0]);
+        } catch (error) {
+            console.error(error);
+            this.noti.error(error.message);
+        }
+    }
     saveToJson() {
         if (!this.semester.currentSemester) return;
         const { current } = this.profile;

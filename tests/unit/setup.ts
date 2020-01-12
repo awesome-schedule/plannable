@@ -51,7 +51,7 @@ function convertAll(all: { [x: string]: Set<number> | -1 }) {
         if (val instanceof Set) {
             const a = new Set<number>();
             for (const idx of val) {
-                a.add(window.catalog.getSection(key, idx).id);
+                a.add(window.catalog.getCourse(key).sections[idx].id);
             }
             converted[key] = [a];
         } else {

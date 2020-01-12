@@ -56,6 +56,7 @@ export default class ProposedSchedule extends Schedule {
      * - If the section is **already in** the schedule, delete it from the schedule
      * - If the section is **not** in the schedule, add it to the schedule
      * @param remove whether to remove the key if the set of sections is empty
+     * @param update whether to recompute the schedule after update
      */
     public update(key: string, section: number, groupIdx = 0, remove = true, update = true) {
         if (section === -1) {

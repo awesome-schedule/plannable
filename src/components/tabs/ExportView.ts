@@ -120,21 +120,10 @@ export default class ExportView extends Store {
                 const str = reader.result.toString();
                 const arr = str.split('UID:class-number-');
                 arr.splice(0, 1);
-                const map = new Map<number, string>();
-                arr.map(str => {
-                    const n = parseInt(str.split('\nDESCRIPTION')[0]);
-                    map.set(n, '');
-                });
-
-                for (const sec of window.catalog.sections) {
-                    const a = map.get(sec.id);
-                    if (a === '') {
-                        map.set(sec.id, sec.key);
-                    }
-                }
-
-                for (const [key, val] of map) {
-                    this.schedule.proposedSchedule.update(val, key, undefined, undefined, false);
+                for (const str of arr) {
+                    const id = parseInt(str.split('\nDESCRIPTION')[0]);
+                    const sec = window.catalog.getSectionById(id);
+                    this.schedule.proposedSchedule.update(sec.key, id, undefined, undefined, false);
                 }
 
                 this.schedule.proposedSchedule.constructDateSeparator();

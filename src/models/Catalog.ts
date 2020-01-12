@@ -60,6 +60,7 @@ export default class Catalog {
      * ```
      */
     public readonly sections: readonly Section[];
+    private readonly sectionMap: Map<number, Section>;
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -71,6 +72,10 @@ export default class Catalog {
         public readonly modified: number
     ) {
         [this.courseDict, this.courses, this.sections] = data;
+        this.sectionMap = new Map();
+        for (const sec of this.sections) {
+            this.sectionMap.set(sec.id, sec);
+        }
     }
 
     /**
@@ -127,12 +132,10 @@ export default class Catalog {
     /**
      * Get a Course associated with the given key and section id
      */
-    public getSectionById(key: string, id: number) {
-        return this.courseDict[key].getSectionById(id);
-    }
-
-    public getSection(key: string, idx: number) {
-        return this.courseDict[key].sections[idx];
+    public getSectionById(id: number) {
+        const sec = this.sectionMap.get(id);
+        if (!sec) throw new Error('Non-existent id ' + id);
+        return sec;
     }
 
     /**

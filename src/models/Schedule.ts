@@ -562,12 +562,14 @@ export default abstract class Schedule {
         for (const key in this.All) {
             const sections = this.All[key];
             if (sections instanceof Array) {
-                All[key] = sections.map(group =>
-                    [...group].map(_id => {
-                        const { id, section } = catalog.getSectionById(key, _id);
-                        return { id, section };
-                    })
-                );
+                All[key] = sections.map(group => {
+                    const ids = [];
+                    for (const _id of group) {
+                        const { id, section } = catalog.getSectionById(_id);
+                        ids.push({ id, section });
+                    }
+                    return ids;
+                });
             } else All[key] = sections;
         }
         return {
@@ -639,6 +641,7 @@ export default abstract class Schedule {
         const s = this.All[key];
         if (s instanceof Array && s.length > 1) {
             const first = s[0];
+            // merge all groups into the first group
             for (let i = 1; i < s.length; i++) {
                 for (const v of s[i]) {
                     first.add(v);

@@ -1,142 +1,142 @@
 {
-  "name": "plannable",
-  "version": "8.0.0",
-  "private": true,
-  "description": "A website that helps UVa students schedule their classes more efficiently.",
-  "author": {
-    "email": "hz2zz@virginia.edu",
-    "name": "Hanzhi Zhou",
-    "url": "https://github.com/hanzhi713"
-  },
-  "contributors": [
-    {
-      "email": "ks5qug@virginia.edu",
-      "name": "Kaiying Shan",
-      "url": "https://github.com/kaiyingshan"
+    "name": "plannable",
+    "version": "8.0.0",
+    "private": true,
+    "description": "A website that helps UVa students schedule their classes more efficiently.",
+    "author": {
+        "email": "hz2zz@virginia.edu",
+        "name": "Hanzhi Zhou",
+        "url": "https://github.com/hanzhi713"
     },
-    {
-      "email": "zh2wc@virginia.edu",
-      "name": "Zichao Hu",
-      "url": "https://github.com/OAHC2022"
-    }
-  ],
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --modern",
-    "lint": "vue-cli-service lint",
-    "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}",
-    "fix": "eslint . --fix",
-    "test": "vue-cli-service test:unit",
-    "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\""
-  },
-  "main": "electron.js",
-  "dependencies": {
-    "axios": "^0.19.0",
-    "bootstrap": "^4.3.1",
-    "core-js": "^3.4.3",
-    "dexie": "^2.0.4",
-    "electron-prompt": "^1.4.0",
-    "fast-fuzzy": "^1.8.8",
-    "file-saver": "^2.0.2",
-    "jquery": "^3.4.1",
-    "lz-string": "^1.4.4",
-    "papaparse": "^5.1.0",
-    "quickselect": "^2.0.0",
-    "randomcolor": "^0.5.4",
-    "tinyqueue": "^2.0.3",
-    "vue": "^2.6.10",
-    "vue-class-component": "^7.1.0",
-    "vue-mathjax": "0.0.10",
-    "vue-property-decorator": "^8.2.2",
-    "vuedraggable": "^2.23.2"
-  },
-  "devDependencies": {
-    "@types/bootstrap": "^4.3.1",
-    "@types/cheerio": "^0.22.15",
-    "@types/file-saver": "^2.0.1",
-    "@types/jquery": "^3.3.31",
-    "@types/lz-string": "^1.3.33",
-    "@types/node": "^12.12.21",
-    "@types/papaparse": "^5.0.1",
-    "@types/randomcolor": "^0.5.3",
-    "@typescript-eslint/eslint-plugin": "^2.12.0",
-    "@typescript-eslint/parser": "^2.12.0",
-    "@vue/cli-plugin-babel": "^4.1.1",
-    "@vue/cli-plugin-eslint": "^4.1.1",
-    "@vue/cli-plugin-typescript": "^4.1.1",
-    "@vue/cli-plugin-unit-jest": "^4.1.1",
-    "@vue/cli-service": "^4.1.1",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "@vue/eslint-config-typescript": "^5.0.1",
-    "@vue/test-utils": "1.0.0-beta.29",
-    "babel-core": "7.0.0-bridge.0",
-    "babel-eslint": "^10.0.1",
-    "babel-plugin-transform-remove-console": "^6.9.4",
-    "cheerio": "^1.0.0-rc.3",
-    "circular-dependency-plugin": "^5.2.0",
-    "electron": "^7.1.7",
-    "electron-builder": "^21.2.0",
-    "eslint": "^5.16.0",
-    "eslint-import-resolver-typescript": "^1.1.1",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-prettier": "^3.1.1",
-    "eslint-plugin-vue": "^5.0.0",
-    "prettier": "^1.18.2",
-    "ts-node": "^8.4.1",
-    "typedoc": "^0.15.5",
-    "typedoc-plugin-external-module-name": "^2.1.0",
-    "typedoc-plugin-no-inherit": "^1.1.10",
-    "typescript": "^3.7.4",
-    "vue-template-compiler": "^2.6.10",
-    "worker-loader": "^2.0.0"
-  },
-  "build": {
-    "appId": "org.plannable",
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
-    "win": {
-      "target": "portable",
-      "icon": "src/assets/logo-800x800.png"
-    },
-    "mac": {
-      "target": "dmg",
-      "icon": "src/assets/logo-800x800.png"
-    },
-    "linux": {
-      "target": [
+    "contributors": [
         {
-          "target": "AppImage",
-          "arch": [
-            "x64",
-            "arm64",
-            "armv7l"
-          ]
+            "email": "ks5qug@virginia.edu",
+            "name": "Kaiying Shan",
+            "url": "https://github.com/kaiyingshan"
         },
         {
-          "target": "snap",
-          "arch": [
-            "x64"
-          ]
+            "email": "zh2wc@virginia.edu",
+            "name": "Zichao Hu",
+            "url": "https://github.com/OAHC2022"
         }
-      ],
-      "category": "productivity",
-      "icon": "src/assets/logo-800x800.png"
-    },
-    "files": [
-      "dist/**",
-      "node_modules",
-      "electron.js"
     ],
-    "directories": {
-      "output": "dist-electron"
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build --modern",
+        "lint": "vue-cli-service lint",
+        "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}",
+        "fix": "eslint . --fix",
+        "test": "vue-cli-service test:unit",
+        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\""
     },
-    "publish": {
-      "provider": "github"
+    "main": "electron.js",
+    "dependencies": {
+        "axios": "^0.19.0",
+        "bootstrap": "^4.3.1",
+        "core-js": "^3.4.3",
+        "dexie": "^2.0.4",
+        "electron-prompt": "^1.4.0",
+        "fast-fuzzy": "^1.8.8",
+        "file-saver": "^2.0.2",
+        "jquery": "^3.4.1",
+        "lz-string": "^1.4.4",
+        "papaparse": "^5.1.0",
+        "quickselect": "^2.0.0",
+        "randomcolor": "^0.5.4",
+        "tinyqueue": "^2.0.3",
+        "vue": "^2.6.10",
+        "vue-class-component": "^7.1.0",
+        "vue-mathjax": "0.0.10",
+        "vue-property-decorator": "^8.2.2",
+        "vuedraggable": "^2.23.2"
     },
-    "snap": {
-      "publish": {
-        "provider": "github"
-      }
-    }
-  },
-  "repository": "https://github.com/awesome-schedule/plannable"
+    "devDependencies": {
+        "@types/bootstrap": "^4.3.1",
+        "@types/cheerio": "^0.22.15",
+        "@types/file-saver": "^2.0.1",
+        "@types/jquery": "^3.3.31",
+        "@types/lz-string": "^1.3.33",
+        "@types/node": "^12.12.21",
+        "@types/papaparse": "^5.0.1",
+        "@types/randomcolor": "^0.5.3",
+        "@typescript-eslint/eslint-plugin": "^2.12.0",
+        "@typescript-eslint/parser": "^2.12.0",
+        "@vue/cli-plugin-babel": "^4.1.1",
+        "@vue/cli-plugin-eslint": "^4.1.1",
+        "@vue/cli-plugin-typescript": "^4.1.1",
+        "@vue/cli-plugin-unit-jest": "^4.1.1",
+        "@vue/cli-service": "^4.1.1",
+        "@vue/eslint-config-prettier": "^6.0.0",
+        "@vue/eslint-config-typescript": "^5.0.1",
+        "@vue/test-utils": "1.0.0-beta.29",
+        "babel-core": "7.0.0-bridge.0",
+        "babel-eslint": "^10.0.1",
+        "babel-plugin-transform-remove-console": "^6.9.4",
+        "cheerio": "^1.0.0-rc.3",
+        "circular-dependency-plugin": "^5.2.0",
+        "electron": "^7.1.7",
+        "electron-builder": "^21.2.0",
+        "eslint": "^5.16.0",
+        "eslint-import-resolver-typescript": "^1.1.1",
+        "eslint-plugin-import": "^2.18.2",
+        "eslint-plugin-prettier": "^3.1.1",
+        "eslint-plugin-vue": "^5.0.0",
+        "prettier": "^1.18.2",
+        "ts-node": "^8.4.1",
+        "typedoc": "^0.15.5",
+        "typedoc-plugin-external-module-name": "^2.1.0",
+        "typedoc-plugin-no-inherit": "^1.1.10",
+        "typescript": "^3.7.4",
+        "vue-template-compiler": "^2.6.10",
+        "worker-loader": "^2.0.0"
+    },
+    "build": {
+        "appId": "org.plannable",
+        "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+        "win": {
+            "target": "portable",
+            "icon": "src/assets/logo-800x800.png"
+        },
+        "mac": {
+            "target": "dmg",
+            "icon": "src/assets/logo-800x800.png"
+        },
+        "linux": {
+            "target": [
+                {
+                    "target": "AppImage",
+                    "arch": [
+                        "x64",
+                        "arm64",
+                        "armv7l"
+                    ]
+                },
+                {
+                    "target": "snap",
+                    "arch": [
+                        "x64"
+                    ]
+                }
+            ],
+            "category": "productivity",
+            "icon": "src/assets/logo-800x800.png"
+        },
+        "files": [
+            "dist/**",
+            "node_modules",
+            "electron.js"
+        ],
+        "directories": {
+            "output": "dist-electron"
+        },
+        "publish": {
+            "provider": "github"
+        },
+        "snap": {
+            "publish": {
+                "provider": "github"
+            }
+        }
+    },
+    "repository": "https://github.com/awesome-schedule/plannable"
 }

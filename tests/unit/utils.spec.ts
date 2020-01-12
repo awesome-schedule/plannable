@@ -105,11 +105,4 @@ describe('Utility Tests', () => {
             expect(Utils.errToStr(err)).toBe('msg: timeout');
         }
     });
-
-    it('parse md', async () => {
-        const md = '## title \n - first \n - second';
-        const html = Utils.parseMD('v1', md);
-        expect(html.indexOf('li')).toBeGreaterThan(-1);
-        expect(html.indexOf('h')).toBeGreaterThan(-1);
-    });
 });

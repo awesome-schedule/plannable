@@ -146,77 +146,6 @@ type GithubResponseData = {
     body: string;
 };
 
-let ul = -1;
-
-export function parseMD(tagName: string, body: string) {
-    return (
-        '<div class="card"> <div class="card-body"> <div class="card-title"> <h6 style="list-style:none; padding-left: 0">' +
-        tagName +
-        '</h6> <hr> </div>' +
-        (body as string)
-            .split(/[\r\n]+/)
-            .map(x => {
-                /**
-                 * Records the number corresponds to the largeness of header.
-                 * It is 0 if this line is not a header.
-                 */
-                let head = 0;
-                /**
-                 * Records if this line is in an "ul" or not by checking if this line starts with "- ";
-                 */
-                let li = 0;
-                let result =
-                    x
-                        .replace(/^(#*)(\s)/, (s1: string, match1: string, match2: string) => {
-                            /**
-                             * Replace # to <h1> (and so on...) and set the variable "header",
-                             * so that "header" can be used
-                             * to close this element (give it a "</h1>")
-                             */
-                            return match1.length === 0
-                                ? match2
-                                : '<h' + (head = match1.length + 2) + '>';
-                        })
-                        .replace(/^(\s*)-\s/, (s: string, match: string) => {
-                            /**
-                             * Replace "- Cats are the best" with "<li>Cats are the best</li>"
-                             * Set appropriate list group information
-                             */
-                            if (head !== 0) return match + '- ';
-                            let tag = '';
-                            if (match.length > ul) {
-                                tag = '<ul>';
-                            } else if (match.length < ul) {
-                                tag = '</ul>';
-                            }
-                            ul = match.length;
-                            li = 1;
-                            return `${tag}<li>`;
-                        })
-                        .replace(/!\[([\w -]+)\]\(([\w -/:]+)\)/, (s, match1: string, match2) => {
-                            // convert md image to html
-                            return `<img src=${match2} alt=${match1}></img>`;
-                        })
-                        .replace('<img', '<img class="img-fluid my-3" ') +
-                    (head === 0
-                        ? li === 0
-                            ? /<\/?\w+>/.exec(x)
-                                ? ''
-                                : '<br />'
-                            : '</li>'
-                        : `</h${head}>`);
-                if (li === 0 && ul !== -1) {
-                    // append "</ul>"s according to the variable "ul"
-                    result = '</ul>'.repeat(ul / 4 + 1) + result;
-                    ul = -1;
-                }
-                return result;
-            })
-            .join(' ') +
-        '</div> </div>'
-    );
-}
-
 /**
  * Get release note for current version && render.
  * Part of this function can be seen as an extremely-lightweight MarkDown renderer.
@@ -228,12 +157,34 @@ export async function getReleaseNote() {
             'https://api.github.com/repos/awesome-schedule/plannable/releases'
         );
 
-        ul = -1;
+        const promises = [];
+        const notes: String[] = [];
 
-        const notes: string[] = res.data.map((x: GithubResponseData) => parseMD(x.name, x.body));
+        for (let i = 0; i < Math.min(3, res.data.length); i++) {
+            promises.push(
+                axios.post('https://api.github.com/markdown', {
+                    text: res.data[i].body,
+                    mode: 'gfm',
+                    context: 'github/gollum'
+                })
+            );
+        }
+
+        await Promise.all(promises).then(values => {
+            for (let i = 0; i < values.length; i++) {
+                notes.push(
+                    '<div class="card"> <div class="card-body"> <div class="card-title"> <h6 style="list-style:none; padding-left: 0">' +
+                        res.data[i].name +
+                        '</h6> <hr> </div>' +
+                        values[i].data +
+                        '</div> </div>'
+                );
+            }
+        });
 
         return notes.join('<br>');
     } catch (err) {
+        console.error(err);
         return (
             'Failed to obtain release note.' +
             ' See https://github.com/awesome-schedule/plannable/releases instead.'

@@ -41,7 +41,7 @@ import GeneratedSchedule from './models/GeneratedSchedule';
 /**
  * need to change for every release
  */
-const version = '8.0';
+const version = '8.1';
 /**
  * returns whether the version stored in localStorage matches the current version
  * then, override localStorage with the current version

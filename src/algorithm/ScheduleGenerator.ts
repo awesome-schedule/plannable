@@ -256,6 +256,7 @@ class ScheduleGenerator {
          * // which is in fact
          * conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
          * ```
+         * @note can do bitpacking, but no performance improvement observed
          */
         const conflictCache = new Uint8Array(buffer, numCourses * 2 + sideLen, sideLen ** 2);
 
@@ -416,7 +417,8 @@ class ScheduleGenerator {
             // check conflict between the newly chosen section and the sections already in the schedule
             const temp = (choiceNum * numCourses + classNum) * sideLen;
             for (let i = 0; i < classNum; i++) {
-                if (conflictCache[temp + i + allChoices[base + i] * numCourses]) {
+                const idx = temp + i + allChoices[base + i] * numCourses;
+                if (conflictCache[idx]) {
                     ++choiceNum;
                     continue outer;
                 }

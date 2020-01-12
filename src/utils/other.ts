@@ -125,27 +125,6 @@ export function isStringArray(x: any): x is string[] {
     return x instanceof Array && typeof x[0] === 'string';
 }
 
-type GithubResponseData = {
-    url: string;
-    assets_url: string;
-    upload_url: string;
-    html_url: string;
-    id: string;
-    node_id: string;
-    tag_name: string;
-    target_commitish: string;
-    name: string;
-    draft: string;
-    author: string;
-    prerelease: string;
-    created_at: string;
-    published_at: string;
-    assets: string;
-    tarball_url: string;
-    zipball_url: string;
-    body: string;
-};
-
 /**
  * Get release note for current version && render.
  * Part of this function can be seen as an extremely-lightweight MarkDown renderer.
@@ -158,7 +137,7 @@ export async function getReleaseNote() {
         );
 
         const promises = [];
-        const notes: String[] = [];
+        const notes: string[] = [];
 
         for (let i = 0; i < Math.min(3, res.data.length); i++) {
             promises.push(

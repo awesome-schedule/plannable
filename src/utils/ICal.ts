@@ -39,6 +39,7 @@ export function toICal(schedule: Schedule) {
                 startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
                 const [el, em, er] = ed.split('/');
                 endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
+                endDate = new Date(endDate.getTime() + 1000 * 60 * 60 * 24);
                 startWeekDay = startDate.getDay();
             }
         }
@@ -64,8 +65,8 @@ export function toICal(schedule: Schedule) {
                     );
                     ical += 'BEGIN:VEVENT\r\n';
                     ical += 'UID:\r\n';
-                    ical += 'DTSTAMP:' + dateToICalString(startTime) + '\r\n';
-                    ical += 'DTSTART:' + dateToICalString(startTime) + '\r\n';
+                    ical += 'DTSTAMP:' + dateToICalString(startDate) + '\r\n';
+                    ical += 'DTSTART:' + dateToICalString(startDate) + '\r\n';
                     ical +=
                         'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                         DAYS[d].toUpperCase() +
@@ -101,8 +102,8 @@ export function toICal(schedule: Schedule) {
                 );
                 ical += 'BEGIN:VEVENT\r\n';
                 ical += 'UID:\r\n';
-                ical += 'DTSTAMP:' + dateToICalString(startTime) + '\r\n';
-                ical += 'DTSTART:' + dateToICalString(startTime) + '\r\n';
+                ical += 'DTSTAMP:' + dateToICalString(startDate) + '\r\n';
+                ical += 'DTSTART:' + dateToICalString(startDate) + '\r\n';
                 ical +=
                     'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
                     DAYS[d].toUpperCase() +

@@ -1,5 +1,4 @@
 import { dataend } from '@/config';
-import CatalogDB from '@/database/CatalogDB';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
 import Section from '@/models/Section';

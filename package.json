@@ -27,7 +27,8 @@
         "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}",
         "fix": "eslint . --fix",
         "test": "vue-cli-service test:unit",
-        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\""
+        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
+        "updatedata": "rm -rf scripts/data && git clone https://github.com/awesome-schedule/data scripts/data"
     },
     "main": "electron.js",
     "dependencies": {

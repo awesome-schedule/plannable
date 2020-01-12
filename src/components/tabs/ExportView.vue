@@ -13,12 +13,12 @@
                     style="width:100%"
                     @change="onUploadJson($event)"
                 />
-                <label class="custom-file-label" for="customFile">Import From..</label>
+                <label class="custom-file-label" for="customFile">Import from JSON..</label>
             </div>
             <small class="text-center form-text text-muted">
                 Import a .json file exported by our website
             </small>
-            <div class="custom-file">
+            <div class="custom-file mt-2">
                 <input
                     id="customFile"
                     type="file"
@@ -27,7 +27,7 @@
                     style="width:100%"
                     @change="onUploadICS($event)"
                 />
-                <label class="custom-file-label" for="customFile">Add Class From ICS..</label>
+                <label class="custom-file-label" for="customFile">Import from ICS..</label>
             </div>
             <small class="text-center form-text text-muted">
                 Import a .ics file exported by UVA SIS

@@ -115,11 +115,14 @@ export default class ExportView extends Store {
         if (!files) return;
 
         const reader = new FileReader();
-        reader.onload = async () => {
-            if (reader.result) {
+        reader.onload = () => {
+            try {
+                if (!reader.result) throw new Error('File is empty!');
                 const str = reader.result.toString();
                 const arr = str.split('UID:class-number-');
                 arr.splice(0, 1);
+
+                this.schedule.newProposed();
                 for (const str of arr) {
                     const id = parseInt(str.split('\nDESCRIPTION')[0]);
                     const sec = window.catalog.getSectionById(id);
@@ -128,8 +131,11 @@ export default class ExportView extends Store {
 
                 this.schedule.proposedSchedule.constructDateSeparator();
                 this.schedule.proposedSchedule.computeSchedule();
-            } else {
-                this.noti.warn('File is empty!');
+
+                this.noti.info('Schedule loaded from ICS!');
+            } catch (e) {
+                console.log(e);
+                this.noti.error(e.message);
             }
             input.value = '';
         };

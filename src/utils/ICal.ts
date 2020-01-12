@@ -15,6 +15,41 @@ import Schedule from '../models/Schedule';
 import Section from '../models/Section';
 import { hr12toInt } from './time';
 
+function toICalEventString(
+    uid: string,
+    startDate: string,
+    summary: string,
+    day: string,
+    hour: string,
+    min: string,
+    until: string,
+    duration: string,
+    description: string,
+    location: string
+) {
+    let ical = '';
+    ical += 'BEGIN:VEVENT\r\n';
+    ical += `UID:${uid}`;
+    ical += `DTSTAMP:${startDate}\r\n`;
+    ical += `DTSTART:${startDate}\r\n`;
+    ical += `SUMMARY:${summary}\r\n`;
+    ical +=
+        'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
+        day +
+        ';BYHOUR=' +
+        hour +
+        ';BYMINUTE=' +
+        min +
+        ';UNTIL=' +
+        until +
+        '\r\n';
+    ical += `DURATION=${duration}\r\n`;
+    ical += `DESCRIPTION:${description}\r\n`;
+    ical += `LOCATION:${location}\r\n`;
+    ical += 'END:VEVENT\r\n';
+    return ical;
+}
+
 /**
  * Convert a schedule to iCalendar format.
  * @see https://icalendar.org/
@@ -24,106 +59,70 @@ import { hr12toInt } from './time';
 export function toICal(schedule: Schedule) {
     let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:UVa-Awesome-Schedule\r\n';
 
-    let startWeekDay = 0;
+    const startWeekDay = 0;
     let startDate = new Date(2019, 7, 27, 0, 0, 0),
         endDate = new Date(2019, 11, 6, 0, 0, 0);
 
-    for (const blocks of schedule.days) {
-        for (const sb of blocks) {
-            const { section } = sb;
-            if (section instanceof Section) {
-                const { dates } = section;
-                if (!dates || dates === 'TBD' || dates === 'TBA') continue;
-                const [sd, , ed] = dates.split(' ');
-                const [sl, sm, sr] = sd.split('/');
-                startDate = new Date(parseInt(sr), parseInt(sl) - 1, parseInt(sm), 0, 0, 0);
-                const [el, em, er] = ed.split('/');
-                endDate = new Date(parseInt(er), parseInt(el) - 1, parseInt(em), 0, 0, 0);
-                endDate = new Date(endDate.getTime() + 1000 * 60 * 60 * 24);
-                startWeekDay = startDate.getDay();
+    for (const [id] of schedule.current.ids) {
+        const sec = window.catalog.getSectionById(parseInt(id));
+        if (!sec.dates || sec.dates === 'TBD' || sec.dates === 'TBA') continue;
+        const [start, , end] = sec.dates.split(' ');
+        const [sm, sd, sy] = start.split('/');
+        const [em, ed, ey] = end.split('/');
+        startDate = new Date(parseInt(sy), parseInt(sm) - 1, parseInt(sd));
+        endDate = new Date(parseInt(ey), parseInt(em) - 1, parseInt(ed));
+        endDate = new Date(endDate.getTime() + 1000 * 60 * 60 * 24);
+
+        for (const meeting of sec.meetings) {
+            const [day, s, , e] = meeting.days.split(' ');
+            const totalMin = hr12toInt(s);
+            const duration = hr12toInt(e) - totalMin;
+            const hour = Math.floor(totalMin / 60);
+            const min = totalMin % 60;
+
+            const days = [];
+            for (let i = 0; i < day.length; i += 2) {
+                days.push(day.substr(i, 2).toUpperCase());
             }
+
+            const icalDay = days.join(',');
+
+            ical += toICalEventString(
+                `class-number-${id}`,
+                dateToICalString(startDate),
+                `${sec.department} ${sec.number}`,
+                icalDay,
+                hour.toString(),
+                min.toString(),
+                dateToICalString(endDate),
+                `${Math.floor(duration / 60)}H${duration % 60}M`,
+                sec.title,
+                meeting.room
+            );
         }
     }
 
-    for (let d = 0; d < 5; d++) {
-        for (const sb of schedule.days[d]) {
-            if (sb.section instanceof Section || sb.section instanceof Course) {
-                let section = sb.section;
-                if (section instanceof Course) {
-                    section = section.sections[0];
-                }
-                for (const m of section.meetings) {
-                    if (m.days === 'TBD' || m.days === 'TBA' || m.days.indexOf(DAYS[d]) === -1)
-                        continue;
-                    const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
-                    const [, start, , end] = m.days.split(' ');
-                    const startMin = hr12toInt(start);
-                    const duration = hr12toInt(end) - startMin;
-
-                    const startTime = new Date(
-                        startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
-                    );
-                    ical += 'BEGIN:VEVENT\r\n';
-                    ical += 'UID:\r\n';
-                    ical += 'DTSTAMP:' + dateToICalString(startDate) + '\r\n';
-                    ical += 'DTSTART:' + dateToICalString(startDate) + '\r\n';
-                    ical +=
-                        'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-                        DAYS[d].toUpperCase() +
-                        ';BYHOUR=' +
-                        startTime.getHours() +
-                        ';BYMINUTE=' +
-                        startTime.getMinutes() +
-                        ';UNTIL=' +
-                        dateToICalString(endDate) +
-                        '\r\n';
-                    ical +=
-                        'DURATION=P' +
-                        Math.floor(duration / 60) +
-                        'H' +
-                        (duration % 60) +
-                        'M' +
-                        '\r\n';
-                    ical += 'SUMMARY:' + section.department + ' ' + section.number + '\r\n';
-                    ical += 'DESCRIPTION:' + section.title + '\r\n';
-                    ical += 'LOCATION:' + m.room + '\r\n';
-                    ical += 'COLOR:' + sb.background + '\r\n';
-                    ical += 'END:VEVENT\r\n';
-                }
-            } else if (sb.section instanceof Event) {
-                const dayoffset = ((d + 7 - startWeekDay) % 7) + 1;
-
-                const [, start, , end] = sb.section.days.split(' ');
-                const startMin = hr12toInt(start);
-                const duration = hr12toInt(end) - startMin;
-
-                const startTime = new Date(
-                    startDate.getTime() + dayoffset * 24 * 60 * 60 * 1000 + startMin * 60 * 1000
-                );
-                ical += 'BEGIN:VEVENT\r\n';
-                ical += 'UID:\r\n';
-                ical += 'DTSTAMP:' + dateToICalString(startDate) + '\r\n';
-                ical += 'DTSTART:' + dateToICalString(startDate) + '\r\n';
-                ical +=
-                    'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-                    DAYS[d].toUpperCase() +
-                    ';BYHOUR=' +
-                    startTime.getHours() +
-                    ';BYMINUTE=' +
-                    startTime.getMinutes() +
-                    ';UNTIL=' +
-                    dateToICalString(endDate) +
-                    '\r\n';
-                ical +=
-                    'DURATION=P' + Math.floor(duration / 60) + 'H' + (duration % 60) + 'M' + '\r\n';
-                if (sb.section.title) ical += 'SUMMARY:' + sb.section.title + '\r\n';
-                if (sb.section.description)
-                    ical += 'DESCRIPTION:' + sb.section.description + '\r\n';
-                if (sb.section.room) ical += 'LOCATION:' + sb.section.room + '\r\n';
-                ical += 'COLOR:' + sb.background + '\r\n';
-                ical += 'END:VEVENT\r\n';
-            }
+    for (const event of schedule.events) {
+        const [day, s, , e] = event.days.split(' ');
+        const startTime = hr12toInt(s);
+        const duration = hr12toInt(e) - startTime;
+        const days = [];
+        for (let i = 0; i < day.length; i += 2) {
+            days.push(day.substr(i, 2).toUpperCase());
         }
+        const dayStr = days.join(',');
+        ical += toICalEventString(
+            `event-${event.title}`,
+            dateToICalString(startDate),
+            event.title ?? 'no title',
+            dayStr,
+            Math.floor(startTime / 60).toString(),
+            (startTime % 60).toString(),
+            dateToICalString(endDate),
+            `${Math.floor(duration / 60)}H${duration % 60}M`,
+            event.description ?? 'no description',
+            event.room ?? 'no room'
+        );
     }
     ical += 'END:VCALENDAR';
     return ical;

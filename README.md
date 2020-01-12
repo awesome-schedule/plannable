@@ -58,10 +58,10 @@ If you use AppImage, you need to add execution permission before launching the f
 chmod +x plannable-x.x.x.AppImage
 ```
 
-If you use snap, you need to add the `--dangerous` flag when installing the snap package
+If you use snap, you can install plannable from the snap store
 
 ```
-sudo snap install --dangerous plannable_x.x.x_amd64.snap
+sudo snap install plannable
 ```
 
 ## Development

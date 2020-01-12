@@ -86,6 +86,9 @@ export default abstract class Schedule {
         };
     }
 
+    /**
+     * @see [[ScheduleAll]]
+     */
     public All: ScheduleAll = {};
     /**
      * computed based on `this.All` by `computeSchedule`
@@ -104,29 +107,17 @@ export default abstract class Schedule {
      */
     public totalCredit = 0;
     /**
-     * a computed object that's updated by the `computeSchedule` method
+     * a computed object that's updated by the `computeSchedule` method,
+     * used by [[ClassList]] for rendering purposes
      *
-     * ids are the list of ids selected for a given course
+     * - courses contain **all** sections (not just those selected by user)
+     * - ids are the list of ids selected for a given course
      */
     public current: { courses: Course[]; ids: string[][] } = { courses: [], ids: [] };
     /**
      * keep track of used colors to avoid color collision
      */
     public colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set<string>());
-    /**
-     * the `computeSchedule` handle returned by `setTimeout`
-     */
-    public pendingCompute = 0;
-
-    /**
-     * The separator of sections in different time periods,
-     * representing different end times of sections. Elements are dates in milliseconds
-     * Example:
-     * ```js
-     * [1567457860885, 1567458860885]
-     * ```
-     */
-    public dateSeparators: number[] = [];
     /**
      * the index of the currently selected separator (in `dateSeparators`)
      */
@@ -136,7 +127,23 @@ export default abstract class Schedule {
      * the currently previewed (hovered) section
      */
     private _preview: Section | null = null;
+    /**
+     * the `All` property partitioned according to date
+     */
     private separatedAll: { [date: string]: ScheduleAll } = {};
+    /**
+     * the `computeSchedule` handle returned by `setTimeout`
+     */
+    private pendingCompute = 0;
+    /**
+     * The separator of sections in different time periods,
+     * representing different end times of sections. Elements are dates in milliseconds
+     * Example:
+     * ```js
+     * [1567457860885, 1567458860885]
+     * ```
+     */
+    private dateSeparators: number[] = [];
 
     /**
      * Construct a `Schedule` object from its raw representation

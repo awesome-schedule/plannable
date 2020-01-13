@@ -8,11 +8,7 @@
 /**
  *
  */
-import Course from '../models/Course';
-import Event from '../models/Event';
-import { DAYS } from '../models/Meta';
 import Schedule from '../models/Schedule';
-import Section from '../models/Section';
 import { hr12toInt } from './time';
 
 function toICalEventString(
@@ -33,16 +29,7 @@ function toICalEventString(
     ical += `DTSTAMP:${startDate}\r\n`;
     ical += `DTSTART:${startDate}\r\n`;
     ical += `SUMMARY:${summary}\r\n`;
-    ical +=
-        'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=' +
-        day +
-        ';BYHOUR=' +
-        hour +
-        ';BYMINUTE=' +
-        min +
-        ';UNTIL=' +
-        until +
-        '\r\n';
+    ical += `RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=${day};BYHOUR=${hour};BYMINUTE=${min};UNTIL=${until}\r\n`;
     ical += `DURATION=${duration}\r\n`;
     ical += `DESCRIPTION:${description}\r\n`;
     ical += `LOCATION:${location}\r\n`;
@@ -59,19 +46,14 @@ function toICalEventString(
 export function toICal(schedule: Schedule) {
     let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:UVa-Awesome-Schedule\r\n';
 
-    const startWeekDay = 0;
     let startDate = new Date(2019, 7, 27, 0, 0, 0),
         endDate = new Date(2019, 11, 6, 0, 0, 0);
 
     for (const [id] of schedule.current.ids) {
         const sec = window.catalog.getSectionById(parseInt(id));
-        if (!sec.dates || sec.dates === 'TBD' || sec.dates === 'TBA') continue;
-        const [start, , end] = sec.dates.split(' ');
-        const [sm, sd, sy] = start.split('/');
-        const [em, ed, ey] = end.split('/');
-        startDate = new Date(parseInt(sy), parseInt(sm) - 1, parseInt(sd));
-        endDate = new Date(parseInt(ey), parseInt(em) - 1, parseInt(ed));
-        endDate = new Date(endDate.getTime() + 1000 * 60 * 60 * 24);
+        if (!sec.dateArray) continue;
+        startDate = new Date(sec.dateArray[0]);
+        endDate = new Date(sec.dateArray[1] + 1000 * 60 * 60 * 24);
 
         for (const meeting of sec.meetings) {
             const [day, s, , e] = meeting.days.split(' ');
@@ -84,13 +66,12 @@ export function toICal(schedule: Schedule) {
             for (let i = 0; i < day.length; i += 2) {
                 days.push(day.substr(i, 2).toUpperCase());
             }
-
             const icalDay = days.join(',');
 
             ical += toICalEventString(
                 `class-number-${id}`,
                 dateToICalString(startDate),
-                `${sec.department} ${sec.number}`,
+                sec.displayName,
                 icalDay,
                 hour.toString(),
                 min.toString(),

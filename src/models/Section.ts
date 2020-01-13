@@ -66,7 +66,13 @@ export interface SectionFields {
     readonly dates: string;
     readonly meetings: readonly Meeting[];
 
+    /**
+     * @see [[ValidFlag]]
+     */
     readonly valid: ValidFlag;
+    /**
+     * @see [[MeetingDate]]
+     */
     readonly dateArray: MeetingDate;
 }
 

@@ -26,7 +26,7 @@ function toICalEventString(
     let ical = '';
     ical += 'BEGIN:VEVENT\r\n';
     ical += `UID:${uid}\r\n`;
-    ical += `DTSTAMP:${startDate}\r\n`;
+    // ical += `DTSTAMP:${startDate}\r\n`;
     ical += `DTSTART:${startDate}\r\n`;
     ical += `SUMMARY:${summary}\r\n`;
     ical += `RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=${day};BYHOUR=${hour};BYMINUTE=${min};UNTIL=${until}\r\n`;
@@ -35,6 +35,16 @@ function toICalEventString(
     ical += `LOCATION:${location}\r\n`;
     ical += 'END:VEVENT\r\n';
     return ical;
+}
+
+function calcStartDate(prevStart: Date, day: string, hour: number, min: number) {
+    const map: { [x: string]: number } = { MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6, SU: 0 };
+    const dayOffset = (map[day] + 7 - prevStart.getDay()) % 7;
+    const hourLen = 1000 * 60 * 60;
+    const minLen = 1000 * 60;
+    return new Date(
+        prevStart.getTime() + dayOffset * 1000 * 60 * 60 * 24 + minLen * min + hourLen * hour
+    );
 }
 
 /**
@@ -49,6 +59,8 @@ export function toICal(schedule: Schedule) {
     let startDate = new Date(2019, 7, 27, 0, 0, 0),
         endDate = new Date(2019, 11, 6, 0, 0, 0);
 
+    const map: { [x: string]: number } = { MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6, SU: 0 };
+
     for (const [id] of schedule.current.ids) {
         const sec = window.catalog.getSectionById(parseInt(id));
         if (!sec.dateArray) continue;
@@ -62,15 +74,15 @@ export function toICal(schedule: Schedule) {
             const hour = Math.floor(totalMin / 60);
             const min = totalMin % 60;
 
-            const days = [];
+            const days: string[] = [];
             for (let i = 0; i < day.length; i += 2) {
                 days.push(day.substr(i, 2).toUpperCase());
             }
             const icalDay = days.join(',');
-
+            // 'start time' in ical means the time of the first occurrence of an event
             ical += toICalEventString(
                 `class-number-${id}`,
-                dateToICalString(startDate),
+                dateToICalString(calcStartDate(startDate, days[0], hour, min)),
                 sec.displayName,
                 icalDay,
                 hour.toString(),
@@ -92,13 +104,15 @@ export function toICal(schedule: Schedule) {
             days.push(day.substr(i, 2).toUpperCase());
         }
         const dayStr = days.join(',');
+        const hour = Math.floor(startTime / 60);
+        const min = startTime % 60;
         ical += toICalEventString(
             `event-${event.title}`,
-            dateToICalString(startDate),
+            dateToICalString(calcStartDate(startDate, days[0], hour, min)),
             event.title ?? 'no title',
             dayStr,
-            Math.floor(startTime / 60).toString(),
-            (startTime % 60).toString(),
+            hour.toString(),
+            min.toString(),
             dateToICalString(endDate),
             `${Math.floor(duration / 60)}H${duration % 60}M`,
             event.description ?? 'no description',

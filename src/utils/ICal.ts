@@ -29,7 +29,7 @@ function toICalEventString(
 ) {
     let ical = '';
     ical += 'BEGIN:VEVENT\r\n';
-    ical += `UID:${uid}`;
+    ical += `UID:${uid}\r\n`;
     ical += `DTSTAMP:${startDate}\r\n`;
     ical += `DTSTART:${startDate}\r\n`;
     ical += `SUMMARY:${summary}\r\n`;

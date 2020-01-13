@@ -125,7 +125,7 @@ export default class ExportView extends Store {
                 this.schedule.newProposed();
 
                 // use set to remove duplicated
-                const ids = new Set(arr.map(str => +str.split('\nDESCRIPTION')[0]));
+                const ids = new Set(arr.map(str => +str.split('\n')[0]));
                 for (const id of ids) {
                     const sec = window.catalog.getSectionById(id);
                     this.schedule.proposedSchedule.update(sec.key, id, undefined, undefined, false);

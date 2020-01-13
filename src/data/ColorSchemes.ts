@@ -1,3 +1,10 @@
+/**
+ * @module data
+ */
+
+/**
+ *
+ */
 export default [
     {
         name: 'dark-11',

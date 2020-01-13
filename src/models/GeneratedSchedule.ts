@@ -1,3 +1,11 @@
+/**
+ * @module models
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import Schedule, { ScheduleAll } from './Schedule';
 import Event from './Event';
 import ProposedSchedule from './ProposedSchedule';

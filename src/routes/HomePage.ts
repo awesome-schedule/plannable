@@ -1,3 +1,10 @@
+/**
+ * @module routes
+ */
+
+/**
+ *
+ */
 import $ from 'jquery';
 import { Component, Vue } from 'vue-property-decorator';
 import { getReleaseNote } from '@/utils';

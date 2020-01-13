@@ -1,6 +1,16 @@
+/**
+ * @module components
+ */
+
+/**
+ *
+ */
 import { Vue, Prop, Component } from 'vue-property-decorator';
 type StepperInfo = { title: string; src: string }[];
 
+/**
+ * @author Kaiying Shan
+ */
 @Component
 export default class Stepper extends Vue {
     @Prop(Array) readonly info!: StepperInfo;

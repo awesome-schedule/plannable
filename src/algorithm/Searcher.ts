@@ -1,4 +1,9 @@
 /**
+ * @module algorithm
+ * @author Hanzhi Zhou
+ */
+
+/**
  * @license MIT
  * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations:
  * 1. Cache the string length
@@ -51,7 +56,9 @@ function findBestMatch(mainString: string, targetStrings: string[]) {
     }
     return [bestMatchIndex, bestMatchRating];
 }
-
+/**
+ * Fast searcher for fuzzy search among a list of strings
+ */
 export class FastSearcher {
     public targets: string[];
     /**

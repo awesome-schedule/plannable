@@ -1,3 +1,11 @@
+/**
+ * @module models
+ * @author Kaiying Shan, Hanzhi Zhou
+ */
+
+/**
+ *
+ */
 import { NotiMsg } from '@/store/notification';
 import { TYPES } from '../config';
 import * as Utils from '../utils';

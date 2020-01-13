@@ -3,6 +3,10 @@
  * @module models
  */
 
+/**
+ * extract the array of instructor names from the array of meetings
+ * @param meetings
+ */
 export function getInstructors(meetings: readonly Meeting[]) {
     const profs: string[] = [];
     for (const meeting of meetings) {

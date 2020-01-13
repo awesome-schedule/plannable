@@ -32,7 +32,7 @@ export interface CourseFields {
      */
     readonly number: number;
     /**
-     * One of the keys of [[Meta.TYPES_PARSE]]
+     * One of the keys of [[TYPES_PARSE]]
      */
     readonly type: string;
     /**
@@ -41,15 +41,20 @@ export interface CourseFields {
      * "1", "3", "2.5", "1 - 12"
      */
     readonly units: string;
-    readonly title: string;
-    readonly description: string;
-
     /**
-     * display name, e.g. ECON 2010 Lecture for courses and ECON 2010-001 Lecture for sections
+     * one line title for the course, e.g. "Principle of Microeconomics"
      */
-    readonly displayName: string;
+    readonly title: string;
+    /**
+     * a full description of the course
+     */
+    readonly description: string;
 }
 
+/**
+ * a match result (from searcher)
+ * @typeparam T the field name of the course/section that matches the search query
+ */
 export interface Match<T extends string> {
     readonly match: T;
     /**
@@ -72,26 +77,32 @@ export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T
  * All course instances are immutable
  */
 export default class Course implements CourseFields, Hashable {
+    /** @see [[CourseFields.key]] */
     public readonly key: string;
+    /** @see [[CourseFields.department]] */
     public readonly department: string;
+    /** @see [[CourseFields.number]] */
     public readonly number: number;
+    /** @see [[CourseFields.type]] */
     public readonly type: CourseType;
+    /** @see [[CourseFields.units]] */
     public readonly units: string;
+    /** @see [[CourseFields.title]] */
     public readonly title: string;
+    /** @see [[CourseFields.description]] */
     public readonly description: string;
 
     /**
-     * Array of section ids contained in this object, sorted in ascending order.
-     * Can be all sections of a subset or the sections. This property is **non-enumerable**
+     * Array of sections contained in this object.
+     * Can be all sections or a subset or the sections. This property is **non-enumerable**
      */
     public readonly sections: Section[];
-    public readonly isSubset: boolean;
 
     /**
-     * @param raw the raw representation of this course
-     * @param key the key of this course, e.g. cs11105
-     * equal to (department + number + `Meta.TYPES_PARSE`\[type\]). see [[Meta.TYPES_PARSE]]
-     * @param ids A list of section indices
+     * this constructor is only used to create a copy of a course with all or selected subset of sections.
+     * Original course instances are created through `Object.create` and are not constructed with this constructor.
+     * @param course the full-course that will be copied
+     * @param ids A list of section indices for specifying the subset of sections to be copied
      */
     constructor(course: Course, public readonly ids: number[]) {
         this.key = course.key;
@@ -107,9 +118,10 @@ export default class Course implements CourseFields, Hashable {
             acc.push(sec);
             return acc;
         }, []);
-        this.isSubset = true;
     }
-
+    /**
+     * human readable name for this course, e.g. ECON 2010 Lecture
+     */
     get displayName() {
         return this.department + ' ' + this.number + ' ' + this.type;
     }

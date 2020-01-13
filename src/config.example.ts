@@ -74,7 +74,7 @@ export const external = {
 /**
  * some default UI configurations. Usually no need to change
  */
-export default {
+export const ui = {
     sideBarWidth: 19,
     sideMargin: 3,
     tabBarWidthMobile: 10,
@@ -89,6 +89,7 @@ export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 
 // -------------------------- lecture type configuration ---------------------------------
 export type CourseType = keyof typeof TYPES_PARSE;
+// course status is only used to typing purposes. can be just an alais of string
 export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
 
 /**
@@ -133,4 +134,17 @@ export const TYPES_PARSE = Object.freeze({
     Workshop: 9,
     WKS: 9
 });
-// -------------------------- lecture type configuration ---------------------------------
+
+/**
+ * whether to enable conversion from [[Course.key]] to human readable string.
+ * It is only used to inform user about the removal of a course when its key does not exist in catalog.
+ * The regex variable [[keyRegex]] will be used to match [[Course.key]]
+ * @see [[Course.key]]
+ */
+export const enableKeyConversion = false;
+/**
+ * the regex used to match the components of [[Course.key]]. It must have three capture groups,
+ * one for the department string, one for the course number, and one for the course type, corresponding
+ * to the keys of TYPES
+ */
+export const keyRegex: typeof enableKeyConversion extends true ? RegExp : null = null;

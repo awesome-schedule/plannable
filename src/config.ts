@@ -105,6 +105,7 @@ export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 
 // -------------------------- lecture type configuration ---------------------------------
 export type CourseType = keyof typeof TYPES_PARSE;
+// course status is only used to typing purposes. can be just an alais of string
 export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
 
 /**
@@ -152,16 +153,20 @@ export const TYPES_PARSE = Object.freeze({
 });
 
 /**
- * whether to enable conversion from Course['key'] to human readable string.
- * It is only used to inform user about the removal of the course when its key does not exist in catalog
+ * whether to enable conversion from [[Course.key]] to human readable string.
+ * It is only used to inform user about the removal of a course when its key does not exist in catalog.
+ * The regex variable [[keyRegex]] will be used to match [[Course.key]]
+ * @see [[Course.key]]
  */
 export const enableKeyConversion = true;
 /**
- * the regex used to match the components of Course['key']. It must have three capture groups,
+ * the regex used to match the components of [[Course.key]]. It must have three capture groups,
  * one for the department string, one for the course number, and one for the course type, corresponding
  * to the keys of TYPES
  */
-export const keyRegex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
+export const keyRegex: typeof enableKeyConversion extends true
+    ? RegExp
+    : null = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
 
 // --------------------------------------------------------------------------------------------
 // | The following functions are specific to plannable for University of Virginia             |

@@ -7,7 +7,7 @@
  *
  */
 import { NotiMsg } from '@/store/notification';
-import { TYPES } from '../config';
+import { TYPES, enableKeyConversion, keyRegex } from '../config';
 import * as Utils from '../utils';
 import Event from './Event';
 import { DAYS } from './Meta';
@@ -183,21 +183,22 @@ export default class ProposedSchedule extends Schedule {
 
         const warnings: string[] = [];
         const catalog = window.catalog;
-        const regex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
         // convert array to set
         for (const key of keys) {
             const sections = obj.All[key] as any;
 
             // try to find the course corresponding to the recorded key
             const course = catalog.getCourse(key);
-            const parts = key.match(regex);
 
-            // converted key
             let convKey = key;
-            if (parts && parts.length === 4) {
-                parts[3] = TYPES[+parts[3] as 1];
-                parts[1] = parts[1].toUpperCase();
-                convKey = parts.slice(1).join(' ');
+            // converted key to human readable form, if enabled
+            if (enableKeyConversion) {
+                const parts = key.match(keyRegex);
+                if (parts && parts.length === 4) {
+                    parts[3] = TYPES[+parts[3] as 1];
+                    parts[1] = parts[1].toUpperCase();
+                    convKey = parts.slice(1).join(' ');
+                }
             }
             // non existent course
             if (!course) {

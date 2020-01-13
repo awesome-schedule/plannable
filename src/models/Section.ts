@@ -84,7 +84,7 @@ export default interface Section extends SectionFields {}
  * and it holds additional information specific to that section.
  *
  * All section instances are immutable. Additionally, they will never be duplicated.
- * They will only created using `Object.create`
+ * They will only created using `Object.create` on page load
  */
 export default class Section implements CourseFields, Hashable {
     public static readonly Validity = [
@@ -113,6 +113,9 @@ export default class Section implements CourseFields, Hashable {
     get description() {
         return this.course.description;
     }
+    /**
+     * human readable name for this section, e.g. ECON 2010-001 Lecture
+     */
     get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }

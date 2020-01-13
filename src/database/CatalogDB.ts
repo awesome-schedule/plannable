@@ -3,7 +3,7 @@ import { CourseFields } from '@/models/Course';
 import Dexie from 'dexie';
 import { SectionFields } from '../models/Section';
 
-export interface CourseTableItem extends Omit<CourseFields, 'displayName'> {
+export interface CourseTableItem extends CourseFields {
     ids: number[];
 }
 // no back ref in db

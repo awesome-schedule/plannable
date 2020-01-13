@@ -15,6 +15,13 @@ import Section from './Section';
  * represents all public information of a Course
  */
 export interface CourseFields {
+    /**
+     * the key of the course. must be globally unique for all courses, e.g. cs11105
+     * composed of three parts:
+     * 1. lowercase department letter, e.g. cs
+     * 2. course number, e.g. 1110
+     * 3. course type index, e.g. 5., corresponding to [[TYPES]]
+     */
     readonly key: string;
     /**
      * department name, short form, all capitalized. e.g `CS`

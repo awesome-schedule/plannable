@@ -123,6 +123,7 @@ export const TYPES = Object.freeze({
     8: 'Studio',
     9: 'Workshop'
 });
+
 /**
  * parse lecture type string to id
  */
@@ -149,7 +150,18 @@ export const TYPES_PARSE = Object.freeze({
     Workshop: 9,
     WKS: 9
 });
-// -------------------------- lecture type configuration ---------------------------------
+
+/**
+ * whether to enable conversion from Course['key'] to human readable string.
+ * It is only used to inform user about the removal of the course when its key does not exist in catalog
+ */
+export const enableKeyConversion = true;
+/**
+ * the regex used to match the components of Course['key']. It must have three capture groups,
+ * one for the department string, one for the course number, and one for the course type, corresponding
+ * to the keys of TYPES
+ */
+export const keyRegex = /([a-z]{1,5})([0-9]{1,5})([0-9])$/i;
 
 // --------------------------------------------------------------------------------------------
 // | The following functions are specific to plannable for University of Virginia             |

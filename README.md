@@ -72,13 +72,11 @@ sudo snap install plannable
 
 -   Node.js >= 10.16
 
-Clone the repository and data
+Clone the repository and update data
 
 ```bash
 git clone https://github.com/awesome-schedule/plannable
-cd plannable/scripts
-git clone https://github.com/awesome-schedule/data
-cd ..
+npm run updatedata
 ```
 
 Install Vue cli and other dependencies. Then, launch the development server

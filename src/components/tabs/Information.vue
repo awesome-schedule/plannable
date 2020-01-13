@@ -374,8 +374,8 @@
                     courses on different topics all under the same course number. To enable group
                     selection mode, click the Groups button, and the group indices will be shown.
                     You can adjust the group index for each of the section.
-                    <strong>One</strong> section will be chosen from <strong>each</strong>set of the
-                    sections that share the same group index. When group selection mode is not
+                    <strong>One</strong> section will be chosen from <strong>each</strong> set of
+                    the sections that share the same group index. When group selection mode is not
                     enabled, all of the sections you selected go into the default group of zero, so
                     only one section will be chosen from your selections.
                 </p>

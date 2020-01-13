@@ -114,6 +114,7 @@
                             <div
                                 class="list-group-item list-group-item-action pl-2 pr-3"
                                 :class="{ active: schedule.isGroup(crs.key) || group[crs.key] }"
+                                title="Group selection mode: new feature of plannable v8.x. See Information for details."
                             >
                                 <div class="row no-gutters flex-nowrap justify-content-between">
                                     <div class="col-xs-auto mr-auto">Groups</div>

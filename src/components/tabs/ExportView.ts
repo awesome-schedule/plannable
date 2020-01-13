@@ -118,14 +118,18 @@ export default class ExportView extends Store {
         reader.onload = () => {
             try {
                 if (!reader.result) throw new Error('File is empty!');
-                const str = reader.result.toString();
-                const arr = str.split('UID:class-number-');
-                arr.splice(0, 1);
+
+                // use set to remove duplicates
+                const ids = new Set(
+                    (reader.result.toString().match(/^UID:class-number-([0-9]+)$/gm) || []).map(
+                        str => {
+                            const comp = str.split('-');
+                            return +comp[comp.length - 1];
+                        }
+                    )
+                );
 
                 this.schedule.newProposed();
-
-                // use set to remove duplicated
-                const ids = new Set(arr.map(str => +str.split('\n')[0]));
                 for (const id of ids) {
                     const sec = window.catalog.getSectionById(id);
                     this.schedule.proposedSchedule.update(sec.key, id, undefined, undefined, false);
@@ -133,7 +137,7 @@ export default class ExportView extends Store {
 
                 this.schedule.proposedSchedule.constructDateSeparator();
                 this.schedule.proposedSchedule.computeSchedule();
-
+                this.saveStatus();
                 this.noti.info('Schedule loaded from ICS!');
             } catch (e) {
                 console.log(e);

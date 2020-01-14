@@ -31,7 +31,7 @@ export function compareTwoStrings(first: string, second: string) {
     let intersectionSize = 0;
     for (let i = 0; i < len2 - 1; i++) {
         const bigram = second.substring(i, i + 2);
-        const count = firstBigrams.get(bigram)! | 0;
+        const count = firstBigrams.get(bigram) || 0;
 
         if (count > 0) {
             firstBigrams.set(bigram, count - 1);

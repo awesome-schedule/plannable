@@ -75,11 +75,28 @@ class FastSearcher<T, K = string> {
         window = Math.max(window || t2.length, 2);
         query = t2.join(' ');
 
-        const queryGrams = new Map<string, number>();
         const len1 = query.length;
-        for (let j = 0; j < len1 - gramLen + 1; j++) {
+
+        /** map from n-gram to index in the frequency array */
+        const queryGrams = new Map<string, number>();
+        const maxGramCount = len1 - gramLen + 1;
+
+        // keep frequencies in separated arrays for performance reasons
+        // copying a Map is slow, but copying a typed array is fast
+        const buffer = new ArrayBuffer(maxGramCount * 2);
+        const freqCount = new Uint8Array(buffer, 0, maxGramCount);
+        // the working copy
+        const freqCountCopy = new Uint8Array(buffer, maxGramCount, maxGramCount);
+
+        for (let j = 0, idx = 0; j < len1 - gramLen + 1; j++) {
             const grams = query.substring(j, j + gramLen);
-            queryGrams.set(grams, 1 + (queryGrams.get(grams) || 0));
+            const eIdx = queryGrams.get(grams);
+            if (eIdx !== undefined) {
+                freqCount[eIdx] += 1;
+            } else {
+                queryGrams.set(grams, idx);
+                freqCount[idx++] = 1;
+            }
         }
 
         const allMatches: SearchResult<T, K>[] = [];
@@ -99,13 +116,12 @@ class FastSearcher<T, K = string> {
                 const end = indices[k + window];
 
                 let intersectionSize = 0;
-                const queryGramsCopy = new Map(queryGrams); // copy gram map
+                freqCountCopy.set(freqCount);
                 for (let j = start; j < end - gramLen; j++) {
                     const grams = fullStr.substring(j, j + gramLen);
-                    const count = queryGramsCopy.get(grams) || 0;
+                    const idx = queryGrams.get(grams);
 
-                    if (count > 0) {
-                        queryGramsCopy.set(grams, count - 1);
+                    if (idx !== undefined && freqCountCopy[idx]-- > 0) {
                         intersectionSize++;
                         matches.push(j, j + gramLen);
                     }

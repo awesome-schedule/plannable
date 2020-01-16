@@ -51,8 +51,8 @@ class FastSearcher<T, K = string> {
                 .replace(/\s+/g, ' '); // remove extra spaces
             const temp = full.split(' ');
             const idx = new Uint16Array(temp.length + 1);
-            for (let i = 0; i < temp.length; i++) {
-                idx[i] = full.indexOf(temp[i]);
+            for (let i = 1; i < temp.length; i++) {
+                idx[i] = full.indexOf(temp[i], idx[i - 1] + temp[i - 1].length);
             }
             idx[idx.length - 1] = full.length;
             this.indices.push(idx);
@@ -117,7 +117,7 @@ class FastSearcher<T, K = string> {
 
                 let intersectionSize = 0;
                 freqCountCopy.set(freqCount);
-                for (let j = start; j < end - gramLen; j++) {
+                for (let j = start; j < end - gramLen + 1; j++) {
                     const grams = fullStr.substring(j, j + gramLen);
                     const idx = queryGrams.get(grams);
 
@@ -128,10 +128,15 @@ class FastSearcher<T, K = string> {
                 }
 
                 const score = (2 * intersectionSize) / (len1 + end - start);
+                // if (isNaN(score)) {
+                //     console.log('asd');
+                // }
+                // maxScore += score;
                 if (score > maxScore) {
                     maxScore = score;
                 }
             }
+            // maxScore /= fullStr.length;
 
             allMatches.push({
                 score: maxScore,
@@ -156,7 +161,7 @@ let instrSearcher: FastSearcher<Section>;
 function processCourseResults(results: SearchResult<Course, string>[], weight: number) {
     for (const result of results) {
         const key = result.item.key;
-        const score = result.score * weight;
+        const score = result.score ** 2 * weight;
 
         const temp = courseMap.get(key);
         if (temp) {
@@ -174,7 +179,7 @@ function processSectionResults(results: SearchResult<Section, string>[], weight:
     for (const result of results) {
         const item = result.item;
         const key = item.key;
-        const score = result.score * weight;
+        const score = result.score ** 2 * weight;
 
         let scoreEntry = scores.get(key);
         if (!scoreEntry) {
@@ -255,6 +260,7 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
                     (a[1][2] && a[1][1] / a[1][2])
             )
             .slice(0, 12);
+        console.log(scoreEntries);
 
         const finalResults: RawAlgoCourse[] = [];
         const allMatches: SearchMatch[] = [];

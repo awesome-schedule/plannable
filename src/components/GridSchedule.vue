@@ -18,7 +18,6 @@
                 class="grid-container main"
                 :style="{
                     'grid-template-columns': gridTemplateCols,
-                    position: 'relative',
                     'grid-template-rows': heightInfo.reduce((acc, x) => acc + (x + 'px '), '48px '),
                     height: mainHeight
                 }"
@@ -31,12 +30,7 @@
                         {{ day }}
                     </div>
                 </template>
-                <div
-                    v-for="idx in numRow * numCol"
-                    :key="idx"
-                    class="placeholder"
-                    style="z-index:1"
-                ></div>
+                <div v-for="idx in numRow * numCol" :key="idx" class="placeholder"></div>
                 <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
                 <template v-for="(day, idx) in days">
                     <course-block
@@ -76,6 +70,7 @@
     border-left: 0.7px solid #e5e3dc;
     border-top: 0.7px solid #e5e3dc;
     text-align: center;
+    z-index: 1;
 }
 
 .time > div {

@@ -63,8 +63,8 @@ function saveToDB(catalog: Catalog, db: CatalogDB) {
         .then(() => {
             console.time('save to db');
             return Promise.all([
-                db.courses.bulkAdd(catalog['courses'] as any),
-                db.sections.bulkAdd(catalog['sections'] as any)
+                db.courses.bulkAdd(catalog.courses as any),
+                db.sections.bulkAdd(catalog.sections as any)
             ]);
         })
         .then(() => {
@@ -88,39 +88,32 @@ async function retrieveFromDB(db: CatalogDB) {
     ]);
     console.timeEnd('get courses from db');
 
-    console.time('retrieve from db');
+    console.time('parse db results');
     const allSections: Section[] = [];
     for (const rawCourse of courses) {
-        // descriptors for this course
-        const desc = Object.getOwnPropertyDescriptors(rawCourse);
-        for (const key in desc) {
-            desc[key].configurable = false;
-            desc[key].writable = false;
-        }
         const sections: Section[] = [];
-        desc.sections = {
-            value: sections // non-enumerable
-        };
-        const course: Course = Object.create(Course.prototype, desc);
+
+        // note: setPrototypeOf is much faster than Object.getPropertyDescriptors
+        // followed by modifying descriptors (make things non-writable, etc.) followed by Object.create.
+        // The trade-off is that the fields of the courses/sections are not write-protected.
+        // They are protected by the TypeScript compiler, however, as they are declared readonly
+        const course: Course = Object.setPrototypeOf(rawCourse, Course.prototype);
+        Object.defineProperty(course, 'sections', {
+            value: sections // non enumerable
+        });
         for (const id of rawCourse.ids) {
             const sec = secMap.get(id);
             if (!sec) continue;
-            // descriptor for this section
-            const secDesc = Object.getOwnPropertyDescriptors(sec);
-            for (const key in secDesc) {
-                secDesc[key].configurable = false;
-                secDesc[key].writable = false;
-            }
-            // add missing property descriptors
-            secDesc.course = {
-                value: course // non-enumerable
-            };
-            const section = Object.create(Section.prototype, secDesc);
+
+            const section: Section = Object.setPrototypeOf(sec, Section.prototype);
+            Object.defineProperty(section, 'course', {
+                value: course // non enumerable
+            });
             sections.push(section);
             allSections.push(section);
         }
         courseDict[rawCourse.key] = course;
     }
-    console.timeEnd('retrieve from db');
+    console.timeEnd('parse db results');
     return [courseDict, Object.values(courseDict), allSections] as const;
 }

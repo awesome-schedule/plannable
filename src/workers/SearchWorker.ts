@@ -72,7 +72,7 @@ class FastSearcher<T, K = string> {
             .trim()
             .toLowerCase()
             .split(/\s+/);
-        window = Math.max(window || t2.length, 2);
+        const maxWindow = Math.max(window || t2.length, 2);
         query = t2.join(' ');
 
         /** map from n-gram to index in the frequency array */
@@ -109,6 +109,9 @@ class FastSearcher<T, K = string> {
             const fullStr = this.originals[i];
             const indices = this.indices[i];
             let maxScore = 0;
+            // use the number of words as the window size in this string if maxWindow > number of words
+            window = Math.min(maxWindow, indices.length - 1);
+            // note: indices.length = number of works + 1
             for (let k = 0; k < indices.length - window; k++) {
                 const start = indices[k];
                 const end = indices[k + window] - gramLen + 1;

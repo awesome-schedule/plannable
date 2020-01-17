@@ -7,8 +7,7 @@
                 class="form-control form-control-sm"
                 placeholder="Title/Topic/Prof./Desc."
                 :disabled="!workerLoaded"
-                @input="$event.target.value || getClass('')"
-                @keydown.enter="getClass($event.target.value)"
+                @input="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"
             />
             <div class="input-group-append">

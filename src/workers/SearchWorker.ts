@@ -75,11 +75,9 @@ class FastSearcher<T, K = string> {
         window = Math.max(window || t2.length, 2);
         query = t2.join(' ');
 
-        const len1 = query.length;
-
         /** map from n-gram to index in the frequency array */
         const queryGrams = new Map<string, number>();
-        const maxGramCount = len1 - gramLen + 1;
+        const maxGramCount = query.length - gramLen + 1;
 
         // keep frequencies in separated arrays for performance reasons
         // copying a Map is slow, but copying a typed array is fast
@@ -88,7 +86,7 @@ class FastSearcher<T, K = string> {
         // the working copy
         const freqCountCopy = new Uint8Array(buffer, maxGramCount, maxGramCount);
 
-        for (let j = 0, idx = 0; j < len1 - gramLen + 1; j++) {
+        for (let j = 0, idx = 0; j < maxGramCount; j++) {
             const grams = query.substring(j, j + gramLen);
             const eIdx = queryGrams.get(grams);
             if (eIdx !== undefined) {
@@ -113,11 +111,11 @@ class FastSearcher<T, K = string> {
             let maxScore = 0;
             for (let k = 0; k < indices.length - window; k++) {
                 const start = indices[k];
-                const end = indices[k + window];
+                const end = indices[k + window] - gramLen + 1;
 
                 let intersectionSize = 0;
                 freqCountCopy.set(freqCount);
-                for (let j = start; j < end - gramLen + 1; j++) {
+                for (let j = start; j < end; j++) {
                     const grams = fullStr.substring(j, j + gramLen);
                     const idx = queryGrams.get(grams);
 
@@ -127,7 +125,7 @@ class FastSearcher<T, K = string> {
                     }
                 }
 
-                const score = (2 * intersectionSize) / (len1 + end - start);
+                const score = (2 * intersectionSize) / (maxGramCount + end - start);
                 // if (isNaN(score)) {
                 //     console.log('asd');
                 // }
@@ -136,7 +134,6 @@ class FastSearcher<T, K = string> {
                     maxScore = score;
                 }
             }
-            // maxScore /= fullStr.length;
 
             allMatches.push({
                 score: maxScore,

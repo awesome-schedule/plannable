@@ -39,6 +39,8 @@ interface SearchWorker extends Worker {
  */
 export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
 
+type SearchWorkerResult = [RawAlgoCourse[], SearchMatch[]];
+
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
  * @author Hanzhi Zhou
@@ -60,7 +62,14 @@ export default class Catalog {
      * ```
      */
     public readonly sections: readonly Section[];
+    /**
+     * a map from section id to section instance
+     */
     private readonly sectionMap: Map<number, Section>;
+    /**
+     * the pending search (one that's not completed yet)
+     */
+    private readonly resultMap = new Map<string, SearchWorkerResult>();
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -95,10 +104,16 @@ export default class Catalog {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
             const Worker = require('worker-loader!../workers/SearchWorker');
             const worker: SearchWorker = new Worker();
-            const prom: Promise<'ready'> = new Promise(resolve => {
+            const prom = new Promise<'ready'>(resolve => {
                 worker.onmessage = ({ data }) => {
                     resolve(data);
                 };
+            }).then(res => {
+                worker.onmessage = ({ data: [query, result] }) => {
+                    this.resultMap.set(query, result);
+                };
+                // worker.onerror = err => this.resultQueue.push(err);
+                return res;
             });
             worker.postMessage([this.courses, this.sections]);
             this.worker = worker;
@@ -113,6 +128,7 @@ export default class Catalog {
     public disposeWorker() {
         if (this.worker) {
             this.worker.terminate();
+            this.resultMap.clear();
             delete this.worker;
         }
     }
@@ -159,16 +175,33 @@ export default class Catalog {
     public fuzzySearch(query: string) {
         const worker = this.worker;
         if (!worker) return Promise.reject('Worker not initialized!');
-        const promise = new Promise((resolve, reject) => {
-            worker.onmessage = ({
-                data: [args, matches]
-            }: {
-                data: [RawAlgoCourse[], SearchMatch[]];
-            }) => resolve([args.map(x => this.getCourse(x[0], new Set(x[1]))), matches]);
-            worker.onerror = err => reject(err);
+
+        const lastResult = this.resultMap.get(query);
+        if (lastResult && !(lastResult instanceof ErrorEvent)) {
+            return Promise.resolve(this.convertWorkerResult(lastResult));
+        } else {
+            worker.postMessage(query);
+        }
+
+        return new Promise<readonly [Course[], SearchMatch[]]>((resolve, reject) => {
+            const that = this;
+            (function waitForLatestResult() {
+                const lastResult = that.resultMap.get(query);
+                if (lastResult) {
+                    if (lastResult instanceof ErrorEvent) {
+                        reject(lastResult);
+                    } else {
+                        resolve(that.convertWorkerResult(lastResult));
+                    }
+                    return;
+                }
+                setTimeout(waitForLatestResult, 25);
+            })();
         });
-        worker.postMessage(query);
-        return promise as Promise<[Course[], SearchMatch[]]>;
+    }
+
+    private convertWorkerResult([courses, match]: SearchWorkerResult) {
+        return [courses.map(x => this.getCourse(x[0], new Set(x[1]))), match] as const;
     }
 
     /**

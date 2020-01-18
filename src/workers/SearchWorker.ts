@@ -20,7 +20,7 @@ import { calcOverlap } from '@/utils';
 type Section = Omit<SectionFields, 'course'>;
 interface Course extends Omit<NonFunctionProperties<_Course>, 'sections'> {}
 
-declare function postMessage(msg: [RawAlgoCourse[], SearchMatch[]] | 'ready'): void;
+declare function postMessage(msg: [string, [RawAlgoCourse[], SearchMatch[]]] | 'ready'): void;
 
 interface SearchResult<T, K = string> {
     score: number;
@@ -94,17 +94,19 @@ class FastSearcher<T, K = string> {
     /**
      * sliding window search
      * @param query
-     * @param window
+     * @param maxWindow
      * @param gramLen
      */
-    public sWSearch(query: string, window?: number, gramLen = 3) {
+    public sWSearch(query: string, gramLen = 3, maxWindow?: number) {
         const t2 = query
             .trim()
             .toLowerCase()
             .split(/\s+/);
         query = t2.join(' ');
         if (query.length <= 2) return [];
-        const maxWindow = Math.max(window || t2.length, 2);
+
+        maxWindow = Math.max(maxWindow || t2.length, 2);
+        if (gramLen === 2) return this.sWSearchG2(query, maxWindow);
 
         /** map from n-gram to index in the frequency array */
         const queryGrams = new Map<string, number>();
@@ -144,7 +146,7 @@ class FastSearcher<T, K = string> {
             const nextOffset = this.idxOffsets[i + 1];
 
             // use the number of words as the window size in this string if maxWindow > number of words
-            window = Math.min(maxWindow, nextOffset - offset - 1);
+            const window = Math.min(maxWindow, nextOffset - offset - 1);
             let maxScore = 0;
             for (let k = offset; k < nextOffset - window; k++) {
                 const start = this.indices[k];
@@ -185,18 +187,10 @@ class FastSearcher<T, K = string> {
      * @param window
      * @param gramLen
      */
-    public sWSearchG2(query: string, window?: number) {
-        const t2 = query
-            .trim()
-            .toLowerCase()
-            .split(/\s+/);
-        query = t2.join(' ');
-        if (query.length <= 2) return [];
-        const maxWindow = Math.max(window || t2.length, 2);
-
+    public sWSearchG2(query: string, maxWindow: number) {
         /** map from n-gram to index in the frequency array */
         const queryGrams = new Map<number, number>();
-        const maxGramCount = query.length - 2 + 1;
+        const maxGramCount = query.length - 1;
 
         // keep frequencies in separated arrays for performance reasons
         // copying a Map is slow, but copying a typed array is fast
@@ -233,15 +227,16 @@ class FastSearcher<T, K = string> {
             const nextOffset = this.idxOffsets[i + 1];
 
             // use the number of words as the window size in this string if maxWindow > number of words
-            window = Math.min(maxWindow, nextOffset - offset - 1);
+            const window = Math.min(maxWindow, nextOffset - offset - 1);
             let maxScore = 0;
             for (let k = offset; k < nextOffset - window; k++) {
                 const start = this.indices[k];
-                const end = this.indices[k + window] - 2 + 1;
+                const end = this.indices[k + window] - 1;
 
                 let intersectionSize = 0;
                 freqCountCopy.set(freqCount);
                 for (let j = start; j < end; j++) {
+                    // assuming little endian
                     const idx = queryGrams.get(rawView.getUint32((rawOffset + j) << 1, true));
 
                     if (idx !== undefined && freqCountCopy[idx]-- > 0) {
@@ -360,15 +355,15 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
     } else {
         const query = data;
 
-        // processCourseResults(titleSearcher.sWSearch(query), 1);
-        // processCourseResults(descriptionSearcher.sWSearch(query), 0.5);
-        // processSectionResults(topicSearcher.sWSearch(query), 0.9);
-        // processSectionResults(instrSearcher.sWSearch(query), 0.25);
+        processCourseResults(titleSearcher.sWSearch(query), 1);
+        processCourseResults(descriptionSearcher.sWSearch(query), 0.5);
+        processSectionResults(topicSearcher.sWSearch(query), 0.9);
+        processSectionResults(instrSearcher.sWSearch(query), 0.25);
 
-        processCourseResults(titleSearcher.sWSearchG2(query), 1);
-        processCourseResults(descriptionSearcher.sWSearchG2(query), 0.5);
-        processSectionResults(topicSearcher.sWSearchG2(query), 0.9);
-        processSectionResults(instrSearcher.sWSearchG2(query), 0.25);
+        // processCourseResults(titleSearcher.sWSearch(query, 2), 1);
+        // processCourseResults(descriptionSearcher.sWSearch(query, 2), 0.5);
+        // processSectionResults(topicSearcher.sWSearch(query, 2), 0.9);
+        // processSectionResults(instrSearcher.sWSearch(query, 2), 0.25);
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
@@ -389,31 +384,23 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
         for (const [key] of scoreEntries) {
             const courseMatch = courseMap.get(key);
             const secMatches = new Map<number, SectionMatch[]>();
+
+            // record section matches
             const s = sectionMap.get(key);
+            if (s) for (const [id, matches] of s) secMatches.set(id, toMatches(matches));
+
             if (courseMatch) {
                 const crsMatches: CourseMatch[] = toMatches(courseMatch);
-                // if the section matches for this course exist
-                if (s) {
-                    for (const [id, matches] of s) {
-                        secMatches.set(id, toMatches(matches));
-                    }
-                }
                 finalResults.push([key, courseMatch[0].item.ids]);
                 allMatches.push([crsMatches, secMatches]);
-                // only section match exists
             } else {
-                // if the section matches for this course exist
-                if (s) {
-                    for (const [id, matches] of s) {
-                        secMatches.set(id, toMatches(matches));
-                    }
-                }
+                // only section match exists
                 finalResults.push([key, [...secMatches.keys()]]);
                 allMatches.push([[], secMatches]);
             }
         }
         // console.log(finalResults, allMatches);
-        postMessage([finalResults, allMatches]);
+        postMessage([query, [finalResults, allMatches]]);
 
         courseMap.clear();
         sectionMap.clear();

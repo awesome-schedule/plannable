@@ -43,6 +43,9 @@ class FastSearcher<T, K = string> {
     public indices: Uint16Array;
     public rawCode: Uint16Array;
 
+    private tokenScore: Map<string, number[]> = new Map();
+    private allTokens: string[][];
+
     /**
      * @param targets the list of strings to search from
      */
@@ -58,7 +61,9 @@ class FastSearcher<T, K = string> {
         this.idxOffsets = new Uint32Array(targets.length + 1);
         this.rawOffsets = new Uint32Array(targets.length + 1);
         for (let i = 0; i < targets.length; i++) {
-            const full = toStr(targets[i]).toLowerCase();
+            const full = toStr(targets[i])
+                .toLowerCase()
+                .trimEnd();
             const temp = full.split(/\s+/);
             this.originals.push(full);
             allTokens.push(temp);
@@ -77,19 +82,30 @@ class FastSearcher<T, K = string> {
             const tokens = allTokens[j];
             const offset = this.idxOffsets[j];
             const original = this.originals[j];
+            this.tokenScore.set(tokens[0], []);
             for (let i = 1; i < tokens.length; i++) {
+                const token = tokens[i];
                 this.indices[offset + i] = original.indexOf(
-                    tokens[i],
+                    token,
                     this.indices[offset + i - 1] + tokens[i - 1].length
                 );
+                this.tokenScore.set(token, []);
             }
-            this.indices[offset + tokens.length] = original.length;
+            this.indices[offset + tokens.length] = original.length + 1;
 
             const rawOffset = this.rawOffsets[j];
             for (let i = 0; i < original.length; i++) {
                 this.rawCode[rawOffset + i] = original.charCodeAt(i);
             }
         }
+
+        let tokens = 0;
+        for (const a of allTokens) {
+            tokens += a.length;
+        }
+        this.allTokens = allTokens;
+        console.log('all tokens', tokens);
+        console.log('unique tokens', this.tokenScore.size);
     }
     /**
      * sliding window search
@@ -130,6 +146,24 @@ class FastSearcher<T, K = string> {
             }
         }
 
+        for (const [key, value] of this.tokenScore) {
+            let intersectionSize = 0;
+            const matches = [];
+            for (let i = 0; i < key.length; i++) {
+                const grams = key.substring(i, i + gramLen);
+                const idx = queryGrams.get(grams);
+
+                if (idx !== undefined && freqCountCopy[idx]-- > 0) {
+                    intersectionSize++;
+                    matches.push(i, i + gramLen);
+                }
+            }
+            const score = (2 * intersectionSize) / (maxGramCount + key.length);
+
+            value.splice(0);
+            value.push(score, ...matches);
+        }
+
         const allMatches: SearchResult<T, K>[] = [];
         for (let i = 0; i < this.originals.length; i++) {
             // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
@@ -139,7 +173,6 @@ class FastSearcher<T, K = string> {
             // if (len1 < 2 || len2 < 2) return [0, []] as const; // if either is a 1-letter string
 
             const matches = [];
-            const fullStr = this.originals[i];
             const offset = this.idxOffsets[i];
 
             // note: nextOffset - offset = num of words + 1
@@ -148,23 +181,50 @@ class FastSearcher<T, K = string> {
             // use the number of words as the window size in this string if maxWindow > number of words
             const window = Math.min(maxWindow, nextOffset - offset - 1);
             let maxScore = 0;
-            for (let k = offset; k < nextOffset - window; k++) {
-                const start = this.indices[k];
-                const end = this.indices[k + window] - gramLen + 1;
 
-                let intersectionSize = 0;
-                freqCountCopy.set(freqCount);
-                for (let j = start; j < end; j++) {
-                    const grams = fullStr.substring(j, j + gramLen);
-                    const idx = queryGrams.get(grams);
+            const len = this.allTokens[i].length;
 
-                    if (idx !== undefined && freqCountCopy[idx]-- > 0) {
-                        intersectionSize++;
-                        matches.push(j, j + gramLen);
+            const tokens = this.allTokens[i];
+
+            for (let k = 0; k < len - window + 1; k++) {
+                // const start = this.indices[k];
+                // const end = this.indices[k + window] - 1;
+                let score = 0;
+
+                // let intersectionSize = 0;
+                // freqCountCopy.set(freqCount);
+                // for (let j = start; j < end; j++) {
+                //     const grams = fullStr.substring(j, j + gramLen);
+                //     const idx = queryGrams.get(grams);
+
+                //     if (idx !== undefined && freqCountCopy[idx]-- > 0) {
+                //         intersectionSize++;
+                //         matches.push(j, j + gramLen);
+                //     }
+                // }
+
+                // const tokens = fullStr
+                //     .substring(start, end)
+                //     .trimEnd()
+                //     .split(/\s+/);
+
+                // for (const token of tokens) {
+                //     const values = this.tokenScore.get(token) as number[];
+                //     score += values[0];
+                //     matches.push(0, 1);
+                // }
+
+                for (let j = k; j < k + window; j++) {
+                    const values = this.tokenScore.get(tokens[j]) as number[];
+                    // console.log(values, this.allTokens[i][j]);
+                    if (values[0] < 0.03) continue;
+                    score += values[0];
+                    const temp = this.indices[offset + j];
+                    for (let m = 1; m < values.length; m++) {
+                        matches.push(values[m] + temp);
                     }
                 }
 
-                const score = (2 * intersectionSize) / (maxGramCount + end - start);
                 if (score > maxScore) {
                     maxScore = score;
                 }
@@ -178,6 +238,7 @@ class FastSearcher<T, K = string> {
                 data: this.data
             });
         }
+
         return allMatches;
     }
 

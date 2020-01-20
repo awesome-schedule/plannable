@@ -269,7 +269,8 @@ class ScheduleGenerator {
         const { maxNumSchedules } = this.options;
 
         // the array used to record all schedules generated
-        const allChoices = new Uint8Array(numCourses * maxNumSchedules);
+        // extra 1x numCourses to prevent write out of bound at computeSchedules at ***
+        const allChoices = new Uint8Array(numCourses * maxNumSchedules + numCourses);
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
@@ -390,7 +391,7 @@ class ScheduleGenerator {
                 for (let i = 0; i < numCourses; i++) {
                     timeLen +=
                         timeArrLens[
-                            (allChoices[base + numCourses + i] = allChoices[base + i]) *
+                            (allChoices[base + numCourses + i] = allChoices[base + i]) * // ***
                                 numCourses +
                                 i
                         ];

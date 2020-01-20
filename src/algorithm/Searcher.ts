@@ -27,11 +27,11 @@ export interface SearchResult<T, K = string> {
 export class FastSearcher<T, K = string> {
     public originals: string[] = [];
 
-    public idxOffsets: Uint32Array;
-    public indices: Uint32Array;
-    public tokenIds: Uint32Array;
+    private idxOffsets: Uint32Array;
+    private indices: Uint32Array;
+    private tokenIds: Uint32Array;
 
-    private num2str: string[] = [];
+    private uniqueTokens: string[] = [];
     private maxTokenLen: number = 0;
 
     /**
@@ -68,16 +68,16 @@ export class FastSearcher<T, K = string> {
             const offset = this.idxOffsets[j];
             const t0 = tokens[0];
             if (str2num.get(t0) === undefined) {
-                str2num.set(t0, this.num2str.length);
-                this.num2str.push(t0);
+                str2num.set(t0, this.uniqueTokens.length);
+                this.uniqueTokens.push(t0);
             }
             this.tokenIds[offset] = str2num.get(t0)!;
             const original = this.originals[j];
             for (let i = 1; i < tokens.length; i++) {
                 const token = tokens[i];
                 if (str2num.get(token) === undefined) {
-                    str2num.set(token, this.num2str.length);
-                    this.num2str.push(token);
+                    str2num.set(token, this.uniqueTokens.length);
+                    this.uniqueTokens.push(token);
                 }
                 this.tokenIds[offset + i] = str2num.get(token)!;
                 this.indices[offset + i] = original.indexOf(
@@ -88,7 +88,7 @@ export class FastSearcher<T, K = string> {
         }
 
         console.log('all tokens', tokenLen);
-        console.log('unique tokens', this.num2str.length);
+        console.log('unique tokens', this.uniqueTokens.length);
     }
     private constructQueryGrams(query: string, gramLen: number) {
         /** map from n-gram to index in the frequency array */
@@ -186,16 +186,17 @@ export class FastSearcher<T, K = string> {
         const queryGramCount = query.length - gramLen + 1;
         const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
 
-        const tokenScoreArr: number[][] = [];
+        const tokenScores = new Float32Array(this.uniqueTokens.length);
+        const tokenMatches: number[][] = [];
         // compute score for each token
-        for (let i = 0; i < this.num2str.length; i++) {
-            const str = this.num2str[i];
+        for (let i = 0; i < this.uniqueTokens.length; i++) {
+            const str = this.uniqueTokens[i];
 
-            const matches = [0];
             let intersectionSize = 0;
             freqCountCopy.set(freqCount);
 
             const tokenGramCount = str.length - gramLen + 1;
+            const matches = [];
             for (let j = 0; j < tokenGramCount; j++) {
                 const grams = str.substring(j, j + gramLen);
                 const idx = queryGrams.get(grams);
@@ -206,8 +207,8 @@ export class FastSearcher<T, K = string> {
                     matches.push(j, j + gramLen);
                 }
             }
-            matches[0] = (2 * intersectionSize) / (queryGramCount + tokenGramCount);
-            tokenScoreArr.push(matches);
+            tokenScores[i] = (2 * intersectionSize) / (queryGramCount + tokenGramCount);
+            tokenMatches.push(matches);
         }
 
         // score & matches for each sentence
@@ -231,14 +232,14 @@ export class FastSearcher<T, K = string> {
                 maxScore = 0;
             // initialize score window
             for (let j = 0; j < window; j++) {
-                const values = tokenScoreArr[this.tokenIds[offset + j]];
-                const v = values[0];
+                const tokenId = this.tokenIds[offset + j];
+                const v = tokenScores[tokenId];
                 score += scoreWindow[j] = v;
 
                 if (v < threshold) continue;
                 const temp = this.indices[offset + j];
-                for (let m = 1; m < values.length; m++) {
-                    matches.push(values[m] + temp);
+                for (const m of tokenMatches[tokenId]) {
+                    matches.push(m + temp);
                 }
             }
             if (score > maxScore) maxScore = score;
@@ -246,16 +247,16 @@ export class FastSearcher<T, K = string> {
             for (let j = window; j < tokenLen; j++) {
                 // subtract the last score and add the new score
                 score -= scoreWindow[j - window];
-                const values = tokenScoreArr[this.tokenIds[offset + j]];
-                const v = values[0];
+                const tokenId = this.tokenIds[offset + j];
+                const v = tokenScores[tokenId];
                 score += scoreWindow[j] = v;
 
                 if (v < threshold) continue;
                 if (score > maxScore) maxScore = score;
 
                 const temp = this.indices[offset + j];
-                for (let m = 1; m < values.length; m++) {
-                    matches.push(values[m] + temp);
+                for (const m of tokenMatches[tokenId]) {
+                    matches.push(m + temp);
                 }
             }
 
@@ -289,12 +290,11 @@ export class FastSearcher<T, K = string> {
         const queryGramCount = query.length - gramLen + 1;
         const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
 
-        const tokenScoreArr = new Float32Array(this.num2str.length);
+        const tokenScores = new Float32Array(this.uniqueTokens.length);
         // compute score for each token
-        for (let i = 0; i < this.num2str.length; i++) {
-            const str = this.num2str[i];
+        for (let i = 0; i < this.uniqueTokens.length; i++) {
+            const str = this.uniqueTokens[i];
 
-            const matches = [0];
             let intersectionSize = 0;
             freqCountCopy.set(freqCount);
 
@@ -306,10 +306,9 @@ export class FastSearcher<T, K = string> {
                 if (idx !== undefined && freqCountCopy[idx] > 0) {
                     freqCountCopy[idx]--;
                     intersectionSize++;
-                    matches.push(j, j + gramLen);
                 }
             }
-            tokenScoreArr[i] = (2 * intersectionSize) / (queryGramCount + tokenGramCount);
+            tokenScores[i] = (2 * intersectionSize) / (queryGramCount + tokenGramCount);
         }
 
         // score & matches for each sentence
@@ -332,7 +331,8 @@ export class FastSearcher<T, K = string> {
                 maxScore = 0;
             // initialize score window
             for (let j = 0; j < window; j++) {
-                const v = tokenScoreArr[this.tokenIds[offset + j]];
+                const tokenId = this.tokenIds[offset + j];
+                const v = tokenScores[tokenId];
                 score += scoreWindow[j] = v;
             }
             if (score > maxScore) maxScore = score;
@@ -340,7 +340,8 @@ export class FastSearcher<T, K = string> {
             for (let j = window; j < tokenLen; j++) {
                 // subtract the last score and add the new score
                 score -= scoreWindow[j - window];
-                const v = tokenScoreArr[this.tokenIds[offset + j]];
+                const tokenId = this.tokenIds[offset + j];
+                const v = tokenScores[tokenId];
                 score += scoreWindow[j] = v;
 
                 if (score > maxScore) maxScore = score;

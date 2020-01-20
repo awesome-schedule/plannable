@@ -38,10 +38,8 @@ import Store, { parseFromURL } from './store';
 import { getReleaseNote } from './utils';
 import GeneratedSchedule from './models/GeneratedSchedule';
 
-/**
- * need to change for every release
- */
-const version = '8.1';
+const version = require('../package.json').version;
+
 /**
  * returns whether the version stored in localStorage matches the current version
  * then, override localStorage with the current version

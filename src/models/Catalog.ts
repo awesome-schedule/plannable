@@ -112,7 +112,9 @@ export default class Catalog {
                 worker.onmessage = ({ data: [query, result] }) => {
                     this.resultMap.set(query, result);
                 };
-                // worker.onerror = err => this.resultQueue.push(err);
+                worker.onerror = err => {
+                    console.error(err);
+                };
                 return res;
             });
             worker.postMessage([this.courses, this.sections]);

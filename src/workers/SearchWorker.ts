@@ -203,27 +203,41 @@ class FastSearcher<T, K = string> {
 
             // use the number of words as the window size in this string if maxWindow > number of words
             const window = Math.min(maxWindow, nextOffset - offset - 1);
-            let maxScore = 0;
 
             const tokens = this.allTokens[i];
-            const len = tokens.length - window + 1;
-            for (let k = 0; k < len; k++) {
-                let score = 0;
+            const scoreWindow = new Float32Array(tokens.length + 1);
+            let score = 0,
+                maxScore = 0;
+            for (let j = 0; j < window; j++) {
+                const values = tokenScoreArr[tokens[j]];
+                const v = values[0];
+                scoreWindow[j] = v;
 
-                for (let j = k; j < k + window; j++) {
-                    const values = tokenScoreArr[tokens[j]];
-                    const v = values[0];
-                    if (v < threshold) continue;
-                    score += v;
-                    const temp = this.indices[offset + j];
-                    for (let m = 1; m < values.length; m++) {
-                        matches.push(values[m] + temp);
-                    }
+                if (v < threshold) continue;
+                score += v;
+                const temp = this.indices[offset + j];
+                for (let m = 1; m < values.length; m++) {
+                    matches.push(values[m] + temp);
+                }
+            }
+            if (score > maxScore) maxScore = score;
+
+            for (let j = window; j < tokens.length; j++) {
+                // remove the last score and add the new score
+                score -= scoreWindow[j - window];
+                const values = tokenScoreArr[tokens[j]];
+                const v = values[0];
+                score += v;
+                scoreWindow[j] = v;
+
+                if (v < threshold) continue;
+
+                const temp = this.indices[offset + j];
+                for (let m = 1; m < values.length; m++) {
+                    matches.push(values[m] + temp);
                 }
 
-                if (score > maxScore) {
-                    maxScore = score;
-                }
+                if (score > maxScore) maxScore = score;
             }
 
             allMatches.push({
@@ -412,11 +426,12 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
     } else {
         const query = data;
 
+        console.time('search');
         processCourseResults(titleSearcher.sWSearch(query), 1);
         processCourseResults(descriptionSearcher.sWSearch(query), 0.5);
         processSectionResults(topicSearcher.sWSearch(query), 0.9);
         processSectionResults(instrSearcher.sWSearch(query), 0.25);
-
+        console.timeEnd('search');
         // processCourseResults(titleSearcher.sWSearch(query, 2), 1);
         // processCourseResults(descriptionSearcher.sWSearch(query, 2), 0.5);
         // processSectionResults(topicSearcher.sWSearch(query, 2), 0.9);

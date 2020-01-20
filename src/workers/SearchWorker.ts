@@ -199,22 +199,20 @@ class FastSearcher<T, K = string> {
             const offset = this.idxOffsets[i];
 
             // note: nextOffset - offset = num of words + 1
-            const nextOffset = this.idxOffsets[i + 1];
-
             // use the number of words as the window size in this string if maxWindow > number of words
-            const window = Math.min(maxWindow, nextOffset - offset - 1);
-
             const tokens = this.allTokens[i];
-            const scoreWindow = new Float32Array(tokens.length + 1);
+            const window = Math.min(maxWindow, tokens.length);
+            const scoreWindow = new Float32Array(tokens.length);
+
             let score = 0,
                 maxScore = 0;
+            // initialize score window
             for (let j = 0; j < window; j++) {
                 const values = tokenScoreArr[tokens[j]];
                 const v = values[0];
-                scoreWindow[j] = v;
+                score += scoreWindow[j] = v;
 
                 if (v < threshold) continue;
-                score += v;
                 const temp = this.indices[offset + j];
                 for (let m = 1; m < values.length; m++) {
                     matches.push(values[m] + temp);
@@ -223,21 +221,19 @@ class FastSearcher<T, K = string> {
             if (score > maxScore) maxScore = score;
 
             for (let j = window; j < tokens.length; j++) {
-                // remove the last score and add the new score
+                // subtract the last score and add the new score
                 score -= scoreWindow[j - window];
                 const values = tokenScoreArr[tokens[j]];
                 const v = values[0];
-                score += v;
-                scoreWindow[j] = v;
+                score += scoreWindow[j] = v;
 
                 if (v < threshold) continue;
+                if (score > maxScore) maxScore = score;
 
                 const temp = this.indices[offset + j];
                 for (let m = 1; m < values.length; m++) {
                     matches.push(values[m] + temp);
                 }
-
-                if (score > maxScore) maxScore = score;
             }
 
             allMatches.push({

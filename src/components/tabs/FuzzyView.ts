@@ -33,6 +33,8 @@ export default class FuzzyView extends Store {
 
     workerLoaded = !!window.catalog.worker;
 
+    realtime = true;
+
     /**
      * initialize catalog's search worker if it is not yet initialized
      */
@@ -45,6 +47,11 @@ export default class FuzzyView extends Store {
             this.loading = false;
             this.workerLoaded = true;
         }
+    }
+
+    onInput(query: string) {
+        if (this.realtime) this.getClass(query);
+        else if (!query) this.getClass('');
     }
 
     disposeWorker() {

@@ -205,7 +205,7 @@ async function requestTimeMatrix(): Promise<Int32Array> {
  * @returns a building searcher
  */
 async function requestBuildingSearcher() {
-    const res = await axios.get(`${getApi()}/data/Distance/Building_Array.json`);
+    const res = await axios.get<string[]>(`${getApi()}/data/Distance/Building_Array.json`);
     return new FastSearcher(res.data);
 }
 

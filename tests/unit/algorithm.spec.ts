@@ -1,18 +1,17 @@
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
-import { compareTwoStrings } from '@/algorithm/Searcher';
 import ProposedSchedule from '@/models/ProposedSchedule';
 
 const store = new Store();
 
 describe('ScheduleGenerator Test', () => {
-    it('Searcher', () => {
-        expect(compareTwoStrings('1', '1')).toBe(1);
-        expect(compareTwoStrings('1', '0')).toBe(0);
-        expect(compareTwoStrings('', '')).toBe(1);
-        expect(compareTwoStrings('', '0')).toBe(0);
-        expect(compareTwoStrings('12', '0')).toBe(0);
-    });
+    // it('Searcher', () => {
+    //     expect(compareTwoStrings('1', '1')).toBe(1);
+    //     expect(compareTwoStrings('1', '0')).toBe(0);
+    //     expect(compareTwoStrings('', '')).toBe(1);
+    //     expect(compareTwoStrings('', '0')).toBe(0);
+    //     expect(compareTwoStrings('12', '0')).toBe(0);
+    // });
     it('ScheduleGenerator', () => {
         store.filter.addTimeSlot();
         store.filter.removeTimeSlot(0);

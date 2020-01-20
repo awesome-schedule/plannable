@@ -22,7 +22,7 @@ declare global {
         scheduleEvaluator: ScheduleEvaluator;
         catalog: Readonly<Catalog>;
         timeMatrix: Readonly<Int32Array>;
-        buildingSearcher: FastSearcher;
+        buildingSearcher: FastSearcher<string>;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html

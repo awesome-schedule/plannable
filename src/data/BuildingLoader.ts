@@ -67,7 +67,7 @@ export function loadTimeMatrix(force = false) {
  */
 export function loadBuildingSearcher(force = false) {
     return fallback(
-        loadFromCache<FastSearcher, BuildingListJSON>(
+        loadFromCache<FastSearcher<string>, BuildingListJSON>(
             'buildingList',
             dataend.buildings,
             x => new FastSearcher(x.buildingList),

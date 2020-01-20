@@ -13,49 +13,8 @@
  * @param first
  * @param second
  */
-export function compareTwoStrings(first: string, second: string) {
-    const len1 = first.length,
-        len2 = second.length;
-    if (!len1 && !len2) return 1; // if both are empty strings
-    if (!len1 || !len2) return 0; // if only one is empty string
-    if (first === second) return 1; // identical
-    if (len1 === 1 && len2 === 1) return 0; // both are 1-letter strings
-    if (len1 < 2 || len2 < 2) return 0; // if either is a 1-letter string
+// export function
 
-    const firstBigrams = new Map<string, number>();
-    for (let i = 0; i < len1 - 1; i++) {
-        const bigram = first.substring(i, i + 2);
-        firstBigrams.set(bigram, 1 + (firstBigrams.get(bigram) || 0));
-    }
-
-    let intersectionSize = 0;
-    for (let i = 0; i < len2 - 1; i++) {
-        const bigram = second.substring(i, i + 2);
-        const count = firstBigrams.get(bigram) || 0;
-
-        if (count > 0) {
-            firstBigrams.set(bigram, count - 1);
-            intersectionSize++;
-        }
-    }
-
-    return (2.0 * intersectionSize) / (len1 + len2 - 2);
-}
-
-function findBestMatch(mainString: string, targetStrings: string[]) {
-    const len = targetStrings.length;
-    let bestMatchIndex = 0;
-    let bestMatchRating = 0;
-    for (let i = 0; i < len; i++) {
-        const currentTargetString = targetStrings[i];
-        const currentRating = compareTwoStrings(mainString, currentTargetString);
-        if (currentRating > bestMatchRating) {
-            bestMatchIndex = i;
-            bestMatchRating = currentRating;
-        }
-    }
-    return [bestMatchIndex, bestMatchRating];
-}
 export interface SearchResult<T, K = string> {
     score: number;
     matches: number[];
@@ -78,7 +37,11 @@ export class FastSearcher<T, K = string> {
     /**
      * @param targets the list of strings to search from
      */
-    constructor(public items: T[], toStr: (a: T) => string, public data: K) {
+    constructor(
+        public items: T[],
+        toStr: (a: T) => string = x => x as any,
+        public data: K = '' as any
+    ) {
         const allTokens: string[][] = [];
         let tokenLen = 0;
         this.idxOffsets = new Uint32Array(items.length + 1);
@@ -126,15 +89,16 @@ export class FastSearcher<T, K = string> {
         console.log('unique tokens', this.num2str.length);
     }
     private constructQueryGrams(query: string, gramLen: number) {
+        /** map from n-gram to index in the frequency array */
         const queryGrams = new Map<string, number>();
         const queryGramCount = query.length - gramLen + 1;
 
         // keep frequencies in separated arrays for performance reasons
         // copying a Map is slow, but copying a typed array is fast
-        const buffer = new ArrayBuffer(queryGramCount * 2);
-        const freqCount = new Uint8Array(buffer, 0, queryGramCount);
+        const buffer = new ArrayBuffer(queryGramCount * 4);
+        const freqCount = new Uint16Array(buffer, 0, queryGramCount);
         // the working copy
-        const freqCountCopy = new Uint8Array(buffer, queryGramCount, queryGramCount);
+        const freqCountCopy = new Uint16Array(buffer, queryGramCount * 2, queryGramCount);
 
         for (let j = 0, idx = 0; j < queryGramCount; j++) {
             const grams = query.substring(j, j + gramLen);
@@ -146,6 +110,60 @@ export class FastSearcher<T, K = string> {
                 freqCount[idx++] = 1;
             }
         }
+        return [queryGrams, freqCount, freqCountCopy] as const;
+    }
+    public findBestMatch(query: string) {
+        query = query
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, ' ');
+
+        const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, 2);
+
+        let bestMatchIndex = 0;
+        let bestMatchRating = 0;
+        for (let i = 0; i < this.originals.length; i++) {
+            freqCountCopy.set(freqCount);
+            const currentTargetString = this.originals[i];
+            const currentRating = this.compareTwoStrings(
+                queryGrams,
+                freqCountCopy,
+                query,
+                currentTargetString
+            );
+            if (currentRating > bestMatchRating) {
+                bestMatchIndex = i;
+                bestMatchRating = currentRating;
+            }
+        }
+        return [bestMatchIndex, bestMatchRating];
+    }
+    public compareTwoStrings(
+        bigrams: Map<string, number>,
+        freqCount: Uint16Array,
+        first: string,
+        second: string
+    ) {
+        const len1 = first.length,
+            len2 = second.length;
+        if (!len1 && !len2) return 1; // if both are empty strings
+        if (!len1 || !len2) return 0; // if only one is empty string
+        if (first === second) return 1; // identical
+        if (len1 === 1 && len2 === 1) return 0; // both are 1-letter strings
+        if (len1 < 2 || len2 < 2) return 0; // if either is a 1-letter string
+
+        let intersectionSize = 0;
+        for (let i = 0; i < len2 - 1; i++) {
+            const bigram = second.substring(i, i + 2);
+            const idx = bigrams.get(bigram);
+
+            if (idx !== undefined && freqCount[idx] > 0) {
+                freqCount[idx]--;
+                intersectionSize++;
+            }
+        }
+
+        return (2.0 * intersectionSize) / (len1 + len2 - 2);
     }
     /**
      * sliding window search
@@ -163,30 +181,10 @@ export class FastSearcher<T, K = string> {
 
         maxWindow = Math.max(maxWindow || t2.length, 2);
 
-        /** map from n-gram to index in the frequency array */
-        const queryGrams = new Map<string, number>();
         const queryGramCount = query.length - gramLen + 1;
-
-        // keep frequencies in separated arrays for performance reasons
-        // copying a Map is slow, but copying a typed array is fast
-        const buffer = new ArrayBuffer(queryGramCount * 2);
-        const freqCount = new Uint8Array(buffer, 0, queryGramCount);
-        // the working copy
-        const freqCountCopy = new Uint8Array(buffer, queryGramCount, queryGramCount);
-
-        for (let j = 0, idx = 0; j < queryGramCount; j++) {
-            const grams = query.substring(j, j + gramLen);
-            const eIdx = queryGrams.get(grams);
-            if (eIdx !== undefined) {
-                freqCount[eIdx] += 1;
-            } else {
-                queryGrams.set(grams, idx);
-                freqCount[idx++] = 1;
-            }
-        }
+        const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
 
         const tokenScoreArr: number[][] = [];
-
         // compute score for each token
         for (const str of this.num2str) {
             const matches = [0];
@@ -198,7 +196,8 @@ export class FastSearcher<T, K = string> {
                 const grams = str.substring(j, j + gramLen);
                 const idx = queryGrams.get(grams);
 
-                if (idx !== undefined && freqCountCopy[idx]-- > 0) {
+                if (idx !== undefined && freqCountCopy[idx] > 0) {
+                    freqCountCopy[idx]--;
                     intersectionSize++;
                     matches.push(j, j + gramLen);
                 }
@@ -267,5 +266,77 @@ export class FastSearcher<T, K = string> {
         }
 
         return allMatches;
+    }
+    /**
+     * sliding window search
+     * @param query
+     * @param maxWindow
+     * @param gramLen
+     */
+    public sWSearchExact(query: string, gramLen = 3, maxWindow?: number) {
+        const t2 = query
+            .trim()
+            .toLowerCase()
+            .split(/\s+/);
+        query = t2.join(' ');
+        if (query.length <= 2) return [];
+
+        maxWindow = Math.max(maxWindow || t2.length, 2);
+
+        const queryGramCount = query.length - gramLen + 1;
+        const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
+
+        const allMatches: SearchResult<T, K>[] = [];
+        for (let i = 0; i < this.originals.length; i++) {
+            // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
+            // if (!len1 || !len2) return [0, []] as const; // if only one is empty string
+            // if (first === second) return [1, [0, len1]] as const; // identical
+            // if (len1 === 1 && len2 === 1) return [0, []] as const; // both are 1-letter strings
+            // if (len1 < 2 || len2 < 2) return [0, []] as const; // if either is a 1-letter string
+
+            const matches = [];
+            const fullStr = this.originals[i];
+            const offset = this.idxOffsets[i];
+
+            // note: nextOffset - offset = num of words + 1
+            const nextOffset = this.idxOffsets[i + 1];
+
+            // use the number of words as the window size in this string if maxWindow > number of words
+            const window = Math.min(maxWindow, (nextOffset - offset) >> 1);
+            let maxScore = 0;
+            for (let k = offset; k < nextOffset - window; k++) {
+                const start = this.indices[k];
+                const end = this.indices[k + window] - gramLen + 1;
+
+                let intersectionSize = 0;
+                freqCountCopy.set(freqCount);
+                for (let j = start; j < end; j++) {
+                    const grams = fullStr.substring(j, j + gramLen);
+                    const idx = queryGrams.get(grams);
+
+                    if (idx !== undefined && freqCountCopy[idx]-- > 0) {
+                        intersectionSize++;
+                        matches.push(j, j + gramLen);
+                    }
+                }
+
+                const score = (2 * intersectionSize) / (queryGramCount + end - start);
+                if (score > maxScore) {
+                    maxScore = score;
+                }
+            }
+
+            allMatches.push({
+                score: maxScore,
+                matches,
+                item: this.items[i],
+                index: i,
+                data: this.data
+            });
+        }
+        return allMatches;
+    }
+    public toJSON() {
+        return this.originals;
     }
 }

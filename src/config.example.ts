@@ -28,7 +28,7 @@ export const backend = {
  * Functions for fetching data
  */
 export const dataend: {
-    readonly buildings: () => Promise<FastSearcher>;
+    readonly buildings: () => Promise<FastSearcher<string>>;
     readonly distances: () => Promise<Int32Array>;
     readonly semesters: (count?: number) => Promise<SemesterJSON[]>;
     readonly courses: (semester: SemesterJSON) => Promise<Catalog>;

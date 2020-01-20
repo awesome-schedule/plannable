@@ -1,5 +1,9 @@
 <template>
     <nav class="bg-light sidebar">
+        <button class="btn btn-info nav-btn">
+            Fuzzy Search
+            <span class="badge badge-secondary">Beta</span>
+        </button>
         <div class="input-group mt-2">
             <input
                 ref="classSearch"
@@ -41,27 +45,16 @@
             ></ClassList>
         </div>
         <div v-else class="mx-3 my-4">
-            Fuzzy search (beta): Enter your search query and press ENTER to get results. Because
-            fuzzy search is slow, we cannot provide real-time results. Please do not search for
-            course number (e.g. 2102) here. It is not supported. This feature is memory intensive,
-            which will cause some browsers to crash. Before enabling this feature, please make sure
-            that your computer has at least 8GB RAM and you are using Chrome or FireFox.
-
-            <button
-                v-if="!workerLoaded"
-                class="btn btn-outline-info w-100 mt-2"
-                @click="initWorker()"
-            >
-                Enable
-            </button>
-            <button
-                v-else
-                class="btn btn-outline-info w-100 mt-2"
-                title="Release worker and reclaim memory"
-                @click="disposeWorker()"
-            >
-                Release
-            </button>
+            <ol class="pl-2">
+                <li class="mb-2 pl-1">
+                    You should use fuzzy search only when you want do an <b>approximate</b>
+                    match to your query. If you know exactly what your target course's course
+                    number/title/etc., please use the ordinary search instead.
+                </li>
+                <li class="mb-2 pl-1">
+                    Searching for course numbers (e.g. CS 2102) is not supported.
+                </li>
+            </ol>
         </div>
     </nav>
 </template>

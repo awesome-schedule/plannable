@@ -28,15 +28,30 @@
                 </a>
             </div>
         </div>
-        <div class="input-group mt-2">
+        <div
+            class="input-group mt-2"
+            @keydown.enter="dSelect(dPointer)"
+            @keydown.down="dropdownNext()"
+            @keydown.up="dropdownPrev()"
+        >
             <input
                 ref="classSearch"
+                v-model="query"
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Title/Number/Topic/Prof./Desc."
-                @input="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"
             />
+            <div v-if="query === ':'" class="dropdown-menu show">
+                <a
+                    v-for="(q, id) of queryTypes"
+                    :key="q"
+                    :class="`dropdown-item ${id === dPointer ? 'active' : ''}`"
+                    @click="dSelect(id)"
+                    @keydown.enter="dSelect(id)"
+                    >{{ q }}</a
+                >
+            </div>
             <div class="input-group-append">
                 <span
                     class="input-group-text px-2"

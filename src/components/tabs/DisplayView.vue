@@ -272,17 +272,6 @@
                         Enable Log History
                     </label>
                 </div>
-                <div class="custom-control custom-checkbox mb-1">
-                    <input
-                        id="enable-fuzzy"
-                        v-model="display.enableFuzzy"
-                        type="checkbox"
-                        class="custom-control-input"
-                    />
-                    <label for="enable-fuzzy" class="custom-control-label">
-                        Enable Fuzzy Search
-                    </label>
-                </div>
             </li>
             <li class="list-group-item">
                 <button

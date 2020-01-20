@@ -49,6 +49,14 @@ export default class FuzzyView extends Store {
         }
     }
 
+    mounted() {
+        if (!this.workerLoaded) this.initWorker();
+    }
+
+    destroyed() {
+        if (this.workerLoaded) this.disposeWorker();
+    }
+
     onInput(query: string) {
         if (this.realtime) this.getClass(query);
         else if (!query) this.getClass('');

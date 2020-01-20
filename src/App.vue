@@ -18,7 +18,6 @@
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
-                v-if="display.enableFuzzy"
                 class="tab-icon mt-0 mb-4"
                 :class="{ 'tab-icon-active': sideBar.showFuzzy }"
                 title="Fuzzy Search"

@@ -10,7 +10,7 @@
 import { SearchMatch } from '@/models/Catalog';
 import Course from '@/models/Course';
 import Store from '@/store';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import ClassList from '../ClassList.vue';
 
 const generatedWarning = `You're editing the generated schedule! You should do 'change to proposed' if you want to add on this particular generated schedule.`;
@@ -30,6 +30,9 @@ export default class ClassView extends Store {
     isEntering = false;
     inputCourses: Course[] = [];
     inputMatches: SearchMatch[] = [];
+    query: string = '';
+    queryTypes: string[] = ['title', 'num', 'topic', 'prof', 'desc'];
+    dPointer = 0;
 
     get current() {
         return this.schedule.currentSchedule.current;
@@ -44,8 +47,9 @@ export default class ClassView extends Store {
      *
      * @see Catalog.search
      */
-    getClass(query: string) {
-        if (!query) {
+    @Watch('query')
+    getClass() {
+        if (!this.query) {
             this.isEntering = false;
             this.inputCourses = [];
             this.inputMatches = [];
@@ -57,7 +61,7 @@ export default class ClassView extends Store {
 
         console.time('query');
         [this.inputCourses, this.inputMatches] = window.catalog.search(
-            query,
+            this.query,
             this.display.numSearchResults
         );
         console.timeEnd('query');
@@ -67,7 +71,7 @@ export default class ClassView extends Store {
 
     closeClassList() {
         (this.$refs.classSearch as HTMLInputElement).value = '';
-        this.getClass('');
+        this.query = '';
     }
 
     /**
@@ -95,5 +99,18 @@ export default class ClassView extends Store {
             this.noti.warn(e.message || generatedWarning);
         }
         this.saveStatus();
+    }
+
+    dropdownNext() {
+        if (this.query === ':') this.dPointer = (this.dPointer + 1) % this.queryTypes.length;
+    }
+
+    dropdownPrev() {
+        if (this.query === ':')
+            this.dPointer = (this.dPointer - 1 + this.queryTypes.length) % this.queryTypes.length;
+    }
+
+    dSelect(id: number) {
+        if (this.query === ':') this.query = `:${this.queryTypes[id]} `;
     }
 }

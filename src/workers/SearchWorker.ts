@@ -87,24 +87,20 @@ class FastSearcher<T, K = string> {
             const tokens = allTokens[j];
             const offset = this.idxOffsets[j];
             const original = this.originals[j];
-            // this.tokenScore.set(tokens[0], []);
             const t0 = tokens[0];
             if (str2num.get(t0) === undefined) {
                 str2num.set(t0, num2str.length);
-                // this.tokenScore.set(num2str.length, []);
                 num2str.push(t0);
             }
-            allTokenIds.push([str2num.get(t0) as number]);
+            allTokenIds.push([str2num.get(t0)!]);
             for (let i = 1; i < tokens.length; i++) {
                 const token = tokens[i];
                 this.indices[offset + i] = original.indexOf(
                     token,
                     this.indices[offset + i - 1] + tokens[i - 1].length
                 );
-                // this.tokenScore.set(token, []);
                 if (str2num.get(token) === undefined) {
                     str2num.set(token, num2str.length);
-                    // this.tokenScore.set(num2str.length, []);
                     num2str.push(token);
                 }
                 allTokenIds[j].push(str2num.get(token) as number);
@@ -132,12 +128,13 @@ class FastSearcher<T, K = string> {
      * @param maxWindow
      * @param gramLen
      */
-    public sWSearch(query: string, gramLen = 3, maxWindow?: number) {
+    public sWSearch(query: string, gramLen = 3, threshold = 0.03, maxWindow?: number) {
         const t2 = query
             .trim()
             .toLowerCase()
             .split(/\s+/);
         query = t2.join(' ');
+        // threshold = Math.floor(threshold * (1 << 16));
         if (query.length <= 2) return [];
 
         maxWindow = Math.max(maxWindow || t2.length, 2);
@@ -167,6 +164,7 @@ class FastSearcher<T, K = string> {
 
         const tokenScoreArr: number[][] = new Array(this.num2str.length);
 
+        // compute score for each token
         for (let i = 0; i < this.num2str.length; i++) {
             const str = this.num2str[i];
             let intersectionSize = 0;
@@ -181,10 +179,14 @@ class FastSearcher<T, K = string> {
                     matches.push(j, j + gramLen);
                 }
             }
+            // matches[0] = Math.floor(
+            //     ((2 * intersectionSize) / (maxGramCount + str.length)) * (1 << 16)
+            // );
             matches[0] = (2 * intersectionSize) / (maxGramCount + str.length);
             tokenScoreArr[i] = matches;
         }
 
+        // score & matches for each sentence
         const allMatches: SearchResult<T, K>[] = [];
         for (let i = 0; i < this.originals.length; i++) {
             // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
@@ -210,8 +212,9 @@ class FastSearcher<T, K = string> {
 
                 for (let j = k; j < k + window; j++) {
                     const values = tokenScoreArr[tokens[j]];
-                    if (values[0] < 0.03) continue;
-                    score += values[0];
+                    const v = values[0];
+                    if (v < threshold) continue;
+                    score += v;
                     const temp = this.indices[offset + j];
                     for (let m = 1; m < values.length; m++) {
                         matches.push(values[m] + temp);

@@ -13,7 +13,6 @@
  * @param first
  * @param second
  */
-// export function
 
 export interface SearchResult<T, K = string> {
     score: number;
@@ -223,10 +222,9 @@ export class FastSearcher<T, K = string> {
 
             const matches = [];
             const offset = this.idxOffsets[i];
-
-            // note: nextOffset - offset = num of words + 1
-            // use the number of words as the window size in this string if maxWindow > number of words
             const tokenLen = this.idxOffsets[i + 1] - offset;
+
+            // use the number of words as the window size in this string if maxWindow > number of words
             const window = Math.min(maxWindow, tokenLen);
 
             let score = 0,
@@ -264,6 +262,93 @@ export class FastSearcher<T, K = string> {
             allMatches.push({
                 score: maxScore,
                 matches,
+                item: this.items[i],
+                index: i,
+                data: this.data
+            });
+        }
+
+        return allMatches;
+    }
+    /**
+     * sliding window search
+     * @param query
+     * @param maxWindow
+     * @param gramLen
+     */
+    public sWSearchNoMatch(query: string, gramLen = 3, maxWindow?: number) {
+        const t2 = query
+            .trim()
+            .toLowerCase()
+            .split(/\s+/);
+        query = t2.join(' ');
+        if (query.length <= 2) return [];
+
+        maxWindow = Math.max(maxWindow || t2.length, 2);
+
+        const queryGramCount = query.length - gramLen + 1;
+        const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
+
+        const tokenScoreArr = new Float32Array(this.num2str.length);
+        // compute score for each token
+        for (let i = 0; i < this.num2str.length; i++) {
+            const str = this.num2str[i];
+
+            const matches = [0];
+            let intersectionSize = 0;
+            freqCountCopy.set(freqCount);
+
+            const tokenGramCount = str.length - gramLen + 1;
+            for (let j = 0; j < tokenGramCount; j++) {
+                const grams = str.substring(j, j + gramLen);
+                const idx = queryGrams.get(grams);
+
+                if (idx !== undefined && freqCountCopy[idx] > 0) {
+                    freqCountCopy[idx]--;
+                    intersectionSize++;
+                    matches.push(j, j + gramLen);
+                }
+            }
+            tokenScoreArr[i] = (2 * intersectionSize) / (queryGramCount + tokenGramCount);
+        }
+
+        // score & matches for each sentence
+        const allMatches: SearchResult<T, K>[] = [];
+        const scoreWindow = new Float32Array(this.maxTokenLen);
+        for (let i = 0; i < this.originals.length; i++) {
+            // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
+            // if (!len1 || !len2) return [0, []] as const; // if only one is empty string
+            // if (first === second) return [1, [0, len1]] as const; // identical
+            // if (len1 === 1 && len2 === 1) return [0, []] as const; // both are 1-letter strings
+            // if (len1 < 2 || len2 < 2) return [0, []] as const; // if either is a 1-letter string
+
+            const offset = this.idxOffsets[i];
+            const tokenLen = this.idxOffsets[i + 1] - offset;
+
+            // use the number of words as the window size in this string if maxWindow > number of words
+            const window = Math.min(maxWindow, tokenLen);
+
+            let score = 0,
+                maxScore = 0;
+            // initialize score window
+            for (let j = 0; j < window; j++) {
+                const v = tokenScoreArr[this.tokenIds[offset + j]];
+                score += scoreWindow[j] = v;
+            }
+            if (score > maxScore) maxScore = score;
+
+            for (let j = window; j < tokenLen; j++) {
+                // subtract the last score and add the new score
+                score -= scoreWindow[j - window];
+                const v = tokenScoreArr[this.tokenIds[offset + j]];
+                score += scoreWindow[j] = v;
+
+                if (score > maxScore) maxScore = score;
+            }
+
+            allMatches.push({
+                score: maxScore,
+                matches: [],
                 item: this.items[i],
                 index: i,
                 data: this.data

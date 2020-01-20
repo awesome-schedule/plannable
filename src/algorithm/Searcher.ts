@@ -30,6 +30,7 @@ export class FastSearcher<T, K = string> {
 
     public idxOffsets: Uint32Array;
     public indices: Uint32Array;
+    public tokenIds: Uint32Array;
 
     private num2str: string[] = [];
     private maxTokenLen: number = 0;
@@ -54,12 +55,14 @@ export class FastSearcher<T, K = string> {
             allTokens.push(temp);
 
             this.idxOffsets[i] = tokenLen;
-            tokenLen += temp.length << 1;
+            tokenLen += temp.length;
             if (temp.length > this.maxTokenLen) this.maxTokenLen = temp.length;
         }
         this.idxOffsets[items.length] = tokenLen;
 
         this.indices = new Uint32Array(tokenLen);
+        this.tokenIds = new Uint32Array(tokenLen);
+
         const str2num: Map<string, number> = new Map();
         for (let j = 0; j < allTokens.length; j++) {
             const tokens = allTokens[j];
@@ -69,7 +72,7 @@ export class FastSearcher<T, K = string> {
                 str2num.set(t0, this.num2str.length);
                 this.num2str.push(t0);
             }
-            this.indices[offset] = str2num.get(t0)!;
+            this.tokenIds[offset] = str2num.get(t0)!;
             const original = this.originals[j];
             for (let i = 1; i < tokens.length; i++) {
                 const token = tokens[i];
@@ -77,10 +80,10 @@ export class FastSearcher<T, K = string> {
                     str2num.set(token, this.num2str.length);
                     this.num2str.push(token);
                 }
-                this.indices[offset + (i << 1)] = str2num.get(token)!;
-                this.indices[offset + (i << 1) + 1] = original.indexOf(
+                this.tokenIds[offset + i] = str2num.get(token)!;
+                this.indices[offset + i] = original.indexOf(
                     token,
-                    this.indices[offset + (i << 1) - 1] + tokens[i - 1].length
+                    this.indices[offset + i - 1] + tokens[i - 1].length
                 );
             }
         }
@@ -186,7 +189,9 @@ export class FastSearcher<T, K = string> {
 
         const tokenScoreArr: number[][] = [];
         // compute score for each token
-        for (const str of this.num2str) {
+        for (let i = 0; i < this.num2str.length; i++) {
+            const str = this.num2str[i];
+
             const matches = [0];
             let intersectionSize = 0;
             freqCountCopy.set(freqCount);
@@ -221,19 +226,19 @@ export class FastSearcher<T, K = string> {
 
             // note: nextOffset - offset = num of words + 1
             // use the number of words as the window size in this string if maxWindow > number of words
-            const tokenLen = (this.idxOffsets[i + 1] - this.idxOffsets[i]) >> 1;
+            const tokenLen = this.idxOffsets[i + 1] - offset;
             const window = Math.min(maxWindow, tokenLen);
 
             let score = 0,
                 maxScore = 0;
             // initialize score window
             for (let j = 0; j < window; j++) {
-                const values = tokenScoreArr[this.indices[offset + (j << 1)]];
+                const values = tokenScoreArr[this.tokenIds[offset + j]];
                 const v = values[0];
                 score += scoreWindow[j] = v;
 
                 if (v < threshold) continue;
-                const temp = this.indices[offset + (j << 1) + 1];
+                const temp = this.indices[offset + j];
                 for (let m = 1; m < values.length; m++) {
                     matches.push(values[m] + temp);
                 }
@@ -243,14 +248,14 @@ export class FastSearcher<T, K = string> {
             for (let j = window; j < tokenLen; j++) {
                 // subtract the last score and add the new score
                 score -= scoreWindow[j - window];
-                const values = tokenScoreArr[this.indices[offset + (j << 1)]];
+                const values = tokenScoreArr[this.tokenIds[offset + j]];
                 const v = values[0];
                 score += scoreWindow[j] = v;
 
                 if (v < threshold) continue;
                 if (score > maxScore) maxScore = score;
 
-                const temp = this.indices[offset + (j << 1) + 1];
+                const temp = this.indices[offset + j];
                 for (let m = 1; m < values.length; m++) {
                     matches.push(values[m] + temp);
                 }
@@ -302,7 +307,7 @@ export class FastSearcher<T, K = string> {
             const nextOffset = this.idxOffsets[i + 1];
 
             // use the number of words as the window size in this string if maxWindow > number of words
-            const window = Math.min(maxWindow, (nextOffset - offset) >> 1);
+            const window = Math.min(maxWindow, nextOffset - offset);
             let maxScore = 0;
             for (let k = offset; k < nextOffset - window; k++) {
                 const start = this.indices[k];

@@ -213,21 +213,16 @@ export default class Catalog {
      * @param max_results
      */
     public search(query: string, max_results = 6): [Course[], SearchMatch[]] {
-        query = query
-            .trim()
-            .toLowerCase()
-            .split(/ +/) // remove redundant spaces
-            .join(' ');
-        const temp = query.split(' ');
-        /**
-         * is special search
-         */
+        query = query.trim().toLowerCase();
+        const temp = query.split(/\s+/);
+        query = temp.join(' ');
+
+        /** is special search*/
         const spec = query.startsWith(':') && temp.length > 1;
-        let field = '';
-        /**
-         * query no space
-         */
+
+        /** query no space*/
         let queryNoSp: string;
+        let field = '';
         if (spec) {
             field = temp[0].substring(1);
             queryNoSp = temp.slice(1).join('');

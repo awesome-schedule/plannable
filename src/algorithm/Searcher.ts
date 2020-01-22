@@ -62,7 +62,7 @@ export class FastSearcher<T, K = string> {
         this.indices = new Uint32Array(tokenLen);
         this.tokenIds = new Uint32Array(tokenLen);
 
-        const str2num: Map<string, number> = new Map();
+        const str2num = new Map<string, number>();
         for (let j = 0; j < allTokens.length; j++) {
             const tokens = allTokens[j];
             const offset = this.idxOffsets[j];
@@ -186,17 +186,17 @@ export class FastSearcher<T, K = string> {
         const queryGramCount = query.length - gramLen + 1;
         const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
 
-        const tokenScores = new Float32Array(this.uniqueTokens.length);
+        const len = this.uniqueTokens.length;
+        const tokenScores = new Float32Array(len);
         const tokenMatches: number[][] = [];
         // compute score for each token
-        for (let i = 0; i < this.uniqueTokens.length; i++) {
-            const str = this.uniqueTokens[i];
-
-            let intersectionSize = 0;
+        for (let i = 0; i < len; i++) {
             freqCountCopy.set(freqCount);
 
+            const str = this.uniqueTokens[i];
             const tokenGramCount = str.length - gramLen + 1;
             const matches: number[] = [];
+            let intersectionSize = 0;
             for (let j = 0; j < tokenGramCount; j++) {
                 const grams = str.substring(j, j + gramLen);
                 const idx = queryGrams.get(grams);
@@ -215,12 +215,6 @@ export class FastSearcher<T, K = string> {
         const allMatches: SearchResult<T, K>[] = [];
         const scoreWindow = new Float32Array(this.maxTokenLen);
         for (let i = 0; i < this.originals.length; i++) {
-            // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
-            // if (!len1 || !len2) return [0, []] as const; // if only one is empty string
-            // if (first === second) return [1, [0, len1]] as const; // identical
-            // if (len1 === 1 && len2 === 1) return [0, []] as const; // both are 1-letter strings
-            // if (len1 < 2 || len2 < 2) return [0, []] as const; // if either is a 1-letter string
-
             const matches = [];
             const offset = this.idxOffsets[i];
             const tokenLen = this.idxOffsets[i + 1] - offset;

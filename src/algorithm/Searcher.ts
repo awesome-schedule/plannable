@@ -49,6 +49,7 @@ export class FastSearcher<T, K = string> {
             const full = toStr(items[i])
                 .trimEnd()
                 .toLowerCase();
+            this.originals.push(full);
             const temp = full.split(/\s+/);
             allTokens.push(temp);
 
@@ -74,7 +75,7 @@ export class FastSearcher<T, K = string> {
             const original = this.originals[j];
             for (let i = 1; i < tokens.length; i++) {
                 const token = tokens[i];
-                if (!str2num.has(t0)) {
+                if (!str2num.has(token)) {
                     str2num.set(token, this.uniqueTokens.length);
                     this.uniqueTokens.push(token);
                 }
@@ -176,7 +177,7 @@ export class FastSearcher<T, K = string> {
         const t2 = query
             .trim()
             .toLowerCase()
-            .split(' ');
+            .split(/\s+/);
         query = t2.join(' ');
         if (query.length <= 2) return [];
 

@@ -209,7 +209,7 @@ export async function requestCourses(semester: SemesterJSON) {
 
     const res = await (location.host === 'plannable.org' || location.protocol === 'file:' // Running on GitHub pages or Electron (primary address)?
         ? axios.post<string>(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/deliverData.php`, // yes
+              'https://louslist.org/deliverData.php', // yes
               stringify({
                   Semester: semester.id,
                   Group: 'CS',
@@ -413,9 +413,7 @@ function parseSemesterData(rawData: string[][]) {
 export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
     console.time('get semester list');
     const response = await (location.host === 'plannable.org' || location.protocol === 'file:'
-        ? axios.get<string>(
-              `https://rabi.phys.virginia.edu/mySIS/CS2/index.php?time=${Math.random()}`
-          )
+        ? axios.get<string>(`https://louslist.org/index.php?time=${Math.random()}`)
         : axios.get<string>(`${getApi()}/data/Semester Data/index.html?time=${Math.random()}`));
     console.timeEnd('get semester list');
 

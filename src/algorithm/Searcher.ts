@@ -47,10 +47,9 @@ export class FastSearcher<T, K = string> {
         this.idxOffsets = new Uint32Array(items.length + 1);
         for (let i = 0; i < items.length; i++) {
             const full = toStr(items[i])
-                .toLowerCase()
-                .trimEnd();
+                .trimEnd()
+                .toLowerCase();
             const temp = full.split(/\s+/);
-            this.originals.push(full);
             allTokens.push(temp);
 
             this.idxOffsets[i] = tokenLen;
@@ -67,7 +66,7 @@ export class FastSearcher<T, K = string> {
             const tokens = allTokens[j];
             const offset = this.idxOffsets[j];
             const t0 = tokens[0];
-            if (str2num.get(t0) === undefined) {
+            if (!str2num.has(t0)) {
                 str2num.set(t0, this.uniqueTokens.length);
                 this.uniqueTokens.push(t0);
             }
@@ -75,7 +74,7 @@ export class FastSearcher<T, K = string> {
             const original = this.originals[j];
             for (let i = 1; i < tokens.length; i++) {
                 const token = tokens[i];
-                if (str2num.get(token) === undefined) {
+                if (!str2num.has(t0)) {
                     str2num.set(token, this.uniqueTokens.length);
                     this.uniqueTokens.push(token);
                 }
@@ -177,7 +176,7 @@ export class FastSearcher<T, K = string> {
         const t2 = query
             .trim()
             .toLowerCase()
-            .split(/\s+/);
+            .split(' ');
         query = t2.join(' ');
         if (query.length <= 2) return [];
 
@@ -196,7 +195,7 @@ export class FastSearcher<T, K = string> {
             freqCountCopy.set(freqCount);
 
             const tokenGramCount = str.length - gramLen + 1;
-            const matches = [];
+            const matches: number[] = [];
             for (let j = 0; j < tokenGramCount; j++) {
                 const grams = str.substring(j, j + gramLen);
                 const idx = queryGrams.get(grams);
@@ -238,8 +237,9 @@ export class FastSearcher<T, K = string> {
 
                 if (v < threshold) continue;
                 const temp = this.indices[offset + j];
-                for (const m of tokenMatches[tokenId]) {
-                    matches.push(m + temp);
+                const tokMatch = tokenMatches[tokenId];
+                for (let k = 0; k < tokMatch.length; k++) {
+                    matches.push(tokMatch[k] + temp);
                 }
             }
             if (score > maxScore) maxScore = score;
@@ -255,101 +255,15 @@ export class FastSearcher<T, K = string> {
                 if (score > maxScore) maxScore = score;
 
                 const temp = this.indices[offset + j];
-                for (const m of tokenMatches[tokenId]) {
-                    matches.push(m + temp);
+                const tokMatch = tokenMatches[tokenId];
+                for (let k = 0; k < tokMatch.length; k++) {
+                    matches.push(tokMatch[k] + temp);
                 }
             }
 
             allMatches.push({
                 score: maxScore,
                 matches,
-                item: this.items[i],
-                index: i,
-                data: this.data
-            });
-        }
-
-        return allMatches;
-    }
-    /**
-     * sliding window search
-     * @param query
-     * @param maxWindow
-     * @param gramLen
-     */
-    public sWSearchNoMatch(query: string, gramLen = 3, maxWindow?: number) {
-        const t2 = query
-            .trim()
-            .toLowerCase()
-            .split(/\s+/);
-        query = t2.join(' ');
-        if (query.length <= 2) return [];
-
-        maxWindow = Math.max(maxWindow || t2.length, 2);
-
-        const queryGramCount = query.length - gramLen + 1;
-        const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
-
-        const tokenScores = new Float32Array(this.uniqueTokens.length);
-        // compute score for each token
-        for (let i = 0; i < this.uniqueTokens.length; i++) {
-            const str = this.uniqueTokens[i];
-
-            let intersectionSize = 0;
-            freqCountCopy.set(freqCount);
-
-            const tokenGramCount = str.length - gramLen + 1;
-            for (let j = 0; j < tokenGramCount; j++) {
-                const grams = str.substring(j, j + gramLen);
-                const idx = queryGrams.get(grams);
-
-                if (idx !== undefined && freqCountCopy[idx] > 0) {
-                    freqCountCopy[idx]--;
-                    intersectionSize++;
-                }
-            }
-            tokenScores[i] = (2 * intersectionSize) / (queryGramCount + tokenGramCount);
-        }
-
-        // score & matches for each sentence
-        const allMatches: SearchResult<T, K>[] = [];
-        const scoreWindow = new Float32Array(this.maxTokenLen);
-        for (let i = 0; i < this.originals.length; i++) {
-            // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
-            // if (!len1 || !len2) return [0, []] as const; // if only one is empty string
-            // if (first === second) return [1, [0, len1]] as const; // identical
-            // if (len1 === 1 && len2 === 1) return [0, []] as const; // both are 1-letter strings
-            // if (len1 < 2 || len2 < 2) return [0, []] as const; // if either is a 1-letter string
-
-            const offset = this.idxOffsets[i];
-            const tokenLen = this.idxOffsets[i + 1] - offset;
-
-            // use the number of words as the window size in this string if maxWindow > number of words
-            const window = Math.min(maxWindow, tokenLen);
-
-            let score = 0,
-                maxScore = 0;
-            // initialize score window
-            for (let j = 0; j < window; j++) {
-                const tokenId = this.tokenIds[offset + j];
-                const v = tokenScores[tokenId];
-                score += scoreWindow[j] = v;
-            }
-            if (score > maxScore) maxScore = score;
-
-            for (let j = window; j < tokenLen; j++) {
-                // subtract the last score and add the new score
-                score -= scoreWindow[j - window];
-                const tokenId = this.tokenIds[offset + j];
-                const v = tokenScores[tokenId];
-                score += scoreWindow[j] = v;
-
-                if (score > maxScore) maxScore = score;
-            }
-
-            allMatches.push({
-                score: maxScore,
-                matches: [],
                 item: this.items[i],
                 index: i,
                 data: this.data

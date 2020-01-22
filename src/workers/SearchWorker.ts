@@ -30,7 +30,7 @@ let instrSearcher: FastSearcher<Section>;
 
 function processCourseResults(results: SearchResult<Course, string>[], weight: number) {
     for (const result of results) {
-        const key = result.item.key;
+        const { key } = courses[result.index];
         const score = result.score ** 2 * weight;
 
         const temp = courseMap.get(key);
@@ -47,8 +47,7 @@ function processCourseResults(results: SearchResult<Course, string>[], weight: n
 
 function processSectionResults(results: SearchResult<Section, string>[], weight: number) {
     for (const result of results) {
-        const item = result.item;
-        const key = item.key;
+        const { key, id } = sections[result.index];
         const score = result.score ** 2 * weight;
 
         let scoreEntry = scores.get(key);
@@ -60,16 +59,16 @@ function processSectionResults(results: SearchResult<Section, string>[], weight:
 
         const secMatches = sectionMap.get(key);
         if (secMatches) {
-            const matches = secMatches.get(item.id);
+            const matches = secMatches.get(id);
             if (matches) {
                 matches.push(result);
             } else {
-                secMatches.set(item.id, [result]);
+                secMatches.set(id, [result]);
                 // if encounter a new section of a course, increment the number of section recorded
                 scoreEntry[2] += 1;
             }
         } else {
-            sectionMap.set(key, new Map().set(item.id, [result]));
+            sectionMap.set(key, new Map().set(id, [result]));
             scoreEntry[2] += 1;
         }
     }

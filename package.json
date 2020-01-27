@@ -4,11 +4,16 @@
     "private": true,
     "description": "A website that helps UVa students schedule their classes more efficiently.",
     "author": {
-        "email": "hz2zz@virginia.edu",
-        "name": "Hanzhi Zhou",
-        "url": "https://github.com/hanzhi713"
+        "email": "",
+        "name": "Plannable",
+        "url": "https://github.com/awesome-schedule/plannable"
     },
     "contributors": [
+        {
+            "email": "hz2zz@virginia.edu",
+            "name": "Hanzhi Zhou",
+            "url": "https://github.com/hanzhi713"
+        },
         {
             "email": "ks5qug@virginia.edu",
             "name": "Kaiying Shan",
@@ -18,6 +23,11 @@
             "email": "zh2wc@virginia.edu",
             "name": "Zichao Hu",
             "url": "https://github.com/OAHC2022"
+        },
+        {
+            "email": "ml6vq@virginia.edu",
+            "name": "Minjun Long",
+            "url": "https://github.com/Elena6918"
         }
     ],
     "scripts": {

@@ -399,7 +399,7 @@ function parseSemesterData(rawData: string[][]) {
                 enumerable: true
             }
         } as {
-            [x in keyof SectionFields]: TypedPropertyDescriptor<Section[x]>;
+            [x in keyof Required<SectionFields>]: TypedPropertyDescriptor<Section[x]>;
         });
 
         course.ids.push(+data[0]);

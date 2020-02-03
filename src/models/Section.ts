@@ -72,8 +72,9 @@ export interface SectionFields {
     readonly valid: ValidFlag;
     /**
      * @see [[MeetingDate]]
+     * undefined if the meeting date is TBA/TBD or cannot be parsed
      */
-    readonly dateArray: MeetingDate;
+    readonly dateArray?: MeetingDate;
 }
 
 // use class-interface merging

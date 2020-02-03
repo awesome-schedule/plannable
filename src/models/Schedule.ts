@@ -344,14 +344,12 @@ export default abstract class Schedule {
                     : -1;
 
             const course = window.catalog.getCourse(key, all);
-            for (const section of course.sections) {
-                if (section.dateArray) sections.push(section);
-            }
+            for (const section of course.sections) if (section.dateArray) sections.push(section);
         }
 
         const _temp = new Set<number>();
-        for (const { dateArray } of sections)
-            _temp.add(dateArray[0]).add(dateArray[1] + 24 * 60 * 60 * 1000);
+        for (const { dateArray } of sections) // dateArray cannot be empty here
+            _temp.add(dateArray![0]).add(dateArray![1] + 24 * 60 * 60 * 1000);
 
         this.dateSeparators = [..._temp].sort((a, b) => a - b);
 
@@ -372,10 +370,10 @@ export default abstract class Schedule {
                 const course = this.All[key];
                 if (course === -1) {
                     const sections = window.catalog.getCourse(key, -1);
-                    for (const sec of sections.sections) {
-                        const [start, end] = sec.dateArray;
-                        if (start < lower && end >= upper) {
-                            this.separatedAll[date][key] = -1;
+                    for (const { dateArray } of sections.sections) {
+                        if (dateArray) {
+                            const [start, end] = dateArray;
+                            if (start < lower && end >= upper) this.separatedAll[date][key] = -1;
                         }
                     }
                     continue;
@@ -385,9 +383,9 @@ export default abstract class Schedule {
                     const sections = window.catalog.getCourse(key, group);
                     const s = new Set<number>();
                     for (const sec of sections.sections) {
-                        const [start, end] = sec.dateArray;
-                        if (start < lower && end >= upper) {
-                            s.add(sec.id);
+                        if (sec.dateArray) {
+                            const [start, end] = sec.dateArray;
+                            if (start < lower && end >= upper) s.add(sec.id);
                         }
                     }
                     // if the **course** already exists in this time block

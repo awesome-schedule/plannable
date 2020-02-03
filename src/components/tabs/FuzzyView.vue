@@ -6,12 +6,23 @@
         </button>
         <div class="input-group mt-2">
             <input
+                v-if="realtime"
                 ref="classSearch"
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Title/Topic/Prof./Desc."
                 :disabled="!workerLoaded"
                 @input="onInput($event.target.value)"
+                @keydown.enter="getClass($event.target.value)"
+                @keyup.esc="closeClassList()"
+            />
+            <input
+                v-else
+                ref="classSearch"
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Title/Topic/Prof./Desc."
+                :disabled="!workerLoaded"
                 @keydown.enter="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"
             />
@@ -44,7 +55,23 @@
                 @close="closeClassList()"
             ></ClassList>
         </div>
-        <div v-else class="mx-3 my-4">
+        <div v-else class="mx-3 my-2">
+            <div class="form-group row no-gutters mt-0 mb-1 mx-2">
+                <div>
+                    <label for="realtime" class="m-0"><small>Real Time</small></label>
+                </div>
+                <div>
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="realtime"
+                            v-model="realtime"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="realtime" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
             <ol class="pl-2">
                 <li class="mb-2 pl-1">
                     You should use fuzzy search only when you want do an <b>approximate</b>

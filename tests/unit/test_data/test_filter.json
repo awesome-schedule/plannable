@@ -12,7 +12,6 @@
         "combineSections": true,
         "expandOnEntering": false,
         "enableLog": false,
-        "enableFuzzy": false,
         "showWeekend": false,
         "showSuffix": true,
         "_fullHeight": 40,

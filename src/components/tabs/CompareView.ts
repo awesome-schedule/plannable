@@ -5,7 +5,6 @@
 /**
  *
  */
-import Schedule, { ScheduleAll } from '@/models/Schedule';
 import GeneratedSchedule from '@/models/GeneratedSchedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';

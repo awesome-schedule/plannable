@@ -131,7 +131,7 @@ export default class Catalog {
         if (this.worker) {
             this.worker.terminate();
             this.resultMap.clear();
-            delete this.worker;
+            this.worker = undefined;
         }
     }
 

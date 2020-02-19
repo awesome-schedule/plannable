@@ -16,17 +16,68 @@ import _Course, { CourseMatch, Match } from '../models/Course';
 import _Meeting from '../models/Meeting';
 import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '@/utils';
-import { FastSearcher, SearchResult } from '@/algorithm/Searcher';
+import { SearchResult } from '@/algorithm/Searcher';
+
+const Module = require('../algorithm/quick_example.js').default;
+// console.log(Module);
+
+export class FastSearcher2<T> {
+    _searcher: any;
+    constructor(items: T[], toStr: (x: T) => string = x => x as any, public data = '') {
+        const sV = Module._stringVec(items.length);
+        for (let i = 0; i < items.length; i++) {
+            sV.set(
+                i,
+                toStr(items[i])
+                    .trimEnd()
+                    .toLowerCase()
+            );
+        }
+        this._searcher = new Module._FastSearcher(sV);
+        this.data = data;
+        console.log(this, this._searcher);
+    }
+    sWSearch(query: string, gramLen = 3, threshold = 0.03, maxWindow = 2) {
+        const t2 = query
+            .trim()
+            .toLowerCase()
+            .split(/\s+/);
+        query = t2.join(' ');
+        if (query.length <= 2) return [];
+
+        maxWindow = Math.max(maxWindow || t2.length, 2);
+        const results = this._searcher.sWSearch(query, maxWindow, gramLen, threshold);
+        const jsArr = [];
+        for (let i = 0; i < results.size(); i++) {
+            const _result = results.get(i);
+            const _matches = _result.matches;
+            const matches = [];
+            for (let j = 0; j < _matches.size(); j++) {
+                matches.push(_matches.get(j));
+            }
+            const result: SearchResult<T, string> = {
+                score: _result.score,
+                index: _result.index,
+                matches,
+                data: this.data
+            };
+            jsArr.push(result);
+        }
+        return jsArr;
+    }
+}
+const FastSearcher = FastSearcher2;
+type _FastSearcher<T> = FastSearcher2<T>;
 
 type Section = Omit<SectionFields, 'course'>;
 interface Course extends Omit<NonFunctionProperties<_Course>, 'sections'> {}
 
 declare function postMessage(msg: [string, [RawAlgoCourse[], SearchMatch[]]] | 'ready'): void;
 
-let titleSearcher: FastSearcher<Course>;
-let descriptionSearcher: FastSearcher<Course>;
-let topicSearcher: FastSearcher<Section>;
-let instrSearcher: FastSearcher<Section>;
+let titleSearcher: _FastSearcher<Course>;
+let descriptionSearcher: _FastSearcher<Course>;
+let topicSearcher: _FastSearcher<Section>;
+let instrSearcher: _FastSearcher<Section>;
 
 function processCourseResults(results: SearchResult<Course, string>[], weight: number) {
     for (const result of results) {
@@ -104,10 +155,16 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
         console.time('worker prep');
         [courses, sections] = data;
 
-        titleSearcher = new FastSearcher(courses, obj => obj.title, 'title');
-        descriptionSearcher = new FastSearcher(courses, obj => obj.description, 'description');
-        topicSearcher = new FastSearcher(sections, obj => obj.topic, 'topic');
-        instrSearcher = new FastSearcher(sections, obj => obj.instructors.join(' '), 'instructors');
+        Module.onRuntimeInitialized = () => {
+            titleSearcher = new FastSearcher(courses, obj => obj.title, 'title');
+            descriptionSearcher = new FastSearcher(courses, obj => obj.description, 'description');
+            topicSearcher = new FastSearcher(sections, obj => obj.topic, 'topic');
+            instrSearcher = new FastSearcher(
+                sections,
+                obj => obj.instructors.join(' '),
+                'instructors'
+            );
+        };
 
         postMessage('ready');
         console.timeEnd('worker prep');
@@ -151,7 +208,7 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
 
             if (courseMatch) {
                 const crsMatches: CourseMatch[] = toMatches(courseMatch);
-                finalResults.push([key, courseMatch[0].item.ids]);
+                finalResults.push([key, courses[courseMatch[0].index].ids]);
                 allMatches.push([crsMatches, secMatches]);
             } else {
                 // only section match exists

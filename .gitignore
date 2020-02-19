@@ -71,3 +71,4 @@ _latexindent_*
 .fuse_hidden*
 
 dist-electron
+quick_example.*

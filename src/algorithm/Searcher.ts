@@ -18,7 +18,6 @@ export interface SearchResult<T, K = string> {
     score: number;
     matches: number[];
     index: number;
-    item: T;
     data: K;
 }
 /**
@@ -259,7 +258,6 @@ export class FastSearcher<T, K = string> {
             allMatches.push({
                 score: maxScore,
                 matches,
-                item: this.items[i],
                 index: i,
                 data: this.data
             });
@@ -329,7 +327,6 @@ export class FastSearcher<T, K = string> {
             allMatches.push({
                 score: maxScore,
                 matches,
-                item: this.items[i],
                 index: i,
                 data: this.data
             });

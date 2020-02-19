@@ -17,9 +17,19 @@
     "vetur.format.options.tabSize": 4,
     "vetur.experimental.templateInterpolationService": true,
     "eslint.options": {
-        "extensions": [".html", ".js", ".vue", ".jsx"]
+        "extensions": [
+            ".html",
+            ".js",
+            ".vue",
+            ".jsx"
+        ]
     },
-    "eslint.validate": ["javascript", "javascriptreact", "vue", "typescript"],
+    "eslint.validate": [
+        "javascript",
+        "javascriptreact",
+        "vue",
+        "typescript"
+    ],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     }

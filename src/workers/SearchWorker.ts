@@ -18,7 +18,7 @@ import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '@/utils';
 import { SearchResult } from '@/algorithm/Searcher';
 
-const Module = require('../algorithm/quick_example.js').default;
+const Module = require('../algorithm/quick_example.js');
 // console.log(Module);
 
 export class FastSearcher2<T> {
@@ -35,9 +35,8 @@ export class FastSearcher2<T> {
         }
         this._searcher = new Module._FastSearcher(sV);
         this.data = data;
-        console.log(this, this._searcher);
     }
-    sWSearch(query: string, gramLen = 3, threshold = 0.03, maxWindow = 2) {
+    sWSearch(query: string, maxWindow?: number, gramLen = 3, threshold = 0.03) {
         const t2 = query
             .trim()
             .toLowerCase()
@@ -63,6 +62,7 @@ export class FastSearcher2<T> {
             };
             jsArr.push(result);
         }
+        // console.log(jsArr);
         return jsArr;
     }
 }
@@ -164,6 +164,7 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
                 obj => obj.instructors.join(' '),
                 'instructors'
             );
+            console.log(titleSearcher);
         };
 
         postMessage('ready');

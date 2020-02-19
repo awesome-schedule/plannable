@@ -100,14 +100,19 @@ class _FastSearcher {
         }
 
         auto len = uniqueTokens.size();
-        const auto tokenData = make_unique<_TokenData[]>(len);
+        vector<_TokenData> tokenData(len);
         // compute score for each token
         for (size_t i = 0; i < len; i++) {
             const auto& str = uniqueTokens[i];
-            const auto tokenGramCount = str.size() - gramLen + 1;
+            const int tokenGramCount = static_cast<int>(str.size()) - gramLen + 1;
             auto& data = tokenData[i];
+            if (tokenGramCount <= 0) {
+                data.score = 0;
+                continue;
+            }
+
             int intersectionSize = 0;
-            unordered_map<string, int> queryGramsCopy = queryGrams;
+            auto queryGramsCopy = queryGrams;
             for (size_t j = 0; j < tokenGramCount; j++) {
                 auto it = queryGramsCopy.find(str.substr(j, gramLen));
                 if (it != queryGramsCopy.end() && it->second > 0) {
@@ -123,7 +128,7 @@ class _FastSearcher {
         len = items.size();
         // score & matches for each sentence
         vector<_SearchResult> allMatches(len);
-        auto scoreWindow = make_unique<float[]>(maxTokenLen);
+        vector<float> scoreWindow(maxTokenLen);
         for (size_t i = 0; i < len; i++) {
             const auto offset = idxOffsets[i];
             const auto tokenLen = idxOffsets[i + 1] - offset;
@@ -161,7 +166,10 @@ class _FastSearcher {
                     result.matches.push_back(mIdx + temp);
                 }
             }
+            result.score = maxScore;
+            result.index = i;
         }
+
         return allMatches;
     }
 };

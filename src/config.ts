@@ -19,15 +19,15 @@ export const backend = {
     /**
      * API endpoint for uploading/overwriting profiles on remote
      */
-    up: 'https://match.msnatuva.org/courses/api/save_plannable_profile/',
+    up: 'https://match.msnatuva.org/courses/api/save_plannable_profile',
     /**
      * API endpoint for downloading profiles from remote
      */
-    down: 'https://match.msnatuva.org/courses/api/get_plannable_profile/',
+    down: 'https://match.msnatuva.org/courses/api/get_plannable_profile',
     /**
      * API endpoint for editing the properties of the profile (e.g. name)
      */
-    edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/'
+    edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile'
 } as const;
 
 /**

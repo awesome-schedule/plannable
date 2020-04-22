@@ -8,9 +8,11 @@ test('profile basic', async () => {
     await s.semester.loadSemesters();
     s.profile.initProfiles(s.semester.semesters);
 
+    // name of the latest semester
+    const latest = s.semester.semesters[0].name;
     s.profile.addProfile(JSON.stringify({ name: 'prof1' }), '');
-    expect(s.profile.profiles).toEqual(['Spring 2020', 'prof1']);
-    s.profile.deleteProfile('Spring 2020', 0);
+    expect(s.profile.profiles).toEqual([latest, 'prof1']);
+    s.profile.deleteProfile(latest, 0);
 
     s.profile.addProfile(JSON.stringify({ name: 'prof2' }), '');
     expect(s.profile.current).toBe('prof2');

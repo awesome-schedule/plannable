@@ -61,10 +61,7 @@ export const dataend = {
  */
 function viewDetails(semester: SemesterJSON, section: Section) {
     window.open(
-        'https://louslist.org/sectiontip.php?Semester=' +
-            semester.id +
-            '&ClassNumber=' +
-            section.id,
+        `https://louslist.org/sectiontip.php?Semester=${semester.id}&ClassNumber=${section.id}`,
         '_blank',
         'width=650,height=700,scrollbars=yes'
     );
@@ -77,6 +74,17 @@ function viewGrades(semester: SemesterJSON, course: CourseFields) {
         `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
         '_blank',
         'width=650,height=700,scrollbars=yes'
+    );
+}
+
+/**
+ * view the evaluations for the given course
+ */
+function viewEvals(semester: SemesterJSON, param: CourseFields) {
+    window.open(
+        `https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp=${param.department},${param.number}`,
+        '_blank',
+        'width=720,height=700,scrollbars=yes'
     );
 }
 
@@ -102,15 +110,23 @@ interface ModalLinks {
 export const modalLinks: ModalLinks = {
     section: [
         {
-            name: "More Details (Lou's List)",
-            action: viewDetails
+            name: 'Course Evaluations',
+            action: viewEvals
         },
         {
             name: 'Grade Distribution',
             action: viewGrades
+        },
+        {
+            name: "More Details (Lou's List)",
+            action: viewDetails
         }
     ],
     course: [
+        {
+            name: 'Course Evaluations',
+            action: viewEvals
+        },
         {
             name: 'Grade Distribution',
             action: viewGrades
@@ -240,7 +256,7 @@ async function requestBuildingSearcher() {
     return new FastSearcher(res.data);
 }
 
-export async function requestCourses(semester: SemesterJSON) {
+async function requestCourses(semester: SemesterJSON) {
     console.time(`request semester ${semester.name} data`);
 
     const res = await (location.host === 'plannable.org' || location.protocol === 'file:' // Running on GitHub pages or Electron (primary address)?
@@ -446,7 +462,7 @@ function parseSemesterData(rawData: string[][]) {
 /**
  * Fetch the list of semesters from Lou's list
  */
-export async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
+async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
     console.time('get semester list');
     const response = await (location.host === 'plannable.org' || location.protocol === 'file:'
         ? axios.get<string>(`https://louslist.org/index.php?time=${Math.random()}`)

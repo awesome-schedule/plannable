@@ -1,6 +1,6 @@
 import { FastSearcher } from './algorithm/Searcher';
 import Catalog, { SemesterJSON } from './models/Catalog';
-import Course, { CourseFields } from './models/Course';
+import Course from './models/Course';
 import Section from './models/Section';
 
 /**

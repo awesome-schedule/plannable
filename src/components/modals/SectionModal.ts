@@ -5,7 +5,7 @@
 /**
  *
  */
-import { external } from '@/config';
+import { modalLinks } from '@/config';
 import { SemesterJSON } from '@/models/Catalog';
 import Section from '@/models/Section';
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -16,8 +16,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
  */
 @Component
 export default class SectionModal extends Vue {
-    get config() {
-        return external;
+    get links() {
+        return modalLinks.section;
     }
     @Prop(Section) readonly section!: Section;
     @Prop(Object) readonly semester!: SemesterJSON;

@@ -83,13 +83,16 @@
                         v-html="highlightMatch(course.description, 'description', match[0])"
                     ></p>
 
-                    <button
-                        v-if="config.enableGrades"
-                        class="btn btn-outline-info"
-                        @click="config.viewGrades(course)"
-                    >
-                        Grade Distribution
-                    </button>
+                    <div v-if="semester">
+                        <button
+                            v-for="item in links"
+                            :key="item.name"
+                            class="btn btn-outline-info mr-2"
+                            @click="item.action(semester, course)"
+                        >
+                            {{ item.name }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

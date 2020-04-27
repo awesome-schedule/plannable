@@ -1,6 +1,7 @@
 import { FastSearcher } from './algorithm/Searcher';
 import Catalog, { SemesterJSON } from './models/Catalog';
-import { CourseFields } from './models/Course';
+import Course, { CourseFields } from './models/Course';
+import Section from './models/Section';
 
 /**
  * Configuration of the backend. Not recommended to use anymore due to some security concerns
@@ -55,21 +56,29 @@ export const dataend: {
     courses: null
 } as any; // remove to enable type checking
 
+interface ModalLinkItem<T> {
+    name: string;
+    /**
+     * an action to perform when user clicks on this link
+     * @param semester the currently selected semester
+     * @param param course/section corresponding to the active modal
+     */
+    action(semester: SemesterJSON, param: T): void;
+}
+
+interface ModalLinks {
+    section: ModalLinkItem<Section>[];
+    course: ModalLinkItem<Course>[];
+}
+
 /**
- * functions for opening external webpages
+ * Used to generate a list of action buttons in section/course modal.
+ * We used it to open external pages relevant to the given course/section.
  */
-export const external = {
-    enableDetails: false,
-    /**
-     * for the given semester id and section id, open an external webpage showing the detail of that section
-     */
-    viewDetails(semesterId: string, secId: number) {},
-    enableGrades: false,
-    /**
-     * for the given course, open an external webpage showing the past grades of that course
-     */
-    viewGrades(course: CourseFields) {}
-} as const;
+export const modalLinks: ModalLinks = {
+    section: [],
+    course: []
+};
 
 /**
  * some default UI configurations. Usually no need to change
@@ -89,7 +98,7 @@ export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 
 // -------------------------- lecture type configuration ---------------------------------
 export type CourseType = keyof typeof TYPES_PARSE;
-// course status is only used to typing purposes. can be just an alais of string
+// CourseStatus is only used for typing purposes. can be just an alias of string
 export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
 
 /**

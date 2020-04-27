@@ -26,18 +26,12 @@
                     <div>{{ section.description }}</div>
                     <div v-if="semester" class="mt-2">
                         <button
-                            v-if="config.enableDetails"
+                            v-for="item in links"
+                            :key="item.name"
                             class="btn btn-outline-info mr-2"
-                            @click="config.viewDetails(semester.id, section.id)"
+                            @click="item.action(semester, section)"
                         >
-                            More Details (Lou's List)
-                        </button>
-                        <button
-                            v-if="config.enableGrades"
-                            class="btn btn-outline-info"
-                            @click="config.viewGrades(section)"
-                        >
-                            Grade Distribution
+                            {{ item.name }}
                         </button>
                     </div>
                 </div>

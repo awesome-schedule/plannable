@@ -143,7 +143,7 @@ export default abstract class Schedule {
      * [1567457860885, 1567458860885]
      * ```
      */
-    private dateSeparators: number[] = [];
+    public dateSeparators: number[] = [];
 
     /**
      * Construct a `Schedule` object from its raw representation

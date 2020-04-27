@@ -1,4 +1,4 @@
-import { external } from '@/config';
+import { modalLinks } from '@/config';
 import * as Utils from '@/utils';
 import axios from 'axios';
 
@@ -65,8 +65,18 @@ describe('Utility Tests', () => {
     });
 
     it('dummy', () => {
-        external.viewDetails('1198', 1);
-        external.viewGrades(window.catalog.getCourse('cs11105'));
+        const semester = {
+            id: '1198',
+            name: ''
+        };
+        const course = window.catalog.getCourse('cs11105');
+        const section = course.sections[0];
+        for (const action of modalLinks.section) {
+            action.action(semester, section);
+        }
+        for (const action of modalLinks.course) {
+            action.action(semester, course);
+        }
     });
 
     it('other', () => {

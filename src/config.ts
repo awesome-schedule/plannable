@@ -57,35 +57,66 @@ export const dataend = {
 } as const;
 
 /**
- * functions for opening external webpages
+ * for the given semester id and section id, open an external webpage showing the detail of that section
  */
-export const external = {
-    enableDetails: true,
+function viewDetails(semester: SemesterJSON, section: Section) {
+    window.open(
+        'https://louslist.org/sectiontip.php?Semester=' +
+            semester.id +
+            '&ClassNumber=' +
+            section.id,
+        '_blank',
+        'width=650,height=700,scrollbars=yes'
+    );
+}
+/**
+ * for the given course, open an external webpage showing the past grades of that course
+ */
+function viewGrades(semester: SemesterJSON, course: CourseFields) {
+    window.open(
+        `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
+        '_blank',
+        'width=650,height=700,scrollbars=yes'
+    );
+}
+
+interface ModalLinkItem<T> {
+    name: string;
     /**
-     * for the given semester id and section id, open an external webpage showing the detail of that section
+     * an action to perform when user clicks on this link
+     * @param semester the currently selected semester
+     * @param param course/section corresponding to the active modal
      */
-    viewDetails(semesterId: string, secId: number) {
-        window.open(
-            'https://rabi.phys.virginia.edu/mySIS/CS2/sectiontip.php?Semester=' +
-                semesterId +
-                '&ClassNumber=' +
-                secId,
-            '_blank',
-            'width=650,height=700,scrollbars=yes'
-        );
-    },
-    enableGrades: true,
-    /**
-     * for the given course, open an external webpage showing the past grades of that course
-     */
-    viewGrades(course: CourseFields) {
-        window.open(
-            `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
-            '_blank',
-            'width=650,height=700,scrollbars=yes'
-        );
-    }
-} as const;
+    action(semester: SemesterJSON, param: T): void;
+}
+
+interface ModalLinks {
+    section: ModalLinkItem<Section>[];
+    course: ModalLinkItem<Course>[];
+}
+
+/**
+ * Used to generate a list of action buttons in section/course modal.
+ * We used it to open external pages relevant to the given course/section.
+ */
+export const modalLinks: ModalLinks = {
+    section: [
+        {
+            name: "More Details (Lou's List)",
+            action: viewDetails
+        },
+        {
+            name: 'Grade Distribution',
+            action: viewGrades
+        }
+    ],
+    course: [
+        {
+            name: 'Grade Distribution',
+            action: viewGrades
+        }
+    ]
+};
 
 /**
  * some default UI configurations. Usually no need to change
@@ -105,7 +136,7 @@ export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 
 // -------------------------- lecture type configuration ---------------------------------
 export type CourseType = keyof typeof TYPES_PARSE;
-// course status is only used to typing purposes. can be just an alais of string
+// CourseStatus is only used for typing purposes. can be just an alias of string
 export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
 
 /**

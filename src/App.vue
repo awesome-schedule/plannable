@@ -1,7 +1,11 @@
 <template>
     <div id="app" class="w-100" @change="saveStatus()">
         <version-modal :version="version"></version-modal>
-        <course-modal :course="modal.course" :match="modal.match"></course-modal>
+        <course-modal
+            :course="modal.course"
+            :match="modal.match"
+            :semester="semester.currentSemester"
+        ></course-modal>
         <section-modal
             :semester="semester.currentSemester"
             :section="modal.section"

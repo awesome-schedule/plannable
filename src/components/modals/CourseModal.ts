@@ -5,8 +5,8 @@
 /**
  *
  */
-import { external } from '@/config';
-import { SearchMatch } from '@/models/Catalog';
+import { modalLinks } from '@/config';
+import { SearchMatch, SemesterJSON } from '@/models/Catalog';
 import Course from '@/models/Course';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 /**
@@ -16,9 +16,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
  */
 @Component
 export default class CourseModal extends Vue {
-    get config() {
-        return external;
+    get links() {
+        return modalLinks.course;
     }
     @Prop(Course) readonly course!: Course;
     @Prop({ type: Array, default: [] }) readonly match!: SearchMatch;
+    @Prop(Object) readonly semester!: SemesterJSON;
 }

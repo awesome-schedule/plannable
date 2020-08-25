@@ -434,7 +434,7 @@ export function compressJSON(jsonString: string) {
 export async function parseFromURL(config: string): Promise<SemesterStorage> {
     // get URL and convert to JSON
     const data: ReturnType<typeof compressJSON> = JSON.parse(
-        lz.decompressFromEncodedURIComponent(config.trim())
+        lz.decompressFromEncodedURIComponent(config.trim())!
     );
     const currentSemester = { id: data[2], name: data[3] };
     await semester.selectSemester(currentSemester);

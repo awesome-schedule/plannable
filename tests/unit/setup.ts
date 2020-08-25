@@ -82,7 +82,7 @@ declare global {
 
 global.queue = [];
 global.convertAll = convertAll;
-global.postMessage = msg => global.queue.push(msg);
+global.postMessage = (msg: any) => global.queue.push(msg);
 
 beforeAll(async () => {
     const catalog = await dataend.courses({ name: '', id: '1198' });

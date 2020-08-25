@@ -280,7 +280,7 @@ async function requestCourses(semester: SemesterJSON) {
             parse(res.data, {
                 skipEmptyLines: true,
                 header: false
-            }).data
+            }).data as string[][]
         ),
         Date.now()
     );

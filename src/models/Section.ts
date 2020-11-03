@@ -90,9 +90,9 @@ export default interface Section extends SectionFields {}
 export default class Section implements CourseFields, Hashable {
     public static readonly Validity = [
         'Valid',
-        'Warning: Some meetings have incomplete information.',
+        'Warning: Some meetings have incomplete information (have TBA/TBD).',
         'Fatal: This section has several different meeting dates.',
-        'Fatal: Some meetings have invalid start or end time.',
+        'Fatal: Some meetings have invalid (TBA/TBD) start or end time.',
         'Fatal: This section has unknown start and end date.'
     ] as const;
     // --------- getters for fields of the course ---------------------

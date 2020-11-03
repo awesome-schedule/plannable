@@ -185,12 +185,13 @@ class ScheduleGenerator {
 
         const courses = schedule.All;
 
+        const msgs: NotiMsg<ScheduleEvaluator>[] = [];
         // for each course selected, form an array of sections
         for (const key in courses) {
             const temp = courses[key];
             const allSections = temp === -1 ? ([-1] as const) : temp;
 
-            let allEmpty = true;
+            let noSelected = true;
             for (let i = 0; i < allSections.length; i++) {
                 const subgroup = allSections[i];
 
@@ -199,23 +200,31 @@ class ScheduleGenerator {
 
                 const courseRec = this.catalog.getCourse(key, subgroup);
 
-                const [classes, timeArrays, dates] = this.filterSections(courseRec, timeSlots);
+                const [classes, timeArrays, dates, allInvalid] = this.filterSections(
+                    courseRec,
+                    timeSlots
+                );
+
+                noSelected = false;
                 // throw an error of none of the sections pass the filter
                 if (classes.length === 0) {
-                    return {
-                        level: 'error',
-                        msg: `No sections of ${courseRec.displayName} ${
-                            i === 0 || subgroup === -1 ? '' : 'belonging to group ' + i // don't show group idx for default group or Any Section
-                        } satisfy your filters and do not conflict with your events`
-                    };
+                    msgs.push({
+                        level: 'warn',
+                        msg: `Not scheduled: ${courseRec.displayName}${
+                            i === 0 || subgroup === -1 ? '' : ' belonging to group ' + i // don't show group idx for default group or Any Section
+                        }. Reason: No sections ${
+                            allInvalid
+                                ? 'have valid meeting times (e.g. All TBA/TBD)'
+                                : 'satisfy your filters and do not conflict with your events'
+                        }`
+                    });
+                } else {
+                    classList.push(classes);
+                    timeArrayList.push(timeArrays);
+                    dateList.push(dates);
                 }
-                classList.push(classes);
-                timeArrayList.push(timeArrays);
-                dateList.push(dates);
-
-                allEmpty = false;
             }
-            if (allEmpty) {
+            if (noSelected) {
                 return {
                     level: 'error',
                     msg: `No sections of ${
@@ -300,9 +309,11 @@ class ScheduleGenerator {
         if (size > 0) {
             console.timeEnd('add to eval');
             if (sort) evaluator.sort();
+            let msgString = '<br>';
+            for (const msg of msgs) msgString += msg.msg + '<br>';
             return {
-                level: 'success',
-                msg: `${size} Schedules Generated!`,
+                level: msgs.length > 0 ? 'warn' : 'success',
+                msg: `${size} Schedules Generated! ${msgString}`,
                 payload: evaluator
             };
         }
@@ -323,6 +334,7 @@ class ScheduleGenerator {
             ? Object.values(courseRec.getCombined())
             : courseRec.sections.map(s => [s]);
 
+        let allInvalid = true;
         // for each combined section, form a RawAlgoCourse
         outer: for (const sections of combined) {
             // only take the time and room info of the first section
@@ -334,6 +346,7 @@ class ScheduleGenerator {
             const timeArray = sections[0].getTimeRoom();
             if (!timeArray) continue;
 
+            allInvalid = false;
             // don't include this combined section if it conflicts with any time filter or event.
             for (const td of timeSlots) {
                 if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;
@@ -354,7 +367,7 @@ class ScheduleGenerator {
             }
         }
 
-        return [classes, timeArrays, dates] as const;
+        return [classes, timeArrays, dates, allInvalid] as const;
     }
 
     /**

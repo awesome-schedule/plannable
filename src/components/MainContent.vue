@@ -15,10 +15,19 @@
                 :class="`alert-${noti.cls}`"
                 style="width: 85%"
             >
-                <span v-html="noti.msg"></span>
-                <button type="button" class="close" style="align:center" @click="noti.clear()">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <div class="row  align-items-center">
+                    <div class="col-md-auto mr-auto" v-html="noti.msg"></div>
+                    <div class="col">
+                        <button
+                            type="button"
+                            class="close"
+                            style="align:center"
+                            @click="noti.clear()"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </transition>
 

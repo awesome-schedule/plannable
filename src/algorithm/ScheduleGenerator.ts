@@ -309,11 +309,11 @@ class ScheduleGenerator {
         if (size > 0) {
             console.timeEnd('add to eval');
             if (sort) evaluator.sort();
-            let msgString = '<br>';
+            let msgString = '';
             for (const msg of msgs) msgString += msg.msg + '<br>';
             return {
                 level: msgs.length > 0 ? 'warn' : 'success',
-                msg: `${size} Schedules Generated! ${msgString}`,
+                msg: `${msgString}${size} Schedules Generated!`,
                 payload: evaluator
             };
         }

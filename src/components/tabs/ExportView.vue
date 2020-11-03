@@ -25,12 +25,12 @@
                     class="custom-file-input"
                     accept="text/ics"
                     style="width:100%"
-                    @change="onUploadICS($event)"
+                    disabled
                 />
                 <label class="custom-file-label" for="customFile">Import from ICS..</label>
             </div>
             <small class="text-center form-text text-muted">
-                Import a .ics file exported by UVA SIS
+                Temporally Unavailable
             </small>
         </div>
         <div class="btn bg-info nav-btn">

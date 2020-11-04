@@ -82,7 +82,7 @@ describe('ScheduleGenerator Test', () => {
         schedule.addEvent('MoTuWeThFr 8:00AM - 8:00PM', false);
 
         let r = store.generateSchedules();
-        expect(r).toBeFalsy();
+        expect(r).toBeTruthy(); // will still try to generate schedule even if there's conflict
 
         schedule.events.length = 0;
         // similarity

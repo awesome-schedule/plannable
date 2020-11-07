@@ -163,7 +163,7 @@ export default class Section implements CourseFields, Hashable {
     /**
      * get the time and room of this section's meetings as [[TimeArray]]
      */
-    public getTimeRoom(): TimeArray | null {
+    public getTimeRoom(): TimeArray {
         // arrays of times and rooms in each day
         const dayArray: number[][] = [[], [], [], [], [], [], []];
 
@@ -178,7 +178,7 @@ export default class Section implements CourseFields, Hashable {
             const tmp1 = parseTimeAll(t);
 
             // skip TBA or ill-formated time
-            if (tmp1 === null) return null;
+            if (tmp1 === null) return new Int16Array(8);
             const [date, timeBlock] = tmp1;
 
             // for each day

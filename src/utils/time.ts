@@ -85,7 +85,7 @@ export function hr12toInt(time: string) {
 }
 
 /**
- * return true of two [[TimeArray]] objects have overlapping time blocks, false otherwise
+ * return true if two [[TimeArray]] objects have overlapping time blocks, false otherwise
  * @author Hanzhi Zhou, (amended by) Kaiying Cat
  * @param timeArray1
  * @param timeArray2

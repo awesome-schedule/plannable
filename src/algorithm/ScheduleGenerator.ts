@@ -206,22 +206,26 @@ class ScheduleGenerator {
                 );
 
                 noSelected = false;
-                // throw an error of none of the sections pass the filter
+                // give an warning if none of the sections pass the filter
                 if (classes.length === 0) {
                     msgs.push({
                         level: 'warn',
                         msg: `Not scheduled: ${courseRec.displayName}${
                             i === 0 || subgroup === -1 ? '' : ' belonging to group ' + i // don't show group idx for default group or Any Section
-                        }. Reason: No sections ${
-                            allInvalid
-                                ? 'have valid meeting times (e.g. All TBA/TBD)'
-                                : 'satisfy your filters and do not conflict with your events'
-                        }`
+                        }. Reason: No sections satisfy your filters and do not conflict with your events`
                     });
                 } else {
                     classList.push(classes);
                     timeArrayList.push(timeArrays);
                     dateList.push(dates);
+                }
+                if (allInvalid) {
+                    msgs.push({
+                        level: 'warn',
+                        msg: `Warning: No sections of ${courseRec.displayName}${
+                            i === 0 || subgroup === -1 ? '' : ' belonging to group ' + i // don't show group idx for default group or Any Section
+                        } have valid meeting times (e.g. All TBA/TBD)`
+                    });
                 }
             }
             if (noSelected) {
@@ -344,9 +348,8 @@ class ScheduleGenerator {
             if (!date) continue;
 
             const timeArray = sections[0].getTimeRoom();
-            if (!timeArray) continue;
+            if (timeArray.length > 8) allInvalid = false;
 
-            allInvalid = false;
             // don't include this combined section if it conflicts with any time filter or event.
             for (const td of timeSlots) {
                 if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;

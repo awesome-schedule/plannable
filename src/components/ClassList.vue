@@ -36,6 +36,13 @@
                             >
                                 <i class="fas fa-exclamation-triangle"></i>
                             </span>
+                            <span
+                                v-if="schedule.isSomeTBD(crs.key)"
+                                class="ml-1 text-warning"
+                                title="All sections selected have invalid (e.g. TBA/TBD) meeting time. They will not appear on the schedule."
+                            >
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
                         </h6>
                         <template v-if="showClasslistTitle || isEntering">
                             <p

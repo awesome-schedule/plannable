@@ -615,6 +615,25 @@ export default abstract class Schedule {
     }
 
     /**
+     * @returns whether some of the sections selected corresponding to the given course key have invalid meeting time
+     */
+    public isSomeTBD(key: string) {
+        const s = this.All[key];
+        if (s === -1) return false;
+        if (s.length === 0) return false;
+
+        const merged = new Set(s[0]);
+        for (let i = 1; i < s.length; i++) {
+            for (const v of s[i]) {
+                merged.add(v);
+            }
+        }
+        return window.catalog
+            .getCourse(key, merged)
+            .sections.some(s => s.getTimeRoom().length == 8);
+    }
+
+    /**
      * @returns whether the given course has `Any Section` selected
      */
     public isAnySection(key: string) {

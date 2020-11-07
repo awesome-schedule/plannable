@@ -619,7 +619,7 @@ export default abstract class Schedule {
      */
     public isSomeTBD(key: string) {
         const s = this.All[key];
-        if (s === -1) return false;
+        if (!(s instanceof Array)) return false;
         if (s.length === 0) return false;
 
         const merged = new Set(s[0]);

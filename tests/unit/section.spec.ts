@@ -28,7 +28,7 @@ describe('section test', () => {
         expect(num / 3).toBe(Math.floor(num / 3));
 
         const s2 = catalog.getCourse('cs99993').sections[0];
-        expect(s2.getTimeRoom()).toBe(null);
+        expect(s2.getTimeRoom().length).toBe(8); // no time or room information
         expect(s2.sameTimeAs(sec)).toBe(false);
         expect(s2.displayName).toBeTruthy();
     });

@@ -35,7 +35,6 @@
             @keydown.up="dropdownPrev()"
         >
             <input
-                ref="classSearch"
                 v-model="query"
                 type="text"
                 class="form-control form-control-sm"
@@ -158,7 +157,7 @@
             @course-modal="modal.showCourseModal($event.crs, $event.match)"
         ></ClassList>
         <div class="btn-group mt-3 w-100">
-            <button type="button" class="btn btn-outline-info" @click="generateSchedules()">
+            <button type="button" class="btn btn-outline-info" @click="generateClick()">
                 Generate
             </button>
             <button
@@ -198,7 +197,16 @@
                     😮
                 </span>
             </li>
-            <table class="ml-2 mr-0 mt-2 mb-2">
+            <table
+                class="ml-2 mr-0 mt-2 mb-2"
+                title="You can use the 'add class by id' function of SIS to conveniently add classes to your SIS shopping cart"
+            >
+                <thead>
+                    <tr>
+                        <th>Course Name</th>
+                        <th>ID</th>
+                    </tr>
+                </thead>
                 <tr v-for="idx in current.ids.length" :key="idx">
                     <td>{{ current.courses[idx - 1].displayName }}</td>
                     <td>

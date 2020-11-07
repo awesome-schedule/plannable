@@ -70,8 +70,12 @@ export default class ClassView extends Store {
     }
 
     closeClassList() {
-        (this.$refs.classSearch as HTMLInputElement).value = '';
         this.query = '';
+    }
+
+    generateClick() {
+        this.query = '';
+        this.generateSchedules();
     }
 
     /**

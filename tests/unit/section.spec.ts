@@ -16,7 +16,7 @@ describe('section test', () => {
 
         const sec3 = catalog.getCourse('cs99993').sections[0];
         expect(sec3.valid & 0b1110).toBeTruthy();
-        expect(sec3.validMsg).not.toBe('Valid');
+        expect(sec3.validMsg[1]).not.toBe('Valid');
     });
 
     it('multiple meetings', () => {

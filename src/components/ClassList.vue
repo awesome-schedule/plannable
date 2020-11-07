@@ -68,7 +68,7 @@
                             class="fas fa-info-circle click-icon"
                             :class="{ 'pr-2': !showClasslistTitle }"
                             title="View class description"
-                            @click.stop="$emit('course_modal', { crs, match: matches[idx] })"
+                            @click.stop="$emit('course-modal', { crs, match: matches[idx] })"
                         ></i>
                         <br v-if="showClasslistTitle" />
                         <i
@@ -76,7 +76,7 @@
                             class="fas fa-times click-icon"
                             :class="{ 'pr-1': !showClasslistTitle }"
                             title="Remove this class and all its sections from your schedule"
-                            @click.stop="$emit('remove_course', crs.key)"
+                            @click.stop="$emit('remove-course', crs.key)"
                         ></i>
                     </div>
                 </div>
@@ -178,14 +178,11 @@
                                     <ul class="list-unstyled m-0" style="font-size: 0.75rem;">
                                         <li>
                                             Section {{ sec.section }}
-                                            <!-- 14 = 0b1110, i.e. validity > 1 -->
                                             <i
                                                 v-if="sec.valid"
-                                                :title="sec.validMsg"
+                                                :title="sec.validMsg[1]"
                                                 class="fas fa-exclamation-triangle"
-                                                :class="
-                                                    sec.valid & 14 ? `text-danger` : `text-warning`
-                                                "
+                                                :class="sec.validMsg[0]"
                                             ></i>
                                         </li>
                                         <li>

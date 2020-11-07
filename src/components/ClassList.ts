@@ -68,9 +68,9 @@ export default class ClassList extends Vue {
         if (idx === -1) {
             // if select AnySection, disable group
             if (!this.schedule.isAnySection(key)) this.$set(this.group, key, false);
-            this.$emit('update_course', key, idx, 0, this.isEntering);
+            this.$emit('update-course', key, idx, 0, this.isEntering);
         } else {
-            this.$emit('update_course', key, idx, +numInput.value, this.isEntering);
+            this.$emit('update-course', key, idx, +numInput.value, this.isEntering);
         }
     }
 
@@ -80,7 +80,7 @@ export default class ClassList extends Vue {
         } else {
             this.$set(this.group, key, true);
             if (this.schedule.isAnySection(key))
-                this.$emit('update_course', key, -1, 0, this.isEntering);
+                this.$emit('update-course', key, -1, 0, this.isEntering);
         }
     }
 

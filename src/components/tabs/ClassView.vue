@@ -72,8 +72,8 @@
             :is-entering="isEntering"
             :show-classlist-title="display.showClasslistTitle"
             :expand-on-entering="display.expandOnEntering"
-            @update_course="updateCourse"
-            @course_modal="modal.showCourseModal($event.crs, $event.match)"
+            @update-course="updateCourse"
+            @course-modal="modal.showCourseModal($event.crs, $event.match)"
             @close="closeClassList()"
         ></ClassList>
         <button
@@ -153,9 +153,9 @@
             :schedule="schedule.currentSchedule"
             :show-any="!schedule.generated"
             :show-classlist-title="display.showClasslistTitle"
-            @update_course="updateCourse"
-            @remove_course="removeCourse"
-            @course_modal="modal.showCourseModal($event.crs, $event.match)"
+            @update-course="updateCourse"
+            @remove-course="removeCourse"
+            @course-modal="modal.showCourseModal($event.crs, $event.match)"
         ></ClassList>
         <div class="btn-group mt-3 w-100">
             <button type="button" class="btn btn-outline-info" @click="generateSchedules()">

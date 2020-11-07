@@ -88,12 +88,21 @@ export default interface Section extends SectionFields {}
  * They will only created using `Object.create` on page load
  */
 export default class Section implements CourseFields, Hashable {
-    public static readonly Validity = [
-        'Valid',
-        'Warning: Some meetings have incomplete information (have TBA/TBD).',
-        'Fatal: This section has several different meeting dates.',
-        'Fatal: Some meetings have invalid (TBA/TBD) start or end time.',
-        'Fatal: This section has unknown start and end date.'
+    private static readonly Validity = [
+        [0, 'Valid'],
+        [
+            1,
+            `Warning: Some meetings have incomplete instruction or room information (e.g. TBA/TBD). This won't affect schedule generation.`
+        ],
+        [
+            2,
+            'Fatal: This section has several different meeting dates. Plannable currently cannot handle these type of meetings correctly'
+        ],
+        [
+            1,
+            'Warning: Some meetings have invalid (TBA/TBD) start or end time. They will not be rendered on the schedule.'
+        ],
+        [2, 'Fatal: This section has unknown start and end date.']
     ] as const;
     // --------- getters for fields of the course ---------------------
     get department() {
@@ -129,13 +138,16 @@ export default class Section implements CourseFields, Hashable {
         let mask = 1;
         let msg = '';
         let count = 1;
+        let maxLevel = 0;
         for (let i = 1; i < Section.Validity.length; i++) {
             if (this.valid & mask) {
-                msg += `${count++}. ${Section.Validity[i]} \n`;
+                const [level, msgStr] = Section.Validity[i];
+                maxLevel = Math.max(maxLevel, level);
+                msg += `${count++}. ${msgStr} \n`;
             }
             mask <<= 1;
         }
-        return msg;
+        return [['', 'text-warning', 'text-danger'][maxLevel], msg] as const;
     }
 
     public sameTimeAs(other: Section) {

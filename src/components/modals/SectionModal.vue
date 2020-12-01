@@ -9,6 +9,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    <h6 v-html="section.title"></h6>
                     <div v-if="section.topic" class="m-color">{{ section.topic }}</div>
                     <div class="m-color">{{ section.type }} | {{ section.units }} units</div>
                     <div class="m-color">{{ section.instructors.join(', ') }}</div>
@@ -17,10 +18,9 @@
                         {{ meeting.days }} @ {{ meeting.room }}
                     </div>
                     <div class="m-color">
-                        {{ section.status }} {{ section.enrollment }}/{{
-                            section.enrollment_limit
-                        }}
-                        | Wait List: {{ section.wait_list }}
+                        Status: {{ section.status }} | Enrolled: {{ section.enrollment }} |
+                        Capacity: {{ section.enrollment_limit }} | Wait List:
+                        {{ section.wait_list }}
                     </div>
                     <br />
                     <div>{{ section.description }}</div>

@@ -5,7 +5,9 @@
                 <div class="modal-header">
                     <h5
                         class="modal-title"
-                        v-html="highlightMatch(course.displayName, 'key', match[0])"
+                        v-html="
+                            highlightMatch(course.displayName, 'key', match[0]) + ' ' + course.title
+                        "
                     ></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
@@ -13,7 +15,7 @@
                 </div>
                 <div class="modal-body">
                     <h6 v-html="highlightMatch(course.title, 'title', match[0])"></h6>
-                    <div style="width: 100%; overflow-x: auto;">
+                    <div style="width: 100%; overflow-x: auto">
                         <table id="sec-table" class="m-color w-100">
                             <!-- <thead>
                                 <tr>
@@ -66,11 +68,7 @@
                                     <td>{{ section.status }}</td>
                                     <td>
                                         {{
-                                            section.enrollment +
-                                                '/' +
-                                                section.enrollment_limit +
-                                                '/' +
-                                                section.wait_list
+                                            `${section.enrollment}/${section.enrollment_limit}/${section.wait_list}`
                                         }}
                                     </td>
                                 </tr>

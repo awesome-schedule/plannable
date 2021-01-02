@@ -4,21 +4,18 @@
  */
 
 /**
- * @license MIT
- * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations:
- * 1. Cache the string length
- * 2. No need to use .has for map
- * 3. Pre-process the target list of strings for repeated searches (see [[FastSearcher]])
- * About 40% faster than the original one.
- * @param first
- * @param second
+ * The struture of the objects used to store search results
  */
-
 export interface SearchResult<T, K = string> {
+    /** the score of this result */
     score: number;
+    /** an array of pairs indicating the indices of match. [[1,2], [7,9]] means that the indices [1, 2) and [7, 9) of the string are matched */
     matches: number[];
+    /** index of the item in the original list */
     index: number;
+    /** original_list[index] */
     item: T;
+    /** some arbitrary data associated with this item */
     data: K;
 }
 /**
@@ -35,7 +32,8 @@ export class FastSearcher<T, K = string> {
     private maxTokenLen: number = 0;
 
     /**
-     * @param targets the list of strings to search from
+     * @param items the list of strings to search from
+     * @param data some arbitrary data that will be passed to each search result
      */
     constructor(
         public items: T[],
@@ -140,6 +138,9 @@ export class FastSearcher<T, K = string> {
         }
         return [bestMatchIndex, bestMatchRating];
     }
+    /**
+     * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations:
+     */
     public compareTwoStrings(
         bigrams: Map<string, number>,
         freqCount: Uint16Array,
@@ -168,7 +169,7 @@ export class FastSearcher<T, K = string> {
         return (2.0 * intersectionSize) / (len1 + len2 - 2);
     }
     /**
-     * sliding window search
+     * approximate sliding window search, accelerated by inverted index
      * @param query
      * @param maxWindow
      * @param gramLen
@@ -268,7 +269,7 @@ export class FastSearcher<T, K = string> {
         return allMatches;
     }
     /**
-     * sliding window search
+     * exact sliding window search
      * @param query
      * @param maxWindow
      * @param gramLen

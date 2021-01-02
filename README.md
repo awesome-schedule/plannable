@@ -82,15 +82,15 @@ npm run updatedata
 Install Vue cli and other dependencies. Then, launch the development server
 
 ```bash
-npm install -g @vue/cli http-server
+npm install -g @vue/cli
 npm install
 npm run serve
 ```
 
-You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, you can run
+You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, open a new terminal and run
 
 ```bash
-bash scripts/run.sh
+npm run data
 ```
 
 in the project root, which will basically open a static http server listening to port `8000` with cross origin header.

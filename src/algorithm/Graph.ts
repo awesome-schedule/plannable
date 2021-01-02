@@ -71,24 +71,25 @@ export function intervalScheduling(blocks: ScheduleBlock[], assignment: Int16Arr
  * calculate the actual path depth of the nodes
  * @requires optimization
  * @param adjList
- * @param colors
+ * @param assignment
  * @param values the array of things contained in each node
  */
-export function colorDepthSearch<T = number>(
+export function calculateMaxDepth<T = number>(
     adjList: number[][],
-    colors: Int16Array,
+    assignment: Int16Array,
     values: T[]
 ): Graph<T> {
     const graph: Graph<T> = new Map();
-    const vertices = adjList.map((_, i) => new Vertex(values[i], colors[i]));
+    const vertices = adjList.map((_, i) => new Vertex(values[i], assignment[i]));
 
-    for (let i = 0; i < colors.length; i++) {
+    for (let i = 0; i < assignment.length; i++) {
         graph.set(
             vertices[i],
             adjList[i].map(x => vertices[x])
         );
     }
 
+    // We start from the node of the greatest depth and traverse to the lower depths
     vertices.sort((v1, v2) => v2.depth - v1.depth);
     for (const start of vertices)
         if (!start.visited) depthFirstSearchRec(start, graph, start.depth + 1);
@@ -100,8 +101,9 @@ export function colorDepthSearch<T = number>(
  * A special implementation of depth first search on a single connected component,
  * used to find the maximum depth of the path that the current node is on.
  *
- * The depth of all nodes are known beforehand.
- * @requires optimization
+ * We start from the node of the greatest depth and traverse to the lower depths
+ *
+ * The depth of all nodes are known beforehand (from the colors/slot assignment).
  */
 function depthFirstSearchRec<T>(start: Vertex<T>, graph: Graph<T>, depth: number) {
     start.visited = true;

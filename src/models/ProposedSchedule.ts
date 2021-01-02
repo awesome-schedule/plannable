@@ -291,9 +291,7 @@ export default class ProposedSchedule extends Schedule {
             }
             const start = Math.floor(Math.random() * (1440 - maxDuration));
             const end =
-                start +
-                minDuration +
-                Math.floor(Math.random() * Math.min(1440 - start, maxDuration));
+                start + minDuration + Math.floor(Math.random() * (maxDuration - minDuration));
 
             days +=
                 ' ' +

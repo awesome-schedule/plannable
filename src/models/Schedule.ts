@@ -6,7 +6,7 @@
 /**
  *
  */
-import { Vertex, intervalScheduling, colorDepthSearch } from '../algorithm/Graph';
+import { Vertex, intervalScheduling, calculateMaxDepth } from '../algorithm/Graph';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -389,8 +389,9 @@ export default abstract class Schedule {
                         }
                     }
                     // if the **course** already exists in this time block
-                    if (this.separatedAll[date][key]) {
-                        (this.separatedAll[date][key] as Set<number>[]).push(s);
+                    const tempCourse = this.separatedAll[date][key];
+                    if (tempCourse) {
+                        (tempCourse as Set<number>[]).push(s);
                     } else {
                         this.separatedAll[date][key] = [s];
                     }
@@ -433,13 +434,13 @@ export default abstract class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const colors = new Int16Array(blocks.length);
-        const numColors = intervalScheduling(blocks, colors);
+        const assignment = new Int16Array(blocks.length);
+        const numSlots = intervalScheduling(blocks, assignment);
         const adjList = this.constructAdjList(blocks);
 
         // note: blocks are contained in nodes
-        const graph = colorDepthSearch(adjList, colors, blocks);
-        const slots: Vertex<ScheduleBlock>[][] = Array.from({ length: numColors }, () => []);
+        const graph = calculateMaxDepth(adjList, assignment, blocks);
+        const slots: Vertex<ScheduleBlock>[][] = Array.from({ length: numSlots }, () => []);
         for (const node of graph.keys()) {
             slots[node.depth].push(node);
             node.val.left = node.depth / node.pathDepth;

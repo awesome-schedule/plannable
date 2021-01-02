@@ -123,8 +123,7 @@ export function loadFromCache<T, T_JSON extends Expirable>(
 /**
  * Await the promise on temp.new (represents a pending request to load new data) to resolve. If timed out, return the old data on temp.old.
  * @returns the payload with an appropriate message
- * @param temp 
- * @param param1 
+ * @param temp
  */
 export async function fallback<T, P extends Promise<T>>(
     temp: { new: P; old?: T },

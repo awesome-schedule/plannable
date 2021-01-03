@@ -150,6 +150,7 @@ export default class App extends Store {
     }
 
     async created() {
+        (window as any).vue = this;
         this.status.loading = true;
 
         // note: these three can be executed in parallel, i.e. they are not inter-dependent

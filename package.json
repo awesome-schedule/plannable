@@ -38,7 +38,8 @@
         "fix": "eslint . --fix",
         "test": "vue-cli-service test:unit",
         "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
-        "updatedata": "rm -rf scripts/data && git clone https://github.com/awesome-schedule/data scripts/data"
+        "updatedata": "rm -rf scripts/data && git clone https://github.com/awesome-schedule/data scripts/data",
+        "data": "cd scripts && http-server --cors -p 8000 -c-1"
     },
     "main": "electron.js",
     "dependencies": {
@@ -91,6 +92,7 @@
         "eslint-plugin-import": "^2.22.0",
         "eslint-plugin-prettier": "^3.1.4",
         "eslint-plugin-vue": "^5.0.0",
+        "http-server": "^0.12.3",
         "prettier": "^1.18.2",
         "ts-node": "^8.10.2",
         "typedoc": "^0.15.8",

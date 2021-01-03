@@ -5,10 +5,8 @@
 /**
  *
  */
-import { backend } from '@/config';
 import Store, { compressJSON, SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
-import axios from 'axios';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 
@@ -174,8 +172,7 @@ export default class ExportView extends Store {
         const newName = this.newName[idx];
         if (!newName) return this.$set(this.newName, idx, null);
         if (newName !== oldName) {
-            if (this.profile.profiles.find(n => n === newName))
-                return this.noti.error('Duplicated name!');
+            if (this.profile.profiles.includes(newName)) return this.noti.error('Duplicated name!');
             this.profile.renameProfile(idx, oldName, newName, raw);
         }
         this.$set(this.newName, idx, null);

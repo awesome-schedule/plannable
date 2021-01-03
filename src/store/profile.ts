@@ -110,6 +110,11 @@ class Profile {
     deleteProfile(name: string, idx: number) {
         this.profiles.splice(idx, 1);
         localStorage.removeItem(name);
+
+        if (this.canSync()) {
+            this.deleteRemote(name);
+        }
+
         if (name === this.current) {
             if (idx === this.profiles.length) {
                 return (this.current = this.profiles[idx - 1]);

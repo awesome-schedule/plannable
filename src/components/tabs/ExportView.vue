@@ -73,7 +73,7 @@
                         <input
                             v-else
                             v-model="newName[idx]"
-                            class="form-control form-control-sm"
+                            class="form-control form-control-inline form-control-sm"
                             type="text"
                             @keyup.enter="renameProfile(name, idx)"
                             @keyup.esc="$set(newName, idx, null)"
@@ -81,6 +81,7 @@
                     </div>
                     <div class="col-sm-auto text-right" style="font-size: 16px">
                         <i
+                            v-if="newName[idx] === null"
                             :id="'2' + idx"
                             class="click-icon mr-2"
                             :class="
@@ -101,7 +102,7 @@
                             @click.stop="renameProfile(name, idx)"
                         ></i>
                         <i
-                            v-if="profile.profiles.length > 1"
+                            v-if="newName[idx] === null && profile.profiles.length > 1"
                             class="fa fa-times ml-1 click-icon"
                             title="delete this profile"
                             @click.stop="deleteProfile(name, idx)"

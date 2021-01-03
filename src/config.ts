@@ -57,16 +57,6 @@ export const dataend = {
 } as const;
 
 /**
- * for the given semester id and section id, open an external webpage showing the detail of that section
- */
-function viewDetails(semester: SemesterJSON, section: Section) {
-    window.open(
-        `https://louslist.org/sectiontip.php?Semester=${semester.id}&ClassNumber=${section.id}`,
-        '_blank',
-        'width=650,height=700,scrollbars=yes'
-    );
-}
-/**
  * for the given course, open an external webpage showing the past grades of that course
  */
 function viewGrades(semester: SemesterJSON, course: CourseFields) {
@@ -119,7 +109,13 @@ export const modalLinks: ModalLinks = {
         },
         {
             name: "More Details (Lou's List)",
-            action: viewDetails
+            action: function(semester: SemesterJSON, section: Section) {
+                window.open(
+                    `https://louslist.org/sectiontip.php?Semester=${semester.id}&ClassNumber=${section.id}`,
+                    '_blank',
+                    'width=650,height=700,scrollbars=yes'
+                );
+            }
         }
     ],
     course: [

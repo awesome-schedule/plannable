@@ -7,6 +7,8 @@
  */
 import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
+import axios from 'axios';
+import { backend } from '@/config';
 
 /**
  * the profile class handles profiles adding, renaming and deleting
@@ -72,16 +74,30 @@ class Profile {
      * @param newName
      * @param raw
      */
-    renameProfile(idx: number, oldName: string, newName: string, raw: string) {
+    async renameProfile(idx: number, oldName: string, newName: string, raw: string) {
         if (oldName === this.current) this.current = newName;
 
         const parsed = JSON.parse(raw);
         parsed.name = newName;
         localStorage.removeItem(oldName);
-        localStorage.setItem(newName, JSON.stringify(parsed));
+
+        const newProf = JSON.stringify(parsed);
+        localStorage.setItem(newName, newProf);
 
         // use splice for reactivity purpose
         this.profiles.splice(idx, 1, newName);
+
+        if (this.canSync()) {
+            const [username, credential] = this._cre();
+            await axios.post(backend.edit, {
+                username,
+                credential,
+                action: 'rename',
+                oldName,
+                newName,
+                profile: newProf
+            });
+        }
     }
 
     /**
@@ -141,6 +157,92 @@ class Profile {
             localStorage.setItem(profileName, raw);
         }
         if (sw) this.current = profileName;
+    }
+
+    _cre() {
+        return [localStorage.getItem('username'), localStorage.getItem('credential')];
+    }
+
+    /**
+     * return whether the credentials in the localStorage exist
+     */
+    canSync() {
+        const [username, credential] = this._cre();
+        return username && credential;
+    }
+
+    async fetchRemoteProfiles() {
+        const [username, credential] = this._cre();
+        return (
+            await axios.post<string[]>(backend.down, {
+                username,
+                credential
+            })
+        ).data.map(s => JSON.parse(s) as SemesterStorage);
+    }
+
+    async uploadProfile(name: string, profile: string) {
+        const [username, credential] = this._cre();
+        await axios.post(backend.up, {
+            username,
+            credential,
+            name,
+            profile
+        });
+    }
+
+    async deleteRemote(name: string) {
+        const [username, credential] = this._cre();
+        await axios.post(backend.edit, {
+            username,
+            credential,
+            action: 'delete',
+            name
+        });
+    }
+
+    async syncProfiles() {
+        if (!this.canSync()) {
+            console.log('No backend exists. Abort syncing profiles');
+            return;
+        }
+
+        const remoteProfiles = new Map(
+            (await this.fetchRemoteProfiles()).map(prof => [prof.name, prof])
+        );
+        const localNames = new Set(this.profiles);
+
+        const needUpload: string[] = [],
+            needDownload: string[] = [];
+        for (const name of remoteProfiles.keys()) {
+            if (localNames.has(name)) {
+                const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
+                const remoteProf: SemesterStorage = remoteProfiles.get(name)!;
+
+                const localTime = new Date(localProf.modified).getTime();
+                const remoteTime = new Date(remoteProf.modified).getTime();
+
+                if (localTime < remoteTime) {
+                    localStorage.setItem(name, JSON.stringify(remoteProfiles.get(name)!));
+                    needDownload.push(name);
+                } else if (localTime > remoteTime) {
+                    needUpload.push(name);
+                }
+            } else {
+                localStorage.setItem(name, JSON.stringify(remoteProfiles.get(name)!));
+                this.profiles.push(name);
+                needDownload.push(name);
+            }
+        }
+        for (const name of localNames) {
+            if (!remoteProfiles.has(name)) needUpload.push(name);
+        }
+
+        await Promise.all(
+            needUpload.map(name => this.uploadProfile(name, localStorage.getItem(name)!))
+        );
+        console.log('uploaded', needUpload);
+        console.log('downloaded', needDownload);
     }
 }
 

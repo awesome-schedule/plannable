@@ -1,8 +1,6 @@
 <template>
     <nav class="bg-light sidebar">
-        <div class="btn bg-info nav-btn">
-            Import Profile
-        </div>
+        <div class="btn bg-info nav-btn">Import Profile</div>
         <div class="m-3">
             <div class="custom-file">
                 <input
@@ -10,7 +8,7 @@
                     type="file"
                     class="custom-file-input"
                     accept="text/json"
-                    style="width:100%"
+                    style="width: 100%"
                     @change="onUploadJson($event)"
                 />
                 <label class="custom-file-label" for="customFile">Import from JSON..</label>
@@ -24,30 +22,20 @@
                     type="file"
                     class="custom-file-input"
                     accept="text/ics"
-                    style="width:100%"
+                    style="width: 100%"
                     disabled
                 />
                 <label class="custom-file-label" for="customFile">Import from ICS..</label>
             </div>
-            <small class="text-center form-text text-muted">
-                Temporally Unavailable
-            </small>
+            <small class="text-center form-text text-muted"> Temporally Unavailable </small>
         </div>
-        <div class="btn bg-info nav-btn">
-            Export Profile
-        </div>
+        <div class="btn bg-info nav-btn">Export Profile</div>
         <div class="mx-3 my-2">
             <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
-                <button class="btn btn-outline-dark px-0" @click="saveToJson()">
-                    Export JSON
-                </button>
-                <button class="btn btn-outline-dark px-0" @click="saveToIcal()">
-                    Export iCal
-                </button>
+                <button class="btn btn-outline-dark px-0" @click="saveToJson()">Export JSON</button>
+                <button class="btn btn-outline-dark px-0" @click="saveToIcal()">Export iCal</button>
             </div>
-            <small class="text-center form-text text-muted">
-                JSON: Can be imported later
-            </small>
+            <small class="text-center form-text text-muted"> JSON: Can be imported later </small>
             <small class="form-text text-muted text-center">
                 iCal: Supported by most calendar apps
             </small>
@@ -55,23 +43,15 @@
         <hr />
         <div class="mx-3 my-2">
             <div class="btn-group w-100" role="group" aria-label="Basic example">
-                <button class="btn btn-outline-primary" @click="exportToURL()">
-                    Export URL
-                </button>
-                <button class="btn btn-outline-primary" @click="print()">
-                    Print
-                </button>
+                <button class="btn btn-outline-primary" @click="exportToURL()">Export URL</button>
+                <button class="btn btn-outline-primary" @click="print()">Print</button>
             </div>
-            <small class="text-center form-text text-muted">
-                URL can be shared easily
-            </small>
+            <small class="text-center form-text text-muted"> URL can be shared easily </small>
             <small class="form-text text-muted text-center">
                 Print your currently rendered schedule
             </small>
         </div>
-        <div class="btn bg-info nav-btn">
-            Local Profiles
-        </div>
+        <div class="btn bg-info nav-btn">Local Profiles</div>
         <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
             <li
                 v-for="(name, idx) in profile.profiles"
@@ -126,18 +106,18 @@
                             title="delete this profile"
                             @click.stop="deleteProfile(name, idx)"
                         ></i>
-                        <i
+                        <!-- <i
                             v-if="canSync()"
                             class="fas fa-upload ml-1 click-icon"
                             title="upload this profile to remote"
                             @click.stop="uploadProfile(name)"
-                        ></i>
+                        ></i> -->
                     </div>
                 </div>
             </li>
         </ul>
-        <template v-if="canSync()">
-            <div class="btn bg-info nav-btn mt-2">
+        <template v-if="profile.canSync()">
+            <!-- <div class="btn bg-info nav-btn mt-2">
                 Remote Profiles <span class="badge badge-primary">Beta</span>
             </div>
             <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
@@ -192,7 +172,7 @@
                         </div>
                     </div>
                 </li>
-            </ul>
+            </ul> -->
             <div class="w-100 text-center">
                 <button
                     class="btn btn-outline-primary mt-2 w-75"

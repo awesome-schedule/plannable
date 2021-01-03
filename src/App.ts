@@ -90,36 +90,8 @@ export default class App extends Store {
         return version;
     }
 
-    async loadCoursesFromURL() {
-        const courseArray = new URLSearchParams(window.location.search).get('courses');
-        if (courseArray) {
-            try {
-                const courses = JSON.parse(decodeURIComponent(courseArray));
-                if (courses && courses instanceof Array) {
-                    const schedule = this.schedule.getDefault();
-                    courses.forEach(key => schedule.currentSchedule.update(key, -1));
-                    this.profile.addProfile(JSON.stringify({ schedule }), backend.name);
-                    await this.loadProfile(undefined, !checkVersion());
-
-                    this.noti.success('Courses loaded from ' + backend.name, 3, true);
-                    return true;
-                } else {
-                    throw new Error('Invalid course format');
-                }
-            } catch (e) {
-                this.noti.error(
-                    `Failed to load courses from ${backend.name}: ` + e.message,
-                    3,
-                    true
-                );
-                return false;
-            }
-        }
-        return false;
-    }
-
-    async loadConfigFromURL() {
-        const encoded = new URLSearchParams(window.location.search).get('config');
+    async loadConfigFromURL(search: URLSearchParams) {
+        const encoded = search.get('config');
 
         if (encoded) {
             try {
@@ -138,8 +110,7 @@ export default class App extends Store {
     /**
      * load credentials from backend
      */
-    loadCredentials() {
-        const search = new URLSearchParams(window.location.search);
+    loadCredentials(search: URLSearchParams) {
         const username = search.get('username'),
             credential = search.get('credential');
         if (username && credential) {
@@ -152,12 +123,18 @@ export default class App extends Store {
     async created() {
         (window as any).vue = this;
         this.status.loading = true;
+        const search = new URLSearchParams(window.location.search);
+
+        // clear url after obtained url params
+        history.replaceState(history.state, 'current', '/');
+        this.loadCredentials(search);
 
         // note: these three can be executed in parallel, i.e. they are not inter-dependent
-        const [pay1, pay2, pay3] = await Promise.all([
+        const [pay1, pay2, pay3, _] = await Promise.all([
             loadTimeMatrix(),
             loadBuildingSearcher(),
-            this.semester.loadSemesters()
+            this.semester.loadSemesters(),
+            this.profile.syncProfiles()
         ]);
 
         this.noti.notify(pay1);
@@ -169,15 +146,13 @@ export default class App extends Store {
         this.noti.notify(pay3);
         if (pay3.payload) {
             this.semester.semesters = pay3.payload;
-            const cre = this.loadCredentials();
-            const urlResult = (await this.loadConfigFromURL()) || (await this.loadCoursesFromURL());
+
+            const urlResult = await this.loadConfigFromURL(search);
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
                 // if version mismatch, force-update semester data
                 await this.loadProfile(this.profile.current, !checkVersion());
             }
-            // clear url after obtained credentials/courses/config
-            if (urlResult || cre) history.replaceState(history.state, 'current', '/');
         }
 
         this.status.loading = false;

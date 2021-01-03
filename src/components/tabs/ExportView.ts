@@ -21,34 +21,9 @@ import { Component } from 'vue-property-decorator';
 @Component
 export default class ExportView extends Store {
     newName: (string | null)[] = [];
-    remoteNewName: (string | null)[] = [];
-    remoteProfiles: SemesterStorage[] = [];
-
-    _cre() {
-        return [localStorage.getItem('username'), localStorage.getItem('credential')];
-    }
-
-    /**
-     * return whether the credentials in the localStorage exist
-     */
-    canSync() {
-        const [username, credential] = this._cre();
-        return username && credential;
-    }
 
     created() {
         this.newName = this.profile.profiles.map(() => null);
-        if (this.canSync()) this.fetchRemoteProfiles();
-    }
-    async fetchRemoteProfiles() {
-        const [username, credential] = this._cre();
-        this.remoteProfiles = (
-            await axios.post(backend.down, {
-                username,
-                credential
-            })
-        ).data.map((s: string) => JSON.parse(s));
-        this.remoteNewName = this.remoteProfiles.map(() => null);
     }
     /**
      * get the meta data of a profile
@@ -180,33 +155,8 @@ export default class ExportView extends Store {
         if (confirm(`Are you sure to delete ${name}?`)) {
             this.newName.pop();
             const prof = this.profile.deleteProfile(name, idx);
-            if (this.canSync()) {
-                const rIdx = this.remoteProfiles.findIndex(p => p.name === name);
-                if (rIdx !== -1)
-                    this.deleteRemote(name, rIdx, `Also delete the remote profile ${name}`);
-            }
-
             // if the deleted profile is the current profile, reload the newly selected current profile
             if (prof) this.loadProfile();
-        }
-    }
-    /**
-     * delete profile from remote
-     * @param name
-     * @param msg optional confirmation msg
-     */
-    async deleteRemote(name: string, idx: number, msg?: string) {
-        if (!msg) msg = `Are you sure to delete the remote profile ${name}?`;
-        if (confirm(msg)) {
-            const [username, credential] = this._cre();
-            await axios.post(backend.edit, {
-                username,
-                credential,
-                action: 'delete',
-                name
-            });
-            this.remoteProfiles.splice(idx, 1);
-            this.remoteNewName.pop();
         }
     }
     selectProfile(profileName: string) {
@@ -227,93 +177,12 @@ export default class ExportView extends Store {
             if (this.profile.profiles.find(n => n === newName))
                 return this.noti.error('Duplicated name!');
             this.profile.renameProfile(idx, oldName, newName, raw);
-
-            // find the remote profile corresponding to the profile to be renamed
-            if (
-                this.canSync() &&
-                this.remoteProfiles.find(p => p.name === oldName) &&
-                confirm(`Also rename the remote profile ${oldName} to ${newName}?`)
-            )
-                this.renameRemote(oldName, idx, newName);
         }
         this.$set(this.newName, idx, null);
     }
-    /**
-     * rename a remote profile
-     * @param oldName
-     * @param idx
-     * @param newName if not provided, use `remoteNewName[idx]`
-     */
-    async renameRemote(oldName: string, idx: number, newName?: string | null) {
-        if (!newName) {
-            newName = this.remoteNewName[idx];
-            if (!newName) return this.$set(this.remoteNewName, idx, null);
-            if (oldName === newName) return this.$set(this.remoteNewName, idx, null);
-            if (this.remoteProfiles.find(p => p.name === newName))
-                return this.noti.error('Duplicated name!');
-        }
-        const [username, credential] = this._cre();
-        const profile = this.remoteProfiles[idx];
-        profile.name = newName;
-        try {
-            await axios.post(backend.edit, {
-                username,
-                credential,
-                action: 'rename',
-                oldName,
-                newName,
-                profile
-            });
-        } catch (err) {
-            this.noti.error(err.message);
-            profile.name = oldName;
-        }
-        this.$set(this.remoteNewName, idx, null);
-    }
+
     print() {
         window.print();
-    }
-
-    async uploadProfile(name: string) {
-        const local = localStorage.getItem(name);
-        if (!local) return Promise.reject('No local profile present!');
-
-        const [username, credential] = this._cre();
-        const remote = this.remoteProfiles.find(p => p.name === name);
-        if (remote) {
-            if (
-                !confirm('A remote profile with the same name already exists. Confirm overwriting?')
-            )
-                return Promise.reject('Cancelled');
-        }
-
-        await axios.post(backend.up, {
-            username,
-            credential,
-            name,
-            profile: local
-        });
-        // append to remote profiles if not overwriting
-        if (!remote) {
-            this.remoteProfiles.push(JSON.parse(local));
-            this.remoteNewName.push(null);
-        }
-    }
-    /**
-     * save a remote profile to localStorage
-     */
-    downloadProfile(profile: SemesterStorage) {
-        const local = localStorage.getItem(profile.name);
-        if (local) {
-            // const t1 = new Date(profile.modified).getTime();
-            // const t2 = new Date(JSON.parse(local).modified).getTime();
-            if (!confirm(`Overwrite your local profile with remote profile?`)) return;
-            localStorage.setItem(profile.name, JSON.stringify(profile));
-            this.$forceUpdate(); // todo
-        } else {
-            this.profile.addProfile(JSON.stringify(profile), profile.name, false);
-            this.newName.push(null);
-        }
     }
 
     logout() {

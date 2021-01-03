@@ -2,7 +2,7 @@
 
 The get api should accept POST requests with body
 
-```json
+```js
 {
     "username": "...",
     "credential": "...",
@@ -13,7 +13,7 @@ The get api should accept POST requests with body
 
 and it should give a JSON response 
 
-```json
+```js
 {
     "success": true, // or false if failed,
     "message": "...", // reason for failure. If success, can put anything here
@@ -30,7 +30,7 @@ and it should give a JSON response
 
 The edit api should accept POST requests with body
 
-```json
+```js
 {
     "username": "...",
     "credential": "...",
@@ -44,7 +44,7 @@ The edit api should accept POST requests with body
 
 It should give a JSON response indicating whether the action is performed successfully
 
-```json
+```js
 {
     "success": true, // or false if failed
     "message": "..." // reason for failure. If success, can put anything here
@@ -55,7 +55,7 @@ It should give a JSON response indicating whether the action is performed succes
 
 The save/upload api should accept POST requests with body
 
-```json
+```js
 {
     "username": "...",
     "credential": "...",
@@ -66,7 +66,7 @@ The save/upload api should accept POST requests with body
 
 It should give a JSON response indicating whether the action is performed successfully. Also, the new version number should be included. 
 
-```json
+```js
 {
     "success": true, // or false if failed
     "message": "...", // reason for failure. If success, can put anything here

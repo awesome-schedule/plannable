@@ -78,7 +78,7 @@ It should give a JSON response indicating whether the action is performed succes
 
 > Profiles are always uniquely identified by their names. All versions of a profile are associated with its name. 
 
-When a profile is **uploaded** (using the save/upload api), a new version for that profile is created. Version numbers should start from 1. If previous versions exist, then increment the version number of the latest version by 1, and use it as the current version. 
+When a profile is **uploaded** (using the save/upload api), a new version for that profile is created. Version numbers should start from 1. If previous versions exist, then increment the version number of the latest version by 1, and use it as the current version. If the previous versions are marked as detached, they should be changed to active. 
 
 When a profile is **renamed**, the version number for its new name starts from 1. All its previous versions shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 
 

@@ -19,7 +19,17 @@ and it should give a JSON response
     "message": "...", // reason for failure. If success, can put anything here
     "profiles": [ // if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. 
         {
-            "versions": [1, 2, 3, ...], // keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles
+            "versions": [
+                {
+                    /** number of milliseconds since Unix epoch */
+                    "modified": 1609794572021,
+                    /** User Agent from the Http Header */
+                    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+                    /** the version number */
+                    "version": 1
+                },
+                ...
+            ], // keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles
             "profile": "..." // the body of the profile corresponding to the queried version. It should be the latest profile if the version number is missing
         }
     ]
@@ -65,7 +75,7 @@ The save/upload api should accept POST requests with body
         "name": "...";
         /** content of the profile */
         "profile": "...";
-        /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to device whether to create a new version */
+        /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to decide whether to create a new version */
         "new": true
     }, ...];
 }

@@ -316,22 +316,20 @@ class Profile {
 
         const needUpload: string[] = [],
             needDownload: string[] = [];
-        for (const name of remoteProfMap.keys()) {
+        for (const [name, { profile: remoteProf }] of remoteProfMap) {
             if (localNames.has(name)) {
                 const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
-                const remoteProf = remoteProfMap.get(name)!.profile;
-
                 const localTime = new Date(localProf.modified).getTime();
                 const remoteTime = new Date(remoteProf.modified).getTime();
 
                 if (localTime < remoteTime) {
-                    localStorage.setItem(name, JSON.stringify(remoteProfMap.get(name)!));
+                    localStorage.setItem(name, JSON.stringify(remoteProf));
                     needDownload.push(name);
                 } else if (localTime > remoteTime) {
                     needUpload.push(name);
                 }
             } else {
-                localStorage.setItem(name, JSON.stringify(remoteProfMap.get(name)!));
+                localStorage.setItem(name, JSON.stringify(remoteProf));
                 this.profiles.push(name);
                 needDownload.push(name);
             }

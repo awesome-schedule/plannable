@@ -58,15 +58,19 @@ It should give a JSON response indicating whether the action is performed succes
 {
     "success": true, // or false if failed
     "message": "...", // reason for failure. If success, can put anything here
-    /** only present if the action was rename. this gives the version information of the newly renamed schedule */
-    "version": {
-        /** number of milliseconds since Unix epoch */
-        "modified": 1609794572021,
-        /** User Agent from the Http Header */
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
-        /** the version number */
-        "version": 1
-    }
+    /** only present if the action was rename. This gives information of all versions of the newly renamed schedule */
+    "versions": [
+        { // version 1
+            /** number of milliseconds since Unix epoch */
+            "modified": 1609794572021,
+            /** User Agent from the Http Header */
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            /** the version number */
+            "version": 1
+        }, 
+        // other versions
+        ...
+    ]
 }
 ```
 
@@ -96,14 +100,19 @@ It should give a JSON response indicating whether the action is performed succes
 {
     "success": true, // or false if failed
     "message": "...", // reason for failure. If success, can put anything here
-    "versions": [{
-        /** number of milliseconds since Unix epoch */
-        "modified": 1609794572021,
-        /** User Agent from the Http Header */
-        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
-        /** the version number */
-        "version": 1
-    }, ...] // version number of each newly uploaded profile. If failed, omit this field
+    /** information of all versions of each newly uploaded profile. If failed, omit this field */
+    "versions": [
+        [ // all versions of profile 1
+            {
+                /** number of milliseconds since Unix epoch */
+                "modified": 1609794572021,
+                /** User Agent from the Http Header */
+                "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+                /** the version number */
+                "version": 1
+            }, ...
+        ], ...
+    ] 
 }
 ```
 

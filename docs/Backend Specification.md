@@ -65,6 +65,8 @@ The save/upload api should accept POST requests with body
         "name": "...";
         /** content of the profile */
         "profile": "...";
+        /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to device whether to create a new version */
+        "new": true
     }, ...];
 }
 ```

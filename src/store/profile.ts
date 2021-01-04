@@ -10,6 +10,64 @@ import { SemesterStorage } from '.';
 import axios from 'axios';
 import { backend } from '@/config';
 
+interface BackendRequestBase {
+    username: string;
+    credential: string;
+}
+
+interface BackendResponseBase {
+    /** true if success, false otherwise */
+    success: boolean;
+    /** reason for failure. If success, can put anything here */
+    message: string;
+}
+
+interface BackendListRequest extends BackendRequestBase {
+    name: '...'; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
+    version: 1; // only present if "name" is present. If this field is missing, then the latest profile should be returned
+}
+
+interface BackendListResponse extends BackendResponseBase {
+    /** if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. */
+    profiles: {
+        /** keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles */
+        versions: number[];
+        /** the body of the profile corresponding to the queried version. It should be the latest profile if the version number is missing */
+        profile: string;
+    }[];
+}
+
+interface BackendUploadRequest extends BackendRequestBase {
+    /** list of profiles to be uploaded */
+    profiles: {
+        /** name of the profile */
+        name: string;
+        /** content of the profile */
+        profile: string;
+    }[];
+}
+
+interface BackendUploadResponse extends BackendResponseBase {
+    versions: number[];
+}
+
+interface BackendEditRequest<T extends 'rename' | 'delete'> extends BackendRequestBase {
+    action: T;
+}
+
+interface BackendRenameRequest extends BackendEditRequest<'rename'> {
+    oldName: string;
+    newName: string;
+    profile: string;
+}
+
+interface BackendDeleteRequest extends BackendEditRequest<'delete'> {
+    /** the name of the profile to be deleted */
+    name: string;
+}
+
+interface BackendEditResponse extends BackendResponseBase {}
+
 /**
  * the profile class handles profiles adding, renaming and deleting
  * @note profile selection is handled in the [[Store]] class
@@ -19,9 +77,11 @@ import { backend } from '@/config';
 class Profile {
     /**
      * a reactive property. whenever changed, the `currentProfile` in the `localStorage` will be updated
-     * @see [[Store.c]]
      */
     current: string;
+    /**
+     * an array of profile names available in the localStorage
+     */
     profiles: string[];
 
     constructor() {
@@ -89,14 +149,15 @@ class Profile {
 
         if (this.canSync()) {
             const [username, credential] = this._cre();
-            await axios.post(backend.edit, {
+            const request: BackendRenameRequest = {
                 username,
                 credential,
                 action: 'rename',
                 oldName,
                 newName,
                 profile: newProf
-            });
+            };
+            await axios.post<BackendEditResponse>(backend.edit, request);
         }
     }
 
@@ -107,12 +168,19 @@ class Profile {
      * @returns the name of the previous profile if the deleted profile is selected,
      * returns undefined otherwise
      */
-    deleteProfile(name: string, idx: number) {
+    async deleteProfile(name: string, idx: number) {
         this.profiles.splice(idx, 1);
         localStorage.removeItem(name);
 
         if (this.canSync()) {
-            this.deleteRemote(name);
+            const [username, credential] = this._cre();
+            const request: BackendDeleteRequest = {
+                username,
+                credential,
+                action: 'delete',
+                name
+            };
+            await axios.post<BackendEditResponse>(backend.edit, request);
         }
 
         if (name === this.current) {
@@ -165,7 +233,7 @@ class Profile {
     }
 
     _cre() {
-        return [localStorage.getItem('username'), localStorage.getItem('credential')];
+        return [localStorage.getItem('username')!, localStorage.getItem('credential')!];
     }
 
     /**
@@ -193,16 +261,6 @@ class Profile {
             credential,
             name,
             profile
-        });
-    }
-
-    async deleteRemote(name: string) {
-        const [username, credential] = this._cre();
-        await axios.post(backend.edit, {
-            username,
-            credential,
-            action: 'delete',
-            name
         });
     }
 

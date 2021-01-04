@@ -65,7 +65,7 @@
                 >
                     <div :id="'1' + idx" class="col-sm-auto mr-auto" style="cursor: pointer">
                         <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
-                            <span>{{ name }}</span> <br />
+                            <strong>{{ name }}</strong> <br />
                             <small v-for="field in getMeta(name)" :key="field" class="text-muted"
                                 >{{ field }} <br />
                             </small>
@@ -80,7 +80,7 @@
                         />
                     </div>
                     <div class="col-sm-auto text-right" style="font-size: 16px">
-                        <i
+                        <!-- <i
                             v-if="newName[idx] === null"
                             :id="'2' + idx"
                             class="click-icon mr-2"
@@ -88,7 +88,7 @@
                                 name === profile.current ? 'far fa-check-square' : 'far fa-square'
                             "
                             title="select this profile"
-                        ></i>
+                        ></i> -->
                         <i
                             v-if="newName[idx] === null"
                             class="fas fa-edit click-icon"
@@ -107,6 +107,24 @@
                             title="delete this profile"
                             @click.stop="deleteProfile(name, idx)"
                         ></i>
+                        <div class="mt-2">
+                            <div class="btn-group">
+                                <button
+                                    class="btn btn-outline-info btn-sm dropdown-toggle"
+                                    type="button"
+                                    data-toggle="dropdown"
+                                    aria-haspopup="true"
+                                    aria-expanded="false"
+                                >
+                                    v1
+                                </button>
+                                <div class="dropdown-menu w-100">
+                                    <a class="dropdown-item w-100" href="#">v2</a>
+                                    <a class="dropdown-item w-100" href="#">v2</a>
+                                    <a class="dropdown-item w-100" href="#">v2</a>
+                                </div>
+                            </div>
+                        </div>
                         <!-- <i
                             v-if="canSync()"
                             class="fas fa-upload ml-1 click-icon"
@@ -192,5 +210,11 @@
 <style scoped>
 .sel {
     background-color: #b8daff;
+}
+.dropdown-menu {
+    min-width: 0.1rem;
+}
+.click-icon {
+    font-size: 14pt;
 }
 </style>

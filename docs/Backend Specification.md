@@ -59,18 +59,23 @@ The save/upload api should accept POST requests with body
 {
     "username": "...",
     "credential": "...",
-    "name": "...", // name of the profile to save
-    "profile": "..." // content of the profile
+    /** list of profiles to be uploaded */
+    "profiles": {
+        /** name of the profile */
+        "name": "...";
+        /** content of the profile */
+        "profile": "...";
+    }[];
 }
 ```
 
-It should give a JSON response indicating whether the action is performed successfully. Also, the new version number should be included. 
+It should give a JSON response indicating whether the action is performed successfully. Also, the new version number for each uploaded profiles should be included. 
 
 ```js
 {
     "success": true, // or false if failed
     "message": "...", // reason for failure. If success, can put anything here
-    "version": 15, // the version number of the newly uploaded profile. If failed, omit this field
+    "versions": [...] // version number of each newly uploaded profile. If failed, omit this field
 }
 ```
 

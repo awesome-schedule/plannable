@@ -60,12 +60,12 @@ The save/upload api should accept POST requests with body
     "username": "...",
     "credential": "...",
     /** list of profiles to be uploaded */
-    "profiles": {
+    "profiles": [{
         /** name of the profile */
         "name": "...";
         /** content of the profile */
         "profile": "...";
-    }[];
+    }, ...];
 }
 ```
 

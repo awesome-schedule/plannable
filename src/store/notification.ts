@@ -92,7 +92,7 @@ class Notification implements NotiState {
     private job: number | null = null;
 
     /**
-     * display notification to users.
+     * display a notification to users.
      * by default, only notifications of higher level will override the previous notification.
      * @param msg the message to display
      * @param type the type of notification
@@ -129,6 +129,10 @@ class Notification implements NotiState {
         return !this.msg && !this.cls;
     }
 
+    /**
+     * clear the current notification
+     * @param timeout clear the current notification after `timeout` seconds. Default to 0, which clears the current notification immediately.
+     */
     public clear(timeout = 0) {
         if (timeout <= 0) {
             this.msg = '';
@@ -143,15 +147,46 @@ class Notification implements NotiState {
         this.history = [];
     }
 
+    /**
+     * display a notification to users.
+     * by default, only notifications of higher level will override the previous notification.
+     * @param msg the message to display
+     * @param timeout timeout in second. this noti msg will be automatically cleared after timeout.
+     * @param override force-override the previous notification, if it exists
+     */
     public warn(msg: string, timeout = 5, override = false) {
         this.notify(msg, 'warning', timeout, override);
     }
+
+    /**
+     * display a notification to users.
+     * by default, only notifications of higher level will override the previous notification.
+     * @param msg the message to display
+     * @param timeout timeout in second. this noti msg will be automatically cleared after timeout.
+     * @param override force-override the previous notification, if it exists
+     */
     public error(msg: string, timeout = 5, override = false) {
         this.notify(msg, 'danger', timeout, override);
     }
+
+    /**
+     * display a notification to users.
+     * by default, only notifications of higher level will override the previous notification.
+     * @param msg the message to display
+     * @param timeout timeout in second. this noti msg will be automatically cleared after timeout.
+     * @param override force-override the previous notification, if it exists
+     */
     public success(msg: string, timeout = 5, override = false) {
         this.notify(msg, 'success', timeout, override);
     }
+
+    /**
+     * display a notification to users.
+     * by default, only notifications of higher level will override the previous notification.
+     * @param msg the message to display
+     * @param timeout timeout in second. this noti msg will be automatically cleared after timeout.
+     * @param override force-override the previous notification, if it exists
+     */
     public info(msg: string, timeout = 5, override = false) {
         this.notify(msg, 'info', timeout, override);
     }

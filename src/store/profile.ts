@@ -302,8 +302,8 @@ class Profile {
             credential,
             profiles
         };
-        // const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request);
-        // console.log(resp);
+        const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request);
+        console.log(resp);
     }
 
     async syncProfiles() {

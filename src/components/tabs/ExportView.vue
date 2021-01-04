@@ -75,6 +75,7 @@
                             v-model="newName[idx]"
                             class="form-control form-control-inline form-control-sm"
                             type="text"
+                            style="width: 99%"
                             @keyup.enter="renameProfile(name, idx)"
                             @keyup.esc="$set(newName, idx, null)"
                         />
@@ -157,6 +158,16 @@
 }
 .dropdown-menu {
     min-width: 0.1rem;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin !important;
+}
+.dropdown-menu::-webkit-scrollbar {
+    width: 5px;
+}
+.dropdown-menu::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #ccc;
 }
 .click-icon {
     font-size: 14pt;

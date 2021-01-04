@@ -23,8 +23,8 @@ interface BackendResponseBase {
 }
 
 interface BackendListRequest extends BackendRequestBase {
-    name: '...'; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
-    version: 1; // only present if "name" is present. If this field is missing, then the latest profile should be returned
+    name: string; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
+    version: number; // only present if "name" is present. If this field is missing, then the latest profile should be returned
 }
 
 interface BackendListResponse extends BackendResponseBase {
@@ -37,31 +37,31 @@ interface BackendListResponse extends BackendResponseBase {
     }[];
 }
 
+interface BackendProfile {
+    /** name of the profile */
+    name: string;
+    /** content of the profile */
+    profile: string;
+}
+
 interface BackendUploadRequest extends BackendRequestBase {
     /** list of profiles to be uploaded */
-    profiles: {
-        /** name of the profile */
-        name: string;
-        /** content of the profile */
-        profile: string;
-    }[];
+    profiles: BackendProfile[];
 }
 
 interface BackendUploadResponse extends BackendResponseBase {
     versions: number[];
 }
 
-interface BackendEditRequest<T extends 'rename' | 'delete'> extends BackendRequestBase {
-    action: T;
-}
-
-interface BackendRenameRequest extends BackendEditRequest<'rename'> {
+interface BackendRenameRequest extends BackendRequestBase {
+    action: 'rename';
     oldName: string;
     newName: string;
     profile: string;
 }
 
-interface BackendDeleteRequest extends BackendEditRequest<'delete'> {
+interface BackendDeleteRequest extends BackendRequestBase {
+    action: 'delete';
     /** the name of the profile to be deleted */
     name: string;
 }
@@ -83,6 +83,11 @@ class Profile {
      * an array of profile names available in the localStorage
      */
     profiles: string[];
+    /**
+     *
+     */
+    versions: number[][] = [];
+    currentVersions: number[] = [];
 
     constructor() {
         this.current = localStorage.getItem('currentProfile') || '';
@@ -173,6 +178,8 @@ class Profile {
         localStorage.removeItem(name);
 
         if (this.canSync()) {
+            this.versions.splice(idx, 1);
+            this.currentVersions.splice(idx, 1);
             const [username, credential] = this._cre();
             const request: BackendDeleteRequest = {
                 username,
@@ -202,6 +209,9 @@ class Profile {
      */
     addProfile(raw: string, fallbackName: string, sw = true) {
         const rawData: SemesterStorage = JSON.parse(raw);
+
+        // change modified time to new to it can overwrite remote profiles
+        rawData.modified = new Date().toJSON();
         let profileName = rawData.name || fallbackName;
         const prevIdx = this.profiles.findIndex(p => p === profileName);
         if (prevIdx !== -1) {
@@ -227,9 +237,11 @@ class Profile {
             rawData.name = profileName;
             localStorage.setItem(profileName, JSON.stringify(rawData));
         } else {
-            localStorage.setItem(profileName, raw);
+            localStorage.setItem(profileName, JSON.stringify(rawData));
         }
         if (sw) this.current = profileName;
+
+        this.syncProfiles();
     }
 
     _cre() {
@@ -244,24 +256,54 @@ class Profile {
         return username && credential;
     }
 
-    async fetchRemoteProfiles() {
+    async getRemoteProfile(name: string, version: number) {
         const [username, credential] = this._cre();
-        return (
-            await axios.post<string[]>(backend.down, {
-                username,
-                credential
-            })
-        ).data.map(s => JSON.parse(s) as SemesterStorage);
-    }
-
-    async uploadProfile(name: string, profile: string) {
-        const [username, credential] = this._cre();
-        await axios.post(backend.up, {
+        const request: BackendListRequest = {
             username,
             credential,
             name,
-            profile
+            version
+        };
+        const { data: resp } = await axios.post<BackendListResponse>(backend.down, request);
+        if (resp.success) {
+            return resp.profiles[0];
+        }
+        return Promise.reject(resp.message);
+    }
+
+    async fetchRemoteProfiles() {
+        const [username, credential] = this._cre();
+        const { data: resp } = await axios.post<BackendListResponse>(backend.down, {
+            username,
+            credential
         });
+        if (resp.success) {
+            console.log(resp);
+            return new Map(
+                resp.profiles.map(p => {
+                    const parsed: SemesterStorage = JSON.parse(p.profile)!;
+                    return [
+                        parsed.name,
+                        {
+                            versions: p.versions,
+                            profile: parsed
+                        }
+                    ];
+                })
+            );
+        }
+        return Promise.reject(resp.message);
+    }
+
+    async uploadProfile(profiles: BackendProfile[]) {
+        const [username, credential] = this._cre();
+        const request: BackendUploadRequest = {
+            username,
+            credential,
+            profiles
+        };
+        // const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request);
+        // console.log(resp);
     }
 
     async syncProfiles() {
@@ -269,43 +311,57 @@ class Profile {
             console.log('No backend exists. Abort syncing profiles');
             return;
         }
-
-        const remoteProfiles = new Map(
-            (await this.fetchRemoteProfiles()).map(prof => [prof.name, prof])
-        );
+        const remoteProfMap = await this.fetchRemoteProfiles();
         const localNames = new Set(this.profiles);
 
         const needUpload: string[] = [],
             needDownload: string[] = [];
-        for (const name of remoteProfiles.keys()) {
+        for (const name of remoteProfMap.keys()) {
             if (localNames.has(name)) {
                 const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
-                const remoteProf: SemesterStorage = remoteProfiles.get(name)!;
+                const remoteProf = remoteProfMap.get(name)!.profile;
 
                 const localTime = new Date(localProf.modified).getTime();
                 const remoteTime = new Date(remoteProf.modified).getTime();
 
                 if (localTime < remoteTime) {
-                    localStorage.setItem(name, JSON.stringify(remoteProfiles.get(name)!));
+                    localStorage.setItem(name, JSON.stringify(remoteProfMap.get(name)!));
                     needDownload.push(name);
                 } else if (localTime > remoteTime) {
                     needUpload.push(name);
                 }
             } else {
-                localStorage.setItem(name, JSON.stringify(remoteProfiles.get(name)!));
+                localStorage.setItem(name, JSON.stringify(remoteProfMap.get(name)!));
                 this.profiles.push(name);
                 needDownload.push(name);
             }
         }
         for (const name of localNames) {
-            if (!remoteProfiles.has(name)) needUpload.push(name);
+            if (!remoteProfMap.has(name)) needUpload.push(name);
         }
 
-        await Promise.all(
-            needUpload.map(name => this.uploadProfile(name, localStorage.getItem(name)!))
+        await this.uploadProfile(
+            needUpload.map(p => ({
+                name: p,
+                profile: localStorage.getItem(p)!
+            }))
         );
         console.log('uploaded', needUpload);
         console.log('downloaded', needDownload);
+
+        const newProfileMap = await this.fetchRemoteProfiles();
+        const newVersions = [],
+            newCurrentVersions = [];
+        for (let i = 0; i < this.profiles.length; i++) {
+            const name = this.profiles[i];
+            const data = newProfileMap.get(name)!;
+            if (data) {
+                newVersions[i] = data.versions.sort((a, b) => b - a);
+                newCurrentVersions[i] = newVersions[i][0];
+            }
+        }
+        this.versions = newVersions;
+        this.currentVersions = newCurrentVersions;
     }
 }
 

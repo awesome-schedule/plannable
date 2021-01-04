@@ -32,7 +32,6 @@ import URLModal from './components/modals/URLModal.vue';
 import VersionModal from './components/modals/VersionModal.vue';
 
 import randomColor from 'randomcolor';
-import { backend } from './config';
 import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import { getReleaseNote } from './utils';

@@ -10,5 +10,5 @@ export default interface Expirable {
     /**
      * the JSON representation of a Date object, representing the time when this expirable object is created
      */
-    readonly modified: string;
+    modified: string;
 }

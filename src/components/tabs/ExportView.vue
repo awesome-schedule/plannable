@@ -80,15 +80,6 @@
                         />
                     </div>
                     <div class="col-sm-auto text-right" style="font-size: 16px">
-                        <!-- <i
-                            v-if="newName[idx] === null"
-                            :id="'2' + idx"
-                            class="click-icon mr-2"
-                            :class="
-                                name === profile.current ? 'far fa-check-square' : 'far fa-square'
-                            "
-                            title="select this profile"
-                        ></i> -->
                         <i
                             v-if="newName[idx] === null"
                             class="fas fa-edit click-icon"
@@ -116,82 +107,26 @@
                                     aria-haspopup="true"
                                     aria-expanded="false"
                                 >
-                                    v1
+                                    v{{ profile.currentVersions[idx] }}
                                 </button>
-                                <div class="dropdown-menu w-100">
-                                    <a class="dropdown-item w-100" href="#">v2</a>
-                                    <a class="dropdown-item w-100" href="#">v2</a>
-                                    <a class="dropdown-item w-100" href="#">v2</a>
+                                <div class="dropdown-menu w-100 text-center">
+                                    <a
+                                        v-for="ver in profile.versions[idx]"
+                                        :key="ver"
+                                        class="dropdown-item w-100 px-0"
+                                        :class="{ active: ver === profile.currentVersions[idx] }"
+                                        href="#"
+                                        @click.stop="switchVersion(name, idx, ver)"
+                                        >v{{ ver }}
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                        <!-- <i
-                            v-if="canSync()"
-                            class="fas fa-upload ml-1 click-icon"
-                            title="upload this profile to remote"
-                            @click.stop="uploadProfile(name)"
-                        ></i> -->
                     </div>
                 </div>
             </li>
         </ul>
         <template v-if="profile.canSync()">
-            <!-- <div class="btn bg-info nav-btn mt-2">
-                Remote Profiles <span class="badge badge-primary">Beta</span>
-            </div>
-            <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
-                <li
-                    v-for="(data, idx) in remoteProfiles"
-                    :key="data.name"
-                    class="list-group-item list-group-item-action pl-3 pr-2"
-                >
-                    <div class="form-row no-gutters justify-content-between">
-                        <div class="col-sm-auto mr-auto" style="cursor: pointer">
-                            <span v-if="remoteNewName[idx] === null">
-                                <span>{{ data.name }}</span> <br />
-                                <small class="text-muted">{{ data.currentSemester.name }} </small>
-                                <br />
-                                <small class="text-muted"
-                                    >{{ new Date(data.modified).toLocaleString() }}
-                                </small>
-                                <br />
-                            </span>
-                            <input
-                                v-else
-                                v-model="remoteNewName[idx]"
-                                class="form-control form-control-sm"
-                                type="text"
-                                @keyup.enter="renameRemote(data.name, idx)"
-                                @keyup.esc="$set(remoteNewName, idx, null)"
-                            />
-                        </div>
-                        <div class="col-sm-auto text-right" style="font-size: 16px">
-                            <i
-                                v-if="remoteNewName[idx] === null"
-                                class="fas fa-edit click-icon"
-                                title="rename this profile"
-                                @click="$set(remoteNewName, idx, data.name)"
-                            ></i>
-                            <i
-                                v-else
-                                class="fas fa-check ml-1 click-icon"
-                                title="confirm renaming"
-                                @click="renameRemote(data.name, idx)"
-                            ></i>
-                            <i
-                                class="fa fa-times ml-1 click-icon"
-                                title="delete this profile"
-                                @click="deleteRemote(data.name, idx)"
-                            ></i>
-                            <i
-                                class="fa fa-download ml-1 click-icon"
-                                title="download this profile"
-                                @click="downloadProfile(data)"
-                            ></i>
-                        </div>
-                    </div>
-                </li>
-            </ul> -->
             <div class="w-100 text-center">
                 <button
                     class="btn btn-outline-primary mt-2 w-75"
@@ -199,6 +134,15 @@
                     @click="logout()"
                 >
                     Logout
+                </button>
+            </div>
+            <div class="w-100 text-center">
+                <button
+                    class="btn btn-outline-primary mt-2 w-75"
+                    title="Synchronize"
+                    @click="profile.syncProfiles()"
+                >
+                    Refresh
                 </button>
             </div>
         </template>

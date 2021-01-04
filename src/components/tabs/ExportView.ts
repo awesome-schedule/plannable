@@ -165,6 +165,13 @@ export default class ExportView extends Store {
         this.loadProfile();
         this.$forceUpdate();
     }
+    async switchVersion(name: string, idx: number, version: number) {
+        this.profile.currentVersions[idx] = version;
+        const remote = await this.profile.getRemoteProfile(name, version);
+        localStorage.setItem(name, remote.profile);
+        this.loadProfile();
+        this.$forceUpdate();
+    }
     renameProfile(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);
         if (!raw) return;

@@ -10,6 +10,7 @@ import { SemesterStorage } from '.';
 import axios from 'axios';
 import { backend } from '@/config';
 import Vue from 'vue';
+import { NotiMsg } from './notification';
 
 interface BackendBaseRequest {
     username: string;
@@ -108,12 +109,15 @@ class Profile {
      *
      */
     currentVersions: number[];
+    canSync: boolean;
 
     constructor() {
         this.current = localStorage.getItem('currentProfile') || '';
         this.profiles = JSON.parse(localStorage.getItem('profiles') || '[]');
         this.versions = Array.from({ length: this.profiles.length }, () => []);
         this.currentVersions = Array.from({ length: this.profiles.length }, () => 1);
+        const [_u, _c] = this._cre();
+        this.canSync = !!_u && !!_c;
     }
 
     /**
@@ -174,7 +178,7 @@ class Profile {
         // use splice for reactivity purpose
         Vue.set(this.profiles, idx, newName);
 
-        if (this.canSync()) {
+        if (this.canSync) {
             const [username, credential] = this._cre();
             const request: BackendRenameRequest = {
                 username,
@@ -185,6 +189,14 @@ class Profile {
                 profile: newProf
             };
             const { data: resp } = await axios.post<BackendRenameResponse>(backend.edit, request);
+            if (!resp.success) {
+                this.logout();
+                return {
+                    msg: `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`,
+                    level: 'error'
+                } as const;
+            }
+
             Vue.set(
                 this.versions,
                 idx,
@@ -205,7 +217,11 @@ class Profile {
         this.profiles.splice(idx, 1);
         localStorage.removeItem(name);
 
-        if (this.canSync()) {
+        const msg: NotiMsg<string> = {
+            msg: '',
+            level: 'success'
+        };
+        if (this.canSync) {
             this.versions.splice(idx, 1);
             this.currentVersions.splice(idx, 1);
             const [username, credential] = this._cre();
@@ -215,16 +231,22 @@ class Profile {
                 action: 'delete',
                 name
             };
-            await axios.post<BackendDeleteResponse>(backend.edit, request);
+            const { data: resp } = await axios.post<BackendDeleteResponse>(backend.edit, request);
+            if (!resp.success) {
+                this.logout();
+                msg.level = 'error';
+                msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
+            }
         }
 
         if (name === this.current) {
             if (idx === this.profiles.length) {
-                return (this.current = this.profiles[idx - 1]);
+                msg.payload = this.current = this.profiles[idx - 1];
             } else {
-                return (this.current = this.profiles[idx]);
+                msg.payload = this.current = this.profiles[idx];
             }
         }
+        return msg;
     }
 
     /**
@@ -235,7 +257,7 @@ class Profile {
      * @param sw whether to switch to the newly added schedule
      * by setting `current` to the name of the newly added profile
      */
-    addProfile(raw: string, fallbackName: string) {
+    async addProfile(raw: string, fallbackName: string) {
         const rawData: SemesterStorage = JSON.parse(raw);
 
         // change modified time to new to it can overwrite remote profiles
@@ -245,7 +267,7 @@ class Profile {
         if (prevIdx !== -1) {
             if (
                 !confirm(
-                    `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both`
+                    `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both.`
                 )
             ) {
                 let idx = 2;
@@ -267,20 +289,20 @@ class Profile {
         // backward compatibility only
         if (!rawData.name) rawData.name = profileName;
 
-        localStorage.setItem(profileName, JSON.stringify(rawData));
+        const data = JSON.stringify(rawData);
+        localStorage.setItem(profileName, data);
         this.current = profileName;
+        const msg = await this.uploadProfile([
+            {
+                profile: data,
+                name: profileName
+            }
+        ]);
+        if (msg) return msg;
     }
 
     _cre() {
         return [localStorage.getItem('username')!, localStorage.getItem('credential')!];
-    }
-
-    /**
-     * return whether the credentials in the localStorage exist
-     */
-    canSync() {
-        const [username, credential] = this._cre();
-        return username && credential;
     }
 
     async getRemoteProfile(name: string, version: number) {
@@ -292,33 +314,18 @@ class Profile {
             version
         };
         const { data: resp } = await axios.post<BackendListResponse>(backend.down, request);
+        const msg: NotiMsg<BackendListResponse['profiles'][0]> = {
+            level: 'success',
+            msg: ''
+        };
         if (resp.success) {
-            return resp.profiles[0];
+            msg.payload = resp.profiles[0];
+        } else {
+            msg.level = 'error';
+            msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
+            this.logout();
         }
-        return Promise.reject(resp.message);
-    }
-
-    async fetchRemoteProfiles() {
-        const [username, credential] = this._cre();
-        const { data: resp } = await axios.post<BackendListResponse>(backend.down, {
-            username,
-            credential
-        });
-        if (resp.success) {
-            return new Map(
-                resp.profiles.map(p => {
-                    const parsed: SemesterStorage = JSON.parse(p.profile)!;
-                    return [
-                        parsed.name,
-                        {
-                            versions: p.versions.sort((a, b) => b.version - a.version),
-                            profile: parsed
-                        }
-                    ];
-                })
-            );
-        }
-        return Promise.reject(resp.message);
+        return msg;
     }
 
     async uploadProfile(profiles: BackendProfile[]) {
@@ -329,6 +336,14 @@ class Profile {
             profiles
         };
         const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request);
+        if (!resp.success) {
+            this.logout();
+            return {
+                msg: `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`,
+                level: 'error'
+            } as const;
+        }
+
         for (let i = 0; i < profiles.length; i++) {
             const name = profiles[i].name;
             const version = resp.versions[i].sort((a, b) => b.version - a.version);
@@ -338,12 +353,36 @@ class Profile {
         }
     }
 
-    async syncProfiles() {
-        if (!this.canSync()) {
+    async syncProfiles(): Promise<NotiMsg<undefined> | undefined> {
+        if (!this.canSync) {
             console.log('No backend exists. Abort syncing profiles');
             return;
         }
-        const remoteProfMap = await this.fetchRemoteProfiles();
+        const [username, credential] = this._cre();
+        const { data: resp } = await axios.post<BackendListResponse>(backend.down, {
+            username,
+            credential
+        });
+        if (!resp.success) {
+            this.logout();
+            return {
+                msg: `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`,
+                level: 'error'
+            };
+        }
+
+        const remoteProfMap = new Map(
+            resp.profiles.map(p => {
+                const parsed: SemesterStorage = JSON.parse(p.profile)!;
+                return [
+                    parsed.name,
+                    {
+                        versions: p.versions.sort((a, b) => b.version - a.version),
+                        profile: parsed
+                    }
+                ];
+            })
+        );
         const localNames = this.profiles;
 
         const needUpload: string[] = [],
@@ -380,14 +419,22 @@ class Profile {
             if (!remoteProfMap.has(name)) needUpload.push(name);
         }
 
-        await this.uploadProfile(
+        const msg = await this.uploadProfile(
             needUpload.map(p => ({
                 name: p,
                 profile: localStorage.getItem(p)!
             }))
         );
+        if (msg) return msg;
+
         console.log('uploaded', needUpload);
         console.log('downloaded', needDownload);
+    }
+
+    logout() {
+        localStorage.removeItem('username');
+        localStorage.removeItem('credential');
+        this.canSync = false;
     }
 }
 

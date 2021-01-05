@@ -115,6 +115,7 @@ export default class App extends Store {
         if (username && credential) {
             localStorage.setItem('username', username);
             localStorage.setItem('credential', credential);
+            this.profile.canSync = true;
             return true;
         }
     }
@@ -129,12 +130,14 @@ export default class App extends Store {
         this.loadCredentials(search);
 
         // note: these three can be executed in parallel, i.e. they are not inter-dependent
-        const [pay1, pay2, pay3, _] = await Promise.all([
+        const [pay1, pay2, pay3, pay4] = await Promise.all([
             loadTimeMatrix(),
             loadBuildingSearcher(),
             this.semester.loadSemesters(),
             this.profile.syncProfiles()
         ]);
+
+        if (pay4) this.noti.notify(pay4);
 
         this.noti.notify(pay1);
         if (pay1.payload) window.timeMatrix = pay1.payload;

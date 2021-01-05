@@ -51,7 +51,14 @@
                 Print your currently rendered schedule
             </small>
         </div>
-        <div class="btn bg-info nav-btn">Local Profiles</div>
+        <div class="btn bg-info nav-btn">
+            Profiles
+            <i
+                v-if="profile.canSync"
+                class="fas fa-cloud"
+                :title="`You profiles are synchronizd with ${backendName}`"
+            ></i>
+        </div>
         <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
             <li
                 v-for="(name, idx) in profile.profiles"
@@ -84,10 +91,9 @@
                     <div class="col-xs-auto text-right" style="font-size: 16px">
                         <template
                             v-if="
-                                !profile.canSync() ||
-                                    profile.versions[idx].length === 0 ||
-                                    profile.currentVersions[idx] ===
-                                        profile.versions[idx][0].version
+                                !profile.canSync ||
+                                profile.versions[idx].length === 0 ||
+                                profile.currentVersions[idx] === profile.versions[idx][0].version
                             "
                         >
                             <i
@@ -119,7 +125,7 @@
                             </button>
                         </template>
                         <div
-                            v-if="profile.canSync()"
+                            v-if="profile.canSync"
                             class="mt-2"
                             title="Checkout historical versions of this profile"
                         >
@@ -139,7 +145,7 @@
                                         :key="ver.version"
                                         class="dropdown-item px-2"
                                         :class="{
-                                            active: ver.version === profile.currentVersions[idx]
+                                            active: ver.version === profile.currentVersions[idx],
                                         }"
                                         href="#"
                                         :title="ver.userAgent"
@@ -155,24 +161,20 @@
                 </div>
             </li>
         </ul>
-        <template v-if="profile.canSync()">
+        <template v-if="profile.canSync">
             <div class="w-100 text-center">
                 <button
                     class="btn btn-outline-primary mt-2 w-75"
-                    title="Close connection to remote"
-                    @click="logout()"
+                    :title="`Close connection to ${backendName}`"
+                    @click="profile.logout()"
                 >
                     Logout
                 </button>
             </div>
-            <div class="w-100 text-center">
-                <button
-                    class="btn btn-outline-primary mt-2 w-75"
-                    title="Synchronize"
-                    @click="profile.syncProfiles()"
-                >
-                    Refresh
-                </button>
+            <div class="mx-2 mt-1 mb-3 text-center">
+                <small class="text-muted">
+                    You profiles are synchronizd with {{ backendName }}
+                </small>
             </div>
         </template>
     </nav>

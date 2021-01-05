@@ -21,6 +21,10 @@ import { Component } from 'vue-property-decorator';
 export default class ExportView extends Store {
     newName: (string | null)[] = [];
 
+    get backendName() {
+        return backend.name;
+    }
+
     created() {
         this.newName = this.profile.profiles.map(() => null);
     }
@@ -150,19 +154,20 @@ export default class ExportView extends Store {
         }
     }
 
-    deleteProfile(name: string, idx: number) {
+    async deleteProfile(name: string, idx: number) {
         if (confirm(`Are you sure to delete ${name}?`)) {
             this.newName.pop();
-            const prof = this.profile.deleteProfile(name, idx);
+            const msg = await this.profile.deleteProfile(name, idx);
+            if (msg.level === 'error') return this.noti.notify(msg);
             // if the deleted profile is the current profile, reload the newly selected current profile
-            if (prof) this.loadProfile();
+            if (msg.payload) this.loadProfile();
         }
     }
     selectProfile(profileName: string) {
         if (profileName === this.profile.current) return;
         const item = localStorage.getItem(profileName);
         if (!item) return;
-        if (this.profile.canSync()) {
+        if (this.profile.canSync) {
             // set previously selected profile to its latest version, if not already
             this.noti.clear();
             const idx = this.profile.profiles.findIndex(p => p === this.profile.current);
@@ -182,29 +187,32 @@ export default class ExportView extends Store {
     async switchVersion(name: string, idx: number, version: number) {
         this.profile.currentVersions[idx] = version;
         const remote = await this.profile.getRemoteProfile(name, version);
+        if (remote.level === 'error') return this.noti.notify(remote);
+
         // backup the current profile, in case we need to switch back
         localStorage.setItem('backup-' + name, localStorage.getItem(name)!);
-        localStorage.setItem(name, remote.profile);
+        localStorage.setItem(name, remote.payload!.profile);
         this.loadProfile();
         this.noti.warn(
-            `You checked out a historical version your profile. Your changes to this profile will not be synchronized with ${backend.name} unless you click "Keep"`,
+            `You checked out a historical version your profile. Your changes to this profile will not be synchronized with ${backend.name} unless you click "Keep".`,
             3600,
             true
         );
         this.$forceUpdate();
     }
     async keepVersion(name: string, idx: number) {
-        await this.profile.uploadProfile([
+        const msg = await this.profile.uploadProfile([
             {
                 name,
                 profile: localStorage.getItem(name)!,
                 new: true
             }
         ]);
+        if (msg) this.noti.notify(msg);
         localStorage.removeItem('backup-' + name);
         this.noti.clear();
     }
-    renameProfile(oldName: string, idx: number) {
+    async renameProfile(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);
         if (!raw) return;
 
@@ -212,18 +220,13 @@ export default class ExportView extends Store {
         if (!newName) return this.$set(this.newName, idx, null);
         if (newName !== oldName) {
             if (this.profile.profiles.includes(newName)) return this.noti.error('Duplicated name!');
-            this.profile.renameProfile(idx, oldName, newName, raw);
+            const msg = await this.profile.renameProfile(idx, oldName, newName, raw);
+            if (msg) return this.noti.notify(msg);
         }
         this.$set(this.newName, idx, null);
     }
 
     print() {
         window.print();
-    }
-
-    logout() {
-        localStorage.removeItem('username');
-        localStorage.removeItem('credential');
-        this.$forceUpdate();
     }
 }

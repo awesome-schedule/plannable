@@ -128,7 +128,7 @@ function _saveStatus() {
     if (!currentSemester) return;
     const name = profile.current;
 
-    if (profile.canSync() && profile.currentVersions.length && profile.versions.length) {
+    if (profile.canSync && profile.currentVersions.length && profile.versions.length) {
         const idx = profile.profiles.findIndex(p => p === name);
         if (idx !== -1 && profile.currentVersions[idx] !== profile.versions[idx][0].version) {
             console.log(
@@ -152,7 +152,7 @@ function _saveStatus() {
 
     const str = JSON.stringify(obj);
     localStorage.setItem(name, str);
-    if (profile.canSync()) profile.uploadProfile([{ name, profile: str }]);
+    if (profile.canSync) profile.uploadProfile([{ name, profile: str }]);
     pendingStatusSave = -1;
 
     console.log('status saved');

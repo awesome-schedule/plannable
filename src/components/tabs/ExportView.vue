@@ -93,7 +93,7 @@
                             v-if="
                                 !profile.canSync ||
                                 profile.versions[idx].length === 0 ||
-                                profile.currentVersions[idx] === profile.versions[idx][0].version
+                                profile.isLatest(idx)
                             "
                         >
                             <i

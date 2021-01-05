@@ -188,6 +188,7 @@ class Profile {
                 newName,
                 profile: newProf
             };
+            console.log(request);
             const { data: resp } = await axios.post<BackendRenameResponse>(backend.edit, request);
             if (!resp.success) {
                 this.logout();
@@ -214,16 +215,11 @@ class Profile {
      * returns undefined otherwise
      */
     async deleteProfile(name: string, idx: number) {
-        this.profiles.splice(idx, 1);
-        localStorage.removeItem(name);
-
         const msg: NotiMsg<string> = {
             msg: '',
             level: 'success'
         };
         if (this.canSync) {
-            this.versions.splice(idx, 1);
-            this.currentVersions.splice(idx, 1);
             const [username, credential] = this._cre();
             const request: BackendDeleteRequest = {
                 username,
@@ -236,8 +232,14 @@ class Profile {
                 this.logout();
                 msg.level = 'error';
                 msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
+            } else {
+                this.versions.splice(idx, 1);
+                this.currentVersions.splice(idx, 1);
             }
         }
+
+        this.profiles.splice(idx, 1);
+        localStorage.removeItem(name);
 
         if (name === this.current) {
             if (idx === this.profiles.length) {
@@ -299,6 +301,10 @@ class Profile {
             }
         ]);
         if (msg) return msg;
+    }
+
+    isLatest(idx: number) {
+        return this.currentVersions[idx] === this.versions[idx][0].version;
     }
 
     _cre() {

@@ -156,8 +156,8 @@ export default class ExportView extends Store {
 
     async deleteProfile(name: string, idx: number) {
         if (confirm(`Are you sure to delete ${name}?`)) {
-            this.newName.pop();
             const msg = await this.profile.deleteProfile(name, idx);
+            this.newName.pop();
             if (msg.level === 'error') return this.noti.notify(msg);
             // if the deleted profile is the current profile, reload the newly selected current profile
             if (msg.payload) this.loadProfile();
@@ -171,7 +171,7 @@ export default class ExportView extends Store {
             // set previously selected profile to its latest version, if not already
             this.noti.clear();
             const idx = this.profile.profiles.findIndex(p => p === this.profile.current);
-            if (this.profile.currentVersions[idx] !== this.profile.versions[idx][0].version) {
+            if (!this.profile.isLatest(idx)) {
                 this.profile.currentVersions[idx] = this.profile.versions[idx][0].version;
                 localStorage.setItem(
                     this.profile.current,
@@ -190,14 +190,16 @@ export default class ExportView extends Store {
         if (remote.level === 'error') return this.noti.notify(remote);
 
         // backup the current profile, in case we need to switch back
+
         localStorage.setItem('backup-' + name, localStorage.getItem(name)!);
         localStorage.setItem(name, remote.payload!.profile);
         this.loadProfile();
-        this.noti.warn(
-            `You checked out a historical version your profile. Your changes to this profile will not be synchronized with ${backend.name} unless you click "Keep".`,
-            3600,
-            true
-        );
+        if (!this.profile.isLatest(idx))
+            this.noti.warn(
+                `You checked out a historical version your profile. Your changes to this profile will not be saved or synchronized with ${backend.name} unless you click "Keep".`,
+                3600,
+                true
+            );
         this.$forceUpdate();
     }
     async keepVersion(name: string, idx: number) {

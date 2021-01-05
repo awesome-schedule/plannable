@@ -84,8 +84,10 @@
                     <div class="col-xs-auto text-right" style="font-size: 16px">
                         <template
                             v-if="
-                                profile.versions[idx].length === 0 ||
-                                profile.currentVersions[idx] === profile.versions[idx][0].version
+                                !profile.canSync() ||
+                                    profile.versions[idx].length === 0 ||
+                                    profile.currentVersions[idx] ===
+                                        profile.versions[idx][0].version
                             "
                         >
                             <i
@@ -116,7 +118,11 @@
                                 Keep
                             </button>
                         </template>
-                        <div class="mt-2" title="Checkout historical versions of this profile">
+                        <div
+                            v-if="profile.canSync()"
+                            class="mt-2"
+                            title="Checkout historical versions of this profile"
+                        >
                             <div class="btn-group">
                                 <button
                                     class="btn btn-outline-info btn-sm dropdown-toggle"
@@ -133,7 +139,7 @@
                                         :key="ver.version"
                                         class="dropdown-item px-2"
                                         :class="{
-                                            active: ver.version === profile.currentVersions[idx],
+                                            active: ver.version === profile.currentVersions[idx]
                                         }"
                                         href="#"
                                         :title="ver.userAgent"

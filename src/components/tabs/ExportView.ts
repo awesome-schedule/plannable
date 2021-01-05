@@ -166,7 +166,14 @@ export default class ExportView extends Store {
             // set previously selected profile to its latest version, if not already
             this.noti.clear();
             const idx = this.profile.profiles.findIndex(p => p === this.profile.current);
-            this.profile.currentVersions[idx] = this.profile.versions[idx][0].version;
+            if (this.profile.currentVersions[idx] !== this.profile.versions[idx][0].version) {
+                this.profile.currentVersions[idx] = this.profile.versions[idx][0].version;
+                localStorage.setItem(
+                    this.profile.current,
+                    localStorage.getItem('backup-' + this.profile.current)!
+                );
+                localStorage.removeItem('backup-' + this.profile.current);
+            }
         }
         this.profile.current = profileName;
         this.loadProfile();
@@ -175,6 +182,8 @@ export default class ExportView extends Store {
     async switchVersion(name: string, idx: number, version: number) {
         this.profile.currentVersions[idx] = version;
         const remote = await this.profile.getRemoteProfile(name, version);
+        // backup the current profile, in case we need to switch back
+        localStorage.setItem('backup-' + name, localStorage.getItem(name)!);
         localStorage.setItem(name, remote.profile);
         this.loadProfile();
         this.noti.warn(
@@ -192,6 +201,7 @@ export default class ExportView extends Store {
                 new: true
             }
         ]);
+        localStorage.removeItem('backup-' + name);
         this.noti.clear();
     }
     renameProfile(oldName: string, idx: number) {

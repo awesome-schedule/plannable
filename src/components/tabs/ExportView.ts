@@ -5,6 +5,7 @@
 /**
  *
  */
+import { backend } from '@/config';
 import Store, { compressJSON, SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
@@ -161,6 +162,12 @@ export default class ExportView extends Store {
         if (profileName === this.profile.current) return;
         const item = localStorage.getItem(profileName);
         if (!item) return;
+        if (this.profile.canSync()) {
+            // set previously selected profile to its latest version, if not already
+            this.noti.clear();
+            const idx = this.profile.profiles.findIndex(p => p === this.profile.current);
+            this.profile.currentVersions[idx] = this.profile.versions[idx][0].version;
+        }
         this.profile.current = profileName;
         this.loadProfile();
         this.$forceUpdate();
@@ -170,7 +177,22 @@ export default class ExportView extends Store {
         const remote = await this.profile.getRemoteProfile(name, version);
         localStorage.setItem(name, remote.profile);
         this.loadProfile();
+        this.noti.warn(
+            `You checked out a historical version your profile. Your changes to this profile will not be synchronized with ${backend.name} unless you click "Keep"`,
+            3600,
+            true
+        );
         this.$forceUpdate();
+    }
+    async keepVersion(name: string, idx: number) {
+        await this.profile.uploadProfile([
+            {
+                name,
+                profile: localStorage.getItem(name)!,
+                new: true
+            }
+        ]);
+        this.noti.clear();
     }
     renameProfile(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);

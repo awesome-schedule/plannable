@@ -61,9 +61,10 @@
             >
                 <div
                     class="form-row no-gutters justify-content-between"
+                    style="flex-wrap: nowrap"
                     @click="selectProfile(name)"
                 >
-                    <div :id="'1' + idx" class="col-sm-auto mr-auto" style="cursor: pointer">
+                    <div :id="'1' + idx" class="col-xs-auto mr-auto" style="cursor: pointer">
                         <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
                             <strong>{{ name }}</strong> <br />
                             <small v-for="field in getMeta(name)" :key="field" class="text-muted"
@@ -80,26 +81,42 @@
                             @keyup.esc="$set(newName, idx, null)"
                         />
                     </div>
-                    <div class="col-sm-auto text-right" style="font-size: 16px">
-                        <i
-                            v-if="newName[idx] === null"
-                            class="fas fa-edit click-icon"
-                            title="rename this profile"
-                            @click.stop="$set(newName, idx, name)"
-                        ></i>
-                        <i
-                            v-else
-                            class="fas fa-check ml-1 click-icon"
-                            title="confirm renaming"
-                            @click.stop="renameProfile(name, idx)"
-                        ></i>
-                        <i
-                            v-if="newName[idx] === null && profile.profiles.length > 1"
-                            class="fa fa-times ml-1 click-icon"
-                            title="delete this profile"
-                            @click.stop="deleteProfile(name, idx)"
-                        ></i>
-                        <div class="mt-2">
+                    <div class="col-xs-auto text-right" style="font-size: 16px">
+                        <template
+                            v-if="
+                                profile.versions[idx].length === 0 ||
+                                profile.currentVersions[idx] === profile.versions[idx][0].version
+                            "
+                        >
+                            <i
+                                v-if="newName[idx] === null"
+                                class="fas fa-edit click-icon"
+                                title="rename this profile"
+                                @click.stop="$set(newName, idx, name)"
+                            ></i>
+                            <i
+                                v-else
+                                class="fas fa-check ml-1 click-icon"
+                                title="confirm renaming"
+                                @click.stop="renameProfile(name, idx)"
+                            ></i>
+                            <i
+                                v-if="newName[idx] === null && profile.profiles.length > 1"
+                                class="fa fa-times ml-1 click-icon"
+                                title="delete this profile"
+                                @click.stop="deleteProfile(name, idx)"
+                            ></i>
+                        </template>
+                        <template v-else>
+                            <button
+                                class="btn btn-outline-primary btn-sm"
+                                title="Keep this version of the profile"
+                                @click.stop="keepVersion(name, idx)"
+                            >
+                                Keep
+                            </button>
+                        </template>
+                        <div class="mt-2" title="Checkout historical versions of this profile">
                             <div class="btn-group">
                                 <button
                                     class="btn btn-outline-info btn-sm dropdown-toggle"
@@ -110,15 +127,20 @@
                                 >
                                     v{{ profile.currentVersions[idx] }}
                                 </button>
-                                <div class="dropdown-menu w-100 text-center">
+                                <div class="dropdown-menu text-center">
                                     <a
                                         v-for="ver in profile.versions[idx]"
-                                        :key="ver"
-                                        class="dropdown-item w-100 px-0"
-                                        :class="{ active: ver === profile.currentVersions[idx] }"
+                                        :key="ver.version"
+                                        class="dropdown-item px-2"
+                                        :class="{
+                                            active: ver.version === profile.currentVersions[idx],
+                                        }"
                                         href="#"
-                                        @click.stop="switchVersion(name, idx, ver)"
-                                        >v{{ ver }}
+                                        :title="ver.userAgent"
+                                        @click.stop="switchVersion(name, idx, ver.version)"
+                                    >
+                                        v{{ ver.version }} |
+                                        <small>{{ new Date(ver.modified).toLocaleString() }}</small>
                                     </a>
                                 </div>
                             </div>

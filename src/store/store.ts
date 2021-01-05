@@ -128,6 +128,18 @@ function _saveStatus() {
     if (!currentSemester) return;
     const name = profile.current;
 
+    if (profile.canSync() && profile.currentVersions.length && profile.versions.length) {
+        const idx = profile.profiles.findIndex(p => p === name);
+        if (idx !== -1 && profile.currentVersions[idx] !== profile.versions[idx][0].version) {
+            console.log(
+                'Uploading & saving of',
+                name,
+                'aborted due to checking out historical versions'
+            );
+            return;
+        }
+    }
+
     const obj: SemesterStorage = {
         name,
         modified: new Date().toJSON(),

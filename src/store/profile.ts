@@ -9,29 +9,39 @@ import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
 import axios from 'axios';
 import { backend } from '@/config';
+import Vue from 'vue';
 
-interface BackendRequestBase {
+interface BackendBaseRequest {
     username: string;
     credential: string;
 }
 
-interface BackendResponseBase {
+interface BackendBaseResponse {
     /** true if success, false otherwise */
     success: boolean;
     /** reason for failure. If success, can put anything here */
     message: string;
 }
 
-interface BackendListRequest extends BackendRequestBase {
+interface BackendListRequest extends BackendBaseRequest {
     name: string; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
-    version: number; // only present if "name" is present. If this field is missing, then the latest profile should be returned
+    version?: number; // only present if "name" is present. If this field is missing, then the latest profile should be returned
 }
 
-interface BackendListResponse extends BackendResponseBase {
+interface ProfileVersion {
+    /** number of milliseconds since Unix epoch */
+    modified: number;
+    /** User Agent from the Http Header */
+    userAgent: string;
+    /** the version number */
+    version: number;
+}
+
+interface BackendListResponse extends BackendBaseResponse {
     /** if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. */
     profiles: {
         /** keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles */
-        versions: number[];
+        versions: ProfileVersion[];
         /** the body of the profile corresponding to the queried version. It should be the latest profile if the version number is missing */
         profile: string;
     }[];
@@ -42,33 +52,38 @@ interface BackendProfile {
     name: string;
     /** content of the profile */
     profile: string;
-    /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to device whether to create a new version */
+    /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to decide whether to create a new version */
     new?: true;
 }
 
-interface BackendUploadRequest extends BackendRequestBase {
+interface BackendUploadRequest extends BackendBaseRequest {
     /** list of profiles to be uploaded */
     profiles: BackendProfile[];
 }
 
-interface BackendUploadResponse extends BackendResponseBase {
-    versions: number[];
+interface BackendUploadResponse extends BackendBaseResponse {
+    /** version information of each newly uploaded profile. If failed, this field is not present */
+    versions: ProfileVersion[][];
 }
 
-interface BackendRenameRequest extends BackendRequestBase {
+interface BackendRenameRequest extends BackendBaseRequest {
     action: 'rename';
     oldName: string;
     newName: string;
     profile: string;
 }
 
-interface BackendDeleteRequest extends BackendRequestBase {
+interface BackendRenameResponse extends BackendBaseResponse {
+    versions: ProfileVersion[];
+}
+
+interface BackendDeleteRequest extends BackendBaseRequest {
     action: 'delete';
     /** the name of the profile to be deleted */
     name: string;
 }
 
-interface BackendEditResponse extends BackendResponseBase {}
+interface BackendDeleteResponse extends BackendBaseResponse {}
 
 /**
  * the profile class handles profiles adding, renaming and deleting
@@ -88,12 +103,17 @@ class Profile {
     /**
      *
      */
-    versions: number[][] = [];
-    currentVersions: number[] = [];
+    versions: ProfileVersion[][];
+    /**
+     *
+     */
+    currentVersions: number[];
 
     constructor() {
         this.current = localStorage.getItem('currentProfile') || '';
         this.profiles = JSON.parse(localStorage.getItem('profiles') || '[]');
+        this.versions = Array.from({ length: this.profiles.length }, () => []);
+        this.currentVersions = Array.from({ length: this.profiles.length }, () => 1);
     }
 
     /**
@@ -152,7 +172,7 @@ class Profile {
         localStorage.setItem(newName, newProf);
 
         // use splice for reactivity purpose
-        this.profiles.splice(idx, 1, newName);
+        Vue.set(this.profiles, idx, newName);
 
         if (this.canSync()) {
             const [username, credential] = this._cre();
@@ -164,7 +184,13 @@ class Profile {
                 newName,
                 profile: newProf
             };
-            await axios.post<BackendEditResponse>(backend.edit, request);
+            const { data: resp } = await axios.post<BackendRenameResponse>(backend.edit, request);
+            Vue.set(
+                this.versions,
+                idx,
+                resp.versions.sort((a, b) => b.version - a.version)
+            );
+            Vue.set(this.currentVersions, idx, resp.versions[0].version);
         }
     }
 
@@ -189,7 +215,7 @@ class Profile {
                 action: 'delete',
                 name
             };
-            await axios.post<BackendEditResponse>(backend.edit, request);
+            await axios.post<BackendDeleteResponse>(backend.edit, request);
         }
 
         if (name === this.current) {
@@ -209,7 +235,7 @@ class Profile {
      * @param sw whether to switch to the newly added schedule
      * by setting `current` to the name of the newly added profile
      */
-    addProfile(raw: string, fallbackName: string, sw = true) {
+    addProfile(raw: string, fallbackName: string) {
         const rawData: SemesterStorage = JSON.parse(raw);
 
         // change modified time to new to it can overwrite remote profiles
@@ -228,22 +254,21 @@ class Profile {
 
                 rawData.name = profileName;
                 localStorage.setItem(profileName, JSON.stringify(rawData));
+
                 this.profiles.push(profileName);
+                this.versions.push([]);
+                this.currentVersions.push(1);
             }
         } else {
             this.profiles.push(profileName);
+            this.versions.push([]);
+            this.currentVersions.push(1);
         }
+        // backward compatibility only
+        if (!rawData.name) rawData.name = profileName;
 
-        if (!rawData.name) {
-            // backward compatibility
-            rawData.name = profileName;
-            localStorage.setItem(profileName, JSON.stringify(rawData));
-        } else {
-            localStorage.setItem(profileName, JSON.stringify(rawData));
-        }
-        if (sw) this.current = profileName;
-
-        this.syncProfiles();
+        localStorage.setItem(profileName, JSON.stringify(rawData));
+        this.current = profileName;
     }
 
     _cre() {
@@ -280,14 +305,13 @@ class Profile {
             credential
         });
         if (resp.success) {
-            console.log(resp);
             return new Map(
                 resp.profiles.map(p => {
                     const parsed: SemesterStorage = JSON.parse(p.profile)!;
                     return [
                         parsed.name,
                         {
-                            versions: p.versions,
+                            versions: p.versions.sort((a, b) => b.version - a.version),
                             profile: parsed
                         }
                     ];
@@ -305,7 +329,13 @@ class Profile {
             profiles
         };
         const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request);
-        console.log(resp);
+        for (let i = 0; i < profiles.length; i++) {
+            const name = profiles[i].name;
+            const version = resp.versions[i].sort((a, b) => b.version - a.version);
+            const idx = this.profiles.findIndex(p => p === name);
+            Vue.set(this.versions, idx, version);
+            Vue.set(this.currentVersions, idx, version[0].version);
+        }
     }
 
     async syncProfiles() {
@@ -314,25 +344,35 @@ class Profile {
             return;
         }
         const remoteProfMap = await this.fetchRemoteProfiles();
-        const localNames = new Set(this.profiles);
+        const localNames = this.profiles;
 
         const needUpload: string[] = [],
             needDownload: string[] = [];
-        for (const [name, { profile: remoteProf }] of remoteProfMap) {
-            if (localNames.has(name)) {
+        for (const [name, { profile: remoteProf, versions: remoteVersions }] of remoteProfMap) {
+            const localIdx = localNames.findIndex(p => p === name);
+            if (localIdx !== -1) {
                 const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
                 const localTime = new Date(localProf.modified).getTime();
                 const remoteTime = new Date(remoteProf.modified).getTime();
 
                 if (localTime < remoteTime) {
                     localStorage.setItem(name, JSON.stringify(remoteProf));
+                    Vue.set(this.versions, localIdx, remoteVersions);
+                    Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
+
                     needDownload.push(name);
                 } else if (localTime > remoteTime) {
                     needUpload.push(name);
+                } else {
+                    Vue.set(this.versions, localIdx, remoteVersions);
+                    Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
                 }
             } else {
                 localStorage.setItem(name, JSON.stringify(remoteProf));
                 this.profiles.push(name);
+                this.versions.push(remoteVersions);
+                this.currentVersions.push(remoteVersions[0].version);
+
                 needDownload.push(name);
             }
         }
@@ -348,20 +388,6 @@ class Profile {
         );
         console.log('uploaded', needUpload);
         console.log('downloaded', needDownload);
-
-        const newProfileMap = await this.fetchRemoteProfiles();
-        const newVersions = [],
-            newCurrentVersions = [];
-        for (let i = 0; i < this.profiles.length; i++) {
-            const name = this.profiles[i];
-            const data = newProfileMap.get(name)!;
-            if (data) {
-                newVersions[i] = data.versions.sort((a, b) => b - a);
-                newCurrentVersions[i] = newVersions[i][0];
-            }
-        }
-        this.versions = newVersions;
-        this.currentVersions = newCurrentVersions;
     }
 }
 

@@ -3,7 +3,7 @@
         class="schedule mt-2"
         :style="{
             width: scheduleWidth + 'vw',
-            'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
+            'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw',
         }"
     >
         <transition name="fade">
@@ -15,13 +15,13 @@
                 :class="`alert-${noti.cls}`"
                 style="width: 85%"
             >
-                <div class="row  align-items-center">
-                    <div class="col-md-auto mr-auto" v-html="noti.msg"></div>
-                    <div class="col">
+                <div class="row align-items-center">
+                    <div class="col-md-11" v-html="noti.msg"></div>
+                    <div class="col-md-1">
                         <button
                             type="button"
                             class="close"
-                            style="align:center"
+                            style="align: center"
                             @click="noti.clear()"
                         >
                             <span aria-hidden="true">&times;</span>

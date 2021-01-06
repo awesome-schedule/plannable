@@ -224,7 +224,7 @@ class ScheduleGenerator {
                         level: 'warn',
                         msg: `Warning: No sections of ${courseRec.displayName}${
                             i === 0 || subgroup === -1 ? '' : ' belonging to group ' + i // don't show group idx for default group or Any Section
-                        } have valid meeting times (e.g. All TBA/TBD)`
+                        } have valid meeting times (e.g. All TBA/TBD/Online Asynchronous). It will not be shown on the schedule grid.`
                     });
                 }
             }

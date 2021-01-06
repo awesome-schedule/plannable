@@ -53,11 +53,18 @@
         </div>
         <div class="btn bg-info nav-btn">
             Profiles
-            <i
-                v-if="profile.canSync"
-                class="fas fa-cloud"
-                :title="`You profiles are synchronizd with ${backendName}`"
-            ></i>
+            <template v-if="profile.canSync">
+                <i
+                    class="fas fa-cloud"
+                    :title="`You profiles are synchronizd with ${backendName}`"
+                ></i>
+                <span
+                    class="badge badge-secondary ml-1"
+                    title="This function is at the beta-testing stage. If you find any issues with it, please report it through GitHub issues or google form"
+                >
+                    Beta
+                </span>
+            </template>
         </div>
         <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
             <li
@@ -92,8 +99,8 @@
                         <template
                             v-if="
                                 !profile.canSync ||
-                                profile.versions[idx].length === 0 ||
-                                profile.isLatest(idx)
+                                    profile.versions[idx].length === 0 ||
+                                    profile.isLatest(idx)
                             "
                         >
                             <i
@@ -145,7 +152,7 @@
                                         :key="ver.version"
                                         class="dropdown-item px-2"
                                         :class="{
-                                            active: ver.version === profile.currentVersions[idx],
+                                            active: ver.version === profile.currentVersions[idx]
                                         }"
                                         href="#"
                                         :title="ver.userAgent"

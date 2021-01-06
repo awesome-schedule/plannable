@@ -138,7 +138,7 @@ export default class App extends Store {
             this.profile.syncProfiles()
         ]);
 
-        if (pay4) this.noti.notify(pay4);
+        if (pay4.level !== 'warn') this.noti.notify(pay4);
 
         this.noti.notify(pay1);
         if (pay1.payload) window.timeMatrix = pay1.payload;

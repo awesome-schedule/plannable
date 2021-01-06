@@ -359,10 +359,12 @@ class Profile {
         }
     }
 
-    async syncProfiles(): Promise<NotiMsg<undefined> | undefined> {
+    async syncProfiles(): Promise<NotiMsg<undefined>> {
         if (!this.canSync) {
-            console.log('No backend exists. Abort syncing profiles');
-            return;
+            return {
+                msg: 'No backend exists. Abort syncing profiles',
+                level: 'warn'
+            };
         }
         const [username, credential] = this._cre();
         const { data: resp } = await axios.post<BackendListResponse>(backend.down, {
@@ -401,14 +403,36 @@ class Profile {
                 const remoteTime = new Date(remoteProf.modified).getTime();
 
                 if (localTime < remoteTime) {
+                    // remote profile is newer
                     localStorage.setItem(name, JSON.stringify(remoteProf));
                     Vue.set(this.versions, localIdx, remoteVersions);
                     Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
 
                     needDownload.push(name);
                 } else if (localTime > remoteTime) {
-                    needUpload.push(name);
+                    /**
+                     * local profile is newer
+                     * We only upload if the local profile is not empty. This local profile might be empty when the user logins in on a new device.
+                     * We want to avoid the case when a local empty profile overwrites an useful remote profile of the same name.
+                     */
+                    if (
+                        localProf.schedule.proposedSchedules.length === 1 &&
+                        (Object.keys(localProf.schedule.proposedSchedules[0].All).length > 0 ||
+                            localProf.schedule.proposedSchedules[0].events.length > 0)
+                    ) {
+                        needUpload.push(name);
+                    } else if (localProf.schedule.proposedSchedules.length > 1) {
+                        needUpload.push(name);
+                    } else {
+                        // if local is empty, we overwrite the local with the remote
+                        localStorage.setItem(name, JSON.stringify(remoteProf));
+                        Vue.set(this.versions, localIdx, remoteVersions);
+                        Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
+
+                        needDownload.push(name);
+                    }
                 } else {
+                    // if the local profile is the same as the remote profile (in terms of modified time), just fetch the version history from the remote.
                     Vue.set(this.versions, localIdx, remoteVersions);
                     Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
                 }
@@ -433,8 +457,12 @@ class Profile {
         );
         if (msg) return msg;
 
-        console.log('uploaded', needUpload);
-        console.log('downloaded', needDownload);
+        return {
+            msg: `Successfully synchronized your profiles with Hoosmyprofessor. Uploaded ${needUpload.join(
+                ', '
+            ) || 'none'}, downloaded ${needDownload.join(', ') || 'none'}.`,
+            level: 'success'
+        };
     }
 
     logout() {

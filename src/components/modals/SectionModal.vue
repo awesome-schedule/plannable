@@ -24,11 +24,13 @@
                     </div>
                     <br />
                     <div>{{ section.description }}</div>
+                    <hr />
+                    <h6>External Links:</h6>
                     <div v-if="semester" class="mt-2">
                         <button
                             v-for="item in links"
                             :key="item.name"
-                            class="btn btn-outline-info mr-2"
+                            class="btn btn-outline-info mr-2 mb-2"
                             @click="item.action(semester, section)"
                         >
                             {{ item.name }}

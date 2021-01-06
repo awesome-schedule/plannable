@@ -78,6 +78,10 @@ function viewEvals(semester: SemesterJSON, param: CourseFields) {
     );
 }
 
+function viewHpEvals(semester: SemesterJSON, param: CourseFields) {
+    window.open(`https://match.msnatuva.org/courses/v2/${param.key}/`, '_blank');
+}
+
 interface ModalLinkItem<T> {
     name: string;
     /**
@@ -116,6 +120,10 @@ export const modalLinks: ModalLinks = {
                     'width=650,height=700,scrollbars=yes'
                 );
             }
+        },
+        {
+            name: 'Reviews (Hoosmyprofessor, Chinese)',
+            action: viewHpEvals
         }
     ],
     course: [
@@ -126,6 +134,10 @@ export const modalLinks: ModalLinks = {
         {
             name: 'Grade Distribution',
             action: viewGrades
+        },
+        {
+            name: 'Reviews (Hoosmyprofessor, Chinese)',
+            action: viewHpEvals
         }
     ]
 };

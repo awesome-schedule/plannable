@@ -80,12 +80,13 @@
                         class="mt-2"
                         v-html="highlightMatch(course.description, 'description', match[0])"
                     ></p>
-
+                    <hr class="mb-2" />
+                    <h6>External Links:</h6>
                     <div v-if="semester">
                         <button
                             v-for="item in links"
                             :key="item.name"
-                            class="btn btn-outline-info mr-2"
+                            class="btn btn-outline-info mr-2 mb-2"
                             @click="item.action(semester, course)"
                         >
                             {{ item.name }}

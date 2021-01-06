@@ -1,5 +1,5 @@
 /**
- * @module algorithm
+ * @module src/algorithm
  * @author Hanzhi Zhou, Zichao Hu, Kaiying Cat
  */
 

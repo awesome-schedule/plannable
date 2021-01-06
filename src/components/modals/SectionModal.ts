@@ -1,5 +1,5 @@
 /**
- * @module components
+ * @module src/components
  */
 
 /**

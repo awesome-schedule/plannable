@@ -1,5 +1,5 @@
 /**
- * @module models
+ * @module src/models
  */
 
 /**

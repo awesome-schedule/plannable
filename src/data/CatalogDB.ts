@@ -1,3 +1,12 @@
+/**
+ * The module responsible for loading data required by plannable, including but not limited to semester list, semester course data, building data, etc.
+ * @preferred
+ * @module src/data
+ */
+
+/**
+ *
+ */
 import { SemesterJSON } from '@/models/Catalog';
 import { CourseFields } from '@/models/Course';
 import Dexie from 'dexie';

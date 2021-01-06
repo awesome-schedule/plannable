@@ -1,6 +1,6 @@
 // this file exists solely for documentation purposes
 /**
- * @module algorithm
+ * @module src/algorithm
  * @preferred
  */
 

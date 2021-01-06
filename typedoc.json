@@ -1,0 +1,7 @@
+{
+    "mode": "modules",
+    "out": "./docs/tsdoc",
+    "exclude": [
+        "node_modules/**"
+    ]
+}

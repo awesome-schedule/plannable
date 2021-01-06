@@ -1,6 +1,6 @@
 /**
  * miscellaneous utility functions
- * @module utils
+ * @module src/utils
  */
 
 /**

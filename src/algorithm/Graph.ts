@@ -1,7 +1,7 @@
 /**
  * the graph model and algorithm used primarily for schedule rendering
  * @author Hanzhi Zhou, Kaiying Cat
- * @module algorithm
+ * @module src/algorithm
  */
 
 /**

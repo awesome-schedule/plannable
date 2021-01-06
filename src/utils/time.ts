@@ -1,6 +1,6 @@
 /**
  * Utilities for parsing and convert in-between different time representations
- * @module utils
+ * @module src/utils
  */
 
 /**

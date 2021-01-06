@@ -1,7 +1,7 @@
 /**
  * Meta stores some constants and type definitions
  * @author Hanzhi Zhou
- * @module models
+ * @module src/models
  */
 
 /**

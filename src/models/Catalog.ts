@@ -1,7 +1,7 @@
 // note: this is the description for the entire module.
 /**
  * models and data structures used across the website
- * @module models
+ * @module src/models
  * @preferred
  */
 

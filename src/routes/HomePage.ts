@@ -1,5 +1,5 @@
 /**
- * @module routes
+ * @module src/routes
  */
 
 /**

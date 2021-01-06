@@ -37,7 +37,7 @@
         "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}",
         "fix": "eslint . --fix",
         "test": "vue-cli-service test:unit",
-        "tsdoc": "typedoc --out ./docs/tsdoc ./src --mode modules --exclude \"node_modules/**\"",
+        "tsdoc": "typedoc --options typedoc.json ./src",
         "updatedata": "rm -rf scripts/data && git clone https://github.com/awesome-schedule/data scripts/data",
         "data": "cd scripts && http-server --cors -p 8000 -c-1"
     },

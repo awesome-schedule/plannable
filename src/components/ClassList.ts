@@ -1,6 +1,6 @@
 /**
  * Miscellaneous components used in tabs and App.vue
- * @module components
+ * @module src/components
  * @preferred
  */
 

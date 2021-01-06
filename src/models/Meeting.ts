@@ -1,6 +1,6 @@
 /**
  * @author Hanzhi Zhou
- * @module models
+ * @module src/models
  */
 
 /**

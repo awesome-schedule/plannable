@@ -1,5 +1,5 @@
 /**
- * @module data
+ * @module src/data
  * @author Hanzhi Zhou
  */
 

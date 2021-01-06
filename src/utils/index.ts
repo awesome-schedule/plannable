@@ -1,6 +1,6 @@
 /**
  * the module containing utilities functions used across the whole project
- * @module utils
+ * @module src/utils
  * @preferred
  */
 

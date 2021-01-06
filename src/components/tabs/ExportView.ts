@@ -1,5 +1,5 @@
 /**
- * @module components/tabs
+ * @module src/components/tabs
  */
 
 /**

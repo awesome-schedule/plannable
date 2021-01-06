@@ -1,5 +1,6 @@
 /**
  * the entry point of our project
+ * @module src/main
  * @author Hanzhi Zhou
  */
 
@@ -13,6 +14,7 @@ import { highlightMatch } from './utils';
 import { FastSearcher } from './algorithm/Searcher';
 import App from './App.vue';
 import axios from 'axios';
+import WatchFactory from './store/watch';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -23,6 +25,7 @@ declare global {
         catalog: Readonly<Catalog>;
         timeMatrix: Readonly<Int32Array>;
         buildingSearcher: FastSearcher<string>;
+        watchers: WatchFactory;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html

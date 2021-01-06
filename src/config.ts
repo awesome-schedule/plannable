@@ -1,3 +1,10 @@
+/**
+ * @module src/config
+ */
+
+/**
+ *
+ */
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';

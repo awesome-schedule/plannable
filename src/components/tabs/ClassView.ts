@@ -1,6 +1,6 @@
 /**
  * Tabs components, shown when their corresponding tabs are active
- * @module components/tabs
+ * @module src/components/tabs
  * @preferred
  */
 

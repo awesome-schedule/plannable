@@ -1,5 +1,5 @@
 /**
- * @module data
+ * @module src/data
  * @author Hanzhi Zhou
  * Script for loading and parsing the list of semesters from Lou's list
  */

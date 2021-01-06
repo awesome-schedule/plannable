@@ -1,11 +1,11 @@
 /**
- * @module components/tabs
+ * @module src/components/tabs
  */
 
 /**
  *
  */
-import CatalogDB from '@/database/CatalogDB';
+import CatalogDB from '@/data/CatalogDB';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 

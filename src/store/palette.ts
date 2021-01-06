@@ -1,5 +1,5 @@
 /**
- * @module store
+ * @module src/store
  */
 
 /**

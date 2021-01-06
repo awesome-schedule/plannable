@@ -1,6 +1,6 @@
 /**
  * the routes module, currently unused
- * @module routes
+ * @module src/routes
  * @preferred
  */
 

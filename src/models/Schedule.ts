@@ -1,6 +1,6 @@
 /**
  * @author Hanzhi Zhou, Kaiying Shan
- * @module models
+ * @module src/models
  */
 
 /**

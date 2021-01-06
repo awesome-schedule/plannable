@@ -1,5 +1,5 @@
 /**
- * @module data
+ * @module src/data
  * @author Hanzhi Zhou, Kaiying Shan
  * Script for loading the catalog for a given semester
  */
@@ -7,7 +7,7 @@
 /**
  *
  */
-import CatalogDB, { SectionTableItem } from '@/database/CatalogDB';
+import CatalogDB, { SectionTableItem } from '@/data/CatalogDB';
 import Section from '@/models/Section';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 

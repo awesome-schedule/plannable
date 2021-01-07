@@ -10,7 +10,7 @@ function cb(err: NodeJS.ErrnoException | null) {
     if (err) console.error(err);
 }
 
-async function loadSemesterList(count = 5) {
+async function loadSemesterList(count = 10) {
     const { data } = await axios.get<string>('https://louslist.org/index.php');
     const $ = cheerio.load(data);
     fs.writeFile(dataDir + 'index.html', data, cb);

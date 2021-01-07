@@ -22,7 +22,7 @@ interface SemesterListJSON extends Expirable {
  *
  * storage key: "semesters"
  */
-export function loadSemesterList(count = 5) {
+export function loadSemesterList(count = 10) {
     // load the cached list of semesters, if it exists
     return fallback(
         loadFromCache<SemesterJSON[], SemesterListJSON>(

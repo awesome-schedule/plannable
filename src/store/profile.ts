@@ -98,24 +98,30 @@ class Profile {
      */
     current: string;
     /**
-     * an array of profile names available in the localStorage
+     * an array of local profile names and their associated information
      */
-    profiles: string[];
-    /**
-     *
-     */
-    versions: ProfileVersion[][];
-    /**
-     *
-     */
-    currentVersions: number[];
+    profiles: {
+        name: string;
+        remote: boolean;
+        versions: ProfileVersion[];
+        currentVersion: number;
+    }[];
     canSync: boolean;
 
     constructor() {
         this.current = localStorage.getItem('currentProfile') || '';
-        this.profiles = JSON.parse(localStorage.getItem('profiles') || '[]');
-        this.versions = Array.from({ length: this.profiles.length }, () => []);
-        this.currentVersions = Array.from({ length: this.profiles.length }, () => 1);
+        const profiles: any[] = JSON.parse(localStorage.getItem('profiles') || '[]') || [];
+        if (profiles.length === 0) this.profiles = profiles;
+        else {
+            if (typeof profiles[0] === 'string')
+                this.profiles = profiles.map(p => this.createProfile(p));
+            else if (typeof profiles[0] === 'object') {
+                this.profiles = profiles;
+            } else {
+                console.error('unknown profile format');
+                this.profiles = [];
+            }
+        }
         const [_u, _c] = this._cre();
         this.canSync = !!_u && !!_c;
     }
@@ -153,8 +159,17 @@ class Profile {
             if (!profiles.includes(latest)) profiles.push(latest);
 
             this.current = latest;
-            this.profiles = profiles;
+            this.profiles = profiles.map(p => this.createProfile(p));
         }
+    }
+
+    createProfile(name: string) {
+        return {
+            name,
+            remote: false,
+            versions: [],
+            currentVersion: -1
+        };
     }
 
     /**
@@ -175,8 +190,7 @@ class Profile {
         const newProf = JSON.stringify(parsed);
         localStorage.setItem(newName, newProf);
 
-        // use splice for reactivity purpose
-        Vue.set(this.profiles, idx, newName);
+        this.profiles[idx].name = newName;
 
         if (this.canSync) {
             const [username, credential] = this._cre();
@@ -198,13 +212,21 @@ class Profile {
                 } as const;
             }
 
-            Vue.set(
-                this.versions,
-                idx,
-                resp.versions.sort((a, b) => b.version - a.version)
-            );
-            Vue.set(this.currentVersions, idx, resp.versions[0].version);
+            this.profiles[idx].versions = resp.versions.sort((a, b) => b.version - a.version);
+            this.profiles[idx].currentVersion = resp.versions[0].version;
         }
+    }
+
+    async deleteRemote(name: string) {
+        const [username, credential] = this._cre();
+        const request: BackendDeleteRequest = {
+            username,
+            credential,
+            action: 'delete',
+            name
+        };
+        const { data: resp } = await axios.post<BackendDeleteResponse>(backend.edit, request);
+        return resp;
     }
 
     /**
@@ -214,27 +236,22 @@ class Profile {
      * @returns the name of the previous profile if the deleted profile is selected,
      * returns undefined otherwise
      */
-    async deleteProfile(name: string, idx: number) {
+    async deleteProfile(name: string, idx: number, requestRemote = true) {
         const msg: NotiMsg<string> = {
             msg: '',
             level: 'success'
         };
-        if (this.canSync) {
-            const [username, credential] = this._cre();
-            const request: BackendDeleteRequest = {
-                username,
-                credential,
-                action: 'delete',
-                name
-            };
-            const { data: resp } = await axios.post<BackendDeleteResponse>(backend.edit, request);
+        if (this.canSync && this.profiles[idx].remote && requestRemote) {
+            const resp = await this.deleteRemote(name);
             if (!resp.success) {
-                this.logout();
-                msg.level = 'error';
-                msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
-            } else {
-                this.versions.splice(idx, 1);
-                this.currentVersions.splice(idx, 1);
+                if (resp.message === "Profile doesn't exist") {
+                    msg.level = 'warn';
+                    msg.msg = `Profile ${name} is already deleted from ${backend.name}! The deletion is probably requested by another device`;
+                } else {
+                    this.logout();
+                    msg.level = 'error';
+                    msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
+                }
             }
         }
 
@@ -243,9 +260,9 @@ class Profile {
 
         if (name === this.current) {
             if (idx === this.profiles.length) {
-                msg.payload = this.current = this.profiles[idx - 1];
+                msg.payload = this.current = this.profiles[idx - 1].name;
             } else {
-                msg.payload = this.current = this.profiles[idx];
+                msg.payload = this.current = this.profiles[idx].name;
             }
         }
         return msg;
@@ -265,7 +282,7 @@ class Profile {
         // change modified time to new to it can overwrite remote profiles
         rawData.modified = new Date().toJSON();
         let profileName = rawData.name || fallbackName;
-        const prevIdx = this.profiles.findIndex(p => p === profileName);
+        const prevIdx = this.profiles.findIndex(p => p.name === profileName);
         if (prevIdx !== -1) {
             if (
                 !confirm(
@@ -273,20 +290,16 @@ class Profile {
                 )
             ) {
                 let idx = 2;
-                while (this.profiles.includes(`${profileName} (${idx})`)) idx++;
+                while (this.profiles.find(p => p.name === `${profileName} (${idx})`)) idx++;
                 profileName = `${profileName} (${idx})`;
 
                 rawData.name = profileName;
                 localStorage.setItem(profileName, JSON.stringify(rawData));
 
-                this.profiles.push(profileName);
-                this.versions.push([]);
-                this.currentVersions.push(1);
+                this.profiles.push(this.createProfile(profileName));
             }
         } else {
-            this.profiles.push(profileName);
-            this.versions.push([]);
-            this.currentVersions.push(1);
+            this.profiles.push(this.createProfile(profileName));
         }
         // backward compatibility only
         if (!rawData.name) rawData.name = profileName;
@@ -304,7 +317,7 @@ class Profile {
     }
 
     isLatest(idx: number) {
-        return this.currentVersions[idx] === this.versions[idx][0].version;
+        return this.profiles[idx].currentVersion === this.profiles[idx].versions[0].version;
     }
 
     _cre() {
@@ -350,12 +363,13 @@ class Profile {
             } as const;
         }
 
+        // for each uploaded profile, update their version history.
         for (let i = 0; i < profiles.length; i++) {
             const name = profiles[i].name;
             const version = resp.versions[i].sort((a, b) => b.version - a.version);
-            const idx = this.profiles.findIndex(p => p === name);
-            Vue.set(this.versions, idx, version);
-            Vue.set(this.currentVersions, idx, version[0].version);
+            const profile = this.profiles.find(p => p.name === name)!;
+            profile.versions = version;
+            profile.currentVersion = version[0].version;
         }
     }
 
@@ -391,13 +405,23 @@ class Profile {
                 ];
             })
         );
-        const localNames = this.profiles;
+
+        // for local profiles marked as sync, if they are not in the remote list, that means they are deleted. Remote them from local.
+        this.profiles.concat().forEach(p => {
+            if (p.remote && !remoteProfMap.has(p.name)) {
+                this.deleteProfile(
+                    p.name,
+                    this.profiles.findIndex(p2 => p2.name === p.name),
+                    false
+                );
+            }
+        });
 
         const needUpload: string[] = [],
             needDownload: string[] = [];
         for (const [name, { profile: remoteProf, versions: remoteVersions }] of remoteProfMap) {
-            const localIdx = localNames.findIndex(p => p === name);
-            if (localIdx !== -1) {
+            const prof = this.profiles.find(p => p.name === name);
+            if (prof && prof.remote) {
                 const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
                 const localTime = new Date(localProf.modified).getTime();
                 const remoteTime = new Date(remoteProf.modified).getTime();
@@ -405,48 +429,49 @@ class Profile {
                 if (localTime < remoteTime) {
                     // remote profile is newer
                     localStorage.setItem(name, JSON.stringify(remoteProf));
-                    Vue.set(this.versions, localIdx, remoteVersions);
-                    Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
+                    prof.versions = remoteVersions;
+                    prof.currentVersion = remoteVersions[0].version;
 
                     needDownload.push(name);
                 } else if (localTime > remoteTime) {
-                    /**
-                     * local profile is newer
-                     * We only upload if the local profile is not empty. This local profile might be empty when the user logins in on a new device.
-                     * We want to avoid the case when a local empty profile overwrites an useful remote profile of the same name.
-                     */
-                    if (
-                        localProf.schedule.proposedSchedules.length === 1 &&
-                        (Object.keys(localProf.schedule.proposedSchedules[0].All).length > 0 ||
-                            localProf.schedule.proposedSchedules[0].events.length > 0)
-                    ) {
-                        needUpload.push(name);
-                    } else if (localProf.schedule.proposedSchedules.length > 1) {
-                        needUpload.push(name);
-                    } else {
-                        // if local is empty, we overwrite the local with the remote
-                        localStorage.setItem(name, JSON.stringify(remoteProf));
-                        Vue.set(this.versions, localIdx, remoteVersions);
-                        Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
-
-                        needDownload.push(name);
-                    }
+                    // local profile is newer
+                    needUpload.push(name);
                 } else {
                     // if the local profile is the same as the remote profile (in terms of modified time), just fetch the version history from the remote.
-                    Vue.set(this.versions, localIdx, remoteVersions);
-                    Vue.set(this.currentVersions, localIdx, remoteVersions[0].version);
+                    prof.versions = remoteVersions;
+                    prof.currentVersion = remoteVersions[0].version;
+                }
+            } else if (prof && !prof.remote) {
+                const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
+                // For the unsynchronized local profile that has the same name as the remote profile, we never upload.
+                if (
+                    localProf.schedule.proposedSchedules.length > 1 ||
+                    (localProf.schedule.proposedSchedules.length === 1 &&
+                        (Object.keys(localProf.schedule.proposedSchedules[0].All).length > 0 ||
+                            localProf.schedule.proposedSchedules[0].events.length > 0))
+                ) {
+                    // if the local is nonempty, we ask user for permission to overwrite local with remote
+                } else {
+                    // if local is empty, we overwrite the local with the remote
+                    localStorage.setItem(name, JSON.stringify(remoteProf));
+                    prof.versions = remoteVersions;
+                    prof.currentVersion = remoteVersions[0].version;
+                    prof.remote = true;
+
+                    needDownload.push(name);
                 }
             } else {
+                // this remote profile is not present locally. Download it.
                 localStorage.setItem(name, JSON.stringify(remoteProf));
-                this.profiles.push(name);
-                this.versions.push(remoteVersions);
-                this.currentVersions.push(remoteVersions[0].version);
+                this.profiles.push({
+                    name,
+                    remote: true,
+                    versions: remoteVersions,
+                    currentVersion: remoteVersions[0].version
+                });
 
                 needDownload.push(name);
             }
-        }
-        for (const name of localNames) {
-            if (!remoteProfMap.has(name)) needUpload.push(name);
         }
 
         const msg = await this.uploadProfile(

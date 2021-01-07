@@ -38,6 +38,26 @@ export default class ExportView extends Store {
         return result_str;
     }
 
+    updateRemoteStatus(prof: this['profile']['profiles'][0]) {
+        prof.remote = !prof.remote;
+        if (prof.remote) {
+            this.profile.uploadProfile([
+                {
+                    name: prof.name,
+                    profile: localStorage.getItem(prof.name)!
+                }
+            ]);
+        } else {
+            this.profile.deleteRemote(prof.name);
+        }
+    }
+
+    getRemoteStatusString(remote: boolean) {
+        const msg1 = remote ? 'synced' : 'not synced';
+        const msg2 = remote ? 'unsync' : 'sync';
+        return `This profile is currently ${msg1} with ${backend.name}. Click me to ${msg2}.`;
+    }
+
     created() {
         this.newName = this.profile.profiles.map(() => null);
     }
@@ -171,7 +191,7 @@ export default class ExportView extends Store {
         if (confirm(`Are you sure to delete ${name}?`)) {
             const msg = await this.profile.deleteProfile(name, idx);
             this.newName.pop();
-            if (msg.level === 'error') return this.noti.notify(msg);
+            if (msg.level !== 'success') return this.noti.notify(msg);
             // if the deleted profile is the current profile, reload the newly selected current profile
             if (msg.payload) this.loadProfile();
         }
@@ -183,9 +203,11 @@ export default class ExportView extends Store {
         if (this.profile.canSync) {
             // set previously selected profile to its latest version, if not already
             this.noti.clear();
-            const idx = this.profile.profiles.findIndex(p => p === this.profile.current);
+            const idx = this.profile.profiles.findIndex(p => p.name === this.profile.current);
             if (!this.profile.isLatest(idx)) {
-                this.profile.currentVersions[idx] = this.profile.versions[idx][0].version;
+                this.profile.profiles[idx].currentVersion = this.profile.profiles[
+                    idx
+                ].versions[0].version;
                 localStorage.setItem(
                     this.profile.current,
                     localStorage.getItem('backup-' + this.profile.current)!
@@ -198,12 +220,11 @@ export default class ExportView extends Store {
         this.$forceUpdate();
     }
     async switchVersion(name: string, idx: number, version: number) {
-        this.profile.currentVersions[idx] = version;
+        this.profile.profiles[idx].currentVersion = version;
         const remote = await this.profile.getRemoteProfile(name, version);
         if (remote.level === 'error') return this.noti.notify(remote);
 
         // backup the current profile, in case we need to switch back
-
         localStorage.setItem('backup-' + name, localStorage.getItem(name)!);
         localStorage.setItem(name, remote.payload!.profile);
         this.loadProfile();
@@ -234,7 +255,8 @@ export default class ExportView extends Store {
         const newName = this.newName[idx];
         if (!newName) return this.$set(this.newName, idx, null);
         if (newName !== oldName) {
-            if (this.profile.profiles.includes(newName)) return this.noti.error('Duplicated name!');
+            if (this.profile.profiles.find(p => p.name === newName))
+                return this.noti.error('Duplicated name!');
             const msg = await this.profile.renameProfile(idx, oldName, newName, raw);
             if (msg) return this.noti.notify(msg);
         }

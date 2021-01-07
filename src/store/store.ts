@@ -127,10 +127,9 @@ function _saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
     const name = profile.current;
-
-    if (profile.canSync && profile.currentVersions.length && profile.versions.length) {
-        const idx = profile.profiles.findIndex(p => p === name);
-        if (idx !== -1 && profile.currentVersions[idx] !== profile.versions[idx][0].version) {
+    const idx = profile.profiles.findIndex(p => p.name === name);
+    if (profile.canSync && profile.profiles[idx].remote) {
+        if (idx !== -1 && !profile.isLatest(idx)) {
             console.log(
                 'Uploading & saving of',
                 name,
@@ -383,7 +382,7 @@ export default class Store extends Vue {
         let parsedLatest = -Infinity;
 
         // find the latest profile corresponding to the semester to be switched
-        for (const profileName of profiles) {
+        for (const { name: profileName } of profiles) {
             const data = localStorage.getItem(profileName);
             if (data) {
                 const temp: Partial<SemesterStorage> = JSON.parse(data);
@@ -403,24 +402,26 @@ export default class Store extends Vue {
         }
         // no profile for target semester exists. let's create one
         if (!parsed.currentSemester) {
-            const { name } = target;
-            if (profiles.includes(name)) {
+            let { name } = target;
+            if (profiles.find(p => p.name === name)) {
                 if (
                     !confirm(
                         `You already have a profile named ${name}. However, it does not correspond to the ${name} semester. Click Ok to overwrite, click Cancel to keep both.`
                     )
                 ) {
                     let idx = 2;
-                    while (profiles.includes(`${name} (${idx})`)) idx++;
-                    profiles.push(`${name} (${idx})`);
+                    while (profiles.find(p => p.name === `${name} (${idx})`)) idx++;
+                    name = `${name} (${idx})`;
+                    profiles.push(profile.createProfile(name));
                 }
             } else {
-                profiles.push(name);
+                profiles.push(profile.createProfile(name));
             }
             parsed.currentSemester = target;
             this.profile.current = parsed.name = name;
             localStorage.setItem(name, JSON.stringify(parsed));
         } else {
+            // load the existing profile
             this.profile.current = parsed.name!;
         }
         await this.loadProfile();

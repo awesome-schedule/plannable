@@ -68,20 +68,26 @@
         </div>
         <ul class="list-group list-group-flush mx-auto" style="font-size: 14px; width: 99%">
             <li
-                v-for="(name, idx) in profile.profiles"
-                :key="name"
+                v-for="(prof, idx) in profile.profiles"
+                :key="prof.name"
                 class="list-group-item list-group-item-action pl-3 pr-2"
-                :class="{ sel: name === profile.current }"
+                :class="{ sel: prof.name === profile.current }"
             >
                 <div
                     class="form-row no-gutters justify-content-between"
                     style="flex-wrap: nowrap"
-                    @click="selectProfile(name)"
+                    @click="selectProfile(prof.name)"
                 >
                     <div :id="'1' + idx" class="col-xs-auto mr-auto" style="cursor: pointer">
-                        <span v-if="newName[idx] === null" @dblclick="$set(newName, idx, name)">
-                            <strong>{{ name }}</strong> <br />
-                            <small v-for="field in getMeta(name)" :key="field" class="text-muted"
+                        <span
+                            v-if="newName[idx] === null"
+                            @dblclick="$set(newName, idx, prof.name)"
+                        >
+                            <strong>{{ prof.name }}</strong> <br />
+                            <small
+                                v-for="field in getMeta(prof.name)"
+                                :key="field"
+                                class="text-muted"
                                 >{{ field }} <br />
                             </small>
                         </span>
@@ -91,48 +97,57 @@
                             class="form-control form-control-inline form-control-sm"
                             type="text"
                             style="width: 99%"
-                            @keyup.enter="renameProfile(name, idx)"
+                            @keyup.enter="renameProfile(prof.name, idx)"
                             @keyup.esc="$set(newName, idx, null)"
                         />
                     </div>
                     <div class="col-xs-auto text-right" style="font-size: 16px">
+                        <i
+                            v-if="profile.canSync"
+                            class="fas fa-cloud click-icon mr-1"
+                            :class="prof.remote ? 'text-success' : 'text-warning'"
+                            :title="getRemoteStatusString(prof.remote)"
+                            @click.stop="updateRemoteStatus(prof)"
+                        ></i>
                         <template
                             v-if="
                                 !profile.canSync ||
-                                profile.versions[idx].length === 0 ||
-                                profile.isLatest(idx)
+                                !prof.remote ||
+                                (prof.remote && profile.isLatest(idx))
                             "
                         >
                             <i
                                 v-if="newName[idx] === null"
                                 class="fas fa-edit click-icon"
                                 title="rename this profile"
-                                @click.stop="$set(newName, idx, name)"
+                                @click.stop="$set(newName, idx, prof.name)"
                             ></i>
                             <i
                                 v-else
                                 class="fas fa-check ml-1 click-icon"
                                 title="confirm renaming"
-                                @click.stop="renameProfile(name, idx)"
+                                @click.stop="renameProfile(prof.name, idx)"
                             ></i>
                             <i
                                 v-if="newName[idx] === null && profile.profiles.length > 1"
                                 class="fa fa-times ml-1 click-icon"
                                 title="delete this profile"
-                                @click.stop="deleteProfile(name, idx)"
+                                @click.stop="deleteProfile(prof.name, idx)"
                             ></i>
                         </template>
-                        <template v-else>
+                        <template
+                            v-else-if="profile.canSync && prof.remote && !profile.isLatest(idx)"
+                        >
                             <button
                                 class="btn btn-outline-primary btn-sm"
                                 title="Keep this version of the profile"
-                                @click.stop="keepVersion(name, idx)"
+                                @click.stop="keepVersion(prof.name, idx)"
                             >
                                 Keep
                             </button>
                         </template>
                         <div
-                            v-if="profile.canSync"
+                            v-if="profile.canSync && prof.remote"
                             class="mt-2"
                             title="Checkout historical versions of this profile"
                         >
@@ -144,19 +159,19 @@
                                     aria-haspopup="true"
                                     aria-expanded="false"
                                 >
-                                    v{{ profile.currentVersions[idx] }}
+                                    v{{ prof.currentVersion }}
                                 </button>
                                 <div class="dropdown-menu" style="line-height: 12pt">
                                     <a
-                                        v-for="ver in profile.versions[idx]"
+                                        v-for="ver in prof.versions"
                                         :key="ver.version"
                                         class="dropdown-item px-2 pb-1 pt-0"
                                         :class="{
-                                            active: ver.version === profile.currentVersions[idx],
+                                            active: ver.version === prof.currentVersion,
                                         }"
                                         href="#"
                                         :title="`Full user agent: ${ver.userAgent}`"
-                                        @click.stop="switchVersion(name, idx, ver.version)"
+                                        @click.stop="switchVersion(prof.name, idx, ver.version)"
                                     >
                                         <div
                                             class="row no-gutters align-items-center"

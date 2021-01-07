@@ -99,8 +99,8 @@
                         <template
                             v-if="
                                 !profile.canSync ||
-                                    profile.versions[idx].length === 0 ||
-                                    profile.isLatest(idx)
+                                profile.versions[idx].length === 0 ||
+                                profile.isLatest(idx)
                             "
                         >
                             <i
@@ -146,20 +146,33 @@
                                 >
                                     v{{ profile.currentVersions[idx] }}
                                 </button>
-                                <div class="dropdown-menu text-center">
+                                <div class="dropdown-menu" style="line-height: 12pt">
                                     <a
                                         v-for="ver in profile.versions[idx]"
                                         :key="ver.version"
-                                        class="dropdown-item px-2"
+                                        class="dropdown-item px-2 pb-1 pt-0"
                                         :class="{
-                                            active: ver.version === profile.currentVersions[idx]
+                                            active: ver.version === profile.currentVersions[idx],
                                         }"
                                         href="#"
-                                        :title="ver.userAgent"
+                                        :title="`Full user agent: ${ver.userAgent}`"
                                         @click.stop="switchVersion(name, idx, ver.version)"
                                     >
-                                        v{{ ver.version }} |
-                                        <small>{{ new Date(ver.modified).toLocaleString() }}</small>
+                                        <div
+                                            class="row no-gutters align-items-center"
+                                            style="flex-wrap: nowrap"
+                                        >
+                                            <div class="col-xs-auto mr-auto pr-1 h-100">
+                                                v{{ ver.version }}
+                                            </div>
+                                            <div class="col-xs-auto pl-1 ua-cell text-right">
+                                                <small>
+                                                    {{ new Date(ver.modified).toLocaleString() }}
+                                                    <br />
+                                                    {{ getParsedUA(ver.userAgent) }}
+                                                </small>
+                                            </div>
+                                        </div>
                                     </a>
                                 </div>
                             </div>
@@ -208,5 +221,10 @@
 }
 .click-icon {
     font-size: 14pt;
+}
+.ua-cell {
+    border-style: none none none solid;
+    border-width: 1px;
+    border-color: #666;
 }
 </style>

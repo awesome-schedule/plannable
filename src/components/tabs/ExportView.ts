@@ -10,6 +10,7 @@ import Store, { compressJSON, SemesterStorage } from '@/store';
 import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
+import UAParser from 'ua-parser-js';
 
 /**
  * component for import/export/print schedules and managing profiles
@@ -23,6 +24,18 @@ export default class ExportView extends Store {
 
     get backendName() {
         return backend.name;
+    }
+
+    getParsedUA(ua: string) {
+        const parser = new UAParser(ua);
+        const result = parser.getResult();
+        let result_str = '';
+        if (result.os.name && result.os.version)
+            result_str += result.os.name + ' ' + result.os.version;
+        if (result.device.vendor) result_str += ' | ' + result.device.vendor;
+        // if (result.browser.name && result.browser.version)
+        //     result_str += '|' + result.browser.name + ' ' + result.browser.version;
+        return result_str;
     }
 
     created() {

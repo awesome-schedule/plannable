@@ -442,15 +442,36 @@ class Profile {
                     prof.currentVersion = remoteVersions[0].version;
                 }
             } else if (prof && !prof.remote) {
+                // unsynchronized local profile that has the same name as the remote profile
                 const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
-                // For the unsynchronized local profile that has the same name as the remote profile, we never upload.
                 if (
                     localProf.schedule.proposedSchedules.length > 1 ||
                     (localProf.schedule.proposedSchedules.length === 1 &&
                         (Object.keys(localProf.schedule.proposedSchedules[0].All).length > 0 ||
                             localProf.schedule.proposedSchedules[0].events.length > 0))
                 ) {
-                    // if the local is nonempty, we ask user for permission to overwrite local with remote
+                    // if the local is nonempty
+                    // this case should rarely occur
+                    const localTime = new Date(localProf.modified).getTime();
+                    const remoteTime = new Date(remoteProf.modified).getTime();
+                    if (localTime <= remoteTime) {
+                        // remote is newer: overwrite local with remote and set remote to true
+                        localStorage.setItem(name, JSON.stringify(remoteProf));
+                        prof.remote = true;
+                        prof.versions = remoteVersions;
+                        prof.currentVersion = remoteVersions[0].version;
+
+                        needDownload.push(name);
+                    } else {
+                        if (
+                            confirm(
+                                `On the cloud there exists a profile called ${name}, but locally you have a non-synchronized profile of the same name and is newer. Do you want to turn on synchronization for this profile?`
+                            )
+                        ) {
+                            prof.remote = true;
+                            needUpload.push(name);
+                        }
+                    }
                 } else {
                     // if local is empty, we overwrite the local with the remote
                     localStorage.setItem(name, JSON.stringify(remoteProf));

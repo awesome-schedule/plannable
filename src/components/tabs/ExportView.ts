@@ -26,6 +26,10 @@ export default class ExportView extends Store {
         return backend.name;
     }
 
+    /**
+     * parse an user-friendly string indicating OS/device type from the user agent
+     * @param ua
+     */
     getParsedUA(ua: string) {
         const parser = new UAParser(ua);
         const result = parser.getResult();
@@ -39,16 +43,23 @@ export default class ExportView extends Store {
     }
 
     updateRemoteStatus(prof: this['profile']['profiles'][0]) {
-        prof.remote = !prof.remote;
-        if (prof.remote) {
+        if (!prof.remote) {
             this.profile.uploadProfile([
                 {
                     name: prof.name,
                     profile: localStorage.getItem(prof.name)!
                 }
             ]);
+            prof.remote = !prof.remote;
         } else {
-            this.profile.deleteRemote(prof.name);
+            if (
+                confirm(
+                    `If you disable sync for this profile (${prof.name}), it will be deleted from ${backend.name} and your other devices that enabled sync. Are you sure?`
+                )
+            ) {
+                this.profile.deleteRemote(prof.name);
+                prof.remote = !prof.remote;
+            }
         }
     }
 
@@ -257,8 +268,14 @@ export default class ExportView extends Store {
         if (newName !== oldName) {
             if (this.profile.profiles.find(p => p.name === newName))
                 return this.noti.error('Duplicated name!');
-            const msg = await this.profile.renameProfile(idx, oldName, newName, raw);
-            if (msg) return this.noti.notify(msg);
+            if (
+                confirm(
+                    'If you rename a profile, all its historical versions will be lost. Are you sure?'
+                )
+            ) {
+                const msg = await this.profile.renameProfile(idx, oldName, newName, raw);
+                if (msg) return this.noti.notify(msg);
+            }
         }
         this.$set(this.newName, idx, null);
     }

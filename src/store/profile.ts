@@ -468,7 +468,7 @@ class Profile {
                     } else {
                         if (
                             confirm(
-                                `On the cloud there exists a profile called ${name}, but locally you have a non-synchronized profile of the same name and is newer. Do you want to turn on synchronization for this profile?`
+                                `On the cloud (${backend.name}) there exists a profile called "${name}", but locally you have a non-synchronized profile of the same name and is newer. Do you want to turn on synchronization for this profile? If you turned on synchronization, a new version of "${name}" will be created on ${backend.name}. You will still be able to retrieve the original version on ${backend.name} by viewing the version history.`
                             )
                         ) {
                             prof.remote = true;

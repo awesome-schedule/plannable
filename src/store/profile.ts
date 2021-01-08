@@ -282,8 +282,8 @@ class Profile {
         // change modified time to new to it can overwrite remote profiles
         rawData.modified = new Date().toJSON();
         let profileName = rawData.name || fallbackName;
-        const prevIdx = this.profiles.findIndex(p => p.name === profileName);
-        if (prevIdx !== -1) {
+        let prev = this.profiles.find(p => p.name === profileName);
+        if (prev) {
             if (
                 !confirm(
                     `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both.`
@@ -296,10 +296,10 @@ class Profile {
                 rawData.name = profileName;
                 localStorage.setItem(profileName, JSON.stringify(rawData));
 
-                this.profiles.push(this.createProfile(profileName));
+                this.profiles.push((prev = this.createProfile(profileName)));
             }
         } else {
-            this.profiles.push(this.createProfile(profileName));
+            this.profiles.push((prev = this.createProfile(profileName)));
         }
         // backward compatibility only
         if (!rawData.name) rawData.name = profileName;
@@ -307,13 +307,16 @@ class Profile {
         const data = JSON.stringify(rawData);
         localStorage.setItem(profileName, data);
         this.current = profileName;
-        const msg = await this.uploadProfile([
-            {
-                profile: data,
-                name: profileName
-            }
-        ]);
-        if (msg) return msg;
+
+        if (this.canSync && prev.remote) {
+            const msg = await this.uploadProfile([
+                {
+                    profile: data,
+                    name: profileName
+                }
+            ]);
+            if (msg) return msg;
+        }
     }
 
     isLatest(idx: number) {

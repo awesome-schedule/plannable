@@ -44,13 +44,13 @@ export default class ExportView extends Store {
 
     updateRemoteStatus(prof: this['profile']['profiles'][0]) {
         if (!prof.remote) {
+            prof.remote = !prof.remote;
             this.profile.uploadProfile([
                 {
                     name: prof.name,
                     profile: localStorage.getItem(prof.name)!
                 }
             ]);
-            prof.remote = !prof.remote;
         } else {
             if (
                 confirm(

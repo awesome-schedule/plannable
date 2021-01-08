@@ -18,7 +18,7 @@ Our website is a single-page application (SPA). Our source code is intended to b
 
 ## TypeDoc
 
-TypeDoc is a JSDoc-like documentation built from source code. Our TypeDoc that is built from master is available to browse at https://plannable.org/docs/tsdoc/. However, I personally prefer checking out the source code in my favorite editor rather than browsing the built doc online
+TypeDoc is a JSDoc-like documentation built from the source code. Our TypeDoc that is built from master is available to browse at https://plannable.org/docs/tsdoc/. However, I personally prefer checking out the source code in my favorite editor rather than browsing the built doc online.
 
 ### Building from source
 

@@ -11,6 +11,7 @@ import { savePlain, toICal } from '@/utils';
 import lz from 'lz-string';
 import { Component } from 'vue-property-decorator';
 import UAParser from 'ua-parser-js';
+import { LocalProfileEntry } from '@/store/profile';
 
 /**
  * component for import/export/print schedules and managing profiles
@@ -42,7 +43,7 @@ export default class ExportView extends Store {
         return result_str;
     }
 
-    updateRemoteStatus(prof: this['profile']['profiles'][0]) {
+    updateRemoteStatus(prof: LocalProfileEntry) {
         if (!prof.remote) {
             prof.remote = !prof.remote;
             this.profile.uploadProfile([

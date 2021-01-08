@@ -9,7 +9,6 @@ import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
 import axios from 'axios';
 import { backend } from '@/config';
-import Vue from 'vue';
 import { NotiMsg } from './notification';
 
 interface BackendBaseRequest {
@@ -48,6 +47,7 @@ interface BackendListResponse extends BackendBaseResponse {
     }[];
 }
 
+/** the format of a profile entry to upload to the remote */
 interface BackendProfile {
     /** name of the profile */
     name: string;
@@ -86,6 +86,17 @@ interface BackendDeleteRequest extends BackendBaseRequest {
 
 interface BackendDeleteResponse extends BackendBaseResponse {}
 
+export interface LocalProfileEntry {
+    /** name of the profile */
+    name: string;
+    /** whether the profile is synced with the remote */
+    remote: boolean;
+    /** historical versions of this profile stored on the remote. Invalid if remote=false */
+    versions: ProfileVersion[];
+    /** current version of this profile selected (locally). Invalid if remote=false */
+    currentVersion: number;
+}
+
 /**
  * the profile class handles profiles adding, renaming and deleting
  * @note profile selection is handled in the [[Store]] class
@@ -94,18 +105,14 @@ interface BackendDeleteResponse extends BackendBaseResponse {}
  */
 class Profile {
     /**
-     * a reactive property. whenever changed, the `currentProfile` in the `localStorage` will be updated
+     * the name of the current profile.
+     * This is a reactive property. Whenever changed, the `currentProfile` in the `localStorage` will be updated
      */
     current: string;
     /**
      * an array of local profile names and their associated information
      */
-    profiles: {
-        name: string;
-        remote: boolean;
-        versions: ProfileVersion[];
-        currentVersion: number;
-    }[];
+    profiles: LocalProfileEntry[];
     canSync: boolean;
 
     constructor() {
@@ -163,7 +170,7 @@ class Profile {
         }
     }
 
-    createProfile(name: string) {
+    createProfile(name: string): LocalProfileEntry {
         return {
             name,
             remote: false,
@@ -173,12 +180,10 @@ class Profile {
     }
 
     /**
-     * rename a profile.
-     * note that name duplication is not checked! This check is done in [[ExportView.finishEdit]]
-     * @param idx
-     * @param oldName
-     * @param newName
-     * @param raw
+     * rename a profile. If remote=true, also rename the remote profile.
+     * note that name duplication is not checked! This check should be done by the caller.
+     * @see [[ExportView.renameProfile]]
+     * @param raw the content fetched from localStorage.getItem(oldName)
      */
     async renameProfile(idx: number, oldName: string, newName: string, raw: string) {
         if (oldName === this.current) this.current = newName;
@@ -230,9 +235,7 @@ class Profile {
     }
 
     /**
-     * delete a profile
-     * @param name
-     * @param idx
+     * delete a profile. If remote and requestRemote=true, also delete it from the remote.
      * @returns the name of the previous profile if the deleted profile is selected,
      * returns undefined otherwise
      */
@@ -269,12 +272,10 @@ class Profile {
     }
 
     /**
-     * parse a profile from string, add it to the list of profiles and store it in localStorage
-     * @note you need to call loadProfile() manually if you set `sw` to `true`
-     * @param raw
+     * parse a profile from string, add it to the list of profiles, store it in localStorage, and set [[Profile.current]] to be the newly added profile
+     * @note it is the caller's responsibility to call loadProfile() to load the newly added profile
+     * @param raw the raw string representation of the profile (before JSON.parse)
      * @param fallbackName the fallback name if the raw does not contain the name of the profile
-     * @param sw whether to switch to the newly added schedule
-     * by setting `current` to the name of the newly added profile
      */
     async addProfile(raw: string, fallbackName: string) {
         const rawData: SemesterStorage = JSON.parse(raw);
@@ -328,6 +329,9 @@ class Profile {
         return [localStorage.getItem('username')!, localStorage.getItem('credential')!];
     }
 
+    /**
+     * get a specific version of a profile
+     */
     async getRemoteProfile(name: string, version: number) {
         const [username, credential] = this._cre();
         const request: BackendListRequest = {
@@ -351,6 +355,12 @@ class Profile {
         return msg;
     }
 
+    /**
+     * upload the list of profiles given to the remote, and also update their version histories
+     * @note the list of profiles given must be present in [[Profile.profiles]]. If not, [[Profile.addProfile]] must be called first.
+     * @param profiles
+     * @returns an error message when failed, undefined when success
+     */
     async uploadProfile(profiles: BackendProfile[]) {
         const [username, credential] = this._cre();
         const request: BackendUploadRequest = {
@@ -377,6 +387,10 @@ class Profile {
         }
     }
 
+    /**
+     * Synchronize local profiles with the remote profiles
+     * @returns a noti message indicating success/failure
+     */
     async syncProfiles(): Promise<NotiMsg<undefined>> {
         if (!this.canSync) {
             return {

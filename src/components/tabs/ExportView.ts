@@ -33,12 +33,12 @@ export default class ExportView extends Store {
     getParsedUA(ua: string) {
         const parser = new UAParser(ua);
         const result = parser.getResult();
-        let result_str = '';
+        let result_str = '&nbsp;';
         if (result.os.name && result.os.version)
             result_str += result.os.name + ' ' + result.os.version;
         if (result.device.vendor) result_str += ' | ' + result.device.vendor;
-        // if (result.browser.name && result.browser.version)
-        //     result_str += '|' + result.browser.name + ' ' + result.browser.version;
+        if (result.browser.name && result.browser.version)
+            result_str += '<br />&nbsp;' + result.browser.name + ' ' + result.browser.version;
         return result_str;
     }
 
@@ -269,8 +269,9 @@ export default class ExportView extends Store {
             if (this.profile.profiles.find(p => p.name === newName))
                 return this.noti.error('Duplicated name!');
             if (
+                !this.profile.profiles[idx].remote ||
                 confirm(
-                    'If you rename a profile, all its historical versions will be lost. Are you sure?'
+                    'If you rename a synced profile, all its history will be lost. Are you sure?'
                 )
             ) {
                 const msg = await this.profile.renameProfile(idx, oldName, newName, raw);

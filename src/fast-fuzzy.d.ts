@@ -55,7 +55,7 @@ declare module 'fast-fuzzy' {
          * selects the string(s)* to search when candidates are objects.
          * default: identity function s => s
          */
-        keySelector?(obj: T): (T[keyof T])[] | T[keyof T] | T;
+        keySelector?(obj: T): T[keyof T][] | T[keyof T] | T;
     }
 
     export interface ReturnMatchData {

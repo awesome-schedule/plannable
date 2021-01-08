@@ -109,7 +109,7 @@
                             :title="getRemoteStatusString(prof.remote)"
                             @click.stop="updateRemoteStatus(prof)"
                         ></i>
-                        <template v-if="!profile.canSync || (prof.remote && profile.isLatest(idx))">
+                        <template v-if="!profile.canSync || profile.isLatest(idx)">
                             <i
                                 v-if="newName[idx] === null"
                                 class="fas fa-edit click-icon"
@@ -172,14 +172,18 @@
                                             class="row no-gutters align-items-center"
                                             style="flex-wrap: nowrap"
                                         >
-                                            <div class="col-xs-auto mr-auto pr-1 h-100">
+                                            <div class="col col-2 mr-1 h-100">
                                                 v{{ ver.version }}
                                             </div>
-                                            <div class="col-xs-auto pl-1 ua-cell text-right">
+                                            <div class="col col-10 ua-cell text-right">
                                                 <small>
-                                                    {{ new Date(ver.modified).toLocaleString() }}
+                                                    &nbsp;{{
+                                                        new Date(ver.modified).toLocaleString()
+                                                    }}
                                                     <br />
-                                                    {{ getParsedUA(ver.userAgent) }}
+                                                    <span
+                                                        v-html="getParsedUA(ver.userAgent)"
+                                                    ></span>
                                                 </small>
                                             </div>
                                         </div>

@@ -526,9 +526,10 @@
                 </div>
                 <p>
                     It is possible to reverse one or more of the sort options provided above: just
-                    click the <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want
-                    your schedule to be very compact (i.e. you want to have some time to rest
-                    between classes), you can enable "Vertical compactness" and click the
+                    click the
+                    <i class="fas fa-arrow-up"></i> icon. For example, if you do NOT want your
+                    schedule to be very compact (i.e. you want to have some time to rest between
+                    classes), you can enable "Vertical compactness" and click the
                     <i class="fas fa-arrow-up"></i> icon so it becomes
                     <i class="fas fa-arrow-down"></i>.
                 </p>
@@ -613,7 +614,8 @@
                     <ol>
                         <li>
                             Max number of search results: The maximum number of the relevant results
-                            shown below the <strong>search field </strong>
+                            shown below the
+                            <strong>search field </strong>
                             <i class="fas fa-search"></i>
                         </li>
                         <li>
@@ -787,7 +789,8 @@
                     and
                     <strong> <a href="#item-7" @click="showGuide(7)">export/import</a> </strong>
                     features in the previous sections. You can share shedules with other people
-                    using <strong> export/import </strong>, then compare the schedules here :)
+                    using
+                    <strong> export/import </strong>, then compare the schedules here :)
                 </p>
                 <stepper :info="compareSteps" :helper="true" :always-title="true"></stepper>
                 <button

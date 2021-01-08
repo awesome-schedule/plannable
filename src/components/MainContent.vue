@@ -3,7 +3,7 @@
         class="schedule mt-2"
         :style="{
             width: scheduleWidth + 'vw',
-            'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw',
+            'margin-left': (status.isMobile ? 11 : scheduleLeft) + 'vw'
         }"
     >
         <transition name="fade">

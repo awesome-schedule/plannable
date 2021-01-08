@@ -96,7 +96,7 @@
                             v-model="newName[idx]"
                             class="form-control form-control-inline form-control-sm"
                             type="text"
-                            style="width: 99%"
+                            style="width: 95%"
                             @keyup.enter="renameProfile(prof.name, idx)"
                             @keyup.esc="$set(newName, idx, null)"
                         />
@@ -124,7 +124,7 @@
                             ></i>
                             <i
                                 v-else
-                                class="fas fa-check ml-1 click-icon"
+                                class="fas fa-check click-icon"
                                 title="confirm renaming"
                                 @click.stop="renameProfile(prof.name, idx)"
                             ></i>
@@ -153,11 +153,12 @@
                         >
                             <div class="btn-group">
                                 <button
-                                    class="btn btn-outline-info btn-sm dropdown-toggle"
+                                    class="btn btn-outline-dark btn-sm dropdown-toggle"
                                     type="button"
                                     data-toggle="dropdown"
                                     aria-haspopup="true"
                                     aria-expanded="false"
+                                    :disabled="prof.name !== profile.current"
                                 >
                                     v{{ prof.currentVersion }}
                                 </button>

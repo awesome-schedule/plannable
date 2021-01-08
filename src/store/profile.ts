@@ -320,7 +320,8 @@ class Profile {
     }
 
     isLatest(idx: number) {
-        return this.profiles[idx].currentVersion === this.profiles[idx].versions[0].version;
+        const prof = this.profiles[idx];
+        return !prof.remote || prof.currentVersion === prof.versions[0].version;
     }
 
     _cre() {

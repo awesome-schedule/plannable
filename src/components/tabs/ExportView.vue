@@ -109,13 +109,7 @@
                             :title="getRemoteStatusString(prof.remote)"
                             @click.stop="updateRemoteStatus(prof)"
                         ></i>
-                        <template
-                            v-if="
-                                !profile.canSync ||
-                                !prof.remote ||
-                                (prof.remote && profile.isLatest(idx))
-                            "
-                        >
+                        <template v-if="!profile.canSync || (prof.remote && profile.isLatest(idx))">
                             <i
                                 v-if="newName[idx] === null"
                                 class="fas fa-edit click-icon"
@@ -168,7 +162,7 @@
                                         :key="ver.version"
                                         class="dropdown-item px-2 pb-1 pt-0"
                                         :class="{
-                                            active: ver.version === prof.currentVersion,
+                                            active: ver.version === prof.currentVersion
                                         }"
                                         href="#"
                                         :title="`Full user agent: ${ver.userAgent}`"

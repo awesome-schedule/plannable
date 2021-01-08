@@ -192,7 +192,7 @@ class Profile {
 
         this.profiles[idx].name = newName;
 
-        if (this.canSync) {
+        if (this.canSync && this.profiles[idx].remote) {
             const [username, credential] = this._cre();
             const request: BackendRenameRequest = {
                 username,
@@ -282,8 +282,8 @@ class Profile {
         // change modified time to new to it can overwrite remote profiles
         rawData.modified = new Date().toJSON();
         let profileName = rawData.name || fallbackName;
-        let prev = this.profiles.find(p => p.name === profileName);
-        if (prev) {
+        let prof = this.profiles.find(p => p.name === profileName);
+        if (prof) {
             if (
                 !confirm(
                     `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both.`
@@ -296,10 +296,10 @@ class Profile {
                 rawData.name = profileName;
                 localStorage.setItem(profileName, JSON.stringify(rawData));
 
-                this.profiles.push((prev = this.createProfile(profileName)));
+                this.profiles.push((prof = this.createProfile(profileName)));
             }
         } else {
-            this.profiles.push((prev = this.createProfile(profileName)));
+            this.profiles.push((prof = this.createProfile(profileName)));
         }
         // backward compatibility only
         if (!rawData.name) rawData.name = profileName;
@@ -308,7 +308,7 @@ class Profile {
         localStorage.setItem(profileName, data);
         this.current = profileName;
 
-        if (this.canSync && prev.remote) {
+        if (this.canSync && prof.remote) {
             const msg = await this.uploadProfile([
                 {
                     profile: data,
@@ -409,7 +409,7 @@ class Profile {
             })
         );
 
-        // for local profiles marked as sync, if they are not in the remote list, that means they are deleted. Remote them from local.
+        // for local profiles marked as sync, if they are not in the remote list, that means they are deleted (by another device). Remove them from local.
         this.profiles.concat().forEach(p => {
             if (p.remote && !remoteProfMap.has(p.name)) {
                 this.deleteProfile(

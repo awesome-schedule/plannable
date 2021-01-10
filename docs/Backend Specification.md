@@ -1,11 +1,63 @@
+# Backend Spec
+
+## Authorization
+
+The authorization process of plannable follows the authorization code flow (without PKCE) of the OAuth 2.0 standard. Appropriate information should be filled into config.ts.
+
+The backend should provide an endpoint (`backend.code`) for getting an authorization code. The request to this endpoint will a HTTP GET containing the following information:
+
+```js
+{
+    client_id: backend.client_id,
+    state: "....", // a randomly generated string
+    redirect_uri: 'https://plannable.org',
+    code_challenge: "...", // SHA256 of a randomly generated string
+    code_challenge_method: 'S256'
+}
+```
+
+The backend should redirect to plannable with the authorization code attached onto the url
+
+```
+https://plannable.org?code=...
+```
+
+Additionally, the backend should provide an endpoint (`backend.token`) for getting a access token using the authorization code. The request to this endpoint will be a HTTP POST and the body will be JSON encoded. 
+
+```js
+{
+    client_id: backend.client_id,
+    code: "...", // the authorization code acquired from the authorization code endpoint
+    grant_type: 'authorization_code',
+    code_verifier: '...' // the code_challenge field of the previous request to the authorization code endpoint,
+    redirect_uri: 'https://plannable.org'
+}
+```
+
+It should give a JSON response:
+
+```js
+{
+    "access_token": "...",
+    "expires_in": "...", // expiration time in seconds
+    "token_type": "..." // an alphabetical name for this token type
+}
+```
+
+Once plannable has the access token, all requests to the backend will be sent with the Authorization header
+
+```
+Authorization: token_type access_token
+```
+
+For example, if the token_type is `Bearer` and access_token is `deadbeef`, then the header `Authorization: Bearer deadbeef` will be included in every request. 
+
 ## Get API
 
 The get api should accept POST requests with body
 
 ```js
 {
-    "username": "...",
-    "credential": "...",
     "name": "...", // the profile name. If omitted, return all the profiles (each profile should be the latest version)
     "version": 1 // only present if "name" is present. If this field is missing, then the latest profile should be returned
 }
@@ -42,8 +94,6 @@ The edit api should accept POST requests with body
 
 ```js
 {
-    "username": "...",
-    "credential": "...",
     "action": "...", // either "delete" or "rename"
     "name": "...", // only present if action == "delete". The name of the profile to be deleted
     "oldName": "...", // only present if action == "rename". The name of the profile to be renamed
@@ -80,8 +130,6 @@ The save/upload api should accept POST requests with body
 
 ```js
 {
-    "username": "...",
-    "credential": "...",
     /** list of profiles to be uploaded */
     "profiles": [{
         /** name of the profile */

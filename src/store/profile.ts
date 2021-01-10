@@ -20,7 +20,7 @@ interface BackendBaseResponse {
 }
 
 interface BackendListRequest {
-    name: string; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
+    name?: string; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
     version?: number; // only present if "name" is present. If this field is missing, then the latest profile should be returned
 }
 
@@ -201,34 +201,34 @@ class Profile {
     }
 
     async loginBackend() {
-        const code_challenge = await this.sha256(Math.random().toString());
+        const code_verifier = Math.random().toString();
         const state = Math.random().toString();
         localStorage.setItem('auth_state', state);
-        localStorage.setItem('auth_challenge', code_challenge);
-        window.open(
-            `${backend.code}?${stringify({
-                client_id: backend.client_id,
-                state,
-                redirect_uri: 'https://plannable.org',
-                code_challenge,
-                code_challenge_method: 'S256'
-            })}`
-        );
+        localStorage.setItem('auth_code_verifier', code_verifier);
+        const url = `${backend.code}?${stringify({
+            client_id: backend.client_id,
+            state,
+            redirect_uri: window.location.origin,
+            code_challenge: await this.sha256(code_verifier),
+            code_challenge_method: 'S256'
+        })}`;
+        window.location.href = url;
+        // window.open(url, '_blank');
     }
 
     async getBackendToken(code: string | null) {
         if (code) {
-            const response = await axios.post(
-                backend.token,
-                stringify({
-                    client_id: backend.client_id,
-                    code,
-                    grant_type: 'authorization_code',
-                    code_verifier: localStorage.getItem('auth_challenge'),
-                    redirect_uri: 'https://plannable.org'
-                })
-            );
+            const response = await axios.post(backend.token, {
+                client_id: backend.client_id,
+                code,
+                grant_type: 'authorization_code',
+                code_verifier: localStorage.getItem('auth_code_verifier'),
+                redirect_uri: window.location.origin
+            });
+            localStorage.removeItem('auth_state');
+            localStorage.removeItem('auth_code_verifier');
             const data = response.data;
+            console.log(data);
             if (data['access_token']) {
                 localStorage.setItem('access_token', data['access_token']);
                 localStorage.setItem('token_type', data['token_type']);
@@ -386,19 +386,28 @@ class Profile {
         return [localStorage.getItem('username')!, localStorage.getItem('credential')!];
     }
 
-    /**
-     * get a specific version of a profile
-     */
-    async getRemoteProfile(name: string, version: number) {
-        const request: BackendListRequest = {
-            name,
-            version
-        };
-        const { data: resp } = await axios.post<BackendListResponse>(backend.down, request, {
+    private async requestBackend<RequestType, ResponseType extends BackendBaseResponse>(
+        endpoint: string,
+        request: RequestType
+    ) {
+        return await axios.post<ResponseType>(endpoint, request, {
             headers: {
                 Authorization: this.tokenType + ' ' + this.accessToken
             }
         });
+    }
+
+    /**
+     * get a specific version of a profile
+     */
+    async getRemoteProfile(name: string, version: number) {
+        const { data: resp } = await this.requestBackend<BackendListRequest, BackendListResponse>(
+            backend.down,
+            {
+                name,
+                version
+            }
+        );
         const msg: NotiMsg<BackendListResponse['profiles'][0]> = {
             level: 'success',
             msg: ''
@@ -420,12 +429,11 @@ class Profile {
      * @returns an error message when failed, undefined when success
      */
     async uploadProfile(profiles: BackendProfile[]) {
-        const request: BackendUploadRequest = { profiles };
-        const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request, {
-            headers: {
-                Authorization: this.tokenType + ' ' + this.accessToken
-            }
-        });
+        const { data: resp } = await this.requestBackend<
+            BackendUploadRequest,
+            BackendUploadResponse
+        >(backend.up, { profiles });
+
         if (!resp.success) {
             this.logout();
             return {
@@ -455,15 +463,11 @@ class Profile {
                 level: 'warn'
             };
         }
-        const { data: resp } = await axios.post<BackendListResponse>(
+        const { data: resp } = await this.requestBackend<BackendListRequest, BackendListResponse>(
             backend.down,
-            {},
-            {
-                headers: {
-                    Authorization: this.tokenType + ' ' + this.accessToken
-                }
-            }
+            {}
         );
+        console.log('List', resp);
         if (!resp.success) {
             this.logout();
             return {

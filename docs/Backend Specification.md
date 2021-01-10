@@ -1,5 +1,14 @@
 # Backend Spec
 
+## CORS headers
+
+To satisfy the CORS policies, the backend needs to include the following headers
+
+```
+Access-Control-Allow-Origin: https://plannable.org
+Access-Control-Allow-Headers: Authorization
+```
+
 ## Authorization
 
 The authorization process of plannable follows the authorization code flow (without PKCE) of the OAuth 2.0 standard. Appropriate information should be filled into config.ts.

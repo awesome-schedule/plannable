@@ -1,5 +1,6 @@
+const path = require('path');
 const static = require('node-static');
-const file = new static.Server('dist/');
+const file = new static.Server(path.join(__dirname, 'dist/'), { indexFile: 'index.html' });
 
 const port = require('http')
     .createServer(function(request, response) {
@@ -58,8 +59,7 @@ function createWindow() {
             }
         ])
     );
-    win.loadURL(`http://localhost:${port}/index.html`);
-    win.webContents.openDevTools();
+    win.loadURL(`http://localhost:${port}`);
 }
 
 // This method will be called when Electron has finished

@@ -47,7 +47,6 @@
         "bootstrap": "^4.5.3",
         "core-js": "^3.8.2",
         "dexie": "^2.0.4",
-        "electron-prompt": "^1.6.0",
         "file-saver": "^2.0.5",
         "jquery": "^3.5.1",
         "lz-string": "^1.4.4",
@@ -60,7 +59,9 @@
         "vue-class-component": "^7.2.6",
         "vue-mathjax": "0.0.10",
         "vue-property-decorator": "^8.5.1",
-        "vuedraggable": "^2.24.3"
+        "vuedraggable": "^2.24.3",
+        "electron-prompt": "^1.6.0",
+        "node-static": "^0.7.11"
     },
     "devDependencies": {
         "@types/bootstrap": "^4.5.1",
@@ -95,7 +96,6 @@
         "eslint-plugin-prettier": "^3.3.1",
         "eslint-plugin-vue": "^5.0.0",
         "http-server": "^0.12.3",
-        "node-static": "^0.7.11",
         "prettier": "^1.18.2",
         "ts-node": "^8.10.2",
         "typedoc": "^0.17.8",
@@ -137,7 +137,7 @@
             "icon": "src/assets/logo-800x800.png"
         },
         "files": [
-            "dist/**",
+            "dist",
             "node_modules",
             "electron_main.js"
         ],

@@ -112,8 +112,13 @@ export default class App extends Store {
         (window as any).vue = this;
         this.status.loading = true;
         const search = new URLSearchParams(window.location.search);
+
         if (search.get('auth') === backend.name) {
             return this.profile.loginBackend();
+        }
+        if (search.get('error')) {
+            // failed to get auth code
+            this.noti.error(`Failed to login: ${search.get('error_description')}`);
         }
 
         // clear url after obtained url params

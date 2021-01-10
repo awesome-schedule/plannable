@@ -4,7 +4,7 @@ import Course from './models/Course';
 import Section from './models/Section';
 
 /**
- * Configuration of the backend. Not recommended to use anymore due to some security concerns
+ * Configuration of the backend.
  */
 export const backend = {
     /**
@@ -22,7 +22,19 @@ export const backend = {
     /**
      * API endpoint for editing the properties of the profile (e.g. name)
      */
-    edit: ''
+    edit: '',
+    /**
+     * API endpoint for getting the authorization code
+     */
+    code: '',
+    /**
+     * API endpoint to exchange authorization code for an access token
+     */
+    token: '',
+    /**
+     * Client ID for OAuth
+     */
+    client_id: ''
 } as const;
 
 /**

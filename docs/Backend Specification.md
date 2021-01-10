@@ -1,8 +1,14 @@
-# Backend Spec
+# Backend Specification
+
+If you're interested in providing a profile storage backend for plannable, this document provides the detailed specification. If you're interested in parsing the profile stored by plannable, please refer to the `SemesterStorage` interface in `../src/store/store.ts`. The profile uploaded to the backend will be a string, and when it's JSON deserialized, it will be an object of the type `SemesterStorage`. 
+
+## Backend configuration
+
+The backend provider should provide the information specified in the `backend` constant in [config.example.ts](../src/config.example.ts). 
 
 ## CORS headers
 
-To satisfy the CORS policies, the backend needs to include the following headers
+To satisfy the CORS policies, the backend needs to include the following headers on every response
 
 ```
 Access-Control-Allow-Origin: https://plannable.org
@@ -20,7 +26,7 @@ The backend should provide an endpoint (`backend.code`) for getting an authoriza
     client_id: backend.client_id,
     state: "....", // a randomly generated string
     redirect_uri: 'https://plannable.org',
-    code_challenge: "...", // SHA256 of a randomly generated string
+    code_challenge: "...", // SHA256(code_verifier), where code_verifier is a randomly generated string
     code_challenge_method: 'S256'
 }
 ```
@@ -38,7 +44,7 @@ Additionally, the backend should provide an endpoint (`backend.token`) for getti
     client_id: backend.client_id,
     code: "...", // the authorization code acquired from the authorization code endpoint
     grant_type: 'authorization_code',
-    code_verifier: '...' // the code_challenge field of the previous request to the authorization code endpoint,
+    code_verifier: '...' // the code verifier of the previous request to the authorization code endpoint,
     redirect_uri: 'https://plannable.org'
 }
 ```
@@ -63,7 +69,7 @@ For example, if the token_type is `Bearer` and access_token is `deadbeef`, then 
 
 ## Get API
 
-The get api should accept POST requests with body
+The get api (`backend.down`) should accept POST requests with JSON-encoded body
 
 ```js
 {
@@ -78,9 +84,9 @@ and it should give a JSON response
 {
     "success": true, // or false if failed,
     "message": "...", // reason for failure. If success, can put anything here
-    "profiles": [ // if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. 
+    "profiles": [ // if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. If failed, omit this field.
         {
-            "versions": [
+            "versions": [ // all versions of this profile
                 {
                     /** number of milliseconds since Unix epoch */
                     "modified": 1609794572021,
@@ -99,7 +105,7 @@ and it should give a JSON response
 
 ## Edit API
 
-The edit api should accept POST requests with body
+The edit api (`backend.edit`) should accept POST requests with JSON-encoded body
 
 ```js
 {
@@ -111,7 +117,7 @@ The edit api should accept POST requests with body
 }
 ```
 
-It should give a JSON response indicating whether the action is performed successfully
+It should give a JSON response indicating whether the action is performed successfully. Also, if the action is rename, the complete version history of the profile after rename should be given. 
 
 ```js
 {
@@ -135,7 +141,7 @@ It should give a JSON response indicating whether the action is performed succes
 
 ## Save/Upload API
 
-The save/upload api should accept POST requests with body
+The save/upload api (`backend.up`) should accept POST requests with JSON-encoded body
 
 ```js
 {
@@ -177,8 +183,20 @@ It should give a JSON response indicating whether the action is performed succes
 
 > Profiles are always uniquely identified by their names. All versions of a profile are associated with its name. 
 
-When a profile is **uploaded** (using the save/upload api), a new version for that profile is created. Version numbers should start from 1. If previous versions exist, then increment the version number of the latest version by 1, and use it as the current version. If the previous versions are marked as detached, they should be changed to active. 
+When a profile is **uploaded**:
+- If previous versions exist:
+    - If the previous versions are marked as detached, they should be changed to active. 
+    - Increment the version number of the latest version by 1, and use it as the current version. 
+- If previous versions do not exist:
+    - A new version history for that profile is created. Version numbers should start from 1.
 
-When a profile is **renamed**, the version number for its new name starts from 1. All its previous versions shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 
+
+When a profile is **renamed**:
+- All its previous versions corresponding to the old name shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 
+- If previous versions corresponding to the new name exists:
+    - If the previous versions are marked as detached, they should be changed to active. 
+    - Increment the version number of the latest version by 1, and use it as the current version.
+- If previous versions corresponding to the new name do not exists: 
+    - A new version history for the new name is created. Version numbers should start from 1.
 
 When a profile is **deleted**, all its previous versions shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 

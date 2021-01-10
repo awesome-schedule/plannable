@@ -16,7 +16,7 @@ import Section, { SectionFields, ValidFlag } from './models/Section';
 import { parseDate } from './utils';
 
 /**
- * Configuration of the backend. Not recommended to use anymore due to some security concerns
+ * Configuration of the backend.
  */
 export const backend = {
     /**
@@ -35,8 +35,17 @@ export const backend = {
      * API endpoint for editing the properties of the profile (e.g. name)
      */
     edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/',
+    /**
+     * API endpoint for getting the authorization code
+     */
     code: 'https://match.msnatuva.org/oauth/authorize/',
+    /**
+     * API endpoint to exchange authorization code for an access token
+     */
     token: 'https://match.msnatuva.org/oauth/api/token/',
+    /**
+     * Client ID for OAuth
+     */
     client_id: '56e1ed98f4e740ef883cc7190cf9488c'
 } as const;
 

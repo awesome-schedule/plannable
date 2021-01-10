@@ -205,15 +205,13 @@ class Profile {
         const state = Math.random().toString();
         localStorage.setItem('auth_state', state);
         localStorage.setItem('auth_code_verifier', code_verifier);
-        const url = `${backend.code}?${stringify({
+        window.location.href = `${backend.code}?${stringify({
             client_id: backend.client_id,
             state,
             redirect_uri: window.location.origin,
             code_challenge: await this.sha256(code_verifier),
             code_challenge_method: 'S256'
         })}`;
-        window.location.href = url;
-        // window.open(url, '_blank');
     }
 
     async getBackendToken(code: string | null) {
@@ -228,7 +226,6 @@ class Profile {
             localStorage.removeItem('auth_state');
             localStorage.removeItem('auth_code_verifier');
             const data = response.data;
-            console.log(data);
             if (data['access_token']) {
                 localStorage.setItem('access_token', data['access_token']);
                 localStorage.setItem('token_type', data['token_type']);
@@ -257,17 +254,14 @@ class Profile {
         this.profiles[idx].name = newName;
 
         if (this.tokenType && this.profiles[idx].remote) {
-            const request: BackendRenameRequest = {
+            const { data: resp } = await this.requestBackend<
+                BackendRenameRequest,
+                BackendRenameResponse
+            >(backend.edit, {
                 action: 'rename',
                 oldName,
                 newName,
                 profile: newProf
-            };
-            console.log(request);
-            const { data: resp } = await axios.post<BackendRenameResponse>(backend.edit, request, {
-                headers: {
-                    Authorization: this.tokenType + ' ' + this.accessToken
-                }
             });
             if (!resp.success) {
                 this.logout();
@@ -467,7 +461,6 @@ class Profile {
             backend.down,
             {}
         );
-        console.log('List', resp);
         if (!resp.success) {
             this.logout();
             return {

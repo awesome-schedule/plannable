@@ -18,9 +18,10 @@ import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
 
 /**
- * the structure of a Section in local storage
+ * the structure of a [[Section]] in local storage
  */
 export interface SectionJSON {
+    /** @see [[Section.id]] */
     id: number;
     /**
      * This property is
@@ -44,6 +45,9 @@ export interface ScheduleAll<T = Set<number>[] | -1> {
     [courseKey: string]: T;
 }
 
+/**
+ * the representation of a [[Schedule]] in local storage
+ */
 export interface ScheduleJSON {
     All: ScheduleAll<SectionJSON[][] | -1>;
     events: Event[];

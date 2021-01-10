@@ -16,7 +16,6 @@ import { LocalProfileEntry } from '@/store/profile';
 /**
  * component for import/export/print schedules and managing profiles
  * @author Hanzhi Zhou, Kaiying Shan
- * @todo credential safety
  * @noInheritDoc
  */
 @Component

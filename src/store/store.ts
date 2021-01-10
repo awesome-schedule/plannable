@@ -26,6 +26,9 @@ import status from './status';
 import colorSchemes from '@/data/ColorSchemes';
 import GeneratedSchedule from '@/models/GeneratedSchedule';
 
+/**
+ * the latest storage format of plannable
+ */
 export interface SemesterStorage extends Expirable {
     name: string;
     currentSemester: SemesterJSON;

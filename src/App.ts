@@ -37,6 +37,7 @@ import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import { getReleaseNote } from './utils';
 import GeneratedSchedule from './models/GeneratedSchedule';
+import { backend } from './config';
 
 const version = require('../package.json').version;
 
@@ -111,6 +112,9 @@ export default class App extends Store {
         (window as any).vue = this;
         this.status.loading = true;
         const search = new URLSearchParams(window.location.search);
+        if (search.get('auth') === backend.name) {
+            return this.profile.loginBackend();
+        }
 
         // clear url after obtained url params
         history.replaceState(history.state, 'current', '/');

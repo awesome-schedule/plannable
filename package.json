@@ -139,7 +139,7 @@
         "files": [
             "dist/**",
             "node_modules",
-            "electron.js"
+            "electron_main.js"
         ],
         "directories": {
             "output": "dist-electron"

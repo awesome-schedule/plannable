@@ -11,7 +11,7 @@ Access-Control-Allow-Headers: Authorization
 
 ## Authorization
 
-The authorization process of plannable follows the authorization code flow (without PKCE) of the OAuth 2.0 standard. Appropriate information should be filled into config.ts.
+The authorization process of plannable follows the authorization code flow with PKCE of the OAuth 2.0 standard. Appropriate information should be filled into config.ts.
 
 The backend should provide an endpoint (`backend.code`) for getting an authorization code. The request to this endpoint will a HTTP GET containing the following information:
 
@@ -25,10 +25,10 @@ The backend should provide an endpoint (`backend.code`) for getting an authoriza
 }
 ```
 
-The backend should redirect to plannable with the authorization code attached onto the url
+The backend should redirect to plannable with the authorization code and the previous state attached onto the url
 
 ```
-https://plannable.org?code=...
+https://plannable.org?code=...&state=...
 ```
 
 Additionally, the backend should provide an endpoint (`backend.token`) for getting a access token using the authorization code. The request to this endpoint will be a HTTP POST and the body will be JSON encoded. 

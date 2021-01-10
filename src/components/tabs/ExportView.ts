@@ -43,23 +43,23 @@ export default class ExportView extends Store {
         return result_str;
     }
 
-    updateRemoteStatus(prof: LocalProfileEntry) {
+    async updateRemoteStatus(prof: LocalProfileEntry) {
         if (!prof.remote) {
-            prof.remote = !prof.remote;
-            this.profile.uploadProfile([
+            await this.profile.uploadProfile([
                 {
                     name: prof.name,
                     profile: localStorage.getItem(prof.name)!
                 }
             ]);
+            prof.remote = true;
         } else {
             if (
                 confirm(
                     `If you disable sync for this profile (${prof.name}), it will be deleted from ${backend.name} and your other devices that enabled sync. Are you sure?`
                 )
             ) {
-                this.profile.deleteRemote(prof.name);
-                prof.remote = !prof.remote;
+                await this.profile.deleteRemote(prof.name);
+                prof.remote = false;
             }
         }
     }

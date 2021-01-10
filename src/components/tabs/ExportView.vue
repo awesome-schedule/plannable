@@ -30,24 +30,24 @@
             <small class="text-center form-text text-muted"> Temporally Unavailable </small>
         </div>
         <div class="btn bg-info nav-btn">Export Profile</div>
-        <div class="mx-3 my-2">
+        <div class="mx-3 my-2 text-center">
             <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
                 <button class="btn btn-outline-dark px-0" @click="saveToJson()">Export JSON</button>
                 <button class="btn btn-outline-dark px-0" @click="saveToIcal()">Export iCal</button>
             </div>
-            <small class="text-center form-text text-muted"> JSON: Can be imported later </small>
-            <small class="form-text text-muted text-center">
+            <small class="form-text text-muted">
+                JSON: Can be imported later <br />
                 iCal: Supported by most calendar apps
             </small>
         </div>
         <hr />
-        <div class="mx-3 my-2">
+        <div class="mx-3 my-2 text-center">
             <div class="btn-group w-100" role="group" aria-label="Basic example">
                 <button class="btn btn-outline-primary" @click="exportToURL()">Export URL</button>
                 <button class="btn btn-outline-primary" @click="print()">Print</button>
             </div>
-            <small class="text-center form-text text-muted"> URL can be shared easily </small>
-            <small class="form-text text-muted text-center">
+            <small class="form-text text-muted">
+                URL can be shared easily <br />
                 Print your currently rendered schedule
             </small>
         </div>
@@ -195,25 +195,27 @@
                 </div>
             </li>
         </ul>
-        <template v-if="profile.tokenType">
-            <div class="w-100 text-center">
-                <button
-                    class="btn btn-outline-primary mt-2 w-75"
-                    :title="`Close connection to ${backendName}`"
-                    @click="profile.logout()"
-                >
-                    Logout
-                </button>
-            </div>
-            <div class="mx-2 mt-1 mb-3 text-center">
+
+        <div v-if="profile.tokenType" class="w-100 text-center">
+            <button
+                class="btn btn-outline-primary my-2"
+                :title="`Close connection to ${backendName}`"
+                @click="profile.logout()"
+            >
+                Logout
+            </button>
+            <div>
                 <small class="text-muted">
                     You profiles are synchronizd with {{ backendName }}
                 </small>
             </div>
-        </template>
-        <button class="btn btn-outline-primary mt-2 w-75" @click="profile.loginBackend()">
-            Login to Hoosmyprofessor
-        </button>
+        </div>
+
+        <div v-else class="w-100 my-3 text-center">
+            <button class="btn btn-outline-primary mx-3" @click="profile.loginBackend()">
+                Login to Hoosmyprofessor
+            </button>
+        </div>
     </nav>
 </template>
 

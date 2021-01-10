@@ -107,20 +107,6 @@ export default class App extends Store {
         return false;
     }
 
-    /**
-     * load credentials from backend
-     */
-    loadCredentials(search: URLSearchParams) {
-        const username = search.get('username'),
-            credential = search.get('credential');
-        if (username && credential) {
-            localStorage.setItem('username', username);
-            localStorage.setItem('credential', credential);
-            this.profile.canSync = true;
-            return true;
-        }
-    }
-
     async created() {
         (window as any).vue = this;
         this.status.loading = true;
@@ -128,15 +114,22 @@ export default class App extends Store {
 
         // clear url after obtained url params
         history.replaceState(history.state, 'current', '/');
-        this.loadCredentials(search);
 
         // note: these three can be executed in parallel, i.e. they are not inter-dependent
-        const [pay1, pay2, pay3, pay4] = await Promise.all([
+        const [pay1, pay2, pay3, pay4, auth_result] = await Promise.all([
             loadTimeMatrix(),
             loadBuildingSearcher(),
             this.semester.loadSemesters(),
-            this.profile.syncProfiles()
+            this.profile.syncProfiles(),
+            this.profile.getBackendToken(search.get('code'))
         ]);
+
+        // check if auth is successful. If success, sync profiles immediately.
+        let prom = null;
+        if (auth_result) {
+            this.profile.loadToken();
+            prom = this.profile.syncProfiles();
+        }
 
         if (pay4.level !== 'warn') this.noti.notify(pay4);
 
@@ -157,7 +150,7 @@ export default class App extends Store {
                 await this.loadProfile(this.profile.current, !checkVersion());
             }
         }
-
+        if (prom) await prom;
         this.status.loading = false;
     }
     /**

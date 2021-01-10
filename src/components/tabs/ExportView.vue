@@ -53,7 +53,7 @@
         </div>
         <div class="btn bg-info nav-btn">
             Profiles
-            <template v-if="profile.canSync">
+            <template v-if="profile.tokenType">
                 <i
                     class="fas fa-cloud"
                     :title="`You profiles are synchronizd with ${backendName}`"
@@ -103,13 +103,13 @@
                     </div>
                     <div class="col-xs-auto text-right" style="font-size: 16px">
                         <i
-                            v-if="profile.canSync"
+                            v-if="profile.tokenType"
                             class="fas fa-cloud click-icon mr-1"
                             :class="prof.remote ? 'text-success' : 'text-warning'"
                             :title="getRemoteStatusString(prof.remote)"
                             @click.stop="updateRemoteStatus(prof)"
                         ></i>
-                        <template v-if="!profile.canSync || profile.isLatest(idx)">
+                        <template v-if="!profile.tokenType || profile.isLatest(idx)">
                             <i
                                 v-if="newName[idx] === null"
                                 class="fas fa-edit click-icon"
@@ -130,7 +130,7 @@
                             ></i>
                         </template>
                         <template
-                            v-else-if="profile.canSync && prof.remote && !profile.isLatest(idx)"
+                            v-else-if="profile.tokenType && prof.remote && !profile.isLatest(idx)"
                         >
                             <button
                                 class="btn btn-outline-primary btn-sm"
@@ -141,7 +141,7 @@
                             </button>
                         </template>
                         <div
-                            v-if="profile.canSync && prof.remote"
+                            v-if="profile.tokenType && prof.remote"
                             class="mt-2"
                             title="Checkout historical versions of this profile"
                         >
@@ -195,7 +195,7 @@
                 </div>
             </li>
         </ul>
-        <template v-if="profile.canSync">
+        <template v-if="profile.tokenType">
             <div class="w-100 text-center">
                 <button
                     class="btn btn-outline-primary mt-2 w-75"
@@ -211,6 +211,9 @@
                 </small>
             </div>
         </template>
+        <button class="btn btn-outline-primary mt-2 w-75" @click="profile.loginBackend()">
+            Login to Hoosmyprofessor
+        </button>
     </nav>
 </template>
 

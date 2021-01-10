@@ -212,7 +212,7 @@ export default class ExportView extends Store {
         if (profileName === this.profile.current) return;
         const item = localStorage.getItem(profileName);
         if (!item) return;
-        if (this.profile.canSync) {
+        if (this.profile.tokenType) {
             // set previously selected profile to its latest version, if not already
             this.noti.clear();
             const idx = this.profile.profiles.findIndex(p => p.name === this.profile.current);

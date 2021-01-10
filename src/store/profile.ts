@@ -10,11 +10,7 @@ import { SemesterStorage } from '.';
 import axios from 'axios';
 import { backend } from '@/config';
 import { NotiMsg } from './notification';
-
-interface BackendBaseRequest {
-    username: string;
-    credential: string;
-}
+import { stringify } from 'querystring';
 
 interface BackendBaseResponse {
     /** true if success, false otherwise */
@@ -23,7 +19,7 @@ interface BackendBaseResponse {
     message: string;
 }
 
-interface BackendListRequest extends BackendBaseRequest {
+interface BackendListRequest {
     name: string; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
     version?: number; // only present if "name" is present. If this field is missing, then the latest profile should be returned
 }
@@ -57,7 +53,7 @@ interface BackendProfile {
     new?: true;
 }
 
-interface BackendUploadRequest extends BackendBaseRequest {
+interface BackendUploadRequest {
     /** list of profiles to be uploaded */
     profiles: BackendProfile[];
 }
@@ -67,7 +63,7 @@ interface BackendUploadResponse extends BackendBaseResponse {
     versions: ProfileVersion[][];
 }
 
-interface BackendRenameRequest extends BackendBaseRequest {
+interface BackendRenameRequest {
     action: 'rename';
     oldName: string;
     newName: string;
@@ -78,7 +74,7 @@ interface BackendRenameResponse extends BackendBaseResponse {
     versions: ProfileVersion[];
 }
 
-interface BackendDeleteRequest extends BackendBaseRequest {
+interface BackendDeleteRequest {
     action: 'delete';
     /** the name of the profile to be deleted */
     name: string;
@@ -113,7 +109,8 @@ class Profile {
      * an array of local profile names and their associated information
      */
     profiles: LocalProfileEntry[];
-    canSync: boolean;
+    tokenType!: string;
+    private accessToken!: string;
 
     constructor() {
         this.current = localStorage.getItem('currentProfile') || '';
@@ -129,8 +126,13 @@ class Profile {
                 this.profiles = [];
             }
         }
-        const [_u, _c] = this._cre();
-        this.canSync = !!_u && !!_c;
+
+        this.loadToken();
+    }
+
+    loadToken() {
+        this.tokenType = localStorage.getItem('token_type') || '';
+        this.accessToken = localStorage.getItem('access_token') || '';
     }
 
     /**
@@ -180,6 +182,63 @@ class Profile {
     }
 
     /**
+     * from https://stackoverflow.com/questions/18338890/are-there-any-sha-256-javascript-implementations-that-are-generally-considered-t
+     * @param message
+     */
+    async sha256(message: string) {
+        // encode as UTF-8
+        const msgBuffer = new TextEncoder().encode(message);
+
+        // hash the message
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+        // convert ArrayBuffer to Array
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+        // convert bytes to hex string
+        const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+        return hashHex;
+    }
+
+    async loginBackend() {
+        const code_challenge = await this.sha256(Math.random().toString());
+        const state = Math.random().toString();
+        localStorage.setItem('auth_state', state);
+        localStorage.setItem('auth_challenge', code_challenge);
+        window.open(
+            `${backend.code}?${stringify({
+                client_id: backend.client_id,
+                state,
+                redirect_uri: 'https://plannable.org',
+                code_challenge,
+                code_challenge_method: 'S256'
+            })}`
+        );
+    }
+
+    async getBackendToken(code: string | null) {
+        if (code) {
+            const response = await axios.post(
+                backend.token,
+                stringify({
+                    client_id: backend.client_id,
+                    code,
+                    grant_type: 'authorization_code',
+                    code_verifier: localStorage.getItem('auth_challenge'),
+                    redirect_uri: 'https://plannable.org'
+                })
+            );
+            const data = response.data;
+            if (data['access_token']) {
+                localStorage.setItem('access_token', data['access_token']);
+                localStorage.setItem('token_type', data['token_type']);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * rename a profile. If remote=true, also rename the remote profile.
      * note that name duplication is not checked! This check should be done by the caller.
      * @see [[ExportView.renameProfile]]
@@ -197,18 +256,19 @@ class Profile {
 
         this.profiles[idx].name = newName;
 
-        if (this.canSync && this.profiles[idx].remote) {
-            const [username, credential] = this._cre();
+        if (this.tokenType && this.profiles[idx].remote) {
             const request: BackendRenameRequest = {
-                username,
-                credential,
                 action: 'rename',
                 oldName,
                 newName,
                 profile: newProf
             };
             console.log(request);
-            const { data: resp } = await axios.post<BackendRenameResponse>(backend.edit, request);
+            const { data: resp } = await axios.post<BackendRenameResponse>(backend.edit, request, {
+                headers: {
+                    Authorization: this.tokenType + ' ' + this.accessToken
+                }
+            });
             if (!resp.success) {
                 this.logout();
                 return {
@@ -223,10 +283,7 @@ class Profile {
     }
 
     async deleteRemote(name: string) {
-        const [username, credential] = this._cre();
         const request: BackendDeleteRequest = {
-            username,
-            credential,
             action: 'delete',
             name
         };
@@ -244,7 +301,7 @@ class Profile {
             msg: '',
             level: 'success'
         };
-        if (this.canSync && this.profiles[idx].remote && requestRemote) {
+        if (this.tokenType && this.profiles[idx].remote && requestRemote) {
             const resp = await this.deleteRemote(name);
             if (!resp.success) {
                 if (resp.message === "Profile doesn't exist") {
@@ -309,7 +366,7 @@ class Profile {
         localStorage.setItem(profileName, data);
         this.current = profileName;
 
-        if (this.canSync && prof.remote) {
+        if (this.tokenType && prof.remote) {
             const msg = await this.uploadProfile([
                 {
                     profile: data,
@@ -333,14 +390,15 @@ class Profile {
      * get a specific version of a profile
      */
     async getRemoteProfile(name: string, version: number) {
-        const [username, credential] = this._cre();
         const request: BackendListRequest = {
-            username,
-            credential,
             name,
             version
         };
-        const { data: resp } = await axios.post<BackendListResponse>(backend.down, request);
+        const { data: resp } = await axios.post<BackendListResponse>(backend.down, request, {
+            headers: {
+                Authorization: this.tokenType + ' ' + this.accessToken
+            }
+        });
         const msg: NotiMsg<BackendListResponse['profiles'][0]> = {
             level: 'success',
             msg: ''
@@ -362,13 +420,12 @@ class Profile {
      * @returns an error message when failed, undefined when success
      */
     async uploadProfile(profiles: BackendProfile[]) {
-        const [username, credential] = this._cre();
-        const request: BackendUploadRequest = {
-            username,
-            credential,
-            profiles
-        };
-        const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request);
+        const request: BackendUploadRequest = { profiles };
+        const { data: resp } = await axios.post<BackendUploadResponse>(backend.up, request, {
+            headers: {
+                Authorization: this.tokenType + ' ' + this.accessToken
+            }
+        });
         if (!resp.success) {
             this.logout();
             return {
@@ -392,17 +449,21 @@ class Profile {
      * @returns a noti message indicating success/failure
      */
     async syncProfiles(): Promise<NotiMsg<undefined>> {
-        if (!this.canSync) {
+        if (!this.tokenType) {
             return {
                 msg: 'No backend exists. Abort syncing profiles',
                 level: 'warn'
             };
         }
-        const [username, credential] = this._cre();
-        const { data: resp } = await axios.post<BackendListResponse>(backend.down, {
-            username,
-            credential
-        });
+        const { data: resp } = await axios.post<BackendListResponse>(
+            backend.down,
+            {},
+            {
+                headers: {
+                    Authorization: this.tokenType + ' ' + this.accessToken
+                }
+            }
+        );
         if (!resp.success) {
             this.logout();
             return {
@@ -530,9 +591,10 @@ class Profile {
     }
 
     logout() {
-        localStorage.removeItem('username');
-        localStorage.removeItem('credential');
-        this.canSync = false;
+        localStorage.removeItem('token_type');
+        localStorage.removeItem('access_token');
+        this.tokenType = '';
+        this.accessToken = '';
     }
 }
 

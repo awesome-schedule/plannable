@@ -34,7 +34,10 @@ export const backend = {
     /**
      * API endpoint for editing the properties of the profile (e.g. name)
      */
-    edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/'
+    edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/',
+    code: 'https://match.msnatuva.org/oauth/authorize/',
+    token: 'https://match.msnatuva.org/oauth/api/token/',
+    client_id: '56e1ed98f4e740ef883cc7190cf9488c'
 } as const;
 
 /**

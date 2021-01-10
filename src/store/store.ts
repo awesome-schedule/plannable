@@ -128,7 +128,7 @@ function _saveStatus() {
     if (!currentSemester) return;
     const name = profile.current;
     const idx = profile.profiles.findIndex(p => p.name === name);
-    if (profile.canSync && profile.profiles[idx].remote) {
+    if (profile.tokenType && profile.profiles[idx].remote) {
         if (idx !== -1 && !profile.isLatest(idx)) {
             console.log(
                 'Uploading & saving of',
@@ -152,7 +152,7 @@ function _saveStatus() {
     const str = JSON.stringify(obj);
     localStorage.setItem(name, str);
 
-    if (profile.canSync && profile.profiles[idx].remote)
+    if (profile.tokenType && profile.profiles[idx].remote)
         profile.uploadProfile([{ name, profile: str }]);
 
     pendingStatusSave = -1;

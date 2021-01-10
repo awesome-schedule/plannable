@@ -115,8 +115,9 @@ export default class App extends Store {
         // clear url after obtained url params
         history.replaceState(history.state, 'current', '/');
 
-        // note: these three can be executed in parallel, i.e. they are not inter-dependent
-        const [pay1, pay2, pay3, pay4, auth_result] = await Promise.all([
+        // note: these can be executed in parallel, i.e. they are not inter-dependent
+        // eslint-disable-next-line prefer-const
+        let [pay1, pay2, pay3, pay4, auth_result] = await Promise.all([
             loadTimeMatrix(),
             loadBuildingSearcher(),
             this.semester.loadSemesters(),
@@ -125,10 +126,9 @@ export default class App extends Store {
         ]);
 
         // check if auth is successful. If success, sync profiles immediately.
-        let prom = null;
         if (auth_result) {
             this.profile.loadToken();
-            prom = this.profile.syncProfiles();
+            pay4 = await this.profile.syncProfiles();
         }
 
         if (pay4.level !== 'warn') this.noti.notify(pay4);
@@ -150,7 +150,6 @@ export default class App extends Store {
                 await this.loadProfile(this.profile.current, !checkVersion());
             }
         }
-        if (prom) await prom;
         this.status.loading = false;
     }
     /**

@@ -183,6 +183,8 @@ It should give a JSON response indicating whether the action is performed succes
 
 > Profiles are always uniquely identified by their names. All versions of a profile are associated with its name. 
 
+> The detached behavior is recommended but optional. If you do not wish to implement it, you can simply delete the version history from the database when it is `marked as detached`, and thus you do not need to implement the reattach behavior, i.e. `changed to active`. 
+
 When a profile is **uploaded**:
 - If previous versions exist:
     - If the previous versions are marked as detached, they should be changed to active. 

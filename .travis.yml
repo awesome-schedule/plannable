@@ -6,8 +6,6 @@ node_js:
 install:
     - npm install -g codecov
     - npm ci
-after_success:
-    - codecov
 
 cache:
     directories:
@@ -25,25 +23,25 @@ env:
 jobs:
     include:
         - stage: Deploy to GitHub pages & Build Electron Linux
-          os: linux
-          dist: xenial
-          addons:
-              snaps:
-                  - name: snapcraft
-                    confinement: classic
-          script:
-              - bash ./scripts/deploy.sh # tests run here
-              - npx electron-builder --linux
+            os: linux
+            dist: xenial
+            addons:
+                snaps:
+                    - name: snapcraft
+                      confinement: classic
+            script:
+                - bash ./scripts/deploy.sh # tests run here
+                - npx electron-builder --linux
+            after_success:
+                - codecov
         - stage: Build Electron Windows & Mac
-          os: osx
-          osx_image: xcode10.2
-          script:
-              - npm run build
-              - npx electron-builder --mac
-        #   before_cache:
-        #       - rm -rf $HOME/.cache/electron-builder/wine
+            os: osx
+            osx_image: xcode10.2
+            script:
+                - npm run build
+                - npx electron-builder --mac
         - stage: Build Electron Windows & Mac
-          os: windows
-          script:
-              - npm run build
-              - npx electron-builder --win
+            os: windows
+            script:
+                - npm run build
+                - npx electron-builder --win

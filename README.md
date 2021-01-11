@@ -68,7 +68,7 @@ sudo snap install plannable
 
 > Note: We recommend [VS Code](https://code.visualstudio.com/) for development
 
-### Install Dependencies
+### Install Dependencies and Launch Development Server
 
 -   Node.js >= 10.16
 
@@ -96,6 +96,13 @@ npm run data
 in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
 
 Then you can visit the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
+
+### Build Desktop App
+
+You can use `npx electron .` to launch the native application powered by electron. 
+
+You can use `npx electron-builder --win` (or `--mac`, `--linux`) to build the native executable for your platform. 
+
 
 ## Built With
 

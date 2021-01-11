@@ -1,20 +1,8 @@
 # Scripts
 
-The scripts in this directory are used to deploy our website on both our primary address (https://plannable.org) and our mirror (https://plannable.gitee.io) in China. To operate such a mirror, we basically have to mirror the resources that are located in the U.S., among which the two important ones are the website itself and the course catalog. Normally, there is no need for you to understand or modify these scripts, nor should you execute them directly (except `run.sh`). If you want to update the data in scripts, just remove and re-clone it.
+The scripts in this directory are used to deploy our website on both our primary address (https://plannable.org) and our mirror (https://plannable.gitee.io) in China. To operate such a mirror, we basically have to mirror the resources that are located in the U.S., among which the two important ones are the website itself and the course catalog. Normally, there is no need for you to understand or modify these scripts, nor should you execute them directly. 
 
-```bash
-rm -rf data
-git clone https://github.com/awesome-schedule/data
-```
-
-## Initialization
-
-First cd into this directory, then
-
-```bash
-git clone https://github.com/awesome-schedule/awesome-schedule.github.io
-git clone https://github.com/awesome-schedule/data
-```
+If you want to update the data in scripts, make sure that you're in the project root, and run `npm run updatedata`.
 
 ## File Descriptions
 

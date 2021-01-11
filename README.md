@@ -36,6 +36,8 @@ https://plannable.org/
 
 Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load and store it in browser cache.
 
+However, optional backend storage features are available. Users can choose to login to a third-party website and stores their plannable profiles. This enables cross-device profile syncing. We currently support [Hoosmyprofessor](https://match.msnatuva.org). If you wish to provide such service, please refer to our [backend specification](./docs/Backend%20Specification.md) for more details. 
+
 ## Mirror
 
 To facilitate access in China, we provide a mirror: https://cn.plannable.org/. It is synchronized with https://plannable.org/ once per hour.
@@ -72,7 +74,7 @@ sudo snap install plannable
 
 -   Node.js >= 10.16
 
-Clone the repository and update data
+Clone the repository and update data. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data can be access locally. 
 
 ```bash
 git clone https://github.com/awesome-schedule/plannable
@@ -93,16 +95,15 @@ You need to serve the static files in scripts/data, because we only load local d
 npm run data
 ```
 
-in the project root, which will basically open a static http server listening to port `8000` with cross origin header.
+in the project root, which will open a static http server listening to port `8000` with cross origin headers. This static server must run on `localhost:8000`. 
 
-Then you can visit the development server at [http://127.0.0.1:8080](http://127.0.0.1:8080/).
+Then you can visit the development server shown in the terminal.
 
 ### Build Desktop App
 
 You can use `npx electron .` to launch the native application powered by electron. 
 
 You can use `npx electron-builder --win` (or `--mac`, `--linux`) to build the native executable for your platform. 
-
 
 ## Built With
 

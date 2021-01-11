@@ -2,7 +2,7 @@ sudo: false
 
 language: node_js
 node_js:
-    - stable
+    - 14
 install:
     - npm install -g codecov
     - npm ci
@@ -39,6 +39,11 @@ jobs:
           osx_image: xcode10.2
           script:
               - npm run build
-              - npx electron-builder --mac --win
-          before_cache:
-              - rm -rf $HOME/.cache/electron-builder/wine
+              - npx electron-builder --mac
+        #   before_cache:
+        #       - rm -rf $HOME/.cache/electron-builder/wine
+        - stage: Build Electron Windows & Mac
+          os: windows
+          script:
+              - npm run build
+              - npx electron-builder --win

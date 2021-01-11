@@ -7,7 +7,7 @@ TARGET_BRANCH="master"
 function doCompile {
     cd scripts
     git clone https://github.com/awesome-schedule/data # clone and serve our data
-    http-server -p 8000 --cors --silent &
+    npx http-server -p 8000 --cors --silent &
     cd ..
     npm run test
     npm run build

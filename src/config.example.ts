@@ -3,83 +3,72 @@ import Catalog, { SemesterJSON } from './models/Catalog';
 import Course from './models/Course';
 import Section from './models/Section';
 
-/**
- * Configuration of the backend.
- */
-export const backend = {
-    /**
-     * Name of the backend
-     */
-    name: '',
-    /**
-     * API endpoint for uploading/overwriting profiles on remote
-     */
-    up: '',
-    /**
-     * API endpoint for downloading profiles from remote
-     */
-    down: '',
-    /**
-     * API endpoint for editing the properties of the profile (e.g. name)
-     */
-    edit: '',
-    /**
-     * API endpoint for getting the authorization code
-     */
-    code: '',
-    /**
-     * API endpoint to exchange authorization code for an access token
-     */
-    token: '',
-    /**
-     * Client ID for OAuth
-     */
-    client_id: '',
-    /**
-     * Whether to allow OAuth on plannable desktop app (built with electron)
-     */
-    oauth_on_electron: false,
+/** the version string from package.json */
+export const version: string = require('../package.json').version;
+
+/** whether running on electron */
+export const runningOnElectron = window.navigator.userAgent.toLowerCase().includes('electron');
+
+export interface BackendConfig {
+    /** Name of the backend */
+    name: string;
+    /** API endpoint for uploading/overwriting profiles on remote*/
+    up: string;
+    /** API endpoint for downloading profiles from remote */
+    down: string;
+    /** API endpoint for editing the properties of the profile (e.g. name) */
+    edit: string;
+    /** API endpoint for getting the authorization code */
+    code: string;
+    /** API endpoint to exchange authorization code for an access token */
+    token: string;
+    /** Client ID for OAuth */
+    client_id: string;
+    /** Whether to allow OAuth on plannable desktop app (built with electron) */
+    oauth_on_electron: false;
     /**
      * Redirect URI for plannable desktop app. This URI will not be visited. Instead, it acts like a flag, indicating that the server
      * has directed back to the client. This can set to anything, as long as the server and the client have an agreement.
-     * It is recommended to set this value to a non-existent localhost URI.
-     * If set, the redirect_uri field of package.json also must be set to the same value.
+     * It is recommended to set this value to a (probably non-existent) localhost URI.
      */
-    oauth_electron_redirect_uri: 'http://localhost:8081'
-} as const;
+    oauth_electron_redirect_uri: string;
+}
 
-/**
- * Functions for fetching data
- */
-export const dataend: {
-    readonly buildings: () => Promise<FastSearcher<string>>;
-    readonly distances: () => Promise<Int32Array>;
-    readonly semesters: (count?: number) => Promise<SemesterJSON[]>;
-    readonly courses: (semester: SemesterJSON) => Promise<Catalog>;
-} = {
+export interface DataEnd {
     /**
      * an async function that fetches the array of buildings
      * @returns a FastSearcher instance constructed from the array of buildings
      */
-    buildings: null,
+    readonly buildings: () => Promise<FastSearcher<string>>;
     /**
      * an async function that fetches the distance matrix (equivalently, the walking time) between the buildings.
      * matrix[i * len + j] represents the distance between the ith building and jth building in the array of buildings fetched by dataend.buildings
      * @returns the distance matrix, in Int32Array
      */
-    distances: null,
+    readonly distances: () => Promise<Int32Array>;
     /**
      * an async function that fetches the list of the semesters
      */
-    semesters: null,
+    readonly semesters: (count?: number) => Promise<SemesterJSON[]>;
     /**
      * an async function that fetches all courses corresponding to the given semester
      * @returns a catalog object built from the courses
      */
+    readonly courses: (semester: SemesterJSON) => Promise<Catalog>;
+}
+
+/**
+ * Functions for fetching data
+ */
+export const dataend: DataEnd = {
+    buildings: null,
+    distances: null,
+    semesters: null,
     courses: null
 } as any; // remove to enable type checking
 
 interface ModalLinkItem<T> {
+    /** the inner text of the button used to open your link */
     name: string;
     /**
      * an action to perform when user clicks on this link
@@ -89,7 +78,7 @@ interface ModalLinkItem<T> {
     action(semester: SemesterJSON, param: T): void;
 }
 
-interface ModalLinks {
+export interface ModalLinks {
     section: ModalLinkItem<Section>[];
     course: ModalLinkItem<Course>[];
 }

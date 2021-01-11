@@ -20,6 +20,8 @@ import ExportView from './components/tabs/ExportView.vue';
 import External from './components/tabs/External.vue';
 import FilterView from './components/tabs/FilterView.vue';
 import PaletteView from './components/tabs/PaletteView.vue';
+import FuzzyView from './components/tabs/FuzzyView.vue';
+import LogView from './components/tabs/LogView.vue';
 
 // other components
 import DateSeparator from './components/DateSeparator.vue';
@@ -35,11 +37,9 @@ import VersionModal from './components/modals/VersionModal.vue';
 import randomColor from 'randomcolor';
 import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
-import { getReleaseNote } from './utils';
 import GeneratedSchedule from './models/GeneratedSchedule';
-import { backend } from './config';
-
-const version = require('../package.json').version;
+import { backend, runningOnElectron, version } from './config';
+import { viewReleaseNote } from './utils';
 
 /**
  * returns whether the version stored in localStorage matches the current version
@@ -48,10 +48,7 @@ const version = require('../package.json').version;
 function checkVersion() {
     const match = localStorage.getItem('version') === version;
     localStorage.setItem('version', version);
-    if (!match) {
-        getReleaseNote().then(note => $('#release-note-body').html(note));
-        $('#versionModal').modal();
-    }
+    if (!match) viewReleaseNote();
     return match;
 }
 
@@ -66,11 +63,10 @@ function checkVersion() {
         ExportView,
         CompareView,
         External,
+        FuzzyView,
+        LogView,
         // use dynamic component for this one because it is relatively large in size
         Information: () => import('./components/tabs/Information.vue'),
-        // opt-in tabs
-        FuzzyView: () => import('./components/tabs/FuzzyView.vue'),
-        LogView: () => import('./components/tabs/LogView.vue'),
 
         Pagination,
         GridSchedule,
@@ -89,6 +85,10 @@ export default class App extends Store {
 
     get version() {
         return version;
+    }
+
+    get showInformation() {
+        return runningOnElectron;
     }
 
     async loadConfigFromURL(search: URLSearchParams) {

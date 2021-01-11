@@ -5,8 +5,9 @@
 /**
  *
  */
+import { viewReleaseNote } from '@/utils';
 import { Component } from 'vue-property-decorator';
-import { ui as config } from '../config';
+import { ui as config, version } from '../config';
 import Store from '../store';
 
 /**
@@ -25,5 +26,11 @@ export default class MainContent extends Store {
         return this.status.sideBarActive
             ? config.sideBarWidth + config.tabBarWidth + 1
             : config.tabBarWidth;
+    }
+    get version() {
+        return version;
+    }
+    viewReleaseNote() {
+        viewReleaseNote();
     }
 }

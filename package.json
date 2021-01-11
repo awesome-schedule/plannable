@@ -42,7 +42,17 @@
         "data": "cd scripts && http-server --cors -p 8000 -c-1"
     },
     "main": "electron_main.js",
-    "redirect_url": "http://localhost:8081",
+    "backend": {
+        "name": "Hoosmyprofessor",
+        "up": "https://match.msnatuva.org/courses/api/save_plannable_profile/",
+        "down": "https://match.msnatuva.org/courses/api/get_plannable_profile/",
+        "edit": "https://match.msnatuva.org/courses/api/edit_plannable_profile/",
+        "code": "https://match.msnatuva.org/oauth/authorize/",
+        "token": "https://match.msnatuva.org/oauth/api/token/",
+        "client_id": "56e1ed98f4e740ef883cc7190cf9488c",
+        "oauth_on_electron": true,
+        "oauth_electron_redirect_uri": "http://localhost:8081"
+    },
     "dependencies": {
         "axios": "^0.21.1",
         "bootstrap": "^4.5.3",

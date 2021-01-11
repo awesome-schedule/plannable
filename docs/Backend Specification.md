@@ -4,7 +4,7 @@ If you're interested in providing a profile storage backend for plannable, this 
 
 ## Backend configuration
 
-The backend provider should provide the information specified in the `backend` constant in [config.example.ts](../src/config.example.ts). 
+The backend provider should provide the information specified in the `BackendConfig` type in [config.example.ts](../src/config.example.ts) and fill them into the `"backend"` field of [package.json](../package.json)
 
 ## CORS headers
 

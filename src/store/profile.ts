@@ -8,7 +8,7 @@
 import { SemesterJSON } from '@/models/Catalog';
 import { SemesterStorage } from '.';
 import axios from 'axios';
-import { backend } from '@/config';
+import { backend, runningOnElectron } from '@/config';
 import { NotiMsg } from './notification';
 import { stringify } from 'querystring';
 
@@ -209,9 +209,7 @@ class Profile {
      * get the redirect url for the authorization code flow. For the desktop app (electron), a configured uri will be used.
      */
     private getRedirectURL() {
-        return window.navigator.userAgent.toLowerCase().includes('electron')
-            ? backend.oauth_electron_redirect_uri
-            : window.location.origin;
+        return runningOnElectron ? backend.oauth_electron_redirect_uri : window.location.origin;
     }
 
     /**

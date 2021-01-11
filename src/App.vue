@@ -87,6 +87,7 @@
                 <i class="fas fa-stream"></i>
             </div>
             <div
+                v-if="showInformation"
                 title="Website guide and miscellaneous information"
                 :class="{ 'tab-icon-active': sideBar.showInfo }"
                 class="tab-icon mb-4"
@@ -214,6 +215,15 @@
     padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     width: 3vw;
+    overflow-y: auto;
+    scrollbar-width: thin !important;
+}
+.tab-bar::-webkit-scrollbar {
+    width: 5px;
+}
+.tab-bar::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #ccc;
 }
 .nav-btn {
     border-radius: 0 !important;

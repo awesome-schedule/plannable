@@ -54,17 +54,17 @@ function createWindow() {
         win.loadFile('dist/index.html');
     });
 
-    const { redirect_url } = require('./package.json');
+    const { backend } = require('./package.json');
     win.webContents.on('will-redirect', (_, _url) => {
         console.log(_url);
         const url = new URL(_url);
-        if (url.origin === redirect_url) {
+        if (url.origin === backend.oauth_electron_redirect_uri) {
             win.loadFile('dist/index.html', {
                 search: url.search
             });
         }
     });
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished

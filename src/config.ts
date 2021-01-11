@@ -14,124 +14,34 @@ import Course, { CourseFields } from './models/Course';
 import Meeting, { getInstructors } from './models/Meeting';
 import Section, { SectionFields, ValidFlag } from './models/Section';
 import { parseDate } from './utils';
+import * as defaultConfig from './config.example';
+
+/** the version string from package.json */
+export const version: string = defaultConfig.version;
+
+/** whether running on electron */
+export const runningOnElectron = defaultConfig.runningOnElectron;
 
 /**
  * Configuration of the backend.
  */
-export const backend = {
-    /**
-     * Name of the backend
-     */
-    name: 'Hoosmyprofessor',
-    /**
-     * API endpoint for uploading/overwriting profiles on remote
-     */
-    up: 'https://match.msnatuva.org/courses/api/save_plannable_profile/',
-    /**
-     * API endpoint for downloading profiles from remote
-     */
-    down: 'https://match.msnatuva.org/courses/api/get_plannable_profile/',
-    /**
-     * API endpoint for editing the properties of the profile (e.g. name)
-     */
-    edit: 'https://match.msnatuva.org/courses/api/edit_plannable_profile/',
-    /**
-     * API endpoint for getting the authorization code
-     */
-    code: 'https://match.msnatuva.org/oauth/authorize/',
-    /**
-     * API endpoint to exchange authorization code for an access token
-     */
-    token: 'https://match.msnatuva.org/oauth/api/token/',
-    /**
-     * Client ID for OAuth
-     */
-    client_id: '56e1ed98f4e740ef883cc7190cf9488c',
-    /**
-     * Whether to allow OAuth on plannable desktop app (built with electron)
-     */
-    oauth_on_electron: true,
-    /**
-     * Redirect URI for plannable desktop app. This URI will not be visited. Instead, it acts like a flag, indicating that the server
-     * has directed back to the client. This can set to anything, as long as the server and the client have an agreement.
-     * It is recommended to set this value to a non-existent localhost URI.
-     * If set, the redirect_uri field of package.json also must be set to the same value.
-     */
-    oauth_electron_redirect_uri: 'http://localhost:8081'
-} as const;
+export const backend: defaultConfig.BackendConfig = require('../package.json').backend;
 
 /**
  * Functions for fetching data
  */
-export const dataend = {
-    /**
-     * an async function that fetches the array of buildings
-     * @returns a FastSearcher instance constructed from the array of buildings
-     */
+export const dataend: defaultConfig.DataEnd = {
     buildings: requestBuildingSearcher,
-    /**
-     * an async function that fetches the distance matrix (equivalently, the walking time) between the buildings.
-     * matrix[i * len + j] represents the distance between the ith building and jth building in the array of buildings fetched by dataend.buildings
-     * @returns the distance matrix, in Int32Array
-     */
     distances: requestTimeMatrix,
-    /**
-     * an async function that fetches the list of the semesters
-     */
     semesters: requestSemesterList,
-    /**
-     * an async function that fetches all courses corresponding to the given semester
-     * @returns a catalog object built from the courses
-     */
     courses: requestCourses
-} as const;
-
-/**
- * for the given course, open an external webpage showing the past grades of that course
- */
-function viewGrades(semester: SemesterJSON, course: CourseFields) {
-    window.open(
-        `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
-        '_blank',
-        'width=650,height=700,scrollbars=yes'
-    );
-}
-
-/**
- * view the evaluations for the given course
- */
-function viewEvals(semester: SemesterJSON, param: CourseFields) {
-    window.open(
-        `https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp=${param.department},${param.number}`,
-        '_blank',
-        'width=720,height=700,scrollbars=yes'
-    );
-}
-
-function viewHpEvals(semester: SemesterJSON, param: CourseFields) {
-    window.open(`https://match.msnatuva.org/courses/v2/${param.key}/`, '_blank');
-}
-
-interface ModalLinkItem<T> {
-    name: string;
-    /**
-     * an action to perform when user clicks on this link
-     * @param semester the currently selected semester
-     * @param param course/section corresponding to the active modal
-     */
-    action(semester: SemesterJSON, param: T): void;
-}
-
-interface ModalLinks {
-    section: ModalLinkItem<Section>[];
-    course: ModalLinkItem<Course>[];
-}
+};
 
 /**
  * Used to generate a list of action buttons in section/course modal.
  * We used it to open external pages relevant to the given course/section.
  */
-export const modalLinks: ModalLinks = {
+export const modalLinks: defaultConfig.ModalLinks = {
     section: [
         {
             name: 'Course Evaluations',
@@ -175,68 +85,28 @@ export const modalLinks: ModalLinks = {
 /**
  * some default UI configurations. Usually no need to change
  */
-export const ui = {
-    sideBarWidth: 19,
-    sideMargin: 3,
-    tabBarWidthMobile: 10,
-    tabBarWidth: 3
-} as const;
+export const ui = defaultConfig.ui;
 
 /**
  * expiration config, usually no need to change
  */
-export const semesterListExpirationTime = 86400 * 1000; // one day
-export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
+export const semesterListExpirationTime = defaultConfig.semesterListExpirationTime; // one day
+export const semesterDataExpirationTime = defaultConfig.semesterDataExpirationTime; // two hours
 
 // -------------------------- lecture type configuration ---------------------------------
-export type CourseType = keyof typeof TYPES_PARSE;
+export type CourseType = defaultConfig.CourseType;
 // CourseStatus is only used for typing purposes. can be just an alias of string
-export type CourseStatus = 'TBA' | 'Open' | 'Closed' | 'Wait List';
+export type CourseStatus = defaultConfig.CourseStatus;
 
 /**
  * lecture type number => meaning
  */
-export const TYPES = Object.freeze({
-    '-1': '',
-    0: 'Clinical',
-    1: 'Discussion',
-    2: 'Drill',
-    3: 'Independent Study',
-    4: 'Laboratory',
-    5: 'Lecture',
-    6: 'Practicum',
-    7: 'Seminar',
-    8: 'Studio',
-    9: 'Workshop'
-});
+export const TYPES = defaultConfig.TYPES;
 
 /**
  * parse lecture type string to id
  */
-export const TYPES_PARSE = Object.freeze({
-    '': -1,
-    Clinical: 0,
-    CLN: 0,
-    Discussion: 1,
-    DIS: 1,
-    Drill: 2,
-    DRL: 2,
-    'Independent Study': 3,
-    IND: 3,
-    Laboratory: 4,
-    LAB: 4,
-    Lecture: 5,
-    LEC: 5,
-    Practicum: 6,
-    PRA: 6,
-    Seminar: 7,
-    SEM: 7,
-    Studio: 8,
-    STO: 8,
-    Workshop: 9,
-    WKS: 9
-});
-
+export const TYPES_PARSE = defaultConfig.TYPES_PARSE;
 /**
  * whether to enable conversion from [[Course.key]] to human readable string.
  * It is only used to inform user about the removal of a course when its key does not exist in catalog.
@@ -256,6 +126,32 @@ export const keyRegex: typeof enableKeyConversion extends true
 // --------------------------------------------------------------------------------------------
 // | The following functions are specific to plannable for University of Virginia             |
 // --------------------------------------------------------------------------------------------
+
+/**
+ * for the given course, open an external webpage showing the past grades of that course
+ */
+function viewGrades(semester: SemesterJSON, course: CourseFields) {
+    window.open(
+        `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
+        '_blank',
+        'width=650,height=700,scrollbars=yes'
+    );
+}
+
+/**
+ * view the evaluations for the given course
+ */
+function viewEvals(semester: SemesterJSON, param: CourseFields) {
+    window.open(
+        `https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp=${param.department},${param.number}`,
+        '_blank',
+        'width=720,height=700,scrollbars=yes'
+    );
+}
+
+function viewHpEvals(semester: SemesterJSON, param: CourseFields) {
+    window.open(`https://match.msnatuva.org/courses/v2/${param.key}/`, '_blank');
+}
 
 /**
  * get the origin

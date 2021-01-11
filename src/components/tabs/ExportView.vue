@@ -196,9 +196,9 @@
             </li>
         </ul>
 
-        <div v-if="profile.tokenType" class="w-100 text-center">
+        <div v-if="profile.tokenType" class="w-100 text-center my-2">
             <button
-                class="btn btn-outline-primary my-2"
+                class="btn btn-outline-primary"
                 :title="`Close connection to ${backendName}`"
                 @click="profile.logout()"
             >
@@ -211,7 +211,7 @@
             </div>
         </div>
 
-        <div v-else-if="allowBackend" class="w-100 my-3 text-center">
+        <div v-else-if="allowBackend" class="w-100 my-2 text-center">
             <button class="btn btn-outline-primary mx-3" @click="profile.loginBackend()">
                 Login to Hoosmyprofessor
             </button>

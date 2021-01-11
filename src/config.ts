@@ -500,7 +500,7 @@ function parseSemesterData(rawData: string[][]) {
 /**
  * Fetch the list of semesters from Lou's list
  */
-async function requestSemesterList(count = 5): Promise<SemesterJSON[]> {
+async function requestSemesterList(count = 10): Promise<SemesterJSON[]> {
     console.time('get semester list');
     const response = await (location.host === 'plannable.org' || location.protocol === 'file:'
         ? axios.get<string>(`https://louslist.org/index.php?time=${Math.random()}`)

@@ -283,11 +283,13 @@ class Profile {
     }
 
     async deleteRemote(name: string) {
-        const request: BackendDeleteRequest = {
+        const { data: resp } = await this.requestBackend<
+            BackendDeleteRequest,
+            BackendDeleteResponse
+        >(backend.edit, {
             action: 'delete',
             name
-        };
-        const { data: resp } = await axios.post<BackendDeleteResponse>(backend.edit, request);
+        });
         return resp;
     }
 
@@ -311,6 +313,7 @@ class Profile {
                     this.logout();
                     msg.level = 'error';
                     msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
+                    return msg;
                 }
             }
         }

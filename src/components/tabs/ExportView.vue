@@ -211,7 +211,7 @@
             </div>
         </div>
 
-        <div v-else class="w-100 my-3 text-center">
+        <div v-else-if="allowBackend" class="w-100 my-3 text-center">
             <button class="btn btn-outline-primary mx-3" @click="profile.loginBackend()">
                 Login to Hoosmyprofessor
             </button>

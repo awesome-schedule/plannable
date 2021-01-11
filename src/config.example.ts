@@ -34,7 +34,11 @@ export const backend = {
     /**
      * Client ID for OAuth
      */
-    client_id: ''
+    client_id: '',
+    /**
+     * Whether to allow OAuth on plannable desktop app (built with electron)
+     */
+    oauth_on_electron: false
 } as const;
 
 /**

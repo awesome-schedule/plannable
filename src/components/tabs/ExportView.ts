@@ -26,6 +26,10 @@ export default class ExportView extends Store {
         return backend.name;
     }
 
+    get allowBackend() {
+        return window.location.protocol !== 'file:' || backend.oauth_on_electron;
+    }
+
     /**
      * parse an user-friendly string indicating OS/device type from the user agent
      * @param ua

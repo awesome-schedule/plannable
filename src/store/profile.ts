@@ -33,14 +33,16 @@ interface ProfileVersion {
     version: number;
 }
 
+interface BackendListItem {
+    /** keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles */
+    versions: ProfileVersion[];
+    /** the body of the profile corresponding to the queried version. It should be the latest profile if the version number is missing */
+    profile: string;
+}
+
 interface BackendListResponse extends BackendBaseResponse {
     /** if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. */
-    profiles: {
-        /** keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles */
-        versions: ProfileVersion[];
-        /** the body of the profile corresponding to the queried version. It should be the latest profile if the version number is missing */
-        profile: string;
-    }[];
+    profiles: BackendListItem[];
 }
 
 /** the format of a profile entry to upload to the remote */
@@ -109,6 +111,9 @@ class Profile {
      * an array of local profile names and their associated information
      */
     profiles: LocalProfileEntry[];
+    /**
+     * the access token type. If this field is non-empty, that means we have a valid access token and can communicate with the backend.
+     */
     tokenType!: string;
     private accessToken!: string;
 
@@ -200,12 +205,18 @@ class Profile {
         return hashHex;
     }
 
-    private getOrigin() {
+    /**
+     * get the redirect url for the authorization code flow. For the desktop app (electron), a configured uri will be used.
+     */
+    private getRedirectURL() {
         return window.navigator.userAgent.toLowerCase().includes('electron')
             ? backend.oauth_electron_redirect_uri
             : window.location.origin;
     }
 
+    /**
+     * redirect to the url for requesting an authorization code. It should redirect back with the code attached to the url.
+     */
     async loginBackend() {
         const code_verifier = Math.random().toString();
         const state = Math.random().toString();
@@ -214,12 +225,16 @@ class Profile {
         window.location.href = `${backend.code}?${stringify({
             client_id: backend.client_id,
             state,
-            redirect_uri: this.getOrigin(),
+            redirect_uri: this.getRedirectURL(),
             code_challenge: await this.sha256(code_verifier),
             code_challenge_method: 'S256'
         })}`;
     }
 
+    /**
+     * using the code, request an access token.
+     * @param code
+     */
     async getBackendToken(code: string | null) {
         if (code) {
             const response = await axios.post(backend.token, {
@@ -227,7 +242,7 @@ class Profile {
                 code,
                 grant_type: 'authorization_code',
                 code_verifier: localStorage.getItem('auth_code_verifier'),
-                redirect_uri: this.getOrigin()
+                redirect_uri: this.getRedirectURL()
             });
             localStorage.removeItem('auth_state');
             localStorage.removeItem('auth_code_verifier');
@@ -282,6 +297,10 @@ class Profile {
         }
     }
 
+    /**
+     * delete a profile from the remote
+     * @param name
+     */
     async deleteRemote(name: string) {
         const { data: resp } = await this.requestBackend<
             BackendDeleteRequest,
@@ -295,8 +314,7 @@ class Profile {
 
     /**
      * delete a profile. If remote and requestRemote=true, also delete it from the remote.
-     * @returns the name of the previous profile if the deleted profile is selected,
-     * returns undefined otherwise
+     * @returns A noti message containing the name of the previous profile if the deleted profile is selected, undefined otherwise
      */
     async deleteProfile(name: string, idx: number, requestRemote = true) {
         const msg: NotiMsg<string> = {
@@ -385,10 +403,11 @@ class Profile {
         return !prof.remote || prof.currentVersion === prof.versions[0].version;
     }
 
-    _cre() {
-        return [localStorage.getItem('username')!, localStorage.getItem('credential')!];
-    }
-
+    /**
+     * request a backend api endpoint with authorization headers
+     * @param endpoint url for the api endpoint
+     * @param request the request object
+     */
     private async requestBackend<RequestType, ResponseType extends BackendBaseResponse>(
         endpoint: string,
         request: RequestType
@@ -411,7 +430,7 @@ class Profile {
                 version
             }
         );
-        const msg: NotiMsg<BackendListResponse['profiles'][0]> = {
+        const msg: NotiMsg<BackendListItem> = {
             level: 'success',
             msg: ''
         };

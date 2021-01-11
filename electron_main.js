@@ -1,24 +1,13 @@
-const path = require('path');
-const static = require('node-static');
-const file = new static.Server(path.join(__dirname, 'dist/'), { indexFile: 'index.html' });
-
-const port = require('http')
-    .createServer(function(request, response) {
-        request
-            .addListener('end', function() {
-                file.serve(request, response);
-            })
-            .resume();
-    })
-    .listen(8081)
-    .address().port;
-
+const URL = require('url').URL;
 const { app, BrowserWindow, Menu } = require('electron');
 
 function createWindow() {
     const win = new BrowserWindow({
         width: 1280,
-        height: 720
+        height: 720,
+        webPreferences: {
+            webSecurity: false
+        }
     });
     const contents = win.webContents;
     const prompt = require('electron-prompt');
@@ -59,7 +48,23 @@ function createWindow() {
             }
         ])
     );
-    win.loadURL(`http://localhost:${port}`);
+
+    win.loadFile('dist/index.html');
+    win.webContents.on('did-fail-load', () => {
+        win.loadFile('dist/index.html');
+    });
+
+    const { redirect_url } = require('./package.json');
+    win.webContents.on('will-redirect', (_, _url) => {
+        console.log(_url);
+        const url = new URL(_url);
+        if (url.origin === redirect_url) {
+            win.loadFile('dist/index.html', {
+                search: url.search
+            });
+        }
+    });
+    win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished

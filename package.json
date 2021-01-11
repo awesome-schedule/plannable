@@ -42,6 +42,7 @@
         "data": "cd scripts && http-server --cors -p 8000 -c-1"
     },
     "main": "electron_main.js",
+    "redirect_url": "http://localhost:8081",
     "dependencies": {
         "axios": "^0.21.1",
         "bootstrap": "^4.5.3",

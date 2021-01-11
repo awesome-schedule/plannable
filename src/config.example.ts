@@ -38,7 +38,14 @@ export const backend = {
     /**
      * Whether to allow OAuth on plannable desktop app (built with electron)
      */
-    oauth_on_electron: false
+    oauth_on_electron: false,
+    /**
+     * Redirect URI for plannable desktop app. This URI will not be visited. Instead, it acts like a flag, indicating that the server
+     * has directed back to the client. This can set to anything, as long as the server and the client have an agreement.
+     * It is recommended to set this value to a non-existent localhost URI.
+     * If set, the redirect_uri field of package.json also must be set to the same value.
+     */
+    oauth_electron_redirect_uri: 'http://localhost:8081'
 } as const;
 
 /**

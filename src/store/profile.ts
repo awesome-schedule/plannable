@@ -200,6 +200,12 @@ class Profile {
         return hashHex;
     }
 
+    private getOrigin() {
+        return window.navigator.userAgent.toLowerCase().includes('electron')
+            ? backend.oauth_electron_redirect_uri
+            : window.location.origin;
+    }
+
     async loginBackend() {
         const code_verifier = Math.random().toString();
         const state = Math.random().toString();
@@ -208,7 +214,7 @@ class Profile {
         window.location.href = `${backend.code}?${stringify({
             client_id: backend.client_id,
             state,
-            redirect_uri: window.location.origin,
+            redirect_uri: this.getOrigin(),
             code_challenge: await this.sha256(code_verifier),
             code_challenge_method: 'S256'
         })}`;
@@ -221,7 +227,7 @@ class Profile {
                 code,
                 grant_type: 'authorization_code',
                 code_verifier: localStorage.getItem('auth_code_verifier'),
-                redirect_uri: window.location.origin
+                redirect_uri: this.getOrigin()
             });
             localStorage.removeItem('auth_state');
             localStorage.removeItem('auth_code_verifier');

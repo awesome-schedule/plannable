@@ -1,15 +1,11 @@
 <p align="center"><img src="./src/assets/cover.jpg" width="560px" alt="cover"/></p>
 
 <p align="center">
-    <a href="https://www.codacy.com/manual/hanzhi713/plannable?utm_source=github.com&utm_medium=referral&utm_content=awesome-schedule/plannable&utm_campaign=Badge_Grade"
-        rel="nofollow">
-        <img src="https://api.codacy.com/project/badge/Grade/255cd2c2c4d4459f81bbd9c685471ef8" alt="Codacy Badge" />
-    </a>
     <a href="https://www.gnu.org/licenses/gpl-3.0" rel="nofollow">
         <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License: GPL v3" />
     </a>
-    <a href="https://travis-ci.org/awesome-schedule/" rel="nofollow">
-        <img src="https://travis-ci.org/awesome-schedule/plannable.svg?branch=master" alt="Build Status" />
+    <a href="https://travis-ci.com/github/awesome-schedule/plannable" rel="nofollow">
+        <img src="https://travis-ci.com/awesome-schedule/plannable.svg?branch=master" alt="Build Status" />
     </a>
     <a href="https://codecov.io/gh/awesome-schedule/plannable" rel="nofollow">
         <img src="https://codecov.io/gh/awesome-schedule/plannable/branch/master/graph/badge.svg" alt="codecov" />

@@ -16,18 +16,6 @@
             <small class="text-center form-text text-muted">
                 Import a .json file exported by our website
             </small>
-            <div class="custom-file mt-2">
-                <input
-                    id="customFile"
-                    type="file"
-                    class="custom-file-input"
-                    accept="text/ics"
-                    style="width: 100%"
-                    disabled
-                />
-                <label class="custom-file-label" for="customFile">Import from ICS..</label>
-            </div>
-            <small class="text-center form-text text-muted"> Temporally Unavailable </small>
         </div>
         <div class="btn bg-info nav-btn">Export Profile</div>
         <div class="mx-3 my-2 text-center">

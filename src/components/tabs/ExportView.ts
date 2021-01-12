@@ -134,51 +134,6 @@ export default class ExportView extends Store {
             this.noti.error(error.message);
         }
     }
-
-    onUploadICS(event: { target: EventTarget | null }) {
-        const input = event.target as HTMLInputElement;
-        const { files } = input;
-        if (!files) return;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            try {
-                if (!reader.result) throw new Error('File is empty!');
-
-                // use set to remove duplicates
-                const ids = new Set(
-                    (reader.result.toString().match(/^UID:class-number-([0-9]+)$/gm) || []).map(
-                        str => {
-                            const comp = str.split('-');
-                            return +comp[comp.length - 1];
-                        }
-                    )
-                );
-
-                this.schedule.newProposed();
-                for (const id of ids) {
-                    const sec = window.catalog.getSectionById(id);
-                    this.schedule.proposedSchedule.update(sec.key, id, undefined, undefined, false);
-                }
-
-                this.schedule.proposedSchedule.constructDateSeparator();
-                this.schedule.proposedSchedule.computeSchedule();
-                this.saveStatus();
-                this.noti.info('Schedule loaded from ICS!');
-            } catch (e) {
-                console.log(e);
-                this.noti.error(e.message);
-            }
-            input.value = '';
-        };
-
-        try {
-            reader.readAsText(files[0]);
-        } catch (error) {
-            console.error(error);
-            this.noti.error(error.message);
-        }
-    }
     saveToJson() {
         if (!this.semester.currentSemester) return;
         const { current } = this.profile;

@@ -141,7 +141,7 @@ export default class ExportView extends Store {
         if (json) savePlain(json, current + '.json');
     }
     saveToIcal() {
-        savePlain(toICal(this.schedule.currentSchedule), this.profile.current + '.ical');
+        savePlain(toICal(this.schedule.currentSchedule), this.profile.current + '.ics');
     }
     exportToURL() {
         if (!this.semester.currentSemester) return;

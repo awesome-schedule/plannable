@@ -10,8 +10,7 @@ import { NotiMsg } from '@/store/notification';
 import { TYPES, enableKeyConversion, keyRegex } from '../config';
 import * as Utils from '../utils';
 import Event from './Event';
-import { DAYS } from './Meta';
-import Schedule, { ScheduleAll, ScheduleJSON, SectionJSON } from './Schedule';
+import Schedule, { DAYS, ScheduleAll, ScheduleJSON, SectionJSON } from './Schedule';
 import Section from './Section';
 
 /**

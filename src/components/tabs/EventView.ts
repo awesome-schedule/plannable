@@ -6,7 +6,7 @@
  *
  */
 import Event from '@/models/Event';
-import { DAYS } from '@/models/Meta';
+import { DAYS } from '@/models/Schedule';
 import Store from '@/store';
 import { hr24toInt, to12hr, to24hr } from '@/utils';
 import { Component, Watch } from 'vue-property-decorator';

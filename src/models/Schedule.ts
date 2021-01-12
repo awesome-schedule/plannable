@@ -11,11 +11,24 @@ import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
 import Hashable from './Hashable';
-import { Day, dayToInt } from './Meta';
 import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
+
+export type Day = keyof typeof dayToInt;
+
+export const dayToInt = Object.freeze({
+    Mo: 0,
+    Tu: 1,
+    We: 2,
+    Th: 3,
+    Fr: 4,
+    Sa: 5,
+    Su: 6
+});
+
+export const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
 
 /**
  * the structure of a [[Section]] in local storage

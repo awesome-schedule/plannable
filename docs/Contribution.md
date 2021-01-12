@@ -105,7 +105,6 @@ The underlying models and data structures are the core of our website. These are
 | Course        | Hanzhi Zhou               |
 | Event         | Kaiying Shan              |
 | Meeting       | Hanzhi Zhou               |
-| Meta          | Hanzhi Zhou               |
 | Schedule      | Hanzhi Zhou, Kaiying Shan |
 | ScheduleBlock | Hanzhi Zhou               |
 | Section       | Hanzhi Zhou               |
@@ -143,12 +142,12 @@ Commonly used utility functions, found in [src/utils](/src/utils)
 
 We use a number of algorithms to generate, sort and render schedules. They can be found in [src/algorithm](/src/algorithm)
 
-| Name               | Contributors                         |
-| ------------------ | ------------------------------------ |
-| Schedule Generator | Hanzhi Zhou, Zichao Hu, Kaiying Shan |
-| Coloring           | Hanzhi Zhou                          |
-| Graph              | Hanzhi Zhou                          |
-| Schedule Evaluator | Hanzhi Zhou                          |
+| Name              | Contributors                         |
+| ----------------- | ------------------------------------ |
+| ScheduleGenerator | Hanzhi Zhou, Zichao Hu, Kaiying Shan |
+| Graph             | Hanzhi Zhou                          |
+| ScheduleEvaluator | Hanzhi Zhou                          |
+| FastSearcher      | Kaiying Shan, Hanzhi Zhou            |
 
 ### Testing
 

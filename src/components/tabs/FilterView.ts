@@ -5,7 +5,7 @@
 /**
  *
  */
-import { DAYS } from '@/models/Meta';
+import { DAYS } from '@/models/Schedule';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';

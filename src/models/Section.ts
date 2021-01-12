@@ -12,7 +12,7 @@ import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { dayToInt } from './Meta';
+import { dayToInt } from './Schedule';
 import { CourseStatus } from '../config';
 
 /**

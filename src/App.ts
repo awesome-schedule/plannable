@@ -88,7 +88,7 @@ export default class App extends Store {
     }
 
     get showInformation() {
-        return runningOnElectron;
+        return !runningOnElectron;
     }
 
     async loadConfigFromURL(search: URLSearchParams) {

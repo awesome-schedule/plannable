@@ -43,7 +43,7 @@ export default class FuzzyView extends Store {
             this.loading = true;
             this.noti.info('Gathering data for fuzzy search...');
             await window.catalog.initWorker();
-            this.noti.success('Success!', 2.5);
+            this.noti.success('Successfully initialized fuzzy search!', 2.5);
             this.loading = false;
             this.workerLoaded = true;
         }

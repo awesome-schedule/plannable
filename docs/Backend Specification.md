@@ -31,7 +31,7 @@ The backend should provide an endpoint (`backend.code`) for getting an authoriza
 }
 ```
 
-The backend should redirect to plannable with the authorization code and the previous state attached onto the url
+The backend should redirect to plannable with the authorization code and the previous state attached onto the url.
 
 ```
 https://plannable.org?code=...&state=...
@@ -151,7 +151,7 @@ The save/upload api (`backend.up`) should accept POST requests with JSON-encoded
         "name": "...";
         /** content of the profile */
         "profile": "...";
-        /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to decide whether to create a new version */
+        /** whether to force create a new version for this file. If this field is false or is not present, then it is up to the server to decide whether to create a new version (depending on SAVE_INTERVAL) */
         "new": true
     }, ...];
 }
@@ -181,24 +181,31 @@ It should give a JSON response indicating whether the action is performed succes
 
 ## Versioning requirements
 
-> Profiles are always uniquely identified by their names. All versions of a profile are associated with its name. 
-
-> The detached behavior is recommended but optional. If you do not wish to implement it, you can simply delete the version history from the database when it is `marked as detached`, and thus you do not need to implement the reattach behavior, i.e. `changed to active`. 
-
 When a profile is **uploaded**:
 - If previous versions exist:
-    - If the previous versions are marked as detached, they should be changed to active. 
-    - Increment the version number of the latest version by 1, and use it as the current version. 
+  - If the previous versions are marked as detached, they should be changed to active. 
+  - If [time now] - [modified time of the latest version] > SAVE_INTERVAL:
+    - Increment the version number of the latest version by 1, and use it as the current version.
+  - else
+    - Overwrite the content of the latest version with the newly uploaded profile.
 - If previous versions do not exist:
-    - A new version history for that profile is created. Version numbers should start from 1.
-
+  - A new version history for that profile is created. Version numbers should start from 1. 
+- Set the modified time to now. 
 
 When a profile is **renamed**:
 - All its previous versions corresponding to the old name shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 
 - If previous versions corresponding to the new name exists:
-    - If the previous versions are marked as detached, they should be changed to active. 
-    - Increment the version number of the latest version by 1, and use it as the current version.
+  - If the previous versions are marked as detached, they should be changed to active. 
+  - Increment the version number of the latest version by 1, and use it as the current version.
 - If previous versions corresponding to the new name do not exists: 
-    - A new version history for the new name is created. Version numbers should start from 1.
+  - A new version history for the new name is created. Version numbers should start from 1.
+- Set the modified time to now. 
 
 When a profile is **deleted**, all its previous versions shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 
+
+Some notes:
+- Profiles are always uniquely identified by their names. All versions of a profile are associated with its name. 
+- The detached behavior is recommended but optional. If you do not wish to implement it, you can simply delete the version history from the database when it is `marked as detached`, and thus you do not need to implement the reattach behavior, i.e. `changed to active`. 
+- The expiration time for detached versions should be at least a week.
+- The SAVE_INTERVAL should be set to somewhere between 5 and 10 minutes.
+- To save database space, you can set a cap on the number of versions a profile can have. This number should be at least 50. When the cap is reached, delete the oldest version to allow the new version to be created. 

@@ -8,6 +8,7 @@
 /**
  *
  */
+import { Day, dayToInt } from '@/config';
 import Schedule from '../models/Schedule';
 import { hr12toInt } from './time';
 
@@ -37,9 +38,8 @@ function toICalEventString(
     return ical;
 }
 
-function calcStartDate(prevStart: Date, day: string, hour: number, min: number) {
-    const map: { [x: string]: number } = { MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6, SU: 0 };
-    const dayOffset = (map[day] + 7 - prevStart.getDay()) % 7;
+function calcStartDate(prevStart: Date, day: Day, hour: number, min: number) {
+    const dayOffset = (dayToInt[day] + 7 - prevStart.getDay()) % 7;
     const hourLen = 1000 * 60 * 60;
     const minLen = 1000 * 60;
     return new Date(
@@ -54,12 +54,10 @@ function calcStartDate(prevStart: Date, day: string, hour: number, min: number) 
  * @return a string of iCalendar format
  */
 export function toICal(schedule: Schedule) {
-    let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:UVa-Awesome-Schedule\r\n';
+    let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:plannable\r\n';
 
     let startDate = new Date(2019, 7, 27, 0, 0, 0),
         endDate = new Date(2019, 11, 6, 0, 0, 0);
-
-    const map: { [x: string]: number } = { MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6, SU: 0 };
 
     for (const [id] of schedule.current.ids) {
         const sec = window.catalog.getSectionById(parseInt(id));
@@ -68,30 +66,34 @@ export function toICal(schedule: Schedule) {
         endDate = new Date(sec.dateArray[1] + 1000 * 60 * 60 * 24);
 
         for (const meeting of sec.meetings) {
-            const [day, s, , e] = meeting.days.split(' ');
-            const totalMin = hr12toInt(s);
-            const duration = hr12toInt(e) - totalMin;
-            const hour = Math.floor(totalMin / 60);
-            const min = totalMin % 60;
+            try {
+                const [day, s, , e] = meeting.days.split(' ');
+                const totalMin = hr12toInt(s);
+                const duration = hr12toInt(e) - totalMin;
+                const hour = Math.floor(totalMin / 60);
+                const min = totalMin % 60;
 
-            const days: string[] = [];
-            for (let i = 0; i < day.length; i += 2) {
-                days.push(day.substr(i, 2).toUpperCase());
+                const days: Day[] = [];
+                for (let i = 0; i < day.length; i += 2) {
+                    days.push(day.substr(i, 2).toUpperCase() as Day);
+                }
+                const icalDay = days.join(',');
+                // 'start time' in ical means the time of the first occurrence of an event
+                ical += toICalEventString(
+                    `class-number-${id}`,
+                    dateToICalString(calcStartDate(startDate, days[0], hour, min)),
+                    sec.displayName,
+                    icalDay,
+                    hour.toString(),
+                    min.toString(),
+                    dateToICalString(endDate),
+                    `${Math.floor(duration / 60)}H${duration % 60}M`,
+                    sec.title,
+                    meeting.room
+                );
+            } catch (e) {
+                // exception adding this event to ical
             }
-            const icalDay = days.join(',');
-            // 'start time' in ical means the time of the first occurrence of an event
-            ical += toICalEventString(
-                `class-number-${id}`,
-                dateToICalString(calcStartDate(startDate, days[0], hour, min)),
-                sec.displayName,
-                icalDay,
-                hour.toString(),
-                min.toString(),
-                dateToICalString(endDate),
-                `${Math.floor(duration / 60)}H${duration % 60}M`,
-                sec.title,
-                meeting.room
-            );
         }
     }
 
@@ -99,9 +101,9 @@ export function toICal(schedule: Schedule) {
         const [day, s, , e] = event.days.split(' ');
         const startTime = hr12toInt(s);
         const duration = hr12toInt(e) - startTime;
-        const days = [];
+        const days: Day[] = [];
         for (let i = 0; i < day.length; i += 2) {
-            days.push(day.substr(i, 2).toUpperCase());
+            days.push(day.substr(i, 2).toUpperCase() as Day);
         }
         const dayStr = days.join(',');
         const hour = Math.floor(startTime / 60);

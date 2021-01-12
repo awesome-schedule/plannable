@@ -108,6 +108,20 @@ export const ui = {
 export const semesterListExpirationTime = 86400 * 1000; // one day
 export const semesterDataExpirationTime = 2 * 3600 * 1000; // two hours
 
+export type Day = 'Mo' | 'Tu' | 'We' | 'Th' | 'Fr' | 'Sa' | 'Su';
+
+export const dayToInt = Object.freeze({
+    Mo: 0,
+    Tu: 1,
+    We: 2,
+    Th: 3,
+    Fr: 4,
+    Sa: 5,
+    Su: 6
+});
+
+export const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
+
 // -------------------------- lecture type configuration ---------------------------------
 export type CourseType = keyof typeof TYPES_PARSE;
 // CourseStatus is only used for typing purposes. can be just an alias of string

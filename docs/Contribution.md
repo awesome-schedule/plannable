@@ -105,7 +105,6 @@ The underlying models and data structures are the core of our website. These are
 | Course        | Hanzhi Zhou               |
 | Event         | Kaiying Shan              |
 | Meeting       | Hanzhi Zhou               |
-| Meta          | Hanzhi Zhou               |
 | Schedule      | Hanzhi Zhou, Kaiying Shan |
 | ScheduleBlock | Hanzhi Zhou               |
 | Section       | Hanzhi Zhou               |

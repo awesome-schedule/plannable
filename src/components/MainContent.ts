@@ -7,7 +7,7 @@
  */
 import { viewReleaseNote } from '@/utils';
 import { Component } from 'vue-property-decorator';
-import { ui as config, version } from '../config';
+import { ui as config, version } from '@/config';
 import Store from '../store';
 
 /**

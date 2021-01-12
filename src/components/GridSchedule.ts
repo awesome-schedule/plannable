@@ -7,7 +7,7 @@
  */
 import Schedule from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
-import { DAYS } from '../models/Meta';
+import { DAYS } from '@/config';
 import Store from '../store';
 import { timeToNum, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';

@@ -6,7 +6,7 @@
 /**
  *
  */
-import { CourseStatus } from '../config';
+import { CourseStatus } from '@/config';
 import Course from '../models/Course';
 import Event from '../models/Event';
 import GeneratedSchedule from '../models/GeneratedSchedule';

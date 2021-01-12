@@ -65,7 +65,7 @@ export function hashCode(str: string): number {
 export function timeout<T>(
     promise: Promise<T>,
     time: number,
-    msg = 'Time out fetching data. Please try again later'
+    msg = 'Timed out fetching data. Please try again later'
 ): Promise<T> {
     if (time > 0) {
         const p = cancelablePromise(promise);

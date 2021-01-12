@@ -93,6 +93,12 @@ export const ui = defaultConfig.ui;
 export const semesterListExpirationTime = defaultConfig.semesterListExpirationTime; // one day
 export const semesterDataExpirationTime = defaultConfig.semesterDataExpirationTime; // two hours
 
+export type Day = defaultConfig.Day;
+
+export const dayToInt = defaultConfig.dayToInt;
+
+export const DAYS = defaultConfig.DAYS;
+
 // -------------------------- lecture type configuration ---------------------------------
 export type CourseType = defaultConfig.CourseType;
 // CourseStatus is only used for typing purposes. can be just an alias of string

@@ -6,7 +6,7 @@
 /**
  *
  */
-import { CourseType } from '../config';
+import { CourseType } from '@/config';
 import { hashCode } from '../utils';
 import Hashable from './Hashable';
 import Section from './Section';

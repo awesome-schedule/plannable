@@ -6,7 +6,7 @@
  *
  */
 import Event from '@/models/Event';
-import { DAYS } from '@/models/Meta';
+import { DAYS } from '@/config';
 import Schedule, { ScheduleAll, SectionJSON } from '@/models/Schedule';
 import ProposedSchedule from '@/models/ProposedSchedule';
 import { to12hr } from '@/utils';

@@ -19,9 +19,15 @@ interface BackendBaseResponse {
     message: string;
 }
 
+interface BackendFailedResponse extends BackendBaseResponse {
+    success: false;
+}
+
 interface BackendListRequest {
-    name?: string; // the profile name. If omitted, return all the profiles (each profile should be the latest version)
-    version?: number; // only present if "name" is present. If this field is missing, then the latest profile should be returned
+    /** the profile name. If omitted, return all the profiles (each profile should be the latest version) */
+    name?: string;
+    /** only present if "name" is present. If this field is missing, then the latest profile should be returned */
+    version?: number;
 }
 
 interface ProfileVersion {
@@ -41,6 +47,7 @@ interface BackendListItem {
 }
 
 interface BackendListResponse extends BackendBaseResponse {
+    success: true;
     /** if the name field of the request is missing, this should be a list of all profiles. Otherwise, this should be a list of 1 profile corresponding to the name and version given. */
     profiles: BackendListItem[];
 }
@@ -61,6 +68,7 @@ interface BackendUploadRequest {
 }
 
 interface BackendUploadResponse extends BackendBaseResponse {
+    success: true;
     /** version information of each newly uploaded profile. If failed, this field is not present */
     versions: ProfileVersion[][];
 }
@@ -73,6 +81,7 @@ interface BackendRenameRequest {
 }
 
 interface BackendRenameResponse extends BackendBaseResponse {
+    success: true;
     versions: ProfileVersion[];
 }
 
@@ -82,7 +91,9 @@ interface BackendDeleteRequest {
     name: string;
 }
 
-interface BackendDeleteResponse extends BackendBaseResponse {}
+interface BackendDeleteResponse extends BackendBaseResponse {
+    success: true;
+}
 
 export interface LocalProfileEntry {
     /** name of the profile */
@@ -411,7 +422,7 @@ class Profile {
     private async requestBackend<RequestType, ResponseType extends BackendBaseResponse>(
         endpoint: string,
         request: RequestType
-    ): Promise<ResponseType> {
+    ): Promise<ResponseType | BackendFailedResponse> {
         try {
             return (
                 await axios.post<ResponseType>(endpoint, request, {
@@ -424,7 +435,7 @@ class Profile {
             return {
                 success: false,
                 message: err.message
-            } as ResponseType;
+            };
         }
     }
 

@@ -48,12 +48,13 @@ export default class ExportView extends Store {
 
     async updateRemoteStatus(prof: LocalProfileEntry) {
         if (!prof.remote) {
-            await this.profile.uploadProfile([
+            const msg = await this.profile.uploadProfile([
                 {
                     name: prof.name,
                     profile: localStorage.getItem(prof.name)!
                 }
             ]);
+            if (msg) return this.noti.notify(msg);
             prof.remote = true;
         } else {
             if (
@@ -61,7 +62,12 @@ export default class ExportView extends Store {
                     `If you disable sync for this profile (${prof.name}), it will be deleted from ${backend.name} and your other devices that enabled sync. Are you sure?`
                 )
             ) {
-                await this.profile.deleteRemote(prof.name);
+                const msg = await this.profile.deleteRemote(prof.name);
+                if (msg.level === 'error') {
+                    return this.noti.notify(msg);
+                } else if (msg.level === 'warn') {
+                    this.noti.notify(msg);
+                }
                 prof.remote = false;
             }
         }

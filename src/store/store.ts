@@ -155,8 +155,13 @@ function _saveStatus() {
     const str = JSON.stringify(obj);
     localStorage.setItem(name, str);
 
-    if (profile.tokenType && profile.profiles[idx].remote)
-        profile.uploadProfile([{ name, profile: str }]);
+    if (profile.tokenType && profile.profiles[idx].remote) {
+        profile.uploadProfile([{ name, profile: str }]).then(msg => {
+            if (msg) {
+                noti.notify(msg);
+            }
+        });
+    }
 
     pendingStatusSave = -1;
     console.log('status saved');

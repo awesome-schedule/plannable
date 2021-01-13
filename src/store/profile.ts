@@ -273,15 +273,15 @@ class Profile {
         this.profiles[idx].name = newName;
 
         if (this.tokenType && this.profiles[idx].remote) {
-            const { data: resp } = await this.requestBackend<
-                BackendRenameRequest,
-                BackendRenameResponse
-            >(backend.edit, {
-                action: 'rename',
-                oldName,
-                newName,
-                profile: newProf
-            });
+            const resp = await this.requestBackend<BackendRenameRequest, BackendRenameResponse>(
+                backend.edit,
+                {
+                    action: 'rename',
+                    oldName,
+                    newName,
+                    profile: newProf
+                }
+            );
             if (!resp.success) {
                 this.logout();
                 return {
@@ -300,14 +300,28 @@ class Profile {
      * @param name
      */
     async deleteRemote(name: string) {
-        const { data: resp } = await this.requestBackend<
-            BackendDeleteRequest,
-            BackendDeleteResponse
-        >(backend.edit, {
-            action: 'delete',
-            name
-        });
-        return resp;
+        const msg: NotiMsg<string> = {
+            msg: '',
+            level: 'success'
+        };
+        const resp = await this.requestBackend<BackendDeleteRequest, BackendDeleteResponse>(
+            backend.edit,
+            {
+                action: 'delete',
+                name
+            }
+        );
+        if (!resp.success) {
+            if (resp.message === "Profile doesn't exist") {
+                msg.level = 'warn';
+                msg.msg = `Profile ${name} is already deleted from ${backend.name}! The deletion was probably requested by another device.`;
+            } else {
+                this.logout();
+                msg.level = 'error';
+                msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
+            }
+        }
+        return msg;
     }
 
     /**
@@ -315,24 +329,12 @@ class Profile {
      * @returns A noti message containing the name of the previous profile if the deleted profile is selected, undefined otherwise
      */
     async deleteProfile(name: string, idx: number, requestRemote = true) {
-        const msg: NotiMsg<string> = {
+        let msg: NotiMsg<string> = {
             msg: '',
             level: 'success'
         };
-        if (this.tokenType && this.profiles[idx].remote && requestRemote) {
-            const resp = await this.deleteRemote(name);
-            if (!resp.success) {
-                if (resp.message === "Profile doesn't exist") {
-                    msg.level = 'warn';
-                    msg.msg = `Profile ${name} is already deleted from ${backend.name}! The deletion is probably requested by another device`;
-                } else {
-                    this.logout();
-                    msg.level = 'error';
-                    msg.msg = `Failed to communicate with ${backend.name}: ${resp.message}. Please try to re-login from ${backend.name}.`;
-                    return msg;
-                }
-            }
-        }
+        if (this.tokenType && this.profiles[idx].remote && requestRemote)
+            msg = await this.deleteRemote(name);
 
         this.profiles.splice(idx, 1);
         localStorage.removeItem(name);
@@ -409,19 +411,28 @@ class Profile {
     private async requestBackend<RequestType, ResponseType extends BackendBaseResponse>(
         endpoint: string,
         request: RequestType
-    ) {
-        return await axios.post<ResponseType>(endpoint, request, {
-            headers: {
-                Authorization: this.tokenType + ' ' + this.accessToken
-            }
-        });
+    ): Promise<ResponseType> {
+        try {
+            return (
+                await axios.post<ResponseType>(endpoint, request, {
+                    headers: {
+                        Authorization: this.tokenType + ' ' + this.accessToken
+                    }
+                })
+            ).data;
+        } catch (err) {
+            return {
+                success: false,
+                message: err.message
+            } as ResponseType;
+        }
     }
 
     /**
      * get a specific version of a profile
      */
     async getRemoteProfile(name: string, version: number) {
-        const { data: resp } = await this.requestBackend<BackendListRequest, BackendListResponse>(
+        const resp = await this.requestBackend<BackendListRequest, BackendListResponse>(
             backend.down,
             {
                 name,
@@ -449,10 +460,10 @@ class Profile {
      * @returns an error message when failed, undefined when success
      */
     async uploadProfile(profiles: BackendProfile[]) {
-        const { data: resp } = await this.requestBackend<
-            BackendUploadRequest,
-            BackendUploadResponse
-        >(backend.up, { profiles });
+        const resp = await this.requestBackend<BackendUploadRequest, BackendUploadResponse>(
+            backend.up,
+            { profiles }
+        );
 
         if (!resp.success) {
             this.logout();
@@ -483,7 +494,7 @@ class Profile {
                 level: 'warn'
             };
         }
-        const { data: resp } = await this.requestBackend<BackendListRequest, BackendListResponse>(
+        const resp = await this.requestBackend<BackendListRequest, BackendListResponse>(
             backend.down,
             {}
         );

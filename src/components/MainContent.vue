@@ -60,7 +60,9 @@
         </div>
         <div id="footer-org">
             &copy;2019-2021 —&nbsp;<strong>Plannable v{{ version }}</strong>
-            <a class="ml-4" href="javascript:void" @click="viewReleaseNote()">View release note</a>
+            <a class="ml-4" href="javascript:void" @click="modal.showReleaseNoteModal()">
+                View release note
+            </a>
         </div>
     </div>
 </template>

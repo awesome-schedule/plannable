@@ -39,18 +39,11 @@ import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import GeneratedSchedule from './models/GeneratedSchedule';
 import { backend, runningOnElectron, version } from './config';
-import { viewReleaseNote } from './utils';
 
-/**
- * returns whether the version stored in localStorage matches the current version
- * then, override localStorage with the current version
- */
-function checkVersion() {
-    const match = localStorage.getItem('version') === version;
-    localStorage.setItem('version', version);
-    if (!match) viewReleaseNote();
-    return match;
-}
+/** whether the version stored in localStorage matches the current version */
+const match = localStorage.getItem('version') === version;
+// then, override localStorage with the current version
+localStorage.setItem('version', version);
 
 @Component({
     components: {
@@ -97,7 +90,7 @@ export default class App extends Store {
         if (encoded) {
             try {
                 this.profile.addProfile(JSON.stringify(await parseFromURL(encoded)), 'url loaded');
-                await this.loadProfile(undefined, !checkVersion());
+                await this.loadProfile(undefined, !match);
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;
             } catch (err) {
@@ -120,6 +113,7 @@ export default class App extends Store {
             // failed to get auth code
             this.noti.error(`Failed to login: ${search.get('error_description')}`);
         }
+        if (!match) this.modal.showReleaseNoteModal();
 
         // clear url after obtained url params
         history.replaceState(history.state, 'current', '/');
@@ -156,7 +150,7 @@ export default class App extends Store {
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
                 // if version mismatch, force-update semester data
-                await this.loadProfile(this.profile.current, !checkVersion());
+                await this.loadProfile(this.profile.current, !match);
             }
         }
         this.status.loading = false;

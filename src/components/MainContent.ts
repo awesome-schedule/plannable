@@ -5,7 +5,6 @@
 /**
  *
  */
-import { viewReleaseNote } from '@/utils';
 import { Component } from 'vue-property-decorator';
 import { ui as config, version } from '../config';
 import Store from '../store';
@@ -29,8 +28,5 @@ export default class MainContent extends Store {
     }
     get version() {
         return version;
-    }
-    viewReleaseNote() {
-        viewReleaseNote();
     }
 }

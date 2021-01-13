@@ -171,12 +171,6 @@ export async function getReleaseNote() {
     }
 }
 
-export async function viewReleaseNote() {
-    const note = await getReleaseNote();
-    $('#release-note-body').html(note);
-    $('#versionModal').modal();
-}
-
 export class GeneratedError extends Error {
     constructor(message: string) {
         super(message);

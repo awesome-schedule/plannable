@@ -7,6 +7,7 @@
  *
  */
 import { SearchMatch } from '@/models/Catalog';
+import { getReleaseNote } from '@/utils';
 import 'bootstrap';
 import $ from 'jquery';
 import Course from '../models/Course';
@@ -35,6 +36,12 @@ class Modal {
     showURLModal(url: string) {
         this.url = url;
         $('#url-modal').modal();
+    }
+
+    async showReleaseNoteModal() {
+        const note = await getReleaseNote();
+        $('#release-note-body').html(note);
+        $('#versionModal').modal();
     }
 }
 

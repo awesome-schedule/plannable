@@ -8,42 +8,56 @@
 /**
  *
  */
+import Event from '@/models/Event';
+import Meeting from '@/models/Meeting';
 import Schedule, { Day, dayToInt } from '../models/Schedule';
 import { hr12toInt } from './time';
 
 function toICalEventString(
+    event: Event | Meeting,
     uid: string,
-    startDate: string,
+    startDate: Date,
+    until: Date,
     summary: string,
-    day: string,
-    hour: string,
-    min: string,
-    until: string,
-    duration: string,
     description: string,
     location: string
 ) {
+    const [day, s, , e] = event.days.split(' ');
+    const startMin = hr12toInt(s);
+    const endMin = hr12toInt(e);
+
+    const days: Day[] = [];
+    for (let i = 0; i < day.length; i += 2) {
+        days.push(day.substr(i, 2) as Day);
+    }
+    startDate = calcStartDate(startDate, days[0]);
+
+    console.log(startMin, endMin);
+
     let ical = '';
     ical += 'BEGIN:VEVENT\r\n';
     ical += `UID:${uid}\r\n`;
     ical += `DTSTAMP:${dateToICalString(new Date())}\r\n`;
-    ical += `DTSTART:${startDate}\r\n`;
+    ical += `DTSTART:${dateToICalString(
+        new Date(startDate.getTime() + (startMin + 300) * 60 * 1000)
+    )}\r\n`;
+    ical += `DTEND:${dateToICalString(
+        new Date(startDate.getTime() + (endMin + 300) * 60 * 1000)
+    )}\r\n`;
     ical += `SUMMARY:${summary}\r\n`;
-    ical += `RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=${day.toUpperCase()};BYHOUR=${hour};BYMINUTE=${min};UNTIL=${until}\r\n`;
-    ical += `DURATION=${duration}\r\n`;
+    ical += `RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=${days
+        .join(',')
+        .toUpperCase()};UNTIL=${dateToICalString(until)}\r\n`;
+    ical += `DURATION=${endMin - startMin}\r\n`;
     ical += `DESCRIPTION:${description}\r\n`;
     ical += `LOCATION:${location}\r\n`;
     ical += 'END:VEVENT\r\n';
     return ical;
 }
 
-function calcStartDate(prevStart: Date, day: Day, hour: number, min: number) {
+function calcStartDate(prevStart: Date, day: Day) {
     const dayOffset = (dayToInt[day] + 7 - prevStart.getDay()) % 7;
-    const hourLen = 1000 * 60 * 60;
-    const minLen = 1000 * 60;
-    return new Date(
-        prevStart.getTime() + dayOffset * 1000 * 60 * 60 * 24 + minLen * min + hourLen * hour
-    );
+    return new Date(prevStart.getTime() + dayOffset * 1000 * 60 * 60 * 24);
 }
 
 /**
@@ -53,10 +67,16 @@ function calcStartDate(prevStart: Date, day: Day, hour: number, min: number) {
  * @return a string of iCalendar format
  */
 export function toICal(schedule: Schedule) {
-    let ical = 'BEGIN:VCALENDAR\r\nVERSION:7.1\r\nPRODID:plannable\r\n';
+    let ical = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:plannable\r\n';
 
-    let startDate = new Date(2019, 7, 27, 0, 0, 0),
-        endDate = new Date(2019, 11, 6, 0, 0, 0);
+    let startDate: Date, endDate: Date;
+    for (const { dateArray } of window.catalog.sections) {
+        if (dateArray) {
+            startDate = new Date(dateArray[0]);
+            endDate = new Date(dateArray[1] + 1000 * 60 * 60 * 24);
+            break;
+        }
+    }
 
     for (const [id] of schedule.current.ids) {
         const sec = window.catalog.getSectionById(parseInt(id));
@@ -66,27 +86,12 @@ export function toICal(schedule: Schedule) {
 
         for (const meeting of sec.meetings) {
             try {
-                const [day, s, , e] = meeting.days.split(' ');
-                const totalMin = hr12toInt(s);
-                const duration = hr12toInt(e) - totalMin;
-                const hour = Math.floor(totalMin / 60);
-                const min = totalMin % 60;
-
-                const days: Day[] = [];
-                for (let i = 0; i < day.length; i += 2) {
-                    days.push(day.substr(i, 2) as Day);
-                }
-                const icalDay = days.join(',');
-                // 'start time' in ical means the time of the first occurrence of an event
                 ical += toICalEventString(
+                    meeting,
                     `class-number-${id}`,
-                    dateToICalString(calcStartDate(startDate, days[0], hour, min)),
+                    startDate,
+                    endDate,
                     sec.displayName,
-                    icalDay,
-                    hour.toString(),
-                    min.toString(),
-                    dateToICalString(endDate),
-                    `${Math.floor(duration / 60)}H${duration % 60}M`,
                     sec.title,
                     meeting.room
                 );
@@ -98,52 +103,40 @@ export function toICal(schedule: Schedule) {
     }
 
     for (const event of schedule.events) {
-        const [day, s, , e] = event.days.split(' ');
-        const startTime = hr12toInt(s);
-        const duration = hr12toInt(e) - startTime;
-        const days: Day[] = [];
-        for (let i = 0; i < day.length; i += 2) {
-            days.push(day.substr(i, 2) as Day);
-        }
-        const dayStr = days.join(',');
-        const hour = Math.floor(startTime / 60);
-        const min = startTime % 60;
         ical += toICalEventString(
-            `event-${event.title}`,
-            dateToICalString(calcStartDate(startDate, days[0], hour, min)),
+            event,
+            `event-${event.key}`,
+            startDate!,
+            endDate!,
             event.title ?? 'no title',
-            dayStr,
-            hour.toString(),
-            min.toString(),
-            dateToICalString(endDate),
-            `${Math.floor(duration / 60)}H${duration % 60}M`,
             event.description ?? 'no description',
             event.room ?? 'no room'
         );
     }
     ical += 'END:VCALENDAR';
+    console.log(ical);
     return ical;
 }
 
 function dateToICalString(date: Date) {
     return (
-        date.getFullYear() +
-        (date.getMonth() + 1).toString().padStart(2, '0') +
+        date.getUTCFullYear() +
+        (date.getUTCMonth() + 1).toString().padStart(2, '0') +
         date
-            .getDate()
+            .getUTCDate()
             .toString()
             .padStart(2, '0') +
         'T' +
         date
-            .getHours()
+            .getUTCHours()
             .toString()
             .padStart(2, '0') +
         date
-            .getMinutes()
+            .getUTCMinutes()
             .toString()
             .padStart(2, '0') +
         date
-            .getSeconds()
+            .getUTCSeconds()
             .toString()
             .padStart(2, '0') +
         'Z'

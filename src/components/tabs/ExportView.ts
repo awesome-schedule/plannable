@@ -212,17 +212,23 @@ export default class ExportView extends Store {
             );
         this.$forceUpdate();
     }
-    async keepVersion(name: string, idx: number) {
+    async keepVersion(name: string) {
+        // make sure that the profile's modified time is changed to the latest so it can overwrite profiles on other synced devices
+        const _profile: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
+        _profile.modified = new Date().toJSON();
+        const profile = JSON.stringify(_profile);
+        localStorage.setItem(name, profile);
         const msg = await this.profile.uploadProfile([
             {
                 name,
-                profile: localStorage.getItem(name)!,
+                profile,
                 new: true
             }
         ]);
-        if (msg) this.noti.notify(msg);
+        if (msg) return this.noti.notify(msg);
         localStorage.removeItem('backup-' + name);
         this.noti.clear();
+        this.$forceUpdate();
     }
     async renameProfile(oldName: string, idx: number) {
         const raw = localStorage.getItem(oldName);

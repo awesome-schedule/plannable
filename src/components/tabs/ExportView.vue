@@ -123,7 +123,7 @@
                             <button
                                 class="btn btn-outline-primary btn-sm"
                                 title="Keep this version of the profile"
-                                @click.stop="keepVersion(prof.name, idx)"
+                                @click.stop="keepVersion(prof.name)"
                             >
                                 Keep
                             </button>

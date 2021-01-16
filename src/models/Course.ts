@@ -77,19 +77,12 @@ export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T
  * All course instances are immutable
  */
 export default class Course implements CourseFields, Hashable {
-    /** @see [[CourseFields.key]] */
     public readonly key: string;
-    /** @see [[CourseFields.department]] */
     public readonly department: string;
-    /** @see [[CourseFields.number]] */
     public readonly number: number;
-    /** @see [[CourseFields.type]] */
     public readonly type: CourseType;
-    /** @see [[CourseFields.units]] */
     public readonly units: string;
-    /** @see [[CourseFields.title]] */
     public readonly title: string;
-    /** @see [[CourseFields.description]] */
     public readonly description: string;
 
     /**
@@ -100,9 +93,9 @@ export default class Course implements CourseFields, Hashable {
 
     /**
      * this constructor is only used to create a copy of a course with all or selected subset of sections.
-     * Original course instances are created through `Object.create` and are not constructed with this constructor.
+     * Original course instances are created through `Object.create` and are not constructed by this constructor.
      * @param course the full-course that will be copied
-     * @param ids A list of section indices for specifying the subset of sections to be copied
+     * @param ids A list of section indices for specifying the subset of sections contained in this course
      */
     constructor(course: Course, public readonly ids: number[]) {
         this.key = course.key;

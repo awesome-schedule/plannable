@@ -34,6 +34,14 @@ interface LoaderOptions<T, T_JSON extends Expirable> {
     force?: boolean;
 }
 
+/** an object that can be used as the `temp` argument of the [[fallback]] function */
+export interface FallBackable<T> {
+    /** represents a pending request to load new data */
+    new: CancelablePromise<T>;
+    /** represents already loaded old data (probably retrieved from cache) */
+    old?: T;
+}
+
 interface FallbackOptions {
     /**
      * the warning message to return when data expired and we failed to request new data from remote.
@@ -89,7 +97,7 @@ export function loadFromCache<T, T_JSON extends Expirable>(
         validator = defaultValidator,
         force = false
     }: LoaderOptions<T, T_JSON>
-): { new: CancelablePromise<T>; old?: T } {
+): FallBackable<T> {
     const storage = localStorage.getItem(key);
     const data = parse(storage);
     if (validator(data)) {
@@ -121,12 +129,12 @@ export function loadFromCache<T, T_JSON extends Expirable>(
 }
 
 /**
- * Await the promise on temp.new (represents a pending request to load new data) to resolve. If timed out, return the old data on temp.old.
+ * Await the promise on temp.new to resolve. If timed out, return the old data on temp.old.
  * @returns the payload with an appropriate message
  * @param temp
  */
-export async function fallback<T, P extends Promise<T>>(
-    temp: { new: P; old?: T },
+export async function fallback<T>(
+    temp: FallBackable<T>,
     { succMsg = '', warnMsg = x => x, errMsg = x => x, timeoutTime = 5000 }: FallbackOptions = {}
 ): Promise<NotiMsg<T>> {
     try {

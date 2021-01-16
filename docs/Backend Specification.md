@@ -203,7 +203,7 @@ When a profile is **renamed**:
 
 When a profile is **deleted**, all its previous versions shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 
 
-Some notes:
+**Some important notes:**
 - Profiles are always uniquely identified by their names. All versions of a profile are associated with its name. 
 - The detached behavior is recommended but optional. If you do not wish to implement it, you can simply delete the version history from the database when it is `marked as detached`, and thus you do not need to implement the reattach behavior, i.e. `changed to active`. 
 - The expiration time for detached versions should be at least a week.

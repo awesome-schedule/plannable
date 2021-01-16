@@ -12,8 +12,9 @@ import Section from '@/models/Section';
 import Catalog, { SemesterJSON } from '../models/Catalog';
 
 import Course from '@/models/Course';
-import { cancelablePromise, CancelablePromise } from '../utils';
+import { cancelablePromise } from '../utils';
 import { dataend, semesterDataExpirationTime } from '@/config';
+import { FallBackable } from './Loader';
 
 /**
  * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
@@ -28,10 +29,7 @@ import { dataend, semesterDataExpirationTime } from '@/config';
 export async function loadSemesterData(
     semester: SemesterJSON,
     force = false
-): Promise<{
-    new: CancelablePromise<Catalog>;
-    old?: Catalog;
-}> {
+): Promise<FallBackable<Catalog>> {
     const db = new CatalogDB(semester);
     if (!(await db.empty())) {
         const time = await db.timestamp();

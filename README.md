@@ -32,7 +32,7 @@ https://plannable.org/
 
 Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load and store it in browser cache.
 
-However, optional backend storage features are available. Users can choose to login to a third-party website and stores their plannable profiles. This enables cross-device profile syncing. We currently support [Hoosmyprofessor](https://match.msnatuva.org). If you wish to provide such service, please refer to our [backend specification](./docs/Backend%20Specification.md) for more details. 
+However, optional backend storage features are available. Users can choose to login to a third-party website and store their plannable profiles. This enables cross-device profile syncing. We currently support [Hoosmyprofessor](https://match.msnatuva.org). If you wish to provide such service, please refer to our [backend specification](./docs/Backend%20Specification.md) for more details. 
 
 ## Mirror
 
@@ -68,7 +68,7 @@ sudo snap install plannable
 
 ### Install Dependencies and Launch Development Server
 
--   Node.js >= 10.16
+-   Node.js >= 12.x
 
 Clone the repository and update data. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data can be access locally. 
 
@@ -120,7 +120,7 @@ Please refer to our [documentation](docs/README.md) and [contributing guide](doc
 Some efforts have been made to make it easier to integrate plannable with other universities. If you want to use plannable to create course-scheduling websites for other universities, you probably need to:
 
 1. Fork this repository
-2. Overwrite src/config.ts with your custom configuration. See src/config.example.ts for reference
+2. Overwrite src/config.ts with your custom configuration. See [src/config.example.ts](src/config.example.ts) for reference
 3. Write your custom data loader that returns the correct objects in config.ts
 4. Make some tweaks to the source code in other places if needed. 
 5. Build and deploy to some other places

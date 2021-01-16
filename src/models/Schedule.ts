@@ -45,13 +45,13 @@ export interface SectionJSON {
 }
 
 /**
- * represents all courses in a schedule, stored as `(key, set of sections)` pair
+ * represents all courses in a schedule, usually stored as `(key, array of set of sections)` pair
  *
- * Note that if **section** is -1, it means that all sections are allowed.
- * Otherwise, **section** should be a Set/array of object corresponding to each section
+ * If **section** is -1, it means that all sections are allowed.
+ * Otherwise, **section** should be an array of groups, and each group should be an array/set of sections
  *
  * @typeparam T the type of the container used for the set of sections.
- * By default, this is a set of numbers, corresponding to the `id` field of each section
+ * By default, this is a array of set of numbers, corresponding to the `id` field of each section
  * @remarks This field is called `All` (yes, with the first letter capitalized) due to historical reasons
  */
 export interface ScheduleAll<T = Set<number>[] | -1> {

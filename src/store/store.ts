@@ -169,18 +169,16 @@ function _saveStatus() {
 
 interface CompareCandidate {
     schedule: GeneratedSchedule;
+    /** the corresponding profile name of this schedule */
     profileName: string;
-    /**
-     * index of the generated schedule
-     */
+    /** index of this schedule among the generated schedules */
     index: number;
-    /**
-     * index of proposed schedule
-     */
+    /** index of this schedule among the proposed schedules */
     pIdx: number;
     color: string;
 }
 
+// this must be declared outside for it to be shared among components that inherit from store
 const compare: CompareCandidate[] = [];
 /**
  * The Store module provides methods to save, retrieve and manipulate store.
@@ -231,6 +229,7 @@ export default class Store extends Vue {
                 console.error(e);
             }
         }
+        if (Object.keys(parsed).length === 0) this.noti.error(`Failed to parsed profile`);
 
         // do not re-select current semester if it is already selected and this is not a force-update
         if (
@@ -270,6 +269,7 @@ export default class Store extends Vue {
             this.schedule.fromJSON(newStore.schedule || {});
             this.palette.fromJSON(newStore.palette || {});
         }
+        this.compare.splice(0, this.compare.length);
         // update schedule global options
         Schedule.colors = colorSchemes[this.display.colorScheme].colors;
         Schedule.combineSections = this.display.combineSections;

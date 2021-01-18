@@ -1,10 +1,8 @@
 <template>
     <div>
         <nav class="bg-light sidebar">
-            <div class="btn bg-info nav-btn">
-                Compare Schedules
-            </div>
-            <ul v-if="compare.length" class="list-group list-group-flush mx-1">
+            <div class="btn bg-info nav-btn">Compare Schedules</div>
+            <ul v-if="compare.length > 0" class="list-group list-group-flush mx-1">
                 <li
                     v-for="(cur, idx) in compare"
                     :key="cur"
@@ -55,18 +53,21 @@
                 "Compare" button at the top of the page when you have generated some schedules. You
                 can also compare generated schedules across different profiles.
             </div>
-            <div class="btn bg-info nav-btn">
-                Sort by Similarity to Another Schedule
+            <div class="btn bg-info nav-btn">Sort by Similarity to Another Schedule</div>
+            <div v-if="filter.similarityEnabled" class="mx-2 my-2 text-center">
+                <pre class="mb-2 text-left mx-1">{{ refSchedule }}</pre>
+                <button
+                    type="button"
+                    class="btn btn-outline-info"
+                    @click="renderSimilarityRefSchedule()"
+                >
+                    {{ similarityRefShown ? 'Hide' : 'Display' }} Reference Schedule
+                </button>
             </div>
-            <ul class="list-group list-group-flush mx-1">
-                <li v-if="filter.similarityEnabled" class="list-group-item px-1">
-                    <pre>{{ refSchedule }}</pre>
-                </li>
-                <li v-else class="list-group-item">
-                    Select "Ref" for any schedule in the compare list to enable sort by similarity
-                    with reference to the selected schedule.
-                </li>
-            </ul>
+            <div v-else class="mx-2 my-2 text-center">
+                Select "Ref" for any schedule in the compare list to enable sort by similarity with
+                reference to the selected schedule.
+            </div>
         </nav>
         <main-content>
             <grid-schedule :current-schedule="compareSchedule"></grid-schedule>

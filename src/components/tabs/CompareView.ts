@@ -27,6 +27,7 @@ import MainContent from '../MainContent.vue';
 export default class CompareView extends Store {
     compareSchedule = new GeneratedSchedule();
     highlightIdx = -1;
+    similarityRefShown = false;
 
     created() {
         this.renderSchedule();
@@ -128,5 +129,13 @@ export default class CompareView extends Store {
     }
     isSimilarSchedule(idx: number) {
         return this.compare[idx].schedule.allEquals(window.scheduleEvaluator.refSchedule);
+    }
+    renderSimilarityRefSchedule() {
+        this.compareSchedule = new GeneratedSchedule();
+        if (!this.similarityRefShown) {
+            this.compareSchedule.All = this.filter.refSchedule;
+            this.compareSchedule.computeSchedule();
+        }
+        this.similarityRefShown = !this.similarityRefShown;
     }
 }

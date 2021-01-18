@@ -285,19 +285,23 @@ export default class Store extends Vue {
      * @returns true if the current combination of sort options is valid, false otherwise
      */
     validateSortOptions() {
-        if (!Object.values(this.filter.sortOptions.sortBy).some(x => x.enabled)) {
+        const similarityOption = this.filter.sortOptions.sortBy.find(x => x.name === 'similarity')!;
+        if (!this.filter.sortOptions.sortBy.some(x => x.enabled)) {
             this.noti.error('Filter: You must have at least one sort option!');
             return false;
         } else if (
-            Object.values(this.filter.sortOptions.sortBy).some(
-                x => x.name === 'distance' && x.enabled
-            ) &&
+            this.filter.sortOptions.sortBy.some(x => x.name === 'distance' && x.enabled) &&
             (!window.buildingSearcher || !window.timeMatrix)
         ) {
             this.noti.error(
                 'Filter: Building list fails to load. Please disable "walking distance"'
             );
             return false;
+        } else if (similarityOption.enabled && !this.filter.similarityEnabled) {
+            this.noti.warn(
+                'Similarity sorting is enabled, but there is no reference schedule. It will be disabled automatically.'
+            );
+            similarityOption.enabled = false;
         }
         return true;
     }

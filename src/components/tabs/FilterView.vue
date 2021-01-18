@@ -1,8 +1,6 @@
 <template>
     <nav class="bg-light sidebar">
-        <div class="btn bg-info nav-btn">
-            Filters
-        </div>
+        <div class="btn bg-info nav-btn">Filters</div>
         <ul class="list-group list-group-flush mx-1">
             <li class="list-group-item px-3" title="Time periods when you don't want to have class">
                 No Class Time
@@ -82,9 +80,7 @@
                 </button>
             </li>
 
-            <div class="btn bg-info nav-btn">
-                Sort Priority
-            </div>
+            <div class="btn bg-info nav-btn">Sort Priority</div>
             <li
                 class="list-group-item px-3"
                 title="Note that you can drag sort options to change their priority in fallback mode"
@@ -103,9 +99,7 @@
                             <span
                                 v-if="!getSortOptRange(option.name)"
                                 class="ml-1 text-warning"
-                                :title="
-                                    `Enabling this sort option has no effect, because all schedules have the same '${option.title.toLowerCase()}'`
-                                "
+                                :title="`Enabling this sort option has no effect, because all schedules have the same '${option.title.toLowerCase()}'`"
                             >
                                 <i class="fas fa-exclamation-triangle"></i>
                             </span>
@@ -141,34 +135,37 @@
                                 class="custom-control custom-checkbox"
                                 style="display: inline-block; cursor: pointer"
                             >
-                                <input
+                                <template
                                     v-if="option.name === 'similarity' && !filter.similarityEnabled"
-                                    type="checkbox"
-                                    class="custom-control-input"
-                                    :value="option.name"
-                                    disabled
-                                    @click="
-                                        noti.info(
-                                            'To enable sort by similarity, please first set a reference schedule in the compare tab',
-                                            3,
-                                            true
-                                        )
-                                    "
-                                />
-                                <input
-                                    v-else
-                                    :id="option.name"
-                                    v-model="option.enabled"
-                                    type="checkbox"
-                                    class="custom-control-input"
-                                    :value="option.name"
-                                    @change="changeSorting(+optIdx)"
-                                />
-                                <label
-                                    class="custom-control-label"
-                                    :for="option.name"
-                                    title="Enable this sorting option"
-                                ></label>
+                                >
+                                    <input
+                                        :id="option.name"
+                                        type="checkbox"
+                                        class="custom-control-input"
+                                        :value="option.name"
+                                        disabled
+                                    />
+                                    <label
+                                        class="custom-control-label"
+                                        :for="option.name"
+                                        title="To enable sort by similarity, please first set a reference schedule in the compare tab"
+                                    ></label>
+                                </template>
+                                <template v-else>
+                                    <input
+                                        :id="option.name"
+                                        v-model="option.enabled"
+                                        type="checkbox"
+                                        class="custom-control-input"
+                                        :value="option.name"
+                                        @change="changeSorting(+optIdx)"
+                                    />
+                                    <label
+                                        class="custom-control-label"
+                                        :for="option.name"
+                                        title="Enable this sorting option"
+                                    ></label>
+                                </template>
                             </div>
                         </div>
                     </div>

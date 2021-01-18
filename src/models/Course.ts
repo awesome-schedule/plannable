@@ -92,7 +92,7 @@ export default class Course implements CourseFields, Hashable {
     public readonly sections: Section[];
 
     /**
-     * this constructor is only used to create a copy of a course with all or selected subset of sections.
+     * this constructor is only used to create a copy of a course with all or a selected subset of sections.
      * Original course instances are created through `Object.create` and are not constructed by this constructor.
      * @param course the full-course that will be copied
      * @param ids A list of section indices for specifying the subset of sections contained in this course

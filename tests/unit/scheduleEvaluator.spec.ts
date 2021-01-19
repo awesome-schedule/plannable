@@ -44,8 +44,8 @@ const evaluator = new ScheduleEvaluator(
 );
 describe('Schedule Evaluator Test', () => {
     it('Compactness Test', () => {
-        const func = ScheduleEvaluator.sortFunctions.compactness;
-        expect(func(evaluator['blocks'], 0)).toBe(35 + 20 + 150 + 50 + 0 + 150);
+        const func = ScheduleEvaluator.sortFunctions.compactness.bind(evaluator);
+        expect(func(0)).toBe(35 + 20 + 150 + 50 + 0 + 150);
     });
 
     it('Insertion Test', () => {

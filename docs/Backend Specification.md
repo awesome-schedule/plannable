@@ -96,7 +96,7 @@ and it should give a JSON response
                     "version": 1
                 },
                 ...
-            ], // keys of all historical versions for this profile. They can be used as the "version" field to query historical profiles
+            ],
             "profile": "..." // the body of the profile corresponding to the queried version. It should be the latest profile if the version number is missing
         }
     ]
@@ -105,25 +105,48 @@ and it should give a JSON response
 
 ## Edit API
 
-The edit api (`backend.edit`) should accept POST requests with JSON-encoded body
+The edit api (`backend.edit`) should accept 2 types of POST requests with JSON-encoded body.
+
+### Delete Request
+
+Request format:
 
 ```js
 {
-    "action": "...", // either "delete" or "rename"
-    "name": "...", // only present if action == "delete". The name of the profile to be deleted
-    "oldName": "...", // only present if action == "rename". The name of the profile to be renamed
-    "newName": "...", // only present if action == "rename". The new name of the profile
-    "profile": "..." // only present if action == "rename". The content of the profile
+    "action": "delete",
+    "name": "..." // name of the profile to be deleted
 }
 ```
 
-It should give a JSON response indicating whether the action is performed successfully. Also, if the action is rename, the complete version history of the profile after rename should be given. 
+Response should in JSON. Format:
 
 ```js
 {
     "success": true, // or false if failed
     "message": "...", // reason for failure. If success, can put anything here
-    /** only present if the action was rename. This gives information of all versions of the newly renamed schedule */
+}
+```
+
+### Rename Request
+
+Request format:
+
+```js
+{
+    "action": "rename",
+    "oldName": "...", // The name of the profile to be renamed
+    "newName": "...", // The new name of the profile
+    "profile": "..." // The content of the profile
+}
+```
+
+The complete version history of the profile after rename should be given in the JSON response. Format:
+
+```js
+{
+    "success": true, // or false if failed
+    "message": "...", // reason for failure. If success, can put anything here
+    /** This gives information of all versions of the newly renamed schedule */
     "versions": [
         { // version 1
             /** number of milliseconds since Unix epoch */
@@ -179,7 +202,7 @@ It should give a JSON response indicating whether the action is performed succes
 }
 ```
 
-## Versioning requirements
+## Versioning and miscellaneous requirements
 
 When a profile is **uploaded**:
 - If previous versions exist:
@@ -209,3 +232,11 @@ When a profile is **deleted**, all its previous versions shall be marked as deta
 - The expiration time for detached versions should be at least a week.
 - The SAVE_INTERVAL should be set to somewhere between 5 and 10 minutes.
 - To save database space, you can set a cap on the number of versions a profile can have. This number should be at least 50. When the cap is reached, delete the oldest version to allow the new version to be created. 
+- To fullfil the specified API, for each profile name, you probably need to store at least the following information, although it is up to the backend provider to decide the implementation details.
+  - profile name
+  - the latest version number
+  - a list of all versions, and for each version, you probably need to store
+    - version number
+    - modified time
+    - the User-Agent header of the request when this version was created
+    - profile content

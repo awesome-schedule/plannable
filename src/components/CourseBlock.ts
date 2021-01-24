@@ -11,7 +11,7 @@ import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Store from '../store';
-import { timeToNum, hr24toInt, hr12toInt } from '../utils';
+import { hr12toInt, roundTime } from '../utils';
 
 /**
  * the component for rendering a course on GridSchedule
@@ -28,10 +28,10 @@ export default class CourseBlock extends Store {
         return this.scheduleBlock.section;
     }
     get startPx() {
-        return this.getPx(this.scheduleBlock.start);
+        return this.getPx(this.scheduleBlock.startMin);
     }
     get endPx() {
-        return this.getPx(this.scheduleBlock.end);
+        return this.getPx(this.scheduleBlock.endMin);
     }
     get style() {
         return {
@@ -39,16 +39,13 @@ export default class CourseBlock extends Store {
         } as const;
     }
 
-    getPx(time: string) {
+    getPx(time: number) {
         let px = 48;
-        const t = time.split(':');
-        const min = parseInt(t[1]) >= 30 ? parseInt(t[1]) - 30 : parseInt(t[1]);
-
-        const temp = timeToNum(time);
+        const temp = roundTime(time);
         for (let i = this.absoluteEarliest; i < temp; i++) {
             px += this.heightInfo[i - this.absoluteEarliest];
         }
-        px += (min / 30) * this.display.fullHeight;
+        px += ((time % 30) / 30) * this.display.fullHeight;
         return px;
     }
 
@@ -69,8 +66,8 @@ export default class CourseBlock extends Store {
             if (meeting.days.includes(this.day)) {
                 const [, start, , end] = meeting.days.split(' ');
                 if (
-                    hr24toInt(this.scheduleBlock.start) === hr12toInt(start) &&
-                    hr24toInt(this.scheduleBlock.end) === hr12toInt(end)
+                    this.scheduleBlock.startMin === hr12toInt(start) &&
+                    this.scheduleBlock.endMin === hr12toInt(end)
                 ) {
                     return meeting.room;
                 }

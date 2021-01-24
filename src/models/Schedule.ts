@@ -424,14 +424,12 @@ export default abstract class Schedule {
      */
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            const graph = constructAdjList(blocks);
-            const len = graph.length;
-            const visited = new Uint8Array(len);
+            constructAdjList(blocks);
             // find all connected components
-            for (let i = 0; i < len; i++) {
-                if (!visited[i])
+            for (const node of blocks) {
+                if (!node.visited)
                     // we compute positions for each connected component separately
-                    this._computeBlockPositions(BFS(i, graph, visited).map(idx => blocks[idx]));
+                    this._computeBlockPositions(BFS(node));
             }
         }
     }
@@ -441,15 +439,13 @@ export default abstract class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const assignment = new Uint16Array(blocks.length);
-        const slots = intervalScheduling(blocks, assignment);
-        const adjList = constructAdjList(blocks);
-        const [pathDepth, isFixed] = calculateMaxDepth(adjList, assignment);
+        const slots = intervalScheduling(blocks);
+        calculateMaxDepth(blocks);
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
-            block.left = assignment[i] / pathDepth[i];
-            block.width = 1 / pathDepth[i];
-            if (isFixed[i]) {
+            block.left = block.depth / block.pathDepth;
+            block.width = 1 / block.pathDepth;
+            if (block.isFixed) {
                 (blocks[i].background as any) = '#000000';
             }
         }
@@ -556,15 +552,15 @@ export default abstract class Schedule {
     private placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
         const [days, start, , end] = dayTimes.split(' ');
         if (days && start && end) {
-            const startMin = Utils.to24hr(start);
-            const endMin = Utils.to24hr(end);
+            const startMin = Utils.hr12toInt(start);
+            const endMin = Utils.hr12toInt(end);
             // wait... start time equals end time?
             if (startMin === endMin) {
-                console.warn('start time equals end time:', events, startMin, endMin);
+                console.warn('start time equals end time:', events, start, end);
                 return;
             }
             for (let i = 0; i < days.length; i += 2) {
-                const scheduleBlock = new ScheduleBlock(color, startMin, endMin, events);
+                const scheduleBlock = new ScheduleBlock(color, events, startMin, endMin);
                 this.days[dayToInt[days.substr(i, 2) as Day]].push(scheduleBlock);
             }
         }

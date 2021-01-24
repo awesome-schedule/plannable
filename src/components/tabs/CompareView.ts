@@ -43,7 +43,7 @@ export default class CompareView extends Store {
             const { schedule, color } = this.compare[i];
             for (let j = 0; j < 7; j++) {
                 for (const sb of schedule.days[j]) {
-                    const nsb = new ScheduleBlock(color, sb.start, sb.end, sb.section);
+                    const nsb = new ScheduleBlock(color, sb.section, sb.startMin, sb.endMin);
                     nsb.strong = this.highlightIdx === i;
                     this.compareSchedule.days[j].push(nsb);
                 }

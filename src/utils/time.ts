@@ -242,6 +242,10 @@ export function timeToNum(time: string) {
     return min >= 30 ? t + 1 : t;
 }
 
+export function roundTime(time: number) {
+    return Math.floor((time - 8 * 60) / 30);
+}
+
 export function intTo24hr(num: number) {
     return `${Math.floor(num / 60)
         .toString()

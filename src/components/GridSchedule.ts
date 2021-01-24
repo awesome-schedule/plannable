@@ -8,7 +8,7 @@
 import Schedule, { DAYS } from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
-import { timeToNum, to12hr } from '../utils';
+import { roundTime, timeToNum, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
 
 /**
@@ -44,7 +44,7 @@ export default class GridSchedule extends Store {
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
-                const temp = timeToNum(course.start);
+                const temp = roundTime(course.startMin);
                 if (temp < earliest) {
                     earliest = temp;
                 }
@@ -60,7 +60,7 @@ export default class GridSchedule extends Store {
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
-                const temp = timeToNum(course.end);
+                const temp = roundTime(course.endMin);
                 if (temp > latest) {
                     latest = temp;
                 }
@@ -133,8 +133,8 @@ export default class GridSchedule extends Store {
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
-                const startTime = timeToNum(course.start);
-                const endTime = timeToNum(course.end);
+                const startTime = roundTime(course.startMin);
+                const endTime = roundTime(course.endMin);
                 for (let i = startTime; i <= endTime; i++) {
                     info[i - earliest] = this.display.fullHeight;
                 }

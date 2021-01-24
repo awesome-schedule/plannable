@@ -66,21 +66,24 @@ sudo snap install plannable
 
 > Note: We recommend [VS Code](https://code.visualstudio.com/) for development
 
+> Some of our scripts assumed a bash-like shell
+
+> On Linux, you may need to increase you system file watcher limit
+
 ### Install Dependencies and Launch Development Server
 
 -   Node.js >= 12.x
 
-Clone the repository and update data. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data can be access locally. 
+Clone the repository and update data. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. 
 
 ```bash
 git clone https://github.com/awesome-schedule/plannable
 npm run updatedata
 ```
 
-Install Vue cli and other dependencies. Then, launch the development server
+Install dependencies. Then, launch the development server
 
 ```bash
-npm install -g @vue/cli
 npm install
 npm run serve
 ```

@@ -5,8 +5,7 @@
         :style="{
             'margin-top': startPx + 'px',
             height: endPx - startPx + 'px',
-            'background-color': scheduleBlock.background,
-            color: scheduleBlock.foreground
+            'background-color': scheduleBlock.background
         }"
         @click="showModal()"
     >

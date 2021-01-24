@@ -35,8 +35,7 @@ export default class CourseBlock extends Store {
     }
     get style() {
         return {
-            'font-size': '11px',
-            color: this.scheduleBlock.foregroundLight
+            'font-size': '11px'
         } as const;
     }
 

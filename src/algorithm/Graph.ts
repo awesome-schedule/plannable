@@ -55,8 +55,8 @@ export function BFS(start: number, adjList: number[][], visited: Uint8Array): nu
  * @param assignment room index for each event
  * @returns the total number of rooms required
  */
-export function intervalScheduling(blocks: ScheduleBlock[], assignment: Int16Array) {
-    if (blocks.length === 0) return [0, []] as const;
+export function intervalScheduling(blocks: ScheduleBlock[], assignment: Uint16Array) {
+    if (blocks.length === 0) return [];
 
     blocks.sort((b1, b2) => {
         const diff = b1.startMin - b2.startMin;
@@ -74,7 +74,6 @@ export function intervalScheduling(blocks: ScheduleBlock[], assignment: Int16Arr
         }
     );
     let numRooms = 0;
-    assignment[0] = 0;
     for (let i = 1; i < blocks.length; i++) {
         const { startMin, endMin } = blocks[i];
         const [earliestEnd, roomIdx] = queue.peek()!;
@@ -107,7 +106,7 @@ export function intervalScheduling(blocks: ScheduleBlock[], assignment: Int16Arr
             }
         }
     }
-    return [numRooms, groupedByRoom] as const;
+    return groupedByRoom;
 }
 
 /**
@@ -115,23 +114,31 @@ export function intervalScheduling(blocks: ScheduleBlock[], assignment: Int16Arr
  * @requires optimization
  * @param adjList
  * @param assignment
- * @param values the array of things contained in each node
  */
-export function calculateMaxDepth(adjList: number[][], depths: Int16Array) {
+export function calculateMaxDepth(adjList: number[][], depths: Uint16Array) {
     const len = depths.length;
     const visited = new Uint8Array(len);
-    const vertices = new Int16Array(len);
-    const pathDepth = new Int16Array(len);
+    const pathDepth = new Uint16Array(len);
+    const isFixed = new Uint8Array(len);
 
-    for (let i = 0; i < len; i++) {
+    const vertices = new Uint16Array(len);
+    for (let i = 0; i < vertices.length; i++) {
         vertices[i] = i;
     }
     vertices.sort((v1, v2) => depths[v2] - depths[v1]);
-    // We start from the node of the greatest depth and traverse to the lower depths
-    for (let i = 0; i < len; i++)
-        if (!visited[i]) depthFirstSearchRec(i, adjList, visited, depths, pathDepth, depths[i] + 1);
 
-    return pathDepth;
+    // We start from the node of the greatest depth and traverse to the lower depths
+    for (const v of vertices)
+        if (!visited[v]) depthFirstSearchRec(v, adjList, visited, depths, pathDepth, depths[v] + 1);
+
+    for (let i = 0; i < len; i++) {
+        const curDepth = depths[i];
+        if (adjList[i].every(v => depths[v] < curDepth)) {
+            DFSFindFixed(i, adjList, isFixed, depths, pathDepth);
+        }
+    }
+
+    return [pathDepth, isFixed] as const;
 }
 
 /**
@@ -146,8 +153,8 @@ function depthFirstSearchRec(
     start: number,
     adjList: number[][],
     visited: Uint8Array,
-    depths: Int16Array,
-    pathDepth: Int16Array,
+    depths: Uint16Array,
+    pathDepth: Uint16Array,
     maxDepth: number
 ) {
     visited[start] = 1;
@@ -159,4 +166,29 @@ function depthFirstSearchRec(
         if (!visited[adj] && depths[adj] < startDepth)
             depthFirstSearchRec(adj, adjList, visited, depths, pathDepth, maxDepth);
     }
+}
+
+function DFSFindFixed(
+    start: number,
+    adjList: number[][],
+    isFixed: Uint8Array,
+    depths: Uint16Array,
+    pathDepth: Uint16Array
+): boolean {
+    const startDepth = depths[start];
+    if (startDepth === 0) {
+        isFixed[start] = 1;
+        return true;
+    }
+    const pDepth = pathDepth[start];
+    let flag = false;
+    for (const adj of adjList[start]) {
+        // we only visit nodes of lower depth
+        if (startDepth - depths[adj] === 1 && pDepth === pathDepth[adj]) {
+            // be careful of the short-circuit evaluation
+            flag = DFSFindFixed(adj, adjList, isFixed, depths, pathDepth) || flag;
+        }
+    }
+    isFixed[start] = +flag;
+    return flag;
 }

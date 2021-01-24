@@ -173,6 +173,20 @@ export default class Section implements CourseFields, Hashable {
     }
 
     /**
+     * @returns whether some meeting times of this sections are TBD
+     */
+    public isTBD() {
+        for (const meeting of this.meetings) {
+            const t = meeting.days;
+            // skip empty string
+            if (!t) continue;
+
+            if (parseTimeAll(t) === null) return true;
+        }
+        return false;
+    }
+
+    /**
      * get the time and room of this section's meetings as [[TimeArray]]
      */
     public getTimeRoom(): TimeArray {

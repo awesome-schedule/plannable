@@ -245,9 +245,7 @@ export default abstract class Schedule {
     public computeSchedule(sync = true, time = 10) {
         window.clearTimeout(this.pendingCompute);
         if (sync) {
-            console.time('compute schedule');
             this._computeSchedule();
-            console.timeEnd('compute schedule');
         } else {
             this.pendingCompute = window.setTimeout(() => {
                 this._computeSchedule();
@@ -259,6 +257,7 @@ export default abstract class Schedule {
         const catalog = window.catalog;
         if (!catalog) return;
 
+        console.time('compute schedule');
         this.cleanSchedule();
         const temp = new Date(this.dateSeparators[this.dateSelector]);
 
@@ -339,7 +338,10 @@ export default abstract class Schedule {
         this.current.ids = current.map(x => x[1]);
 
         for (const event of this.events) if (event.display) this.place(event);
+        console.time('compute block positions');
         this.computeBlockPositions();
+        console.timeEnd('compute block positions');
+        console.timeEnd('compute schedule');
     }
 
     /**
@@ -439,41 +441,75 @@ export default abstract class Schedule {
      * @param blocks blocks belonging to the same connected component
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const assignment = new Int16Array(blocks.length);
-        const [maxDepth, slots] = intervalScheduling(blocks, assignment);
+        const assignment = new Uint16Array(blocks.length);
+        const slots = intervalScheduling(blocks, assignment);
         const adjList = constructAdjList(blocks);
-
-        // note: blocks are contained in nodes
-        const pathDepth = calculateMaxDepth(adjList, assignment);
-        for (const slot of slots) {
-            for (const idx of slot) {
-                const block = blocks[idx];
-                block.left = assignment[idx] / pathDepth[idx];
-                block.width = 1 / pathDepth[idx];
+        const [pathDepth, isFixed] = calculateMaxDepth(adjList, assignment);
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            block.left = assignment[i] / pathDepth[i];
+            block.width = 1 / pathDepth[i];
+            if (isFixed[i]) {
+                (blocks[i].background as any) = '#000000';
             }
         }
 
-        // auto-expansion
-        // no need to expand for the first slot
-        for (let i = slots.length - 2; i >= 0; i--) {
-            for (const idx of slots[i]) {
-                const block = blocks[idx];
-                const blockDepth = assignment[idx];
-                // find the width that this block can obtain
-                let minWidth = Infinity;
-                for (const v of adjList[idx]) {
-                    if (assignment[v] > assignment[idx])
-                        minWidth = Math.min(blocks[v].left - block.left, minWidth);
-                }
-                if (minWidth !== Infinity) {
-                    // expand this block's width by 1/(depth+1)
-                    // distribute the remaining expansion space to other nodes
-                    const delta = (minWidth - block.width) * (blockDepth / (blockDepth + 1));
-                    block.left += delta;
-                    block.width = minWidth - delta;
-                }
-            }
-        }
+        // // auto-expansion
+        // // no need to expand for the first slot
+        // for (let i = slots.length - 2; i >= 0; i--) {
+        //     for (const idx of slots[i]) {
+        //         if (isFixed[idx]) continue;
+
+        //         const block = blocks[idx];
+        //         // find the width that this block can obtain
+        //         let minWidth = Infinity;
+        //         const blockDepth = assignment[idx];
+        //         let maxFixedDepth = -1; // left to this node
+        //         for (const v of adjList[idx]) {
+        //             if (assignment[v] > assignment[idx])
+        //                 minWidth = Math.min(blocks[v].left - block.left, minWidth);
+        //             else {
+        //                 if (isFixed[v]) maxFixedDepth = Math.max(maxFixedDepth, assignment[v]);
+        //             }
+        //         }
+        //         maxFixedDepth = 0;
+        //         if (minWidth !== Infinity) {
+        //             // expand this block's width by 1/(depth+1)
+        //             // distribute the remaining expansion space to other nodes
+        //             const delta =
+        //                 (minWidth - block.width) *
+        //                 ((blockDepth - maxFixedDepth) / (blockDepth - maxFixedDepth + 1));
+        //             block.left += delta;
+        //             block.width = minWidth - delta;
+        //         }
+        //     }
+        // }
+
+        // for (let i = 1; i < slots.length; i++) {
+        //     for (const idx of slots[i]) {
+        //         if (isFixed[idx]) continue;
+
+        //         // maximum left that the current block can possibly obtain
+        //         let maxLeft = 0;
+        //         let minFixedDepth = pathDepth[idx];
+        //         for (const v of adjList[idx]) {
+        //             if (assignment[v] < assignment[idx]) {
+        //                 const blockV = blocks[v];
+        //                 maxLeft = Math.max(maxLeft, blockV.left + blockV.width);
+        //             } else {
+        //                 if (isFixed[v]) {
+        //                     minFixedDepth = Math.min(minFixedDepth, assignment[v]);
+        //                 }
+        //             }
+        //         }
+        //         const block = blocks[idx];
+        //         // distribute deltas to remaining nodes
+        //         const delta = (block.left - maxLeft) / (minFixedDepth - assignment[idx]);
+        //         if (delta <= 0) continue;
+        //         block.left = maxLeft;
+        //         block.width += delta;
+        //     }
+        // }
     }
 
     /**
@@ -617,9 +653,7 @@ export default abstract class Schedule {
                 merged.add(v);
             }
         }
-        return window.catalog
-            .getCourse(key, merged)
-            .sections.some(s => s.getTimeRoom().length == 8);
+        return window.catalog.getCourse(key, merged).sections.some(s => s.isTBD());
     }
 
     /**

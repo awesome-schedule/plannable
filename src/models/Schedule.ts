@@ -6,7 +6,7 @@
 /**
  *
  */
-import { Vertex, intervalScheduling, calculateMaxDepth } from '../algorithm/Graph';
+import { intervalScheduling, calculateMaxDepth, constructAdjList, BFS } from '../algorithm/Graph';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -418,31 +418,19 @@ export default abstract class Schedule {
     }
 
     /**
-     * for the array of schedule blocks provided, construct an adjacency list
-     * to represent the conflicts between each pair of blocks
-     */
-    private constructAdjList(blocks: ScheduleBlock[]) {
-        const len = blocks.length;
-        const adjList: number[][] = blocks.map(() => []);
-
-        // construct an undirected graph
-        for (let i = 0; i < len; i++) {
-            for (let j = i + 1; j < len; j++) {
-                if (blocks[i].conflict(blocks[j])) {
-                    adjList[i].push(j);
-                    adjList[j].push(i);
-                }
-            }
-        }
-        return adjList;
-    }
-
-    /**
      * compute the width and left of the blocks contained in each day
      */
     public computeBlockPositions() {
         for (const blocks of this.days) {
-            this._computeBlockPositions(blocks);
+            const graph = constructAdjList(blocks);
+            const len = graph.length;
+            const visited = new Uint8Array(len);
+            // find all connected components
+            for (let i = 0; i < len; i++) {
+                if (!visited[i])
+                    // we compute positions for each connected component separately
+                    this._computeBlockPositions(BFS(i, graph, visited).map(idx => blocks[idx]));
+            }
         }
     }
 
@@ -452,57 +440,40 @@ export default abstract class Schedule {
      */
     private _computeBlockPositions(blocks: ScheduleBlock[]) {
         const assignment = new Int16Array(blocks.length);
-        const numSlots = intervalScheduling(blocks, assignment);
-        const adjList = this.constructAdjList(blocks);
+        const [maxDepth, slots] = intervalScheduling(blocks, assignment);
+        const adjList = constructAdjList(blocks);
 
         // note: blocks are contained in nodes
-        const graph = calculateMaxDepth(adjList, assignment, blocks);
-        const slots: Vertex<ScheduleBlock>[][] = Array.from({ length: numSlots }, () => []);
-        for (const node of graph.keys()) {
-            slots[node.depth].push(node);
-            node.val.left = node.depth / node.pathDepth;
-            node.val.width = 1 / node.pathDepth;
+        const pathDepth = calculateMaxDepth(adjList, assignment);
+        for (const slot of slots) {
+            for (const idx of slot) {
+                const block = blocks[idx];
+                block.left = assignment[idx] / pathDepth[idx];
+                block.width = 1 / pathDepth[idx];
+            }
         }
 
         // auto-expansion
         // no need to expand for the first slot
-        for (let i = 1; i < slots.length; i++) {
-            const slot = slots[i];
-            for (const node of slot) {
-                // maximum left that the current block can possibly obtain
-                let maxLeft = 0;
-                const neighbors = graph.get(node)!;
-                for (const v of neighbors) {
-                    if (v.depth < node.depth) {
-                        const { left, width } = v.val;
-                        const newLeft = left + width;
-                        if (newLeft >= maxLeft) {
-                            maxLeft = newLeft;
-                        }
-                    }
+        for (let i = slots.length - 2; i >= 0; i--) {
+            for (const idx of slots[i]) {
+                const block = blocks[idx];
+                const blockDepth = assignment[idx];
+                // find the width that this block can obtain
+                let minWidth = Infinity;
+                for (const v of adjList[idx]) {
+                    if (assignment[v] > assignment[idx])
+                        minWidth = Math.min(blocks[v].left - block.left, minWidth);
                 }
-                // distribute deltas to remaining nodes
-                const delta = (node.val.left - maxLeft) / (node.pathDepth - node.depth);
-                if (delta <= 0) continue;
-                node.val.left = maxLeft;
-                node.val.width += delta;
-            }
-        }
-
-        for (const [node, neighbors] of graph) {
-            // minimum left of the block that has greater depth than the current block
-            let minLeft = Infinity;
-            for (const v of neighbors) {
-                if (v.depth > node.depth) {
-                    const left = v.val.left;
-                    if (left < minLeft) minLeft = left;
+                if (minWidth !== Infinity) {
+                    // expand this block's width by 1/(depth+1)
+                    // distribute the remaining expansion space to other nodes
+                    const delta = (minWidth - block.width) * (blockDepth / (blockDepth + 1));
+                    block.left += delta;
+                    block.width = minWidth - delta;
                 }
             }
-            if (minLeft !== Infinity) {
-                node.val.width = minLeft - node.val.left;
-            }
         }
-        graph.clear();
     }
 
     /**

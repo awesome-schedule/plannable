@@ -64,7 +64,6 @@
         "papaparse": "^5.3.0",
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
-        "tinyqueue": "^2.0.3",
         "ua-parser-js": "^0.7.23",
         "vue": "^2.6.12",
         "vue-class-component": "^7.2.6",

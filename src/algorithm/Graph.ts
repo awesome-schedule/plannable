@@ -8,7 +8,6 @@
  *
  */
 import ScheduleBlock from '@/models/ScheduleBlock';
-import PriorityQueue from 'tinyqueue';
 
 /**
  * for the array of schedule blocks provided, construct an adjacency list
@@ -33,7 +32,7 @@ export function constructAdjList(blocks: ScheduleBlock[]) {
  */
 export function BFS(start: ScheduleBlock) {
     let qIdx = 0;
-    const componentNodes: ScheduleBlock[] = [start];
+    const componentNodes = [start];
     start.visited = true;
     while (qIdx < componentNodes.length) {
         for (const node of componentNodes[qIdx++].neighbors) {
@@ -47,55 +46,45 @@ export function BFS(start: ScheduleBlock) {
 }
 
 /**
- * the classical interval scheduling algorithm
+ * a modified interval scheduling algorithm, runs in worst case O(n^2)
+ * besides using the fewest possible rooms,
+ * it also tries to assignment events to the rooms with the lowest index possible
  * @param blocks the events to schedule
  */
 export function intervalScheduling(blocks: ScheduleBlock[]) {
     if (blocks.length === 0) return [];
 
+    // sort by start time
     blocks.sort((b1, b2) => {
         const diff = b1.startMin - b2.startMin;
         if (diff === 0) return b1.duration - b2.duration;
         return diff;
-    }); // sort by start time
-    // min heap, the top element is the room whose end time is minimal
-    // a room is represented as a pair: [end time, room index]
-    const queue = new PriorityQueue<ScheduleBlock>([blocks[0]], (r1, r2) => {
-        const diff = r1.endMin - r2.endMin;
-        if (diff === 0) return r1.depth - r2.depth;
-        return diff;
     });
+    const occupied = [blocks[0]];
     let numRooms = 0;
     for (let i = 1; i < blocks.length; i++) {
         const block = blocks[i];
-        const prevBlock = queue.peek()!;
-        if (prevBlock.endMin > block.startMin) {
-            // conflict, need to add a new room
+        let idx = -1;
+        let minRoomIdx = Infinity;
+        for (let k = 0; k < occupied.length; k++) {
+            const prevBlock = occupied[k];
+            if (prevBlock.endMin <= block.startMin && prevBlock.depth < minRoomIdx) {
+                minRoomIdx = prevBlock.depth;
+                idx = k;
+            }
+        }
+        if (idx === -1) {
             numRooms += 1;
             block.depth = numRooms;
+            occupied.push(block);
         } else {
-            queue.pop(); // update the room end time
-            block.depth = prevBlock.depth;
+            block.depth = occupied[idx].depth;
+            occupied[idx] = block;
         }
-        queue.push(block);
     }
     numRooms += 1;
     const groupedByRoom: ScheduleBlock[][] = Array.from({ length: numRooms }, () => []);
     for (const block of blocks) groupedByRoom[block.depth].push(block);
-    for (let i = 1; i < numRooms; i++) {
-        for (let j = 0; j < groupedByRoom[i].length; j++) {
-            const block = groupedByRoom[i][j];
-            for (let k = 0; k < i; k++) {
-                const prevBlocks = groupedByRoom[k];
-                if (prevBlocks.every(b => !b.conflict(block))) {
-                    block.depth = k;
-                    groupedByRoom[i].splice(j--, 1);
-                    prevBlocks.push(block);
-                    break;
-                }
-            }
-        }
-    }
     return groupedByRoom;
 }
 
@@ -136,19 +125,16 @@ function depthFirstSearchRec(start: ScheduleBlock, maxDepth: number) {
 
 function DFSFindFixed(start: ScheduleBlock): boolean {
     const startDepth = start.depth;
-    if (startDepth === 0) {
-        start.isFixed = true;
-        return true;
-    }
+    if (startDepth === 0) return (start.isFixed = true);
+
     const pDepth = start.pathDepth;
     let flag = false;
     for (const adj of start.neighbors) {
         // we only visit nodes next to the current node (depth different is exactly 1) with the same pathDepth
         if (startDepth - adj.depth === 1 && pDepth === adj.pathDepth) {
             // be careful of the short-circuit evaluation
-            flag = DFSFindFixed(adj) || flag;
+            flag = DFSFindFixed(adj) || flag || adj.isFixed;
         }
     }
-    start.isFixed = flag;
-    return flag;
+    return (start.isFixed = flag || start.isFixed);
 }

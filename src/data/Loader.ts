@@ -10,6 +10,10 @@ import { NotiMsg } from '../store/notification';
 import { cancelablePromise, CancelablePromise, errToStr, timeout } from '../utils';
 import Expirable from './Expirable';
 
+function defaultValidator<T_JSON extends Expirable>(x: T_JSON | null): x is T_JSON {
+    return !!x && !!x.modified;
+}
+
 interface LoaderOptions<T, T_JSON extends Expirable> {
     /**
      * the expiration time of this T_JSON
@@ -144,20 +148,16 @@ export async function fallback<T>(
             msg: succMsg,
             level: 'success'
         };
-    } catch (err_2) {
+    } catch (err2) {
         return temp.old
             ? {
                   payload: temp.old,
-                  msg: warnMsg(errToStr(err_2)),
+                  msg: warnMsg(errToStr(err2)),
                   level: 'warn'
               }
             : {
-                  msg: errMsg(errToStr(err_2)),
+                  msg: errMsg(errToStr(err2)),
                   level: 'error'
               };
     }
-}
-
-function defaultValidator<T_JSON extends Expirable>(x: T_JSON | null): x is T_JSON {
-    return !!x && !!x.modified;
 }

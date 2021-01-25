@@ -38,7 +38,7 @@ describe('notification test', () => {
         expect(noti.msg).toBeFalsy();
 
         noti.error('.', 0.01);
-        await new Promise(resolve => {
+        await new Promise<void>(resolve => {
             setTimeout(() => resolve(), 100);
         });
         expect(noti.msg).toBeFalsy();

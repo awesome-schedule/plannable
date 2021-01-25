@@ -120,7 +120,7 @@ export default class App extends Store {
 
         // note: these can be executed in parallel, i.e. they are not inter-dependent
         // eslint-disable-next-line prefer-const
-        let [pay1, pay2, pay3, pay4, auth_result] = await Promise.all([
+        let [pay1, pay2, pay3, pay4, authResult] = await Promise.all([
             loadTimeMatrix(),
             loadBuildingSearcher(),
             this.semester.loadSemesters(),
@@ -129,7 +129,7 @@ export default class App extends Store {
         ]);
 
         // check if auth is successful. If success, sync profiles immediately.
-        if (auth_result) {
+        if (authResult) {
             this.profile.loadToken();
             pay4 = await this.profile.syncProfiles();
         }

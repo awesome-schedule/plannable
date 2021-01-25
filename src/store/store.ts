@@ -113,19 +113,6 @@ function isLegacy(parsed: any): parsed is LegacyStorage {
 
 let pendingStatusSave = 0;
 
-/**
- * save all store modules to localStorage
- * @note this function needs to be separated from the [[Store]] class because it is used in the [[schedule]] sub-module,
- * and the [[schedule]] sub-module does not have access to the [[Store]] class
- */
-export function saveStatus() {
-    if (pendingStatusSave !== -1) {
-        window.clearTimeout(pendingStatusSave);
-        console.log('cancelled pending status save');
-    }
-    pendingStatusSave = window.setTimeout(_saveStatus, 100);
-}
-
 function _saveStatus() {
     const { currentSemester } = semester;
     if (!currentSemester) return;
@@ -165,6 +152,19 @@ function _saveStatus() {
 
     pendingStatusSave = -1;
     console.log('status saved');
+}
+
+/**
+ * save all store modules to localStorage
+ * @note this function needs to be separated from the [[Store]] class because it is used in the [[schedule]] sub-module,
+ * and the [[schedule]] sub-module does not have access to the [[Store]] class
+ */
+export function saveStatus() {
+    if (pendingStatusSave !== -1) {
+        window.clearTimeout(pendingStatusSave);
+        console.log('cancelled pending status save');
+    }
+    pendingStatusSave = window.setTimeout(_saveStatus, 100);
 }
 
 interface CompareCandidate {

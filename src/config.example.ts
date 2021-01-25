@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { FastSearcher } from './algorithm/Searcher';
 import Catalog, { SemesterJSON } from './models/Catalog';
 import Course from './models/Course';

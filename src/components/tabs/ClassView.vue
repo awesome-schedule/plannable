@@ -148,7 +148,7 @@
         </div>
         <ClassList
             ref="selectedClassList"
-            :courses="current.courses"
+            :courses="schedule.currentSchedule.current.courses"
             :schedule="schedule.currentSchedule"
             :show-any="!schedule.generated"
             :show-classlist-title="display.showClasslistTitle"

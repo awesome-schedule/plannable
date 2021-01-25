@@ -89,22 +89,6 @@ export function intervalScheduling(blocks: ScheduleBlock[]) {
 }
 
 /**
- * calculate the actual path depth of the nodes
- * @requires optimization
- */
-export function calculateMaxDepth(blocks: ScheduleBlock[]) {
-    for (const block of blocks) block.visited = false;
-
-    blocks.sort((v1, v2) => v2.depth - v1.depth);
-
-    // We start from the node of the greatest depth and traverse to the lower depths
-    for (const node of blocks) if (!node.visited) depthFirstSearchRec(node, node.depth + 1);
-
-    for (const node of blocks)
-        if (node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
-}
-
-/**
  * A special implementation of depth first search on a single connected component,
  * used to find the maximum depth of the path that the current node is on.
  *
@@ -137,4 +121,20 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
         }
     }
     return (start.isFixed = flag || start.isFixed);
+}
+
+/**
+ * calculate the actual path depth of the nodes
+ * @requires optimization
+ */
+export function calculateMaxDepth(blocks: ScheduleBlock[]) {
+    for (const block of blocks) block.visited = false;
+
+    blocks.sort((v1, v2) => v2.depth - v1.depth);
+
+    // We start from the node of the greatest depth and traverse to the lower depths
+    for (const node of blocks) if (!node.visited) depthFirstSearchRec(node, node.depth + 1);
+
+    for (const node of blocks)
+        if (node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
 }

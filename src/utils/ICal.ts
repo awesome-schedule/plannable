@@ -13,6 +13,36 @@ import Meeting from '@/models/Meeting';
 import Schedule, { Day, dayToInt } from '../models/Schedule';
 import { hr12toInt } from './time';
 
+function dateToICalString(date: Date) {
+    return (
+        date.getUTCFullYear() +
+        (date.getUTCMonth() + 1).toString().padStart(2, '0') +
+        date
+            .getUTCDate()
+            .toString()
+            .padStart(2, '0') +
+        'T' +
+        date
+            .getUTCHours()
+            .toString()
+            .padStart(2, '0') +
+        date
+            .getUTCMinutes()
+            .toString()
+            .padStart(2, '0') +
+        date
+            .getUTCSeconds()
+            .toString()
+            .padStart(2, '0') +
+        'Z'
+    );
+}
+
+function calcStartDate(prevStart: Date, day: Day) {
+    const dayOffset = (dayToInt[day] + 7 - prevStart.getDay()) % 7;
+    return new Date(prevStart.getTime() + dayOffset * 1000 * 60 * 60 * 24);
+}
+
 function toICalEventString(
     event: Event | Meeting,
     uid: string,
@@ -53,11 +83,6 @@ function toICalEventString(
     ical += `LOCATION:${location}\r\n`;
     ical += 'END:VEVENT\r\n';
     return ical;
-}
-
-function calcStartDate(prevStart: Date, day: Day) {
-    const dayOffset = (dayToInt[day] + 7 - prevStart.getDay()) % 7;
-    return new Date(prevStart.getTime() + dayOffset * 1000 * 60 * 60 * 24);
 }
 
 /**
@@ -116,29 +141,4 @@ export function toICal(schedule: Schedule) {
     ical += 'END:VCALENDAR';
     console.log(ical);
     return ical;
-}
-
-function dateToICalString(date: Date) {
-    return (
-        date.getUTCFullYear() +
-        (date.getUTCMonth() + 1).toString().padStart(2, '0') +
-        date
-            .getUTCDate()
-            .toString()
-            .padStart(2, '0') +
-        'T' +
-        date
-            .getUTCHours()
-            .toString()
-            .padStart(2, '0') +
-        date
-            .getUTCMinutes()
-            .toString()
-            .padStart(2, '0') +
-        date
-            .getUTCSeconds()
-            .toString()
-            .padStart(2, '0') +
-        'Z'
-    );
 }

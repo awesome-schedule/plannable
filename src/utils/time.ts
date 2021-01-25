@@ -8,6 +8,78 @@
  */
 import { Day, dayToInt } from '@/models/Schedule';
 import { TimeArray } from '../algorithm/ScheduleGenerator';
+
+/**
+ * convert 24 hour format time to 12 hour format.
+ * @author Kaiying Shan
+ * @param time the time in 24 hour format
+ *
+ * Example usage and return value:
+ * ```js
+ * to12hr('17:00') => '5:00PM'
+ * ```
+ */
+export function to12hr(time: string) {
+    const sep = time.split(':');
+    const hr = +sep[0];
+    if (hr === 12) {
+        return time + 'PM';
+    } else if (hr === 0) {
+        return `12:${sep[1]}AM`;
+    } else if (hr < 12) {
+        return time + 'AM';
+    } else {
+        return `${hr - 12}:${sep[1]}PM`;
+    }
+}
+
+/**
+ * convert 12 hr to 24 hr
+ * @author Hanzhi Zhou
+ * @param time
+ * Example usage and return value:
+ * ```js
+ * to12hr('5:00PM') => '17:00'
+ * ```
+ */
+export function to24hr(time: string) {
+    const pre = time.substring(0, time.length - 2);
+    const [hour, minute] = pre.split(':');
+
+    const numHour = +hour;
+    const suffix = time.substring(time.length - 2);
+    if (suffix === 'AM' || suffix == 'am') {
+        if (numHour === 12) {
+            return '00:' + minute;
+        } else {
+            return pre;
+        }
+    } else {
+        if (numHour === 12) {
+            return pre;
+        } else {
+            return `${(numHour + 12).toString().padStart(2, '0')}:${minute}`;
+        }
+    }
+}
+
+/**
+ * convert `13:00` style time to minutes starting from `00:00`
+ * @param time
+ */
+export function hr24toInt(time: string) {
+    const sep = time.split(':');
+    return +sep[0] * 60 + +sep[1];
+}
+
+/**
+ * convert `1:00AM` style time to minutes starting from `00:00`
+ * @param time
+ */
+export function hr12toInt(time: string) {
+    return hr24toInt(to24hr(time));
+}
+
 /**
  * @author Hanzhi Zhou
  * @param time
@@ -65,23 +137,6 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
         return arr;
     }
     return null;
-}
-
-/**
- * convert `13:00` style time to minutes starting from `00:00`
- * @param time
- */
-export function hr24toInt(time: string) {
-    const sep = time.split(':');
-    return +sep[0] * 60 + +sep[1];
-}
-
-/**
- * convert `1:00AM` style time to minutes starting from `00:00`
- * @param time
- */
-export function hr12toInt(time: string) {
-    return hr24toInt(to24hr(time));
 }
 
 /**
@@ -172,60 +227,6 @@ export function blockUnion(
     else if (a <= c && c <= b) return [a, d];
     else if (a <= d && d <= b) return [c, b];
     return;
-}
-
-/**
- * convert 24 hour format time to 12 hour format.
- * @author Kaiying Shan
- * @param time the time in 24 hour format
- *
- * Example usage and return value:
- * ```js
- * to12hr('17:00') => '5:00PM'
- * ```
- */
-export function to12hr(time: string) {
-    const sep = time.split(':');
-    const hr = +sep[0];
-    if (hr === 12) {
-        return time + 'PM';
-    } else if (hr === 0) {
-        return `12:${sep[1]}AM`;
-    } else if (hr < 12) {
-        return time + 'AM';
-    } else {
-        return `${hr - 12}:${sep[1]}PM`;
-    }
-}
-
-/**
- * convert 12 hr to 24 hr
- * @author Hanzhi Zhou
- * @param time
- * Example usage and return value:
- * ```js
- * to12hr('5:00PM') => '17:00'
- * ```
- */
-export function to24hr(time: string) {
-    const pre = time.substring(0, time.length - 2);
-    const [hour, minute] = pre.split(':');
-
-    const numHour = +hour;
-    const suffix = time.substring(time.length - 2);
-    if (suffix === 'AM' || suffix == 'am') {
-        if (numHour === 12) {
-            return '00:' + minute;
-        } else {
-            return pre;
-        }
-    } else {
-        if (numHour === 12) {
-            return pre;
-        } else {
-            return `${(numHour + 12).toString().padStart(2, '0')}:${minute}`;
-        }
-    }
 }
 
 /**

@@ -37,13 +37,13 @@ export default class ExportView extends Store {
     getParsedUA(ua: string) {
         const parser = new UAParser(ua);
         const result = parser.getResult();
-        let result_str = '&nbsp;';
+        let resultStr = '&nbsp;';
         if (result.os.name && result.os.version)
-            result_str += result.os.name + ' ' + result.os.version;
-        if (result.device.vendor) result_str += ' | ' + result.device.vendor;
+            resultStr += result.os.name + ' ' + result.os.version;
+        if (result.device.vendor) resultStr += ' | ' + result.device.vendor;
         if (result.browser.name && result.browser.version)
-            result_str += '<br />&nbsp;' + result.browser.name + ' ' + result.browser.version;
-        return result_str;
+            resultStr += '<br />&nbsp;' + result.browser.name + ' ' + result.browser.version;
+        return resultStr;
     }
 
     async updateRemoteStatus(prof: LocalProfileEntry) {

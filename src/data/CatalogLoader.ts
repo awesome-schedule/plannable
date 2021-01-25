@@ -16,46 +16,6 @@ import { cancelablePromise } from '../utils';
 import { dataend, semesterDataExpirationTime } from '@/config';
 import { FallBackable } from './Loader';
 
-/**
- * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
- * set of data from Lou's list and save to `localStorage`.
- *
- * storage key: 1198data
- *
- * @param semester the semester to load data
- * @param force force update
- */
-
-export async function loadSemesterData(
-    semester: SemesterJSON,
-    force = false
-): Promise<FallBackable<Catalog>> {
-    const db = new CatalogDB(semester);
-    if (!(await db.empty())) {
-        const time = await db.timestamp();
-        if (force || Date.now() - time > semesterDataExpirationTime) {
-            // send the request first, then fetch the local data
-            const newData = cancelablePromise(
-                dataend.courses(semester).then(catalog => saveToDB(catalog, db))
-            );
-            return {
-                new: newData,
-                old: new Catalog(semester, await retrieveFromDB(db), time)
-            };
-        } else {
-            return {
-                new: cancelablePromise(
-                    retrieveFromDB(db).then(data => new Catalog(semester, data, time))
-                )
-            };
-        }
-    } else {
-        return {
-            new: cancelablePromise(dataend.courses(semester).then(catalog => saveToDB(catalog, db)))
-        };
-    }
-}
-
 function saveToDB(catalog: Catalog, db: CatalogDB) {
     Promise.all([db.courses.clear(), db.sections.clear()])
         .then(() => {
@@ -114,4 +74,43 @@ async function retrieveFromDB(db: CatalogDB) {
     }
     console.timeEnd('parse db results');
     return [courseDict, Object.values(courseDict), allSections] as const;
+}
+
+/**
+ * Try to load semester data from `localStorage`. If data expires/does not exist, fetch a fresh
+ * set of data from Lou's list and save to `localStorage`.
+ *
+ * storage key: 1198data
+ *
+ * @param semester the semester to load data
+ * @param force force update
+ */
+export async function loadSemesterData(
+    semester: SemesterJSON,
+    force = false
+): Promise<FallBackable<Catalog>> {
+    const db = new CatalogDB(semester);
+    if (!(await db.empty())) {
+        const time = await db.timestamp();
+        if (force || Date.now() - time > semesterDataExpirationTime) {
+            // send the request first, then fetch the local data
+            const newData = cancelablePromise(
+                dataend.courses(semester).then(catalog => saveToDB(catalog, db))
+            );
+            return {
+                new: newData,
+                old: new Catalog(semester, await retrieveFromDB(db), time)
+            };
+        } else {
+            return {
+                new: cancelablePromise(
+                    retrieveFromDB(db).then(data => new Catalog(semester, data, time))
+                )
+            };
+        }
+    } else {
+        return {
+            new: cancelablePromise(dataend.courses(semester).then(catalog => saveToDB(catalog, db)))
+        };
+    }
 }

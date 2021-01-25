@@ -30,7 +30,7 @@ export default class ClassView extends Store {
     isEntering = false;
     inputCourses: Course[] = [];
     inputMatches: SearchMatch[] = [];
-    query: string = '';
+    query = '';
     queryTypes: string[] = ['title', 'num', 'topic', 'prof', 'desc'];
     dPointer = 0;
 

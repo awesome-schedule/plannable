@@ -186,6 +186,7 @@ export default class Catalog {
         }
 
         return new Promise<readonly [Course[], SearchMatch[]]>((resolve, reject) => {
+            // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             (function waitForLatestResult() {
                 const lastResult = that.resultMap.get(query);
@@ -210,9 +211,9 @@ export default class Catalog {
      * Perform a linear search in the catalog against
      * course number, title, topic, professor name and description, in the order specified.
      * @param query
-     * @param max_results
+     * @param maxResults
      */
-    public search(query: string, max_results = 6): [Course[], SearchMatch[]] {
+    public search(query: string, maxResults = 6): [Course[], SearchMatch[]] {
         query = query.trim().toLowerCase();
         const temp = query.split(/\s+/);
         query = temp.join(' ');
@@ -239,31 +240,31 @@ export default class Catalog {
         if (!spec || field === 'num' || field === 'key')
             for (let i = 0; i < len; i++) {
                 this.searchKey(queryNoSp, courses[i], results, matches);
-                if (results.length >= max_results) return [results, matches];
+                if (results.length >= maxResults) return [results, matches];
             }
 
         if (!spec || field === 'title')
             for (let i = 0; i < len; i++) {
                 this.searchField(query, 'title', courses[i], results, matches);
-                if (results.length >= max_results) return [results, matches];
+                if (results.length >= maxResults) return [results, matches];
             }
 
         if (!spec || field === 'topic')
             for (let i = 0; i < len; i++) {
                 this.searchTopic(query, courses[i], results, matches);
-                if (results.length >= max_results) return [results, matches];
+                if (results.length >= maxResults) return [results, matches];
             }
 
         if (!spec || field === 'prof')
             for (let i = 0; i < len; i++) {
                 this.searchProf(query, courses[i], results, matches);
-                if (results.length >= max_results) return [results, matches];
+                if (results.length >= maxResults) return [results, matches];
             }
 
         if (!spec || field === 'desc')
             for (let i = 0; i < len; i++) {
                 this.searchField(query, 'description', courses[i], results, matches);
-                if (results.length >= max_results) return [results, matches];
+                if (results.length >= maxResults) return [results, matches];
             }
         return [results, matches];
     }

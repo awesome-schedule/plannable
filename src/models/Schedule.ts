@@ -16,8 +16,6 @@ import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
 
-export type Day = keyof typeof dayToInt;
-
 export const dayToInt = Object.freeze({
     Mo: 0,
     Tu: 1,
@@ -27,6 +25,8 @@ export const dayToInt = Object.freeze({
     Sa: 5,
     Su: 6
 });
+
+export type Day = keyof typeof dayToInt;
 
 export const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const;
 
@@ -241,6 +241,8 @@ export default abstract class Schedule {
      * @remarks this method has a very high time complexity.
      * However, because we're running on small input sets (usually contain no more than 20 sections), it
      * usually completes within 50ms.
+     * @note it is the caller's responsibility to call constructDateSeparators,
+     * which is necessary if new classes are added
      */
     public computeSchedule(sync = true, time = 10) {
         window.clearTimeout(this.pendingCompute);
@@ -341,6 +343,7 @@ export default abstract class Schedule {
         console.time('compute block positions');
         this.computeBlockPositions();
         console.timeEnd('compute block positions');
+        this.days = this.days.concat() as any;
         console.timeEnd('compute schedule');
     }
 
@@ -571,7 +574,7 @@ export default abstract class Schedule {
      * `computeSchedule method`
      */
     public cleanSchedule() {
-        this.days = [[], [], [], [], [], [], []];
+        this.days = Object.seal([[], [], [], [], [], [], []]);
         this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set());
         this.totalCredit = 0;
         this.current.ids = [];

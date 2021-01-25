@@ -29,7 +29,7 @@ export class FastSearcher<T, K = string> {
     private tokenIds: Uint32Array;
 
     private uniqueTokens: string[] = [];
-    private maxTokenLen: number = 0;
+    private maxTokenLen = 0;
 
     /**
      * @param items the list of strings to search from

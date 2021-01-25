@@ -12,6 +12,7 @@ import Event from '../models/Event';
 import { calcOverlap } from '../utils';
 import { RawAlgoCourse } from './ScheduleGenerator';
 
+// eslint-disable-next-line @typescript-eslint/no-use-before-define
 export type SortFunctions = typeof ScheduleEvaluator.sortFunctions;
 
 /**

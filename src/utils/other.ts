@@ -55,6 +55,21 @@ export function hashCode(str: string): number {
 }
 
 /**
+ * wrap a promise and return a new promise with a `cancel` method
+ * @author Hanzhi Zhou
+ * @param promise
+ */
+export function cancelablePromise<T>(promise: Promise<T>) {
+    let cancel: Cancel;
+    const p = new Promise((resolve, reject) => {
+        promise.then(res => resolve(res)).catch(err => reject(err));
+        cancel = reason => reject(reason);
+    }) as CancelablePromise<T>;
+    p.cancel = cancel!;
+    return p;
+}
+
+/**
  * Apply timeout on a promise
  *
  * @author Hanzhi Zhou
@@ -77,20 +92,6 @@ export function timeout<T>(
 type Cancel = (msg: any) => void;
 export interface CancelablePromise<T> extends Promise<T> {
     cancel: Cancel;
-}
-/**
- * wrap a promise and return a new promise with a `cancel` method
- * @author Hanzhi Zhou
- * @param promise
- */
-export function cancelablePromise<T>(promise: Promise<T>) {
-    let cancel: Cancel;
-    const p = new Promise((resolve, reject) => {
-        promise.then(res => resolve(res)).catch(err => reject(err));
-        cancel = reason => reject(reason);
-    }) as CancelablePromise<T>;
-    p.cancel = cancel!;
-    return p;
 }
 
 /**

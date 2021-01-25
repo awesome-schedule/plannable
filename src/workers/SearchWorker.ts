@@ -12,13 +12,12 @@
 import { RawAlgoCourse } from '@/algorithm/ScheduleGenerator';
 import { SearchMatch } from '@/models/Catalog';
 import _Course, { CourseMatch, Match } from '../models/Course';
-import _Meeting from '../models/Meeting';
 import { SectionFields, SectionMatch } from '../models/Section';
 import { calcOverlap } from '@/utils';
 import { FastSearcher, SearchResult } from '@/algorithm/Searcher';
 
 type Section = Omit<SectionFields, 'course'>;
-interface Course extends Omit<NonFunctionProperties<_Course>, 'sections'> {}
+type Course = Omit<NonFunctionProperties<_Course>, 'sections'>;
 
 declare function postMessage(msg: [string, [RawAlgoCourse[], SearchMatch[]]] | 'ready'): void;
 
@@ -26,6 +25,24 @@ let titleSearcher: FastSearcher<Course>;
 let descriptionSearcher: FastSearcher<Course>;
 let topicSearcher: FastSearcher<Section>;
 let instrSearcher: FastSearcher<Section>;
+
+type CourseResultMap = Map<string, SearchResult<Course, string>[]>;
+type SectionResultMap = Map<string, Map<number, SearchResult<Section, string>[]>>;
+/**
+ * elements in array:
+ * 1. score for courses,
+ * 2. score for sections,
+ * 3. number of distinct sections
+ */
+type ScoreEntry = [number, number, number];
+type Scores = Map<string, ScoreEntry>;
+
+const courseMap: CourseResultMap = new Map();
+const sectionMap: SectionResultMap = new Map();
+const scores: Scores = new Map();
+
+let courses: Course[];
+let sections: Section[];
 
 function processCourseResults(results: SearchResult<Course, string>[], weight: number) {
     for (const result of results) {
@@ -73,23 +90,44 @@ function processSectionResults(results: SearchResult<Section, string>[], weight:
     }
 }
 
-type CourseResultMap = Map<string, SearchResult<Course, string>[]>;
-type SectionResultMap = Map<string, Map<number, SearchResult<Section, string>[]>>;
-/**
- * elements in array:
- * 1. score for courses,
- * 2. score for sections,
- * 3. number of distinct sections
- */
-type ScoreEntry = [number, number, number];
-type Scores = Map<string, ScoreEntry>;
+function resolveOverlap(arr: Match<any>[]) {
+    arr.sort((a, b) => a.start - b.start);
+    for (let i = 0; i < arr.length - 1; i++) {
+        let j = i + 1;
+        const a = arr[i];
+        let b = arr[j];
 
-const courseMap: CourseResultMap = new Map();
-const sectionMap: SectionResultMap = new Map();
-const scores: Scores = new Map();
+        while (a.match !== b.match && j + 1 < arr.length) {
+            b = arr[++j];
+        }
 
-let courses: Course[];
-let sections: Section[];
+        if (a.match !== b.match) continue;
+        const ovlp = calcOverlap(a.start, a.end, b.start, b.end);
+        if (ovlp > 0) {
+            const prevStart = a.start;
+            (a as any).start = Math.min(a.start, b.start);
+            (a as any).end = a.end - prevStart + a.start + b.end - b.start - ovlp;
+            arr.splice(j, 1);
+            i--;
+        }
+    }
+    return arr;
+}
+
+function toMatches(matches: SearchResult<any, any>[]) {
+    const allMatches: Match<any>[] = [];
+    for (const { data, matches: m } of matches) {
+        for (let i = 0; i < m.length; i += 2) {
+            allMatches.push({
+                match: data as any,
+                start: m[i],
+                end: m[i + 1]
+            });
+        }
+    }
+    return resolveOverlap(allMatches);
+}
+
 /**
  * initialize the worker using `msg.data` which is assumed to be a `courseDict` on the first message,
  * posting the string literal 'ready' as the response
@@ -166,41 +204,3 @@ onmessage = ({ data }: { data: [Course[], Section[]] | string }) => {
         scores.clear();
     }
 };
-
-function resolveOverlap(arr: Match<any>[]) {
-    arr.sort((a, b) => a.start - b.start);
-    for (let i = 0; i < arr.length - 1; i++) {
-        let j = i + 1;
-        const a = arr[i];
-        let b = arr[j];
-
-        while (a.match !== b.match && j + 1 < arr.length) {
-            b = arr[++j];
-        }
-
-        if (a.match !== b.match) continue;
-        const ovlp = calcOverlap(a.start, a.end, b.start, b.end);
-        if (ovlp > 0) {
-            const prevStart = a.start;
-            (a as any).start = Math.min(a.start, b.start);
-            (a as any).end = a.end - prevStart + a.start + b.end - b.start - ovlp;
-            arr.splice(j, 1);
-            i--;
-        }
-    }
-    return arr;
-}
-
-function toMatches(matches: SearchResult<any, any>[]) {
-    const allMatches: Match<any>[] = [];
-    for (const { data, matches: m } of matches) {
-        for (let i = 0; i < m.length; i += 2) {
-            allMatches.push({
-                match: data as any,
-                start: m[i],
-                end: m[i + 1]
-            });
-        }
-    }
-    return resolveOverlap(allMatches);
-}

@@ -1,4 +1,3 @@
-/* eslint-disable import/export */
 /**
  * @author Hanzhi Zhou, Kaiying Cat
  * @module src/models

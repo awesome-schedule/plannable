@@ -229,22 +229,8 @@ export function blockUnion(
     return;
 }
 
-/**
- * helper function used in
- * @see [[GridSchedule]]
- * @see [[CourseBlock]]
- * @author Kaiying Shan
- * @param time
- */
-export function timeToNum(time: string) {
-    const sep = time.split(':');
-    const min = parseInt(sep[1]);
-    const t = (parseInt(sep[0]) - 8) * 2;
-    return min >= 30 ? t + 1 : t;
-}
-
 export function roundTime(time: number) {
-    return Math.floor((time - 8 * 60) / 30);
+    return Math.floor(time / 30);
 }
 
 export function intTo24hr(num: number) {

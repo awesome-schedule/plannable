@@ -33,20 +33,14 @@ export default class CourseBlock extends Store {
     get endPx() {
         return this.getPx(this.scheduleBlock.endMin);
     }
-    get style() {
-        return {
-            'font-size': '11px'
-        } as const;
-    }
 
     getPx(time: number) {
-        let px = 48;
-        const temp = roundTime(time);
-        for (let i = this.absoluteEarliest; i < temp; i++) {
-            px += this.heightInfo[i - this.absoluteEarliest];
-        }
-        px += ((time % 30) / 30) * this.display.fullHeight;
-        return px;
+        const idx = roundTime(time) - this.absoluteEarliest - 1;
+        return (
+            48 +
+            (idx <= 0 ? 0 : this.heightInfo[idx]) +
+            ((time % 30) / 30) * this.display.fullHeight
+        );
     }
 
     get firstSec(): Section {

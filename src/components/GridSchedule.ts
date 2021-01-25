@@ -8,7 +8,7 @@
 import Schedule, { DAYS } from '@/models/Schedule';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
-import { roundTime, timeToNum, to12hr } from '../utils';
+import { hr24toInt, roundTime, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
 
 /**
@@ -26,7 +26,6 @@ export default class GridSchedule extends Store {
 
     df = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    // note: we need Schedule.days because it's an array that keeps the keys in order
     get days() {
         return this.display.showWeekend ? DAYS : DAYS.slice(0, 5);
     }
@@ -40,7 +39,7 @@ export default class GridSchedule extends Store {
      * return 0 if no class
      */
     get earliestBlock() {
-        let earliest = 817;
+        let earliest = 48;
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
@@ -72,23 +71,13 @@ export default class GridSchedule extends Store {
      * return the block in which the schedule starts with
      */
     get absoluteEarliest() {
-        const early = this.display.earliest;
-        if (timeToNum(early) > this.earliestBlock) {
-            return this.earliestBlock;
-        } else {
-            return timeToNum(early);
-        }
+        return Math.min(this.earliestBlock, roundTime(hr24toInt(this.display.earliest)));
     }
     /**
      * return the block in which the schedule ends with
      */
     get absoluteLatest() {
-        const late = this.display.latest;
-        if (timeToNum(late) < this.latestBlock) {
-            return this.latestBlock;
-        } else {
-            return timeToNum(late);
-        }
+        return Math.max(this.latestBlock, roundTime(hr24toInt(this.display.latest)));
     }
 
     /**
@@ -107,54 +96,38 @@ export default class GridSchedule extends Store {
     }
 
     get hours() {
-        let curTime = '';
-        if (this.absoluteEarliest % 2 === 0) {
-            curTime = this.absoluteEarliest / 2 + 8 + ':00';
-        } else {
-            curTime = (this.absoluteEarliest - 1) / 2 + 8 + ':30';
-        }
-
         const time = [];
         const stdTime = [];
         const reducedTime = [];
         for (let i = this.absoluteEarliest; i <= this.absoluteLatest; i++) {
+            const curTime = `${Math.floor(i / 2)}:${i % 2 ? '30' : '00'}`;
             time.push(curTime);
             stdTime.push(to12hr(curTime));
-            curTime = this.increTime(curTime);
-            // note: need .toString to make the type of reducedTime consistent
-            reducedTime.push(i % 2 !== 0 ? '' : (i / 2 + 8).toString());
+            reducedTime.push(i % 2 !== 0 ? '' : (i / 2).toString());
         }
 
         return window.screen.width > 450 ? (this.display.standard ? stdTime : time) : reducedTime;
     }
     get heightInfo() {
-        const info: number[] = new Array(this.numRow).fill(this.display.partialHeight);
+        const heights: number[] = new Array(this.numRow).fill(this.display.partialHeight);
         const earliest = this.absoluteEarliest;
-        const schedule = this.currentSchedule;
-        for (const blocks of schedule.days) {
+        for (const blocks of this.currentSchedule.days) {
             for (const course of blocks) {
                 const startTime = roundTime(course.startMin);
                 const endTime = roundTime(course.endMin);
                 for (let i = startTime; i <= endTime; i++) {
-                    info[i - earliest] = this.display.fullHeight;
+                    heights[i - earliest] = this.display.fullHeight;
                 }
             }
         }
-        return info;
-    }
-    get mainHeight() {
-        return this.heightInfo.reduce((sum, h) => sum + h, 0);
-    }
-
-    increTime(time: string) {
-        const sep = time.split(' ')[0].split(':');
-        const hr = parseInt(sep[0]);
-        const min = parseInt(sep[1]);
-        return (
-            hr +
-            ((min + 30) / 60 >= 1 ? 1 : 0) +
-            ':' +
-            ((min + 30) % 60 < 10 ? '0' + ((min + 30) % 60) : (min + 30) % 60)
-        );
+        const cumulativeHeights = heights.concat();
+        // to prefix array
+        for (let i = 1; i < cumulativeHeights.length; i++) {
+            cumulativeHeights[i] += cumulativeHeights[i - 1];
+        }
+        return {
+            heights,
+            cumulativeHeights
+        };
     }
 }

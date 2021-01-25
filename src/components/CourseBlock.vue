@@ -18,14 +18,14 @@
                             : `${section.department} ${section.number}-${section.section}`
                     }}
                 </div>
-                <div v-if="display.showInstructor" :style="style">
+                <div v-if="display.showInstructor" class="cb-item">
                     {{ section.instructors.join(', ') }}
                 </div>
-                <div v-if="display.showRoom && room" :style="style">
+                <div v-if="display.showRoom && room" class="cb-item">
                     {{ room }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="meeting in section.meetings" :key="meeting.days" :style="style">
+                    <div v-for="meeting in section.meetings" :key="meeting.days" class="cb-item">
                         {{ meeting.days }}
                     </div>
                 </template>
@@ -37,16 +37,16 @@
                     {{ firstSec.type }}
                 </div>
                 <template v-if="display.showTime">
-                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" :style="style">
+                    <div v-for="meeting in firstSec.meetings" :key="meeting.days" class="cb-item">
                         {{ meeting.days }}
                     </div>
                 </template>
-                <div v-if="display.showInstructor" :style="style">
+                <div v-if="display.showInstructor" class="cb-item">
                     {{ firstSec.instructors.join(', ') }} and
                     {{ section.sections.reduce((acc, x) => acc + x.instructors.length, 0) - 1 }}
                     more
                 </div>
-                <div v-if="display.showRoom" :style="style">
+                <div v-if="display.showRoom" class="cb-item">
                     {{ firstSec.meetings[0].room }} and {{ section.sections.length - 1 }} more
                 </div>
             </div>
@@ -54,11 +54,11 @@
                 <div class="mt-2">
                     {{ section.title }}
                 </div>
-                <div :style="style">
+                <div class="cb-item">
                     {{ section.days }}<br />
                     {{ section.room }}
                 </div>
-                <div :style="style" v-html="section.description"></div>
+                <div class="cb-item" v-html="section.description"></div>
             </div>
         </template>
         <div v-else class="mt-2 ml-2" style="font-size:10px">
@@ -99,5 +99,9 @@
 
 .courseBlock:hover {
     box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
+}
+
+.cb-item {
+    font-size: 11px;
 }
 </style>

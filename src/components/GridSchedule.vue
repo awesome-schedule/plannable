@@ -5,8 +5,7 @@
                 class="grid-container time"
                 :style="{
                     'grid-template-columns': 'auto',
-                    height: mainHeight,
-                    'grid-template-rows': heightInfo.reduce((acc, x) => acc + (x + 'px '), '40px ')
+                    'grid-template-rows': `40px ${heightInfo.heights.join('px ')}px`
                 }"
             >
                 <div></div>
@@ -18,8 +17,7 @@
                 class="grid-container main"
                 :style="{
                     'grid-template-columns': gridTemplateCols,
-                    'grid-template-rows': heightInfo.reduce((acc, x) => acc + (x + 'px '), '48px '),
-                    height: mainHeight
+                    'grid-template-rows': `48px ${heightInfo.heights.join('px ')}px`
                 }"
             >
                 <template v-if="status.isMobile">
@@ -37,7 +35,7 @@
                         v-for="(scheduleBlock, _) in currentSchedule.days[+idx]"
                         :key="day + _"
                         :schedule-block="scheduleBlock"
-                        :height-info="heightInfo"
+                        :height-info="heightInfo.cumulativeHeights"
                         :absolute-earliest="absoluteEarliest"
                         :style="{
                             left: (+idx + scheduleBlock.left) * (100 / numCol) + '%',

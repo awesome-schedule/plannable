@@ -1,15 +1,18 @@
 <template>
     <div class="row no-gutters justify-content-start px-1 mb-3" :style="`width: ${display.width}%`">
         <div class="col-xs-auto">
-            <div
-                class="grid-container time"
-                :style="{
-                    'grid-template-columns': 'auto',
-                    'grid-template-rows': `40px ${heightInfo.heights.join('px ')}px`
-                }"
-            >
+            <div class="time">
                 <div></div>
-                <div v-for="hour in hours" :key="hour">{{ hour }}</div>
+                <div
+                    v-for="(hour, idx) in hours"
+                    :key="hour"
+                    :style="{
+                        position: 'absolute',
+                        top: 48 + heightInfo.cumulativeHeights[idx] + 'px'
+                    }"
+                >
+                    {{ hour }}
+                </div>
             </div>
         </div>
         <div class="col">
@@ -35,12 +38,7 @@
                         v-for="(scheduleBlock, _) in currentSchedule.days[+idx]"
                         :key="day + _"
                         :schedule-block="scheduleBlock"
-                        :height-info="heightInfo.cumulativeHeights"
-                        :absolute-earliest="absoluteEarliest"
-                        :style="{
-                            left: (+idx + scheduleBlock.left) * (100 / numCol) + '%',
-                            width: (100 / numCol) * scheduleBlock.width + '%'
-                        }"
+                        :style="getBlockStyle(idx, scheduleBlock)"
                         :day="day"
                     ></course-block>
                 </template>

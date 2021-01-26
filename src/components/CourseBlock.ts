@@ -11,7 +11,7 @@ import Event from '../models/Event';
 import ScheduleBlock from '../models/ScheduleBlock';
 import Section from '../models/Section';
 import Store from '../store';
-import { hr12toInt, roundTime } from '../utils';
+import { hr12toInt } from '../utils';
 
 /**
  * the component for rendering a course on GridSchedule
@@ -21,26 +21,10 @@ import { hr12toInt, roundTime } from '../utils';
 @Component
 export default class CourseBlock extends Store {
     @Prop(ScheduleBlock) readonly scheduleBlock!: ScheduleBlock;
-    @Prop(Array) readonly heightInfo!: number[];
-    @Prop(Number) readonly absoluteEarliest!: number;
     @Prop(String) readonly day!: string;
+
     get section() {
         return this.scheduleBlock.section;
-    }
-    get startPx() {
-        return this.getPx(this.scheduleBlock.startMin);
-    }
-    get endPx() {
-        return this.getPx(this.scheduleBlock.endMin);
-    }
-
-    getPx(time: number) {
-        const idx = roundTime(time) - this.absoluteEarliest - 1;
-        return (
-            48 +
-            (idx <= 0 ? 0 : this.heightInfo[idx]) +
-            ((time % 30) / 30) * this.display.fullHeight
-        );
     }
 
     get firstSec(): Section {

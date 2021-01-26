@@ -1,14 +1,5 @@
 <template>
-    <div
-        class="courseBlock"
-        :class="{ 'block-strong': scheduleBlock.strong }"
-        :style="{
-            'margin-top': startPx + 'px',
-            height: endPx - startPx + 'px',
-            'background-color': scheduleBlock.background
-        }"
-        @click="showModal()"
-    >
+    <div class="courseBlock" :class="{ 'block-strong': scheduleBlock.strong }" @click="showModal()">
         <template v-if="!status.isMobile">
             <div v-if="isSection(section)" class="ml-2">
                 <div class="mt-2" style="font-size:13px">

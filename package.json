@@ -31,7 +31,7 @@
         }
     ],
     "scripts": {
-        "serve": "vue-cli-service serve",
+        "serve": "vue-cli-service serve --port 8081",
         "build": "vue-cli-service build --modern --report",
         "lint": "vue-cli-service lint",
         "exec": "ts-node -r tsconfig-paths/register -O {\\\"module\\\":\\\"commonjs\\\"}",

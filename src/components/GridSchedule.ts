@@ -6,6 +6,7 @@
  *
  */
 import Schedule, { DAYS } from '@/models/Schedule';
+import ScheduleBlock from '@/models/ScheduleBlock';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
 import { hr24toInt, roundTime, to12hr } from '../utils';
@@ -128,6 +129,26 @@ export default class GridSchedule extends Store {
         return {
             heights,
             cumulativeHeights
+        };
+    }
+    getPx(time: number) {
+        const idx = roundTime(time) - this.absoluteEarliest - 1;
+        return (
+            48 +
+            (idx < 0 ? 0 : this.heightInfo.cumulativeHeights[idx]) +
+            ((time % 30) / 30) * this.display.fullHeight
+        );
+    }
+    getBlockStyle(idx: number, scheduleBlock: ScheduleBlock) {
+        const perc = 100 / this.numCol;
+        const startPx = this.getPx(scheduleBlock.startMin);
+        const endPx = this.getPx(scheduleBlock.endMin);
+        return {
+            left: (idx + scheduleBlock.left) * perc + '%',
+            width: scheduleBlock.width * perc + '%',
+            top: startPx + 'px',
+            height: endPx - startPx + 'px',
+            'background-color': scheduleBlock.background
         };
     }
 }

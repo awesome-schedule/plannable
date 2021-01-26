@@ -542,12 +542,13 @@ class Profile {
             }
         });
 
-        const needUpload: string[] = [],
+        const needUpload: BackendProfile[] = [],
             needDownload: string[] = [];
         for (const [name, { profile: remoteProf, versions: remoteVersions }] of remoteProfMap) {
             const prof = this.profiles.find(p => p.name === name);
             if (prof && prof.remote) {
-                const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
+                const localRaw = localStorage.getItem(name)!;
+                const localProf: SemesterStorage = JSON.parse(localRaw);
                 const localTime = new Date(localProf.modified).getTime();
                 const remoteTime = new Date(remoteProf.modified).getTime();
 
@@ -560,7 +561,11 @@ class Profile {
                     needDownload.push(name);
                 } else if (localTime > remoteTime) {
                     // local profile is newer
-                    needUpload.push(name);
+                    needUpload.push({
+                        name,
+                        profile: localRaw,
+                        new: true
+                    });
                 } else {
                     // if the local profile is the same as the remote profile (in terms of modified time), just fetch the version history from the remote.
                     prof.versions = remoteVersions;
@@ -568,7 +573,8 @@ class Profile {
                 }
             } else if (prof && !prof.remote) {
                 // unsynchronized local profile that has the same name as the remote profile
-                const localProf: SemesterStorage = JSON.parse(localStorage.getItem(name)!);
+                const localRaw = localStorage.getItem(name)!;
+                const localProf: SemesterStorage = JSON.parse(localRaw);
                 if (
                     localProf.schedule.proposedSchedules.length > 1 ||
                     (localProf.schedule.proposedSchedules.length === 1 &&
@@ -594,7 +600,11 @@ class Profile {
                             )
                         ) {
                             prof.remote = true;
-                            needUpload.push(name);
+                            needUpload.push({
+                                name,
+                                profile: localRaw,
+                                new: true
+                            });
                         }
                     }
                 } else {
@@ -620,18 +630,13 @@ class Profile {
             }
         }
 
-        const msg = await this.uploadProfile(
-            needUpload.map(p => ({
-                name: p,
-                profile: localStorage.getItem(p)!
-            }))
-        );
+        const msg = await this.uploadProfile(needUpload);
         if (msg) return msg;
 
         return {
-            msg: `Successfully synchronized your profiles with Hoosmyprofessor. Uploaded ${needUpload.join(
-                ', '
-            ) || 'none'}, downloaded ${needDownload.join(', ') || 'none'}.`,
+            msg: `Successfully synchronized your profiles with Hoosmyprofessor. Uploaded ${needUpload
+                .map(p => p.name)
+                .join(', ') || 'none'}, downloaded ${needDownload.join(', ') || 'none'}.`,
             level: 'success'
         };
     }

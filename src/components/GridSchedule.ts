@@ -28,11 +28,11 @@ export default class GridSchedule extends Store {
     df = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     get days() {
-        return this.display.showWeekend ? DAYS : DAYS.slice(0, 5);
-    }
-
-    get daysFull() {
-        return this.display.showWeekend ? this.df : this.df.slice(0, 5);
+        if (this.status.isMobile) {
+            return this.display.showWeekend ? DAYS : DAYS.slice(0, 5);
+        } else {
+            return this.display.showWeekend ? this.df : this.df.slice(0, 5);
+        }
     }
 
     /**
@@ -109,35 +109,33 @@ export default class GridSchedule extends Store {
 
         return window.screen.width > 450 ? (this.display.standard ? stdTime : time) : reducedTime;
     }
-    get heightInfo() {
-        const heights: number[] = new Array(this.numRow).fill(this.display.partialHeight);
+    get heights() {
+        const heights = new Uint16Array(this.numRow + 1).fill(this.display.partialHeight);
+        heights[0] = 44; // height of the title cell
         const earliest = this.absoluteEarliest;
         for (const blocks of this.currentSchedule.days) {
             for (const course of blocks) {
-                const startTime = roundTime(course.startMin);
-                const endTime = roundTime(course.endMin);
+                const startTime = roundTime(course.startMin) + 1;
+                const endTime = roundTime(course.endMin) + 1;
                 for (let i = startTime; i <= endTime; i++) {
                     heights[i - earliest] = this.display.fullHeight;
                 }
             }
         }
-        const cumulativeHeights = heights.concat();
+
+        const sumHeights = new Uint16Array(heights);
         // to prefix array
-        for (let i = 1; i < cumulativeHeights.length; i++) {
-            cumulativeHeights[i] += cumulativeHeights[i - 1];
+        for (let i = 1; i < sumHeights.length; i++) {
+            sumHeights[i] += sumHeights[i - 1];
         }
         return {
             heights,
-            cumulativeHeights
+            sumHeights
         };
     }
     getPx(time: number) {
-        const idx = roundTime(time) - this.absoluteEarliest - 1;
-        return (
-            48 +
-            (idx < 0 ? 0 : this.heightInfo.cumulativeHeights[idx]) +
-            ((time % 30) / 30) * this.display.fullHeight
-        );
+        const idx = roundTime(time) - this.absoluteEarliest;
+        return this.heights.sumHeights[idx] + ((time % 30) / 30) * this.display.fullHeight;
     }
     getBlockStyle(idx: number, scheduleBlock: ScheduleBlock) {
         const perc = 100 / this.numCol;

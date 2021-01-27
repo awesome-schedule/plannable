@@ -1,36 +1,34 @@
 <template>
-    <div class="row no-gutters justify-content-start px-1 mb-3" :style="`width: ${display.width}%`">
-        <div class="col-xs-auto">
-            <div class="time">
-                <div></div>
-                <div
-                    v-for="(hour, idx) in hours"
-                    :key="hour"
-                    :style="{
-                        position: 'absolute',
-                        top: 48 + heightInfo.cumulativeHeights[idx] + 'px'
-                    }"
-                >
-                    {{ hour }}
-                </div>
+    <div
+        class="row no-gutters justify-content-start px-1 mb-3"
+        :style="{
+            width: display.width + '%',
+            height: heights.sumHeights[heights.sumHeights.length - 1]
+        }"
+    >
+        <div class="col-xs-auto time">
+            <div
+                v-for="(hour, idx) in hours"
+                :key="hour"
+                :style="{
+                    position: 'absolute',
+                    top: heights.sumHeights[idx] - 5 + 'px'
+                }"
+            >
+                {{ hour }}
             </div>
         </div>
         <div class="col">
             <div
-                class="grid-container main"
+                class="grid-container"
                 :style="{
                     'grid-template-columns': gridTemplateCols,
-                    'grid-template-rows': `48px ${heightInfo.heights.join('px ')}px`
+                    'grid-template-rows': `${heights.heights.join('px ')}px`
                 }"
             >
-                <template v-if="status.isMobile">
-                    <div v-for="day in days" :key="day" class="placeholder day">{{ day }}</div>
-                </template>
-                <template v-else>
-                    <div v-for="day in daysFull" :key="day" class="placeholder day">
-                        {{ day }}
-                    </div>
-                </template>
+                <div v-for="day in days" :key="day" class="day-cell">
+                    {{ day }}
+                </div>
                 <div v-for="idx in numRow * numCol" :key="idx" class="placeholder"></div>
                 <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
                 <template v-for="(day, idx) in days">
@@ -56,25 +54,28 @@
     padding: 0px;
 }
 
-.main {
-    border-right: 0.7px solid #e5e3dc;
-    border-bottom: 0.7px solid #e5e3dc;
+.day-cell {
+    z-index: 1;
+    font-size: 14px;
+    border-left: 0.5px solid #e5e3dc;
+    border-right: 0.5px solid #e5e3dc;
+    border-top: 1px solid #e5e3dc;
+    border-bottom: 1px solid #e5e3dc;
+    text-align: center;
+    padding-top: 10px;
 }
 
 .placeholder {
-    font-size: 14px;
-    border-left: 0.7px solid #e5e3dc;
-    border-top: 0.7px solid #e5e3dc;
-    text-align: center;
     z-index: 1;
+    border-left: 0.5px solid #e5e3dc;
+    border-right: 0.5px solid #e5e3dc;
+    border-bottom: 1px solid #e5e3dc;
 }
 
-.time > div {
+.time {
     text-align: right;
     font-size: 10px;
-}
-
-.day {
-    padding-top: 10px;
+    width: 24px;
+    position: relative;
 }
 </style>

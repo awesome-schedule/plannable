@@ -298,12 +298,21 @@ export default class ProposedSchedule extends Schedule {
                 ' - ' +
                 Utils.to12hr(Utils.intTo24hr(end));
             try {
-                this.addEvent(days, true, 'rand ' + i);
+                for (const e of this.events) {
+                    if (e.days === days) {
+                        throw new Error(
+                            `Your new event's time is identical to ${e.title}. Please consider merging these two events.`
+                        );
+                    }
+                }
+                const ev = new Event(days, true, 'rand ' + i);
+                this.events.push(ev);
             } catch (e) {
                 console.log(e);
                 i--;
             }
         }
+        this.computeSchedule();
     }
 
     /**

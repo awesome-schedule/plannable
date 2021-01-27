@@ -345,7 +345,7 @@ export default abstract class Schedule {
         console.time('compute block positions');
         this.computeBlockPositions();
         console.timeEnd('compute block positions');
-        this.days = this.days.concat() as any;
+        // this.days = this.days.concat() as any;
     }
 
     /**

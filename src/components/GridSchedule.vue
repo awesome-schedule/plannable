@@ -19,7 +19,7 @@
             <div
                 class="grid-container"
                 :style="{
-                    'grid-template-columns': gridTemplateCols,
+                    'grid-template-columns': `${100 / this.numCol}% `.repeat(this.numCol),
                     'grid-template-rows': `${heights.heights.join('px ')}px`
                 }"
             >
@@ -28,12 +28,12 @@
                 </div>
                 <div v-for="idx in numRow * numCol" :key="idx" class="placeholder"></div>
                 <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
-                <template v-for="(day, idx) in days">
+                <template v-for="(day, i) in days">
                     <course-block
-                        v-for="(scheduleBlock, _) in currentSchedule.days[+idx]"
-                        :key="day + _"
+                        v-for="(scheduleBlock, j) in currentSchedule.days[i]"
+                        :key="day + j"
                         :schedule-block="scheduleBlock"
-                        :style="getBlockStyle(idx, scheduleBlock)"
+                        :style="blockStyles[i][j]"
                         :day="day"
                     ></course-block>
                 </template>

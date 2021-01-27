@@ -1,8 +1,12 @@
 <template>
-    <div class="courseBlock" :class="{ 'block-strong': scheduleBlock.strong }" @click="showModal()">
+    <div
+        class="courseBlock"
+        :class="scheduleBlock.strong ? 'block-strong' : ''"
+        @click="showModal()"
+    >
         <template v-if="!status.isMobile">
             <div v-if="isSection(section)" class="ml-2">
-                <div class="mt-2" style="font-size:13px">
+                <div class="mt-2" style="font-size: 13px">
                     {{
                         display.showSuffix
                             ? section.displayName
@@ -22,7 +26,7 @@
                 </template>
             </div>
             <div v-else-if="isCourse(section)" class="ml-2">
-                <div class="mt-2" style="font-size:13px">
+                <div class="mt-2" style="font-size: 13px">
                     {{ firstSec.department }}
                     {{ firstSec.number }}-{{ firstSec.section }} +{{ section.sections.length - 1 }}
                     {{ firstSec.type }}
@@ -52,7 +56,7 @@
                 <div class="cb-item" v-html="section.description"></div>
             </div>
         </template>
-        <div v-else class="mt-2 ml-2" style="font-size:10px">
+        <div v-else class="mt-2 ml-2" style="font-size: 10px">
             <div v-if="isSection(section)">
                 {{ firstSec.department }} <br />
                 {{ firstSec.number }} <br />

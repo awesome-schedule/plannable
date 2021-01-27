@@ -6,10 +6,9 @@
  *
  */
 import Schedule, { DAYS } from '@/models/Schedule';
-import ScheduleBlock from '@/models/ScheduleBlock';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
-import { hr24toInt, roundTime, to12hr } from '../utils';
+import { hr24toInt, to12hr } from '../utils';
 import CourseBlock from './CourseBlock.vue';
 
 /**
@@ -44,7 +43,7 @@ export default class GridSchedule extends Store {
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
-                const temp = roundTime(course.startMin);
+                const temp = Math.floor(course.startMin / 30);
                 if (temp < earliest) {
                     earliest = temp;
                 }
@@ -60,7 +59,7 @@ export default class GridSchedule extends Store {
         const schedule = this.currentSchedule;
         for (const blocks of schedule.days) {
             for (const course of blocks) {
-                const temp = roundTime(course.endMin);
+                const temp = Math.floor(course.endMin / 30);
                 if (temp > latest) {
                     latest = temp;
                 }
@@ -72,13 +71,13 @@ export default class GridSchedule extends Store {
      * return the block in which the schedule starts with
      */
     get absoluteEarliest() {
-        return Math.min(this.earliestBlock, roundTime(hr24toInt(this.display.earliest)));
+        return Math.min(this.earliestBlock, Math.floor(hr24toInt(this.display.earliest) / 30));
     }
     /**
      * return the block in which the schedule ends with
      */
     get absoluteLatest() {
-        return Math.max(this.latestBlock, roundTime(hr24toInt(this.display.latest)));
+        return Math.max(this.latestBlock, Math.floor(hr24toInt(this.display.latest) / 30));
     }
 
     /**
@@ -90,10 +89,6 @@ export default class GridSchedule extends Store {
 
     get numCol() {
         return this.display.showWeekend ? 7 : 5;
-    }
-
-    get gridTemplateCols() {
-        return `${100 / this.numCol}% `.repeat(this.numCol);
     }
 
     get hours() {
@@ -115,8 +110,8 @@ export default class GridSchedule extends Store {
         const earliest = this.absoluteEarliest;
         for (const blocks of this.currentSchedule.days) {
             for (const course of blocks) {
-                const startTime = roundTime(course.startMin) + 1;
-                const endTime = roundTime(course.endMin) + 1;
+                const startTime = Math.floor(course.startMin / 30) + 1;
+                const endTime = Math.floor(course.endMin / 30) + 1;
                 for (let i = startTime; i <= endTime; i++) {
                     heights[i - earliest] = this.display.fullHeight;
                 }
@@ -133,20 +128,33 @@ export default class GridSchedule extends Store {
             sumHeights
         };
     }
-    getPx(time: number) {
-        const idx = roundTime(time) - this.absoluteEarliest;
-        return this.heights.sumHeights[idx] + ((time % 30) / 30) * this.display.fullHeight;
-    }
-    getBlockStyle(idx: number, scheduleBlock: ScheduleBlock) {
-        const perc = 100 / this.numCol;
-        const startPx = this.getPx(scheduleBlock.startMin);
-        const endPx = this.getPx(scheduleBlock.endMin);
-        return {
-            left: (idx + scheduleBlock.left) * perc + '%',
-            width: scheduleBlock.width * perc + '%',
-            top: startPx + 'px',
-            height: endPx - startPx + 'px',
-            'background-color': scheduleBlock.background
-        };
+    get blockStyles() {
+        console.time('compute style');
+        const arr: string[][] = [[], [], [], [], [], [], []];
+        // cache these properties will speed uo their access
+        const schedule = this.schedule.currentSchedule;
+        const sumHeights = this.heights.sumHeights;
+        const absoluteEarliest = this.absoluteEarliest;
+        const fullHeight = this.display.fullHeight;
+        for (let i = 0; i < this.numCol; i++) {
+            for (const block of schedule.days[i]) {
+                const { startMin, endMin, left, width, background } = block;
+                const perc = 100 / this.numCol;
+
+                const startPx =
+                    sumHeights[Math.floor(startMin / 30) - absoluteEarliest] +
+                    ((startMin % 30) / 30) * fullHeight;
+                const endPx =
+                    sumHeights[Math.floor(endMin / 30) - absoluteEarliest] +
+                    ((endMin % 30) / 30) * fullHeight;
+                arr[i].push(
+                    `left: ${(i + left) * perc}%; width: ${width *
+                        perc}%; top: ${startPx}px; height: ${endPx -
+                        startPx}px; background-color: ${background}`
+                );
+            }
+        }
+        console.timeEnd('compute style');
+        return arr;
     }
 }

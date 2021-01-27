@@ -23,7 +23,7 @@
                         id="event-from"
                         v-model="eventTimeFrom"
                         type="time"
-                        style="-webkit-appearance:button"
+                        style="-webkit-appearance: button"
                         class="form-control form-control-sm"
                     />
                 </div>
@@ -35,7 +35,7 @@
                         id="event-to"
                         v-model="eventTimeTo"
                         type="time"
-                        style="-webkit-appearance:button"
+                        style="-webkit-appearance: button"
                         class="form-control form-control-sm"
                     />
                 </div>
@@ -70,27 +70,30 @@
             style="width: 98%"
             placeholder="Description"
         ></textarea>
-        <div v-if="status.eventToEdit" class="btn-group" role="group" style="width:100%">
+        <div v-if="status.eventToEdit" class="btn-group" role="group" style="width: 100%">
             <button type="button" class="btn btn-outline-info" @click="endEditEvent()">
                 Update
             </button>
-            <button type="button" class="btn btn-outline-info" @click="cleanup()">
-                Cancel
-            </button>
+            <button type="button" class="btn btn-outline-info" @click="cancelEdit()">Cancel</button>
             <button type="button" class="btn btn-outline-danger" @click="deleteEvent()">
                 Delete
             </button>
         </div>
-        <button v-else class="btn btn-outline-secondary ml-1" style="width:98%" @click="addEvent()">
+        <button
+            v-else
+            class="btn btn-outline-secondary ml-1"
+            style="width: 98%"
+            @click="addEvent()"
+        >
             Add
         </button>
         <div id="semester" class="btn bg-info nav-btn mt-3">
             <div>Event List</div>
         </div>
 
-        <table style="font-size:14px" class="table table-hover w-100">
+        <table style="font-size: 14px" class="table table-hover w-100">
             <thead>
-                <th style="width:100%">
+                <th style="width: 100%">
                     Number of events:
                     {{ schedule.currentSchedule.events.length }}
                 </th>

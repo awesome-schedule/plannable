@@ -126,6 +126,12 @@ export default class EventView extends Store {
         this.schedule.proposedSchedule.deleteEvent(this.toBeModifiedDays);
         this.cleanup(this.schedule.generated);
     }
+    cancelEdit() {
+        this.eventRoom = this.eventTimeFrom = this.eventTimeTo = this.eventDescription = this.eventTitle =
+            '';
+        this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));
+        this.status.eventToEdit = null;
+    }
     /**
      * Clear all properties of this component and force re-computation of the current schedule,
      * called after deleteEvent, endEditEvent and addEvent.
@@ -135,10 +141,7 @@ export default class EventView extends Store {
         // fold sidebar on mobile
         this.status.foldView();
 
-        this.eventRoom = this.eventTimeFrom = this.eventTimeTo = this.eventDescription = this.eventTitle =
-            '';
-        this.eventWeek.forEach((x, i, arr) => this.$set(arr, i, false));
-        this.status.eventToEdit = null;
+        this.cancelEdit();
         if (regenerate) this.generateSchedules();
         else this.schedule.recomputeAll();
         this.saveStatus();

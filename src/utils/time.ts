@@ -229,10 +229,6 @@ export function blockUnion(
     return;
 }
 
-export function roundTime(time: number) {
-    return Math.floor(time / 30);
-}
-
 export function intTo24hr(num: number) {
     return `${Math.floor(num / 60)
         .toString()

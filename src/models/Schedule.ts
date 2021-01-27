@@ -340,11 +340,12 @@ export default abstract class Schedule {
         this.current.ids = current.map(x => x[1]);
 
         for (const event of this.events) if (event.display) this.place(event);
+        console.timeEnd('compute schedule');
+
         console.time('compute block positions');
         this.computeBlockPositions();
         console.timeEnd('compute block positions');
         this.days = this.days.concat() as any;
-        console.timeEnd('compute schedule');
     }
 
     /**

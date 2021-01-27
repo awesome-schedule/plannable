@@ -117,7 +117,7 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
         // we only visit nodes next to the current node (depth different is exactly 1) with the same pathDepth
         if (startDepth - adj.depth === 1 && pDepth === adj.pathDepth) {
             // be careful of the short-circuit evaluation
-            flag = DFSFindFixed(adj) || flag || adj.isFixed;
+            flag = adj.isFixed || DFSFindFixed(adj) || flag;
         }
     }
     return (start.isFixed = flag || start.isFixed);

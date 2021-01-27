@@ -6,7 +6,7 @@
 const externals = {
     jquery: 'jQuery',
     bootstrap: 'bootstrap',
-    vue: 'Vue',
+    // vue: 'Vue',
     papaparse: 'Papa',
     vuedraggable: 'vuedraggable'
 };

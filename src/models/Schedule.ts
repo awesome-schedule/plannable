@@ -345,7 +345,8 @@ export default abstract class Schedule {
         console.time('compute block positions');
         this.computeBlockPositions();
         console.timeEnd('compute block positions');
-        // this.days = this.days.concat() as any;
+        if (this.days.reduce((sum, blocks) => sum + blocks.length, 0) < 100)
+            this.days = this.days.concat() as any;
     }
 
     /**
@@ -430,11 +431,12 @@ export default abstract class Schedule {
         for (const blocks of this.days) {
             constructAdjList(blocks);
             // find all connected components
-            for (const node of blocks) {
-                if (!node.visited)
-                    // we compute positions for each connected component separately
-                    this._computeBlockPositions(BFS(node));
-            }
+            // for (const node of blocks) {
+            //     if (!node.visited)
+            //         // we compute positions for each connected component separately
+            //         this._computeBlockPositions(BFS(node));
+            // }
+            this._computeBlockPositions(blocks);
         }
     }
 
@@ -447,8 +449,10 @@ export default abstract class Schedule {
         calculateMaxDepth(blocks);
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
-            block.left = block.depth / block.pathDepth;
-            block.width = 1 / block.pathDepth;
+            const total = block.pathDepth;
+            // const total = slots.length;
+            block.left = block.depth / total;
+            block.width = 1.0 / total;
             if (block.isFixed) {
                 (blocks[i].background as any) = '#000000';
             }

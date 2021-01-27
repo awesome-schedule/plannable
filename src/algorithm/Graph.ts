@@ -108,6 +108,7 @@ function depthFirstSearchRec(start: ScheduleBlock, maxDepth: number) {
 }
 
 function DFSFindFixed(start: ScheduleBlock): boolean {
+    start.visited = true;
     const startDepth = start.depth;
     if (startDepth === 0) return (start.isFixed = true);
 
@@ -115,12 +116,15 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
     let flag = false;
     for (const adj of start.neighbors) {
         // we only visit nodes next to the current node (depth different is exactly 1) with the same pathDepth
-        if (startDepth - adj.depth === 1 && pDepth === adj.pathDepth) {
+        const samePath = startDepth - adj.depth === 1 && pDepth === adj.pathDepth;
+        if (adj.visited) {
+            flag = (adj.isFixed && samePath) || flag;
+        } else {
             // be careful of the short-circuit evaluation
-            flag = adj.isFixed || DFSFindFixed(adj) || flag;
+            flag = (samePath && DFSFindFixed(adj)) || flag;
         }
     }
-    return (start.isFixed = flag || start.isFixed);
+    return (start.isFixed = flag);
 }
 
 /**
@@ -134,7 +138,10 @@ export function calculateMaxDepth(blocks: ScheduleBlock[]) {
 
     // We start from the node of the greatest depth and traverse to the lower depths
     for (const node of blocks) if (!node.visited) depthFirstSearchRec(node, node.depth + 1);
-
+    for (const node of blocks) node.visited = false;
     for (const node of blocks)
-        if (node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
+        if (!node.visited && node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
+
+    // we must set all nodes belonging to this component as visited, or the caller will have a problem
+    for (const node of blocks) node.visited = true;
 }

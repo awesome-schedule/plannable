@@ -1,10 +1,7 @@
 <template>
     <div
         class="row no-gutters justify-content-start px-1 mb-3"
-        :style="{
-            width: display.width + '%',
-            height: heights.sumHeights[heights.sumHeights.length - 1]
-        }"
+        :style="{ width: display.width + '%' }"
     >
         <div class="col-xs-auto time">
             <div

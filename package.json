@@ -54,23 +54,24 @@
         "oauth_electron_redirect_uri": "http://localhost:8081"
     },
     "dependencies": {
-        "core-js": "^3.6.5",
-        "vue": "^2.6.11",
-        "vue-class-component": "^7.2.3",
-        "vue-property-decorator": "^9.1.2",
         "axios": "^0.21.1",
         "bootstrap": "^4.5.3",
+        "core-js": "^3.6.5",
         "dexie": "^2.0.4",
+        "electron-prompt": "^1.6.0",
         "file-saver": "^2.0.5",
+        "javascript-lp-solver": "^0.4.24",
         "jquery": "^3.5.1",
         "lz-string": "^1.4.4",
         "papaparse": "^5.3.0",
         "quickselect": "^2.0.0",
         "randomcolor": "^0.5.4",
         "ua-parser-js": "^0.7.23",
+        "vue": "^2.6.11",
+        "vue-class-component": "^7.2.3",
         "vue-mathjax": "0.0.10",
-        "vuedraggable": "^2.24.3",
-        "electron-prompt": "^1.6.0"
+        "vue-property-decorator": "^9.1.2",
+        "vuedraggable": "^2.24.3"
     },
     "devDependencies": {
         "@types/jest": "^24.0.19",

@@ -2,6 +2,7 @@
     <div
         class="courseBlock"
         :class="scheduleBlock.strong ? 'block-strong' : ''"
+        v-if="!scheduleBlock.hidden"
         @click="showModal()"
     >
         <template v-if="!status.isMobile">

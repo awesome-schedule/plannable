@@ -30,6 +30,7 @@ export default class ScheduleBlock {
     /**
      * duration of the block, in minutes
      */
+    public idx = 0;
     public readonly duration: number;
     public depth = 0;
     public pathDepth = 0;
@@ -39,6 +40,7 @@ export default class ScheduleBlock {
     public strong = false;
     public visited = false;
     public isFixed = false;
+    public hidden = false;
 
     public readonly neighbors: ScheduleBlock[] = [];
 

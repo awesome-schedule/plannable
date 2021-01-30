@@ -1,0 +1,163 @@
+import ScheduleBlock from '@/models/ScheduleBlock';
+import solver from 'javascript-lp-solver';
+import { GLPK, LP } from 'glpk.js';
+
+export function buildGLPKModel(component: ScheduleBlock[]) {
+    const objVars = [];
+    const subjectTo: LP['subjectTo'] = [];
+    for (const block of component) {
+        const j = block.idx;
+        let maxLeftFixed = 0;
+        let minRight = 1;
+        for (const v of block.neighbors) {
+            const temp = v.left + v.width;
+            if (temp <= block.left + 1e-8) {
+                if (v.isFixed) {
+                    maxLeftFixed = Math.max(maxLeftFixed, temp);
+                } else {
+                    subjectTo.push({
+                        name: Math.random().toString(),
+                        vars: [
+                            { name: `l${j}`, coef: 1.0 },
+                            { name: `l${v.idx}`, coef: -1.0 },
+                            { name: `w${v.idx}`, coef: -1.0 }
+                        ],
+                        bnds: { type: window.glpk.GLP_UP, lb: 0.0, ub: 1.0 }
+                    });
+                    // model.push(`1 l${j} -1 l${v.idx} -1 w${v.idx} >= 0`);
+                }
+            }
+            if (v.left + 1e-8 >= block.left + block.width) {
+                if (v.isFixed) {
+                    minRight = Math.min(v.left, minRight);
+                }
+            }
+        }
+        objVars.push({ name: `w${j}`, coef: 1 });
+        subjectTo.push(
+            {
+                name: Math.random().toString(),
+                vars: [{ name: `w${j}`, coef: 1.0 }],
+                bnds: { type: window.glpk.GLP_UP, lb: block.width, ub: 3 * block.width }
+            },
+            {
+                name: Math.random().toString(),
+                vars: [{ name: `l${j}`, coef: 1.0 }],
+                bnds: { type: window.glpk.GLP_UP, lb: maxLeftFixed, ub: 1 }
+            },
+            {
+                name: Math.random().toString(),
+                vars: [
+                    { name: `w${j}`, coef: 1.0 },
+                    { name: `l${j}`, coef: 1.0 }
+                ],
+                bnds: { type: window.glpk.GLP_UP, lb: 0, ub: minRight }
+            }
+        );
+    }
+    const lp = {
+        name: 'LP',
+        objective: {
+            direction: window.glpk.GLP_MAX,
+            name: 'obj',
+            vars: objVars
+        },
+        subjectTo
+    };
+    // if (model.length === 1) continue;
+    // console.log(converted);
+    console.time('solve');
+    console.log(window.glpk.solve(lp, window.glpk.GLP_MSG_ALL));
+    console.timeEnd('solve');
+    // console.log(result);
+    // model.push(`1 ${widths.join(' 1 ')} >= ${result.result - 1e-8}`);
+    // const additionalFactor: string[] = [];
+    // // --------- try to minimize the sum of absolute deviations from the mean -----
+    // const meanFactor = 1 / widths.length;
+    // model.push(`${meanFactor} ${widths.join(` ${meanFactor} `)} -1 mean = 0`);
+    // for (let i = 0; i < widths.length; i++) {
+    //     additionalFactor.push(`1 t${i}`);
+    //     model.push(`1 t${i} -1 ${widths[i]} 1 mean >= 0`);
+    //     model.push(`1 t${i} 1 ${widths[i]} -1 mean >= 0`);
+    // }
+    // // ----------------------------------------------------------------------------
+    // model[0] = `min: ${additionalFactor.join(' ')}`;
+    // result = solver.Solve(solver.ReformatLP(model));
+    // if (result.feasible) {
+    //     for (const key in result) {
+    //         if (key.startsWith('l')) {
+    //             const idx = +key.substr(1);
+    //             component.find(b => b.idx === idx)!.left = result[key];
+    //         } else if (key.startsWith('w')) {
+    //             const idx = +key.substr(1);
+    //             component.find(b => b.idx === idx)!.width = result[key];
+    //         }
+    //     }
+    // } else {
+    //     console.log('not feasible');
+    // }
+}
+
+function buildJSLPSolverModel(component: ScheduleBlock[]) {
+    const widths: string[] = [];
+    const model = [''];
+    for (const block of component) {
+        const j = block.idx;
+        let maxLeftFixed = 0;
+        let minRight = 1;
+        for (const v of block.neighbors) {
+            const temp = v.left + v.width;
+            if (temp <= block.left + 1e-8) {
+                if (v.isFixed) {
+                    maxLeftFixed = Math.max(maxLeftFixed, temp);
+                } else {
+                    model.push(`1 l${j} -1 l${v.idx} -1 w${v.idx} >= 0`);
+                }
+            }
+            if (v.left + 1e-8 >= block.left + block.width) {
+                if (v.isFixed) {
+                    minRight = Math.min(v.left, minRight);
+                }
+            }
+        }
+        widths.push(`w${j}`);
+        model.push(`1 w${j} >= ${block.width}`);
+        model.push(`1 w${j} <= ${1.5 * block.width}`);
+        model.push(`1 l${j} >= ${maxLeftFixed}`);
+        model.push(`1 l${j} 1 w${j} <= ${minRight}`);
+    }
+    // if (model.length === 1) continue;
+    model[0] = `max: 1 ${widths.join(' 1 ')}`;
+    const converted = solver.ReformatLP(model);
+    // console.log(converted);
+    console.time('solve');
+    const result = solver.Solve(converted);
+    console.timeEnd('solve');
+    // console.log(result);
+    // model.push(`1 ${widths.join(' 1 ')} >= ${result.result - 1e-8}`);
+    // const additionalFactor: string[] = [];
+    // // --------- try to minimize the sum of absolute deviations from the mean -----
+    // const meanFactor = 1 / widths.length;
+    // model.push(`${meanFactor} ${widths.join(` ${meanFactor} `)} -1 mean = 0`);
+    // for (let i = 0; i < widths.length; i++) {
+    //     additionalFactor.push(`1 t${i}`);
+    //     model.push(`1 t${i} -1 ${widths[i]} 1 mean >= 0`);
+    //     model.push(`1 t${i} 1 ${widths[i]} -1 mean >= 0`);
+    // }
+    // // ----------------------------------------------------------------------------
+    // model[0] = `min: ${additionalFactor.join(' ')}`;
+    // result = solver.Solve(solver.ReformatLP(model));
+    if (result.feasible) {
+        for (const key in result) {
+            if (key.startsWith('l')) {
+                const idx = +key.substr(1);
+                component.find(b => b.idx === idx)!.left = result[key];
+            } else if (key.startsWith('w')) {
+                const idx = +key.substr(1);
+                component.find(b => b.idx === idx)!.width = result[key];
+            }
+        }
+    } else {
+        console.log('not feasible');
+    }
+}

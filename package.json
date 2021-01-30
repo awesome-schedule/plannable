@@ -60,6 +60,7 @@
         "dexie": "^2.0.4",
         "electron-prompt": "^1.6.0",
         "file-saver": "^2.0.5",
+        "glpk.js": "^3.2.0",
         "javascript-lp-solver": "^0.4.24",
         "jquery": "^3.5.1",
         "lz-string": "^1.4.4",

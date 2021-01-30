@@ -15,7 +15,8 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
-import solver from 'javascript-lp-solver';
+import { GLPK } from 'glpk.js';
+import { buildGLPKModel } from '@/algorithm/LP';
 
 export const dayToInt = Object.freeze({
     Mo: 0,
@@ -465,185 +466,15 @@ export default abstract class Schedule {
             }
         }
 
-        // for (const block of blocks) block.visited = false;
-        // for (const _block of blocks) {
-        //     if (!_block.visited && !_block.isFixed) {
-        //         const component = BFS(_block);
-        //         // console.log(component);
-        //         const widths = [];
-        //         const model = [''];
-        //         for (const block of component) {
-        //             const j = block.idx;
-        //             let maxLeftFixed = 0;
-        //             let minRight = 1;
-        //             for (const v of block.neighbors) {
-        //                 const temp = v.left + v.width;
-        //                 if (temp <= block.left + 1e-8) {
-        //                     if (v.isFixed) {
-        //                         maxLeftFixed = Math.max(maxLeftFixed, temp);
-        //                     } else {
-        //                         model.push(`1 l${j} -1 l${v.idx} -1 w${v.idx} >= 0`);
-        //                     }
-        //                 }
-        //                 if (v.left + 1e-8 >= block.left + block.width) {
-        //                     if (v.isFixed) {
-        //                         minRight = Math.min(v.left, minRight);
-        //                     }
-        //                 }
-        //             }
-        //             widths.push(`w${j}`);
-        //             model.push(`1 w${j} >= ${block.width}`);
-
-        //             model.push(`1 l${j} >= ${maxLeftFixed}`);
-        //             model.push(`1 l${j} 1 w${j} <= ${minRight}`);
-        //         }
-        //         if (model.length > 1) {
-        //             const meanFactor = 1 / widths.length;
-        //             const additionalFactor: any = [];
-        //             // model.push(`${meanFactor} ${widths.join(` ${meanFactor} `)} -1 mean = 0`);
-
-        //             // for (let i = 0; i < widths.length; i++) {
-        //             //     additionalFactor.push(`0.5 t${i}`);
-        //             //     model.push(`1 t${i} -1 ${widths[i]} 1 mean >= 0`);
-        //             //     model.push(`1 t${i} 1 ${widths[i]} -1 mean >= 0`);
-        //             // }
-        //             model[0] = `min: -1 ${widths.join(' -1 ')} ${additionalFactor.join(' ')}`;
-
-        //             console.log(model);
-        //             const converted = solver.ReformatLP(model);
-        //             console.time('solve');
-        //             const result = solver.Solve(converted);
-        //             console.timeEnd('solve');
-        //             if (result.feasible) {
-        //                 for (const key in result) {
-        //                     if (key.startsWith('l')) {
-        //                         const idx = +key.substr(1);
-        //                         blocks.find(b => b.idx === idx)!.left = result[key];
-        //                     } else if (key.startsWith('w')) {
-        //                         const idx = +key.substr(1);
-        //                         blocks.find(b => b.idx === idx)!.width = result[key];
-        //                     }
-        //                 }
-        //             } else {
-        //                 console.log('not feasible');
-        //             }
-        //         }
-        //     }
-        // }
-
-        const widths = [];
-        const model = [''];
-        for (let i = 1; i < slots.length; i++) {
-            for (const block of slots[i]) {
-                if (!block.isFixed) {
-                    const j = block.idx;
-                    let maxLeftFixed = 0;
-                    let minRight = 1;
-                    for (const v of block.neighbors) {
-                        const temp = v.left + v.width;
-                        if (temp <= block.left + 1e-8) {
-                            if (v.isFixed) {
-                                maxLeftFixed = Math.max(maxLeftFixed, temp);
-                            } else {
-                                model.push(`1 l${j} -1 l${v.idx} -1 w${v.idx} >= 0`);
-                            }
-                        }
-                        if (v.left + 1e-8 >= block.left + block.width) {
-                            if (v.isFixed) {
-                                minRight = Math.min(v.left, minRight);
-                            }
-                        }
-                    }
-                    widths.push(`w${j}`);
-                    model.push(`1 w${j} >= ${block.width}`);
-                    model.push(`1 w${j} <= ${2 * block.width}`);
-                    model.push(`1 l${j} >= ${maxLeftFixed}`);
-                    model.push(`1 l${j} 1 w${j} <= ${minRight}`);
-                }
+        console.time('lp formulation');
+        for (const block of blocks) block.visited = false;
+        for (const _block of blocks) {
+            if (!_block.visited && !_block.isFixed) {
+                const component = BFS(_block);
+                buildGLPKModel(component);
             }
         }
-        if (model.length > 1) {
-            const meanFactor = 1 / widths.length;
-            const additionalFactor: any = [];
-            // model.push(`${meanFactor} ${widths.join(` ${meanFactor} `)} -1 mean = 0`);
-
-            // for (let i = 0; i < widths.length; i++) {
-            //     additionalFactor.push(`1 t${i}`);
-            //     model.push(`1 t${i} -1 ${widths[i]} 1 mean >= 0`);
-            //     model.push(`1 t${i} 1 ${widths[i]} -1 mean >= 0`);
-            // }
-            model[0] = `min: -1 ${widths.join(' -1 ')} ${additionalFactor.join(' ')}`;
-
-            console.log(model);
-            console.time('convert');
-            const converted = solver.ReformatLP(model);
-            console.timeEnd('convert');
-            console.log(converted);
-            console.time('solve');
-            const result = solver.Solve(converted);
-            console.timeEnd('solve');
-            if (result.feasible) {
-                for (const key in result) {
-                    if (key.startsWith('l')) {
-                        const idx = +key.substr(1);
-                        blocks.find(b => b.idx === idx)!.left = result[key];
-                    } else if (key.startsWith('w')) {
-                        const idx = +key.substr(1);
-                        blocks.find(b => b.idx === idx)!.width = result[key];
-                    }
-                }
-            } else {
-                console.log('not feasible');
-            }
-        }
-
-        // // auto-expansion
-        // // no need to expand for the first slot
-        // for (let i = slots.length - 2; i >= 0; i--) {
-        //     for (const block of slots[i]) {
-        //         if (block.isFixed) continue;
-        //         // find the width that this block can obtain
-        //         let minWidth = 1 - block.left;
-        //         let maxFixedLeft = 0;
-        //         for (const v of block.neighbors) {
-        //             if (v.depth > block.depth) minWidth = Math.min(v.left - block.left, minWidth);
-        //             else if (v.isFixed) maxFixedLeft = Math.max(maxFixedLeft, v.depth);
-        //         }
-
-        //         // expand this block's width by 1/(depth+1)
-        //         // distribute the remaining expansion space to other nodes
-        //         const increment = minWidth - block.width;
-        //         const ratio = 1 / (block.depth + 1 - maxFixedLeft);
-        //         block.left += increment * (1 - ratio);
-        //         block.width += increment * ratio;
-        //     }
-        // }
-
-        // for (let i = 1; i < slots.length; i++) {
-        //     for (const idx of slots[i]) {
-        //         if (isFixed[idx]) continue;
-
-        //         // maximum left that the current block can possibly obtain
-        //         let maxLeft = 0;
-        //         let minFixedDepth = pathDepth[idx];
-        //         for (const v of adjList[idx]) {
-        //             if (assignment[v] < assignment[idx]) {
-        //                 const blockV = blocks[v];
-        //                 maxLeft = Math.max(maxLeft, blockV.left + blockV.width);
-        //             } else {
-        //                 if (isFixed[v]) {
-        //                     minFixedDepth = Math.min(minFixedDepth, assignment[v]);
-        //                 }
-        //             }
-        //         }
-        //         const block = blocks[idx];
-        //         // distribute deltas to remaining nodes
-        //         const delta = (block.left - maxLeft) / (minFixedDepth - assignment[idx]);
-        //         if (delta <= 0) continue;
-        //         block.left = maxLeft;
-        //         block.width += delta;
-        //     }
-        // }
+        console.timeEnd('lp formulation');
     }
 
     /**

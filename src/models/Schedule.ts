@@ -15,8 +15,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
-import { GLPK } from 'glpk.js';
-import { buildGLPKModel } from '@/algorithm/LP';
+import { buildGLPKModel, buildJSLPSolverModel } from '@/algorithm/LP';
 
 export const dayToInt = Object.freeze({
     Mo: 0,

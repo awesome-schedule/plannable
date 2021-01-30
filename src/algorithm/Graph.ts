@@ -107,37 +107,6 @@ function depthFirstSearchRec(start: ScheduleBlock, maxDepth: number) {
     }
 }
 
-// function depthFirstSearchRec2(start: ScheduleBlock, maxDepth: number) {
-//     start.visited = true;
-//     start.pathDepth = maxDepth;
-
-//     const startDepth = start.depth;
-//     for (const adj of start.neighbors) {
-//         // we only visit nodes of lower depth
-//         if (!adj.visited && startDepth - adj.depth === 1) depthFirstSearchRec2(adj, maxDepth);
-//     }
-// }
-
-// function depthFirstSearchRec3(start: ScheduleBlock) {
-//     start.visited = true;
-
-//     let deepest = -1;
-//     const startDepth = start.depth;
-//     for (const adj of start.neighbors) {
-//         // we only visit nodes of lower depth
-//         if (!adj.visited && adj.depth > startDepth) {
-//             deepest = Math.max(depthFirstSearchRec3(adj), deepest);
-//         }
-//         if (adj.visited && adj.depth > startDepth) {
-//             deepest = Math.max(adj.pathDepth, deepest);
-//         }
-//     }
-//     if (deepest === -1) {
-//         return (start.pathDepth = start.depth + 1);
-//     }
-//     return (start.pathDepth = deepest);
-// }
-
 function DFSFindFixed(start: ScheduleBlock): boolean {
     start.visited = true;
     const startDepth = start.depth;

@@ -432,12 +432,6 @@ export default abstract class Schedule {
         for (const blocks of this.days) {
             blocks.forEach((b, i) => (b.idx = i));
             constructAdjList(blocks);
-            // find all connected components
-            // for (const node of blocks) {
-            //     if (!node.visited)
-            //         // we compute positions for each connected component separately
-            //         this._computeBlockPositions(BFS(node));
-            // }
             for (const block of blocks) block.visited = false;
             this._computeBlockPositions(blocks);
             for (const node of blocks) node.visited = true;
@@ -470,7 +464,8 @@ export default abstract class Schedule {
         for (const _block of blocks) {
             if (!_block.visited && !_block.isFixed) {
                 const component = BFS(_block);
-                buildGLPKModel(component);
+                // buildGLPKModel(component);
+                // buildJSLPSolverModel(component);
             }
         }
         console.timeEnd('lp formulation');

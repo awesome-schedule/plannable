@@ -168,7 +168,7 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
  * calculate the actual path depth of the nodes
  * @requires optimization
  */
-export function calculateMaxDepth(blocks: ScheduleBlock[]) {
+function calculateMaxDepth(blocks: ScheduleBlock[]) {
     blocks.sort((v1, v2) => v2.depth - v1.depth);
 
     // We start from the node of the greatest depth and traverse to the lower depths

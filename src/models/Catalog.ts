@@ -12,6 +12,7 @@ import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
 import Course, { CourseMatch } from './Course';
 import Schedule from './Schedule';
 import Section, { SectionMatch } from './Section';
+import Worker from 'worker-loader!../workers/SearchWorker';
 /**
  * represents a semester
  */
@@ -97,12 +98,11 @@ export default class Catalog {
     /**
      * initialize the web worker for searching
      */
-    public initWorker(): Promise<'ready'> {
+    public async initWorker(): Promise<'ready'> {
         if (!this.worker) {
             // use require because we don't want this in unit-tests
             // this if branch will not tested in unit-tests because there's no web worker
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const Worker = require('worker-loader!../workers/SearchWorker');
             const worker: SearchWorker = new Worker();
             const prom = new Promise<'ready'>(resolve => {
                 worker.onmessage = ({ data }) => {
@@ -121,7 +121,7 @@ export default class Catalog {
             this.worker = worker;
             return prom;
         }
-        return Promise.resolve('ready');
+        return 'ready';
     }
 
     /**

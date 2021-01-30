@@ -21,7 +21,14 @@ const GLP_NOFEAS = 4;
 const GLP_OPT = 5;
 const GLP_UNBND = 6;
 
-const workers = [new Worker('js/glpk-worker.js'), new Worker('js/glpk-worker.js')];
+const WorkerURL = '/js/glpk-worker.js';
+const workers: Worker[] = [];
+if (window.Worker) {
+    const numCores = Math.min(Math.max(navigator.hardwareConcurrency, 2), 4);
+    for (let i = 0; i < numCores; i++) {
+        workers.push(new Worker(WorkerURL));
+    }
+}
 const resolveMap = new Map<string, (val: any) => void>();
 function workerOnMessage(msg: MessageEvent) {
     const key = msg.data.name;
@@ -60,6 +67,8 @@ function applyLPResult(component: ScheduleBlock[], result: { [varName: string]: 
 }
 
 export async function buildGLPKModel(component: ScheduleBlock[], uniform = true) {
+    if (!window.Worker) return;
+
     const objVars = [];
     const subjectTo: LP['subjectTo'] = [];
     let count = 0;

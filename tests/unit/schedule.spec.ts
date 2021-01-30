@@ -65,7 +65,7 @@ describe('Schedule Test', () => {
         schedule = ProposedSchedule.fromJSON(parsed).payload!;
     });
 
-    it('add/update course/events', () => {
+    it('add/update course/events', async () => {
         const schedule = new ProposedSchedule();
         const cs11105 = window.catalog.getCourse('cs11105');
         const id0 = cs11105.sections[1].id;
@@ -87,7 +87,7 @@ describe('Schedule Test', () => {
         schedule.update('cs21505', -1);
         schedule.update('cs11105', cs11105.ids[0]);
         schedule.addEvent('MoTu 12:00AM - 3:00AM', true, 'title1');
-        schedule.computeSchedule();
+        await schedule.computeSchedule();
         expect(schedule.days.reduce((acc, x) => acc + x.length, 0)).toBeGreaterThan(3);
         try {
             schedule.addEvent('MoTu 12:15AM - 2:00AM', true);

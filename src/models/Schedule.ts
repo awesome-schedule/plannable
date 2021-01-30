@@ -246,10 +246,10 @@ export default abstract class Schedule {
      * @note it is the caller's responsibility to call constructDateSeparators,
      * which is necessary if new classes are added
      */
-    public computeSchedule(sync = true, time = 10) {
+    public async computeSchedule(sync = true, time = 50) {
         window.clearTimeout(this.pendingCompute);
         if (sync) {
-            this._computeSchedule();
+            await this._computeSchedule();
         } else {
             this.pendingCompute = window.setTimeout(() => {
                 this._computeSchedule();
@@ -346,8 +346,8 @@ export default abstract class Schedule {
         console.timeEnd('compute schedule');
 
         await computeBlockPositions(days);
-        // if (this.days.reduce((sum, blocks) => sum + blocks.length, 0) < 100)
-        this.days = days;
+        if (days.reduce((sum, blocks) => sum + blocks.length, 0) < 100) this.days = days;
+        else this.days = Object.seal(days);
     }
 
     /**

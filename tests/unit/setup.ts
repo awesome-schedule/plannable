@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { dataend } from '@/config';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
@@ -70,6 +71,7 @@ Object.defineProperty(global, 'onmessage', {
 });
 
 declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace NodeJS {
         interface Global {
             queue: any[];

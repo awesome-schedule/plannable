@@ -15,7 +15,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
-import { buildGLPKModel, buildJSLPSolverModel } from '@/algorithm/LP';
+import { buildGLPKModel } from '@/algorithm/LP';
 
 export const dayToInt = Object.freeze({
     Mo: 0,
@@ -256,12 +256,13 @@ export default abstract class Schedule {
         }
     }
 
-    private _computeSchedule() {
+    private async _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
 
         console.time('compute schedule');
         this.cleanSchedule();
+        const days: Schedule['days'] = [[], [], [], [], [], [], []];
         const temp = new Date(this.dateSeparators[this.dateSelector]);
 
         const all =
@@ -297,23 +298,23 @@ export default abstract class Schedule {
             // if any section
             if (sections === -1) {
                 current.push([fullCourse, [' - ']]);
-                this.place(course);
+                this.place(course, days);
             } else {
                 // only one section: place that section
                 if (sections.size === 1) {
                     const sec = course.sections[0];
                     current.push([fullCourse, [sec.id.toString()]]);
-                    this.place(sec);
+                    this.place(sec, days);
                 } else if (sections.size > 0) {
                     if (Schedule.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
                             catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
                         );
-                        for (const crs of combined) this.place(crs);
+                        for (const crs of combined) this.place(crs, days);
                     } else {
                         // a subset of the sections
-                        this.place(course);
+                        this.place(course, days);
                     }
                     current.push([fullCourse, course.sections.map(sec => sec.id.toString())]);
                 }
@@ -332,7 +333,7 @@ export default abstract class Schedule {
                         found = block.strong = true;
                 }
             }
-            if (!found) this.place(section);
+            if (!found) this.place(section, days);
         }
 
         // sort currentCourses in alphabetical order
@@ -340,14 +341,14 @@ export default abstract class Schedule {
         this.current.courses = current.map(x => x[0]);
         this.current.ids = current.map(x => x[1]);
 
-        for (const event of this.events) if (event.display) this.place(event);
+        for (const event of this.events) if (event.display) this.place(event, days);
         console.timeEnd('compute schedule');
 
         console.time('compute block positions');
-        this.computeBlockPositions();
+        await this.computeBlockPositions(days);
         console.timeEnd('compute block positions');
-        if (this.days.reduce((sum, blocks) => sum + blocks.length, 0) < 100)
-            this.days = this.days.concat() as any;
+        // if (this.days.reduce((sum, blocks) => sum + blocks.length, 0) < 100)
+        this.days = days;
     }
 
     /**
@@ -428,8 +429,8 @@ export default abstract class Schedule {
     /**
      * compute the width and left of the blocks contained in each day
      */
-    public computeBlockPositions() {
-        for (const blocks of this.days) {
+    public computeBlockPositions(days: Schedule['days']) {
+        for (const blocks of days) {
             blocks.forEach((b, i) => (b.idx = i));
             constructAdjList(blocks);
             for (const block of blocks) block.visited = false;
@@ -442,7 +443,7 @@ export default abstract class Schedule {
      * compute the width and left of the blocks passed in
      * @param blocks blocks belonging to the same connected component
      */
-    private _computeBlockPositions(blocks: ScheduleBlock[]) {
+    private async _computeBlockPositions(blocks: ScheduleBlock[]) {
         const slots = intervalScheduling(blocks);
         calculateMaxDepth(blocks);
         for (let i = 0; i < blocks.length; i++) {
@@ -464,7 +465,7 @@ export default abstract class Schedule {
         for (const _block of blocks) {
             if (!_block.visited && !_block.isFixed) {
                 const component = BFS(_block);
-                // buildGLPKModel(component);
+                await buildGLPKModel(component);
                 // buildJSLPSolverModel(component);
             }
         }
@@ -475,15 +476,15 @@ export default abstract class Schedule {
      * place a `Section`/`Course`/`Event`/ into one of the `Mo` to `Su` array according to its `days` property
      * @remarks we can place a Course instance if all of its sections occur at the same time
      */
-    private place(course: Section | Course | Event) {
+    private place(course: Section | Course | Event, days: Schedule['days']) {
         if (course instanceof Section) {
             const color = this.getColor(course);
             for (const meeting of course.meetings) {
-                this.placeHelper(color, meeting.days, course);
+                this.placeHelper(color, meeting.days, course, days);
             }
         } else if (course instanceof Event) {
             if (course.display) {
-                this.placeHelper(this.getColor(course), course.days, course);
+                this.placeHelper(this.getColor(course), course.days, course, days);
             }
         } else {
             if (!course.allSameTime()) return;
@@ -493,28 +494,33 @@ export default abstract class Schedule {
             if (courseSec.length === 1) {
                 const color = this.getColor(firstSec);
                 for (const meeting of firstSec.meetings)
-                    this.placeHelper(color, meeting.days, firstSec);
+                    this.placeHelper(color, meeting.days, firstSec, days);
             } else {
                 if (Schedule.combineSections) {
                     const color = this.getColor(course);
                     for (const meeting of firstSec.meetings)
-                        this.placeHelper(color, meeting.days, course);
+                        this.placeHelper(color, meeting.days, course, days);
                 } else {
                     // if we don't combined the sections, we call place for each section
                     for (const section of courseSec) {
                         // note: sections belonging to the same course will have the same color
                         const color = this.getColor(section);
                         for (const meeting of section.meetings)
-                            this.placeHelper(color, meeting.days, section);
+                            this.placeHelper(color, meeting.days, section, days);
                     }
                 }
             }
         }
     }
 
-    private placeHelper(color: string, dayTimes: string, events: Section | Course | Event) {
-        const [days, start, , end] = dayTimes.split(' ');
-        if (days && start && end) {
+    private placeHelper(
+        color: string,
+        dayTimes: string,
+        events: Section | Course | Event,
+        days: Schedule['days']
+    ) {
+        const [daysStr, start, , end] = dayTimes.split(' ');
+        if (daysStr && start && end) {
             const startMin = Utils.hr12toInt(start);
             const endMin = Utils.hr12toInt(end);
             // wait... start time equals end time?
@@ -522,9 +528,9 @@ export default abstract class Schedule {
                 console.warn('start time equals end time:', events, start, end);
                 return;
             }
-            for (let i = 0; i < days.length; i += 2) {
+            for (let i = 0; i < daysStr.length; i += 2) {
                 const scheduleBlock = new ScheduleBlock(color, events, startMin, endMin);
-                this.days[dayToInt[days.substr(i, 2) as Day]].push(scheduleBlock);
+                days[dayToInt[daysStr.substr(i, 2) as Day]].push(scheduleBlock);
             }
         }
     }
@@ -534,7 +540,7 @@ export default abstract class Schedule {
      * `computeSchedule method`
      */
     public cleanSchedule() {
-        this.days = Object.seal([[], [], [], [], [], [], []]);
+        this.days = [[], [], [], [], [], [], []];
         this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set());
         this.totalCredit = 0;
         this.current.ids = [];

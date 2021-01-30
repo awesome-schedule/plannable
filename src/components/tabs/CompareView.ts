@@ -49,7 +49,7 @@ export default class CompareView extends Store {
                 }
             }
         }
-        this.compareSchedule.computeBlockPositions();
+        this.compareSchedule.computeBlockPositions(this.compareSchedule.days);
     }
     randColor(idx: number) {
         this.compare[idx].color = randomColor({ luminosity: 'dark' });

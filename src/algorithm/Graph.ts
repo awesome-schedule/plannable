@@ -52,7 +52,7 @@ export function BFS(start: ScheduleBlock) {
  * @param blocks the events to schedule
  */
 export function intervalScheduling(blocks: ScheduleBlock[]) {
-    if (blocks.length === 0) return [];
+    if (blocks.length === 0) return 0;
 
     // sort by start time
     blocks.sort((b1, b2) => {
@@ -83,9 +83,7 @@ export function intervalScheduling(blocks: ScheduleBlock[]) {
         }
     }
     numRooms += 1;
-    const groupedByRoom: ScheduleBlock[][] = Array.from({ length: numRooms }, () => []);
-    for (const block of blocks) groupedByRoom[block.depth].push(block);
-    return groupedByRoom;
+    return numRooms;
 }
 
 /**

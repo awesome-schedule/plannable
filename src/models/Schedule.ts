@@ -344,9 +344,7 @@ export default abstract class Schedule {
         for (const event of this.events) if (event.display) this.place(event, days);
         console.timeEnd('compute schedule');
 
-        console.time('compute block positions');
         await this.computeBlockPositions(days);
-        console.timeEnd('compute block positions');
         // if (this.days.reduce((sum, blocks) => sum + blocks.length, 0) < 100)
         this.days = days;
     }
@@ -429,26 +427,34 @@ export default abstract class Schedule {
     /**
      * compute the width and left of the blocks contained in each day
      */
-    public computeBlockPositions(days: Schedule['days']) {
+    public async computeBlockPositions(days: Schedule['days']) {
+        const promises: Promise<any>[] = [];
         for (const blocks of days) {
             blocks.forEach((b, i) => (b.idx = i));
             constructAdjList(blocks);
             for (const block of blocks) block.visited = false;
-            this._computeBlockPositions(blocks);
+            this._computeBlockPositions(blocks, promises);
             for (const node of blocks) node.visited = true;
         }
+        await Promise.all(promises);
     }
 
     /**
      * compute the width and left of the blocks passed in
      * @param blocks blocks belonging to the same connected component
      */
-    private async _computeBlockPositions(blocks: ScheduleBlock[]) {
-        const slots = intervalScheduling(blocks);
+    private _computeBlockPositions(blocks: ScheduleBlock[], promises: Promise<any>[]) {
+        const total = intervalScheduling(blocks);
+        if (total <= 1) {
+            for (const node of blocks) {
+                node.left = 1.0;
+                node.width = 1.0;
+            }
+            return;
+        }
         calculateMaxDepth(blocks);
         for (let i = 0; i < blocks.length; i++) {
             const block = blocks[i];
-            const total = slots.length;
             // block.left = block.depth / total;
             // block.width = 1.0 / total;
             block.left = block.depth / block.pathDepth;
@@ -460,16 +466,16 @@ export default abstract class Schedule {
             }
         }
 
-        console.time('lp formulation');
+        // console.time('lp formulation');
         for (const block of blocks) block.visited = false;
         for (const _block of blocks) {
             if (!_block.visited && !_block.isFixed) {
                 const component = BFS(_block);
-                await buildGLPKModel(component);
+                promises.push(buildGLPKModel(component));
                 // buildJSLPSolverModel(component);
             }
         }
-        console.timeEnd('lp formulation');
+        // console.timeEnd('lp formulation');
     }
 
     /**

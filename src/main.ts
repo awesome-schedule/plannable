@@ -15,7 +15,6 @@ import { FastSearcher } from './algorithm/Searcher';
 import App from './App.vue';
 import axios from 'axios';
 import WatchFactory from './store/watch';
-import { GLPK } from 'glpk.js';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -27,7 +26,6 @@ declare global {
         timeMatrix: Readonly<Int32Array>;
         buildingSearcher: FastSearcher<string>;
         watchers: WatchFactory;
-        glpk: GLPK;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -56,6 +54,8 @@ Vue.config.productionTip = false;
 Vue.config.devtools = true;
 Vue.prototype.highlightMatch = highlightMatch;
 
+(window as any).axios = axios;
+
 new Vue({
     data: {
         currentRoute: window.location.pathname
@@ -66,8 +66,3 @@ new Vue({
         return h(App);
     }
 }).$mount('#app');
-
-(window as any).axios = axios;
-(async () => {
-    window.glpk = await require('glpk.js');
-})();

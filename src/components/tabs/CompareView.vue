@@ -5,7 +5,7 @@
             <ul v-if="compare.length > 0" class="list-group list-group-flush mx-1">
                 <li
                     v-for="(cur, idx) in compare"
-                    :key="cur"
+                    :key="idx"
                     class="list-group-item px-1"
                     @mouseenter="highlight(idx)"
                     @mouseleave="highlight(idx)"

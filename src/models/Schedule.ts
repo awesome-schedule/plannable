@@ -6,7 +6,6 @@
 /**
  *
  */
-import { intervalScheduling, calculateMaxDepth, constructAdjList, BFS } from '../algorithm/Graph';
 import * as Utils from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -15,7 +14,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
-import { buildGLPKModel } from '@/algorithm/LP';
+import { computeBlockPositions } from '@/algorithm/Graph';
 
 export const dayToInt = Object.freeze({
     Mo: 0,
@@ -67,6 +66,16 @@ export interface ScheduleJSON {
     events: Event[];
 }
 
+export type ScheduleDays = [
+    ScheduleBlock[], // Monday
+    ScheduleBlock[],
+    ScheduleBlock[],
+    ScheduleBlock[],
+    ScheduleBlock[],
+    ScheduleBlock[],
+    ScheduleBlock[] // Sunday
+];
+
 /**
  * Schedule handles the storage, access, mutation and render of courses and events.
  * @requires window.catalog
@@ -111,15 +120,7 @@ export default abstract class Schedule {
     /**
      * computed based on `this.All` by `computeSchedule`
      */
-    public days: [
-        ScheduleBlock[], // Monday
-        ScheduleBlock[],
-        ScheduleBlock[],
-        ScheduleBlock[],
-        ScheduleBlock[],
-        ScheduleBlock[],
-        ScheduleBlock[] // Sunday
-    ] = [[], [], [], [], [], [], []];
+    public days: ScheduleDays = [[], [], [], [], [], [], []];
     /**
      * total credits stored in this schedule, computed based on `this.All`
      */
@@ -261,7 +262,7 @@ export default abstract class Schedule {
         if (!catalog) return;
 
         console.time('compute schedule');
-        this.cleanSchedule();
+        this.cleanSchedule(false);
         const days: Schedule['days'] = [[], [], [], [], [], [], []];
         const temp = new Date(this.dateSeparators[this.dateSelector]);
 
@@ -344,7 +345,7 @@ export default abstract class Schedule {
         for (const event of this.events) if (event.display) this.place(event, days);
         console.timeEnd('compute schedule');
 
-        await this.computeBlockPositions(days);
+        await computeBlockPositions(days);
         // if (this.days.reduce((sum, blocks) => sum + blocks.length, 0) < 100)
         this.days = days;
     }
@@ -425,60 +426,6 @@ export default abstract class Schedule {
     }
 
     /**
-     * compute the width and left of the blocks contained in each day
-     */
-    public async computeBlockPositions(days: Schedule['days']) {
-        const promises: Promise<any>[] = [];
-        for (const blocks of days) {
-            blocks.forEach((b, i) => (b.idx = i));
-            constructAdjList(blocks);
-            for (const block of blocks) block.visited = false;
-            this._computeBlockPositions(blocks, promises);
-            for (const node of blocks) node.visited = true;
-        }
-        await Promise.all(promises);
-    }
-
-    /**
-     * compute the width and left of the blocks passed in
-     * @param blocks blocks belonging to the same connected component
-     */
-    private _computeBlockPositions(blocks: ScheduleBlock[], promises: Promise<any>[]) {
-        const total = intervalScheduling(blocks);
-        if (total <= 1) {
-            for (const node of blocks) {
-                node.left = 1.0;
-                node.width = 1.0;
-            }
-            return;
-        }
-        calculateMaxDepth(blocks);
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
-            // block.left = block.depth / total;
-            // block.width = 1.0 / total;
-            block.left = block.depth / block.pathDepth;
-            block.width = 1.0 / block.pathDepth;
-            if (block.isFixed) {
-                // block.left = block.depth / block.pathDepth;
-                // block.width = 1.0 / block.pathDepth;
-                (blocks[i].background as any) = '#000000';
-            }
-        }
-
-        // console.time('lp formulation');
-        for (const block of blocks) block.visited = false;
-        for (const _block of blocks) {
-            if (!_block.visited && !_block.isFixed) {
-                const component = BFS(_block);
-                promises.push(buildGLPKModel(component));
-                // buildJSLPSolverModel(component);
-            }
-        }
-        // console.timeEnd('lp formulation');
-    }
-
-    /**
      * place a `Section`/`Course`/`Event`/ into one of the `Mo` to `Su` array according to its `days` property
      * @remarks we can place a Course instance if all of its sections occur at the same time
      */
@@ -535,8 +482,9 @@ export default abstract class Schedule {
                 return;
             }
             for (let i = 0; i < daysStr.length; i += 2) {
-                const scheduleBlock = new ScheduleBlock(color, events, startMin, endMin);
-                days[dayToInt[daysStr.substr(i, 2) as Day]].push(scheduleBlock);
+                days[dayToInt[daysStr.substr(i, 2) as Day]].push(
+                    new ScheduleBlock(color, events, startMin, endMin)
+                );
             }
         }
     }
@@ -545,8 +493,9 @@ export default abstract class Schedule {
      * clean the computed properties of the schedule. They can be recovered by calling the
      * `computeSchedule method`
      */
-    public cleanSchedule() {
-        this.days = [[], [], [], [], [], [], []];
+    public cleanSchedule(cleanDays = true) {
+        if (cleanDays) this.days = [[], [], [], [], [], [], []];
+
         this.colorSlots = Array.from({ length: Schedule.colors.length }, () => new Set());
         this.totalCredit = 0;
         this.current.ids = [];

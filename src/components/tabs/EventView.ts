@@ -143,7 +143,7 @@ export default class EventView extends Store {
 
         this.cancelEdit();
         if (regenerate) this.generateSchedules();
-        else this.schedule.recomputeAll();
+        else this.schedule.proposedSchedule.computeSchedule();
         this.saveStatus();
     }
 }

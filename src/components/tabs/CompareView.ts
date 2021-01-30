@@ -5,7 +5,9 @@
 /**
  *
  */
+import { computeBlockPositions } from '@/algorithm/Graph';
 import GeneratedSchedule from '@/models/GeneratedSchedule';
+import { ScheduleDays } from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';
 import randomColor from 'randomcolor';
@@ -37,19 +39,21 @@ export default class CompareView extends Store {
         return this.getDesc(this.filter.refSchedule);
     }
 
-    renderSchedule() {
-        this.compareSchedule = new GeneratedSchedule();
+    async renderSchedule() {
+        const days: ScheduleDays = [[], [], [], [], [], [], []];
         for (let i = 0; i < this.compare.length; i++) {
             const { schedule, color } = this.compare[i];
             for (let j = 0; j < 7; j++) {
                 for (const sb of schedule.days[j]) {
                     const nsb = new ScheduleBlock(color, sb.section, sb.startMin, sb.endMin);
                     nsb.strong = this.highlightIdx === i;
-                    this.compareSchedule.days[j].push(nsb);
+                    days[j].push(nsb);
                 }
             }
         }
-        this.compareSchedule.computeBlockPositions(this.compareSchedule.days);
+        await computeBlockPositions(days);
+        this.compareSchedule = new GeneratedSchedule();
+        this.compareSchedule.days = days;
     }
     randColor(idx: number) {
         this.compare[idx].color = randomColor({ luminosity: 'dark' });

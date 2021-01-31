@@ -10,7 +10,7 @@
 import { ScheduleDays } from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import PriorityQueue from 'tinyqueue';
-import { buildGLPKModel, buildGLPKModel2, buildGLPKModel3 } from './LP';
+import * as LP from './LP';
 
 /**
  * for the array of schedule blocks provided, construct an adjacency list
@@ -164,17 +164,16 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
     }
     return (start.isFixed = flag);
 }
-function isClose(a: number, b: number) {
-    return Math.abs(a - b) < 1e-8;
-}
+
 export function DFSFindFixedNumerical(start: ScheduleBlock): boolean {
     start.visited = true;
     const startLeft = start.left;
-    if (isClose(startLeft, 0.0)) return (start.isFixed = true);
+    // equality here should be fine
+    if (startLeft === 0.0) return (start.isFixed = true);
 
     let flag = false;
     for (const adj of start.neighbors) {
-        if (isClose(startLeft, adj.left + adj.width)) {
+        if (Math.abs(startLeft - adj.left - adj.width) < 1e-8) {
             if (adj.visited) {
                 flag = adj.isFixed || flag;
             } else {
@@ -203,36 +202,35 @@ function calculateMaxDepth(blocks: ScheduleBlock[]) {
 
 async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
     let prevFixedCount = 0;
-    for (const block of blocks) {
-        prevFixedCount += +(block.visited = block.isFixed);
-    }
+    for (const block of blocks) prevFixedCount += +(block.visited = block.isFixed);
+    // LP.initCountPool(blocks.length * (blocks.length + 2));
+
     let i = 0;
     while (i < 20) {
         const promises = [];
         for (const block of blocks) {
             if (!block.visited) {
                 const component = BFS(block);
-                promises.push(buildGLPKModel3(component));
-                // buildJSLPSolverModel(component);
+                promises.push(LP.buildGLPKModel3(component));
             }
         }
         for (const node of blocks) node.visited = node.isFixed;
         await Promise.all(promises);
 
         for (const node of blocks) {
+            const right = node.left + node.width;
             if (
-                (!node.visited && isClose(node.left + node.width, 1)) ||
-                node.neighbors.find(n => isClose(node.left + node.width, n.left) && n.isFixed)
+                !node.visited &&
+                (Math.abs(right - 1.0) < 1e-8 ||
+                    node.neighbors.find(n => n.isFixed && Math.abs(right - n.left) < 1e-8))
             ) {
                 DFSFindFixedNumerical(node);
             }
         }
         let fixedCount = 0;
-        for (const block of blocks) {
-            fixedCount += +(block.visited = block.isFixed);
-        }
+        for (const block of blocks) fixedCount += +(block.visited = block.isFixed);
         if (fixedCount === prevFixedCount) {
-            console.warn('convergence reached');
+            console.warn('convergence reached at ' + i);
             break;
         }
         prevFixedCount = fixedCount;
@@ -265,13 +263,10 @@ export async function computeBlockPositions(days: ScheduleDays) {
             block.width = 1.0 / block.pathDepth;
             if (block.isFixed) (block.background as any) = '#000000';
         }
-
-        // console.time('lp formulation');
-        // console.timeEnd('lp formulation');
     }
-
+    // const a = performance.now();
     await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
-
+    // console.warn(performance.now() - a);
     for (const blocks of days)
         for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
 }

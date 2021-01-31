@@ -10,7 +10,7 @@
 import { ScheduleDays } from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import PriorityQueue from 'tinyqueue';
-import { buildGLPKModel } from './LP';
+import { buildGLPKModel, buildGLPKModel2, buildGLPKModel3 } from './LP';
 
 /**
  * for the array of schedule blocks provided, construct an adjacency list
@@ -39,7 +39,7 @@ function BFS(start: ScheduleBlock) {
     start.visited = true;
     while (qIdx < componentNodes.length) {
         for (const node of componentNodes[qIdx++].neighbors) {
-            if (!node.visited && !node.isFixed) {
+            if (!node.visited) {
                 node.visited = true;
                 componentNodes.push(node);
             }
@@ -60,7 +60,7 @@ function intervalScheduling(blocks: ScheduleBlock[]) {
     // sort by start time
     blocks.sort((b1, b2) => {
         const diff = b1.startMin - b2.startMin;
-        if (diff === 0) return b1.duration - b2.duration;
+        if (diff === 0) return b2.duration - b1.duration;
         return diff;
     });
     const occupied = [blocks[0]];
@@ -98,7 +98,7 @@ function intervalScheduling2(blocks: ScheduleBlock[]) {
 
     blocks.sort((b1, b2) => {
         const diff = b1.startMin - b2.startMin;
-        if (diff === 0) return b1.duration - b2.duration;
+        if (diff === 0) return b2.duration - b1.duration;
         return diff;
     }); // sort by start time
     // min heap, the top element is the room whose end time is minimal
@@ -153,12 +153,34 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
     let flag = false;
     for (const adj of start.neighbors) {
         // we only visit nodes next to the current node (depth different is exactly 1) with the same pathDepth
-        const samePath = startDepth - adj.depth === 1 && pDepth === adj.pathDepth;
-        if (adj.visited) {
-            flag = (adj.isFixed && samePath) || flag;
-        } else {
-            // be careful of the short-circuit evaluation
-            flag = (samePath && DFSFindFixed(adj)) || flag;
+        if (startDepth - adj.depth === 1 && pDepth === adj.pathDepth) {
+            if (adj.visited) {
+                flag = adj.isFixed || flag;
+            } else {
+                // be careful of the short-circuit evaluation
+                flag = DFSFindFixed(adj) || flag;
+            }
+        }
+    }
+    return (start.isFixed = flag);
+}
+function isClose(a: number, b: number) {
+    return Math.abs(a - b) < 1e-8;
+}
+export function DFSFindFixedNumerical(start: ScheduleBlock): boolean {
+    start.visited = true;
+    const startLeft = start.left;
+    if (isClose(startLeft, 0.0)) return (start.isFixed = true);
+
+    let flag = false;
+    for (const adj of start.neighbors) {
+        if (isClose(startLeft, adj.left + adj.width)) {
+            if (adj.visited) {
+                flag = adj.isFixed || flag;
+            } else {
+                // be careful of the short-circuit evaluation
+                flag = DFSFindFixedNumerical(adj) || flag;
+            }
         }
     }
     return (start.isFixed = flag);
@@ -179,16 +201,57 @@ function calculateMaxDepth(blocks: ScheduleBlock[]) {
         if (!node.visited && node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
 }
 
+async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
+    let prevFixedCount = 0;
+    for (const block of blocks) {
+        prevFixedCount += +(block.visited = block.isFixed);
+    }
+    let i = 0;
+    while (i < 20) {
+        const promises = [];
+        for (const block of blocks) {
+            if (!block.visited) {
+                const component = BFS(block);
+                promises.push(buildGLPKModel3(component));
+                // buildJSLPSolverModel(component);
+            }
+        }
+        for (const node of blocks) node.visited = node.isFixed;
+        await Promise.all(promises);
+
+        for (const node of blocks) {
+            if (
+                (!node.visited && isClose(node.left + node.width, 1)) ||
+                node.neighbors.find(n => isClose(node.left + node.width, n.left) && n.isFixed)
+            ) {
+                DFSFindFixedNumerical(node);
+            }
+        }
+        let fixedCount = 0;
+        for (const block of blocks) {
+            fixedCount += +(block.visited = block.isFixed);
+        }
+        if (fixedCount === prevFixedCount) {
+            console.warn('convergence reached');
+            break;
+        }
+        prevFixedCount = fixedCount;
+        i++;
+    }
+}
+
 /**
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
-    const promises: Promise<any>[] = [];
     for (const blocks of days) {
-        blocks.forEach((b, i) => (b.idx = i));
+        blocks.forEach((b, i) => {
+            b.idx = i;
+            b.lpLNeg.name = b.lpLPos.name = `l${i}`;
+        });
         constructAdjList(blocks);
 
-        const total = intervalScheduling2(blocks);
+        const total = intervalScheduling(blocks);
         if (total <= 1) {
             for (const node of blocks) {
                 node.left = 0.0;
@@ -197,23 +260,18 @@ export async function computeBlockPositions(days: ScheduleDays) {
             continue;
         }
         calculateMaxDepth(blocks);
-        for (let i = 0; i < blocks.length; i++) {
-            const block = blocks[i];
+        for (const block of blocks) {
             block.left = block.depth / block.pathDepth;
             block.width = 1.0 / block.pathDepth;
-            // if (block.isFixed) (blocks[i].background as any) = '#000000';
+            if (block.isFixed) (block.background as any) = '#000000';
         }
 
         // console.time('lp formulation');
-        for (const block of blocks) block.visited = false;
-        for (const _block of blocks) {
-            if (!_block.visited && !_block.isFixed) {
-                const component = BFS(_block);
-                promises.push(buildGLPKModel(component));
-                // buildJSLPSolverModel(component);
-            }
-        }
         // console.timeEnd('lp formulation');
     }
-    await Promise.all(promises);
+
+    await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
+
+    for (const blocks of days)
+        for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
 }

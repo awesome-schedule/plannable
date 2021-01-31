@@ -2,7 +2,6 @@
     <div
         class="courseBlock"
         :class="scheduleBlock.strong ? 'block-strong' : ''"
-        v-if="!scheduleBlock.hidden"
         @click="showModal()"
     >
         <template v-if="!status.isMobile">
@@ -47,7 +46,7 @@
                 </div>
             </div>
             <div v-else-if="isEvent(section)" class="ml-2">
-                <div class="mt-2">
+                <div class="mt-0" style="font-size: 12px">
                     {{ scheduleBlock.depth }} {{ scheduleBlock.pathDepth }}
                     <!-- {{ section.title }} -->
                 </div>

@@ -31,7 +31,6 @@ export default class ScheduleBlock {
      * duration of the block, in minutes
      */
     public idx = 0;
-    public readonly duration: number;
     public depth = 0;
     public pathDepth = 0;
     /**
@@ -40,8 +39,10 @@ export default class ScheduleBlock {
     public strong = false;
     public visited = false;
     public isFixed = false;
-    public hidden = false;
 
+    public readonly duration: number;
+    public readonly lpLPos = { name: '', coef: 1.0 };
+    public readonly lpLNeg = { name: '', coef: -1.0 };
     public readonly neighbors: ScheduleBlock[] = [];
 
     /**
@@ -62,15 +63,10 @@ export default class ScheduleBlock {
     /**
      * returns whether this block has conflict with another block
      * @param other
-     * @param includeEnd whether to treat end-point touch as conflict
+     * @param tolerance tolerance for overlap
      */
-    public conflict(other: ScheduleBlock, includeEnd = false) {
-        const olap = calcOverlap(this.startMin, this.endMin, other.startMin, other.endMin);
-        if (includeEnd) {
-            return olap >= 0;
-        } else {
-            return olap > 0;
-        }
+    public conflict(other: ScheduleBlock, tolerance = 0) {
+        return calcOverlap(this.startMin, this.endMin, other.startMin, other.endMin) > tolerance;
     }
 
     // get left() {

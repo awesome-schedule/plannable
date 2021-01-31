@@ -182,59 +182,239 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = true)
     }
 }
 
-// export function buildJSLPSolverModel(component: ScheduleBlock[], uniform = true) {
-//     const widths: string[] = [];
-//     const model = [''];
-//     for (const block of component) {
-//         const j = block.idx;
-//         let maxLeftFixed = 0;
-//         let minRight = 1;
-//         for (const v of block.neighbors) {
-//             const temp = v.left + v.width;
-//             if (temp <= block.left + 1e-8) {
-//                 if (v.isFixed) {
-//                     maxLeftFixed = Math.max(maxLeftFixed, temp);
-//                 } else {
-//                     model.push(`1 l${j} -1 l${v.idx} -1 w${v.idx} >= 0`);
-//                 }
-//             }
-//             if (v.left + 1e-8 >= block.left + block.width) {
-//                 if (v.isFixed) {
-//                     minRight = Math.min(v.left, minRight);
-//                 }
-//             }
-//         }
-//         widths.push(`w${j}`);
-//         model.push(`1 w${j} >= ${block.width}`);
-//         model.push(`1 w${j} <= ${1.5 * block.width}`);
-//         model.push(`1 l${j} >= ${maxLeftFixed}`);
-//         model.push(`1 l${j} 1 w${j} <= ${minRight}`);
-//     }
-//     if (model.length === 1) return;
-//     model[0] = `max: 1 ${widths.join(' 1 ')}`;
+function applyLPResult2(
+    component: ScheduleBlock[],
+    result: { [varName: string]: number },
+    widthVarMap: Int16Array,
+    numVars: number
+) {
+    const widthResult = new Float64Array(numVars);
+    for (const key in result) {
+        if (key.startsWith('l')) {
+            const idx = +key.substr(1);
+            component.find(b => b.idx === idx)!.left = result[key];
+        } else if (key.startsWith('w')) {
+            const idx = +key.substr(1);
+            widthResult[idx] = result[key];
+        }
+    }
+    for (const block of component) {
+        block.width = widthResult[widthVarMap[block.pathDepth]];
+    }
+}
 
-//     console.time('solve');
-//     let result = solver.Solve(solver.ReformatLP(model));
-//     if (result.feasible) {
-//         // --------- try to minimize the sum of absolute deviations from the mean -----
-//         if (uniform) {
-//             model.push(`1 ${widths.join(' 1 ')} >= ${result.result - 1e-6}`);
-//             const additionalFactor: string[] = [];
-//             const meanFactor = 1 / widths.length;
-//             model.push(`${meanFactor} ${widths.join(` ${meanFactor} `)} -1 mean = 0`);
-//             for (let i = 0; i < widths.length; i++) {
-//                 additionalFactor.push(`1 t${i}`);
-//                 model.push(`1 t${i} -1 ${widths[i]} 1 mean >= 0`);
-//                 model.push(`1 t${i} 1 ${widths[i]} -1 mean >= 0`);
-//             }
-//             model[0] = `min: ${additionalFactor.join(' ')}`;
-//             const temp = solver.Solve(solver.ReformatLP(model));
-//             if (temp.feasible) result = temp;
-//         }
-//         // ----------------------------------------------------------------------------
-//         applyLPResult(component, result);
-//     } else {
-//         console.log('not feasible');
-//     }
-//     console.timeEnd('solve');
-// }
+export async function buildGLPKModel2(component: ScheduleBlock[], uniform = false) {
+    if (!window.Worker) return;
+    const subjectTo: LP['subjectTo'] = [];
+
+    let maxPathDepth = 0;
+    for (const block of component) {
+        maxPathDepth = Math.max(block.pathDepth, maxPathDepth);
+    }
+    maxPathDepth += 1;
+    const widthVarMap = new Int16Array(maxPathDepth).fill(-1);
+    const widthVars: string[] = [];
+    for (const block of component) {
+        if (widthVarMap[block.pathDepth] === -1) {
+            const idx = widthVars.length;
+            widthVars.push(`w${idx}`);
+            widthVarMap[block.pathDepth] = idx;
+        }
+    }
+    const widthVarCount = new Int32Array(widthVars.length);
+
+    let count = 0;
+    for (const block of component) {
+        const j = block.idx;
+        let maxLeftFixed = 0;
+        let minRight = 1;
+        for (const v of block.neighbors) {
+            const temp = v.left + v.width;
+            if (temp <= block.left + 1e-8) {
+                if (v.isFixed) {
+                    maxLeftFixed = Math.max(maxLeftFixed, temp);
+                } else {
+                    subjectTo.push({
+                        name: `${count++}`,
+                        vars: [
+                            { name: `l${j}`, coef: 1.0 },
+                            { name: `l${v.idx}`, coef: -1.0 },
+                            { name: widthVars[widthVarMap[v.pathDepth]], coef: -1.0 }
+                        ],
+                        bnds: { type: GLP_LO, lb: 0.0, ub: 1.0 }
+                    });
+                }
+            }
+            if (v.left >= block.left + block.width - 1e-8) {
+                if (v.isFixed) {
+                    minRight = Math.min(v.left, minRight);
+                }
+            }
+        }
+        const varIdx = widthVarMap[block.pathDepth];
+        widthVarCount[varIdx]++;
+        const bWVar = widthVars[varIdx];
+        subjectTo.push(
+            {
+                name: `${count++}`,
+                vars: [{ name: bWVar, coef: 1.0 }],
+                bnds: { type: GLP_LO, lb: block.width, ub: 3 * block.width }
+            },
+            {
+                name: `${count++}`,
+                vars: [{ name: `l${j}`, coef: 1.0 }],
+                bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
+            },
+            {
+                name: `${count++}`,
+                vars: [
+                    { name: bWVar, coef: 1.0 },
+                    { name: `l${j}`, coef: 1.0 }
+                ],
+                bnds: { type: GLP_UP, lb: 0, ub: minRight }
+            }
+        );
+    }
+
+    const objVars = [];
+    for (let i = 0; i < widthVarCount.length; i++) {
+        objVars.push({ name: widthVars[i], coef: widthVarCount[i] });
+    }
+    // console.log(objVars);
+    if (objVars.length === 0) return;
+    const lp = {
+        name: Math.random().toString(),
+        objective: {
+            direction: GLP_MAX,
+            name: 'obj',
+            vars: objVars
+        },
+        subjectTo
+    };
+
+    const result = await solveLP(lp);
+    nativeTime += result.time * 1000;
+    if (result.result.status === GLP_OPT) {
+        // --------- try to minimize the sum of absolute deviations from the mean -----
+        if (uniform) {
+            subjectTo.push({
+                name: `${count++}`,
+                vars: objVars.map(_var => ({ name: _var.name, coef: 1.0 })),
+                bnds: { type: GLP_LO, lb: result.result.z - 1e-8, ub: 0.0 }
+            });
+            const mean = result.result.z / objVars.length;
+            for (let i = 0; i < objVars.length; i++) {
+                const widthVar = objVars[i].name;
+                subjectTo.push(
+                    {
+                        name: `${count++}`,
+                        vars: [
+                            { name: `t${i}`, coef: 1.0 },
+                            { name: widthVar, coef: 1.0 }
+                        ],
+                        bnds: { type: GLP_LO, lb: mean, ub: 0.0 }
+                    },
+                    {
+                        name: `${count++}`,
+                        vars: [
+                            { name: `t${i}`, coef: 1.0 },
+                            { name: widthVar, coef: -1.0 }
+                        ],
+                        bnds: { type: GLP_LO, lb: -mean, ub: 0.0 }
+                    }
+                );
+                objVars[i].name = `t${i}`;
+            }
+            lp.objective.direction = GLP_MIN;
+            lp.name = Math.random().toString();
+            const result2 = await solveLP(lp);
+            nativeTime += result2.time * 1000;
+            if (result2.result.status === GLP_OPT) {
+                result.result = result2.result;
+            } else {
+                console.log('non feasible uniform constraint');
+            }
+        }
+        // ----------------------------------------------------------------------------
+        applyLPResult2(component, result.result.vars, widthVarMap, widthVars.length);
+    } else {
+        console.log('not feasible');
+    }
+}
+
+function applyLPResult3(component: ScheduleBlock[], result: { [varName: string]: number }) {
+    for (const key in result) {
+        if (key.startsWith('l')) {
+            const idx = +key.substr(1);
+            component.find(b => b.idx === idx)!.left = result[key];
+        } else if (key.startsWith('w')) {
+            for (const b of component) b.width = result[key];
+        }
+    }
+}
+
+export async function buildGLPKModel3(component: ScheduleBlock[]) {
+    if (!window.Worker) return;
+
+    const tStart = performance.now();
+    const subjectTo: LP['subjectTo'] = [];
+    const posWVar = { name: 'width', coef: 1.0 };
+    const negWVar = { name: 'width', coef: -1.0 };
+    const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
+    let count = 0;
+    for (const block of component) {
+        const j = block.idx;
+        let maxLeftFixed = 0;
+        let minRight = 1;
+        for (const v of block.neighbors) {
+            const temp = v.left + v.width;
+            if (temp <= block.left + 1e-8) {
+                if (v.isFixed) {
+                    maxLeftFixed = Math.max(maxLeftFixed, temp);
+                } else {
+                    subjectTo.push({
+                        name: `${count++}`,
+                        vars: [block.lpLPos, v.lpLNeg, negWVar],
+                        bnds: zeroLB
+                    });
+                }
+            }
+            if (v.left >= block.left + block.width - 1e-8) {
+                if (v.isFixed) {
+                    minRight = Math.min(v.left, minRight);
+                }
+            }
+        }
+        subjectTo.push(
+            {
+                name: `${count++}`,
+                vars: [block.lpLPos],
+                bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
+            },
+            {
+                name: `${count++}`,
+                vars: [posWVar, block.lpLPos],
+                bnds: { type: GLP_UP, lb: 0, ub: minRight }
+            }
+        );
+    }
+
+    // console.log(objVars);
+    const lp = {
+        name: Math.random().toString(),
+        objective: {
+            direction: GLP_MAX,
+            name: 'obj',
+            vars: [posWVar]
+        },
+        subjectTo
+    };
+    communicationTime += performance.now() - tStart;
+    const result = await solveLP(lp);
+    nativeTime += result.time * 1000;
+    if (result.result.status === GLP_OPT) {
+        applyLPResult3(component, result.result.vars);
+    } else {
+        console.log('not feasible');
+    }
+}

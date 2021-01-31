@@ -19,6 +19,6 @@ describe('schedule block', () => {
 
         expect(block1.duration).toBe(120);
         expect(block1.conflict(block2)).toBe(false);
-        expect(block1.conflict(block2, true)).toBe(true);
+        expect(block1.conflict(block2, 1)).toBe(true);
     });
 });

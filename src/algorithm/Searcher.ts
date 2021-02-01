@@ -139,7 +139,7 @@ export class FastSearcher<T, K = string> {
         return [bestMatchIndex, bestMatchRating];
     }
     /**
-     * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations:
+     * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations
      */
     public compareTwoStrings(
         bigrams: Map<string, number>,
@@ -289,12 +289,6 @@ export class FastSearcher<T, K = string> {
 
         const allMatches: SearchResult<T, K>[] = [];
         for (let i = 0; i < this.originals.length; i++) {
-            // if (!len1 && !len2) return [1, [0, 0]] as const; // if both are empty strings
-            // if (!len1 || !len2) return [0, []] as const; // if only one is empty string
-            // if (first === second) return [1, [0, len1]] as const; // identical
-            // if (len1 === 1 && len2 === 1) return [0, []] as const; // both are 1-letter strings
-            // if (len1 < 2 || len2 < 2) return [0, []] as const; // if either is a 1-letter string
-
             const matches = [];
             const fullStr = this.originals[i];
             const offset = this.idxOffsets[i];

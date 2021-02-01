@@ -27,10 +27,6 @@ export interface SemesterJSON {
     readonly name: string;
 }
 
-interface SearchWorker extends Worker {
-    onmessage(x: MessageEvent): void;
-    postMessage(x: [readonly Course[], readonly Section[]] | string): void;
-}
 /**
  * the match indices for a [[Course]]
  *
@@ -48,7 +44,7 @@ type SearchWorkerResult = [RawAlgoCourse[], SearchMatch[]];
  * @author Hanzhi Zhou
  */
 export default class Catalog {
-    public worker?: SearchWorker;
+    public worker?: Worker;
     /**
      * a mapping from course key to course itself
      */
@@ -105,7 +101,7 @@ export default class Catalog {
             // use require because we don't want this in unit-tests
             // this if branch will not tested in unit-tests because there's no web worker
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const worker: SearchWorker = new Worker();
+            const worker = new Worker();
             worker.onerror = err => console.error(err);
             worker.postMessage([this.courses, this.sections]);
             await new Promise<'ready'>(resolve => {

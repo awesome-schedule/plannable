@@ -1,4 +1,3 @@
-/* eslint-disable import/export */
 declare module 'quickselect' {
     /**
      * Rearranges items so that all items in the [left, k] are the smallest.

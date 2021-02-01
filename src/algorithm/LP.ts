@@ -35,8 +35,7 @@ const GLP_UNBND = 6;
 
 const WorkerURL = '/js/glpk-worker.js';
 const workers: Worker[] = [];
-declare const importScripts: Function | undefined;
-if (Worker && !(typeof importScripts === 'function')) {
+if (typeof Worker !== 'undefined') {
     const numCores = Math.min(Math.max(navigator.hardwareConcurrency, 2), 4);
     for (let i = 0; i < numCores; i++) {
         workers.push(new Worker(WorkerURL));

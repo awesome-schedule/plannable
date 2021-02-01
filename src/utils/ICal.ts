@@ -10,7 +10,8 @@
  */
 import Event from '@/models/Event';
 import Meeting from '@/models/Meeting';
-import Schedule, { Day, dayToInt } from '../models/Schedule';
+import Schedule from '@/models/Schedule';
+import { Day, dayToInt } from '@/models/constants';
 import { hr12toInt } from './time';
 
 function dateToICalString(date: Date) {

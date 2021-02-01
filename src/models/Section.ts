@@ -11,7 +11,7 @@ import { hashCode, parseTimeAll } from '../utils';
 import Course, { CourseFields, Match } from './Course';
 import Hashable from './Hashable';
 import Meeting from './Meeting';
-import { dayToInt } from './Schedule';
+import { dayToInt } from './constants';
 import { CourseStatus } from '../config';
 
 /**

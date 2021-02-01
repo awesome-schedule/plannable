@@ -10,8 +10,9 @@ import { NotiMsg } from '@/store/notification';
 import { TYPES, enableKeyConversion, keyRegex } from '../config';
 import * as Utils from '../utils';
 import Event from './Event';
-import Schedule, { DAYS, ScheduleAll, ScheduleJSON, SectionJSON } from './Schedule';
+import Schedule, { ScheduleAll, ScheduleJSON, SectionJSON } from './Schedule';
 import Section from './Section';
+import { DAYS } from './constants';
 
 /**
  * check whether the array is the correct JSON format for plannable v5.x to v7.x

@@ -5,7 +5,8 @@
 /**
  *
  */
-import Schedule, { DAYS } from '@/models/Schedule';
+import Schedule from '@/models/Schedule';
+import { DAYS } from '@/models/constants';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
 import { hr24toInt, to12hr } from '../utils';

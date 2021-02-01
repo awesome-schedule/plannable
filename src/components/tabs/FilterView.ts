@@ -5,7 +5,7 @@
 /**
  *
  */
-import { DAYS } from '@/models/Schedule';
+import { DAYS } from '@/models/constants';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';

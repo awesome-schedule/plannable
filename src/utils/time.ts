@@ -6,7 +6,7 @@
 /**
  *
  */
-import { Day, dayToInt } from '@/models/Schedule';
+import { Day, dayToInt } from '@/models/constants';
 import { TimeArray } from '../algorithm/ScheduleGenerator';
 
 /**

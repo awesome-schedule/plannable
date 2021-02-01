@@ -66,7 +66,7 @@ function applyLPResult(component: ScheduleBlock[], result: { [varName: string]: 
     }
 }
 
-export async function buildGLPKModel(component: ScheduleBlock[], uniform = true) {
+export async function buildGLPKModel(component: ScheduleBlock[], uniform = false) {
     if (!window.Worker) return;
 
     const objVars = [];
@@ -99,7 +99,7 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = true)
                 }
             }
         }
-        objVars.push({ name: `w${j}`, coef: 1 });
+        objVars.push({ name: `w${j}`, coef: 1.0 });
         subjectTo.push(
             {
                 name: `${count++}`,
@@ -178,7 +178,7 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = true)
         // ----------------------------------------------------------------------------
         applyLPResult(component, result.result.vars);
     } else {
-        console.log('not feasible');
+        console.log('not optimal');
     }
 }
 
@@ -203,8 +203,13 @@ function applyLPResult2(
     }
 }
 
+const posWVar = { name: 'width', coef: 1.0 };
+const negWVar = { name: 'width', coef: -1.0 };
+const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
+
 export async function buildGLPKModel2(component: ScheduleBlock[], uniform = false) {
     if (!window.Worker) return;
+    const tStart = performance.now();
     const subjectTo: LP['subjectTo'] = [];
 
     let maxPathDepth = 0;
@@ -225,7 +230,6 @@ export async function buildGLPKModel2(component: ScheduleBlock[], uniform = fals
 
     let count = 0;
     for (const block of component) {
-        const j = block.idx;
         let maxLeftFixed = 0;
         let minRight = 1;
         for (const v of block.neighbors) {
@@ -237,11 +241,11 @@ export async function buildGLPKModel2(component: ScheduleBlock[], uniform = fals
                     subjectTo.push({
                         name: `${count++}`,
                         vars: [
-                            { name: `l${j}`, coef: 1.0 },
-                            { name: `l${v.idx}`, coef: -1.0 },
+                            block.lpLPos,
+                            v.lpLNeg,
                             { name: widthVars[widthVarMap[v.pathDepth]], coef: -1.0 }
                         ],
-                        bnds: { type: GLP_LO, lb: 0.0, ub: 1.0 }
+                        bnds: zeroLB
                     });
                 }
             }
@@ -253,24 +257,21 @@ export async function buildGLPKModel2(component: ScheduleBlock[], uniform = fals
         }
         const varIdx = widthVarMap[block.pathDepth];
         widthVarCount[varIdx]++;
-        const bWVar = widthVars[varIdx];
+        const bWVar = { name: widthVars[varIdx], coef: 1.0 };
         subjectTo.push(
+            // {
+            //     name: `${count++}`,
+            //     vars: [bWVar],
+            //     bnds: { type: GLP_LO, lb: block.width, ub: 3 * block.width }
+            // },
             {
                 name: `${count++}`,
-                vars: [{ name: bWVar, coef: 1.0 }],
-                bnds: { type: GLP_LO, lb: block.width, ub: 3 * block.width }
-            },
-            {
-                name: `${count++}`,
-                vars: [{ name: `l${j}`, coef: 1.0 }],
+                vars: [block.lpLPos],
                 bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
             },
             {
                 name: `${count++}`,
-                vars: [
-                    { name: bWVar, coef: 1.0 },
-                    { name: `l${j}`, coef: 1.0 }
-                ],
+                vars: [bWVar, block.lpLPos],
                 bnds: { type: GLP_UP, lb: 0, ub: minRight }
             }
         );
@@ -280,9 +281,8 @@ export async function buildGLPKModel2(component: ScheduleBlock[], uniform = fals
     for (let i = 0; i < widthVarCount.length; i++) {
         objVars.push({ name: widthVars[i], coef: widthVarCount[i] });
     }
-    // console.log(objVars);
-    if (objVars.length === 0) return;
-    const lp = {
+    communicationTime += performance.now() - tStart;
+    const result = await solveLP({
         name: Math.random().toString(),
         objective: {
             direction: GLP_MAX,
@@ -290,55 +290,12 @@ export async function buildGLPKModel2(component: ScheduleBlock[], uniform = fals
             vars: objVars
         },
         subjectTo
-    };
-
-    const result = await solveLP(lp);
+    });
     nativeTime += result.time * 1000;
     if (result.result.status === GLP_OPT) {
-        // --------- try to minimize the sum of absolute deviations from the mean -----
-        if (uniform) {
-            subjectTo.push({
-                name: `${count++}`,
-                vars: objVars.map(_var => ({ name: _var.name, coef: 1.0 })),
-                bnds: { type: GLP_LO, lb: result.result.z - 1e-8, ub: 0.0 }
-            });
-            const mean = result.result.z / objVars.length;
-            for (let i = 0; i < objVars.length; i++) {
-                const widthVar = objVars[i].name;
-                subjectTo.push(
-                    {
-                        name: `${count++}`,
-                        vars: [
-                            { name: `t${i}`, coef: 1.0 },
-                            { name: widthVar, coef: 1.0 }
-                        ],
-                        bnds: { type: GLP_LO, lb: mean, ub: 0.0 }
-                    },
-                    {
-                        name: `${count++}`,
-                        vars: [
-                            { name: `t${i}`, coef: 1.0 },
-                            { name: widthVar, coef: -1.0 }
-                        ],
-                        bnds: { type: GLP_LO, lb: -mean, ub: 0.0 }
-                    }
-                );
-                objVars[i].name = `t${i}`;
-            }
-            lp.objective.direction = GLP_MIN;
-            lp.name = Math.random().toString();
-            const result2 = await solveLP(lp);
-            nativeTime += result2.time * 1000;
-            if (result2.result.status === GLP_OPT) {
-                result.result = result2.result;
-            } else {
-                console.log('non feasible uniform constraint');
-            }
-        }
-        // ----------------------------------------------------------------------------
         applyLPResult2(component, result.result.vars, widthVarMap, widthVars.length);
     } else {
-        console.log('not feasible');
+        console.log('not optimal');
     }
 }
 
@@ -352,10 +309,6 @@ function applyLPResult3(component: ScheduleBlock[], result: { [varName: string]:
         }
     }
 }
-
-const posWVar = { name: 'width', coef: 1.0 };
-const negWVar = { name: 'width', coef: -1.0 };
-const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
 
 export async function buildGLPKModel3(component: ScheduleBlock[]) {
     if (!window.Worker) return;
@@ -399,8 +352,8 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
         );
     }
 
-    // console.log(objVars);
-    const lp = {
+    communicationTime += performance.now() - tStart;
+    const result = await solveLP({
         name: Math.random().toString(),
         objective: {
             direction: GLP_MAX,
@@ -408,13 +361,11 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
             vars: [posWVar]
         },
         subjectTo
-    };
-    communicationTime += performance.now() - tStart;
-    const result = await solveLP(lp);
+    });
     nativeTime += result.time * 1000;
     if (result.result.status === GLP_OPT) {
         applyLPResult3(component, result.result.vars);
     } else {
-        console.log('not feasible');
+        console.log('not optimal');
     }
 }

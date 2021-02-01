@@ -155,7 +155,7 @@ export class Display implements StoreModule<DisplayState, DisplayState> {
         return this._width;
     }
     set width(e) {
-        this._width = bound(e, 10, 1000);
+        this._width = bound(e, 10, 10000);
     }
     get colorScheme() {
         return this._colorScheme;

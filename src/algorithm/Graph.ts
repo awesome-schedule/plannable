@@ -20,10 +20,12 @@ function constructAdjList(blocks: ScheduleBlock[]) {
     const len = blocks.length;
     // construct an undirected graph
     for (let i = 0; i < len; i++) {
+        const bi = blocks[i];
         for (let j = i + 1; j < len; j++) {
-            if (blocks[i].conflict(blocks[j])) {
-                blocks[j].neighbors.push(blocks[i]);
-                blocks[i].neighbors.push(blocks[j]);
+            const bj = blocks[j];
+            if (bi.conflict(bj)) {
+                bj.neighbors.push(bi);
+                bi.neighbors.push(bj);
             }
         }
     }
@@ -206,7 +208,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
     // LP.initCountPool(blocks.length * (blocks.length + 2));
 
     let i = 0;
-    while (i < 20) {
+    while (i < 100) {
         const promises = [];
         for (const block of blocks) {
             if (!block.visited) {
@@ -230,7 +232,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
         let fixedCount = 0;
         for (const block of blocks) fixedCount += +(block.visited = block.isFixed);
         if (fixedCount === prevFixedCount) {
-            console.warn('convergence reached at ' + i);
+            console.info('convergence reached at ' + i);
             break;
         }
         prevFixedCount = fixedCount;
@@ -242,6 +244,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
+    console.time('compute bp');
     for (const blocks of days) {
         blocks.forEach((b, i) => {
             b.idx = i;
@@ -263,9 +266,8 @@ export async function computeBlockPositions(days: ScheduleDays) {
             block.width = 1.0 / block.pathDepth;
         }
     }
-    // const a = performance.now();
+    console.timeEnd('compute bp');
     await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
-    // console.warn(performance.now() - a);
-    for (const blocks of days)
-        for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
+    // for (const blocks of days)
+    //     for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
 }

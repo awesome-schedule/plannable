@@ -35,7 +35,8 @@ const GLP_UNBND = 6;
 
 const WorkerURL = '/js/glpk-worker.js';
 const workers: Worker[] = [];
-if (window.Worker) {
+declare const importScripts: Function | undefined;
+if (Worker && !(typeof importScripts === 'function')) {
     const numCores = Math.min(Math.max(navigator.hardwareConcurrency, 2), 4);
     for (let i = 0; i < numCores; i++) {
         workers.push(new Worker(WorkerURL));
@@ -359,7 +360,7 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
             {
                 name: `${count++}`,
                 vars: [posWVar, block.lpLPos],
-                bnds: { type: GLP_UP, lb: 0, ub: minRight }
+                bnds: { type: GLP_UP, lb: 0.0, ub: minRight }
             }
         );
     }

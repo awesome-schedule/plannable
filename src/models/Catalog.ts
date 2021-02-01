@@ -39,6 +39,7 @@ interface SearchWorker extends Worker {
  * 1: the Map that maps [[Section.id]] to the array of matches for the fields of that section
  */
 export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
+type SearchResult = readonly [Course[], SearchMatch[]];
 
 type SearchWorkerResult = [RawAlgoCourse[], SearchMatch[]];
 
@@ -70,7 +71,8 @@ export default class Catalog {
     /**
      * the pending search (one that's not completed yet)
      */
-    private readonly resultMap = new Map<string, SearchWorkerResult>();
+    private readonly resultMap = new Map<string, SearchResult>();
+    private readonly promMap = new Map<string, (value: any) => void>();
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -104,22 +106,22 @@ export default class Catalog {
             // this if branch will not tested in unit-tests because there's no web worker
             // eslint-disable-next-line @typescript-eslint/no-var-requires
             const worker: SearchWorker = new Worker();
-            const prom = new Promise<'ready'>(resolve => {
+            worker.onerror = err => console.error(err);
+            worker.postMessage([this.courses, this.sections]);
+            await new Promise<'ready'>(resolve => {
                 worker.onmessage = ({ data }) => {
                     resolve(data);
                 };
-            }).then(res => {
-                worker.onmessage = ({ data: [query, result] }) => {
-                    this.resultMap.set(query, result);
-                };
-                worker.onerror = err => {
-                    console.error(err);
-                };
-                return res;
             });
-            worker.postMessage([this.courses, this.sections]);
+            worker.onmessage = ({ data: [query, result] }) => {
+                this.resultMap.set(query, this.convertWorkerResult(result));
+                const resolve = this.promMap.get(query);
+                if (resolve) {
+                    resolve(this.convertWorkerResult(result));
+                    this.promMap.delete(query);
+                }
+            };
             this.worker = worker;
-            return prom;
         }
         return 'ready';
     }
@@ -180,27 +182,14 @@ export default class Catalog {
 
         const lastResult = this.resultMap.get(query);
         if (lastResult && !(lastResult instanceof ErrorEvent)) {
-            return Promise.resolve(this.convertWorkerResult(lastResult));
-        } else {
-            worker.postMessage(query);
+            return Promise.resolve(lastResult);
         }
-
-        return new Promise<readonly [Course[], SearchMatch[]]>((resolve, reject) => {
-            // eslint-disable-next-line @typescript-eslint/no-this-alias
-            const that = this;
-            (function waitForLatestResult() {
-                const lastResult = that.resultMap.get(query);
-                if (lastResult) {
-                    if (lastResult instanceof ErrorEvent) {
-                        reject(lastResult);
-                    } else {
-                        resolve(that.convertWorkerResult(lastResult));
-                    }
-                    return;
-                }
-                setTimeout(waitForLatestResult, 25);
-            })();
+        const promise = new Promise<SearchResult>((resolve, reject) => {
+            this.promMap.set(query, resolve);
         });
+        worker.postMessage(query);
+
+        return promise;
     }
 
     private convertWorkerResult([courses, match]: SearchWorkerResult) {
@@ -213,7 +202,7 @@ export default class Catalog {
      * @param query
      * @param maxResults
      */
-    public search(query: string, maxResults = 6): [Course[], SearchMatch[]] {
+    public search(query: string, maxResults = 6): SearchResult {
         query = query.trim().toLowerCase();
         const temp = query.split(/\s+/);
         query = temp.join(' ');

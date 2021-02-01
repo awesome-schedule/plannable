@@ -261,7 +261,6 @@ export async function computeBlockPositions(days: ScheduleDays) {
         for (const block of blocks) {
             block.left = block.depth / block.pathDepth;
             block.width = 1.0 / block.pathDepth;
-            if (block.isFixed) (block.background as any) = '#000000';
         }
     }
     // const a = performance.now();

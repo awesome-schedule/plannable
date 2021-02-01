@@ -353,17 +353,17 @@ function applyLPResult3(component: ScheduleBlock[], result: { [varName: string]:
     }
 }
 
+const posWVar = { name: 'width', coef: 1.0 };
+const negWVar = { name: 'width', coef: -1.0 };
+const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
+
 export async function buildGLPKModel3(component: ScheduleBlock[]) {
     if (!window.Worker) return;
 
     const tStart = performance.now();
     const subjectTo: LP['subjectTo'] = [];
-    const posWVar = { name: 'width', coef: 1.0 };
-    const negWVar = { name: 'width', coef: -1.0 };
-    const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
     let count = 0;
     for (const block of component) {
-        const j = block.idx;
         let maxLeftFixed = 0;
         let minRight = 1;
         for (const v of block.neighbors) {

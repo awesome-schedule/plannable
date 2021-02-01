@@ -131,7 +131,7 @@ export default class GridSchedule extends Store {
     get blockStyles() {
         console.time('compute style');
         const arr: string[][] = [[], [], [], [], [], [], []];
-        // cache these properties will speed uo their access
+        // cache these properties will speed up their access
         const schedule = this.currentSchedule;
         const sumHeights = this.heights.sumHeights;
         const absoluteEarliest = this.absoluteEarliest;

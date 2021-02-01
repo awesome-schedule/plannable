@@ -232,7 +232,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
         let fixedCount = 0;
         for (const block of blocks) fixedCount += +(block.visited = block.isFixed);
         if (fixedCount === prevFixedCount) {
-            console.info('convergence reached at ' + i);
+            console.log('convergence reached at ' + i);
             break;
         }
         prevFixedCount = fixedCount;

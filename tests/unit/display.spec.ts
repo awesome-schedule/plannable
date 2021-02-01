@@ -20,8 +20,8 @@ describe('notification test', () => {
         display.partialHeight = 10000;
         expect(display.partialHeight).toBe(100);
 
-        display.width = 10000;
-        expect(display.width).toBe(1000);
+        display.width = 100000;
+        expect(display.width).toBe(10000);
 
         display.colorScheme = 1;
         expect(display.colorScheme).toBe(1);

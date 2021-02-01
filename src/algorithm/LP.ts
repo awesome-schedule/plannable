@@ -1,3 +1,15 @@
+/**
+ * this module contains
+ *  - several functions that build a linear programming model for schedule event rendering
+ *  - several GLPK workers that accept LP models and return their solution (if feasible)
+ * @author Hanzhi Zhou
+ * @module src/algorithm
+ */
+
+/**
+ *
+ */
+
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ScheduleBlock from '@/models/ScheduleBlock';
 import { LP, Result } from 'glpk.js';

@@ -21,7 +21,14 @@
         <div class="mx-3 my-2 text-center">
             <div class="btn-group w-100 mt-2" role="group" aria-label="Basic example">
                 <button class="btn btn-outline-dark px-0" @click="saveToJson()">Export JSON</button>
-                <button class="btn btn-outline-dark px-0" @click="saveToIcal()">Export iCal</button>
+                <button class="btn btn-outline-dark px-0" @click="saveToIcal()">
+                    Export iCal
+                    <i
+                        v-if="!schedule.generated"
+                        class="fas fa-exclamation-triangle text-warning"
+                        title="You've not generated schedules yet! Exporting to iCalendar now will probably result in an incomplete calendar."
+                    ></i>
+                </button>
             </div>
             <small class="form-text text-muted">
                 JSON: Can be imported later <br />

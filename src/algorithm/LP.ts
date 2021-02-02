@@ -329,8 +329,8 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
     const subjectTo: LP['subjectTo'] = [];
     let count = 0;
     for (const block of component) {
-        let maxLeftFixed = 0;
-        let minRight = 1;
+        let maxLeftFixed = 0.0;
+        let minRight = 1.0;
         for (const v of block.neighbors) {
             const temp = v.left + v.width;
             if (temp <= block.left + 1e-8) {

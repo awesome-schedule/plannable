@@ -34,8 +34,7 @@ function dateToICalString(date: Date) {
         date
             .getUTCSeconds()
             .toString()
-            .padStart(2, '0') +
-        'Z'
+            .padStart(2, '0')
     );
 }
 
@@ -65,15 +64,16 @@ function toICalEventString(
 
     console.log(startMin, endMin);
 
-    let ical = '';
-    ical += 'BEGIN:VEVENT\r\n';
+    // const timeZone = ';TZID=America/New_York';
+    const timeZone = '';
+    let ical = 'BEGIN:VEVENT\r\n';
     ical += `UID:${uid}\r\n`;
-    ical += `DTSTAMP:${dateToICalString(new Date())}\r\n`;
-    ical += `DTSTART:${dateToICalString(
-        new Date(startDate.getTime() + (startMin + 300) * 60 * 1000)
+    ical += `DTSTAMP${timeZone}:${dateToICalString(new Date())}\r\n`;
+    ical += `DTSTART${timeZone}:${dateToICalString(
+        new Date(startDate.getTime() + startMin * 60 * 1000)
     )}\r\n`;
-    ical += `DTEND:${dateToICalString(
-        new Date(startDate.getTime() + (endMin + 300) * 60 * 1000)
+    ical += `DTEND${timeZone}:${dateToICalString(
+        new Date(startDate.getTime() + endMin * 60 * 1000)
     )}\r\n`;
     ical += `SUMMARY:${summary}\r\n`;
     ical += `RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=${days
@@ -94,7 +94,8 @@ function toICalEventString(
  */
 export function toICal(schedule: Schedule) {
     let ical = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:plannable\r\n';
-
+    // ical += 'BEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\n';
+    // ical += 'END:STANDARD\r\nEND:VTIMEZONE\r\n';
     let startDate: Date, endDate: Date;
     for (const { dateArray } of window.catalog.sections) {
         if (dateArray) {
@@ -105,7 +106,10 @@ export function toICal(schedule: Schedule) {
     }
 
     for (const [id] of schedule.current.ids) {
-        const sec = window.catalog.getSectionById(parseInt(id));
+        const parsed = parseInt(id);
+        if (isNaN(parsed)) continue;
+
+        const sec = window.catalog.getSectionById(parsed);
         if (!sec.dateArray) continue;
         startDate = new Date(sec.dateArray[0]);
         endDate = new Date(sec.dateArray[1] + 1000 * 60 * 60 * 24);
@@ -123,7 +127,7 @@ export function toICal(schedule: Schedule) {
                 );
             } catch (e) {
                 // error parsing time. probably TBA/TBD/Web based
-                console.error(e);
+                console.warn(e);
             }
         }
     }

@@ -201,19 +201,39 @@ function calculateMaxDepth(blocks: ScheduleBlock[]) {
     for (const node of blocks)
         if (!node.visited && node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
 }
+export const options = {
+    applyLP: true,
+    ISMethod: 1,
+    LPIters: 100,
+    LPModel: 3
+};
 
 async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
     let prevFixedCount = 0;
     for (const block of blocks) prevFixedCount += +(block.visited = block.isFixed);
     // LP.initCountPool(blocks.length * (blocks.length + 2));
 
-    let i = 0;
-    while (i < 100) {
+    if (options.LPModel === 1) {
         const promises = [];
         for (const block of blocks) {
             if (!block.visited) {
                 const component = BFS(block);
-                promises.push(LP.buildGLPKModel3(component));
+                promises.push(LP.buildGLPKModel(component));
+            }
+        }
+        await Promise.all(promises);
+        return;
+    }
+    let LPModelFunc = LP.buildGLPKModel3;
+    if (options.LPModel === 2) LPModelFunc = LP.buildGLPKModel2;
+
+    let i = 0;
+    while (i < options.LPIters) {
+        const promises = [];
+        for (const block of blocks) {
+            if (!block.visited) {
+                const component = BFS(block);
+                promises.push(LPModelFunc(component));
             }
         }
         for (const node of blocks) node.visited = node.isFixed;
@@ -232,7 +252,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
         let fixedCount = 0;
         for (const block of blocks) fixedCount += +(block.visited = block.isFixed);
         if (fixedCount === prevFixedCount) {
-            console.log('convergence reached at ' + i);
+            // console.log('convergence reached at ' + i);
             break;
         }
         prevFixedCount = fixedCount;
@@ -244,7 +264,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
-    console.time('compute bp');
+    // console.time('compute bp');
     for (const blocks of days) {
         blocks.forEach((b, i) => {
             b.idx = i;
@@ -252,7 +272,8 @@ export async function computeBlockPositions(days: ScheduleDays) {
         });
         constructAdjList(blocks);
 
-        const total = intervalScheduling(blocks);
+        const total =
+            options.ISMethod === 1 ? intervalScheduling(blocks) : intervalScheduling2(blocks);
         if (total <= 1) {
             for (const node of blocks) {
                 node.left = 0.0;
@@ -266,8 +287,27 @@ export async function computeBlockPositions(days: ScheduleDays) {
             block.width = 1.0 / block.pathDepth;
         }
     }
-    console.timeEnd('compute bp');
+    if (!options.applyLP) return;
+
+    // console.timeEnd('compute bp');
+    // const tStart = performance.now();
     await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
+    // console.log('lp', performance.now() - tStart);
+    let N = 0;
+    let sumW = 0.0,
+        sumW2 = 0.0;
+    for (const blocks of days) {
+        for (const block of blocks) {
+            N++;
+            sumW += block.width * 100;
+            sumW2 += (block.width * 100) ** 2;
+        }
+    }
+    if (N > 500) {
+        const mean = sumW / N;
+        console.log('meanW', mean, 'varW', sumW2 / N - mean ** 2);
+    }
+
     // for (const blocks of days)
     //     for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
 }

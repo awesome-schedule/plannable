@@ -5,9 +5,10 @@
 /**
  *
  */
+import { options } from '@/algorithm/Graph';
 import CatalogDB from '@/data/CatalogDB';
 import Store from '@/store';
-import { Component } from 'vue-property-decorator';
+import { Component, Watch } from 'vue-property-decorator';
 
 /**
  * component for editing settings. This component should really be named as `SettingsView`,
@@ -17,6 +18,10 @@ import { Component } from 'vue-property-decorator';
  */
 @Component
 export default class DisplayView extends Store {
+    options = options;
+    @Watch('options', { deep: true }) private w1() {
+        this.schedule.recomputeAll();
+    }
     /**
      * clear the localStorage and reload the page
      */

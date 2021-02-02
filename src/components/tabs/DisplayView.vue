@@ -1,15 +1,11 @@
 <template>
     <nav class="bg-light sidebar">
-        <div class="btn bg-info nav-btn">
-            Schedule Settings
-        </div>
+        <div class="btn bg-info nav-btn">Schedule Settings</div>
         <div
             class="form-group row no-gutters mt-2 mb-0 mx-2"
             title="Schedule grid earlier than this time won't be displayed if you don't have any class before that time"
         >
-            <label for="schedule-start" class="col-lg-6 col-form-label">
-                Schedule Start
-            </label>
+            <label for="schedule-start" class="col-lg-6 col-form-label"> Schedule Start </label>
             <div class="col-lg-6">
                 <input
                     id="schedule-start"
@@ -150,7 +146,12 @@
         </div>
         <div class="form-group row no-gutters mt-0 mb-1 mx-2">
             <div class="col-md-6">
-                <label for="showSuffix" class="m-0">Show Suffix</label>
+                <label
+                    for="showSuffix"
+                    class="m-0"
+                    title="Show class type, e.g. lecture, lab, studio, etc."
+                    >Show Suffix
+                </label>
             </div>
             <div class="col-md-6">
                 <div class="custom-control custom-checkbox ml-1">
@@ -191,14 +192,10 @@
                 </div>
             </div>
         </div>
-        <div class="btn bg-info nav-btn">
-            Course Search
-        </div>
-        <li class="list-group-item mb-0 pt-1" style="border-bottom: 0">
-            <label for="num-search-results">
-                Max number of search results
-            </label>
-            <div class="mr-5 mb-2">
+        <div class="btn bg-info nav-btn">Course Search</div>
+        <div class="mx-2 my-2">
+            <label for="num-search-results"> Max number of search results </label>
+            <div class="mb-2">
                 <input
                     id="num-search-results"
                     v-model.number="display.numSearchResults"
@@ -231,10 +228,8 @@
                     Show description on class list
                 </label>
             </div>
-        </li>
-        <div class="btn bg-info nav-btn">
-            Advanced Features
         </div>
+        <div class="btn bg-info nav-btn">Advanced Features</div>
         <ul class="list-group list-group-flush mx-1">
             <li class="list-group-item pb-1 pt-0">
                 <div class="form-group my-1">
@@ -290,6 +285,66 @@
                 </button>
             </li>
         </ul>
+        <div class="btn bg-info nav-btn">Advanced Rendering Features</div>
+        <div class="w-100 text-center mb-1"><small>These options will not be saved!</small></div>
+        <div class="form-group row no-gutters my-1 mx-3">
+            <label for="ISMethod" class="col-lg-6 col-form-label">IS Method</label>
+            <div class="col-lg-6">
+                <input
+                    id="ISMethod"
+                    v-model.number="options.ISMethod"
+                    min="1"
+                    step="1"
+                    max="2"
+                    type="number"
+                    class="form-control form-control-sm"
+                />
+            </div>
+        </div>
+        <div class="form-group row no-gutters my-1 mx-3">
+            <div class="col-md-6">
+                <label for="applyLP" class="m-0"> Apply LP </label>
+            </div>
+            <div class="col-md-6">
+                <div class="custom-control custom-checkbox ml-1">
+                    <input
+                        id="applyLP"
+                        v-model.number="options.applyLP"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label for="applyLP" class="custom-control-label"></label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row no-gutters my-1 mx-3">
+            <label for="LPModel" class="col-lg-6 col-form-label">LP Model</label>
+            <div class="col-lg-6">
+                <input
+                    id="LPModel"
+                    v-model.number="options.LPModel"
+                    min="1"
+                    step="1"
+                    max="3"
+                    type="number"
+                    class="form-control form-control-sm"
+                />
+            </div>
+        </div>
+        <div class="form-group row no-gutters mt-0 mb-1 mx-3">
+            <label for="LPIters" class="col-lg-6 col-form-label">LP Iterations</label>
+            <div class="col-lg-6">
+                <input
+                    id="LPIters"
+                    v-model.number="options.LPIters"
+                    min="0"
+                    step="1"
+                    max="2"
+                    type="number"
+                    class="form-control form-control-sm"
+                />
+            </div>
+        </div>
     </nav>
 </template>
 

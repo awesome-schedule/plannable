@@ -205,7 +205,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
 
     /**
      * recompute all of the proposed schedules. meaning of params see [[Schedule.computeSchedule]]
-     * @param sync
+     * @param sync default to true
      * @param time
      */
     recomputeAll(sync = true, time = 10) {

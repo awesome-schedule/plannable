@@ -9,7 +9,6 @@
 /**
  *
  */
-
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import ScheduleBlock from '@/models/ScheduleBlock';
 import { LP, Result } from 'glpk.js';
@@ -78,6 +77,10 @@ function applyLPResult(component: ScheduleBlock[], result: { [varName: string]: 
     }
 }
 
+const posWVar = { name: 'width', coef: 1.0 };
+const negWVar = { name: 'width', coef: -1.0 };
+const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
+
 export async function buildGLPKModel(component: ScheduleBlock[], uniform = false) {
     if (!window.Worker) return;
 
@@ -96,39 +99,30 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = false
                 } else {
                     subjectTo.push({
                         name: `${count++}`,
-                        vars: [
-                            { name: `l${j}`, coef: 1.0 },
-                            { name: `l${v.idx}`, coef: -1.0 },
-                            { name: `w${v.idx}`, coef: -1.0 }
-                        ],
-                        bnds: { type: GLP_LO, lb: 0.0, ub: 1.0 }
+                        vars: [block.lpLPos, v.lpLNeg, { name: `w${v.idx}`, coef: -1.0 }],
+                        bnds: zeroLB
                     });
                 }
             }
-            if (v.left >= block.left + block.width - 1e-8) {
-                if (v.isFixed) {
-                    minRight = Math.min(v.left, minRight);
-                }
-            }
+            if (v.isFixed && v.left >= block.left + block.width - 1e-8)
+                minRight = Math.min(v.left, minRight);
         }
-        objVars.push({ name: `w${j}`, coef: 1.0 });
+        const wWar = { name: `w${j}`, coef: 1.0 };
+        objVars.push(wWar);
         subjectTo.push(
             {
                 name: `${count++}`,
-                vars: [{ name: `w${j}`, coef: 1.0 }],
+                vars: [wWar],
                 bnds: { type: GLP_LO, lb: block.width, ub: 0.0 }
             },
             {
                 name: `${count++}`,
-                vars: [{ name: `l${j}`, coef: 1.0 }],
+                vars: [block.lpLPos],
                 bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
             },
             {
                 name: `${count++}`,
-                vars: [
-                    { name: `w${j}`, coef: 1.0 },
-                    { name: `l${j}`, coef: 1.0 }
-                ],
+                vars: [wWar, block.lpLPos],
                 bnds: { type: GLP_UP, lb: 0, ub: minRight }
             }
         );
@@ -143,7 +137,6 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = false
         },
         subjectTo
     };
-
     const result = await solveLP(lp);
     nativeTime += result.time * 1000;
     if (result.result.status === GLP_OPT) {
@@ -151,28 +144,26 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = false
         if (uniform) {
             subjectTo.push({
                 name: `${count++}`,
+                // we need to copy the objective vars because we will modify it later and we don't want it to be changed here
                 vars: objVars.map(_var => ({ name: _var.name, coef: 1.0 })),
                 bnds: { type: GLP_LO, lb: result.result.z - 1e-8, ub: 0.0 }
             });
             const mean = result.result.z / objVars.length;
+            const upperMeanBnd = { type: GLP_LO, lb: mean, ub: 0.0 },
+                lowerMeanBnd = { type: GLP_LO, lb: -mean, ub: 0.0 };
             for (let i = 0; i < objVars.length; i++) {
                 const widthVar = objVars[i].name;
+                const tVar = { name: `t${i}`, coef: 1.0 };
                 subjectTo.push(
                     {
                         name: `${count++}`,
-                        vars: [
-                            { name: `t${i}`, coef: 1.0 },
-                            { name: widthVar, coef: 1.0 }
-                        ],
-                        bnds: { type: GLP_LO, lb: mean, ub: 0.0 }
+                        vars: [tVar, { name: widthVar, coef: 1.0 }],
+                        bnds: upperMeanBnd
                     },
                     {
                         name: `${count++}`,
-                        vars: [
-                            { name: `t${i}`, coef: 1.0 },
-                            { name: widthVar, coef: -1.0 }
-                        ],
-                        bnds: { type: GLP_LO, lb: -mean, ub: 0.0 }
+                        vars: [tVar, { name: widthVar, coef: -1.0 }],
+                        bnds: lowerMeanBnd
                     }
                 );
                 objVars[i].name = `t${i}`;
@@ -215,11 +206,7 @@ function applyLPResult2(
     }
 }
 
-const posWVar = { name: 'width', coef: 1.0 };
-const negWVar = { name: 'width', coef: -1.0 };
-const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
-
-export async function buildGLPKModel2(component: ScheduleBlock[], uniform = false) {
+export async function buildGLPKModel2(component: ScheduleBlock[]) {
     if (!window.Worker) return;
     const tStart = performance.now();
     const subjectTo: LP['subjectTo'] = [];
@@ -261,11 +248,8 @@ export async function buildGLPKModel2(component: ScheduleBlock[], uniform = fals
                     });
                 }
             }
-            if (v.left >= block.left + block.width - 1e-8) {
-                if (v.isFixed) {
-                    minRight = Math.min(v.left, minRight);
-                }
-            }
+            if (v.isFixed && v.left >= block.left + block.width - 1e-8)
+                minRight = Math.min(v.left, minRight);
         }
         const varIdx = widthVarMap[block.pathDepth];
         widthVarCount[varIdx]++;
@@ -344,11 +328,8 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
                     });
                 }
             }
-            if (v.left >= block.left + block.width - 1e-8) {
-                if (v.isFixed) {
-                    minRight = Math.min(v.left, minRight);
-                }
-            }
+            if (v.isFixed && v.left >= block.left + block.width - 1e-8)
+                minRight = Math.min(v.left, minRight);
         }
         subjectTo.push(
             {
@@ -380,4 +361,9 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
     } else {
         console.log('not optimal');
     }
+}
+
+export function clearTime() {
+    nativeTime = 0.0;
+    communicationTime = 0.0;
 }

@@ -332,9 +332,9 @@ export default abstract class Schedule {
         for (const event of this.events) if (event.display) this.place(event, days);
         console.timeEnd('compute schedule');
 
-        const tStart = performance.now();
+        // const tStart = performance.now();
         await computeBlockPositions(days);
-        console.log('compute blocks', performance.now() - tStart);
+        // console.log('compute blocks', performance.now() - tStart);
         if (days.reduce((sum, blocks) => sum + blocks.length, 0) < 100) this.days = days;
         else this.days = Object.seal(days);
     }

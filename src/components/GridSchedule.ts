@@ -130,7 +130,7 @@ export default class GridSchedule extends Store {
         };
     }
     get blockStyles() {
-        console.time('compute style');
+        // console.time('compute style');
         const arr: string[][] = [[], [], [], [], [], [], []];
         // cache these properties will speed up their access
         const schedule = this.currentSchedule;
@@ -155,7 +155,7 @@ export default class GridSchedule extends Store {
                 );
             }
         }
-        console.timeEnd('compute style');
+        // console.timeEnd('compute style');
         return arr;
     }
 }

@@ -20,30 +20,44 @@ import Section from './Section';
  */
 export default class ScheduleBlock {
     /**
-     * the left of the block relative to the column, a decimal between 0 and 1
+     * the relative distance of the block to the column's left border, a decimal between 0 and 1
      */
     public left = -1.0;
     /**
-     * the width of the block relative to the column, a decimal between 0 and 1
+     * the width of the block relative to the column width, a decimal between 0 and 1
      */
     public width = -1.0;
-    /**
-     * duration of the block, in minutes
-     */
-    public idx = 0;
-    public depth = 0;
-    public pathDepth = 0;
     /**
      * whether the block is highlighted
      */
     public strong = false;
-    public visited = false;
-    public isFixed = false;
-
+    /**
+     * duration of the block, in minutes
+     */
     public readonly duration: number;
+
+    // ----- the following fields are only used to compute the left and width of this block -------
+    // ----- they are not used when rendering
+    /** an unique index for this scheduleBlock */
+    public idx = 0;
+    /** depth/room assignment obtained from the interval scheduling algorithm */
+    public depth = 0;
+    /**
+     * the maximum depth (number of rooms) that the current block is on
+     * also equal to the maximum depth of the block on the right hand side of this block that also conflicts with this blocks
+     */
+    public pathDepth = 0;
+    /** visited flag used in BFS/DFS */
+    public visited = false;
+    /** whether this block is movable/expandable (i.e. whether there's still room for it to change its left and width) */
+    public isFixed = false;
+    /** a variable corresponding to +left, used in LP formulation. name will be assignment based on idx later  */
     public readonly lpLPos = { name: '', coef: 1.0 };
+    /** a variable corresponding to -left, used in LP formulation. name will be assignment based on idx later  */
     public readonly lpLNeg = { name: '', coef: -1.0 };
+    /** all blocks that conflict with this block */
     public readonly neighbors: ScheduleBlock[] = [];
+    // --------------------------------------------------------------------------------------------
 
     /**
      * @param background background color in hex, e.g. `#ffffff`

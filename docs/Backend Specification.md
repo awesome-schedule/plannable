@@ -4,11 +4,11 @@ If you're interested in providing a profile storage backend for plannable, this 
 
 ## Backend configuration
 
-The backend provider should provide the information specified in the `BackendConfig` type in [config.example.ts](../src/config.example.ts) and fill them into the `"backend"` field of [package.json](../package.json)
+The backend provider should provide the information specified in the `BackendConfig` type in [config.example.ts](../src/config.example.ts). Currently, this information should be filled into the `backend` field of [package.json](../package.json). Plannable may support multi-backend in the future, so the `backend` field will become an array. 
 
 ## CORS headers
 
-To satisfy the CORS policies, the backend needs to include the following headers on every response
+To satisfy the CORS policies, the backend needs to include the following headers on every response. However, if you deploy plannable on the same domain as the backend, then no CORS headers are required. 
 
 ```
 Access-Control-Allow-Origin: https://plannable.org
@@ -19,7 +19,7 @@ Access-Control-Allow-Headers: Authorization
 
 The authorization process of plannable follows the authorization code flow with PKCE of the OAuth 2.0 standard. Appropriate information should be filled into config.ts.
 
-The backend should provide an endpoint (`backend.code`) for getting an authorization code. The request to this endpoint will a HTTP GET containing the following information:
+The backend should provide an endpoint (`backend.code`) for getting an authorization code. The request to this endpoint will a HTTP GET containing the following information in the URL:
 
 ```js
 {
@@ -204,16 +204,19 @@ It should give a JSON response indicating whether the action is performed succes
 
 ## Versioning and miscellaneous requirements
 
+The following paragraphs give a rough description on what actions should be performed when some of the APIs are called. The implementer should fill in the details when needed. 
+
 When a profile is **uploaded**:
-- If previous versions exist:
-  - If the previous versions are marked as detached, they should be changed to active. 
-  - If [time now] - [modified time of the latest version] > SAVE_INTERVAL:
-    - Increment the version number of the latest version by 1, and use it as the current version.
-  - else
-    - Overwrite the content of the latest version with the newly uploaded profile.
-- If previous versions do not exist:
-  - A new version history for that profile is created. Version numbers should start from 1. 
-- Set the modified time to now. 
+- For each profile in the array:
+  - If previous versions exist:
+    - If the previous versions are marked as detached, they should be changed to active. 
+    - If [time now] - [modified time of the latest version] > SAVE_INTERVAL **OR** `new` is set to true:
+      - Increment the version number of the latest version by 1, and use it as the current version.
+    - else
+      - Overwrite the content of the latest version with the newly uploaded profile.
+  - If previous versions do not exist:
+    - A new version history for that profile is created. Version numbers should start from 1. 
+  - Set the modified time to now. 
 
 When a profile is **renamed**:
 - All its previous versions corresponding to the old name shall be marked as detached. Administrators can set an expiration time for the detached versions, and delete them from the database when they expire. 

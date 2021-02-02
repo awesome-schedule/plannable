@@ -1,6 +1,6 @@
 /**
  * this module contains
- *  - several functions that build a linear programming model for schedule event rendering
+ *  - several functions that build different linear programming models for schedule event rendering
  *  - several GLPK workers that accept LP models and return their solution (if feasible)
  * @author Hanzhi Zhou
  * @module src/algorithm
@@ -81,7 +81,13 @@ const posWVar = { name: 'width', coef: 1.0 };
 const negWVar = { name: 'width', coef: -1.0 };
 const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
 
-export async function buildGLPKModel(component: ScheduleBlock[], uniform = false) {
+/**
+ * build a LP model that maximizes the sum of widths `w1 + ... + wn`, where `n` equals to the number of blocks passed in.
+ * All ScheduleBlocks have independent widths, but each width variable `wi` must be greater than the initially calculate width.
+ * Then, a second LP model is built to minimize the absolute deviations of each width from the mean while retaining previously maximized sum of the widths
+ * @param component
+ */
+export async function buildGLPKModel(component: ScheduleBlock[], uniform = true) {
     if (!window.Worker) return;
 
     const objVars = [];
@@ -145,28 +151,27 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = false
             subjectTo.push({
                 name: `${count++}`,
                 // we need to copy the objective vars because we will modify it later and we don't want it to be changed here
-                vars: objVars.map(_var => ({ name: _var.name, coef: 1.0 })),
+                vars: objVars.concat(),
                 bnds: { type: GLP_LO, lb: result.result.z - 1e-8, ub: 0.0 }
             });
-            const mean = result.result.z / objVars.length;
+            const mean = result.result.z / objVars.length - 1e-8;
             const upperMeanBnd = { type: GLP_LO, lb: mean, ub: 0.0 },
                 lowerMeanBnd = { type: GLP_LO, lb: -mean, ub: 0.0 };
             for (let i = 0; i < objVars.length; i++) {
-                const widthVar = objVars[i].name;
                 const tVar = { name: `t${i}`, coef: 1.0 };
                 subjectTo.push(
                     {
                         name: `${count++}`,
-                        vars: [tVar, { name: widthVar, coef: 1.0 }],
+                        vars: [tVar, objVars[i]],
                         bnds: upperMeanBnd
                     },
                     {
                         name: `${count++}`,
-                        vars: [tVar, { name: widthVar, coef: -1.0 }],
+                        vars: [tVar, { name: objVars[i].name, coef: -1.0 }],
                         bnds: lowerMeanBnd
                     }
                 );
-                objVars[i].name = `t${i}`;
+                objVars[i] = tVar;
             }
             lp.objective.direction = GLP_MIN;
             lp.name = Math.random().toString();
@@ -206,6 +211,11 @@ function applyLPResult2(
     }
 }
 
+/**
+ * build a LP model that maximizes width `w1 + ... + wn`, where `n` equals to the number of unique pathDepths of the blocks passed in
+ * All ScheduleBlocks that share the same pathDepth are required to have the same width. This function needs to be applied iteratively to achieve the optimal result
+ * @param component
+ */
 export async function buildGLPKModel2(component: ScheduleBlock[]) {
     if (!window.Worker) return;
     const tStart = performance.now();
@@ -306,6 +316,11 @@ function applyLPResult3(component: ScheduleBlock[], result: { [varName: string]:
     }
 }
 
+/**
+ * build a LP model that optimizes the maximum width `w`.
+ * All ScheduleBlocks are required to have width `w`. This function needs to be applied iteratively to achieve the optimal result
+ * @param component
+ */
 export async function buildGLPKModel3(component: ScheduleBlock[]) {
     if (!window.Worker) return;
 

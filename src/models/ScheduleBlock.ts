@@ -6,7 +6,6 @@
 /**
  *
  */
-
 import { calcOverlap } from '../utils';
 import Course from './Course';
 import Event from './Event';
@@ -80,7 +79,7 @@ export default class ScheduleBlock {
      * @param tolerance tolerance for overlap. If the overlap area is greater than this parameter, then 2 schedule blocks are considered to be conflict
      * Notable examples:
      * - tolerance of 0 means end point touch **is not** considered as a conflict
-     * - tolerance of -1 or lower means end point touch **is** not considered as a conflict
+     * - tolerance of -1 or lower means end point touch **is** considered as a conflict
      */
     public conflict(other: ScheduleBlock, tolerance = 0) {
         return calcOverlap(this.startMin, this.endMin, other.startMin, other.endMin) > tolerance;

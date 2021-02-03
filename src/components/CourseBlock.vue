@@ -47,12 +47,12 @@
             </div>
             <div v-else-if="isEvent(section)" class="ml-2">
                 <div class="mt-0" style="font-size: 12px">
-                    {{ scheduleBlock.depth }} {{ scheduleBlock.pathDepth }}
-                    <!-- {{ section.title }} -->
+                    <!-- {{ scheduleBlock.depth }} {{ scheduleBlock.pathDepth }} -->
+                    {{ section.title }}
                 </div>
                 <div class="cb-item">
-                    <!-- {{ section.days }}<br />
-                    {{ section.room }} -->
+                    {{ section.days }}<br />
+                    {{ section.room }}
                 </div>
                 <div class="cb-item" v-html="section.description"></div>
             </div>

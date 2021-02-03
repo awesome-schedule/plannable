@@ -228,10 +228,8 @@ export default abstract class Schedule {
      * @param sync if true, synchronously execute this function, otherwise use setTimeout
      * @param time the delay of setTimeout, in milliseconds
      * @remarks this method has a very high time complexity.
-     * However, because we're running on small input sets (usually contain no more than 20 sections), it
-     * usually completes within 50ms.
-     * @note it is the caller's responsibility to call constructDateSeparators,
-     * which is necessary if new classes are added
+     * However, because we're running on small input sets (usually contain no more than 20 sections), it usually completes within 50ms.
+     * @note it is the caller's responsibility to call constructDateSeparators, which is necessary if new classes are added
      */
     public async computeSchedule(sync = true, time = 50) {
         window.clearTimeout(this.pendingCompute);
@@ -250,6 +248,9 @@ export default abstract class Schedule {
 
         console.time('compute schedule');
         this.cleanSchedule(false);
+        // we will not clean schedule blocks in this.days and place on it directly.
+        // Instead, we created a fresh object, and assign to this.days after blocks have been computed
+        // so there will not be a period in which no blocks are in this.days
         const days: Schedule['days'] = [[], [], [], [], [], [], []];
         const temp = new Date(this.dateSeparators[this.dateSelector]);
 
@@ -415,7 +416,7 @@ export default abstract class Schedule {
     }
 
     /**
-     * place a `Section`/`Course`/`Event`/ into one of the `Mo` to `Su` array according to its `days` property
+     * place a `Section`/`Course`/`Event`/ into one of the days array according to its `days` property
      * @remarks we can place a Course instance if all of its sections occur at the same time
      */
     private place(course: Section | Course | Event, days: Schedule['days']) {

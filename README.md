@@ -104,12 +104,6 @@ You can use `npx electron .` to launch the native application powered by electro
 
 You can use `npx electron-builder --win` (or `--mac`, `--linux`) to build the native executable for your platform. 
 
-## Built With
-
--   [TypeScript](https://www.typescriptlang.org)
--   [Vue.js](https://vuejs.org)
--   [Bootstrap](https://getbootstrap.com/)
-
 ## Contributors
 
 Please refer to our [Contribution Log](docs/Contribution.md) or [GitHub contribution statistics](https://github.com/OAHC2022/UVaAutoScheduler/graphs/contributors)

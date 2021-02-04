@@ -83,7 +83,7 @@ const zeroLB = { type: GLP_LO, lb: 0.0, ub: 0.0 };
 
 /**
  * build a LP model that maximizes the sum of widths `w1 + ... + wn`, where `n` equals to the number of blocks passed in.
- * All ScheduleBlocks have independent widths, but each width variable `wi` must be greater than the initially calculate width.
+ * All ScheduleBlocks have independent widths, but each width variable `wi` must be greater than the initially calculated width.
  * Then, a second LP model is built to minimize the absolute deviations of each width from the mean while retaining previously maximized sum of the widths
  * @param component
  */

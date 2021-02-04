@@ -103,7 +103,7 @@ export function parseTimeAll(time: string): [Day[], [number, number]] | null {
 }
 
 /**
- * @author Kaiying Cat
+ * @author Kaiying Shan
  * @param time
  * @returns null when fail to parse
  *
@@ -141,7 +141,7 @@ export function parseTimeAsTimeArray(time: string): TimeArray | null {
 
 /**
  * return true if two [[TimeArray]] objects have overlapping time blocks, false otherwise
- * @author Hanzhi Zhou, (amended by) Kaiying Cat
+ * @author Hanzhi Zhou, (amended by) Kaiying Shan
  * @param timeArray1
  * @param timeArray2
  * @param step1 the increment step for array 1

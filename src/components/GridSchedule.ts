@@ -14,7 +14,7 @@ import CourseBlock from './CourseBlock.vue';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid
- * @author Kaiying Cat
+ * @author Kaiying Shan
  * @noInheritDoc
  */
 @Component({

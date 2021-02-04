@@ -1,6 +1,6 @@
 /**
  * the graph models and algorithms used primarily for schedule rendering
- * @author Hanzhi Zhou, Kaiying Cat
+ * @author Hanzhi Zhou, Kaiying Shan
  * @module src/algorithm
  */
 

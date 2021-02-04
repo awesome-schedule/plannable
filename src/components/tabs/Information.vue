@@ -283,14 +283,14 @@
                                 <h5 class="card-title">Add Courses</h5>
                                 <div>
                                     You can add courses by
-                                    <font style="background-color:#F2E890">searching</font>
+                                    <font style="background-color: #f2e890">searching</font>
                                     department, professor, class number, or keywords. Pick a section
                                     or multiple sections that you want to take, or choose "<font
-                                        style="background-color:#F2E890"
+                                        style="background-color: #f2e890"
                                         >any section</font
                                     >" if you don't have a particular preference. To clear your
                                     search query, press
-                                    <font style="background-color:#F2E890">ESC</font> or click on
+                                    <font style="background-color: #f2e890">ESC</font> or click on
                                     the <i class="fas fa-times click-icon"> </i> button at the right
                                     end of the search box.
                                 </div>
@@ -308,13 +308,13 @@
                                 <h5 class="card-title">Generate Schedules</h5>
                                 <div>
                                     After you have finished selecting your courses, you can hit the
-                                    <font style="background-color:#D9F290 ">generate</font> button
+                                    <font style="background-color: #d9f290">generate</font> button
                                     to generate all possibles schedules out of the sections you
                                     selected. You can switch between the generated schedule and your
                                     current selection by clicking the "<font
-                                        style="background-color:#D9F290"
+                                        style="background-color: #d9f290"
                                         >edit class</font
-                                    >/<font style="background-color:#D9F290 ">view schedule</font>"
+                                    >/<font style="background-color: #d9f290">view schedule</font>"
                                     button below the search bar.
                                 </div>
                             </div>
@@ -399,9 +399,7 @@
                     <li>
                         Courses that only have one available section and have "Any Section" selected
                     </li>
-                    <li>
-                        Courses that have one section selected
-                    </li>
+                    <li>Courses that have one section selected</li>
                     <li>
                         Courses that have multiple sections selected if "show multiple sections"
                         checkbox is checked.
@@ -486,9 +484,7 @@
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> No Class Time</strong>
                 </h5>
-                <p>
-                    You can select time and day at which you do not wish to have class.
-                </p>
+                <p>You can select time and day at which you do not wish to have class.</p>
                 <img :src="imgPath('no-class-time.gif')" alt="no-class-time.gif" />
                 <h5 id="item-4-2" class="mt-4">
                     <i class="fa fa-university" aria-hidden="true"></i
@@ -551,7 +547,7 @@
                 If you want to balance between multiple sort options, try "combined". On the other
                 hand, if you want to prioritize a single sort option (such as No Early), then try
                 "fallback", as it will sort using options on top first.
-                <div class="my-3" style="text-align:center">
+                <div class="my-3" style="text-align: center">
                     <img :src="imgPath('sort.gif')" alt="sort.gif" class="img-fluid" />
                 </div>
                 <button
@@ -574,9 +570,7 @@
                     <i class="fa fa-university" aria-hidden="true"></i
                     ><strong> Schedule Settings</strong>
                 </h5>
-                <p>
-                    You can change the grid size and the displayed items of your schedules here:
-                </p>
+                <p>You can change the grid size and the displayed items of your schedules here:</p>
                 <div class="border rounded p-2 mb-2 bg-light text-dark mx-5">
                     <ol>
                         <li>
@@ -827,7 +821,7 @@
                         <a href="mailto:hz2zz@virginia.edu"> hz2zz@virginia.edu</a>
                     </li>
                     <li>
-                        Kaiying "Cat" Shan &nbsp;&nbsp;
+                        Kaiying Shan &nbsp;&nbsp;
                         <i class="fab fa-github"></i>
                         <a href="https://github.com/kaiyingshan">
                             https://github.com/kaiyingshan
@@ -933,7 +927,7 @@
                     frequently, because Lou's list itself only updates on an hourly basis.
                 </p>
 
-                <div class="py-5 my-5" style="height: 600px;"></div>
+                <div class="py-5 my-5" style="height: 600px"></div>
             </div>
         </div>
     </div>

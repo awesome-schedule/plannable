@@ -1,5 +1,5 @@
 /**
- * @author Hanzhi Zhou, Kaiying Cat
+ * @author Hanzhi Zhou, Kaiying Shan
  * @module src/models
  */
 

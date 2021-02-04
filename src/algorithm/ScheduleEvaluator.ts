@@ -1,6 +1,6 @@
 /**
  * @module src/algorithm
- * @author Hanzhi Zhou
+ * @author Hanzhi Zhou, Kaiying Shan
  */
 
 /**

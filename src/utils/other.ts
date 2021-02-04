@@ -129,7 +129,7 @@ export function isStringArray(x: any): x is string[] {
 /**
  * Get release note for current version && render.
  * Part of this function can be seen as an extremely-lightweight MarkDown renderer.
- * @author Kaiying Cat
+ * @author Kaiying Shan
  */
 export async function getReleaseNote() {
     try {

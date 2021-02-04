@@ -1,6 +1,6 @@
 /**
  * @module src/algorithm
- * @author Hanzhi Zhou, Zichao Hu, Kaiying Cat
+ * @author Hanzhi Zhou, Zichao Hu, Kaiying Shan
  */
 
 /**
@@ -16,8 +16,8 @@ import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
 /**
- * The blocks is a condensed fixed-length array
- * storing the time and room information of the a schedule at each day.
+ * The TimeArray is a condensed typed array storing
+ * the time (and usually room index) information of the a schedule at each day.
  * Index from 0 to 6 represents the index of information from Monday to Sunday.
  * Index 7 is the length of the array, which is there for convenience.
  * Example:
@@ -35,14 +35,16 @@ import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
  * a typical loop that visits these info is shown below
  * ```js
  * for (let i = 0; i < 7; i++){
- *   const dayEnd = timeArr[i+1];
- *   for (let j = timeArr[i]; j < dayEnd; j+=3) {
+ *   for (let j = timeArr[i]; j < timeArr[i+1]; j += 3) {
  *     const timeStart = timeArr[j],
  *           timeEnd   = timeArr[j+1],
  *           roomIdx   = timeArr[j+2];
  *     // do some processing
  *   }
  * }
+ *
+ * Note that the room information might be absent from the TimeArray, so instead of
+ * using j += 3 in the inner loop, we might use j += 2 in some use cases.
  * ```
  */
 export type TimeArray = Int16Array;
@@ -405,12 +407,8 @@ class ScheduleGenerator {
                 // accumulate the length of the time arrays combined in each schedule
                 // and copy the current schedule to next schedule
                 for (let i = 0; i < numCourses; i++) {
-                    timeLen +=
-                        timeArrLens[
-                            (allChoices[base + numCourses + i] = allChoices[base + i]) * // ***
-                                numCourses +
-                                i
-                        ];
+                    const secIdx = (allChoices[base + numCourses + i] = allChoices[base + i]);
+                    timeLen += timeArrLens[secIdx * numCourses + i];
                 }
 
                 base += numCourses;

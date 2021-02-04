@@ -1,7 +1,7 @@
 /**
  * Search worker is used to perform fuzzy search (which is very expensive)
  * in a separate, non-blocking process.
- * @author Kaiying Cat, Hanzhi Zhou
+ * @author Kaiying Shan, Hanzhi Zhou
  * @module src/workers
  * @preferred
  */

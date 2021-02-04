@@ -17,7 +17,7 @@ import Expand from './Expand.vue';
  * A **pure** component for
  * 1. displaying the list of courses that are match the query string when searching
  * 2. displaying the list of courses currently selected
- * @author Hanzhi Zhou, Kaiying Cat
+ * @author Hanzhi Zhou, Kaiying Shan
  * @noInheritDoc
  */
 @Component({

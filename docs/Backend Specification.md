@@ -19,6 +19,8 @@ Access-Control-Allow-Headers: Authorization
 
 The authorization process of plannable follows the authorization code flow with PKCE of the OAuth 2.0 standard. Appropriate information should be filled into config.ts.
 
+### Authorization Code Endpoint
+
 The backend should provide an endpoint (`backend.code`) for getting an authorization code. The request to this endpoint will a HTTP GET containing the following information in the URL:
 
 ```js
@@ -36,6 +38,8 @@ The backend should redirect to plannable with the authorization code and the pre
 ```
 https://plannable.org?code=...&state=...
 ```
+
+### Token Endpoint
 
 Additionally, the backend should provide an endpoint (`backend.token`) for getting a access token using the authorization code. The request to this endpoint will be a HTTP POST and the body will be JSON encoded. 
 
@@ -66,6 +70,10 @@ Authorization: token_type access_token
 ```
 
 For example, if the token_type is `Bearer` and access_token is `deadbeef`, then the header `Authorization: Bearer deadbeef` will be included in every request. 
+
+### Token Expiration
+
+The backend provider has the freedom to set the expiration time for access tokens. However, for the best user experience, it is recommended to make it valid for at least a week. It is also recommended to implement an auto-extension mechanism: when the token is about to expire and some APIs are called with that token, the expiration date should be automatically extended. 
 
 ## Get API
 

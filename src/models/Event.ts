@@ -1,6 +1,6 @@
 /**
  * @module src/models
- * @author Kaiying Cat
+ * @author Kaiying Shan
  */
 
 /**

@@ -3,7 +3,7 @@
  */
 
 /**
- * @author Kaiying Cat
+ * @author Kaiying Shan
  * @noInheritDoc
  */
 import Schedule from '@/models/Schedule';

@@ -10,7 +10,7 @@ import Store from '../store';
 
 /**
  * The component for showing a list of pages, used for switching between generated schedules
- * @author Kaiying Cat, Hanzhi Zhou
+ * @author Kaiying Shan, Hanzhi Zhou
  * @noInheritDoc
  */
 @Component

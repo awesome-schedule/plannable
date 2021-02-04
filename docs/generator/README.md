@@ -60,8 +60,7 @@ The code example that loops through each of the meeting is shown below.
 
 ```js
 for (let i = 0; i < 7; i++) {
-    const dayEnd = timeArr[i + 1];
-    for (let j = timeArr[i]; j < dayEnd; j += 3) {
+    for (let j = timeArr[i]; j < timeArr[i + 1]; j += 3) {
         const timeStart = timeArr[j],
             timeEnd = timeArr[j + 1],
             roomIdx = timeArr[j + 2];
@@ -128,26 +127,14 @@ Additionally, since all schedules are of the same length, we can avoid storing n
 To convert the schedule `i` to the format prior to v7, we can use
 
 ```ts
-Array.from(allChoices.slice(idx, idx + numCourses)).map(
+Array.from(allChoices.slice(i, i + numCourses)).map(
     (choice, classNum) => classList[classNum][choice]
 );
 ```
 
-### Main Loop
+### Enumeration
 
-The main loop is where we build schedules.
-
-#### Path Memory
-
-Under Construction
-
-#### Current Choices
-
-Under Construction
-
-#### Time Len Computation
-
-Under Construction
+The schedule enumeration algorithm is relatively straightforward. See [ScheduleGenerator.ts](/src/algorithm/ScheduleGenerator.ts) for inline comments about the details of the algorithm.
 
 ## Schedule Evaluation and Sorting
 

@@ -12,18 +12,30 @@ import ScheduleBlock from '@/models/ScheduleBlock';
 import PriorityQueue from 'tinyqueue';
 import * as LP from './LP';
 
+export const options = {
+    isTolerance: 0,
+    ISMethod: 1,
+    applyDFS: true,
+    tolerance: 0,
+    applyLP: true,
+    LPIters: 100,
+    LPModel: 3,
+    showFixed: false
+};
+
 /**
  * for the array of schedule blocks provided, construct an adjacency list
  * to represent the conflicts between each pair of blocks
  */
 function constructAdjList(blocks: ScheduleBlock[]) {
     const len = blocks.length;
+    const tolerance = options.tolerance;
     // construct an undirected graph
     for (let i = 0; i < len; i++) {
         const bi = blocks[i];
         for (let j = i + 1; j < len; j++) {
             const bj = blocks[j];
-            if (bi.conflict(bj)) {
+            if (bi.conflict(bj, tolerance)) {
                 bj.neighbors.push(bi);
                 bi.neighbors.push(bj);
             }
@@ -52,8 +64,7 @@ function BFS(start: ScheduleBlock) {
 
 /**
  * a modified interval scheduling algorithm, runs in worst case O(n^2)
- * besides using the fewest possible rooms,
- * it also tries to assignment events to the rooms with the lowest index possible
+ * besides using the fewest possible rooms, it also tries to assignment events to the rooms with the lowest index possible
  * @param blocks the events to schedule
  */
 function intervalScheduling(blocks: ScheduleBlock[]) {
@@ -67,13 +78,14 @@ function intervalScheduling(blocks: ScheduleBlock[]) {
     });
     const occupied = [blocks[0]];
     let numRooms = 0;
+    const tolerance = options.isTolerance;
     for (let i = 1; i < blocks.length; i++) {
         const block = blocks[i];
         let idx = -1;
         let minRoomIdx = Infinity;
         for (let k = 0; k < occupied.length; k++) {
             const prevBlock = occupied[k];
-            if (prevBlock.endMin <= block.startMin && prevBlock.depth < minRoomIdx) {
+            if (prevBlock.endMin <= block.startMin + tolerance && prevBlock.depth < minRoomIdx) {
                 minRoomIdx = prevBlock.depth;
                 idx = k;
             }
@@ -111,10 +123,11 @@ function intervalScheduling2(blocks: ScheduleBlock[]) {
         return diff;
     });
     let numRooms = 0;
+    const tolerance = options.isTolerance;
     for (let i = 1; i < blocks.length; i++) {
         const block = blocks[i];
         const prevBlock = queue.peek()!;
-        if (prevBlock.endMin > block.startMin) {
+        if (prevBlock.endMin + tolerance > block.startMin) {
             // conflict, need to add a new room
             numRooms += 1;
             block.depth = numRooms;
@@ -201,12 +214,6 @@ function calculateMaxDepth(blocks: ScheduleBlock[]) {
     for (const node of blocks)
         if (!node.visited && node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
 }
-export const options = {
-    applyLP: true,
-    ISMethod: 1,
-    LPIters: 100,
-    LPModel: 3
-};
 
 async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
     let prevFixedCount = 0;
@@ -281,13 +288,20 @@ export async function computeBlockPositions(days: ScheduleDays) {
             }
             continue;
         }
-        calculateMaxDepth(blocks);
-        for (const block of blocks) {
-            block.left = block.depth / block.pathDepth;
-            block.width = 1.0 / block.pathDepth;
+        if (options.applyDFS) {
+            calculateMaxDepth(blocks);
+            for (const block of blocks) {
+                block.left = block.depth / block.pathDepth;
+                block.width = 1.0 / block.pathDepth;
+            }
+        } else {
+            for (const block of blocks) {
+                block.left = block.depth / total;
+                block.width = 1.0 / total;
+            }
         }
     }
-    if (!options.applyLP) return;
+    if (!options.applyDFS || !options.applyLP) return;
 
     // console.timeEnd('compute bp');
     // const tStart = performance.now();
@@ -307,7 +321,7 @@ export async function computeBlockPositions(days: ScheduleDays) {
         const mean = sumW / N;
         console.log('meanW', mean, 'varW', sumW2 / N - mean ** 2);
     }
-
-    // for (const blocks of days)
-    //     for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
+    if (options.showFixed)
+        for (const blocks of days)
+            for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
 }

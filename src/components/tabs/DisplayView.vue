@@ -5,7 +5,9 @@
             class="form-group row no-gutters mt-2 mb-0 mx-2"
             title="Schedule grid earlier than this time won't be displayed if you don't have any class before that time"
         >
-            <label for="schedule-start" class="col-lg-6 col-form-label"> Schedule Start </label>
+            <label for="schedule-start" class="col-lg-6 pt-1 pb-0 col-form-label">
+                Schedule Start
+            </label>
             <div class="col-lg-6">
                 <input
                     id="schedule-start"
@@ -21,7 +23,7 @@
             class="form-group row no-gutters mb-0 mx-2"
             title="Schedule grid later than this time won't be displayed if you don't have any class before that time"
         >
-            <label for="schedule-end" class="col-lg-6 col-form-label">Schedule End</label>
+            <label for="schedule-end" class="col-lg-6 pt-1 pb-0 col-form-label">Schedule End</label>
             <div class="col-lg-6">
                 <input
                     id="schedule-end"
@@ -37,7 +39,7 @@
             class="form-group row no-gutters mb-0 mx-2"
             title="Height of the cells containing classes on the schedule grid"
         >
-            <label for="class-height" class="col-lg-6 col-form-label">Class Height</label>
+            <label for="class-height" class="col-lg-6 pt-1 pb-0 col-form-label">Class Height</label>
             <div class="col-lg-6">
                 <input
                     id="class-height"
@@ -54,7 +56,7 @@
             class="form-group row no-gutters mb-0 mx-2"
             title="height of an empty cell. You can specify a smaller value to compress empty space"
         >
-            <label for="grid-height" class="col-lg-6 col-form-label">Grid Height</label>
+            <label for="grid-height" class="col-lg-6 pt-1 pb-0 col-form-label">Grid Height</label>
             <div class="col-lg-6">
                 <input
                     id="grid-height"
@@ -71,7 +73,7 @@
             class="form-group row no-gutters mb-0 mx-2"
             title="Width of the schedule as a percentage relative to the parent container"
         >
-            <label for="schedule-width" class="col-lg-6 col-form-label">Width</label>
+            <label for="schedule-width" class="col-lg-6 pt-1 pb-0 col-form-label">Width</label>
             <div class="col-lg-6">
                 <input
                     id="schedule-width"
@@ -287,8 +289,8 @@
         </ul>
         <div class="btn bg-info nav-btn">Advanced Rendering Features</div>
         <div class="w-100 text-center mb-1"><small>These options will not be saved!</small></div>
-        <div class="form-group row no-gutters my-1 mx-3">
-            <label for="ISMethod" class="col-lg-6 col-form-label">IS Method</label>
+        <div class="form-group row no-gutters my-0 mx-3">
+            <label for="ISMethod" class="col-lg-6 pt-1 pb-0 col-form-label">IS Method</label>
             <div class="col-lg-6">
                 <input
                     id="ISMethod"
@@ -301,9 +303,53 @@
                 />
             </div>
         </div>
+        <div class="form-group row no-gutters my-0 mx-3">
+            <label for="istolerance" class="col-lg-6 pt-1 pb-0 col-form-label">IS Tolerance</label>
+            <div class="col-lg-6">
+                <input
+                    id="istolerance"
+                    v-model.number="options.isTolerance"
+                    min="-1"
+                    step="1"
+                    max="100"
+                    type="number"
+                    class="form-control form-control-sm"
+                />
+            </div>
+        </div>
         <div class="form-group row no-gutters my-1 mx-3">
             <div class="col-md-6">
-                <label for="applyLP" class="m-0"> Apply LP </label>
+                <label for="applyDFS" class="m-0">Apply DFS</label>
+            </div>
+            <div class="col-md-6">
+                <div class="custom-control custom-checkbox ml-1">
+                    <input
+                        id="applyDFS"
+                        v-model.number="options.applyDFS"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label for="applyDFS" class="custom-control-label"></label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row no-gutters my-0 mx-3">
+            <label for="tolerance" class="col-lg-6 pt-1 pb-0 col-form-label">DFS Tolerance</label>
+            <div class="col-lg-6">
+                <input
+                    id="tolerance"
+                    v-model.number="options.tolerance"
+                    min="-1"
+                    step="1"
+                    max="100"
+                    type="number"
+                    class="form-control form-control-sm"
+                />
+            </div>
+        </div>
+        <div class="form-group row no-gutters my-1 mx-3">
+            <div class="col-md-6">
+                <label for="applyLP" class="m-0">Apply LP</label>
             </div>
             <div class="col-md-6">
                 <div class="custom-control custom-checkbox ml-1">
@@ -317,8 +363,8 @@
                 </div>
             </div>
         </div>
-        <div class="form-group row no-gutters my-1 mx-3">
-            <label for="LPModel" class="col-lg-6 col-form-label">LP Model</label>
+        <div class="form-group row no-gutters my-0 mx-3">
+            <label for="LPModel" class="col-lg-6 pt-1 pb-0 col-form-label">LP Model</label>
             <div class="col-lg-6">
                 <input
                     id="LPModel"
@@ -331,18 +377,34 @@
                 />
             </div>
         </div>
-        <div class="form-group row no-gutters mt-0 mb-1 mx-3">
-            <label for="LPIters" class="col-lg-6 col-form-label">LP Iterations</label>
+        <div class="form-group row no-gutters my-0 mx-3">
+            <label for="LPIters" class="col-lg-6 pt-1 pb-0 col-form-label">LP Max Iters</label>
             <div class="col-lg-6">
                 <input
                     id="LPIters"
                     v-model.number="options.LPIters"
                     min="0"
                     step="1"
-                    max="2"
+                    max="100"
                     type="number"
                     class="form-control form-control-sm"
                 />
+            </div>
+        </div>
+        <div class="form-group row no-gutters my-1 mx-3">
+            <div class="col-md-6">
+                <label for="showFixed" class="m-0">Show Fixed</label>
+            </div>
+            <div class="col-md-6">
+                <div class="custom-control custom-checkbox ml-1">
+                    <input
+                        id="showFixed"
+                        v-model.number="options.showFixed"
+                        type="checkbox"
+                        class="custom-control-input"
+                    />
+                    <label for="showFixed" class="custom-control-label"></label>
+                </div>
             </div>
         </div>
     </nav>

@@ -301,25 +301,25 @@ export async function computeBlockPositions(days: ScheduleDays) {
             }
         }
     }
-    if (!options.applyDFS || !options.applyLP) return;
-
-    // console.timeEnd('compute bp');
-    // const tStart = performance.now();
-    await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
-    // console.log('lp', performance.now() - tStart);
-    let N = 0;
-    let sumW = 0.0,
-        sumW2 = 0.0;
-    for (const blocks of days) {
-        for (const block of blocks) {
-            N++;
-            sumW += block.width * 100;
-            sumW2 += (block.width * 100) ** 2;
+    if (options.applyDFS && options.applyLP) {
+        // console.timeEnd('compute bp');
+        // const tStart = performance.now();
+        await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
+        // console.log('lp', performance.now() - tStart);
+        let N = 0;
+        let sumW = 0.0,
+            sumW2 = 0.0;
+        for (const blocks of days) {
+            for (const block of blocks) {
+                N++;
+                sumW += block.width * 100;
+                sumW2 += (block.width * 100) ** 2;
+            }
         }
-    }
-    if (N > 500) {
-        const mean = sumW / N;
-        console.log('meanW', mean, 'varW', sumW2 / N - mean ** 2);
+        if (N > 500) {
+            const mean = sumW / N;
+            console.log('meanW', mean, 'varW', sumW2 / N - mean ** 2);
+        }
     }
     if (options.showFixed)
         for (const blocks of days)

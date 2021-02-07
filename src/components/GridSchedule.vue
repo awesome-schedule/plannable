@@ -7,10 +7,7 @@
             <div
                 v-for="(hour, idx) in hours"
                 :key="hour"
-                :style="{
-                    position: 'absolute',
-                    top: heights.sumHeights[idx] - 5 + 'px'
-                }"
+                :style="`top: ${heights.sumHeights[idx] - 5}px`"
             >
                 {{ hour }}
             </div>
@@ -74,5 +71,9 @@
     font-size: 10px;
     width: 24px;
     position: relative;
+}
+
+.time > div {
+    position: absolute;
 }
 </style>

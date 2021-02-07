@@ -14,7 +14,7 @@
 
         <nav class="tab-bar bg-light">
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
                 title="Select Classes"
                 @click="status.switchSideBar('showSelectClass')"
@@ -22,7 +22,7 @@
                 <i class="far fa-calendar-alt"></i>
             </div>
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showFuzzy }"
                 title="Fuzzy Search"
                 @click="status.switchSideBar('showFuzzy')"
@@ -30,7 +30,7 @@
                 <i class="fas fa-search"></i>
             </div>
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showEvent }"
                 title="Edit Events"
                 @click="status.switchSideBar('showEvent')"
@@ -38,7 +38,7 @@
                 <i class="fab fa-elementor"></i>
             </div>
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showFilter }"
                 title="Filters"
                 @click="status.switchSideBar('showFilter')"
@@ -46,7 +46,7 @@
                 <i class="fas fa-filter"></i>
             </div>
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showSetting }"
                 title="Display Settings"
                 @click="status.switchSideBar('showSetting')"
@@ -54,7 +54,7 @@
                 <i class="fas fa-cog"></i>
             </div>
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectColor }"
                 title="Customize Colors"
                 @click="status.switchSideBar('showSelectColor')"
@@ -62,17 +62,25 @@
                 <i class="fas fa-palette"></i>
             </div>
             <div
-                class="tab-icon mt-0 mb-4"
+                class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showExport }"
                 title="Import/Export Schedule"
                 @click="status.switchSideBar('showExport')"
             >
                 <i class="fas fa-download"></i>
+                <div
+                    v-if="!profile.tokenType && profile.profiles.some((p) => p.remote)"
+                    class="badge text-warning"
+                    style="position: absolute; top: 0.75rem; right: 0px; font-size: 14px"
+                    title="Some profiles are marked as synced, but you've been logged out."
+                >
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
             </div>
             <div
                 title="Compare"
                 :class="{ 'tab-icon-active': sideBar.showCompare }"
-                class="tab-icon mb-4"
+                class="tab-icon pt-4"
                 @click="status.switchSideBar('showCompare')"
             >
                 <i class="fas fa-balance-scale"></i>
@@ -81,7 +89,7 @@
                 v-if="display.enableLog"
                 title="Show logs"
                 :class="{ 'tab-icon-active': sideBar.showLog }"
-                class="tab-icon mb-4"
+                class="tab-icon pt-4"
                 @click="status.switchSideBar('showLog')"
             >
                 <i class="fas fa-stream"></i>
@@ -90,7 +98,7 @@
                 v-if="showInformation"
                 title="Website guide and miscellaneous information"
                 :class="{ 'tab-icon-active': sideBar.showInfo }"
-                class="tab-icon mb-4"
+                class="tab-icon pt-4"
                 @click="status.switchSideBar('showInfo')"
             >
                 <i class="fas fa-info-circle"></i>
@@ -98,7 +106,7 @@
             <div
                 title="Blank Page"
                 :class="{ 'tab-icon-active': sideBar.showExternal }"
-                class="tab-icon mb-4"
+                class="tab-icon pt-4"
                 @click="status.switchSideBar('showExternal')"
             >
                 <i class="fas fa-bullhorn"></i>
@@ -166,6 +174,7 @@
     text-align: center;
     font-size: 1.8vw;
     color: #888888;
+    position: relative;
 }
 .tab-icon:hover {
     color: #444444;
@@ -212,7 +221,6 @@
     bottom: 0;
     left: 0;
     z-index: 100; /* Behind the navbar */
-    padding: 26px 0 0;
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     width: 3vw;
     overflow-y: auto;

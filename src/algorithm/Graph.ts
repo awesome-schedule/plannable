@@ -17,7 +17,6 @@ export const options = {
     ISMethod: 1,
     applyDFS: true,
     tolerance: 0,
-    applyLP: true,
     LPIters: 100,
     LPModel: 3,
     showFixed: false
@@ -301,7 +300,7 @@ export async function computeBlockPositions(days: ScheduleDays) {
             }
         }
     }
-    if (options.applyDFS && options.applyLP) {
+    if (options.applyDFS) {
         // console.timeEnd('compute bp');
         // const tStart = performance.now();
         await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));

@@ -347,20 +347,18 @@
                 />
             </div>
         </div>
-        <div class="form-group row no-gutters my-1 mx-3">
-            <div class="col-md-6">
-                <label for="applyLP" class="m-0">Apply LP</label>
-            </div>
-            <div class="col-md-6">
-                <div class="custom-control custom-checkbox ml-1">
-                    <input
-                        id="applyLP"
-                        v-model.number="options.applyLP"
-                        type="checkbox"
-                        class="custom-control-input"
-                    />
-                    <label for="applyLP" class="custom-control-label"></label>
-                </div>
+        <div class="form-group row no-gutters my-0 mx-3">
+            <label for="LPIters" class="col-lg-6 pt-1 pb-0 col-form-label">LP Max Iters</label>
+            <div class="col-lg-6">
+                <input
+                    id="LPIters"
+                    v-model.number="options.LPIters"
+                    min="0"
+                    step="1"
+                    max="100"
+                    type="number"
+                    class="form-control form-control-sm"
+                />
             </div>
         </div>
         <div class="form-group row no-gutters my-0 mx-3">
@@ -372,20 +370,6 @@
                     min="1"
                     step="1"
                     max="3"
-                    type="number"
-                    class="form-control form-control-sm"
-                />
-            </div>
-        </div>
-        <div class="form-group row no-gutters my-0 mx-3">
-            <label for="LPIters" class="col-lg-6 pt-1 pb-0 col-form-label">LP Max Iters</label>
-            <div class="col-lg-6">
-                <input
-                    id="LPIters"
-                    v-model.number="options.LPIters"
-                    min="0"
-                    step="1"
-                    max="100"
                     type="number"
                     class="form-control form-control-sm"
                 />

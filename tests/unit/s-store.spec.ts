@@ -39,7 +39,7 @@ test('generated', () => {
     schedule.currentSchedule.update('cs21105', -1);
     store.generateSchedules();
     expect(schedule.cpIndex).toBe(1);
-    schedule.recomputeAll();
+    schedule.recomputeAll(true);
 
     schedule.copyCurrent();
     schedule.switchPage(-1);

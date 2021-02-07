@@ -278,7 +278,7 @@ export default class Store extends Vue {
         if (this.schedule.generated) this.generateSchedules();
         else this.schedule.switchSchedule(false);
 
-        this.schedule.recomputeAll(); // need to compute all schedules for rendering
+        this.schedule.recomputeAll(false, 100); // need to compute all schedules for rendering
     }
 
     /**

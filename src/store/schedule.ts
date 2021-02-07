@@ -208,7 +208,7 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
      * @param sync default to true
      * @param time
      */
-    recomputeAll(sync = true, time = 10) {
+    recomputeAll(sync: boolean, time = 50) {
         if (this.currentSchedule !== this.proposedSchedule) {
             this.currentSchedule.constructDateSeparator();
             this.currentSchedule.computeSchedule(sync, time);

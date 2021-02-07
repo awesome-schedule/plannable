@@ -231,7 +231,7 @@ export default abstract class Schedule {
      * However, because we're running on small input sets (usually contain no more than 20 sections), it usually completes within 50ms.
      * @note it is the caller's responsibility to call constructDateSeparators, which is necessary if new classes are added
      */
-    public async computeSchedule(sync = true, time = 50) {
+    public async computeSchedule(sync = true, time = 100) {
         window.clearTimeout(this.pendingCompute);
         if (sync) {
             await this._computeSchedule();

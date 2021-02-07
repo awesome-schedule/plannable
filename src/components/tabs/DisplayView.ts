@@ -20,7 +20,7 @@ import { Component, Watch } from 'vue-property-decorator';
 export default class DisplayView extends Store {
     options = options;
     @Watch('options', { deep: true }) private w1() {
-        this.schedule.recomputeAll();
+        this.schedule.recomputeAll(false, 100);
     }
     /**
      * clear the localStorage and reload the page

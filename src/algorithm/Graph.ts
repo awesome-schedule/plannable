@@ -285,6 +285,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
  */
 export async function computeBlockPositions(days: ScheduleDays) {
     // console.time('compute bp');
+    const promises = [];
     for (const blocks of days) {
         const total =
             options.ISMethod === 1 ? intervalScheduling(blocks) : intervalScheduling2(blocks);
@@ -296,8 +297,6 @@ export async function computeBlockPositions(days: ScheduleDays) {
             continue;
         }
 
-        // --------------- one of the bottle neck --------------------
-        console.time('group adjList');
         const len = blocks.length;
         for (let i = 0; i < len; i++) {
             const b = blocks[i];
@@ -305,6 +304,8 @@ export async function computeBlockPositions(days: ScheduleDays) {
             b.lpLNeg.name = b.lpLPos.name = `l${i}`;
         }
         const matrix = constructAdjList(blocks);
+        // --------------- one of the bottle neck --------------------
+        console.time('group adjList');
         for (const block of blocks) {
             for (const v1 of block.leftN) {
                 if (!block.leftN.some(v => matrix[v.idx * len + v1.idx])) {
@@ -320,6 +321,7 @@ export async function computeBlockPositions(days: ScheduleDays) {
                 block.left = block.depth / block.pathDepth;
                 block.width = 1.0 / block.pathDepth;
             }
+            promises.push(_computeBlockPositionHelper(blocks));
         } else {
             for (const block of blocks) {
                 block.left = block.depth / total;
@@ -330,8 +332,8 @@ export async function computeBlockPositions(days: ScheduleDays) {
     if (options.applyDFS) {
         // console.timeEnd('compute bp');
         // const tStart = performance.now();
-        await Promise.all(days.map(blocks => _computeBlockPositionHelper(blocks)));
         // console.log('lp', performance.now() - tStart);
+        await Promise.all(promises);
         let N = 0;
         let sumW = 0.0,
             sumW2 = 0.0;

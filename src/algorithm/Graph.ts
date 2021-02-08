@@ -392,7 +392,7 @@ export async function computeBlockPositionsNative(days: ScheduleDays) {
     for (const blocks of days) {
         const len = blocks.length;
         const bufPtr = Module._malloc(len * 4);
-        const u16 = new Uint16Array(Module.HEAPU8.buffer, bufPtr, len * 2);
+        const u16 = new Int16Array(Module.HEAPU8.buffer, bufPtr, len * 2);
         for (let i = 0; i < len; i++) {
             u16[2 * i] = blocks[i].startMin;
             u16[2 * i + 1] = blocks[i].endMin;

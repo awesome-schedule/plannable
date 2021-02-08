@@ -18,15 +18,16 @@ int showFixed = 1;
 struct ScheduleBlock {
     bool visited;
     bool isFixed;
-    uint16_t startMin;
-    uint16_t endMin;
+    int16_t startMin;
+    int16_t endMin;
+    int16_t duration;
     int idx;
-    int duration;
     int depth;
     int pathDepth;
     double left, width;
     vector<ScheduleBlock*> leftN;
     vector<ScheduleBlock*> rightN;
+    vector<ScheduleBlock*> cleftN;
 };
 
 inline int calcOverlap(int a, int b, int c, int d) {
@@ -53,7 +54,8 @@ int intervalScheduling(ScheduleBlock* blocks, ScheduleBlock** occupied, int N) {
         if (diff == 0) return b2.duration - b1.duration < 0;
         return diff < 0;
     });
-    int occupiedSize = 0;
+    occupied[0] = blocks;
+    int occupiedSize = 1;
     int numRooms = 0;
     auto* end = blocks + N;
     for (auto* block = blocks + 1; block < end; block++) {
@@ -240,10 +242,13 @@ void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
         for (auto v : block->leftN)
             if (v->isFixed)
                 maxLeftFixed = max(maxLeftFixed, v->left + v->width);
-            else
-                cons.push_back({i + 1, idxMap[v->idx], 0.0});
+        // else
+        //     cons.push_back({i + 1, idxMap[v->idx], 0.0});
         for (auto v : block->rightN)
             if (v->isFixed) minRight = min(v->left, minRight);
+
+        for (auto v : block->cleftN)
+            if (!v->isFixed) cons.push_back({i + 1, idxMap[v->idx], 0.0});
         cons.push_back({NC + 1, i + 1, minRight});
         bounds[i] = maxLeftFixed;
     }
@@ -327,7 +332,7 @@ void setOptions(int _isTolerance,
     // cout << LPIters << endl;
 }
 
-Result* compute(uint16_t* arr, int N) {
+Result* compute(int16_t* arr, int N) {
     auto* blocks = new ScheduleBlock[N]();
     auto* results = new Result[N];
     for (int i = 0; i < N; i++) {
@@ -351,16 +356,27 @@ Result* compute(uint16_t* arr, int N) {
         return results;
     }
     bool* matrix = constructAdjList(blocks, N);
+    auto end = blocks + N;
+    //
+    for (auto block = blocks; block < end; block++) {
+        for (auto v1 : block->leftN) {
+            for (auto v : block->leftN) {
+                if (matrix[v->idx * N + v1->idx]) goto nextl;
+            }
+            block->cleftN.push_back(v1);
+        nextl:;
+        }
+    }
+    //
+    delete[] matrix;
     calculateMaxDepth(blocks, N);
 
-    auto end = blocks + N;
     int prevFixedCount = 0;
     for (auto block = blocks; block < end; block++) {
         prevFixedCount += (block->visited = block->isFixed);
         block->left = static_cast<double>(block->depth) / block->pathDepth;
         block->width = 1.0 / block->pathDepth;
     }
-    delete[] matrix;
     int i = 0;
     int* idxMap = new int[N];
     while (i < LPIters) {

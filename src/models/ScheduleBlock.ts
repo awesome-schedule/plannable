@@ -55,7 +55,9 @@ export default class ScheduleBlock {
     /** a variable corresponding to -left, used in LP formulation. name will be assignment based on idx later  */
     public readonly lpLNeg = { name: '', coef: -1.0 };
     /** all blocks that conflict with this block */
-    public readonly neighbors: ScheduleBlock[] = [];
+    public readonly leftN: ScheduleBlock[] = [];
+    public readonly rightN: ScheduleBlock[] = [];
+    public readonly cleftN: ScheduleBlock[] = [];
     // --------------------------------------------------------------------------------------------
 
     /**

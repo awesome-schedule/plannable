@@ -28,6 +28,7 @@ export const options = {
  */
 function constructAdjList(blocks: ScheduleBlock[]) {
     const len = blocks.length;
+    const matrix = new Uint8Array(len * len);
     const tolerance = options.tolerance;
     // construct an undirected graph
     for (let i = 0; i < len; i++) {
@@ -35,11 +36,19 @@ function constructAdjList(blocks: ScheduleBlock[]) {
         for (let j = i + 1; j < len; j++) {
             const bj = blocks[j];
             if (bi.conflict(bj, tolerance)) {
-                bj.neighbors.push(bi);
-                bi.neighbors.push(bj);
+                if (bi.depth < bj.depth) {
+                    matrix[bj.idx * len + bi.idx] = 1;
+                    bj.leftN.push(bi);
+                    bi.rightN.push(bj);
+                } else {
+                    matrix[bi.idx * len + bj.idx] = 1;
+                    bj.rightN.push(bi);
+                    bi.leftN.push(bj);
+                }
             }
         }
     }
+    return matrix;
 }
 
 /**
@@ -51,12 +60,19 @@ function BFS(start: ScheduleBlock) {
     const componentNodes = [start];
     start.visited = true;
     while (qIdx < componentNodes.length) {
-        for (const node of componentNodes[qIdx++].neighbors) {
+        for (const node of componentNodes[qIdx].leftN) {
             if (!node.visited) {
                 node.visited = true;
                 componentNodes.push(node);
             }
         }
+        for (const node of componentNodes[qIdx].rightN) {
+            if (!node.visited) {
+                node.visited = true;
+                componentNodes.push(node);
+            }
+        }
+        qIdx++;
     }
     return componentNodes;
 }
@@ -151,10 +167,9 @@ function depthFirstSearchRec(start: ScheduleBlock, maxDepth: number) {
     start.visited = true;
     start.pathDepth = maxDepth;
 
-    const startDepth = start.depth;
-    for (const adj of start.neighbors) {
+    for (const adj of start.leftN) {
         // we only visit nodes of lower depth
-        if (!adj.visited && adj.depth < startDepth) depthFirstSearchRec(adj, maxDepth);
+        if (!adj.visited) depthFirstSearchRec(adj, maxDepth);
     }
 }
 
@@ -165,7 +180,7 @@ function DFSFindFixed(start: ScheduleBlock): boolean {
 
     const pDepth = start.pathDepth;
     let flag = false;
-    for (const adj of start.neighbors) {
+    for (const adj of start.leftN) {
         // we only visit nodes next to the current node (depth different is exactly 1) with the same pathDepth
         if (startDepth - adj.depth === 1 && pDepth === adj.pathDepth) {
             if (adj.visited) {
@@ -186,7 +201,7 @@ export function DFSFindFixedNumerical(start: ScheduleBlock): boolean {
     if (startLeft === 0.0) return (start.isFixed = true);
 
     let flag = false;
-    for (const adj of start.neighbors) {
+    for (const adj of start.leftN) {
         if (Math.abs(startLeft - adj.left - adj.width) < 1e-8) {
             if (adj.visited) {
                 flag = adj.isFixed || flag;
@@ -210,8 +225,7 @@ function calculateMaxDepth(blocks: ScheduleBlock[]) {
     for (const node of blocks) if (!node.visited) depthFirstSearchRec(node, node.depth + 1);
     // for (const node of blocks) if (!node.visited && node.depth === 0) depthFirstSearchRec3(node);
     for (const node of blocks) node.visited = false;
-    for (const node of blocks)
-        if (!node.visited && node.neighbors.every(v => v.depth < node.depth)) DFSFindFixed(node);
+    for (const node of blocks) if (!node.visited && node.rightN.length === 0) DFSFindFixed(node);
 }
 
 async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
@@ -250,7 +264,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
             if (
                 !node.visited &&
                 (Math.abs(right - 1.0) < 1e-8 ||
-                    node.neighbors.find(n => n.isFixed && Math.abs(right - n.left) < 1e-8))
+                    node.rightN.find(n => n.isFixed && Math.abs(right - n.left) < 1e-8))
             ) {
                 DFSFindFixedNumerical(node);
             }
@@ -272,12 +286,6 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
 export async function computeBlockPositions(days: ScheduleDays) {
     // console.time('compute bp');
     for (const blocks of days) {
-        blocks.forEach((b, i) => {
-            b.idx = i;
-            b.lpLNeg.name = b.lpLPos.name = `l${i}`;
-        });
-        constructAdjList(blocks);
-
         const total =
             options.ISMethod === 1 ? intervalScheduling(blocks) : intervalScheduling2(blocks);
         if (total <= 1) {
@@ -287,6 +295,25 @@ export async function computeBlockPositions(days: ScheduleDays) {
             }
             continue;
         }
+
+        // --------------- one of the bottle neck --------------------
+        console.time('group adjList');
+        const len = blocks.length;
+        for (let i = 0; i < len; i++) {
+            const b = blocks[i];
+            b.idx = i;
+            b.lpLNeg.name = b.lpLPos.name = `l${i}`;
+        }
+        const matrix = constructAdjList(blocks);
+        for (const block of blocks) {
+            for (const v1 of block.leftN) {
+                if (!block.leftN.some(v => matrix[v.idx * len + v1.idx])) {
+                    block.cleftN.push(v1);
+                }
+            }
+        }
+        console.timeEnd('group adjList');
+        // ----------------------------------------------------------
         if (options.applyDFS) {
             calculateMaxDepth(blocks);
             for (const block of blocks) {

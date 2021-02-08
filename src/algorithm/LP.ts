@@ -92,44 +92,43 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = true)
 
     const objVars = [];
     const subjectTo: LP['subjectTo'] = [];
+    const bounds: LP['bounds'] = [];
+
     let count = 0;
     for (const block of component) {
         const j = block.idx;
-        let maxLeftFixed = 0;
-        let minRight = 1;
-        for (const v of block.neighbors) {
-            const temp = v.left + v.width;
-            if (temp <= block.left + 1e-8) {
-                if (v.isFixed) {
-                    maxLeftFixed = Math.max(maxLeftFixed, temp);
-                } else {
-                    subjectTo.push({
-                        name: `${count++}`,
-                        vars: [block.lpLPos, v.lpLNeg, { name: `w${v.idx}`, coef: -1.0 }],
-                        bnds: zeroLB
-                    });
-                }
-            }
-            if (v.isFixed && v.left >= block.left + block.width - 1e-8)
-                minRight = Math.min(v.left, minRight);
+        let maxLeftFixed = 0.0;
+        let minRight = 1.0;
+        for (const v of block.leftN)
+            if (v.isFixed) maxLeftFixed = Math.max(maxLeftFixed, v.left + v.width);
+        for (const v of block.rightN) if (v.isFixed) minRight = Math.min(v.left, minRight);
+        for (const v of block.cleftN) {
+            if (!v.isFixed)
+                subjectTo.push({
+                    name: `${count++}`,
+                    vars: [block.lpLPos, v.lpLNeg, { name: `w${v.idx}`, coef: -1.0 }],
+                    bnds: zeroLB
+                });
         }
         const wWar = { name: `w${j}`, coef: 1.0 };
         objVars.push(wWar);
-        subjectTo.push(
+        subjectTo.push({
+            name: `${count++}`,
+            vars: [wWar, block.lpLPos],
+            bnds: { type: GLP_UP, lb: 0, ub: minRight }
+        });
+        bounds.push(
             {
-                name: `${count++}`,
-                vars: [wWar],
-                bnds: { type: GLP_LO, lb: block.width, ub: 0.0 }
+                name: block.lpLPos.name,
+                type: GLP_DB,
+                lb: maxLeftFixed,
+                ub: 1.0
             },
             {
-                name: `${count++}`,
-                vars: [block.lpLPos],
-                bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
-            },
-            {
-                name: `${count++}`,
-                vars: [wWar, block.lpLPos],
-                bnds: { type: GLP_UP, lb: 0, ub: minRight }
+                name: wWar.name,
+                type: GLP_LO,
+                lb: block.width,
+                ub: 0.0
             }
         );
     }
@@ -141,7 +140,8 @@ export async function buildGLPKModel(component: ScheduleBlock[], uniform = true)
             name: 'obj',
             vars: objVars
         },
-        subjectTo
+        subjectTo,
+        bounds
     };
     const result = await solveLP(lp);
     nativeTime += result.time * 1000;
@@ -218,8 +218,10 @@ function applyLPResult2(
  */
 export async function buildGLPKModel2(component: ScheduleBlock[]) {
     if (!window.Worker) return;
+
     const tStart = performance.now();
     const subjectTo: LP['subjectTo'] = [];
+    const bounds: LP['bounds'] = [];
 
     let maxPathDepth = 0;
     for (const block of component) {
@@ -239,48 +241,36 @@ export async function buildGLPKModel2(component: ScheduleBlock[]) {
 
     let count = 0;
     for (const block of component) {
-        let maxLeftFixed = 0;
-        let minRight = 1;
-        for (const v of block.neighbors) {
-            const temp = v.left + v.width;
-            if (temp <= block.left + 1e-8) {
-                if (v.isFixed) {
-                    maxLeftFixed = Math.max(maxLeftFixed, temp);
-                } else {
-                    subjectTo.push({
-                        name: `${count++}`,
-                        vars: [
-                            block.lpLPos,
-                            v.lpLNeg,
-                            { name: widthVars[widthVarMap[v.pathDepth]], coef: -1.0 }
-                        ],
-                        bnds: zeroLB
-                    });
-                }
-            }
-            if (v.isFixed && v.left >= block.left + block.width - 1e-8)
-                minRight = Math.min(v.left, minRight);
+        let maxLeftFixed = 0.0;
+        let minRight = 1.0;
+        for (const v of block.leftN)
+            if (v.isFixed) maxLeftFixed = Math.max(maxLeftFixed, v.left + v.width);
+        for (const v of block.rightN) if (v.isFixed) minRight = Math.min(v.left, minRight);
+        for (const v of block.cleftN) {
+            if (!v.isFixed)
+                subjectTo.push({
+                    name: `${count++}`,
+                    vars: [
+                        block.lpLPos,
+                        v.lpLNeg,
+                        { name: widthVars[widthVarMap[v.pathDepth]], coef: -1.0 }
+                    ],
+                    bnds: zeroLB
+                });
         }
         const varIdx = widthVarMap[block.pathDepth];
         widthVarCount[varIdx]++;
-        const bWVar = { name: widthVars[varIdx], coef: 1.0 };
-        subjectTo.push(
-            // {
-            //     name: `${count++}`,
-            //     vars: [bWVar],
-            //     bnds: { type: GLP_LO, lb: block.width, ub: 3 * block.width }
-            // },
-            {
-                name: `${count++}`,
-                vars: [block.lpLPos],
-                bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
-            },
-            {
-                name: `${count++}`,
-                vars: [bWVar, block.lpLPos],
-                bnds: { type: GLP_UP, lb: 0, ub: minRight }
-            }
-        );
+        subjectTo.push({
+            name: `${count++}`,
+            vars: [{ name: widthVars[varIdx], coef: 1.0 }, block.lpLPos],
+            bnds: { type: GLP_UP, lb: 0, ub: minRight }
+        });
+        bounds.push({
+            name: block.lpLPos.name,
+            type: GLP_DB,
+            lb: maxLeftFixed,
+            ub: 1.0
+        });
     }
 
     const objVars = [];
@@ -295,7 +285,8 @@ export async function buildGLPKModel2(component: ScheduleBlock[]) {
             name: 'obj',
             vars: objVars
         },
-        subjectTo
+        subjectTo,
+        bounds
     });
     nativeTime += result.time * 1000;
     if (result.result.status === GLP_OPT) {
@@ -326,38 +317,33 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
 
     const tStart = performance.now();
     const subjectTo: LP['subjectTo'] = [];
+    const bounds: LP['bounds'] = [];
     let count = 0;
     for (const block of component) {
         let maxLeftFixed = 0.0;
         let minRight = 1.0;
-        for (const v of block.neighbors) {
-            const temp = v.left + v.width;
-            if (temp <= block.left + 1e-8) {
-                if (v.isFixed) {
-                    maxLeftFixed = Math.max(maxLeftFixed, temp);
-                } else {
-                    subjectTo.push({
-                        name: `${count++}`,
-                        vars: [block.lpLPos, v.lpLNeg, negWVar],
-                        bnds: zeroLB
-                    });
-                }
-            }
-            if (v.isFixed && v.left >= block.left + block.width - 1e-8)
-                minRight = Math.min(v.left, minRight);
+        for (const v of block.leftN)
+            if (v.isFixed) maxLeftFixed = Math.max(maxLeftFixed, v.left + v.width);
+        for (const v of block.rightN) if (v.isFixed) minRight = Math.min(v.left, minRight);
+        for (const v of block.cleftN) {
+            if (!v.isFixed)
+                subjectTo.push({
+                    name: `${count++}`,
+                    vars: [block.lpLPos, v.lpLNeg, negWVar],
+                    bnds: zeroLB
+                });
         }
-        subjectTo.push(
-            {
-                name: `${count++}`,
-                vars: [block.lpLPos],
-                bnds: { type: GLP_LO, lb: maxLeftFixed, ub: 1.0 }
-            },
-            {
-                name: `${count++}`,
-                vars: [posWVar, block.lpLPos],
-                bnds: { type: GLP_UP, lb: 0.0, ub: minRight }
-            }
-        );
+        subjectTo.push({
+            name: `${count++}`,
+            vars: [posWVar, block.lpLPos],
+            bnds: { type: GLP_UP, lb: 0.0, ub: minRight }
+        });
+        bounds.push({
+            name: block.lpLPos.name,
+            type: GLP_DB,
+            lb: maxLeftFixed,
+            ub: 1.0
+        });
     }
 
     communicationTime += performance.now() - tStart;
@@ -368,7 +354,8 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
             name: 'obj',
             vars: [posWVar]
         },
-        subjectTo
+        subjectTo,
+        bounds
     });
     nativeTime += result.time * 1000;
     if (result.result.status === GLP_OPT) {
@@ -379,6 +366,8 @@ export async function buildGLPKModel3(component: ScheduleBlock[]) {
 }
 
 export function clearTime() {
+    const prevN = [nativeTime, communicationTime];
     nativeTime = 0.0;
     communicationTime = 0.0;
+    return prevN;
 }

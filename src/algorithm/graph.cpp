@@ -7,6 +7,14 @@
 #include <vector>
 using namespace std;
 
+int isTolerance = 0;
+int ISMethod = 1;
+int applyDFS = 1;
+int dfsTolerance = 0;
+int LPIters = 100;
+int LPModel = 3;
+int showFixed = 1;
+
 struct ScheduleBlock {
     bool visited;
     bool isFixed;
@@ -38,25 +46,22 @@ inline bool conflict(ScheduleBlock& b1, ScheduleBlock& b2, int tolerance) {
     return calcOverlap(b1.startMin, b1.endMin, b2.startMin, b2.endMin) > tolerance;
 }
 
-int intervalScheduling(ScheduleBlock* blocks, int N) {
+int intervalScheduling(ScheduleBlock* blocks, ScheduleBlock** occupied, int N) {
     if (N == 0) return 0;
     sort(blocks, blocks + N, [](ScheduleBlock& b1, ScheduleBlock& b2) {
         int diff = b1.startMin - b2.startMin;
         if (diff == 0) return b2.duration - b1.duration < 0;
         return diff < 0;
     });
-
-    vector<ScheduleBlock*> occupied;
-    occupied.push_back(blocks);
+    int occupiedSize = 0;
     int numRooms = 0;
-    int tolerance = 0;
     auto* end = blocks + N;
     for (auto* block = blocks + 1; block < end; block++) {
         int idx = -1;
         int minRoomIdx = INT_MAX;
-        for (int k = 0; k < occupied.size(); k++) {
+        for (int k = 0; k < occupiedSize; k++) {
             auto* prevBlock = occupied[k];
-            if (prevBlock->endMin <= block->startMin + tolerance && prevBlock->depth < minRoomIdx) {
+            if (prevBlock->endMin <= block->startMin + isTolerance && prevBlock->depth < minRoomIdx) {
                 minRoomIdx = prevBlock->depth;
                 idx = k;
             }
@@ -64,7 +69,7 @@ int intervalScheduling(ScheduleBlock* blocks, int N) {
         if (idx == -1) {
             numRooms += 1;
             block->depth = numRooms;
-            occupied.push_back(block);
+            occupied[occupiedSize++] = block;
         } else {
             block->depth = occupied[idx]->depth;
             occupied[idx] = block;
@@ -76,14 +81,12 @@ int intervalScheduling(ScheduleBlock* blocks, int N) {
 
 bool* constructAdjList(ScheduleBlock* blocks, int len) {
     bool* matrix = new bool[len * len]();
-    int tolerance = 0;
     // construct an undirected graph
     for (int i = 0; i < len; i++) {
         auto& bi = blocks[i];
         for (int j = i + 1; j < len; j++) {
             auto& bj = blocks[j];
-            if (conflict(bi, bj, tolerance)) {
-                if (bi.depth == bj.depth) cout << "!!!" << endl;
+            if (conflict(bi, bj, dfsTolerance)) {
                 if (bi.depth < bj.depth) {
                     matrix[bj.idx * len + bi.idx] = 1;
                     bj.leftN.push_back(&bi);
@@ -94,7 +97,6 @@ bool* constructAdjList(ScheduleBlock* blocks, int len) {
                     bi.leftN.push_back(&bj);
                 }
             }
-            // cout << (&bj == blocks + j) << endl;
         }
     }
     return matrix;
@@ -245,9 +247,7 @@ void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
         cons.push_back({NC + 1, i + 1, minRight});
         bounds[i] = maxLeftFixed;
     }
-    delete[] idxMap;
     glp_prob* lp = glp_create_prob();
-    glp_set_prob_name(lp, "sample");
     glp_set_obj_dir(lp, GLP_MAX);
     glp_add_rows(lp, cons.size());
     glp_add_cols(lp, NC + 1);
@@ -310,6 +310,23 @@ void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
 
 extern "C" {
 
+void setOptions(int _isTolerance,
+                int _ISMethod,
+                int _applyDFS,
+                int _dfsTolerance,
+                int _LPIters,
+                int _LPModel,
+                int _showFixed) {
+    isTolerance = _isTolerance;
+    ISMethod = _ISMethod;
+    applyDFS = _applyDFS;
+    dfsTolerance = _dfsTolerance;
+    LPIters = _LPIters;
+    LPModel = _LPModel;
+    showFixed = _showFixed;
+    // cout << LPIters << endl;
+}
+
 Result* compute(uint16_t* arr, int N) {
     auto* blocks = new ScheduleBlock[N]();
     auto* results = new Result[N];
@@ -319,9 +336,10 @@ Result* compute(uint16_t* arr, int N) {
         blocks[i].duration = blocks[i].endMin - blocks[i].startMin;
         blocks[i].idx = i;
     }
-
-    int total = intervalScheduling(blocks, N);
-    if (total <= 1) {
+    // array of schedule block pointers, used by several functions
+    auto** component = new ScheduleBlock*[N];
+    int total = intervalScheduling(blocks, component, N);
+    if (total <= 1 || !applyDFS) {
         for (int i = 0; i < N; i++) {
             auto& block = blocks[i];
             block.left = static_cast<double>(block.depth) / total;
@@ -329,6 +347,7 @@ Result* compute(uint16_t* arr, int N) {
         }
         computeResult(blocks, results, N);
         delete[] blocks;
+        delete[] component;
         return results;
     }
     bool* matrix = constructAdjList(blocks, N);
@@ -341,11 +360,10 @@ Result* compute(uint16_t* arr, int N) {
         block->left = static_cast<double>(block->depth) / block->pathDepth;
         block->width = 1.0 / block->pathDepth;
     }
-    int i = 0;
     delete[] matrix;
+    int i = 0;
     int* idxMap = new int[N];
-    auto** component = new ScheduleBlock*[N];
-    while (i < 100) {
+    while (i < LPIters) {
         for (auto block = blocks; block < end; block++) {
             if (!block->visited) {
                 buildLPModel1(component, idxMap, BFS(block, component));
@@ -371,7 +389,7 @@ Result* compute(uint16_t* arr, int N) {
         for (auto block = blocks; block < end; block++)
             fixedCount += (block->visited = block->isFixed);
         if (fixedCount == prevFixedCount) {
-            cout << "convergence reached at " << i << endl;
+            // cout << "convergence reached at " << i << endl;
             break;
         }
         prevFixedCount = fixedCount;

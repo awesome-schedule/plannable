@@ -4,11 +4,11 @@ EMCC_FLAGS :=
 # access emcc settings through Runtime.compilerSettings or Runtime.getCompilerSetting(name)
 EMCC_FLAGS += -s RETAIN_COMPILER_SETTINGS=1
 EMCC_FLAGS += -s ALLOW_MEMORY_GROWTH=1
-EMCC_FLAGS += -s EXPORTED_FUNCTIONS='["_compute"]'
-EMCC_FLAGS += -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap"]'
+EMCC_FLAGS += -s EXPORTED_FUNCTIONS='["_compute", "_setOptions", "_free"]'
+EMCC_FLAGS += -s EXPORTED_RUNTIME_METHODS='["cwrap"]'
 PWD=$(shell pwd)
 
-all: glpk glpk.js glpk-worker.js
+all: graph.js
 
 getglpk:
 	wget -nc http://ftp.gnu.org/gnu/glpk/glpk-$(GLPK_VERSION).tar.gz && \
@@ -22,7 +22,7 @@ glpk: getglpk
 
 graph.js: graph.cpp
 	cd $(PWD); \
-	emcc -O2 $(EMCC_FLAGS) \
+	emcc -O2 --profiling $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
 	graph.cpp -o graph.js \

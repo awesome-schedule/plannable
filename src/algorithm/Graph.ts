@@ -17,7 +17,7 @@ export const options = {
     ISMethod: 1,
     applyDFS: true,
     tolerance: 0,
-    LPIters: 0,
+    LPIters: 100,
     LPModel: 3,
     showFixed: false
 };
@@ -357,10 +357,16 @@ export async function computeBlockPositions(days: ScheduleDays) {
 }
 
 declare const Module: any;
-
-const nativeFunc = new Promise<(a: number, b: number) => number>((resolve, reject) => {
+interface NativeFuncs {
+    setOptions(a: number, b: number, c: number, d: number, e: number, f: number, g: number): void;
+    compute(a: number, b: number): number;
+}
+const nativeFuncs = new Promise<NativeFuncs>((resolve, reject) => {
     Module['onRuntimeInitialized'] = () => {
-        resolve(Module.cwrap('compute', 'number', ['number', 'number']));
+        resolve({
+            setOptions: Module.cwrap('setOptions', 'number', new Array(7).fill('number')),
+            compute: Module.cwrap('compute', 'number', ['number', 'number'])
+        });
     };
 });
 
@@ -371,7 +377,18 @@ export async function computeBlockPositionsNative(days: ScheduleDays) {
     // console.time('compute bp');
     // const promises = [];
     console.time('native compute');
-    const func = await nativeFunc;
+    const { compute, setOptions } = await nativeFuncs;
+
+    setOptions(
+        options.isTolerance,
+        options.ISMethod,
+        +options.applyDFS,
+        options.tolerance,
+        options.LPIters,
+        options.LPModel,
+        +options.showFixed
+    );
+
     for (const blocks of days) {
         const len = blocks.length;
         const bufPtr = Module._malloc(len * 4);
@@ -380,7 +397,7 @@ export async function computeBlockPositionsNative(days: ScheduleDays) {
             u16[2 * i] = blocks[i].startMin;
             u16[2 * i + 1] = blocks[i].endMin;
         }
-        const ptr = func(bufPtr, len);
+        const ptr = compute(bufPtr, len);
         const result = new Float64Array(Module.HEAPU8.buffer, ptr, len * 2);
         for (let i = 0; i < len; i++) {
             blocks[i].left = result[2 * i];

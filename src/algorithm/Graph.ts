@@ -17,7 +17,7 @@ export const options = {
     ISMethod: 1,
     applyDFS: true,
     tolerance: 0,
-    LPIters: 100,
+    LPIters: 0,
     LPModel: 3,
     showFixed: false
 };
@@ -286,6 +286,7 @@ async function _computeBlockPositionHelper(blocks: ScheduleBlock[]) {
 export async function computeBlockPositions(days: ScheduleDays) {
     // console.time('compute bp');
     const promises = [];
+    console.time('compute block positions');
     for (const blocks of days) {
         const total =
             options.ISMethod === 1 ? intervalScheduling(blocks) : intervalScheduling2(blocks);
@@ -305,15 +306,15 @@ export async function computeBlockPositions(days: ScheduleDays) {
         }
         const matrix = constructAdjList(blocks);
         // --------------- one of the bottle neck --------------------
-        console.time('group adjList');
-        for (const block of blocks) {
-            for (const v1 of block.leftN) {
-                if (!block.leftN.some(v => matrix[v.idx * len + v1.idx])) {
-                    block.cleftN.push(v1);
-                }
-            }
-        }
-        console.timeEnd('group adjList');
+        // console.time('group adjList');
+        // for (const block of blocks) {
+        //     for (const v1 of block.leftN) {
+        //         if (!block.leftN.some(v => matrix[v.idx * len + v1.idx])) {
+        //             block.cleftN.push(v1);
+        //         }
+        //     }
+        // }
+        // console.timeEnd('group adjList');
         // ----------------------------------------------------------
         if (options.applyDFS) {
             calculateMaxDepth(blocks);
@@ -329,6 +330,7 @@ export async function computeBlockPositions(days: ScheduleDays) {
             }
         }
     }
+    console.timeEnd('compute block positions');
     if (options.applyDFS) {
         // console.timeEnd('compute bp');
         // const tStart = performance.now();
@@ -352,4 +354,40 @@ export async function computeBlockPositions(days: ScheduleDays) {
     if (options.showFixed)
         for (const blocks of days)
             for (const block of blocks) if (block.isFixed) (block.background as any) = '#000000';
+}
+
+declare const Module: any;
+
+const nativeFunc = new Promise<(a: number, b: number) => number>((resolve, reject) => {
+    Module['onRuntimeInitialized'] = () => {
+        resolve(Module.cwrap('compute', 'number', ['number', 'number']));
+    };
+});
+
+/**
+ * compute the width and left of the blocks contained in each day
+ */
+export async function computeBlockPositionsNative(days: ScheduleDays) {
+    // console.time('compute bp');
+    // const promises = [];
+    console.time('native compute');
+    const func = await nativeFunc;
+    for (const blocks of days) {
+        const len = blocks.length;
+        const bufPtr = Module._malloc(len * 4);
+        const u16 = new Uint16Array(Module.HEAPU8.buffer, bufPtr, len * 2);
+        for (let i = 0; i < len; i++) {
+            u16[2 * i] = blocks[i].startMin;
+            u16[2 * i + 1] = blocks[i].endMin;
+        }
+        const ptr = func(bufPtr, len);
+        const result = new Float64Array(Module.HEAPU8.buffer, ptr, len * 2);
+        for (let i = 0; i < len; i++) {
+            blocks[i].left = result[2 * i];
+            blocks[i].width = result[2 * i + 1];
+        }
+        Module._free(bufPtr);
+        Module._free(ptr);
+    }
+    console.timeEnd('native compute');
 }

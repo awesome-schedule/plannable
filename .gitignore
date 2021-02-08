@@ -72,3 +72,5 @@ _latexindent_*
 .fuse_hidden*
 
 dist-electron
+glpk-*
+public/js/graph.*

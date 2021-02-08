@@ -44,7 +44,8 @@ inline int calcOverlap(int a, int b, int c, int d) {
 }
 
 inline bool conflict(ScheduleBlock& b1, ScheduleBlock& b2, int tolerance) {
-    return calcOverlap(b1.startMin, b1.endMin, b2.startMin, b2.endMin) > tolerance;
+    return calcOverlap(b1.startMin, b1.endMin, b2.startMin, b2.endMin) >
+           tolerance;
 }
 
 int intervalScheduling(ScheduleBlock* blocks, ScheduleBlock** occupied, int N) {
@@ -63,7 +64,8 @@ int intervalScheduling(ScheduleBlock* blocks, ScheduleBlock** occupied, int N) {
         int minRoomIdx = INT_MAX;
         for (int k = 0; k < occupiedSize; k++) {
             auto* prevBlock = occupied[k];
-            if (prevBlock->endMin <= block->startMin + isTolerance && prevBlock->depth < minRoomIdx) {
+            if (prevBlock->endMin <= block->startMin + isTolerance &&
+                prevBlock->depth < minRoomIdx) {
                 minRoomIdx = prevBlock->depth;
                 idx = k;
             }
@@ -145,7 +147,8 @@ bool DFSFindFixed(ScheduleBlock* start) {
     int pDepth = start->pathDepth;
     bool flag = false;
     for (auto adj : start->leftN) {
-        // we only visit nodes next to the current node (depth different is exactly 1) with the same pathDepth
+        // we only visit nodes next to the current node (depth different is
+        // exactly 1) with the same pathDepth
         if (startDepth - adj->depth == 1 && pDepth == adj->pathDepth) {
             if (adj->visited) {
                 flag = adj->isFixed || flag;
@@ -183,11 +186,11 @@ void calculateMaxDepth(ScheduleBlock* blocks, int N) {
     for (int i = 0; i < N; i++) {
         indices[i] = i;
     }
-    sort(indices, indices + N, [=](int b1, int b2) {
-        return blocks[b2].depth < blocks[b1].depth;
-    });
+    sort(indices, indices + N,
+         [=](int b1, int b2) { return blocks[b2].depth < blocks[b1].depth; });
 
-    // We start from the node of the greatest depth and traverse to the lower depths
+    // We start from the node of the greatest depth and traverse to the lower
+    // depths
     for (int i = 0; i < N; i++) {
         auto* node = blocks + indices[i];
         if (!node->visited) depthFirstSearchRec(node, node->depth + 1);
@@ -231,10 +234,12 @@ void applyLPResult(glp_prob* lp, ScheduleBlock** component, int NC) {
 void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
     // int numCons = 0;
     vector<Cons> cons;
-    vector<double> bounds(NC);
     for (int i = 0; i < NC; i++) {
         idxMap[component[i]->idx] = i + 1;
     }
+    glp_prob* lp = glp_create_prob();
+    glp_set_obj_dir(lp, GLP_MAX);
+    glp_add_cols(lp, NC + 1);
     for (int i = 0; i < NC; i++) {
         auto block = component[i];
         double maxLeftFixed = 0.0;
@@ -249,13 +254,17 @@ void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
 
         for (auto v : block->cleftN)
             if (!v->isFixed) cons.push_back({i + 1, idxMap[v->idx], 0.0});
+
         cons.push_back({NC + 1, i + 1, minRight});
-        bounds[i] = maxLeftFixed;
+        // bounds for the lefts
+        glp_set_col_bnds(lp, i + 1, GLP_DB, maxLeftFixed, 1.0);
+        glp_set_obj_coef(lp, i + 1, 0.0);
     }
-    glp_prob* lp = glp_create_prob();
-    glp_set_obj_dir(lp, GLP_MAX);
+    // var for width
+    glp_set_col_bnds(lp, NC + 1, GLP_DB, 0.0, 1.0);
+    glp_set_obj_coef(lp, NC + 1, 1.0);
+
     glp_add_rows(lp, cons.size());
-    glp_add_cols(lp, NC + 1);
 
     int numCons = cons.size();
     int* ia = new int[numCons * 3 + 1];
@@ -264,39 +273,35 @@ void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
     int count = 1;
     for (int i = 0; i < numCons; i++) {
         auto& con = cons[i];
-        if (con.var1 == NC + 1) {
-            ia[count] = i + 1;
-            ja[count] = con.var1;
+        int auxVar = i + 1;
+        int structVar1 = con.var1;
+        int structVar2 = con.var2;
+        double bnd = con.var3;
+        if (structVar1 == NC + 1) {
+            ia[count] = auxVar;
+            ja[count] = structVar1;
             ar[count++] = 1.0;
 
-            ia[count] = i + 1;
-            ja[count] = con.var2;
+            ia[count] = auxVar;
+            ja[count] = structVar2;
             ar[count++] = 1.0;
-            glp_set_row_bnds(lp, i + 1, GLP_UP, 0.0, con.var3);
+            glp_set_row_bnds(lp, auxVar, GLP_UP, 0.0, bnd);
         } else {
-            ia[count] = i + 1;
-            ja[count] = con.var1;
+            ia[count] = auxVar;
+            ja[count] = structVar1;
             ar[count++] = 1.0;
 
-            ia[count] = i + 1;
-            ja[count] = con.var2;
+            ia[count] = auxVar;
+            ja[count] = structVar2;
             ar[count++] = -1.0;
 
-            ia[count] = i + 1;
+            ia[count] = auxVar;
             ja[count] = NC + 1;
             ar[count++] = -1.0;
-            glp_set_row_bnds(lp, i + 1, GLP_LO, 0.0, 0.0);
+            glp_set_row_bnds(lp, auxVar, GLP_LO, 0.0, 0.0);
         }
     }
     // cout << NC << " " << numCons << endl;
-    // lefts
-    for (int i = 0; i < NC; i++) {
-        glp_set_col_bnds(lp, i + 1, GLP_DB, bounds[i], 1.0);
-        glp_set_obj_coef(lp, i + 1, 0.0);
-    }
-    // width
-    glp_set_col_bnds(lp, NC + 1, GLP_DB, 0.0, 1.0);
-    glp_set_obj_coef(lp, NC + 1, 1.0);
 
     glp_load_matrix(lp, count - 1, ia, ja, ar);
 
@@ -315,13 +320,8 @@ void buildLPModel1(ScheduleBlock** component, int* idxMap, int NC) {
 
 extern "C" {
 
-void setOptions(int _isTolerance,
-                int _ISMethod,
-                int _applyDFS,
-                int _dfsTolerance,
-                int _LPIters,
-                int _LPModel,
-                int _showFixed) {
+void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
+                int _dfsTolerance, int _LPIters, int _LPModel, int _showFixed) {
     isTolerance = _isTolerance;
     ISMethod = _ISMethod;
     applyDFS = _applyDFS;

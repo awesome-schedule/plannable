@@ -369,7 +369,7 @@
                     v-model.number="options.LPModel"
                     min="1"
                     step="1"
-                    max="3"
+                    max="2"
                     type="number"
                     class="form-control form-control-sm"
                 />

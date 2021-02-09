@@ -15,7 +15,6 @@ import { FastSearcher } from './algorithm/Searcher';
 import App from './App.vue';
 import axios from 'axios';
 import WatchFactory from './store/watch';
-import * as LP from '@/algorithm/LP';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -56,7 +55,6 @@ Vue.config.devtools = true;
 Vue.prototype.highlightMatch = highlightMatch;
 
 (window as any).axios = axios;
-(window as any).LP = LP;
 
 new Vue({
     data: {

@@ -16,9 +16,5 @@ describe('schedule block', () => {
             hr24toInt('17:00'),
             hr24toInt('23:00')
         );
-
-        expect(block1.duration).toBe(120);
-        expect(block1.conflict(block2)).toBe(false);
-        expect(block1.conflict(block2, -1)).toBe(true);
     });
 });

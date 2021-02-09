@@ -14,18 +14,38 @@ int applyDFS = 1;
 int dfsTolerance = 0;
 int LPIters = 100;
 int LPModel = 3;
-int showFixed = 1;
 
 struct ScheduleBlock {
+    /**
+     *  visited flag used in BFS/DFS 
+     **/
     bool visited;
+    /**
+     * whether this block is movable/expandable
+     * i.e. whether there's still room for it to change its left and width) 
+    */
     bool isFixed;
+
     int16_t startMin;
     int16_t endMin;
     int16_t duration;
+
+    /** 
+     * an unique index for this scheduleBlock 
+     * */
     int idx;
+    /** 
+     * depth/room assignment obtained from the interval scheduling algorithm 
+     * */
     int depth;
+    /**
+     * the maximum depth (number of rooms) that the current block is on
+     * Equal to the maximum depth of the block 
+     * on the right hand side of this block that also conflicts with this blocks
+     */
     int pathDepth;
-    double left, width;
+    double left;
+    double width;
     vector<ScheduleBlock*> leftN;
     vector<ScheduleBlock*> rightN;
     vector<ScheduleBlock*> cleftN;
@@ -78,7 +98,7 @@ void computeResult() {
     for (int i = 0; i < N; i++) {
         auto& block = blocks[i];
         r_positions[i].left = block.left;
-        double w = r_positions[i].width = block.width;
+        double w = (r_positions[i].width = block.width) * 100;
         r_fixed[i] = block.isFixed;
         r_sum += w;
         r_sumSq += w * w;
@@ -366,12 +386,45 @@ void buildLPModel1(int NC) {
         glp_set_obj_coef(lp, leftVar + 1, 1.0);
     }
 
-    glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
-
     glp_smcp parm;
     glp_init_smcp(&parm);
     parm.msg_lev = GLP_MSG_ERR;
+
+    glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
     glp_simplex(lp, &parm);
+
+    // ----------------- minimize absolute deviation from the mean -----------
+    glp_set_obj_dir(lp, GLP_MIN);
+    double sumWidth = glp_get_obj_val(lp);
+    double meanWidth = sumWidth / NC;
+    glp_add_cols(lp, NC);
+    glp_add_rows(lp, NC * 2 + 1);
+    for (int i = 0; i < NC; i++) {
+        int tVar = 2 * NC + i + 1;
+        int widthVar = 2 * i + 2;
+
+        // ti >= mean - wi
+        addConstraint(auxVar, tVar, 1.0);
+        addConstraint(auxVar, widthVar, 1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_LO, meanWidth, 0.0);
+
+        // ti >= wi - mean
+        addConstraint(auxVar, tVar, 1.0);
+        addConstraint(auxVar, widthVar, -1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_LO, -meanWidth, 0.0);
+
+        glp_set_obj_coef(lp, widthVar, 0.0);
+        glp_set_obj_coef(lp, tVar, 1.0);
+    }
+    // sum w_i >= optimal
+    for (int i = 0; i < NC; i++) {
+        addConstraint(auxVar, 2 * i + 2, 1.0);
+    }
+    glp_set_row_bnds(lp, auxVar, GLP_LO, sumWidth - 1e-8, 0.0);
+
+    glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
+    glp_simplex(lp, &parm);
+    // ------------------------------------------------------------------
 
     for (int i = 0; i < NC; i++) {
         blockBuffer[i]->left = glp_get_col_prim(lp, 2 * i + 1);
@@ -447,14 +500,13 @@ void buildLPModel2(int NC) {
 extern "C" {
 
 void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
-                int _dfsTolerance, int _LPIters, int _LPModel, int _showFixed) {
+                int _dfsTolerance, int _LPIters, int _LPModel) {
     isTolerance = _isTolerance;
     ISMethod = _ISMethod;
     applyDFS = _applyDFS;
     dfsTolerance = _dfsTolerance;
     LPIters = _LPIters;
     LPModel = _LPModel;
-    showFixed = _showFixed;
 }
 
 void compute(int16_t* arr, int _N) {

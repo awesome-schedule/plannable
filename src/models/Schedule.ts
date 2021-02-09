@@ -14,7 +14,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
-import { computeBlockPositions, computeBlockPositionsNative } from '@/algorithm/Graph';
+import { computeBlockPositions } from '@/algorithm/Graph';
 import { dayToInt, Day } from './constants';
 
 /**
@@ -334,7 +334,7 @@ export default abstract class Schedule {
         console.timeEnd('compute schedule');
 
         // const tStart = performance.now();
-        await computeBlockPositionsNative(days);
+        await computeBlockPositions(days);
         // console.log('compute blocks', performance.now() - tStart);
         if (days.reduce((sum, blocks) => sum + blocks.length, 0) < 100) this.days = days;
         else this.days = Object.seal(days);

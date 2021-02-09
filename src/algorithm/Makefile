@@ -2,6 +2,7 @@ GLPK_VERSION = 4.65
 
 EMCC_FLAGS :=
 # access emcc settings through Runtime.compilerSettings or Runtime.getCompilerSetting(name)
+EMCC_FLAGS += -Wall -Winline
 EMCC_FLAGS += -s RETAIN_COMPILER_SETTINGS=1
 EMCC_FLAGS += -s ALLOW_MEMORY_GROWTH=1
 EMCC_FLAGS += -s EXPORTED_FUNCTIONS='["_compute", "_setOptions", "_getPositions", "_getFixed", "_getSum", "_getSumSq", "_free"]'

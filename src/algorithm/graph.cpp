@@ -300,14 +300,35 @@ struct Cons {
     double var3;
 };
 
+vector<int> ia, ja;
+vector<double> ar;
+
+inline void addConstraint(int auxVar, int structVar, double coeff) {
+    ia.push_back(auxVar);
+    ja.push_back(structVar);
+    ar.push_back(coeff);
+}
+
+template <typename T>
+inline void clearAndReserve(vector<T>& vec) {
+    size_t cap = vec.capacity();
+    vec.clear();
+    vec.reserve(cap);
+}
+
 void buildLPModel1(int NC) {
     for (int i = 0; i < NC; i++) {
-        idxMap[blockBuffer[i]->idx] = i + 1;
+        idxMap[blockBuffer[i]->idx] = 2 * i + 1;
     }
     glp_prob* lp = glp_create_prob();
     glp_set_obj_dir(lp, GLP_MAX);
-    glp_add_cols(lp, NC + 1);
-    vector<Cons> cons;
+    glp_add_cols(lp, NC * 2);
+
+    clearAndReserve(ia);
+    clearAndReserve(ja);
+    clearAndReserve(ar);
+    addConstraint(0, 0, 0.0);
+    int auxVar = 1;
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
@@ -320,58 +341,95 @@ void buildLPModel1(int NC) {
         for (auto v : block->rightN)
             if (v->isFixed) minRight = min(v->left, minRight);
 
-        for (auto v : block->cleftN)
-            if (!v->isFixed) cons.push_back({i + 1, idxMap[v->idx], 0.0});
+        int leftVar = 2 * i + 1;
+        for (auto v : block->cleftN) {
+            if (!v->isFixed) {
+                // l >= leftL + width
+                addConstraint(auxVar, leftVar, 1.0);
+                addConstraint(auxVar, idxMap[v->idx], -1.0);
+                addConstraint(auxVar, idxMap[v->idx] + 1, -1.0);
+                glp_add_rows(lp, 1);
+                glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
+            }
+        }
+        // l + width <= right
+        addConstraint(auxVar, leftVar, 1.0);
+        addConstraint(auxVar, leftVar + 1, 1.0);
+        glp_add_rows(lp, 1);
+        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRight);
 
-        cons.push_back({NC + 1, i + 1, minRight});
-        // bounds for the lefts
-        glp_set_col_bnds(lp, i + 1, GLP_DB, maxLeftFixed, 1.0);
+        // l >= maxLeftFixed
+        glp_set_col_bnds(lp, leftVar, GLP_LO, maxLeftFixed, 0.0);
+        // w >= initialWidth
+        glp_set_col_bnds(lp, leftVar + 1, GLP_LO, block->width, 0.0);
+        glp_set_obj_coef(lp, leftVar, 0.0);
+        glp_set_obj_coef(lp, leftVar + 1, 1.0);
+    }
+
+    glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
+
+    glp_smcp parm;
+    glp_init_smcp(&parm);
+    parm.msg_lev = GLP_MSG_ERR;
+    glp_simplex(lp, &parm);
+
+    for (int i = 0; i < NC; i++) {
+        blockBuffer[i]->left = glp_get_col_prim(lp, 2 * i + 1);
+        blockBuffer[i]->width = glp_get_col_prim(lp, 2 * i + 2);
+    }
+    glp_delete_prob(lp);
+}
+
+void buildLPModel2(int NC) {
+    for (int i = 0; i < NC; i++) {
+        idxMap[blockBuffer[i]->idx] = i + 1;
+    }
+    glp_prob* lp = glp_create_prob();
+    glp_set_obj_dir(lp, GLP_MAX);
+    glp_add_cols(lp, NC + 1);
+
+    clearAndReserve(ia);
+    clearAndReserve(ja);
+    clearAndReserve(ar);
+    addConstraint(0, 0, 0.0);
+    int auxVar = 1;
+    for (int i = 0; i < NC; i++) {
+        auto block = blockBuffer[i];
+        double maxLeftFixed = 0.0;
+        double minRight = 1.0;
+        for (auto v : block->leftN)
+            if (v->isFixed)
+                maxLeftFixed = max(maxLeftFixed, v->left + v->width);
+        // else
+        //     cons.push_back({i + 1, idxMap[v->idx], 0.0});
+        for (auto v : block->rightN)
+            if (v->isFixed) minRight = min(v->left, minRight);
+
+        for (auto v : block->cleftN) {
+            if (!v->isFixed) {
+                // l >= leftL + width
+                addConstraint(auxVar, i + 1, 1.0);
+                addConstraint(auxVar, idxMap[v->idx], -1.0);
+                addConstraint(auxVar, NC + 1, -1.0);
+                glp_add_rows(lp, 1);
+                glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
+            }
+        }
+        // l + width <= right
+        addConstraint(auxVar, i + 1, 1.0);
+        addConstraint(auxVar, NC + 1, 1.0);
+        glp_add_rows(lp, 1);
+        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRight);
+
+        // l >= maxLeft
+        glp_set_col_bnds(lp, i + 1, GLP_LO, maxLeftFixed, 0.0);
         glp_set_obj_coef(lp, i + 1, 0.0);
     }
-    // var for width
+    // 0 <= width <= 1
     glp_set_col_bnds(lp, NC + 1, GLP_DB, 0.0, 1.0);
     glp_set_obj_coef(lp, NC + 1, 1.0);
 
-    glp_add_rows(lp, cons.size());
-
-    int numCons = cons.size();
-    int* ia = new int[numCons * 3 + 1];
-    int* ja = new int[numCons * 3 + 1];
-    double* ar = new double[numCons * 3 + 1];
-    int count = 1;
-    for (int i = 0; i < numCons; i++) {
-        auto& con = cons[i];
-        int auxVar = i + 1;
-        int structVar1 = con.var1;
-        int structVar2 = con.var2;
-        double bnd = con.var3;
-        if (structVar1 == NC + 1) {
-            ia[count] = auxVar;
-            ja[count] = structVar1;
-            ar[count++] = 1.0;
-
-            ia[count] = auxVar;
-            ja[count] = structVar2;
-            ar[count++] = 1.0;
-            glp_set_row_bnds(lp, auxVar, GLP_UP, 0.0, bnd);
-        } else {
-            ia[count] = auxVar;
-            ja[count] = structVar1;
-            ar[count++] = 1.0;
-
-            ia[count] = auxVar;
-            ja[count] = structVar2;
-            ar[count++] = -1.0;
-
-            ia[count] = auxVar;
-            ja[count] = NC + 1;
-            ar[count++] = -1.0;
-            glp_set_row_bnds(lp, auxVar, GLP_LO, 0.0, 0.0);
-        }
-    }
-    // cout << NC << " " << numCons << endl;
-
-    glp_load_matrix(lp, count - 1, ia, ja, ar);
+    glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
 
     glp_smcp parm;
     glp_init_smcp(&parm);
@@ -384,10 +442,6 @@ void buildLPModel1(int NC) {
         blockBuffer[i]->width = width;
     }
     glp_delete_prob(lp);
-
-    delete[] ia;
-    delete[] ja;
-    delete[] ar;
 }
 
 extern "C" {
@@ -456,10 +510,11 @@ void compute(int16_t* arr, int _N) {
         block->width = 1.0 / block->pathDepth;
     }
     int i = 0;
+    auto func = LPModel == 2 ? buildLPModel2 : buildLPModel1;
     while (i < LPIters) {
         for (auto block = blocks; block < end; block++) {
             if (!block->visited) {
-                buildLPModel1(BFS(block));
+                func(BFS(block));
             }
         }
         for (auto block = blocks; block < end; block++)

@@ -199,22 +199,27 @@ export default abstract class Schedule {
     }
 
     /**
-     * preview and remove preview need to use the async version of compute
+     * temporarily add a new section to the schedule
+     * need to re-render the schedule
      */
-    public removePreview() {
-        this._preview = null;
-        this.computeSchedule(false);
-    }
-
     public preview(section: Section) {
         this._preview = section;
         this.computeSchedule(false);
     }
 
+    public removePreview() {
+        this._preview = null;
+        this.computeSchedule(false);
+    }
+
+    /**
+     * highlight a course, if it exists on the schedule
+     * no re-render is needed.
+     */
     public hover(key: string, strong = true) {
         for (const blocks of this.days) {
             for (const block of blocks) {
-                if (block.key === key) block.strong = strong;
+                if (block.section.key === key) block.strong = strong;
             }
         }
     }
@@ -317,9 +322,9 @@ export default abstract class Schedule {
             // do not place into the schedule if the section is already rendered
             // instead, we highlight the schedule
             let found = false;
-            for (const blocks of this.days) {
+            for (const blocks of days) {
                 for (const block of blocks) {
-                    if (block.key === section.key) found = block.strong = true;
+                    if (block.section.has(section)) found = block.strong = true;
                 }
             }
             if (!found) this.place(section, days);
@@ -336,7 +341,8 @@ export default abstract class Schedule {
         // const tStart = performance.now();
         await computeBlockPositions(days);
         // console.log('compute blocks', performance.now() - tStart);
-        if (days.reduce((sum, blocks) => sum + blocks.length, 0) < 100) this.days = days;
+        if (days.reduce((sum, blocks) => sum + blocks.length, 0) < 200) this.days = days;
+        // disable reactivity for large schedules
         else this.days = Object.seal(days);
     }
 
@@ -530,7 +536,7 @@ export default abstract class Schedule {
         if (rendered)
             return (
                 this.events.some(x => x.days === key) ||
-                this.days.some(blocks => blocks.some(block => block.key === key))
+                this.days.some(blocks => blocks.some(block => block.section.key === key))
             );
         else return key in this.All || this.events.some(x => x.days === key);
     }

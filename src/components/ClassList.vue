@@ -1,14 +1,12 @@
 <template>
     <div class="card-body p-1 w-100" tabindex="-1" @keyup.esc="$emit('close')">
         <!-- we want to reduce the number of schedule computations. so we use mouseenter instead of mouseover -->
-        <div
-            v-for="(crs, idx) in courses"
-            :key="crs.key"
-            class="list-group list-group-flush w-100"
-            @mouseenter="schedule.hover(crs.key)"
-            @mouseleave="schedule.unhover(crs.key)"
-        >
-            <div class="list-group-item py-1 px-0 w-100">
+        <div v-for="(crs, idx) in courses" :key="crs.key" class="list-group list-group-flush w-100">
+            <div
+                class="list-group-item py-1 px-0 w-100"
+                @mouseenter="schedule.hover(crs.key)"
+                @mouseleave="schedule.unhover(crs.key)"
+            >
                 <div
                     class="row flex-nowrap no-gutters justify-content-between"
                     style="cursor: pointer"

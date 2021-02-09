@@ -30,13 +30,13 @@ export default class ScheduleBlock {
      * whether the block is highlighted
      */
     public strong = false;
-    public key: string;
 
     /**
      * @param background background color in hex, e.g. `#ffffff`
      * @param section the stuff contained in this block
      * @param startMin start time of this block, in minutes from 00:00
      * @param endMin end time of this block, in minutes from 00:00
+     * @param meeting if `section` is a Course/Section, this is an instance of [[Meeting]], otherwise undefined
      */
     constructor(
         public readonly background: string,
@@ -44,7 +44,5 @@ export default class ScheduleBlock {
         public readonly endMin: number,
         public readonly section: Section | Course | Event,
         public readonly meeting?: Meeting
-    ) {
-        this.key = section.key;
-    }
+    ) {}
 }

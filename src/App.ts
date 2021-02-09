@@ -118,6 +118,7 @@ export default class App extends Store {
         // clear url after obtained url params
         history.replaceState(history.state, 'current', '/');
 
+        console.time('load network');
         // note: these can be executed in parallel, i.e. they are not inter-dependent
         // eslint-disable-next-line prefer-const
         let [pay1, pay2, pay3, pay4, authResult] = await Promise.all([
@@ -133,7 +134,7 @@ export default class App extends Store {
             this.profile.loadToken();
             pay4 = await this.profile.syncProfiles();
         }
-
+        console.timeEnd('load network');
         if (pay4.level !== 'warn') this.noti.notify(pay4);
 
         this.noti.notify(pay1);

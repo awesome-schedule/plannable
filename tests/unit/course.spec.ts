@@ -4,7 +4,6 @@ describe('course test', () => {
         const course = catalog.getCourse('cs11105');
         expect(course.allSameTime()).toBe(false);
         expect(course.has(course.sections[0]));
-        expect(course.has(new Set([course.sections[0].id]), 'cs11105'));
         expect(course.equals({})).toBe(false);
         expect(course.equals(course)).toBe(true);
     });

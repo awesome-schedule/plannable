@@ -182,21 +182,7 @@ export default class Course implements CourseFields, Hashable {
     /**
      * check whether the section is contained in this course
      */
-    public has(section: Section): boolean;
-    /**
-     * check whether the set of sections indices with the given key
-     * exist in the section array contained in this course
-     * @param sections the Set of section indices
-     * @param key the key of the section
-     */
-    // eslint-disable-next-line no-dupe-class-members
-    public has(sections: Set<number>, key: string): boolean;
-    // eslint-disable-next-line no-dupe-class-members
-    public has(element: Section | Set<number>, key?: string): boolean {
-        if (element instanceof Set) {
-            return this.key === key && this.ids.some(id => element.has(id));
-        } else {
-            return this.key === element.key && this.ids.includes(element.id);
-        }
+    public has(element: Section): boolean {
+        return this.key === element.key && this.ids.includes(element.id);
     }
 }

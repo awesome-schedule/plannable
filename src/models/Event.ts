@@ -9,6 +9,7 @@
 import { TimeArray } from '../algorithm/ScheduleGenerator';
 import { hashCode, parseTimeAsTimeArray } from '../utils';
 import Hashable from './Hashable';
+import Section from './Section';
 
 export type EventJSON = [string, number, string?, string?, string?];
 
@@ -52,5 +53,10 @@ export default class Event implements Hashable {
         if (this.description) obj[3] = this.description;
         if (this.room) obj[4] = this.room;
         return obj;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public has(sec: Section) {
+        return false;
     }
 }

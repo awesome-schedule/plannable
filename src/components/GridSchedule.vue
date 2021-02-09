@@ -31,11 +31,11 @@
                         v-for="(block, j) in currentSchedule.days[i]"
                         :style="blockStyles[i][j]"
                         :key="day + j"
-                        class="courseBlock"
+                        class="course-block-mobile"
                         :class="block.strong ? 'block-strong' : ''"
                         @click="showModal(block.section)"
                     >
-                        <div style="font-size: 10px">{{ blockContent[i][j].title }}</div>
+                        {{ blockContent[i][j].title }}
                     </div>
                 </template>
             </template>
@@ -45,7 +45,7 @@
                         v-for="(block, j) in currentSchedule.days[i]"
                         :style="blockStyles[i][j]"
                         :key="day + j"
-                        class="courseBlock"
+                        class="course-block"
                         :class="block.strong ? 'block-strong' : ''"
                         @click="showModal(block.section)"
                     >
@@ -98,7 +98,8 @@
     position: absolute;
 }
 
-.courseBlock {
+.course-block,
+.course-block-mobile {
     z-index: 2;
     color: white;
     cursor: pointer;
@@ -106,17 +107,20 @@
     overflow-x: hidden;
     position: absolute;
     text-shadow: 0px 0px 4px #555;
-    font-size: 11px;
     padding-top: 0.25rem;
     padding-left: 0.5rem;
     /* text-shadow: -1px 0 #222, 0 1px black, 1px 0 black, 0 -1px black; */
 }
-
+.course-block:hover,
+.course-block-mobile:hover,
 .block-strong {
     box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
 }
 
-.courseBlock:hover {
-    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
+.course-block {
+    font-size: 11px;
+}
+.course-block-mobile {
+    font-size: 10px;
 }
 </style>

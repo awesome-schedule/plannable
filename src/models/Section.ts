@@ -240,28 +240,7 @@ export default class Section implements CourseFields, Hashable {
         return timeBlocks;
     }
 
-    public equals(sc: Section): boolean {
-        if (this.key === sc.key && this.id === sc.id) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * check whether given section is equals to this section
-     */
-    public has(section: Section): boolean;
-    /**
-     * check whether this section exists in the set of sections indices with the given key
-     * @param sections
-     * @param key
-     */
-    // eslint-disable-next-line
-    public has(sections: Set<number>, key: string): boolean;
-    // eslint-disable-next-line
-    public has(element: Section | Set<number>, key?: string): boolean {
-        if (element instanceof Set) return this.key === key && element.has(this.id);
-        else return this.equals(element);
+    public has(element: Section) {
+        return this === element;
     }
 }

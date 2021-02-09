@@ -14,30 +14,30 @@ export const options = {
     ISMethod: 1,
     applyDFS: true,
     tolerance: 0,
-    LPIters: 100,
+    LPIters: 50,
     LPModel: 2,
     showFixed: false
 };
 
-declare const Module: any;
-interface NativeFuncs {
-    setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
-    compute(a: number, b: number): void;
-    getPositions(): number;
-    getSum(): number;
-    getSumSq(): number;
-    getFixed(): number;
+interface EMModule {
+    _malloc(size: number): number;
+    _free(ptr: number): void;
+    _setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
+    _compute(a: number, b: number): void;
+    _getPositions(): number;
+    _getSum(): number;
+    _getSumSq(): number;
+    _getFixed(): number;
+    onRuntimeInitialized(): void;
+    HEAPU8: Uint8Array;
 }
-const nativeFuncs = new Promise<NativeFuncs>((resolve, reject) => {
+declare const Module: EMModule;
+
+const nativeReady = new Promise<void>((resolve, reject) => {
+    if (Module.HEAPU8) resolve();
     Module['onRuntimeInitialized'] = () => {
-        resolve({
-            setOptions: Module.cwrap('setOptions', null, new Array(6).fill('number')),
-            compute: Module.cwrap('compute', null, ['number', 'number']),
-            getPositions: Module.cwrap('getPositions', 'number'),
-            getSum: Module.cwrap('getSum', 'number'),
-            getSumSq: Module.cwrap('getSumSq', 'number'),
-            getFixed: Module.cwrap('getFixed', 'number')
-        });
+        resolve();
+        console.log(Module);
     };
 });
 
@@ -45,12 +45,10 @@ const nativeFuncs = new Promise<NativeFuncs>((resolve, reject) => {
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
-    // console.time('compute bp');
-    // const promises = [];
-    console.time('native compute');
-    const funcs = await nativeFuncs;
+    await nativeReady;
 
-    funcs.setOptions(
+    console.time('native compute');
+    Module._setOptions(
         options.isTolerance,
         options.ISMethod,
         +options.applyDFS,
@@ -71,17 +69,17 @@ export async function computeBlockPositions(days: ScheduleDays) {
             u16[2 * i] = blocks[i].startMin;
             u16[2 * i + 1] = blocks[i].endMin;
         }
-        funcs.compute(bufPtr, len);
-        const result = new Float64Array(Module.HEAPU8.buffer, funcs.getPositions(), len * 2);
+        Module._compute(bufPtr, len);
+        const result = new Float64Array(Module.HEAPU8.buffer, Module._getPositions(), len * 2);
         for (let i = 0; i < len; i++) {
             blocks[i].left = result[2 * i];
             blocks[i].width = result[2 * i + 1];
         }
         N += len;
-        sum += funcs.getSum();
-        sumSq += funcs.getSumSq();
+        sum += Module._getSum();
+        sumSq += Module._getSumSq();
         if (options.showFixed) {
-            const fixed = new Uint8Array(Module.HEAPU8.buffer, funcs.getFixed(), len);
+            const fixed = new Uint8Array(Module.HEAPU8.buffer, Module._getFixed(), len);
             for (let i = 0; i < len; i++) {
                 if (fixed[i]) (blocks[i] as any).background = '#000';
             }

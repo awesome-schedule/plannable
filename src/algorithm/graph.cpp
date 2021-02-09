@@ -52,6 +52,8 @@ struct ScheduleBlock {
 };
 
 ScheduleBlock* blocks;
+// pointers to blocks, but may be reordered
+// never change the order of blocks. Instead, change this variable
 ScheduleBlock** blocksReordered;
 // a working buffer for BFS/LP models, usually not full
 ScheduleBlock** blockBuffer;
@@ -197,6 +199,10 @@ int intervalScheduling2() {
     return numRooms + 1;
 }
 
+/**
+ * for the array of schedule blocks provided, construct an adjacency list
+ * to represent the conflicts between each pair of blocks
+ */
 void constructAdjList() {
     // construct an undirected graph
     for (int i = 0; i < N; i++) {
@@ -218,6 +224,10 @@ void constructAdjList() {
     }
 }
 
+/**
+ * find the connected component containing start and other nodes that are not fixed
+ * @returns the number of nodes in this component 
+ */
 int BFS(ScheduleBlock* start) {
     int qIdx = 0;
     int NC = 1;
@@ -241,12 +251,19 @@ int BFS(ScheduleBlock* start) {
     return NC;
 }
 
+/**
+ * A special implementation of depth first search on a single connected component,
+ * used to find the maximum depth of the path that the current node is on.
+ *
+ * We start from the node of the greatest depth and traverse to the lower depths
+ *
+ * The depth of all nodes are known beforehand (from the room assignment).
+ */
 void depthFirstSearchRec(ScheduleBlock* start, int maxDepth) {
     start->visited = true;
     start->pathDepth = maxDepth;
 
     for (auto adj : start->leftN) {
-        // we only visit nodes of lower depth
         if (!adj->visited) depthFirstSearchRec(adj, maxDepth);
     }
 }
@@ -497,6 +514,7 @@ void buildLPModel2(int NC) {
     glp_delete_prob(lp);
 }
 
+// disable name-mangling for exported functions
 extern "C" {
 
 void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
@@ -509,7 +527,16 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
     LPModel = _LPModel;
 }
 
-void compute(int16_t* arr, int _N) {
+struct Input {
+    int16_t startMin, endMin;
+};
+
+/**
+ * compute the width and left of the blocks
+ * @param arr the array of start/end times of the blocks
+ * @param N the number of blocks
+ */
+void compute(Input* arr, int _N) {
     setup(_N);
 
     for (int i = 0; i < N; i++) {
@@ -517,8 +544,8 @@ void compute(int16_t* arr, int _N) {
         blocksReordered[i] = &block;
         block.visited = false;
         block.isFixed = false;
-        block.startMin = arr[2 * i];
-        block.endMin = arr[2 * i + 1];
+        block.startMin = arr[i].startMin;
+        block.endMin = arr[i].endMin;
         block.duration = block.endMin - block.startMin;
         block.idx = i;
         block.depth = 0;
@@ -603,4 +630,3 @@ double getSumSq() { return r_sumSq; }
 Position* getPositions() { return r_positions; }
 bool* getFixed() { return r_fixed; }
 }
-//

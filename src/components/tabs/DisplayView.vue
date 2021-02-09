@@ -287,110 +287,115 @@
                 </button>
             </li>
         </ul>
-        <div class="btn bg-info nav-btn">Advanced Rendering Features</div>
-        <div class="w-100 text-center mb-1"><small>These options will not be saved!</small></div>
-        <div class="form-group row no-gutters my-0 mx-3">
-            <label for="ISMethod" class="col-lg-6 pt-1 pb-0 col-form-label">IS Method</label>
-            <div class="col-lg-6">
-                <input
-                    id="ISMethod"
-                    v-model.number="options.ISMethod"
-                    min="1"
-                    step="1"
-                    max="2"
-                    type="number"
-                    class="form-control form-control-sm"
-                />
-            </div>
-        </div>
-        <div class="form-group row no-gutters my-0 mx-3">
-            <label for="istolerance" class="col-lg-6 pt-1 pb-0 col-form-label">IS Tolerance</label>
-            <div class="col-lg-6">
-                <input
-                    id="istolerance"
-                    v-model.number="options.isTolerance"
-                    min="-1"
-                    step="1"
-                    max="100"
-                    type="number"
-                    class="form-control form-control-sm"
-                />
-            </div>
-        </div>
-        <div class="form-group row no-gutters my-1 mx-3">
-            <div class="col-md-6">
-                <label for="applyDFS" class="m-0">Apply DFS</label>
-            </div>
-            <div class="col-md-6">
-                <div class="custom-control custom-checkbox ml-1">
+        <template v-if="showRenderingOptions">
+            <div class="btn bg-info nav-btn mb-2">Advanced Rendering Features</div>
+            <div class="form-group row no-gutters my-0 mx-3">
+                <label for="ISMethod" class="col-lg-6 pt-1 pb-0 col-form-label">IS Method</label>
+                <div class="col-lg-6">
                     <input
-                        id="applyDFS"
-                        v-model.number="options.applyDFS"
-                        type="checkbox"
-                        class="custom-control-input"
+                        id="ISMethod"
+                        v-model.number="options.ISMethod"
+                        min="1"
+                        step="1"
+                        max="2"
+                        type="number"
+                        class="form-control form-control-sm"
                     />
-                    <label for="applyDFS" class="custom-control-label"></label>
                 </div>
             </div>
-        </div>
-        <div class="form-group row no-gutters my-0 mx-3">
-            <label for="tolerance" class="col-lg-6 pt-1 pb-0 col-form-label">DFS Tolerance</label>
-            <div class="col-lg-6">
-                <input
-                    id="tolerance"
-                    v-model.number="options.tolerance"
-                    min="-1"
-                    step="1"
-                    max="100"
-                    type="number"
-                    class="form-control form-control-sm"
-                />
-            </div>
-        </div>
-        <div class="form-group row no-gutters my-0 mx-3">
-            <label for="LPIters" class="col-lg-6 pt-1 pb-0 col-form-label">LP Max Iters</label>
-            <div class="col-lg-6">
-                <input
-                    id="LPIters"
-                    v-model.number="options.LPIters"
-                    min="0"
-                    step="1"
-                    max="100"
-                    type="number"
-                    class="form-control form-control-sm"
-                />
-            </div>
-        </div>
-        <div class="form-group row no-gutters my-0 mx-3">
-            <label for="LPModel" class="col-lg-6 pt-1 pb-0 col-form-label">LP Model</label>
-            <div class="col-lg-6">
-                <input
-                    id="LPModel"
-                    v-model.number="options.LPModel"
-                    min="1"
-                    step="1"
-                    max="2"
-                    type="number"
-                    class="form-control form-control-sm"
-                />
-            </div>
-        </div>
-        <div class="form-group row no-gutters my-1 mx-3">
-            <div class="col-md-6">
-                <label for="showFixed" class="m-0">Show Fixed</label>
-            </div>
-            <div class="col-md-6">
-                <div class="custom-control custom-checkbox ml-1">
+            <div class="form-group row no-gutters my-0 mx-3">
+                <label for="istolerance" class="col-lg-6 pt-1 pb-0 col-form-label"
+                    >IS Tolerance</label
+                >
+                <div class="col-lg-6">
                     <input
-                        id="showFixed"
-                        v-model.number="options.showFixed"
-                        type="checkbox"
-                        class="custom-control-input"
+                        id="istolerance"
+                        v-model.number="options.isTolerance"
+                        min="-1"
+                        step="1"
+                        max="100"
+                        type="number"
+                        class="form-control form-control-sm"
                     />
-                    <label for="showFixed" class="custom-control-label"></label>
                 </div>
             </div>
-        </div>
+            <div class="form-group row no-gutters my-1 mx-3">
+                <div class="col-md-6">
+                    <label for="applyDFS" class="m-0">Apply DFS</label>
+                </div>
+                <div class="col-md-6">
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="applyDFS"
+                            v-model.number="options.applyDFS"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="applyDFS" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row no-gutters my-0 mx-3">
+                <label for="tolerance" class="col-lg-6 pt-1 pb-0 col-form-label"
+                    >DFS Tolerance</label
+                >
+                <div class="col-lg-6">
+                    <input
+                        id="tolerance"
+                        v-model.number="options.tolerance"
+                        min="-1"
+                        step="1"
+                        max="100"
+                        type="number"
+                        class="form-control form-control-sm"
+                    />
+                </div>
+            </div>
+            <div class="form-group row no-gutters my-0 mx-3">
+                <label for="LPIters" class="col-lg-6 pt-1 pb-0 col-form-label">LP Max Iters</label>
+                <div class="col-lg-6">
+                    <input
+                        id="LPIters"
+                        v-model.number="options.LPIters"
+                        min="0"
+                        step="1"
+                        max="100"
+                        type="number"
+                        class="form-control form-control-sm"
+                    />
+                </div>
+            </div>
+            <div class="form-group row no-gutters my-0 mx-3">
+                <label for="LPModel" class="col-lg-6 pt-1 pb-0 col-form-label">LP Model</label>
+                <div class="col-lg-6">
+                    <input
+                        id="LPModel"
+                        v-model.number="options.LPModel"
+                        min="1"
+                        step="1"
+                        max="2"
+                        type="number"
+                        class="form-control form-control-sm"
+                    />
+                </div>
+            </div>
+            <div class="form-group row no-gutters my-1 mx-3">
+                <div class="col-md-6">
+                    <label for="showFixed" class="m-0">Show Fixed</label>
+                </div>
+                <div class="col-md-6">
+                    <div class="custom-control custom-checkbox ml-1">
+                        <input
+                            id="showFixed"
+                            v-model.number="options.showFixed"
+                            type="checkbox"
+                            class="custom-control-input"
+                        />
+                        <label for="showFixed" class="custom-control-label"></label>
+                    </div>
+                </div>
+            </div>
+        </template>
     </nav>
 </template>
 

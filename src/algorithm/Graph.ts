@@ -19,20 +19,22 @@ export const options = {
     showFixed: false
 };
 
+// denote the pointer type, though it is just an integer in JS
+type Ptr = number;
 interface EMModule {
-    _malloc(size: number): number;
+    _malloc(size: number): Ptr;
     _free(ptr: number): void;
     _setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
-    _compute(a: number, b: number): void;
-    _getPositions(): number;
     _getSum(): number;
     _getSumSq(): number;
-    _getFixed(): number;
+    _compute(a: Ptr, b: number): void;
+    _getPositions(): Ptr;
+    _getFixed(): Ptr;
     onRuntimeInitialized(): void;
     HEAPU8: Uint8Array;
 }
-declare const Module: EMModule;
-
+const Module: EMModule =
+    process.env.NODE_ENV === 'test' ? require('../../public/js/graph.js') : (window as any).Module;
 const nativeReady = new Promise<void>((resolve, reject) => {
     if (Module.HEAPU8) resolve();
     Module['onRuntimeInitialized'] = () => {

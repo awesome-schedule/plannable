@@ -19,6 +19,7 @@ import { Component, Watch } from 'vue-property-decorator';
 @Component
 export default class DisplayView extends Store {
     options = options;
+    showRenderingOptions = process.env.NODE_ENV === 'development';
     @Watch('options', { deep: true }) private w1() {
         this.schedule.recomputeAll(false, 100);
     }

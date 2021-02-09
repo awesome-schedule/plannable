@@ -23,13 +23,4 @@ describe('catalog test', () => {
         expect(catalog.convertKey('123213213', schedule)).toBe('123213213');
         expect(catalog.convertKey('MoFr 10:00AM - 11:30AM', schedule)).toBe('title asd');
     });
-
-    it('other', () => {
-        try {
-            window.catalog.initWorker();
-        } catch (e) {
-            // module not found
-        }
-        window.catalog.disposeWorker();
-    });
 });

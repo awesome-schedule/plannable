@@ -108,7 +108,7 @@
     text-shadow: 0px 0px 4px #555;
     font-size: 11px;
     padding-top: 0.25rem;
-    padding-left: 0.25rem;
+    padding-left: 0.5rem;
     /* text-shadow: -1px 0 #222, 0 1px black, 1px 0 black, 0 -1px black; */
 }
 

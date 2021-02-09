@@ -170,7 +170,7 @@ export default class ProposedSchedule extends Schedule {
         const schedule = new ProposedSchedule();
         if (obj.events)
             schedule.events = obj.events.map(x =>
-                x instanceof Event ? x : Object.setPrototypeOf(x, Event.prototype)
+                Object.freeze(x instanceof Event ? x : Object.setPrototypeOf(x, Event.prototype))
             );
 
         const keys = Object.keys(obj.All).map(x => x.toLowerCase());

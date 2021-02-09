@@ -21,14 +21,14 @@ export default class Event implements Hashable {
     public static fromJSONShort(obj: EventJSON) {
         return new Event(...obj);
     }
-    public key: string;
-    public display: boolean;
+    public readonly key: string;
+    public readonly display: boolean;
     constructor(
-        public days: string,
+        public readonly days: string,
         display: boolean | number,
-        public title?: string,
-        public description?: string,
-        public room?: string
+        public readonly title?: string,
+        public readonly description?: string,
+        public readonly room?: string
     ) {
         this.key = days;
         this.display = Boolean(display);

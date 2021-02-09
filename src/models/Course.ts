@@ -116,7 +116,10 @@ export default class Course implements CourseFields, Hashable {
      * human readable name for this course, e.g. ECON 2010 Lecture
      */
     get displayName() {
-        return this.department + ' ' + this.number + ' ' + this.type;
+        return `${this.department} ${this.number} ${this.type}`;
+    }
+    get displayNameNoType() {
+        return `${this.department} ${this.number}`;
     }
 
     /**

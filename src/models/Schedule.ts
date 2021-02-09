@@ -16,6 +16,7 @@ import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
 import { computeBlockPositions } from '@/algorithm/Graph';
 import { dayToInt, Day } from './constants';
+import Meeting from './Meeting';
 
 /**
  * the structure of a [[Section]] in local storage
@@ -213,7 +214,7 @@ export default abstract class Schedule {
     public hover(key: string, strong = true) {
         for (const blocks of this.days) {
             for (const block of blocks) {
-                if (block.section.key === key) block.strong = strong;
+                if (block.key === key) block.strong = strong;
             }
         }
     }
@@ -318,8 +319,7 @@ export default abstract class Schedule {
             let found = false;
             for (const blocks of this.days) {
                 for (const block of blocks) {
-                    if (!(block.section instanceof Event) && block.section.has(section))
-                        found = block.strong = true;
+                    if (block.key === section.key) found = block.strong = true;
                 }
             }
             if (!found) this.place(section, days);
@@ -423,11 +423,11 @@ export default abstract class Schedule {
         if (course instanceof Section) {
             const color = this.getColor(course);
             for (const meeting of course.meetings) {
-                this.placeHelper(color, meeting.days, course, days);
+                this.placeHelper(color, days, course, meeting);
             }
         } else if (course instanceof Event) {
             if (course.display) {
-                this.placeHelper(this.getColor(course), course.days, course, days);
+                this.placeHelper(this.getColor(course), days, course, undefined);
             }
         } else {
             if (!course.allSameTime()) return;
@@ -437,31 +437,33 @@ export default abstract class Schedule {
             if (courseSec.length === 1) {
                 const color = this.getColor(firstSec);
                 for (const meeting of firstSec.meetings)
-                    this.placeHelper(color, meeting.days, firstSec, days);
+                    this.placeHelper(color, days, firstSec, meeting);
             } else {
                 if (Schedule.combineSections) {
                     const color = this.getColor(course);
                     for (const meeting of firstSec.meetings)
-                        this.placeHelper(color, meeting.days, course, days);
+                        this.placeHelper(color, days, course, meeting);
                 } else {
                     // if we don't combined the sections, we call place for each section
                     for (const section of courseSec) {
                         // note: sections belonging to the same course will have the same color
                         const color = this.getColor(section);
                         for (const meeting of section.meetings)
-                            this.placeHelper(color, meeting.days, section, days);
+                            this.placeHelper(color, days, section, meeting);
                     }
                 }
             }
         }
     }
 
-    private placeHelper(
+    private placeHelper<T extends Section | Course | Event>(
         color: string,
-        dayTimes: string,
-        events: Section | Course | Event,
-        days: Schedule['days']
+        days: Schedule['days'],
+        events: T,
+        meeting: T extends Event ? undefined : Meeting
     ) {
+        const dayTimes = events instanceof Event ? events.days : meeting!.days;
+        // const dayTimes = events instanceof
         const [daysStr, start, , end] = dayTimes.split(' ');
         if (daysStr && start && end) {
             const startMin = Utils.hr12toInt(start);
@@ -473,7 +475,7 @@ export default abstract class Schedule {
             }
             for (let i = 0; i < daysStr.length; i += 2) {
                 days[dayToInt[daysStr.substr(i, 2) as Day]].push(
-                    new ScheduleBlock(color, events, startMin, endMin)
+                    new ScheduleBlock(color, startMin, endMin, events, meeting)
                 );
             }
         }
@@ -528,7 +530,7 @@ export default abstract class Schedule {
         if (rendered)
             return (
                 this.events.some(x => x.days === key) ||
-                this.days.some(blocks => blocks.some(block => block.section.key === key))
+                this.days.some(blocks => blocks.some(block => block.key === key))
             );
         else return key in this.All || this.events.some(x => x.days === key);
     }

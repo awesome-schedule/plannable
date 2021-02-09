@@ -24,17 +24,38 @@
                     {{ day }}
                 </div>
                 <div v-for="idx in numRow * numCol" :key="idx" class="placeholder"></div>
-                <!-- note: template element removes the need to wrap CourseBlock components in a HTML element -->
-                <template v-for="(day, i) in days">
-                    <course-block
-                        v-for="(scheduleBlock, j) in currentSchedule.days[i]"
-                        :key="day + j"
-                        :schedule-block="scheduleBlock"
-                        :style="blockStyles[i][j]"
-                        :day="day"
-                    ></course-block>
-                </template>
             </div>
+            <template v-if="status.isMobile">
+                <template v-for="(day, i) in days">
+                    <div
+                        v-for="(block, j) in currentSchedule.days[i]"
+                        :style="blockStyles[i][j]"
+                        :key="day + j"
+                        class="courseBlock"
+                        :class="block.strong ? 'block-strong' : ''"
+                        @click="showModal(block.section)"
+                    >
+                        <div style="font-size: 10px">{{ blockContent[i][j].title }}</div>
+                    </div>
+                </template>
+            </template>
+            <template v-else>
+                <template v-for="(day, i) in days">
+                    <div
+                        v-for="(block, j) in currentSchedule.days[i]"
+                        :style="blockStyles[i][j]"
+                        :key="day + j"
+                        class="courseBlock"
+                        :class="block.strong ? 'block-strong' : ''"
+                        @click="showModal(block.section)"
+                    >
+                        <div style="font-size: 13px">{{ blockContent[i][j].title }}</div>
+                        <div>{{ blockContent[i][j].time }}</div>
+                        <div>{{ blockContent[i][j].room }}</div>
+                        <div>{{ blockContent[i][j].description }}</div>
+                    </div>
+                </template>
+            </template>
         </div>
     </div>
 </template>
@@ -75,5 +96,27 @@
 
 .time > div {
     position: absolute;
+}
+
+.courseBlock {
+    z-index: 2;
+    color: white;
+    cursor: pointer;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    position: absolute;
+    text-shadow: 0px 0px 4px #555;
+    font-size: 11px;
+    padding-top: 0.25rem;
+    padding-left: 0.25rem;
+    /* text-shadow: -1px 0 #222, 0 1px black, 1px 0 black, 0 -1px black; */
+}
+
+.block-strong {
+    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
+}
+
+.courseBlock:hover {
+    box-shadow: 0 4px 12px 4px rgba(0, 0, 0, 0.5);
 }
 </style>

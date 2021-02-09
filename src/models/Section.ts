@@ -128,6 +128,9 @@ export default class Section implements CourseFields, Hashable {
     get displayName() {
         return `${this.department} ${this.number}-${this.section} ${this.type}`;
     }
+    get displayNameNoType() {
+        return `${this.department} ${this.number}-${this.section}`;
+    }
     // --------- end getters for fields of the course ---------------------
 
     /**

@@ -10,18 +10,16 @@ import { DAYS } from '@/models/constants';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
 import { hr24toInt, to12hr } from '../utils';
-import CourseBlock from './CourseBlock.vue';
+import Section from '@/models/Section';
+import Course from '@/models/Course';
+import Event from '@/models/Event';
 
 /**
  * the component for rendering a schedule (with courses and events) on a grid
  * @author Kaiying Shan
  * @noInheritDoc
  */
-@Component({
-    components: {
-        CourseBlock
-    }
-})
+@Component
 export default class GridSchedule extends Store {
     @Prop(Object) readonly currentSchedule!: Schedule;
 
@@ -157,5 +155,68 @@ export default class GridSchedule extends Store {
         }
         // console.timeEnd('compute style');
         return arr;
+    }
+    get blockContent() {
+        console.time('compute content');
+        const arr: { title: string; time: string; room: string; description: string }[][] = [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+        ];
+        const schedule = this.currentSchedule;
+        const { showInstructor, showRoom, showTime, showSuffix } = this.display;
+        for (let i = 0; i < this.numCol; i++) {
+            for (const block of schedule.days[i]) {
+                const section = block.section;
+                if (section instanceof Section) {
+                    arr[i].push({
+                        title: showSuffix ? section.displayName : section.displayNameNoType,
+                        time: showTime ? block.meeting!.days : '',
+                        room: showRoom ? block.meeting!.room : '',
+                        description: showInstructor ? section.instructors.join(', ') : ''
+                    });
+                } else if (section instanceof Course) {
+                    const firstSec = section.sections[0];
+
+                    const more = section.sections.length - 1;
+                    arr[i].push({
+                        title: `${
+                            showSuffix ? firstSec.displayName : firstSec.displayNameNoType
+                        } and ${more} more`,
+                        time: showTime ? block.meeting!.days : '',
+                        room: showRoom ? `${block.meeting!.room} and ${more} more` : '',
+                        description: showInstructor
+                            ? `${firstSec.instructors.join(', ')} and ${section.sections.reduce(
+                                  (acc, x) => acc + x.instructors.length,
+                                  0
+                              ) - 1} more`
+                            : ''
+                    });
+                } else {
+                    arr[i].push({
+                        title: section.title || '',
+                        time: showTime ? section.key : '',
+                        room: showRoom ? section.room || '' : '',
+                        description: ''
+                    });
+                }
+            }
+        }
+        console.timeEnd('compute content');
+        return arr;
+    }
+    showModal(section: Section | Course | Event) {
+        if (section instanceof Section) {
+            this.modal.showSectionModal(section);
+        } else if (section instanceof Course) {
+            this.modal.showCourseModal(section);
+        } else if (section instanceof Event) {
+            if (!this.status.sideBar.showEvent) this.status.switchSideBar('showEvent');
+            this.status.eventToEdit = section;
+        }
     }
 }

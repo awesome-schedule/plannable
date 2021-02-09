@@ -6,9 +6,9 @@
 /**
  *
  */
-import { calcOverlap } from '../utils';
 import Course from './Course';
 import Event from './Event';
+import Meeting from './Meeting';
 import Section from './Section';
 
 /**
@@ -30,6 +30,7 @@ export default class ScheduleBlock {
      * whether the block is highlighted
      */
     public strong = false;
+    public key: string;
 
     /**
      * @param background background color in hex, e.g. `#ffffff`
@@ -39,8 +40,11 @@ export default class ScheduleBlock {
      */
     constructor(
         public readonly background: string,
-        public readonly section: Section | Course | Event,
         public readonly startMin: number,
-        public readonly endMin: number
-    ) {}
+        public readonly endMin: number,
+        public readonly section: Section | Course | Event,
+        public readonly meeting?: Meeting
+    ) {
+        this.key = section.key;
+    }
 }

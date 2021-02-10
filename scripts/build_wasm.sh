@@ -1,5 +1,4 @@
 #!/bin/bash
-source ~/emsdk/emsdk_env.sh
 mkdir -p public/js
 cd src/algorithm
 mkdir -p temp

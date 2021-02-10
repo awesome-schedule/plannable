@@ -32,7 +32,7 @@ https://plannable.org/
 
 Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load and store it in browser cache.
 
-However, optional backend storage features are available. Users can choose to login to a third-party website and store their plannable profiles. This enables cross-device profile syncing. We currently support [Hoosmyprofessor](https://match.msnatuva.org). If you wish to provide such service, please refer to our [backend specification](./docs/Backend%20Specification.md) for more details. 
+However, optional backend storage features are available. Users can choose to login to a third-party website and store their plannable profiles. This enables cross-device profile syncing. We currently support [Hoosmyprofessor](https://match.msnatuva.org). If you wish to provide such service, please refer to our [backend specification](./docs/Backend%20Specification.md) for more details.
 
 ## Mirror
 
@@ -42,11 +42,11 @@ To facilitate access in China, we provide a mirror: https://cn.plannable.org/. I
 
 > powered by electron
 
-The desktop app of plannable can be downloaded from [releases](https://github.com/awesome-schedule/plannable/releases). 
+The desktop app of plannable can be downloaded from [releases](https://github.com/awesome-schedule/plannable/releases).
 
 ### Note for Windows and MacOS users
 
-Your operating system may block the execution of the app because it is unrecognized/unsigned. We do not have the signed certificates which cost at least 200$ per year. You can proceed safely because there is no security risk. 
+Your operating system may block the execution of the app because it is unrecognized/unsigned. We do not have the signed certificates which cost at least 200\$ per year. You can proceed safely because there is no security risk.
 
 ### Note for Linux users
 
@@ -66,7 +66,7 @@ sudo snap install plannable
 
 > Note: We recommend [VS Code](https://code.visualstudio.com/) for development
 
-> Some of our scripts assumed a bash-like shell
+> Most of our scripts assumed a bash-like shell
 
 > On Linux, you may need to increase you system file watcher limit
 
@@ -74,11 +74,12 @@ sudo snap install plannable
 
 -   Node.js >= 12.x
 
-Clone the repository and update data. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. 
+Clone the repository. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. The `getwasm` script will clone the pre-build wasm binary so you don't need to build it yourself.
 
 ```bash
 git clone https://github.com/awesome-schedule/plannable
 npm run updatedata
+npm run getwasm
 ```
 
 Install dependencies. Then, launch the development server
@@ -88,21 +89,33 @@ npm install
 npm run serve
 ```
 
-You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, open a new terminal and run
-
-```bash
-npm run data
-```
-
-in the project root, which will open a static http server listening to port `8000` with cross origin headers. This static server must run on `localhost:8000`. 
+You need to serve the static files in scripts/data, because we only load local data in local development mode. To do so, open a new terminal and run `npm run data`. This will open a static http server listening to port `8000` with cross origin headers. This static server must run on `localhost:8000`.
 
 Then you can visit the development server shown in the terminal.
 
 ### Build Desktop App
 
-You can use `npx electron .` to launch the native application powered by electron. 
+You can use `npx electron .` to launch the native application powered by electron.
 
-You can use `npx electron-builder --win` (or `--mac`, `--linux`) to build the native executable for your platform. 
+You can use `npx electron-builder --win` (or `--mac`, `--linux`) to build the native executable for your platform.
+
+### Build WASM
+
+Make sure that you have [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) installed. Also make sure that emsdk_env.sh is sourced before running the following scripts.
+
+Before you can build the binary, you need to compile GLPK first. This only needs to be done once.
+
+```bash
+npm run getglpk
+```
+
+Then, each time you modify any cpp file, you can simply do
+
+```bash
+npm run wasm -- dev
+```
+
+to build the wasm binary and js glue code, which will be moved to public/js.
 
 ## Contributors
 
@@ -119,10 +132,10 @@ Some efforts have been made to make it easier to integrate plannable with other 
 1. Fork this repository
 2. Overwrite src/config.ts with your custom configuration. See [src/config.example.ts](src/config.example.ts) for reference
 3. Write your custom data loader that returns the correct objects in config.ts
-4. Make some tweaks to the source code in other places if needed. 
+4. Make some tweaks to the source code in other places if needed.
 5. Build and deploy to some other places
 
-If you have questions when integrating plannable with other schools or want to deploy your favor of plannable to a subdomain of plannable (e.g. yourschool.plannable.org), feel free to contact us by GitHub issue or email. 
+If you have questions when integrating plannable with other schools or want to deploy your favor of plannable to a subdomain of plannable (e.g. yourschool.plannable.org), feel free to contact us by GitHub issue or email.
 
 ## License
 

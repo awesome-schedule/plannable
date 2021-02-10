@@ -13,7 +13,7 @@ import { RawAlgoCourse } from '@/algorithm/ScheduleGenerator';
 import { SearchMatch } from '@/models/Catalog';
 import _Course, { CourseMatch, Match } from '../models/Course';
 import { SectionFields, SectionMatch } from '../models/Section';
-import { calcOverlap } from '@/utils';
+import { calcOverlap } from '@/utils/time';
 import { FastSearcher, SearchResult } from '@/algorithm/Searcher';
 
 type Section = Omit<SectionFields, 'course'>;

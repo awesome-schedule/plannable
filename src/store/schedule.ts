@@ -6,7 +6,7 @@
  *
  */
 import ScheduleEvaluator from '../algorithm/ScheduleEvaluator';
-import { saveStatus, StoreModule } from '.';
+import { saveStatus, StoreModule } from './store';
 import ProposedSchedule from '../models/ProposedSchedule';
 import Schedule, { ScheduleJSON } from '../models/Schedule';
 import noti from './notification';

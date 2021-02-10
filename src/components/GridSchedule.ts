@@ -157,7 +157,6 @@ export default class GridSchedule extends Store {
         return arr;
     }
     get blockContent() {
-        console.time('compute content');
         const arr: { title: string; time: string; room: string; description: string }[][] = [
             [],
             [],
@@ -206,7 +205,6 @@ export default class GridSchedule extends Store {
                 }
             }
         }
-        console.timeEnd('compute content');
         return arr;
     }
     showModal(section: Section | Course | Event) {

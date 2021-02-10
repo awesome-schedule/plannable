@@ -23,7 +23,7 @@ glpk: getglpk
 
 dev: graph.cpp
 	cd $(PWD); \
-	emcc -O2 --profiling $(EMCC_FLAGS) \
+	emcc -g -O2 --profiling $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
 	graph.cpp -o temp/graph.js

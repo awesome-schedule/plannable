@@ -252,7 +252,6 @@ export default abstract class Schedule {
         const catalog = window.catalog;
         if (!catalog) return;
 
-        console.time('compute schedule');
         this.cleanSchedule(false);
         // we will not clean schedule blocks in this.days and place on it directly.
         // Instead, we created a fresh object, and assign to this.days after blocks have been computed
@@ -336,7 +335,6 @@ export default abstract class Schedule {
         this.current.ids = current.map(x => x[1]);
 
         for (const event of this.events) if (event.display) this.place(event, days);
-        console.timeEnd('compute schedule');
 
         // const tStart = performance.now();
         await computeBlockPositions(days);

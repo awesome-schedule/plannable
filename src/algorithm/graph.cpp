@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <climits>
 #include <cstdint>
-#include <iostream>
+#include <cstring>
+// #include <iostream>
 #include <queue>
 #include <vector>
 using namespace std;
@@ -14,6 +15,8 @@ int applyDFS = 1;
 int dfsTolerance = 0;
 int LPIters = 100;
 int LPModel = 3;
+
+glp_smcp parm;
 
 struct ScheduleBlock {
     /**
@@ -51,48 +54,45 @@ struct ScheduleBlock {
     vector<ScheduleBlock*> cleftN;
 };
 
-ScheduleBlock* blocks;
+ScheduleBlock* blocks = NULL;
 // pointers to blocks, but may be reordered
 // never change the order of blocks. Instead, change this variable
-ScheduleBlock** blocksReordered;
+ScheduleBlock** blocksReordered = NULL;
 // a working buffer for BFS/LP models, usually not full
-ScheduleBlock** blockBuffer;
-int* idxMap;
-bool* matrix;
+ScheduleBlock** blockBuffer = NULL;
+int* idxMap = NULL;
+bool* matrix = NULL;
 
 // --------- results -----------------
 double r_sum;
 double r_sumSq;
 struct Position {
     double left, width;
-} * r_positions;
-bool* r_fixed;
+}* r_positions = NULL;
+bool* r_fixed = NULL;
 // --------- results -----------------
+int maxN = 0;
 int N = 0;
 
 void setup(int _N) {
-    if (_N > N) {
-        // we need to allocate more memory
-        if (N != 0) {
-            delete[] blocks;
-            delete[] blocksReordered;
-            delete[] blockBuffer;
-            delete[] idxMap;
-            delete[] matrix;
-            delete[] r_positions;
-            delete[] r_fixed;
-        }
-        blocks = new ScheduleBlock[_N]();
-        blocksReordered = new ScheduleBlock*[_N];
-        blockBuffer = new ScheduleBlock*[_N];
-        idxMap = new int[_N];
-        matrix = new bool[_N * _N]();
-        r_positions = new Position[_N];
-        r_fixed = new bool[_N];
-    } else {
-        fill(matrix, matrix + _N * _N, false);
-    }
     N = _N;
+    if (N > maxN) {
+        // we need to allocate more memory.
+        // the previous ptr may be NULL, so realloc will be equivalent to malloc in that case
+        blocks = (ScheduleBlock*)realloc(blocks, N * sizeof(ScheduleBlock));
+        // initialize newly allocated memory
+        for (int i = maxN; i < N; i++) new ((void*)&blocks[i]) ScheduleBlock;
+        blocksReordered = (ScheduleBlock**)realloc(blocksReordered, N * sizeof(ScheduleBlock*));
+        blockBuffer = (ScheduleBlock**)realloc(blockBuffer, N * sizeof(ScheduleBlock*));
+        idxMap = (int*)realloc(idxMap, N * sizeof(int));
+        matrix = (bool*)realloc(matrix, N * N * sizeof(bool));
+        r_positions = (Position*)realloc(r_positions, N * sizeof(Position));
+        r_fixed = (bool*)realloc(r_fixed, N * sizeof(bool));
+        maxN = N;
+    }
+    // for old arrays, use memset if needed
+    // if they are overwritten anyway, no need to use memset
+    memset(matrix, 0, N * N * sizeof(bool));
     r_sumSq = r_sum = 0.0;
 }
 
@@ -346,13 +346,6 @@ inline void addConstraint(int auxVar, int structVar, double coeff) {
     ar.push_back(coeff);
 }
 
-template <typename T>
-inline void clearAndReserve(vector<T>& vec) {
-    size_t cap = vec.capacity();
-    vec.clear();
-    vec.reserve(cap);
-}
-
 void buildLPModel1(int NC) {
     for (int i = 0; i < NC; i++) {
         idxMap[blockBuffer[i]->idx] = 2 * i + 1;
@@ -361,10 +354,10 @@ void buildLPModel1(int NC) {
     glp_set_obj_dir(lp, GLP_MAX);
     glp_add_cols(lp, NC * 2);
 
-    clearAndReserve(ia);
-    clearAndReserve(ja);
-    clearAndReserve(ar);
-    addConstraint(0, 0, 0.0);
+    // index 0 is not used by glpk
+    ia.resize(1);
+    ja.resize(1);
+    ar.resize(1);
     int auxVar = 1;
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
@@ -402,10 +395,6 @@ void buildLPModel1(int NC) {
         glp_set_obj_coef(lp, leftVar, 0.0);
         glp_set_obj_coef(lp, leftVar + 1, 1.0);
     }
-
-    glp_smcp parm;
-    glp_init_smcp(&parm);
-    parm.msg_lev = GLP_MSG_ERR;
 
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
     glp_simplex(lp, &parm);
@@ -458,10 +447,10 @@ void buildLPModel2(int NC) {
     glp_set_obj_dir(lp, GLP_MAX);
     glp_add_cols(lp, NC + 1);
 
-    clearAndReserve(ia);
-    clearAndReserve(ja);
-    clearAndReserve(ar);
-    addConstraint(0, 0, 0.0);
+    // index 0 is not used by glpk
+    ia.resize(1);
+    ja.resize(1);
+    ar.resize(1);
     int auxVar = 1;
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
@@ -500,10 +489,6 @@ void buildLPModel2(int NC) {
     glp_set_obj_coef(lp, NC + 1, 1.0);
 
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
-
-    glp_smcp parm;
-    glp_init_smcp(&parm);
-    parm.msg_lev = GLP_MSG_ERR;
     glp_simplex(lp, &parm);
 
     double width = glp_get_col_prim(lp, NC + 1);
@@ -525,6 +510,9 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
     dfsTolerance = _dfsTolerance;
     LPIters = _LPIters;
     LPModel = _LPModel;
+
+    glp_init_smcp(&parm);
+    parm.msg_lev = GLP_MSG_ERR;
 }
 
 struct Input {
@@ -553,9 +541,9 @@ void compute(Input* arr, int _N) {
         // block.pathDepth = 0;
         // block.left = 0.0;
         // block.depth = 0.0;
-        block.leftN.clear();
-        block.rightN.clear();
-        block.cleftN.clear();
+        block.leftN.resize(0);
+        block.rightN.resize(0);
+        block.cleftN.resize(0);
     }
     // array of schedule block pointers, used by several functions
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();

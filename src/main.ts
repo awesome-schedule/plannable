@@ -15,6 +15,7 @@ import { FastSearcher } from './algorithm/Searcher';
 import App from './App.vue';
 import axios from 'axios';
 import WatchFactory from './store/watch';
+import { saveStatus } from './store';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -26,6 +27,7 @@ declare global {
         timeMatrix: Readonly<Int32Array>;
         buildingSearcher: FastSearcher<string>;
         watchers: WatchFactory;
+        saveStatus: typeof saveStatus;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -54,12 +56,10 @@ Vue.config.productionTip = false;
 Vue.config.devtools = true;
 Vue.prototype.highlightMatch = highlightMatch;
 
-(window as any).axios = axios;
+window.saveStatus = saveStatus;
+window.watchers = new WatchFactory();
 
 new Vue({
-    data: {
-        currentRoute: window.location.pathname
-    },
     render(h) {
         // const matchingView = routes[this.currentRoute];
         // const component = matchingView ? matchingView : HomePage;

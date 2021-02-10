@@ -3,6 +3,7 @@ import { dataend } from '@/config';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
 import Section from '@/models/Section';
+import { saveStatus } from '@/store';
 
 global.console.time = jest.fn();
 global.console.timeEnd = jest.fn();
@@ -143,6 +144,7 @@ beforeAll(async () => {
         }
     });
     catalog.courseDict.cs45015.sections.push(section);
+    window.saveStatus = saveStatus;
     window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
     window.timeMatrix = await dataend.distances();
     window.buildingSearcher = await dataend.buildings();

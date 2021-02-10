@@ -39,7 +39,6 @@ const nativeReady = new Promise<void>((resolve, reject) => {
     if (Module.HEAPU8) resolve();
     Module['onRuntimeInitialized'] = () => {
         resolve();
-        console.log(Module);
     };
 });
 

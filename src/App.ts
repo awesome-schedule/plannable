@@ -39,6 +39,7 @@ import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import GeneratedSchedule from './models/GeneratedSchedule';
 import { backend, runningOnElectron, version } from './config';
+import axios from 'axios';
 
 /** whether the version stored in localStorage matches the current version */
 const match = localStorage.getItem('version') === version;
@@ -102,7 +103,10 @@ export default class App extends Store {
     }
 
     async created() {
+        // for debugging purpose
+        (window as any).axios = axios;
         (window as any).vue = this;
+
         this.status.loading = true;
         const search = new URLSearchParams(window.location.search);
 

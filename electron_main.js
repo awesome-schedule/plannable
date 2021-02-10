@@ -1,50 +1,63 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const URL = require('url').URL;
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, nativeImage } = require('electron');
+const prompt = require('electron-prompt');
+const fs = require('fs');
 
 function createWindow() {
+    const baseDir = __dirname + '/dist/img';
+    const fileN = fs.readdirSync(baseDir).find(f => f.startsWith('logo-800x800'));
+    const icon = nativeImage.createFromPath(baseDir + '/' + fileN);
     const win = new BrowserWindow({
         width: 1280,
         height: 720,
         webPreferences: {
             webSecurity: false
-        }
+        },
+        icon
     });
-    const contents = win.webContents;
-    const prompt = require('electron-prompt');
+
     win.setMenu(
         Menu.buildFromTemplate([
             {
-                label: 'Menu',
-                submenu: [
-                    {
-                        label: 'Read URL',
-                        click() {
-                            prompt({
-                                title: 'Input URL',
-                                label: 'URL:',
-                                value: '',
-                                inputAttrs: {
-                                    type: 'url'
-                                },
-                                type: 'input',
-                                width: 640,
-                                height: 150
-                            }).then(res => {
-                                if (res === null) {
-                                    return console.log('user cancelled');
-                                }
-                                const url = new URL(res);
-                                contents.executeJavaScript(`location.search = "${url.search}"`);
-                            });
-                        }
-                    },
-                    {
-                        label: 'Exit',
-                        click() {
-                            app.quit();
-                        }
-                    }
-                ]
+                label: 'Read URL',
+                click() {
+                    prompt(
+                        {
+                            title: 'Input a URL',
+                            label: 'URL:',
+                            value: '',
+                            inputAttrs: {
+                                type: 'url'
+                            },
+                            type: 'input',
+                            width: 640,
+                            height: 150
+                        },
+                        win
+                    )
+                        .then(res => {
+                            if (res === null) return console.log('user cancelled');
+
+                            const url = new URL(res);
+                            win.webContents.executeJavaScript(`location.search = "${url.search}"`);
+                        })
+                        .catch(err => {
+                            win.webContents.executeJavaScript(`alert('${err}')`);
+                        });
+                }
+            },
+            {
+                label: 'Open Dev Tools',
+                click() {
+                    win.webContents.openDevTools();
+                }
+            },
+            {
+                label: 'Exit',
+                click() {
+                    app.quit();
+                }
             }
         ])
     );
@@ -64,7 +77,6 @@ function createWindow() {
             });
         }
     });
-    win.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished

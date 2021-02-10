@@ -4,7 +4,7 @@ function clear_and_commit {
     rm -rf .git
     git init 
     git config user.name updatebot
-    git config user.email bot@bot.bot
+    git config user.email ""
     git add .
     git commit -m "update"
 }

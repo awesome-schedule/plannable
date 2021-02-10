@@ -229,7 +229,6 @@ export default class Store extends Vue {
                 console.error(e);
             }
         }
-        if (Object.keys(parsed).length === 0) this.noti.error(`Failed to parsed profile`);
 
         // do not re-select current semester if it is already selected and this is not a force-update
         if (

@@ -9,6 +9,7 @@ function doCompile {
     git clone https://github.com/awesome-schedule/data # clone and serve our data
     npx http-server -p 8000 --cors --silent &
     cd ..
+    npm run getwasm
     npm run test
     npm run build
     npm run tsdoc # build our documentation

@@ -164,7 +164,10 @@ function getApi() {
         window.location.host.indexOf('127.0.0.1') !== -1
     ) {
         return 'http://localhost:8000'; // local development
-    } else if (window.location.protocol === 'file:') {
+    } else if (
+        window.location.protocol === 'file:' ||
+        window.location.host === 'dev.plannable.org' // dev environment
+    ) {
         return `https://plannable.org/`; // electron?
     } else {
         return `${window.location.protocol}//${window.location.host}`; // other: plannable.org or plannable.gitee.io

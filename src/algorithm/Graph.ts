@@ -33,20 +33,17 @@ interface EMModule {
     onRuntimeInitialized(): void;
     HEAPU8: Uint8Array;
 }
-const Module: EMModule =
-    process.env.NODE_ENV === 'test' ? require('../../public/js/graph.js') : (window as any).Module;
-const nativeReady = new Promise<void>((resolve, reject) => {
-    if (Module.HEAPU8) resolve();
-    Module['onRuntimeInitialized'] = () => {
-        resolve();
-    };
-});
 
 /**
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
-    await nativeReady;
+    // await nativeReady;
+
+    const Module: EMModule = await (process.env.NODE_ENV === 'test'
+        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('../../public/js/graph.js')()
+        : (window as any).nativeRenderer());
 
     console.time('native compute');
     Module._setOptions(

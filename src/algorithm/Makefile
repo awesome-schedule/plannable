@@ -4,7 +4,8 @@ GLPK_VERSION = 4.65
 EMCC_FLAGS :=
 EMCC_FLAGS += -Wall -Winline
 EMCC_FLAGS += -s ALLOW_MEMORY_GROWTH=1
-EMCC_FLAGS += -s ENVIRONMENT=web
+EMCC_FLAGS += -s MODULARIZE=1 -s EXPORT_NAME="nativeRenderer"
+# EMCC_FLAGS += -s ENVIRONMENT=web
 EMCC_FLAGS += -s EXPORTED_FUNCTIONS='["_compute", "_setOptions", "_getPositions", "_getFixed", "_getSum", "_getSumSq", "_free"]'
 # EMCC_FLAGS += -s EXPORTED_RUNTIME_METHODS='["cwrap"]'
 PWD=$(shell pwd)
@@ -22,14 +23,12 @@ glpk: getglpk
 	emmake make -j4 \
 
 dev: graph.cpp
-	cd $(PWD); \
-	emcc -g -O2 --profiling $(EMCC_FLAGS) \
+	emcc -O2 $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
 	graph.cpp -o temp/graph.js
 
 prod: graph.cpp
-	cd $(PWD); \
 	emcc -O3 $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \

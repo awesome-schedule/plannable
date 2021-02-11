@@ -4,7 +4,7 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
-// #include <iostream>
+#include <iostream>
 #include <queue>
 #include <vector>
 using namespace std;
@@ -52,6 +52,7 @@ struct ScheduleBlock {
     vector<ScheduleBlock*> leftN;
     vector<ScheduleBlock*> rightN;
     vector<ScheduleBlock*> cleftN;
+    vector<ScheduleBlock*> crightN;
 };
 
 ScheduleBlock* blocks = NULL;
@@ -60,6 +61,7 @@ ScheduleBlock* blocks = NULL;
 ScheduleBlock** blocksReordered = NULL;
 // a working buffer for BFS/LP models, usually not full
 ScheduleBlock** blockBuffer = NULL;
+
 int* idxMap = NULL;
 bool* matrix = NULL;
 
@@ -105,24 +107,6 @@ void computeResult() {
         r_sum += w;
         r_sumSq += w * w;
     }
-}
-
-inline int calcOverlap(int a, int b, int c, int d) {
-    if (a <= c && d <= b)
-        return d - c;
-    else if (c <= a && b <= d)
-        return b - a;
-    else if (a <= c && c <= b)
-        return b - c;
-    else if (a <= d && d <= b)
-        return d - a;
-    else
-        return -1;
-}
-
-inline bool conflict(ScheduleBlock& b1, ScheduleBlock& b2, int tolerance) {
-    return calcOverlap(b1.startMin, b1.endMin, b2.startMin, b2.endMin) >
-           tolerance;
 }
 
 void sortByStartTime() {
@@ -202,24 +186,44 @@ int intervalScheduling2() {
 /**
  * for the array of schedule blocks provided, construct an adjacency list
  * to represent the conflicts between each pair of blocks
+ * @note this function assumes blocksReordered is sorted by start time
  */
 void constructAdjList() {
-    // construct an undirected graph
     for (int i = 0; i < N; i++) {
-        auto& bi = blocks[i];
+        auto bi = blocksReordered[i];
         for (int j = i + 1; j < N; j++) {
-            auto& bj = blocks[j];
-            if (conflict(bi, bj, dfsTolerance)) {
-                if (bi.depth < bj.depth) {
-                    matrix[j * N + i] = 1;
-                    bj.leftN.push_back(&bi);
-                    bi.rightN.push_back(&bj);
-                } else {
-                    matrix[i * N + j] = 1;
-                    bj.rightN.push_back(&bi);
-                    bi.leftN.push_back(&bj);
-                }
+            auto bj = blocksReordered[j];
+            if (bj->startMin + dfsTolerance >= bi->endMin) break;
+            if (bi->depth < bj->depth) {
+                matrix[bj->idx * N + bi->idx] = 1;
+                bj->leftN.push_back(bi);
+                bi->rightN.push_back(bj);
+            } else {
+                matrix[bi->idx * N + bj->idx] = 1;
+                bj->rightN.push_back(bi);
+                bi->leftN.push_back(bj);
             }
+        }
+    }
+}
+
+// one of the bottle necks of the algorithm
+void condenseAdjList() {
+    auto end = blocks + N;
+    for (auto block = blocks; block < end; block++) {
+        for (auto v1 : block->leftN) {
+            for (auto v : block->leftN) {
+                if (matrix[v->idx * N + v1->idx]) goto nextl1;
+            }
+            block->cleftN.push_back(v1);
+        nextl1:;
+        }
+        for (auto v1 : block->rightN) {
+            for (auto v : block->rightN) {
+                if (matrix[v1->idx * N + v->idx]) goto nextl2;
+            }
+            block->crightN.push_back(v1);
+        nextl2:;
         }
     }
 }
@@ -234,13 +238,13 @@ int BFS(ScheduleBlock* start) {
     blockBuffer[0] = start;
     start->visited = true;
     while (qIdx < NC) {
-        for (auto node : blockBuffer[qIdx]->leftN) {
+        for (auto node : blockBuffer[qIdx]->cleftN) {
             if (!node->visited) {
                 node->visited = true;
                 blockBuffer[NC++] = node;
             }
         }
-        for (auto node : blockBuffer[qIdx]->rightN) {
+        for (auto node : blockBuffer[qIdx]->crightN) {
             if (!node->visited) {
                 node->visited = true;
                 blockBuffer[NC++] = node;
@@ -248,6 +252,7 @@ int BFS(ScheduleBlock* start) {
         }
         qIdx++;
     }
+    // cout << NC << endl;
     return NC;
 }
 
@@ -263,7 +268,7 @@ void depthFirstSearchRec(ScheduleBlock* start, int maxDepth) {
     start->visited = true;
     start->pathDepth = maxDepth;
 
-    for (auto adj : start->leftN) {
+    for (auto adj : start->cleftN) {
         if (!adj->visited) depthFirstSearchRec(adj, maxDepth);
     }
 }
@@ -275,7 +280,7 @@ bool DFSFindFixed(ScheduleBlock* start) {
 
     int pDepth = start->pathDepth;
     bool flag = false;
-    for (auto adj : start->leftN) {
+    for (auto adj : start->cleftN) {
         // we only visit nodes next to the current node (depth different is
         // exactly 1) with the same pathDepth
         if (startDepth - adj->depth == 1 && pDepth == adj->pathDepth) {
@@ -297,7 +302,7 @@ bool DFSFindFixedNumerical(ScheduleBlock* start) {
     if (startLeft == 0.0) return (start->isFixed = true);
 
     bool flag = false;
-    for (auto adj : start->leftN) {
+    for (auto adj : start->cleftN) {
         if (abs(startLeft - adj->left - adj->width) < 1e-8) {
             if (adj->visited) {
                 flag = adj->isFixed || flag;
@@ -350,31 +355,32 @@ void buildLPModel1(int NC) {
     for (int i = 0; i < NC; i++) {
         idxMap[blockBuffer[i]->idx] = 2 * i + 1;
     }
+    // count the number of rows needed
+    int auxVar = 0;
+    for (int i = 0; i < NC; i++)
+        for (auto v : blockBuffer[i]->cleftN)
+            auxVar += !v->isFixed;
     glp_prob* lp = glp_create_prob();
     glp_set_obj_dir(lp, GLP_MAX);
+
+    // preallocate rows and cols
     glp_add_cols(lp, NC * 2);
+    glp_add_rows(lp, auxVar + NC);
 
     // index 0 is not used by glpk
     ia.resize(1);
     ja.resize(1);
     ar.resize(1);
-    int auxVar = 1;
+    auxVar = 1;
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
         double minRight = 1.0;
-        for (auto v : block->leftN)
-            if (v->isFixed)
-                maxLeftFixed = max(maxLeftFixed, v->left + v->width);
-        // else
-        //     cons.push_back({i + 1, idxMap[v->idx], 0.0});
-        for (auto v : block->rightN)
-            if (v->isFixed) minRight = min(v->left, minRight);
-
         int leftVar = 2 * i + 1;
         for (auto v : block->cleftN) {
-            if (!v->isFixed) {
-                // l >= leftL + width
+            if (v->isFixed)
+                maxLeftFixed = max(maxLeftFixed, v->left + v->width);
+            else {
                 addConstraint(auxVar, leftVar, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
                 addConstraint(auxVar, idxMap[v->idx] + 1, -1.0);
@@ -382,6 +388,9 @@ void buildLPModel1(int NC) {
                 glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
             }
         }
+        for (auto v : block->crightN)
+            if (v->isFixed) minRight = min(v->left, minRight);
+
         // l + width <= right
         addConstraint(auxVar, leftVar, 1.0);
         addConstraint(auxVar, leftVar + 1, 1.0);
@@ -443,41 +452,44 @@ void buildLPModel2(int NC) {
     for (int i = 0; i < NC; i++) {
         idxMap[blockBuffer[i]->idx] = i + 1;
     }
+    // count the number of rows needed
+    int auxVar = 0;
+    for (int i = 0; i < NC; i++)
+        for (auto v : blockBuffer[i]->cleftN)
+            auxVar += !v->isFixed;
     glp_prob* lp = glp_create_prob();
     glp_set_obj_dir(lp, GLP_MAX);
+
+    // preallocate rows and cols
     glp_add_cols(lp, NC + 1);
+    glp_add_rows(lp, auxVar + NC);
 
     // index 0 is not used by glpk
     ia.resize(1);
     ja.resize(1);
     ar.resize(1);
-    int auxVar = 1;
+    auxVar = 1;
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
         double minRight = 1.0;
-        for (auto v : block->leftN)
+        for (auto v : block->cleftN) {
             if (v->isFixed)
                 maxLeftFixed = max(maxLeftFixed, v->left + v->width);
-        // else
-        //     cons.push_back({i + 1, idxMap[v->idx], 0.0});
-        for (auto v : block->rightN)
-            if (v->isFixed) minRight = min(v->left, minRight);
-
-        for (auto v : block->cleftN) {
-            if (!v->isFixed) {
+            else {
                 // l >= leftL + width
                 addConstraint(auxVar, i + 1, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
                 addConstraint(auxVar, NC + 1, -1.0);
-                glp_add_rows(lp, 1);
                 glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
             }
         }
+        for (auto v : block->crightN)
+            if (v->isFixed) minRight = min(v->left, minRight);
+
         // l + width <= right
         addConstraint(auxVar, i + 1, 1.0);
         addConstraint(auxVar, NC + 1, 1.0);
-        glp_add_rows(lp, 1);
         glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRight);
 
         // l >= maxLeft
@@ -499,6 +511,10 @@ void buildLPModel2(int NC) {
     glp_delete_prob(lp);
 }
 
+struct Input {
+    int16_t startMin, endMin;
+};
+
 // disable name-mangling for exported functions
 extern "C" {
 
@@ -514,10 +530,6 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
     glp_init_smcp(&parm);
     parm.msg_lev = GLP_MSG_ERR;
 }
-
-struct Input {
-    int16_t startMin, endMin;
-};
 
 /**
  * compute the width and left of the blocks
@@ -544,6 +556,7 @@ void compute(Input* arr, int _N) {
         block.leftN.resize(0);
         block.rightN.resize(0);
         block.cleftN.resize(0);
+        block.crightN.resize(0);
     }
     // array of schedule block pointers, used by several functions
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
@@ -557,17 +570,7 @@ void compute(Input* arr, int _N) {
         return;
     }
     constructAdjList();
-    //
-    for (auto block = blocks; block < end; block++) {
-        for (auto v1 : block->leftN) {
-            for (auto v : block->leftN) {
-                if (matrix[v->idx * N + v1->idx]) goto nextl;
-            }
-            block->cleftN.push_back(v1);
-        nextl:;
-        }
-    }
-    //
+    condenseAdjList();
     calculateMaxDepth();
 
     int prevFixedCount = 0;
@@ -580,9 +583,8 @@ void compute(Input* arr, int _N) {
     auto func = LPModel == 2 ? buildLPModel2 : buildLPModel1;
     while (i < LPIters) {
         for (auto block = blocks; block < end; block++) {
-            if (!block->visited) {
+            if (!block->visited)
                 func(BFS(block));
-            }
         }
         for (auto block = blocks; block < end; block++)
             block->visited = block->isFixed;

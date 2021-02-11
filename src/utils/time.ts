@@ -205,11 +205,8 @@ export function parseDate(date: string): [number, number] | undefined {
  *  - the area of overlapping region if overlap
  */
 export function calcOverlap(a: number, b: number, c: number, d: number) {
-    if (a <= c && d <= b) return d - c;
-    else if (c <= a && b <= d) return b - a;
-    else if (a <= c && c <= b) return b - c;
-    else if (a <= d && d <= b) return d - a;
-    else return -1;
+    if (c > b || a > d) return -1;
+    return Math.min(b, d) - Math.max(a, c);
 }
 
 /**

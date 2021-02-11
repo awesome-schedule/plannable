@@ -4,6 +4,7 @@ import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
 import Section from '@/models/Section';
 import { saveStatus } from '@/store';
+import WatchFactory from '@/store/watch';
 
 global.console.time = jest.fn();
 global.console.timeEnd = jest.fn();
@@ -148,4 +149,5 @@ beforeAll(async () => {
     window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
     window.timeMatrix = await dataend.distances();
     window.buildingSearcher = await dataend.buildings();
+    window.watchers = new WatchFactory();
 });

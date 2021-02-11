@@ -66,11 +66,17 @@ sudo snap install plannable
 
 > Note: We recommend [VS Code](https://code.visualstudio.com/) and a Unix-like environment for development
 
-> Most of our scripts assumed a bash-like shell.
+### Note for Windows users
 
-> On Linux, you may need to increase you system file watcher limit
+Most of our scripts assumed a bash-like shell. If you're using windows, you can use git bash, cygwin, or WSL bash shell. Make sure to change npm's default shell by using
+
+```bash
+npm config set script-shell YOURSHELL
+```
 
 ### Install Dependencies and Launch Development Server
+
+> On Linux, you may need to increase you system file watcher limit
 
 -   Node.js >= 12.x
 

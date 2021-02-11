@@ -3,11 +3,11 @@ const URL = require('url').URL;
 const { app, BrowserWindow, Menu, nativeImage } = require('electron');
 const prompt = require('electron-prompt');
 const fs = require('fs');
-
+const path = require('path');
 function createWindow() {
-    const baseDir = __dirname + '/dist/img';
+    const baseDir = path.join(__dirname, 'dist', 'img');
     const fileN = fs.readdirSync(baseDir).find(f => f.startsWith('logo-800x800'));
-    const icon = nativeImage.createFromPath(baseDir + '/' + fileN);
+    const icon = nativeImage.createFromPath(path.join(baseDir, fileN));
     const win = new BrowserWindow({
         width: 1280,
         height: 720,

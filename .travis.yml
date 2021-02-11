@@ -4,7 +4,6 @@ node_js:
 install:
     - npm install -g codecov
     - npm ci
-    - npm run getwasm
 
 cache:
     directories:
@@ -21,7 +20,7 @@ env:
 
 jobs:
     include:
-        - stage: Deploy to GitHub pages & Build Electron Linux
+        - stage: Build and Deploy
           os: linux
           dist: xenial
           addons:
@@ -33,14 +32,16 @@ jobs:
               - npx electron-builder --linux
           after_success:
               - codecov
-        - stage: Build Electron Windows & Mac
+        - stage: Build and Deploy
           os: osx
           osx_image: xcode10.2
           script:
+              - npm run getwasm
               - npm run build
               - npx electron-builder --mac
-        - stage: Build Electron Windows & Mac
+        - stage: Build and Deploy
           os: windows
           script:
+              - ./scripts/get_wasm.sh # cannot use npm run wasm here because it will use window's command prompt
               - npm run build
               - npx electron-builder --win

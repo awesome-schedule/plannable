@@ -9,6 +9,8 @@
 #include <vector>
 using namespace std;
 
+#define DOUBLE_EPS 1e-8
+
 int isTolerance = 0;
 int ISMethod = 1;
 int applyDFS = 1;
@@ -20,14 +22,14 @@ glp_smcp parm;
 
 struct ScheduleBlock {
     /**
-     *  visited flag used in BFS/DFS 
-     **/
-    bool visited;
-    /**
      * whether this block is movable/expandable
      * i.e. whether there's still room for it to change its left and width) 
     */
     bool isFixed;
+    /**
+     *  visited flag used in BFS/DFS 
+     **/
+    bool visited;
 
     int16_t startMin;
     int16_t endMin;
@@ -49,15 +51,30 @@ struct ScheduleBlock {
     int pathDepth;
     double left;
     double width;
+
+    /**
+     * all blocks that conflict with the current block and also on the LHS of the current block
+    */
     vector<ScheduleBlock*> leftN;
+    /**
+     * all blocks that conflict with the current block and also on the RHS of the current block
+    */
     vector<ScheduleBlock*> rightN;
+    /**
+     * a subset of leftN. For each node in leftN, it belongs to cleftN if and only if 
+     * it is not in the leftN of any node that is in leftN
+     */
     vector<ScheduleBlock*> cleftN;
+    /**
+     * a subset of rightN. For each node in rightN, it belongs to crightN if and only if 
+     * it is not in the rightN of any node that is in rightN
+     */
     vector<ScheduleBlock*> crightN;
 };
 
 ScheduleBlock* blocks = NULL;
 // pointers to blocks, but may be reordered
-// never change the order of blocks. Instead, change this variable
+// never change the order of elements in blocks. Instead, change this variable
 ScheduleBlock** blocksReordered = NULL;
 // a working buffer for BFS/LP models, usually not full
 ScheduleBlock** blockBuffer = NULL;
@@ -68,11 +85,8 @@ bool* matrix = NULL;
 // --------- results -----------------
 double r_sum;
 double r_sumSq;
-struct Position {
-    double left, width;
-}* r_positions = NULL;
-bool* r_fixed = NULL;
 // --------- results -----------------
+
 int maxN = 0;
 int N = 0;
 
@@ -88,8 +102,6 @@ void setup(int _N) {
         blockBuffer = (ScheduleBlock**)realloc(blockBuffer, N * sizeof(ScheduleBlock*));
         idxMap = (int*)realloc(idxMap, N * sizeof(int));
         matrix = (bool*)realloc(matrix, N * N * sizeof(bool));
-        r_positions = (Position*)realloc(r_positions, N * sizeof(Position));
-        r_fixed = (bool*)realloc(r_fixed, N * sizeof(bool));
         maxN = N;
     }
     // for old arrays, use memset if needed
@@ -100,10 +112,7 @@ void setup(int _N) {
 
 void computeResult() {
     for (int i = 0; i < N; i++) {
-        auto& block = blocks[i];
-        r_positions[i].left = block.left;
-        double w = (r_positions[i].width = block.width) * 100;
-        r_fixed[i] = block.isFixed;
+        double w = blocks[i].width;
         r_sum += w;
         r_sumSq += w * w;
     }
@@ -186,7 +195,7 @@ int intervalScheduling2() {
 /**
  * for the array of schedule blocks provided, construct an adjacency list
  * to represent the conflicts between each pair of blocks
- * @note this function assumes blocksReordered is sorted by start time
+ * @note this function assumes blocksReordered is already sorted by start time
  */
 void constructAdjList() {
     for (int i = 0; i < N; i++) {
@@ -207,7 +216,9 @@ void constructAdjList() {
     }
 }
 
-// one of the bottle necks of the algorithm
+/**
+ * @note one of the bottle necks of the algorithm
+ */
 void condenseAdjList() {
     auto end = blocks + N;
     for (auto block = blocks; block < end; block++) {
@@ -303,7 +314,7 @@ bool DFSFindFixedNumerical(ScheduleBlock* start) {
 
     bool flag = false;
     for (auto adj : start->cleftN) {
-        if (abs(startLeft - adj->left - adj->width) < 1e-8) {
+        if (abs(startLeft - adj->left - adj->width) < DOUBLE_EPS) {
             if (adj->visited) {
                 flag = adj->isFixed || flag;
             } else {
@@ -435,7 +446,7 @@ void buildLPModel1(int NC) {
     for (int i = 0; i < NC; i++) {
         addConstraint(auxVar, 2 * i + 2, 1.0);
     }
-    glp_set_row_bnds(lp, auxVar, GLP_LO, sumWidth - 1e-8, 0.0);
+    glp_set_row_bnds(lp, auxVar, GLP_LO, sumWidth - DOUBLE_EPS, 0.0);
 
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
     glp_simplex(lp, &parm);
@@ -536,14 +547,15 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
  * @param arr the array of start/end times of the blocks
  * @param N the number of blocks
  */
-void compute(Input* arr, int _N) {
+ScheduleBlock* compute(Input* arr, int _N) {
     setup(_N);
 
+    // initialize each block
     for (int i = 0; i < N; i++) {
         auto& block = blocks[i];
         blocksReordered[i] = &block;
-        block.visited = false;
         block.isFixed = false;
+        block.visited = false;
         block.startMin = arr[i].startMin;
         block.endMin = arr[i].endMin;
         block.duration = block.endMin - block.startMin;
@@ -558,7 +570,7 @@ void compute(Input* arr, int _N) {
         block.cleftN.resize(0);
         block.crightN.resize(0);
     }
-    // array of schedule block pointers, used by several functions
+    // the total number of rooms/slots needed
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
     auto end = blocks + N;
     if (total <= 1 || !applyDFS) {
@@ -567,7 +579,7 @@ void compute(Input* arr, int _N) {
             block->width = 1.0 / total;
         }
         computeResult();
-        return;
+        return blocks;
     }
     constructAdjList();
     condenseAdjList();
@@ -580,23 +592,23 @@ void compute(Input* arr, int _N) {
         block->width = 1.0 / block->pathDepth;
     }
     int i = 0;
-    auto func = LPModel == 2 ? buildLPModel2 : buildLPModel1;
+    auto buildLPModel = LPModel == 2 ? buildLPModel2 : buildLPModel1;
     while (i < LPIters) {
         for (auto block = blocks; block < end; block++) {
             if (!block->visited)
-                func(BFS(block));
+                buildLPModel(BFS(block));
         }
         for (auto block = blocks; block < end; block++)
             block->visited = block->isFixed;
         for (auto block = blocks; block < end; block++) {
             if (block->visited) continue;
             double right = block->left + block->width;
-            if (abs(right - 1.0) < 1e-8) {
+            if (abs(right - 1.0) < DOUBLE_EPS) {
                 DFSFindFixedNumerical(block);
                 continue;
             }
             for (auto n : block->rightN) {
-                if (n->isFixed && abs(right - n->left) < 1e-8) {
+                if (n->isFixed && abs(right - n->left) < DOUBLE_EPS) {
                     DFSFindFixedNumerical(block);
                     break;
                 }
@@ -613,10 +625,9 @@ void compute(Input* arr, int _N) {
         i++;
     }
     computeResult();
+    return blocks;
 }
 
 double getSum() { return r_sum; }
 double getSumSq() { return r_sumSq; }
-Position* getPositions() { return r_positions; }
-bool* getFixed() { return r_fixed; }
 }

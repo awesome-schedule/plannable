@@ -314,6 +314,7 @@ export default class ProposedSchedule extends Schedule {
             }
         }
         this.computeSchedule();
+        window.saveStatus();
     }
 
     /**

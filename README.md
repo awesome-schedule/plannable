@@ -64,9 +64,9 @@ sudo snap install plannable
 
 ## Development
 
-> Note: We recommend [VS Code](https://code.visualstudio.com/) for development
+> Note: We recommend [VS Code](https://code.visualstudio.com/) and a Unix-like environment for development
 
-> Most of our scripts assumed a bash-like shell
+> Most of our scripts assumed a bash-like shell.
 
 > On Linux, you may need to increase you system file watcher limit
 
@@ -74,7 +74,7 @@ sudo snap install plannable
 
 -   Node.js >= 12.x
 
-Clone the repository. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. The `getwasm` script will clone the pre-build wasm binary so you don't need to build it yourself.
+Clone the repository. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. The `getwasm` script will clone the pre-build wasm binary. Note that if you want to build wasm yourself, please refer to the Build WASM section below.
 
 ```bash
 git clone https://github.com/awesome-schedule/plannable
@@ -82,7 +82,7 @@ npm run updatedata
 npm run getwasm
 ```
 
-Install dependencies. Then, launch the development server
+Install dependencies and launch the development server
 
 ```bash
 npm install

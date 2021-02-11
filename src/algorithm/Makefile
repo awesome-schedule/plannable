@@ -23,7 +23,7 @@ glpk: getglpk
 	emmake make -j4 \
 
 dev: graph.cpp
-	emcc -O2 $(EMCC_FLAGS) \
+	emcc -O2 -g --profiling $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
 	graph.cpp -o temp/graph.js

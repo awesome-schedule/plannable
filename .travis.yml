@@ -42,6 +42,6 @@ jobs:
         - stage: Build and Deploy
           os: windows
           script:
-              - ./scripts/get_wasm.sh # cannot use npm run wasm here because it will use window's command prompt
+              - ./scripts/get_wasm.sh # cannot use npm run getwasm here because it will use window's command prompt
               - npm run build
               - npx electron-builder --win

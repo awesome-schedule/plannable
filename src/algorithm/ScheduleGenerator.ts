@@ -245,16 +245,13 @@ class ScheduleGenerator {
         const sideLen = maxLen * numCourses; // the side length of the conflict cache matrix
 
         const buffer = new ArrayBuffer(
-            numCourses * 2 + // pathMemory & sectionLens
+            numCourses + // pathMemory & sectionLens
             sideLen + // timeArrLens
                 sideLen * sideLen // conflictCache
         );
 
-        // record the index of sections that are already tested
-        const pathMemory = new Uint8Array(buffer, 0, numCourses);
-
         // cache for the number of sections in each course
-        const sectionLens = new Uint8Array(buffer, numCourses, numCourses);
+        const sectionLens = new Uint8Array(buffer, 0, numCourses);
 
         for (let i = 0; i < numCourses; i++) sectionLens[i] = classList[i].length;
         /**
@@ -263,7 +260,7 @@ class ScheduleGenerator {
          * len = timeArrLens[sectionIdx * numCourses + courseIdx]
          * ```
          */
-        const timeArrLens = new Uint8Array(buffer, numCourses * 2, sideLen);
+        const timeArrLens = new Uint8Array(buffer, numCourses, sideLen);
         /**
          * the conflict cache matrix, a 4d tensor. Indexed like this:
          * ```js
@@ -273,7 +270,7 @@ class ScheduleGenerator {
          * ```
          * @note can do bitpacking, but no performance improvement observed
          */
-        const conflictCache = new Uint8Array(buffer, numCourses * 2 + sideLen, sideLen ** 2);
+        const conflictCache = new Uint8Array(buffer, numCourses + sideLen, sideLen * sideLen);
 
         // prepare the timeArrLens array
         computeTimeArrLens(timeArrayList, timeArrLens);
@@ -290,7 +287,6 @@ class ScheduleGenerator {
 
         console.time('running algorithm:');
         const [count, timeLen] = this.computeSchedules(
-            pathMemory,
             sectionLens,
             timeArrLens,
             conflictCache,
@@ -385,7 +381,6 @@ class ScheduleGenerator {
      * @returns [number of schedules generated, the length of time arrays of schedules in total]
      */
     private computeSchedules(
-        pathMemory: Uint8Array,
         sectionLens: Uint8Array,
         timeArrLens: Uint8Array,
         conflictCache: Uint8Array,
@@ -396,24 +391,31 @@ class ScheduleGenerator {
         const sideLen = timeArrLens.length;
         maxNumSchedules *= numCourses;
 
-        let timeLen = 0; // the total length of the time array that we need to allocate for schedules generated
-        let classNum = 0; // current course index
-        let choiceNum = 0; // the index of the section of the current course
-        let base = 0; // the total number of schedules already generated multiplied by numCourses
-        // serve as the base for current schedule in the allChoices array
+        /**  the total length of the time array that we need to allocate for schedules generated */
+        let timeLen = 0;
+        /** current course index */
+        let classNum = 0;
+        /** the index of the section of the current course */
+        let choiceNum = 0;
+        /**
+         * the total number of schedules already generated multiplied by numCourses
+         * serve as the base pointer for current schedule in the allChoices array
+         */
+        let base = 0;
 
         outer: while (true) {
             if (classNum >= numCourses) {
                 // accumulate the length of the time arrays combined in each schedule
                 // and copy the current schedule to next schedule
+                const newBase = base + numCourses;
                 for (let i = 0; i < numCourses; i++) {
-                    const secIdx = (allChoices[base + numCourses + i] = allChoices[base + i]);
+                    const secIdx = (allChoices[newBase + i] = allChoices[base + i]);
                     timeLen += timeArrLens[secIdx * numCourses + i];
                 }
 
-                base += numCourses;
+                base = newBase;
                 if (base >= maxNumSchedules) break outer;
-                choiceNum = pathMemory[--classNum];
+                choiceNum = allChoices[base + --classNum] + 1;
             }
 
             /**
@@ -425,8 +427,8 @@ class ScheduleGenerator {
                 // if all possibilities are exhausted, break out the loop
                 if (--classNum < 0) break outer;
 
-                choiceNum = pathMemory[classNum];
-                for (let i = classNum + 1; i < numCourses; i++) pathMemory[i] = 0;
+                choiceNum = allChoices[base + classNum] + 1;
+                for (let i = classNum + 1; i < numCourses; i++) allChoices[base + i] = 0;
             }
 
             // check conflict between the newly chosen section and the sections already in the schedule
@@ -441,8 +443,7 @@ class ScheduleGenerator {
 
             // if the section does not conflict with any previously chosen sections,
             // increment the path memory and go to the next class, reset the choiceNum = 0
-            allChoices[base + classNum] = choiceNum;
-            pathMemory[classNum++] = choiceNum + 1;
+            allChoices[base + classNum++] = choiceNum;
             choiceNum = 0;
         }
         const count = base / numCourses;

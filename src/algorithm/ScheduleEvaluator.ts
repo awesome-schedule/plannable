@@ -198,7 +198,7 @@ class ScheduleEvaluator {
     /**
      * the indices of the sorted schedules, equals to argsort([[ScheduleEvaluator.coeffs]])
      * */
-    public indices: Uint32Array;
+    private indices: Uint32Array;
     /**
      * the coefficient array used when performing a sort
      */
@@ -230,12 +230,12 @@ class ScheduleEvaluator {
      */
     constructor(
         public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },
-        public readonly timeMatrix: Readonly<Int32Array> = new Int32Array(),
-        public readonly events: Event[] = [],
-        public readonly classList: RawAlgoCourse[][] = [],
-        public readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
+        private readonly timeMatrix: Readonly<Int32Array> = new Int32Array(),
+        private readonly events: Event[] = [],
+        private readonly classList: RawAlgoCourse[][] = [],
+        private readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
         public refSchedule: GeneratedSchedule['All'] = {},
-        readonly timeArrays: Readonly<Int32Array> = new Int32Array(),
+        timeArrays: Readonly<Int32Array> = new Int32Array(),
         count = 0,
         timeLen = 0
     ) {
@@ -298,7 +298,7 @@ class ScheduleEvaluator {
     /**
      * whether the random sort option is enabled
      */
-    public isRandom() {
+    private isRandom() {
         return this.options.sortBy.some(x => x.name === 'IamFeelingLucky' && x.enabled);
     }
 
@@ -311,7 +311,7 @@ class ScheduleEvaluator {
      * @param assign whether assign to the values to `this.coeffs`
      * @returns the computed/cached array of coefficients
      */
-    public computeCoeffFor(funcName: keyof SortFunctions, assign: boolean) {
+    private computeCoeffFor(funcName: keyof SortFunctions, assign: boolean) {
         const len = this.size;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {
@@ -339,7 +339,7 @@ class ScheduleEvaluator {
      * so that they don't need to be computed on the fly when sorting
      * @requires optimization
      */
-    public computeCoeff() {
+    private computeCoeff() {
         if (this.isRandom()) return;
 
         const [count, lastIdx] = this.countSortOpt();
@@ -399,7 +399,7 @@ class ScheduleEvaluator {
      * count the number of sort options enabled.
      * @returns [number of sort options enabled, the index of the last enabled sort option]
      */
-    public countSortOpt(): [number, number] {
+    private countSortOpt(): [number, number] {
         let count = 0;
         let lastIdx = -1;
         for (let i = 0; i < this.options.sortBy.length; i++) {
@@ -507,7 +507,7 @@ class ScheduleEvaluator {
      * @see https://en.wikipedia.org/wiki/Floyd%E2%80%93Rivest_algorithm
      * @see https://github.com/mourner/quickselect
      */
-    public partialSort(arr: Uint32Array, compare: (x: number, y: number) => number, num: number) {
+    private partialSort(arr: Uint32Array, compare: (x: number, y: number) => number, num: number) {
         const len = arr.length;
 
         // no point to use quick select if num of elements to be selected is greater than half of the length

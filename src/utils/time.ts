@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 /**
  * Utilities for parsing and convert in-between different time representations
  * @module src/utils
@@ -167,11 +168,7 @@ export function checkTimeConflict(
             for (let k = s2; k < e2; k += step2) {
                 const begin2 = timeArray2[k];
                 const end2 = timeArray2[k + 1];
-                if (
-                    (begin1 <= begin2 && begin2 <= end1) ||
-                    (begin1 <= end2 && end2 <= end1) ||
-                    (begin1 >= begin2 && end1 <= end2)
-                ) {
+                if (calcOverlap(begin1, end1, begin2, end2) !== -1) {
                     return true;
                 }
             }

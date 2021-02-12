@@ -163,12 +163,10 @@ export function checkTimeConflict(
 
         const e1 = timeArray1[i + 1];
         for (let j = timeArray1[i]; j < e1; j += step1) {
-            const begin1 = timeArray1[j] + 1;
-            const end1 = timeArray1[j + 1] - 1;
+            const begin1 = timeArray1[j];
+            const end1 = timeArray1[j + 1];
             for (let k = s2; k < e2; k += step2) {
-                const begin2 = timeArray2[k];
-                const end2 = timeArray2[k + 1];
-                if (calcOverlap(begin1, end1, begin2, end2) !== -1) {
+                if (calcOverlap(begin1, end1, timeArray2[k], timeArray2[k + 1]) > 0) {
                     return true;
                 }
             }

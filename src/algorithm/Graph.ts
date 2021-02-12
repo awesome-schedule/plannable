@@ -19,31 +19,11 @@ export const options = {
     showFixed: false
 };
 
-// denote the pointer type, though it is just an integer in JS
-type Ptr = number;
-interface EMModule {
-    _malloc(size: number): Ptr;
-    _free(ptr: number): void;
-    _setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
-    _getSum(): number;
-    _getSumSq(): number;
-    _compute(a: Ptr, b: number): Ptr;
-    onRuntimeInitialized(): void;
-    HEAPU8: Uint8Array;
-}
-
-const ModulePromise =
-    process.env.NODE_ENV === 'test'
-        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
-          require('../../public/js/graph.js')()
-        : (window as any).nativeRenderer();
-
 /**
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
-    const Module: EMModule = await ModulePromise;
-    (window as any)._Module = Module;
+    const Module = await window.ModulePromise;
 
     console.time('native compute');
     Module._setOptions(

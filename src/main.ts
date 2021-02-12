@@ -20,6 +20,19 @@ import { saveStatus } from './store';
 axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 axios.defaults.xsrfCookieName = 'csrftoken';
 
+// denote the pointer type, though it is just an integer in JS
+type Ptr = number;
+interface EMModule {
+    _malloc(size: number): Ptr;
+    _free(ptr: Ptr): void;
+    _setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
+    _getSum(): number;
+    _getSumSq(): number;
+    _compute(a: Ptr, b: number): Ptr;
+    onRuntimeInitialized(): void;
+    HEAPU8: Uint8Array;
+}
+
 declare global {
     interface Window {
         scheduleEvaluator: ScheduleEvaluator;
@@ -28,6 +41,7 @@ declare global {
         buildingSearcher: FastSearcher<string>;
         watchers: WatchFactory;
         saveStatus: typeof saveStatus;
+        ModulePromise: Promise<EMModule>;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -58,6 +72,11 @@ Vue.prototype.highlightMatch = highlightMatch;
 
 window.saveStatus = saveStatus;
 window.watchers = new WatchFactory();
+window.ModulePromise =
+    process.env.NODE_ENV === 'test'
+        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
+          require('../public/js/graph.js')()
+        : (window as any).nativeRenderer();
 
 new Vue({
     render(h) {

@@ -195,7 +195,7 @@ export default class Section implements CourseFields, Hashable {
         // arrays of times and rooms in each day
         const dayArray: number[][] = [[], [], [], [], [], [], []];
 
-        // there may be multiple meeting times. parse each of them and add to tmp_dict
+        // there may be multiple meeting times. parse each of them
         const searcher = window.buildingSearcher;
         for (const meeting of this.meetings) {
             const t = meeting.days;

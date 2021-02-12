@@ -22,14 +22,14 @@ glpk: getglpk
 	emconfigure ../configure --disable-shared && \
 	emmake make -j4 \
 
-dev: graph.cpp
+dev: ScheduleRenderer.cpp ScheduleGenerator.cpp
 	emcc -O2 -g --profiling $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
-	graph.cpp -o temp/graph.js
+	ScheduleRenderer.cpp -o temp/wasm_modules.js
 
-prod: graph.cpp
+prod: ScheduleRenderer.cpp ScheduleGenerator.cpp
 	emcc -O3 $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
-	graph.cpp -o temp/graph.js
+	ScheduleRenderer.cpp ScheduleGenerator.cpp -o temp/wasm_modules.js

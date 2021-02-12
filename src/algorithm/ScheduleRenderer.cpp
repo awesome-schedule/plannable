@@ -11,6 +11,8 @@ using namespace std;
 
 #define DOUBLE_EPS 1e-8
 
+namespace ScheduleRenderer {
+
 int isTolerance = 0;
 int ISMethod = 1;
 int applyDFS = 1;
@@ -631,3 +633,4 @@ ScheduleBlock* compute(Input* arr, int _N) {
 double getSum() { return r_sum; }
 double getSumSq() { return r_sumSq; }
 }
+}  // namespace ScheduleRenderer

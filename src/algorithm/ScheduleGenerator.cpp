@@ -1,0 +1,4 @@
+
+namespace ScheduleGenerator {
+
+}  // namespace ScheduleGenerator

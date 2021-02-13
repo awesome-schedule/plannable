@@ -7,7 +7,8 @@
  *
  */
 import { TimeArray } from '../algorithm/ScheduleGenerator';
-import { hashCode, parseTimeAsTimeArray } from '../utils';
+import { hashCode, hr12toInt } from '../utils';
+import { Day, dayToInt } from './constants';
 import Hashable from './Hashable';
 import Section from './Section';
 
@@ -44,7 +45,15 @@ export default class Event implements Hashable {
     }
 
     public toTimeArray(): TimeArray {
-        return parseTimeAsTimeArray(this.days)!;
+        const dayArray: TimeArray = [[], [], [], [], [], [], []];
+        const [days, start, , end] = this.days.split(' ');
+        if (days && start && end) {
+            const tStart = hr12toInt(start),
+                tEnd = hr12toInt(end);
+            for (let i = 0; i < days.length; i += 2)
+                dayArray[dayToInt[days.substr(i, 2) as Day]].push(tStart, tEnd);
+        }
+        return dayArray;
     }
 
     public toJSONShort() {

@@ -217,6 +217,8 @@ class ScheduleEvaluator {
      */
     private buf: ArrayBuffer;
 
+    private timeMatrix: typeof window.timeMatrix;
+
     /**
      * @param options
      * @param timeMatrix see [[Window.timeMatrix]]
@@ -230,17 +232,18 @@ class ScheduleEvaluator {
      */
     constructor(
         public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },
-        private readonly timeMatrix: Readonly<Int32Array> = new Int32Array(),
         private readonly events: Event[] = [],
         private readonly classList: RawAlgoCourse[][] = [],
         private readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
         public refSchedule: GeneratedSchedule['All'] = {},
         timeArrays: Readonly<Int32Array> = new Int32Array(),
+        maxLen = 0,
         count = 0,
         timeLen = 0
     ) {
         // note: timeLen is typically about 50*count, which takes the most space
         // previous three arrays are 32-bit typed arrays, so no byte alignment is needed
+        this.timeMatrix = window.timeMatrix;
         this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);
         this.indices = new Uint32Array(this.buf, 0, count);
         this.coeffs = new Float32Array(this.buf, count * 4, count);
@@ -263,10 +266,10 @@ class ScheduleEvaluator {
                 const s1 = (blocks[j + offset] = bound);
                 for (let k = 0; k < numCourses; k++) {
                     // offset of the time arrays
-                    const arrOffset = timeArrays[allChoices[start + k] * numCourses + k];
-                    const e2 = timeArrays[arrOffset + j + 1];
+                    const _off = (k * maxLen + allChoices[start + k]) << 3;
+                    const e2 = timeArrays[_off + j + 1];
                     // insertion sort, fast for small arrays
-                    for (let n = timeArrays[arrOffset + j]; n < e2; n += 3, bound += 3) {
+                    for (let n = timeArrays[_off + j]; n < e2; n += 3, bound += 3) {
                         // p already contains offset
                         let p = s1 + offset;
                         const vToBeInserted = timeArrays[n],

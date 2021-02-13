@@ -12,7 +12,6 @@ describe('Utility Tests', () => {
             ['Mo', 'We', 'Fr'],
             [11 * 60, 13 * 60 + 50]
         ]);
-        expect(Utils.parseTimeAsTimeArray('asdasd')).toEqual(null);
         expect(Utils.parseTimeAll('TBA')).toBe(null);
     });
 

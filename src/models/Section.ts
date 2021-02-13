@@ -183,7 +183,8 @@ export default class Section implements CourseFields, Hashable {
             // skip empty string
             if (!t) continue;
 
-            if (parseTimeAll(t) === null) return true;
+            const [days, start, , end] = t.split(' ');
+            if (!days || !start || !end) return true;
         }
         return false;
     }
@@ -191,9 +192,9 @@ export default class Section implements CourseFields, Hashable {
     /**
      * get the time and room of this section's meetings as [[TimeArray]]
      */
-    public getTimeRoom(): TimeArray {
+    public getTimeRoom() {
         // arrays of times and rooms in each day
-        const dayArray: number[][] = [[], [], [], [], [], [], []];
+        const dayArray: TimeArray = [[], [], [], [], [], [], []];
 
         // there may be multiple meeting times. parse each of them
         const searcher = window.buildingSearcher;
@@ -206,7 +207,7 @@ export default class Section implements CourseFields, Hashable {
             const tmp1 = parseTimeAll(t);
 
             // skip TBA or ill-formated time
-            if (tmp1 === null) return new Int16Array(8);
+            if (tmp1 === null) return dayArray;
             const [date, timeBlock] = tmp1;
 
             // for each day
@@ -228,16 +229,7 @@ export default class Section implements CourseFields, Hashable {
             }
         }
 
-        // convert iliffe vector to array
-        const timeBlocks = new Int16Array(dayArray.reduce((acc, arr) => acc + arr.length, 8));
-        let count = 0;
-        for (let i = 0; i < 7; i++) {
-            timeBlocks[i] = count + 8;
-            timeBlocks.set(dayArray[i], count + 8);
-            count += dayArray[i].length;
-        }
-        timeBlocks[7] = timeBlocks.length;
-        return timeBlocks;
+        return dayArray;
     }
 
     public has(element: Section) {

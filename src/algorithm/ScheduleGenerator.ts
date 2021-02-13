@@ -12,7 +12,7 @@ import Event from '../models/Event';
 import GeneratedSchedule from '../models/GeneratedSchedule';
 import ProposedSchedule from '../models/ProposedSchedule';
 import { NotiMsg } from '../store/notification';
-import { calcOverlap, checkTimeConflict, parseDate } from '../utils';
+import { calcOverlap, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
 /**
@@ -47,7 +47,7 @@ import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
  * using j += 3 in the inner loop, we might use j += 2 in some use cases.
  * ```
  */
-export type TimeArray = Int16Array;
+export type TimeArray = [number[], number[], number[], number[], number[], number[], number[]];
 /**
  * Start and end date in millisecond (obtained via `Date.getTime`)
  */
@@ -68,47 +68,66 @@ export type MeetingDate = [number, number];
 export type RawAlgoCourse = [string, number[]];
 
 /**
- * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
- * of time array of section `i` of course `j` is at `i * numCourse + j` position of the resulting array.
+ * return true if two [[TimeArray]] objects have overlapping time blocks, false otherwise
+ * @param timeArray1
+ * @param timeArray2
+ * @param step1 the increment step for array 1
+ * @param step2 the increment step for array 2
+ * @note use step=2 for time only array, use step=3 for time-room combined array
  */
-export function timeArrayToCompact(timeArrayList: TimeArray[][], timeArrLens: Uint8Array) {
-    const len = timeArrLens.length;
-    let offset = 0;
-    for (let i = 0; i < len; i++) offset += timeArrLens[i];
-    const compact = new Int32Array(len + offset);
+export function checkTimeConflict(
+    timeArray1: TimeArray,
+    timeArray2: TimeArray,
+    step1 = 2,
+    step2 = 2
+) {
+    for (let i = 0; i < 7; i++) {
+        // skip the entire inner loop if needed
+        const day1 = timeArray1[i],
+            day2 = timeArray2[i];
+        if (!day2.length) continue;
 
-    const numCourses = timeArrayList.length;
-    offset = len;
-    for (let i = 0; i < numCourses; i++) {
-        const arr = timeArrayList[i];
-        for (let j = 0; j < arr.length; j++) {
-            compact[j * numCourses + i] = offset;
-            const time = arr[j];
-            let k = 0;
-            for (; k < 8; k++) {
-                compact[offset + k] = time[k] + offset; // add offset to the first 8 elements
-            }
-            for (; k < time.length; k++) {
-                compact[offset + k] = time[k];
-            }
-            offset += time.length;
+        for (let j = 0; j < day1.length; j += step1) {
+            const begin1 = day1[j];
+            const end1 = day1[j + 1];
+            for (let k = 0; k < day2.length; k += step2)
+                if (calcOverlap(begin1, end1, day2[k], day2[k + 1]) > 0) return true;
         }
     }
-    return compact;
+    return false;
 }
 
 /**
- * record the length of `timeArrayList[crs][sec]` at `timeArrLens[sec * numCourses + crs]`,
- * exported for unit test purposes
+ * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
+ * of time array of section `i` of course `j` is at `i * numCourse + j` position of the resulting array.
  */
-export function computeTimeArrLens(timeArrayList: TimeArray[][], timeArrLens: Uint8Array) {
-    const numCourses = timeArrayList.length;
-    for (let i = 0; i < numCourses; i++) {
-        const arrs = timeArrayList[i];
-        for (let j = 0; j < arrs.length; j++) {
-            timeArrLens[j * numCourses + i] = arrs[j].length;
+export function timeArrayToCompact(timeArrays: TimeArray[][]) {
+    const numCourses = timeArrays.length;
+    const maxSecLen = Math.max(...timeArrays.map(arr => arr.length));
+    const prefixLen = numCourses * maxSecLen * 8;
+    let len = prefixLen;
+    for (const course of timeArrays) {
+        for (const sec of course) {
+            for (const day of sec) {
+                len += day.length;
+            }
         }
     }
+    const arr = new Int32Array(len);
+    len = prefixLen;
+    for (let i = 0; i < numCourses; i++) {
+        for (let j = 0; j < timeArrays[i].length; j++) {
+            for (let k = 0; k < 7; k++) {
+                arr[i * maxSecLen * 8 + j * 8 + k] = len;
+                const day = timeArrays[i][j][k];
+                arr.set(day, len);
+                len += day.length;
+            }
+            arr[i * maxSecLen * 8 + j * 8 + 7] = len;
+        }
+    }
+    // console.log(arr.slice());
+    return arr;
 }
 
 /**
@@ -240,27 +259,21 @@ class ScheduleGenerator {
             }
         }
 
-        const numCourses = classList.length; // number of courses
-        const maxLen = Math.max(...classList.map(c => c.length)); // the maximum number of sections in each course
-        const sideLen = maxLen * numCourses; // the side length of the conflict cache matrix
-
-        const buffer = new ArrayBuffer(
-            numCourses + // pathMemory & sectionLens
-            sideLen + // timeArrLens
-                sideLen * sideLen // conflictCache
-        );
+        const numCourses = classList.length;
 
         // cache for the number of sections in each course
-        const sectionLens = new Uint8Array(buffer, 0, numCourses);
+        const sectionLens = new Uint8Array(numCourses);
 
-        for (let i = 0; i < numCourses; i++) sectionLens[i] = classList[i].length;
-        /**
-         * the cache of the length of TimeArray for each section.
-         * ```js
-         * len = timeArrLens[sectionIdx * numCourses + courseIdx]
-         * ```
-         */
-        const timeArrLens = new Uint8Array(buffer, numCourses, sideLen);
+        // the maximum number of sections in each course
+        let maxLen = 0;
+        for (let i = 0; i < numCourses; i++) {
+            const len = (sectionLens[i] = classList[i].length);
+            if (len > maxLen) maxLen = len;
+        }
+
+        // the side length of the conflict cache matrix
+        const sideLen = maxLen * numCourses;
+
         /**
          * the conflict cache matrix, a 4d tensor. Indexed like this:
          * ```js
@@ -270,15 +283,13 @@ class ScheduleGenerator {
          * ```
          * @note can do bitpacking, but no performance improvement observed
          */
-        const conflictCache = new Uint8Array(buffer, numCourses + sideLen, sideLen * sideLen);
-
-        // prepare the timeArrLens array
-        computeTimeArrLens(timeArrayList, timeArrLens);
+        const conflictCache = new Uint8Array(sideLen * sideLen);
 
         // prepare the conflictCache
         computeConflict(timeArrayList, dateList, conflictCache, sideLen);
 
         const { maxNumSchedules } = this.options;
+        const compact = timeArrayToCompact(timeArrayList);
 
         // the array used to record all schedules generated
         // extra 1x numCourses to prevent write out of bound at computeSchedules at ***
@@ -288,22 +299,23 @@ class ScheduleGenerator {
         console.time('running algorithm:');
         const [count, timeLen] = this.computeSchedules(
             sectionLens,
-            timeArrLens,
+            compact,
             conflictCache,
             allChoices,
-            maxNumSchedules
+            maxNumSchedules,
+            maxLen
         );
         console.timeEnd('running algorithm:');
 
         console.time('add to eval');
         const evaluator = new ScheduleEvaluator(
             this.options.sortOptions,
-            this.timeMatrix,
             schedule.events,
             classList,
             allChoices,
             refSchedule,
-            timeArrayToCompact(timeArrayList, timeArrLens),
+            compact,
+            maxLen,
             count,
             timeLen
         );
@@ -346,13 +358,14 @@ class ScheduleGenerator {
             if (!date) continue;
 
             const timeArray = sections[0].getTimeRoom();
-            if (timeArray.length > 8) allInvalid = false;
+            if (timeArray.some(arr => arr.length > 0)) {
+                allInvalid = false;
 
-            // don't include this combined section if it conflicts with any time filter or event.
-            for (const td of timeSlots) {
-                if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;
+                // don't include this combined section if it conflicts with any time filter or event.
+                for (const td of timeSlots) {
+                    if (checkTimeConflict(td, timeArray, 2, 3)) continue outer;
+                }
             }
-
             const secIndices: number[] = [];
             for (const section of sections) {
                 // filter out sections with unwanted status
@@ -382,13 +395,14 @@ class ScheduleGenerator {
      */
     private computeSchedules(
         sectionLens: Uint8Array,
-        timeArrLens: Uint8Array,
+        compact: Int32Array,
         conflictCache: Uint8Array,
         allChoices: Uint8Array,
-        maxNumSchedules: number
+        maxNumSchedules: number,
+        maxLen: number
     ) {
         const numCourses = sectionLens.length;
-        const sideLen = timeArrLens.length;
+        const sideLen = numCourses * maxLen;
         maxNumSchedules *= numCourses;
 
         /**  the total length of the time array that we need to allocate for schedules generated */
@@ -410,7 +424,8 @@ class ScheduleGenerator {
                 const newBase = base + numCourses;
                 for (let i = 0; i < numCourses; i++) {
                     const secIdx = (allChoices[newBase + i] = allChoices[base + i]);
-                    timeLen += timeArrLens[secIdx * numCourses + i];
+                    const _off = i * maxLen * 8 + secIdx * 8;
+                    timeLen += compact[_off + 7] - compact[_off];
                 }
 
                 base = newBase;
@@ -447,7 +462,7 @@ class ScheduleGenerator {
             choiceNum = 0;
         }
         const count = base / numCourses;
-        return [count, timeLen - (numCourses - 1) * 8 * count] as const;
+        return [count, timeLen + 8 * count] as const;
     }
 }
 

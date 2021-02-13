@@ -86,7 +86,6 @@ export default class FuzzyView extends Store {
         if (this.schedule.generated) this.schedule.switchSchedule(false);
         window.catalog.initWorker();
 
-        console.time('query');
         try {
             [this.inputCourses, this.inputMatches] = await window.catalog.fuzzySearch(query);
         } catch (err) {
@@ -94,7 +93,6 @@ export default class FuzzyView extends Store {
             console.error(err);
         } finally {
             this.loading = false;
-            console.timeEnd('query');
         }
     }
 

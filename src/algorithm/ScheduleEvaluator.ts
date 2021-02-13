@@ -268,10 +268,10 @@ class ScheduleEvaluator {
                 const s1 = (blocks[j + offset] = bound);
                 for (let k = 0; k < numCourses; k++) {
                     // offset of the time arrays
-                    const _off = (k * maxLen + allChoices[start + k]) << 3;
-                    const e2 = timeArrays[_off + j + 1];
+                    const _off = ((k * maxLen + allChoices[start + k]) << 3) + j;
+                    const e2 = timeArrays[_off + 1];
                     // insertion sort, fast for small arrays
-                    for (let n = timeArrays[_off + j]; n < e2; n += 3, bound += 3) {
+                    for (let n = timeArrays[_off]; n < e2; n += 3, bound += 3) {
                         // p already contains offset
                         let p = s1 + offset;
                         const vToBeInserted = timeArrays[n],

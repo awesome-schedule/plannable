@@ -1,4 +1,0 @@
-
-namespace ScheduleGenerator {
-
-}  // namespace ScheduleGenerator

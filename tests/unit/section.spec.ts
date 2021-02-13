@@ -11,7 +11,7 @@ describe('section test', () => {
         expect(sec.description).toBeTruthy();
 
         const timeRoom = sec.getTimeRoom()!;
-        expect((timeRoom.length - 8) / 3).toBe(Math.floor((timeRoom.length - 8) / 3));
+        expect(timeRoom.length).toBe(7);
 
         const sec3 = catalog.getCourse('cs99993').sections[0];
         expect(sec3.valid & 0b1110).toBeTruthy();
@@ -23,11 +23,10 @@ describe('section test', () => {
         const sec = catalog.getCourse('comm30105').sections[0];
 
         const timeRoom = sec.getTimeRoom()!;
-        const num = timeRoom.length - 8;
-        expect(num / 3).toBe(Math.floor(num / 3));
+        expect(timeRoom.some(day => day.length >= 6)).toBe(true);
 
         const s2 = catalog.getCourse('cs99993').sections[0];
-        expect(s2.getTimeRoom().length).toBe(8); // no time or room information
+        expect(s2.getTimeRoom().every(day => day.length === 0)).toBe(true); // no time or room information
         expect(s2.sameTimeAs(sec)).toBe(false);
         expect(s2.displayName).toBeTruthy();
     });

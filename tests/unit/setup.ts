@@ -150,4 +150,6 @@ beforeAll(async () => {
     window.timeMatrix = await dataend.distances();
     window.buildingSearcher = await dataend.buildings();
     window.watchers = new WatchFactory();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    window.NativeModule = await require('../../public/js/wasm_modules.js')();
 });

@@ -7,8 +7,7 @@
 /**
  *
  */
-import { Day, dayToInt } from '@/models/constants';
-import { TimeArray } from '../algorithm/ScheduleGenerator';
+import { Day } from '@/models/constants';
 
 /**
  * convert 24 hour format time to 12 hour format.

@@ -26,7 +26,19 @@
         "_colorScheme": 0
     },
     "filter": {
-        "timeSlots": [[false, true, true, false, false, false, false, "13:00", "14:00"]],
+        "timeSlots": [
+            [
+                false,
+                true,
+                true,
+                false,
+                false,
+                false,
+                false,
+                "13:00",
+                "14:00"
+            ]
+        ],
         "allowWaitlist": true,
         "allowClosed": true,
         "sortOptions": {
@@ -35,43 +47,50 @@
                     "name": "IamFeelingLucky",
                     "enabled": false,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 6
                 },
                 {
                     "name": "distance",
                     "enabled": true,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 0
                 },
                 {
                     "name": "variance",
                     "enabled": true,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 1
                 },
                 {
                     "name": "similarity",
                     "enabled": false,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 5
                 },
                 {
                     "name": "compactness",
                     "enabled": false,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 2
                 },
                 {
                     "name": "lunchTime",
                     "enabled": false,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 3
                 },
                 {
                     "name": "noEarly",
                     "enabled": false,
                     "reverse": true,
-                    "weight": 1
+                    "weight": 1,
+                    "idx": 4
                 }
             ],
             "mode": 0

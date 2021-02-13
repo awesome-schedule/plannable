@@ -107,7 +107,7 @@ export default class App extends Store {
         (window as any).axios = axios;
         (window as any).vue = this;
 
-        window.NativeModule = await (window as any).nativeRenderer();
+        window.NativeModule = await window.GetNative();
 
         this.status.loading = true;
         const search = new URLSearchParams(window.location.search);

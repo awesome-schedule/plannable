@@ -5,7 +5,7 @@
 /**
  *
  */
-import { options } from '@/algorithm/Graph';
+import { options } from '@/algorithm/Renderer';
 import CatalogDB from '@/data/CatalogDB';
 import Store from '@/store';
 import { Component, Watch } from 'vue-property-decorator';

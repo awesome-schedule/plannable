@@ -1,7 +1,10 @@
 {
     "name": "empty_schedule",
     "modified": "2019-08-05T03:18:14.361Z",
-    "currentSemester": { "id": "1198", "name": "Fall 2019" },
+    "currentSemester": {
+        "id": "1198",
+        "name": "Fall 2019"
+    },
     "display": {
         "showTime": false,
         "showRoom": true,
@@ -28,13 +31,55 @@
         "allowClosed": true,
         "sortOptions": {
             "sortBy": [
-                { "name": "distance", "enabled": true, "reverse": false, "weight": 1 },
-                { "name": "variance", "enabled": true, "reverse": false, "weight": 1 },
-                { "name": "compactness", "enabled": false, "reverse": false, "weight": 1 },
-                { "name": "lunchTime", "enabled": false, "reverse": false, "weight": 1 },
-                { "name": "noEarly", "enabled": false, "reverse": false, "weight": 1 },
-                { "name": "similarity", "enabled": false, "reverse": false, "weight": 1 },
-                { "name": "IamFeelingLucky", "enabled": false, "reverse": false, "weight": 1 }
+                {
+                    "name": "distance",
+                    "enabled": true,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 0
+                },
+                {
+                    "name": "variance",
+                    "enabled": true,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 1
+                },
+                {
+                    "name": "compactness",
+                    "enabled": false,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 2
+                },
+                {
+                    "name": "lunchTime",
+                    "enabled": false,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 3
+                },
+                {
+                    "name": "noEarly",
+                    "enabled": false,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 4
+                },
+                {
+                    "name": "similarity",
+                    "enabled": false,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 5
+                },
+                {
+                    "name": "IamFeelingLucky",
+                    "enabled": false,
+                    "reverse": false,
+                    "weight": 1,
+                    "idx": 6
+                }
             ],
             "mode": 1
         },
@@ -42,10 +87,17 @@
     },
     "schedule": {
         "currentScheduleIndex": 0,
-        "proposedSchedules": [{ "All": {}, "events": [] }],
+        "proposedSchedules": [
+            {
+                "All": {},
+                "events": []
+            }
+        ],
         "proposedScheduleIndex": 0,
         "cpIndex": -1,
         "generated": false
     },
-    "palette": { "savedColors": {} }
+    "palette": {
+        "savedColors": {}
+    }
 }

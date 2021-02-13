@@ -14,7 +14,7 @@ import ScheduleBlock from './ScheduleBlock';
 import Section from './Section';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from './ProposedSchedule';
-import { computeBlockPositions } from '@/algorithm/Graph';
+import { computeBlockPositions } from '@/algorithm/Renderer';
 import { dayToInt, Day } from './constants';
 import Meeting from './Meeting';
 

@@ -9,7 +9,7 @@ describe('notification test', () => {
         expect(display.latest).toBe('12:00');
 
         display.maxNumSchedules = 1000000000;
-        expect(display.maxNumSchedules).toBe(5000000);
+        expect(display.maxNumSchedules).toBe(10000000);
 
         display.numSearchResults = 10000;
         expect(display.numSearchResults).toBe(20);

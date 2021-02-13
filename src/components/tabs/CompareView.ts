@@ -5,7 +5,7 @@
 /**
  *
  */
-import { computeBlockPositions } from '@/algorithm/Graph';
+import { computeBlockPositions } from '@/algorithm/Renderer';
 import GeneratedSchedule from '@/models/GeneratedSchedule';
 import { ScheduleDays } from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';

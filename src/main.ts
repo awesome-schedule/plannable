@@ -37,6 +37,7 @@ interface EMModule {
     _size(): number;
     _setTimeMatrix(a: Ptr, b: number): void;
     _getSchedule(a: number): Ptr;
+    _getRange(a: number): number;
     onRuntimeInitialized(): void;
     HEAP8: Int8Array;
     HEAP16: Int16Array;

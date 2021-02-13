@@ -14,6 +14,7 @@ import ProposedSchedule from '../models/ProposedSchedule';
 import { NotiMsg } from '../store/notification';
 import { calcOverlap, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
+import NativeEvaluator from './NativeEvaluator';
 
 /**
  * The TimeArray is a condensed typed array storing
@@ -125,6 +126,9 @@ export function timeArrayToCompact(timeArrays: TimeArray[][]) {
             }
             arr[i * maxSecLen * 8 + j * 8 + 7] = len;
         }
+    }
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === -1) arr[i] = 0;
     }
     // console.log(arr.slice());
     return arr;
@@ -291,37 +295,66 @@ class ScheduleGenerator {
         const { maxNumSchedules } = this.options;
         const compact = timeArrayToCompact(timeArrayList);
 
-        // the array used to record all schedules generated
-        // extra 1x numCourses to prevent write out of bound at computeSchedules at ***
-        const allChoices = new Uint8Array(numCourses * maxNumSchedules + numCourses);
         console.timeEnd('algorithm bootstrapping');
 
-        console.time('running algorithm:');
-        const [count, timeLen] = this.computeSchedules(
-            sectionLens,
-            compact,
-            conflictCache,
-            allChoices,
-            maxNumSchedules,
-            maxLen
-        );
-        console.timeEnd('running algorithm:');
+        let evaluator: ScheduleEvaluator;
+        if (true) {
+            const Module = window.NativeModule;
+            {
+                const secLenPtr = Module._malloc(sectionLens.byteLength);
+                const conflictCachePtr = Module._malloc(conflictCache.byteLength);
+                console.warn(sideLen);
+                const timeArrayPtr = Module._malloc(compact.byteLength);
 
-        console.time('add to eval');
-        const evaluator = new ScheduleEvaluator(
-            this.options.sortOptions,
-            schedule.events,
-            classList,
-            allChoices,
-            refSchedule,
-            compact,
-            maxLen,
-            count,
-            timeLen
-        );
+                Module.HEAPU8.set(sectionLens, secLenPtr);
+                Module.HEAPU8.set(conflictCache, conflictCachePtr);
+                Module.HEAP32.set(compact, timeArrayPtr / 4);
+                Module._generate(
+                    numCourses,
+                    maxNumSchedules,
+                    secLenPtr,
+                    conflictCachePtr,
+                    timeArrayPtr
+                );
+            }
+            evaluator = new NativeEvaluator(
+                this.options.sortOptions,
+                schedule.events,
+                classList,
+                window.NativeModule
+            ) as any;
+        } else {
+            // the array used to record all schedules generated
+            // extra 1x numCourses to prevent write out of bound at computeSchedules at ***
+            const allChoices = new Uint8Array(numCourses * maxNumSchedules + numCourses);
+
+            const [count, timeLen] = this.computeSchedules(
+                sectionLens,
+                compact,
+                conflictCache,
+                allChoices,
+                maxNumSchedules,
+                maxLen
+            );
+            console.warn('block len', timeLen);
+            evaluator = new ScheduleEvaluator(
+                this.options.sortOptions,
+                schedule.events,
+                classList,
+                allChoices,
+                refSchedule,
+                compact,
+                maxLen,
+                count,
+                timeLen
+            );
+        }
+
+        // console.time('running algorithm:');
+        // console.timeEnd('running algorithm:');
+
         const size = evaluator.size;
         if (size > 0) {
-            console.timeEnd('add to eval');
             if (sort) evaluator.sort();
             let msgString = '';
             for (const msg of msgs) msgString += msg.msg + '<br>';

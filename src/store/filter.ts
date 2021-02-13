@@ -125,7 +125,6 @@ const defaultOptions: DetailedEvaluatorOptions = {
             reverse: false,
             idx: 3,
             weight: 1,
-
             exclusive: ['IamFeelingLucky'],
             title: 'Lunch Time',
             description: 'Leave spaces for lunch'

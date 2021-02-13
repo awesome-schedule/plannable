@@ -433,8 +433,6 @@ class ScheduleEvaluator {
         quickThresh?: number;
     } = {}) {
         if (newOptions) this.options = newOptions;
-        this.computeCoeff();
-
         console.time('sorting: ');
 
         // reset indices
@@ -447,26 +445,25 @@ class ScheduleEvaluator {
             console.timeEnd('sorting: ');
             return;
         }
+        this.computeCoeff();
 
         const options = this.options.sortBy.filter(x => x.enabled);
         const isCombined = this.options.mode === SortMode.combined;
 
-        /**
-         * The comparator function used:
-         *
-         * if only one option is enabled, the sort direction depends on the `reversed` property of it
-         *
-         * if multiple sort options are enabled and the sort mode is combined, which means
-         * `(!isCombined || options.length === 1)` is false, the `computeCoeff` method
-         * is already taken care of the sort direction of each function, so we sort in ascending order anyway
-         */
         const coeffs = this.coeffs;
-        const cmpFunc: (a: number, b: number) => number =
-            options[0].reverse && (!isCombined || options.length === 1)
-                ? (a, b) => coeffs[b] - coeffs[a] // descending
-                : (a, b) => coeffs[a] - coeffs[b]; // ascending
-
         if (isCombined || options.length === 1) {
+            /**
+             * The comparator function used:
+             *
+             * if only one option is enabled, the sort direction depends on the `reversed` property of it.
+             *
+             * if multiple sort options are enabled, `computeCoeff` method will
+             * take care of the sort direction of each function, so we sort in ascending order anyway.
+             */
+            const cmpFunc: (a: number, b: number) => number =
+                options[0].reverse && options.length === 1
+                    ? (a, b) => coeffs[b] - coeffs[a] // descending
+                    : (a, b) => coeffs[a] - coeffs[b]; // ascending
             if (quick || this.size > quickThresh) {
                 this.partialSort(this.indices, cmpFunc, 1000);
             } else {
@@ -503,6 +500,7 @@ class ScheduleEvaluator {
     }
 
     public getRange(opt: SortOption) {
+        if (opt.name == 'IamFeelingLucky') return 1.0;
         const [, max, min] = this.sortCoeffCache[opt.name]!;
         return max - min;
     }

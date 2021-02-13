@@ -127,9 +127,6 @@ export function timeArrayToCompact(timeArrays: TimeArray[][]) {
             arr[i * maxSecLen * 8 + j * 8 + 7] = len;
         }
     }
-    for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === -1) arr[i] = 0;
-    }
     // console.log(arr.slice());
     return arr;
 }
@@ -297,6 +294,7 @@ class ScheduleGenerator {
 
         console.timeEnd('algorithm bootstrapping');
 
+        console.time('running algorithm:');
         let evaluator: ScheduleEvaluator;
         if (true) {
             const Module = window.NativeModule;
@@ -349,13 +347,14 @@ class ScheduleGenerator {
                 timeLen
             );
         }
-
-        // console.time('running algorithm:');
-        // console.timeEnd('running algorithm:');
+        console.timeEnd('running algorithm:');
 
         const size = evaluator.size;
         if (size > 0) {
+            console.time('sort');
             if (sort) evaluator.sort();
+            console.timeEnd('sort');
+
             let msgString = '';
             for (const msg of msgs) msgString += msg.msg + '<br>';
             return {

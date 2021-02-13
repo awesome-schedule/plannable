@@ -95,10 +95,12 @@ int16_t* __restrict__ blocks = NULL;
  * number of schedules generated
  */
 int count = 0;
+
+void* evalMem = NULL;
 /**
- * length of blocks
+ * length the memory for the schedule evaluator
  */
-int blockLen = 0;
+int memSize = 0;
 
 /**
  * compute the variance of class times during the week
@@ -206,7 +208,6 @@ float distance(int idx) {
                      r2 = blocks[j + 5];
 
                 // skip unknown buildings
-                if (r1 < 0 || r2 < 0) cout << "!!" << r1 << "!" << r2 << endl;
                 if (r1 != -1 && r2 != -1) dist += timeMatrix[r1 * tmSize + r2];
             }
         }
@@ -260,7 +261,6 @@ CoeffCache computeCoeffFor(int funcIdx, bool assign) {
         float max = -std::numeric_limits<float>::infinity(),
               min = std::numeric_limits<float>::infinity();
         auto evalFunc = sortFunctions[funcIdx];
-        cout << "func count " << tmSize << endl;
         for (int i = 0; i < count; i++) {
             float val = (newCache[i] = evalFunc(i));
             if (val > max) max = val;
@@ -352,9 +352,6 @@ void addToEval(const int32_t* __restrict__ timeArray, int maxLen) {
                     _blocks[p] = vToBeInserted;
                     _blocks[p + 1] = timeArray[n + 1];
                     _blocks[p + 2] = timeArray[n + 2];
-                    if (_blocks[p] < -1) cout << "p1!!!!" << timeArray[n] << endl;
-                    if (_blocks[p + 1] < -1) cout << "p2!!!!" << timeArray[n + 1] << endl;
-                    if (_blocks[p + 2] < -1) cout << "p3!!!!" << timeArray[n + 2] << endl;
                 }
             }
         }
@@ -435,47 +432,31 @@ int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ s
     outer:;
     }
 end:;
+    count = base / numCourses;
+    timeLen += 8 * count;
+
+    // handle reallocation of memory
+    int newMemSize = count * 3 * 4 + timeLen * 2;
+    if (newMemSize > memSize) {
+        evalMem = realloc(evalMem, newMemSize);
+        memSize = newMemSize;
+        indices = (int*)evalMem;
+        coeffs = ((float*)evalMem) + count;
+        offsets = ((int*)evalMem) + 2 * count;
+        blocks = ((int16_t*)evalMem) + 6 * count;
+    }
+
+    addToEval(timeArray, maxLen);
+
+    // cleanup
     delete[] conflictCache;
     delete[] timeArray;
-
     for (auto& cache : sortCoeffCache) {
         if (cache.coeffs != NULL) {
             delete[] cache.coeffs;
             cache.coeffs = NULL;
         }
     }
-
-    int _count = base / numCourses;
-    timeLen += 8 * _count;
-    // handle reallocation of memory
-    if (_count > count) {
-        indices = (int*)realloc(indices, _count * sizeof(int));
-        // for (int i = 0; i < _count; i++) indices[i] = i;
-        coeffs = (float*)realloc(coeffs, _count * sizeof(float));
-        offsets = (int*)realloc(offsets, _count * sizeof(int));
-    }
-    if (timeLen > blockLen) {
-        blocks = (int16_t*)realloc(blocks, timeLen * 2);
-    }
-
-    // static void* mem = NULL;
-    // free(mem);
-    // mem = malloc(_count * 3 * sizeof(int) + timeLen * 2);
-    // indices = (int*)mem;
-    // coeffs = ((float*)mem) + _count;
-    // offsets = ((int*)mem) + 2 * _count;
-    // blocks = ((int16_t*)mem) + 6 * _count;
-
-    // cout << "blockLen " << blockLen << endl;
-    // for (int i = 0; i < numCourses; i++) {
-    //     cout << (int)allChoices[i] << ",";
-    // }
-    // cout << endl;
-
-    count = _count;
-    blockLen = timeLen;
-
-    addToEval(timeArray, maxLen);
     return count;
 }
 

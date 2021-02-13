@@ -29,8 +29,22 @@ interface EMModule {
     _getSum(): number;
     _getSumSq(): number;
     _compute(a: Ptr, b: number): Ptr;
+
+    _generate(a: number, b: number, c: Ptr, d: Ptr, e: Ptr): number;
+    _setSortOption: any;
+    _setSortMode(a: number): void;
+    _sort(): void;
+    _size(): number;
+    _setTimeMatrix(a: Ptr, b: number): void;
+    _getSchedule(a: number): Ptr;
     onRuntimeInitialized(): void;
+    HEAP8: Int8Array;
+    HEAP16: Int16Array;
+    HEAP32: Int32Array;
     HEAPU8: Uint8Array;
+    HEAPU16: Uint16Array;
+    HEAPU32: Uint32Array;
+    HEAPF64: Float64Array;
 }
 
 declare global {
@@ -41,7 +55,7 @@ declare global {
         buildingSearcher: FastSearcher<string>;
         watchers: WatchFactory;
         saveStatus: typeof saveStatus;
-        ModulePromise: Promise<EMModule>;
+        NativeModule: EMModule;
     }
 
     // copied from https://www.typescriptlang.org/docs/handbook/advanced-types.html
@@ -72,11 +86,6 @@ Vue.prototype.highlightMatch = highlightMatch;
 
 window.saveStatus = saveStatus;
 window.watchers = new WatchFactory();
-window.ModulePromise =
-    process.env.NODE_ENV === 'test'
-        ? // eslint-disable-next-line @typescript-eslint/no-var-requires
-          require('../public/js/graph.js')()
-        : (window as any).nativeRenderer();
 
 new Vue({
     render(h) {

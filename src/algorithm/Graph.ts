@@ -23,7 +23,7 @@ export const options = {
  * compute the width and left of the blocks contained in each day
  */
 export async function computeBlockPositions(days: ScheduleDays) {
-    const Module = await window.ModulePromise;
+    const Module = window.NativeModule;
 
     console.time('native compute');
     Module._setOptions(

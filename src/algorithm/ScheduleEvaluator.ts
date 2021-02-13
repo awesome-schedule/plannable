@@ -13,18 +13,20 @@ import { calcOverlap } from '../utils';
 import { RawAlgoCourse } from './ScheduleGenerator';
 
 // eslint-disable-next-line @typescript-eslint/no-use-before-define
-export type SortFunctions = typeof ScheduleEvaluator.sortFunctions;
+export type SortFunctionNames = keyof typeof ScheduleEvaluator.sortFunctions;
 
 /**
  * representation of a single sort option
  */
 export interface SortOption {
     /** name of this sort option*/
-    readonly name: keyof SortFunctions;
+    readonly name: SortFunctionNames;
     /** whether or not this option is enabled */
     enabled: boolean;
     /** whether to sort in reverse */
     reverse: boolean;
+    /** a unique index for this sort option */
+    idx: number;
     /** the weight of this sort option, used by the combined sort mode only */
     weight: number;
 }
@@ -193,7 +195,7 @@ class ScheduleEvaluator {
      * the cache of [coefficient array, max, min] for each sort function
      */
     public sortCoeffCache: {
-        [x in keyof SortFunctions]?: readonly [Float32Array, number, number];
+        [x in SortFunctionNames]?: readonly [Float32Array, number, number];
     } = {};
     /**
      * the indices of the sorted schedules, equals to argsort([[ScheduleEvaluator.coeffs]])
@@ -311,7 +313,7 @@ class ScheduleEvaluator {
      * @param assign whether assign to the values to `this.coeffs`
      * @returns the computed/cached array of coefficients
      */
-    private computeCoeffFor(funcName: keyof SortFunctions, assign: boolean) {
+    private computeCoeffFor(funcName: SortFunctionNames, assign: boolean) {
         const len = this.size;
         const cache = this.sortCoeffCache[funcName];
         if (cache) {

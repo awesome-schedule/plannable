@@ -9,7 +9,7 @@ import { DAYS } from '@/models/constants';
 import Store from '@/store';
 import { Component } from 'vue-property-decorator';
 import draggable from 'vuedraggable';
-import { SortFunctions } from '@/algorithm/ScheduleEvaluator';
+import { SortFunctionNames } from '@/algorithm/ScheduleEvaluator';
 
 /**
  * the component for editing and applying filters
@@ -39,7 +39,7 @@ export default class FilterView extends Store {
         this.$set(this.filter.timeSlots[i], j, !this.filter.timeSlots[i][j]);
     }
 
-    getSortOptRange(name: keyof SortFunctions) {
+    getSortOptRange(name: SortFunctionNames) {
         const cache = window.scheduleEvaluator.sortCoeffCache[name];
         return cache ? cache[1] - cache[2] : -1; // max - min
     }

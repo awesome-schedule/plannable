@@ -83,6 +83,7 @@ describe('Schedule Evaluator Test', () => {
                     name: 'distance',
                     enabled: false,
                     reverse: true,
+                    idx: 1,
                     weight: 1
                 }
             ],

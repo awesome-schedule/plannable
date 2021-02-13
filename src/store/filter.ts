@@ -13,7 +13,7 @@ import { to12hr } from '@/utils';
 import { StoreModule } from '.';
 import ScheduleEvaluator, {
     EvaluatorOptions,
-    SortFunctions,
+    SortFunctionNames,
     SortMode,
     SortOption
 } from '../algorithm/ScheduleEvaluator';
@@ -44,7 +44,7 @@ interface DetailedSortOption extends SortOption {
     /**
      * the names of the sorting options that cannot be applied when this option is enabled
      */
-    readonly exclusive: readonly (keyof SortFunctions)[];
+    readonly exclusive: readonly SortFunctionNames[];
     /**
      * text displayed next to the checkbox
      */
@@ -93,6 +93,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'distance',
             enabled: true,
             reverse: false,
+            idx: 0,
             weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Walking Distance',
@@ -102,6 +103,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'variance',
             enabled: true,
             reverse: false,
+            idx: 1,
             weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Variance',
@@ -111,6 +113,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'compactness',
             enabled: false,
             reverse: false,
+            idx: 2,
             weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Vertical compactness',
@@ -120,7 +123,9 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'lunchTime',
             enabled: false,
             reverse: false,
+            idx: 3,
             weight: 1,
+
             exclusive: ['IamFeelingLucky'],
             title: 'Lunch Time',
             description: 'Leave spaces for lunch'
@@ -129,6 +134,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'noEarly',
             enabled: false,
             reverse: false,
+            idx: 4,
             weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'No Early',
@@ -138,6 +144,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'similarity',
             enabled: false,
             reverse: false,
+            idx: 5,
             weight: 1,
             exclusive: ['IamFeelingLucky'],
             title: 'Similarity',
@@ -147,6 +154,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
             name: 'IamFeelingLucky',
             enabled: false,
             reverse: false,
+            idx: 6,
             weight: 1,
             exclusive: ['variance', 'compactness', 'lunchTime', 'noEarly', 'distance'],
             title: `I'm Feeling Lucky`,
@@ -160,6 +168,7 @@ const defaultOptions: DetailedEvaluatorOptions = {
                 name: x.name,
                 enabled: x.enabled,
                 reverse: x.reverse,
+                idx: x.idx,
                 weight: x.weight
             })),
             mode: this.mode

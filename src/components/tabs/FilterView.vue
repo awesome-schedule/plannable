@@ -97,9 +97,11 @@
                         <div class="col col-sm-10 drag-handle" :title="option.description">
                             <span style="cursor: pointer"> {{ option.title }} </span>
                             <span
-                                v-if="!getSortOptRange(option.name)"
+                                v-if="option.enabled && !getSortOptRange(option)"
                                 class="ml-1 text-warning"
-                                :title="`Enabling this sort option has no effect, because all schedules have the same '${option.title.toLowerCase()}'`"
+                                :title="
+                                    `Enabling this sort option has no effect, because all schedules have the same '${option.title.toLowerCase()}'`
+                                "
                             >
                                 <i class="fas fa-exclamation-triangle"></i>
                             </span>

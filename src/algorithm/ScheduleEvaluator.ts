@@ -194,7 +194,7 @@ class ScheduleEvaluator {
     /**
      * the cache of [coefficient array, max, min] for each sort function
      */
-    public sortCoeffCache: {
+    private sortCoeffCache: {
         [x in SortFunctionNames]?: readonly [Float32Array, number, number];
     } = {};
     /**
@@ -500,6 +500,15 @@ class ScheduleEvaluator {
             }
         }
         console.timeEnd('sorting: ');
+    }
+
+    public getRange(opt: SortOption) {
+        const [, max, min] = this.sortCoeffCache[opt.name]!;
+        return max - min;
+    }
+
+    public clearCache(opt: SortOption) {
+        delete this.sortCoeffCache[opt.name];
     }
 
     /**

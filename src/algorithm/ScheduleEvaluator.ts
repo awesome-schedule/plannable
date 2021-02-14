@@ -166,20 +166,11 @@ class ScheduleEvaluator {
         },
 
         similarity(this: ScheduleEvaluator, idx: number) {
-            const sim = this.refSchedule,
-                classList = this.classList,
-                allChoices = this.allChoices;
-            const numCourses = classList.length;
+            const numCourses = this.classList.length;
             let sum = 0;
             idx *= numCourses;
             for (let j = 0; j < numCourses; j++) {
-                const course = classList[j][allChoices[idx + j]];
-                const key = sim[course[0]] as Set<number>[];
-                if (key) {
-                    for (const sid of course[1]) {
-                        sum += +(key.find(s => s.has(sid)) !== undefined);
-                    }
-                }
+                sum += +(this.refScheduleEncoded[j] === this.allChoices[idx + j]);
             }
             return -1 * sum;
         },
@@ -219,6 +210,9 @@ class ScheduleEvaluator {
      */
     private buf: ArrayBuffer;
 
+    private _refSchedule!: GeneratedSchedule['All'];
+    private refScheduleEncoded!: Uint8Array;
+
     private timeMatrix: typeof window.timeMatrix;
 
     /**
@@ -237,7 +231,7 @@ class ScheduleEvaluator {
         private readonly events: Event[] = [],
         private readonly classList: RawAlgoCourse[][] = [],
         private readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
-        public refSchedule: GeneratedSchedule['All'] = {},
+        refSchedule: GeneratedSchedule['All'] = {},
         timeArrays: Readonly<Int32Array> = new Int32Array(),
         maxLen = 0,
         count = 0,
@@ -249,6 +243,7 @@ class ScheduleEvaluator {
         this.buf = new ArrayBuffer(count * 4 * 3 + timeLen * 2);
         this.indices = new Uint32Array(this.buf, 0, count);
         this.coeffs = new Float32Array(this.buf, count * 4, count);
+        this.refSchedule = refSchedule;
 
         const offsets = (this.offsets = new Uint32Array(this.buf, count * 8, count));
         const blocks = (this.blocks = new Int16Array(this.buf, count * 12));
@@ -290,6 +285,27 @@ class ScheduleEvaluator {
                 }
             }
             offset += blocks[offset + 7] = bound;
+        }
+    }
+
+    get refSchedule() {
+        return this._refSchedule;
+    }
+
+    set refSchedule(refSchedule: GeneratedSchedule['All']) {
+        this._refSchedule = refSchedule;
+        const numCourses = this.classList.length;
+
+        this.refScheduleEncoded = new Uint8Array(numCourses).fill(255);
+        for (const key in refSchedule) {
+            const refSecs = refSchedule[key].map(x => x.keys().next().value);
+            for (let i = 0; i < this.classList.length; i++) {
+                const secs = this.classList[i];
+                for (let j = 0; j < secs.length; j++) {
+                    if (secs[j][0] === key && refSecs.some(id => secs[j][1].includes(id)))
+                        this.refScheduleEncoded[i] = j;
+                }
+            }
         }
     }
 

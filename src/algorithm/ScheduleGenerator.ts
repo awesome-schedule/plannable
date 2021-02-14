@@ -101,9 +101,8 @@ export function checkTimeConflict(
  * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
  * of time array of section `i` of course `j` is at `i * numCourse + j` position of the resulting array.
  */
-export function timeArrayToCompact(timeArrays: TimeArray[][]) {
+export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number) {
     const numCourses = timeArrays.length;
-    const maxSecLen = Math.max(...timeArrays.map(arr => arr.length));
     const prefixLen = numCourses * maxSecLen * 8;
     let len = prefixLen;
     for (const course of timeArrays) {
@@ -289,7 +288,7 @@ class ScheduleGenerator {
         computeConflict(timeArrayList, dateList, conflictCache, sideLen);
 
         const { maxNumSchedules } = this.options;
-        const compact = timeArrayToCompact(timeArrayList);
+        const compact = timeArrayToCompact(timeArrayList, maxLen);
 
         // the array used to record all schedules generated
         // extra 1x numCourses to prevent write out of bound at computeSchedules at ***

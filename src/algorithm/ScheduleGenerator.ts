@@ -99,9 +99,9 @@ export function checkTimeConflict(
 
 /**
  * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
- * of time array of section `i` of course `j` is at `i * numCourse + j` position of the resulting array.
+ * of time array of section `i` of course `j` at day k is at `j * maxLen * 8 + i * 8 + k` position of the resulting array.
  */
-export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number) {
+function timeArrayToCompact(Module: EMModule, timeArrays: TimeArray[][], maxSecLen: number) {
     const numCourses = timeArrays.length;
     const prefixLen = numCourses * maxSecLen * 8;
     let len = prefixLen;
@@ -112,7 +112,8 @@ export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number)
             }
         }
     }
-    const arr = new Uint16Array(len);
+    const ptr = Module._malloc(len * 2);
+    const arr = Module.HEAPU16.subarray(ptr / 2);
     len = 0;
     for (let i = 0; i < numCourses; i++) {
         for (let j = 0; j < timeArrays[i].length; j++) {
@@ -125,7 +126,7 @@ export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number)
             arr[i * maxSecLen * 8 + j * 8 + 7] = len;
         }
     }
-    return arr;
+    return ptr;
 }
 
 /**
@@ -181,11 +182,7 @@ class ScheduleGenerator {
 
     /**
      * The entrance of the schedule generator
-     * @returns a sorted [[ScheduleEvaluator]] Object
-     * @requires optimization
-     * @remarks The use of data structure assumes that
-     * 1. Each course has no more than 255 sections
-     * 2. Each section meets no more than 82 times in a week
+     * @returns a [[ScheduleEvaluator]] Object
      */
     public getSchedules(
         schedule: ProposedSchedule,
@@ -258,51 +255,35 @@ class ScheduleGenerator {
         }
 
         const numCourses = classList.length;
-
-        // cache for the number of sections in each course
-        const sectionLens = new Uint8Array(numCourses);
+        const Module = window.NativeModule;
 
         // the maximum number of sections in each course
         let maxLen = 0;
+        // pointer to the cache for the number of sections in each course
+        const secLenPtr = Module._malloc(numCourses);
         for (let i = 0; i < numCourses; i++) {
-            const len = (sectionLens[i] = classList[i].length);
+            const len = (Module.HEAPU8[secLenPtr + i] = classList[i].length);
             if (len > maxLen) maxLen = len;
         }
 
         // the side length of the conflict cache matrix
         const sideLen = maxLen * numCourses;
-
-        /**
-         * the conflict cache matrix, a 4d tensor. Indexed like this:
-         * ```js
-         * conflictCache[section1][course1][section2][course2]
-         * // which is in fact
-         * conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
-         * ```
-         * @note can do bitpacking, but no performance improvement observed
-         */
-        const conflictCache = new Uint8Array(sideLen * sideLen);
+        const conflictCachePtr = Module._malloc(sideLen * sideLen);
 
         // prepare the conflictCache
-        computeConflict(timeArrayList, dateList, conflictCache, sideLen);
-
-        const { maxNumSchedules } = this.options;
-        const compact = timeArrayToCompact(timeArrayList, maxLen);
+        computeConflict(timeArrayList, dateList, Module.HEAPU8.subarray(conflictCachePtr), sideLen);
 
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
-
-        const Module = window.NativeModule;
-        const secLenPtr = Module._malloc(sectionLens.byteLength);
-        const conflictCachePtr = Module._malloc(conflictCache.byteLength);
-        console.warn(sideLen);
-        const timeArrayPtr = Module._malloc(compact.byteLength);
-
-        Module.HEAPU8.set(sectionLens, secLenPtr);
-        Module.HEAPU8.set(conflictCache, conflictCachePtr);
-        Module.HEAP16.set(compact, timeArrayPtr / 2);
-        Module._generate(numCourses, maxNumSchedules, secLenPtr, conflictCachePtr, timeArrayPtr);
+        Module._generate(
+            numCourses,
+            this.options.maxNumSchedules,
+            secLenPtr,
+            conflictCachePtr,
+            timeArrayToCompact(Module, timeArrayList, maxLen)
+        );
+        console.timeEnd('running algorithm:');
 
         const evaluator = new ScheduleEvaluator(
             this.options.sortOptions,
@@ -311,8 +292,6 @@ class ScheduleGenerator {
             refSchedule,
             window.NativeModule
         );
-
-        console.timeEnd('running algorithm:');
 
         const size = evaluator.size;
         if (size > 0) {

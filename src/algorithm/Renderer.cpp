@@ -4,7 +4,6 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <queue>
 #include <vector>
 using namespace std;
@@ -265,7 +264,6 @@ int BFS(ScheduleBlock* start) {
         }
         qIdx++;
     }
-    // cout << NC << endl;
     return NC;
 }
 

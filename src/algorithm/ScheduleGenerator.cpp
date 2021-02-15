@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <limits>
 #include <random>
 #include <vector>
@@ -26,6 +25,12 @@ using namespace std;
 // };
 
 namespace ScheduleGenerator {
+
+/**
+ * The use of data structure assumes that
+ * 1. Each course has no more than 255 sections (uint8 for allChoices)
+ * 2. Each schedule has no more than 21845 meetings each week (uint16 for timeArray)
+*/
 
 template <typename T>
 inline T calcOverlap(T a, T b, T c, T d) {
@@ -63,7 +68,7 @@ struct CoeffCache {
 };
 
 int* __restrict__ timeMatrix = NULL;
-/** size length of the timeMatrix */
+/** side length of the timeMatrix */
 int tmSize = 0;
 
 int numCourses;
@@ -101,11 +106,14 @@ uint16_t* __restrict__ blocks = NULL;
  */
 int count = 0;
 
+/**
+ * backing storage for the four pointers above
+ */
 void* evalMem = NULL;
 /**
- * length the memory for the schedule evaluator
+ * length of the evalMem in bytes
  */
-int memSize = 0;
+uint32_t memSize = 0;
 
 /**
  * compute the variance of class times during the week
@@ -333,7 +341,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
     for (int i = 0; i < count; i++) {
         // sort the time blocks in order
         int bound = 8;  // size does not contain offset
-        // no offset in j because arr2 also needs it
+        // no offset in j because timeArray also needs it
         for (int j = 0; j < 7; j++) {
             // start of the current day
             int s1 = (_blocks[j] = bound);
@@ -342,7 +350,6 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
                 int _off = ((k * maxLen + _allChoices[k]) << 3) + j;
                 // insertion sort, fast for small arrays
                 for (int n = timeArray[_off] + prefixLen, e2 = timeArray[_off + 1] + prefixLen; n < e2; n += 3, bound += 3) {
-                    // p already contains offset
                     int p = s1;
                     uint16_t vToBeInserted = timeArray[n];
                     for (; p < bound; p += 3) {
@@ -364,7 +371,13 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
         _allChoices += numCourses;
     }
 }
-
+/**
+ * @param sectionLens array that stores the number of sections in each course
+ * @param conflictCache the conflict cache matrix, a 4d matrix that caches the conflict between each pair of sections.
+ * Indexed like this: conflictCache[section1][course1][section2][course2]
+ * which is in fact: conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
+ * Can do bitpacking, but no performance improvement observed
+ */
 int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
     numCourses = _numCourses;
     int maxLen = *max_element(sectionLens, sectionLens + numCourses);
@@ -396,7 +409,7 @@ int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ s
             for (int i = 0; i < numCourses; i++) {
                 int secIdx = (allChoices[newBase + i] = allChoices[base + i]);  // *!*!*
                 int _off = i * maxLen * 8 + secIdx * 8;
-                timeLen += (timeArray[_off + 7]) - timeArray[_off];
+                timeLen += timeArray[_off + 7] - timeArray[_off];
             }
 
             base = newBase;
@@ -438,9 +451,14 @@ end:;
     timeLen += 8 * count;
 
     // handle reallocation of memory
-    int newMemSize = count * 3 * 4 + timeLen * 2;
+    uint32_t newMemSize = (uint32_t)(count)*3 * 4 + (uint32_t)(timeLen)*2;
     if (newMemSize > memSize) {
-        evalMem = realloc(evalMem, newMemSize);
+        void* newMem = realloc(evalMem, newMemSize);
+        if (newMem == NULL) {
+            // EM_ASM({console.log("Failed to allocate " + $0)}, newMemSize);
+            abort();
+        }
+        evalMem = newMem;
         memSize = newMemSize;
         indices = (int*)evalMem;
         coeffs = ((float*)evalMem) + count;

@@ -1,6 +1,5 @@
 import ScheduleEvaluator, { EvaluatorOptions } from '@/algorithm/ScheduleEvaluator';
 import filter from '@/store/filter';
-import { timeArrayToCompact } from '@/algorithm/ScheduleGenerator';
 
 const d1 = new Date('2019/8/28').getTime();
 const d2 = new Date('2019/12/7').getTime();

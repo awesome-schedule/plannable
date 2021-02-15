@@ -23,13 +23,13 @@ glpk: getglpk
 	emmake make -j4 \
 
 dev: Renderer.cpp ScheduleGenerator.cpp
-	emcc -s SAFE_HEAP=1 -g --profiling $(EMCC_FLAGS) \
+	emcc -O2 -g --profiling $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
 	Renderer.cpp ScheduleGenerator.cpp -o temp/wasm_modules.js
 
 prod: Renderer.cpp ScheduleGenerator.cpp
-	emcc -O3 $(EMCC_FLAGS) \
+	emcc --closure 1 -O3 $(EMCC_FLAGS) \
 	-Iglpk-$(GLPK_VERSION)/src \
 	glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a \
 	Renderer.cpp ScheduleGenerator.cpp -o temp/wasm_modules.js

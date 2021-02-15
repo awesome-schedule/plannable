@@ -232,7 +232,7 @@ class ScheduleEvaluator {
         private readonly classList: RawAlgoCourse[][] = [],
         private readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
         refSchedule: GeneratedSchedule['All'] = {},
-        timeArrays: Readonly<Int32Array> = new Int32Array(),
+        timeArrays: Readonly<Int16Array> = new Int16Array(),
         maxLen = 0,
         count = 0,
         timeLen = 0
@@ -249,6 +249,7 @@ class ScheduleEvaluator {
         const blocks = (this.blocks = new Int16Array(this.buf, count * 12));
 
         const numCourses = classList.length;
+        const prefixLen = numCourses * maxLen * 8;
         let offset = 0;
         for (let i = 0; i < count; i++) {
             // record the current offset
@@ -264,9 +265,9 @@ class ScheduleEvaluator {
                 for (let k = 0; k < numCourses; k++) {
                     // offset of the time arrays
                     const _off = ((k * maxLen + allChoices[start + k]) << 3) + j;
-                    const e2 = timeArrays[_off + 1];
+                    const e2 = timeArrays[_off + 1] + prefixLen;
                     // insertion sort, fast for small arrays
-                    for (let n = timeArrays[_off]; n < e2; n += 3, bound += 3) {
+                    for (let n = timeArrays[_off] + prefixLen; n < e2; n += 3, bound += 3) {
                         // p already contains offset
                         let p = s1 + offset;
                         const vToBeInserted = timeArrays[n],

@@ -234,7 +234,10 @@
         <div class="btn bg-info nav-btn">Advanced Features</div>
         <ul class="list-group list-group-flush mx-1">
             <li class="list-group-item pb-1 pt-0">
-                <div class="form-group my-1">
+                <div
+                    class="form-group my-1"
+                    title="If this number is too large, your browser may crash"
+                >
                     <label for="num-schedule">Max number of schedules</label>
                     <input
                         id="num-schedule"

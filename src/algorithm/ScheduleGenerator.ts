@@ -112,14 +112,14 @@ export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number)
             }
         }
     }
-    const arr = new Int32Array(len);
-    len = prefixLen;
+    const arr = new Int16Array(len);
+    len = 0;
     for (let i = 0; i < numCourses; i++) {
         for (let j = 0; j < timeArrays[i].length; j++) {
             for (let k = 0; k < 7; k++) {
                 arr[i * maxSecLen * 8 + j * 8 + k] = len;
                 const day = timeArrays[i][j][k];
-                arr.set(day, len);
+                arr.set(day, len + prefixLen);
                 len += day.length;
             }
             arr[i * maxSecLen * 8 + j * 8 + 7] = len;
@@ -289,6 +289,7 @@ class ScheduleGenerator {
 
         const { maxNumSchedules } = this.options;
         const compact = timeArrayToCompact(timeArrayList, maxLen);
+        console.log(compact);
 
         // the array used to record all schedules generated
         // extra 1x numCourses to prevent write out of bound at computeSchedules at ***
@@ -394,7 +395,7 @@ class ScheduleGenerator {
      */
     private computeSchedules(
         sectionLens: Uint8Array,
-        compact: Int32Array,
+        compact: Int16Array,
         conflictCache: Uint8Array,
         allChoices: Uint8Array,
         maxNumSchedules: number,

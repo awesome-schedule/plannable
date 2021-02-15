@@ -114,7 +114,6 @@ export default class CompareView extends Store {
         const evaluator = window.scheduleEvaluator;
         // remove similarity cache
         const opt = evaluator.options.sortBy.find(x => x.name === 'similarity')!;
-        evaluator.clearCache(opt);
 
         // we click the reference schedule again: clear the reference schedule
         if (this.compare[idx].schedule.allEquals(evaluator.refSchedule)) {

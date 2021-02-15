@@ -144,7 +144,13 @@ export default class App extends Store {
         if (pay4.level !== 'warn') this.noti.notify(pay4);
 
         this.noti.notify(pay1);
-        if (pay1.payload) window.timeMatrix = pay1.payload;
+        if (pay1.payload) {
+            window.timeMatrix = pay1.payload;
+            const M = window.NativeModule;
+            const ptr = M._malloc(window.timeMatrix.byteLength);
+            M.HEAP32.set(window.timeMatrix, ptr / 4);
+            M._setTimeMatrix(ptr, window.timeMatrix.length ** 0.5);
+        }
 
         this.noti.notify(pay2);
         if (pay2.payload) window.buildingSearcher = pay2.payload;

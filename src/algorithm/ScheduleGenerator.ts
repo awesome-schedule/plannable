@@ -125,7 +125,6 @@ export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number)
             arr[i * maxSecLen * 8 + j * 8 + 7] = len;
         }
     }
-    // console.log(arr.slice());
     return arr;
 }
 
@@ -289,40 +288,38 @@ class ScheduleGenerator {
 
         const { maxNumSchedules } = this.options;
         const compact = timeArrayToCompact(timeArrayList, maxLen);
-        console.log(compact);
 
-        // the array used to record all schedules generated
-        // extra 1x numCourses to prevent write out of bound at computeSchedules at ***
-        const allChoices = new Uint8Array(numCourses * maxNumSchedules + numCourses);
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
-        const [count, timeLen] = this.computeSchedules(
-            sectionLens,
-            compact,
-            conflictCache,
-            allChoices,
-            maxNumSchedules,
-            maxLen
-        );
-        console.timeEnd('running algorithm:');
 
-        console.time('add to eval');
+        const Module = window.NativeModule;
+        const secLenPtr = Module._malloc(sectionLens.byteLength);
+        const conflictCachePtr = Module._malloc(conflictCache.byteLength);
+        console.warn(sideLen);
+        const timeArrayPtr = Module._malloc(compact.byteLength);
+
+        Module.HEAPU8.set(sectionLens, secLenPtr);
+        Module.HEAPU8.set(conflictCache, conflictCachePtr);
+        Module.HEAP16.set(compact, timeArrayPtr / 2);
+        Module._generate(numCourses, maxNumSchedules, secLenPtr, conflictCachePtr, timeArrayPtr);
+
         const evaluator = new ScheduleEvaluator(
             this.options.sortOptions,
             schedule.events,
             classList,
-            allChoices,
             refSchedule,
-            compact,
-            maxLen,
-            count,
-            timeLen
+            window.NativeModule
         );
+
+        console.timeEnd('running algorithm:');
+
         const size = evaluator.size;
         if (size > 0) {
-            console.timeEnd('add to eval');
+            console.time('sort');
             if (sort) evaluator.sort();
+            console.timeEnd('sort');
+
             let msgString = '';
             for (const msg of msgs) msgString += msg.msg + '<br>';
             return {
@@ -382,87 +379,6 @@ class ScheduleGenerator {
         }
 
         return [classes, timeArrays, dates, allInvalid] as const;
-    }
-
-    /**
-     * the main algorithm loop: generate all possible schedules based on the pre-computed information
-     * @remarks this method does the most computation. It is made extremely efficient
-     * by only operating on integers and typed integer arrays. Can be easily ported to C++
-     *
-     * **for parameter meaning see the `getSchedules` method above**
-     *
-     * @returns [number of schedules generated, the length of time arrays of schedules in total]
-     */
-    private computeSchedules(
-        sectionLens: Uint8Array,
-        compact: Uint16Array,
-        conflictCache: Uint8Array,
-        allChoices: Uint8Array,
-        maxNumSchedules: number,
-        maxLen: number
-    ) {
-        const numCourses = sectionLens.length;
-        const sideLen = numCourses * maxLen;
-        maxNumSchedules *= numCourses;
-
-        /**  the total length of the time array that we need to allocate for schedules generated */
-        let timeLen = 0;
-        /** current course index */
-        let classNum = 0;
-        /** the index of the section of the current course */
-        let choiceNum = 0;
-        /**
-         * the total number of schedules already generated multiplied by numCourses
-         * serve as the base pointer for current schedule in the allChoices array
-         */
-        let base = 0;
-
-        outer: while (true) {
-            if (classNum >= numCourses) {
-                // accumulate the length of the time arrays combined in each schedule
-                // and copy the current schedule to next schedule
-                const newBase = base + numCourses;
-                for (let i = 0; i < numCourses; i++) {
-                    const secIdx = (allChoices[newBase + i] = allChoices[base + i]);
-                    const _off = i * maxLen * 8 + secIdx * 8;
-                    timeLen += compact[_off + 7] - compact[_off];
-                }
-
-                base = newBase;
-                if (base >= maxNumSchedules) break outer;
-                choiceNum = allChoices[base + --classNum] + 1;
-            }
-
-            /**
-             * when all possibilities in on class have exhausted, retract one class
-             * explore the next possibilities in the previous class
-             * reset the memory path forward to zero
-             */
-            while (choiceNum >= sectionLens[classNum]) {
-                // if all possibilities are exhausted, break out the loop
-                if (--classNum < 0) break outer;
-
-                choiceNum = allChoices[base + classNum] + 1;
-                for (let i = classNum + 1; i < numCourses; i++) allChoices[base + i] = 0;
-            }
-
-            // check conflict between the newly chosen section and the sections already in the schedule
-            const temp = (choiceNum * numCourses + classNum) * sideLen;
-            for (let i = 0; i < classNum; i++) {
-                const idx = temp + i + allChoices[base + i] * numCourses;
-                if (conflictCache[idx]) {
-                    ++choiceNum;
-                    continue outer;
-                }
-            }
-
-            // if the section does not conflict with any previously chosen sections,
-            // increment the path memory and go to the next class, reset the choiceNum = 0
-            allChoices[base + classNum++] = choiceNum;
-            choiceNum = 0;
-        }
-        const count = base / numCourses;
-        return [count, timeLen + 8 * count] as const;
     }
 }
 

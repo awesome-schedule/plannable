@@ -25,10 +25,22 @@ type Ptr = number;
 interface EMModule {
     _malloc(size: number): Ptr;
     _free(ptr: Ptr): void;
+
     _setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
     _getSum(): number;
     _getSumSq(): number;
     _compute(a: Ptr, b: number): Ptr;
+
+    _generate(a: number, b: number, c: Ptr, d: Ptr, e: Ptr): number;
+    _setSortOption: any;
+    _setSortMode(a: number): void;
+    _sort(): void;
+    _size(): number;
+    _setTimeMatrix(a: Ptr, b: number): void;
+    _getSchedule(a: number): Ptr;
+    _getRange(a: number): number;
+    _setRefSchedule(a: Ptr): number;
+
     onRuntimeInitialized(): void;
     HEAP8: Int8Array;
     HEAP16: Int16Array;

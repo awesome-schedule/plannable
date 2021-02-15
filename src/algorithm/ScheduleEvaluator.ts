@@ -158,7 +158,7 @@ class ScheduleEvaluator {
                             r2 = this.blocks[j + 5];
 
                         // skip unknown buildings
-                        if (r1 !== -1 && r2 !== -1) dist += this.timeMatrix[r1 * len + r2];
+                        if (r1 !== 65535 && r2 !== 65535) dist += this.timeMatrix[r1 * len + r2];
                     }
                 }
             }
@@ -204,7 +204,7 @@ class ScheduleEvaluator {
     /**
      * array of [[TimeArray]]s concatenated together
      */
-    private blocks: Readonly<Int16Array>;
+    private blocks: Readonly<Uint16Array>;
     /**
      * the underlying buffer for the typed arrays above, except `sortCoeffCache`
      */
@@ -232,7 +232,7 @@ class ScheduleEvaluator {
         private readonly classList: RawAlgoCourse[][] = [],
         private readonly allChoices: Readonly<Uint8Array> = new Uint8Array(),
         refSchedule: GeneratedSchedule['All'] = {},
-        timeArrays: Readonly<Int16Array> = new Int16Array(),
+        timeArrays: Readonly<Uint16Array> = new Uint16Array(),
         maxLen = 0,
         count = 0,
         timeLen = 0
@@ -246,7 +246,7 @@ class ScheduleEvaluator {
         this.refSchedule = refSchedule;
 
         const offsets = (this.offsets = new Uint32Array(this.buf, count * 8, count));
-        const blocks = (this.blocks = new Int16Array(this.buf, count * 12));
+        const blocks = (this.blocks = new Uint16Array(this.buf, count * 12));
 
         const numCourses = classList.length;
         const prefixLen = numCourses * maxLen * 8;

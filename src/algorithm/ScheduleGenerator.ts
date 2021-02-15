@@ -112,7 +112,7 @@ export function timeArrayToCompact(timeArrays: TimeArray[][], maxSecLen: number)
             }
         }
     }
-    const arr = new Int16Array(len);
+    const arr = new Uint16Array(len);
     len = 0;
     for (let i = 0; i < numCourses; i++) {
         for (let j = 0; j < timeArrays[i].length; j++) {
@@ -395,7 +395,7 @@ class ScheduleGenerator {
      */
     private computeSchedules(
         sectionLens: Uint8Array,
-        compact: Int16Array,
+        compact: Uint16Array,
         conflictCache: Uint8Array,
         allChoices: Uint8Array,
         maxNumSchedules: number,

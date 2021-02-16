@@ -25,7 +25,7 @@ export const options = {
 export async function computeBlockPositions(days: ScheduleDays) {
     const Module = window.NativeModule;
 
-    // console.time('native compute');
+    console.time('native compute');
     Module._setOptions(
         options.isTolerance,
         options.ISMethod,
@@ -74,6 +74,6 @@ export async function computeBlockPositions(days: ScheduleDays) {
         }
         Module._free(bufPtr);
     }
-    // if (N > 0) console.log('mean', sum / N, 'variance', sumSq / N - (sum / N) ** 2);
-    // console.timeEnd('native compute');
+    if (N > 0) console.log('mean', sum / N, 'variance', sumSq / N - (sum / N) ** 2);
+    console.timeEnd('native compute');
 }

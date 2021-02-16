@@ -76,10 +76,9 @@ export default class EventView extends Store {
     addEvent() {
         // fold sidebar on mobile
         this.status.foldView();
+        const days = this.getEventDays();
+        if (!days) return;
         try {
-            const days = this.getEventDays();
-            if (!days) return;
-
             this.schedule.proposedSchedule.addEvent(
                 days,
                 true,
@@ -87,11 +86,11 @@ export default class EventView extends Store {
                 this.eventRoom,
                 this.eventDescription ? this.eventDescription.split('\n').join('<br />') : ''
             );
-            // note: we don't need to regenerate schedules if the days property is not changed
-            this.cleanup(this.toBeModifiedDays !== days && this.schedule.generated);
         } catch (err) {
             this.noti.error(err.message);
         }
+        // note: we don't need to regenerate schedules if the days property is not changed
+        this.cleanup(this.toBeModifiedDays !== days && this.schedule.generated);
     }
     /**
      * bind the properties of this event to input fields

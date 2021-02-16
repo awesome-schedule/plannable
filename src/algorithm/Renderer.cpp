@@ -1,9 +1,6 @@
 #include <glpk.h>
 
 #include <algorithm>
-#include <climits>
-#include <cstdint>
-#include <cstring>
 #include <queue>
 #include <vector>
 using namespace std;
@@ -73,15 +70,15 @@ struct ScheduleBlock {
     vector<ScheduleBlock*> crightN;
 };
 
-ScheduleBlock* blocks = NULL;
+ScheduleBlock* __restrict__ blocks = NULL;
 // pointers to blocks, but may be reordered
 // never change the order of elements in blocks. Instead, change this variable
-ScheduleBlock** blocksReordered = NULL;
+ScheduleBlock** __restrict__ blocksReordered = NULL;
 // a working buffer for BFS/LP models, usually not full
-ScheduleBlock** blockBuffer = NULL;
+ScheduleBlock** __restrict__ blockBuffer = NULL;
 
-int* idxMap = NULL;
-bool* matrix = NULL;
+int* __restrict__ idxMap = NULL;
+bool* __restrict__ matrix = NULL;
 
 // --------- results -----------------
 double r_sum;
@@ -121,7 +118,7 @@ void computeResult() {
 
 void sortByStartTime() {
     sort(blocksReordered, blocksReordered + N,
-         [](ScheduleBlock* b1, ScheduleBlock* b2) {
+         [](const ScheduleBlock* b1, const ScheduleBlock* b2) {
              int diff = b1->startMin - b2->startMin;
              if (diff == 0) return b2->duration - b1->duration < 0;
              return diff < 0;
@@ -166,7 +163,7 @@ int intervalScheduling2() {
     sortByStartTime();
     // min heap, the top element is the room whose end time is minimal
     // a room is represented as a pair: [end time, room index]
-    auto comp = [](ScheduleBlock* r1, ScheduleBlock* r2) {
+    auto comp = [](const ScheduleBlock* r1, const ScheduleBlock* r2) {
         int diff = r1->endMin - r2->endMin;
         if (diff == 0) return r1->depth - r2->depth > 0;
         return diff > 0;
@@ -328,7 +325,7 @@ bool DFSFindFixedNumerical(ScheduleBlock* start) {
 
 void calculateMaxDepth() {
     sort(blocksReordered, blocksReordered + N,
-         [](ScheduleBlock* b1, ScheduleBlock* b2) {
+         [](const ScheduleBlock* b1, const ScheduleBlock* b2) {
              return b2->depth < b1->depth;
          });
 
@@ -395,7 +392,6 @@ void buildLPModel1(int NC) {
                 addConstraint(auxVar, leftVar, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
                 addConstraint(auxVar, idxMap[v->idx] + 1, -1.0);
-                glp_add_rows(lp, 1);
                 glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
             }
         }
@@ -405,7 +401,6 @@ void buildLPModel1(int NC) {
         // l + width <= right
         addConstraint(auxVar, leftVar, 1.0);
         addConstraint(auxVar, leftVar + 1, 1.0);
-        glp_add_rows(lp, 1);
         glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRight);
 
         // l >= maxLeftFixed
@@ -547,7 +542,7 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
  * @param arr the array of start/end times of the blocks
  * @param N the number of blocks
  */
-ScheduleBlock* compute(Input* arr, int _N) {
+ScheduleBlock* compute(const Input* arr, int _N) {
     setup(_N);
 
     // initialize each block

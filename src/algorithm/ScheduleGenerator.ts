@@ -255,6 +255,13 @@ class ScheduleGenerator {
         }
 
         const numCourses = classList.length;
+        if (numCourses === 0) {
+            return {
+                level: 'error',
+                msg: 'Given your filter, we cannot generate schedules without overlapping classes'
+            };
+        }
+
         const Module = window.NativeModule;
 
         // the maximum number of sections in each course

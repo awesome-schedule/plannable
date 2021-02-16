@@ -82,6 +82,7 @@ describe('ScheduleGenerator Test', () => {
 
         let r = store.generateSchedules();
         expect(r).toBeTruthy(); // will still try to generate schedule even if there's conflict
+        expect(r!.size).toBe(1);
 
         schedule.events.length = 0;
         // similarity

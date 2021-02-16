@@ -228,17 +228,17 @@ export default class ProposedSchedule extends Schedule {
                                     .map(idx => allSections[idx].id)
                             )
                         ];
-                        console.log('< v5 json detected');
+                        // console.log('< v5 json detected');
                     } else if (is_v5_v7(sections)) {
                         schedule.All[key] = [
                             filterSections(sections, allSections, warnings, convKey)
                         ];
-                        console.log('v5-v7 json detected');
+                        // console.log('v5-v7 json detected');
                     } else if (is_v8(sections)) {
                         schedule.All[key] = sections.map(group =>
                             filterSections(group, allSections, warnings, convKey)
                         );
-                        console.log('v8 json detected');
+                        // console.log('v8 json detected');
                     } else {
                         schedule.All[key] = [new Set()];
                     }
@@ -315,6 +315,24 @@ export default class ProposedSchedule extends Schedule {
         }
         this.computeSchedule();
         window.saveStatus();
+    }
+
+    private addAllClasses() {
+        const catalog = window.catalog;
+        for (const course of catalog.courses) {
+            if (course.type != 'IND') {
+                const secs = [
+                    new Set(
+                        course.sections
+                            .filter(s => s.meetings.every(m => m.room.indexOf('Web-Based') === -1))
+                            .map(s => s.id)
+                    )
+                ];
+                if (secs[0].size) this.All[course.key] = secs;
+            }
+        }
+        this.constructDateSeparator();
+        this.computeSchedule();
     }
 
     /**

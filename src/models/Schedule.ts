@@ -17,6 +17,7 @@ import ProposedSchedule from './ProposedSchedule';
 import { computeBlockPositions } from '@/algorithm/Renderer';
 import { dayToInt, Day } from './constants';
 import Meeting from './Meeting';
+import { calcOverlap } from '../utils';
 
 /**
  * the structure of a [[Section]] in local storage
@@ -134,10 +135,7 @@ export default abstract class Schedule {
      * the currently previewed (hovered) section
      */
     private _preview: Section | null = null;
-    /**
-     * the `All` property partitioned according to date
-     */
-    private separatedAll: { [date: string]: ScheduleAll } = {};
+
     /**
      * the `computeSchedule` handle returned by `setTimeout`
      */
@@ -257,16 +255,10 @@ export default abstract class Schedule {
         // Instead, we created a fresh object, and assign to this.days after blocks have been computed
         // so there will not be a period in which no blocks are in this.days
         const days: Schedule['days'] = [[], [], [], [], [], [], []];
-        const temp = new Date(this.dateSeparators[this.dateSelector]);
-
-        const all =
-            this.dateSelector === -1 || this.dateSelector >= this.dateSeparators.length
-                ? this.All
-                : this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()];
 
         const current: [Course, string[]][] = [];
-        for (const key in all) {
-            const temp = all[key];
+        for (const key in this.All) {
+            const temp = this.All[key];
 
             // combine all groups because groups don't affect display
             const sections =
@@ -363,7 +355,10 @@ export default abstract class Schedule {
                     : -1;
 
             const course = window.catalog.getCourse(key, all);
-            for (const section of course.sections) if (section.dateArray) sections.push(section);
+            for (const section of course.sections) {
+                // also make sure that all meetings of this section are not TBA
+                if (section.dateArray && (section.valid & 0b100) === 0) sections.push(section);
+            }
         }
 
         const _temp = new Set<number>();
@@ -371,60 +366,36 @@ export default abstract class Schedule {
             _temp.add(dateArray![0]).add(dateArray![1] + 24 * 60 * 60 * 1000);
 
         this.dateSeparators = [..._temp].sort((a, b) => a - b);
+    }
 
-        // create empty objects for separated "All"
-        this.separatedAll = Object.create(null);
-        for (let i = 0; i < this.dateSeparators.length; i++) {
-            const temp = new Date(this.dateSeparators[i]);
-            this.separatedAll[temp.getMonth() + 1 + '/' + temp.getDate()] = {};
-        }
+    /**
+     * check if the section should be rendered given the current dataSelector
+     * @param section
+     */
+    private checkDate(section: Section) {
+        if (!section.dateArray) return false;
 
-        // add the section ids to the separated all
-        for (let i = 0; i < this.dateSeparators.length; i++) {
-            const lower = this.dateSeparators[i];
-            const upper = i === 0 ? -1 : this.dateSeparators[i - 1];
-            const sep = new Date(lower);
-            const date = sep.getMonth() + 1 + '/' + sep.getDate();
-            for (const key in this.All) {
-                const course = this.All[key];
-                if (course === -1) {
-                    const sections = window.catalog.getCourse(key, -1);
-                    for (const { dateArray } of sections.sections) {
-                        if (dateArray) {
-                            const [start, end] = dateArray;
-                            if (start < lower && end >= upper) this.separatedAll[date][key] = -1;
-                        }
-                    }
-                    continue;
-                }
-                // one set for each group
-                for (const group of course) {
-                    const sections = window.catalog.getCourse(key, group);
-                    const s = new Set<number>();
-                    for (const sec of sections.sections) {
-                        if (sec.dateArray) {
-                            const [start, end] = sec.dateArray;
-                            if (start < lower && end >= upper) s.add(sec.id);
-                        }
-                    }
-                    // if the **course** already exists in this time block
-                    const tempCourse = this.separatedAll[date][key];
-                    if (tempCourse) {
-                        (tempCourse as Set<number>[]).push(s);
-                    } else {
-                        this.separatedAll[date][key] = [s];
-                    }
-                }
-            }
-        }
+        const [start, end] = section.dateArray;
+        if (
+            this.dateSelector !== -1 &&
+            calcOverlap(
+                this.dateSeparators[this.dateSelector],
+                this.dateSeparators[this.dateSelector + 1],
+                start,
+                end
+            ) <= 0
+        )
+            return false;
+        return true;
     }
 
     /**
      * place a `Section`/`Course`/`Event`/ into one of the days array according to its `days` property
      * @remarks we can place a Course instance if all of its sections occur at the same time
      */
-    private place(course: Section | Course | Event, days: Schedule['days']) {
+    private place(course: Section | Course | Event, days: ScheduleDays) {
         if (course instanceof Section) {
+            if (!this.checkDate(course)) return;
             const color = this.getColor(course);
             for (const meeting of course.meetings) {
                 this.placeHelper(color, days, course, meeting);
@@ -437,6 +408,8 @@ export default abstract class Schedule {
             if (!course.allSameTime()) return;
             const courseSec = course.sections;
             const firstSec = courseSec[0];
+            if (!this.checkDate(firstSec)) return;
+
             // if only one section, just use the section rather than the section array
             if (courseSec.length === 1) {
                 const color = this.getColor(firstSec);
@@ -462,7 +435,7 @@ export default abstract class Schedule {
 
     private placeHelper<T extends Section | Course | Event>(
         color: string,
-        days: Schedule['days'],
+        days: ScheduleDays,
         events: T,
         meeting: T extends Event ? undefined : Meeting
     ) {
@@ -621,6 +594,7 @@ export default abstract class Schedule {
         this.All = {};
         this._preview = null;
         this.events = [];
+        this.constructDateSeparator();
     }
 
     public empty() {

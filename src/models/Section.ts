@@ -91,7 +91,7 @@ export default class Section implements CourseFields, Hashable {
         [0, 'Valid'],
         [
             1,
-            `Warning: Some meetings have incomplete instruction or room information (e.g. TBA/TBD). This won't affect schedule generation.`
+            `Warning: Some meetings have incomplete instructor or room information (e.g. TBA/TBD). This won't affect schedule generation.`
         ],
         [
             2,

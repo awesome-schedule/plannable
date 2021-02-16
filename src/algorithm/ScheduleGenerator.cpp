@@ -376,6 +376,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
  * Indexed like this: conflictCache[section1][course1][section2][course2]
  * which is in fact: conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
  * Can do bitpacking, but no performance improvement observed
+ * @returns the number of schedules generated. Returns -1 on memory allocation failure
  */
 int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
     numCourses = _numCourses;
@@ -386,7 +387,10 @@ int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ s
     if (maxNumSchedules + numCourses > allChoiceLen) {
         // extra 1x numCourses to prevent write out of bound at computeSchedules at *!*!*
         allChoiceLen = maxNumSchedules + numCourses;
-        allChoices = (uint8_t*)realloc(allChoices, allChoiceLen);
+        auto* newMem = (uint8_t*)realloc(allChoices, allChoiceLen);
+        // handle allocation failure
+        if (newMem == NULL) return -1;
+        allChoices = newMem;
     }
 
     /**  the total length of the time array that we need to allocate for schedules generated */
@@ -453,10 +457,7 @@ end:;
     uint32_t newMemSize = (uint32_t)(count)*3 * 4 + (uint32_t)(timeLen)*2;
     if (newMemSize > memSize) {
         void* newMem = realloc(evalMem, newMemSize);
-        if (newMem == NULL) {
-            // EM_ASM({console.log("Failed to allocate " + $0)}, newMemSize);
-            abort();
-        }
+        if (newMem == NULL) return -1;
         evalMem = newMem;
         memSize = newMemSize;
         indices = (int*)evalMem;

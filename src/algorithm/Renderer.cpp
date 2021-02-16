@@ -88,26 +88,6 @@ double r_sumSq;
 int maxN = 0;
 int N = 0;
 
-void setup(int _N) {
-    N = _N;
-    if (N > maxN) {
-        // we need to allocate more memory.
-        // the previous ptr may be NULL, so realloc will be equivalent to malloc in that case
-        blocks = (ScheduleBlock*)realloc(blocks, N * sizeof(ScheduleBlock));
-        // initialize newly allocated memory
-        for (int i = maxN; i < N; i++) new ((void*)&blocks[i]) ScheduleBlock;
-        blocksReordered = (ScheduleBlock**)realloc(blocksReordered, N * sizeof(ScheduleBlock*));
-        blockBuffer = (ScheduleBlock**)realloc(blockBuffer, N * sizeof(ScheduleBlock*));
-        idxMap = (int*)realloc(idxMap, N * sizeof(int));
-        matrix = (bool*)realloc(matrix, N * N * sizeof(bool));
-        maxN = N;
-    }
-    // for old arrays, use memset if needed
-    // if they are overwritten anyway, no need to use memset
-    memset(matrix, 0, N * N * sizeof(bool));
-    r_sumSq = r_sum = 0.0;
-}
-
 void computeResult() {
     for (int i = 0; i < N; i++) {
         double w = blocks[i].width;
@@ -543,7 +523,25 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
  * @param N the number of blocks
  */
 ScheduleBlock* compute(const Input* arr, int _N) {
-    setup(_N);
+    // ---------------------------- setup --------------------------------------
+    N = _N;
+    if (N > maxN) {  // TOOD: check for allocation failure
+        // we need to allocate more memory.
+        // the previous ptr may be NULL, so realloc will be equivalent to malloc in that case
+        blocks = (ScheduleBlock*)realloc(blocks, N * sizeof(ScheduleBlock));
+
+        // initialize newly allocated memory
+        for (int i = maxN; i < N; i++) new ((void*)&blocks[i]) ScheduleBlock;
+        blocksReordered = (ScheduleBlock**)realloc(blocksReordered, N * sizeof(ScheduleBlock*));
+        blockBuffer = (ScheduleBlock**)realloc(blockBuffer, N * sizeof(ScheduleBlock*));
+        idxMap = (int*)realloc(idxMap, N * sizeof(int));
+        matrix = (bool*)realloc(matrix, N * N * sizeof(bool));
+        maxN = N;
+    }
+    // for old arrays, use memset if needed
+    // if they are overwritten anyway, no need to use memset
+    memset(matrix, 0, N * N * sizeof(bool));
+    r_sumSq = r_sum = 0.0;
 
     // initialize each block
     for (int i = 0; i < N; i++) {
@@ -565,6 +563,8 @@ ScheduleBlock* compute(const Input* arr, int _N) {
         block.cleftN.resize(0);
         block.crightN.resize(0);
     }
+    // ---------------------------- end setup --------------------------------------
+
     // the total number of rooms/slots needed
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
     auto end = blocks + N;

@@ -283,7 +283,7 @@ class ScheduleGenerator {
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
-        Module._generate(
+        const size = Module._generate(
             numCourses,
             this.options.maxNumSchedules,
             secLenPtr,
@@ -291,6 +291,17 @@ class ScheduleGenerator {
             timeArrayToCompact(Module, timeArrayList, maxLen)
         );
         console.timeEnd('running algorithm:');
+
+        if (size < 0)
+            return {
+                level: 'error',
+                msg: 'Out of memory! Please try to reduce the max number of schedules'
+            };
+        if (size === 0)
+            return {
+                level: 'error',
+                msg: 'Given your filter, we cannot generate schedules without overlapping classes'
+            };
 
         const evaluator = new ScheduleEvaluator(
             this.options.sortOptions,
@@ -300,24 +311,16 @@ class ScheduleGenerator {
             window.NativeModule
         );
 
-        const size = evaluator.size;
-        if (size > 0) {
-            console.time('sort');
-            if (sort) evaluator.sort();
-            console.timeEnd('sort');
+        console.time('sort');
+        if (sort) evaluator.sort();
+        console.timeEnd('sort');
 
-            let msgString = '';
-            for (const msg of msgs) msgString += msg.msg + '<br>';
-            return {
-                level: msgs.length > 0 ? 'warn' : 'success',
-                msg: `${msgString}${size} Schedules Generated!`,
-                payload: evaluator
-            };
-        }
-        console.timeEnd('add to eval');
+        let msgString = '';
+        for (const msg of msgs) msgString += msg.msg + '<br>';
         return {
-            level: 'error',
-            msg: 'Given your filter, we cannot generate schedules without overlapping classes'
+            level: msgs.length > 0 ? 'warn' : 'success',
+            msg: `${msgString}${size} Schedules Generated!`,
+            payload: evaluator
         };
     }
 

@@ -66,7 +66,11 @@ struct CoeffCache {
     float* __restrict__ coeffs = NULL;
 };
 
-int* __restrict__ timeMatrix = NULL;
+/** 
+ * timeMatrix[i*tmSize+j] = walking distance between room i and j
+ * this matrix will be passed into this module through pointer, so it is declared as const
+ */
+const int* __restrict__ timeMatrix = NULL;
 /** side length of the timeMatrix */
 int tmSize = 0;
 
@@ -106,29 +110,18 @@ uint16_t* __restrict__ blocks = NULL;
 int count = 0;
 
 /**
- * backing storage for the four pointers above
- */
-void* evalMem = NULL;
-/**
- * length of the evalMem in bytes
- */
-uint32_t memSize = 0;
-
-/**
  * compute the variance of class times during the week
  *
  * returns a higher value when the class times are unbalanced
  */
 float variance(int idx) {
-    int offset = offsets[idx];
+    const auto* _blocks = blocks + offsets[idx];
     int sum = 0,
         sumSq = 0;
-    int oEnd = offset + 7;
-    for (int i = offset; i < oEnd; i++) {
-        int end = offset + blocks[i + 1];
+    for (int i = 0; i < 7; i++) {
         int classTime = 0;
-        for (int j = blocks[i] + offset; j < end; j += 3) {
-            classTime += blocks[j + 1] - blocks[j];
+        for (int j = _blocks[i], end = _blocks[i + 1]; j < end; j += 3) {
+            classTime += _blocks[j + 1] - _blocks[j];
         }
         sum += classTime;
         sumSq += classTime * classTime;
@@ -144,13 +137,11 @@ float variance(int idx) {
  * The greater the time gap between classes, the greater the return value will be
  */
 float compactness(int idx) {
-    int offset = offsets[idx];
+    const auto* _blocks = blocks + offsets[idx];
     int compact = 0;
-    int oEnd = offset + 7;
-    for (int i = offset; i < oEnd; i++) {
-        int end = offset + blocks[i + 1] - 5;
-        for (int j = blocks[i] + offset; j < end; j += 3) {
-            compact += blocks[j + 3] - blocks[j + 1];
+    for (int i = 0; i < 7; i++) {
+        for (int j = _blocks[i], end = _blocks[i + 1] - 5; j < end; j += 3) {
+            compact += _blocks[j + 3] - _blocks[j + 1];
         }
     }
     return compact;
@@ -163,16 +154,14 @@ float compactness(int idx) {
  * The greater the overlap, the greater the return value will be
  */
 float lunchTime(int idx) {
-    int offset = offsets[idx];
+    const auto* _blocks = blocks + offsets[idx];
     // 11:00 to 14:00
     int totalOverlap = 0;
-    int oEnd = offset + 7;
-    for (int i = offset; i < oEnd; i++) {
-        int end = blocks[i + 1] + offset;
+    for (int i = 0; i < 7; i++) {
         int dayOverlap = 0;
-        for (int j = blocks[i] + offset; j < end; j += 3) {
+        for (int j = _blocks[i], end = _blocks[i + 1]; j < end; j += 3) {
             // 11:00 to 14:00
-            dayOverlap += calcOverlap((uint16_t)660, (uint16_t)840, blocks[j], blocks[j + 1]);
+            dayOverlap += calcOverlap((int16_t)660, (int16_t)840, (int16_t)_blocks[j], (int16_t)_blocks[j + 1]);
         }
 
         if (dayOverlap > 60) totalOverlap += dayOverlap;
@@ -186,16 +175,15 @@ float lunchTime(int idx) {
  * For a schedule that has earlier classes, this method will return a higher number
  */
 float noEarly(int idx) {
-    int offset = offsets[idx];
-    int refTime = 12 * 60,
-        oEnd = offset + 7;
+    const auto* _blocks = blocks + offsets[idx];
+    int refTime = 12 * 60;
     int total = 0;
-    for (int i = offset; i < oEnd; i++) {
-        int start = blocks[i],
-            end = blocks[i + 1];
+    for (int i = 0; i < 7; i++) {
+        int start = _blocks[i],
+            end = _blocks[i + 1];
         if (end > start) {
             // if this day is not empty
-            int time = blocks[start + offset];
+            int time = _blocks[start];
             int temp = max(refTime - time, 0);
             total += temp * temp;
         }
@@ -207,17 +195,15 @@ float noEarly(int idx) {
  * compute the sum of walking distances between each consecutive pair of classes
  */
 float distance(int idx) {
-    int offset = offsets[idx];
+    const auto* _blocks = blocks + offsets[idx];
     // timeMatrix is actually a flattened matrix, so matrix[i][j] = matrix[i*len+j]
-    int oEnd = offset + 7;
     int dist = 0;
-    for (int i = offset; i < oEnd; i++) {
-        int end = blocks[i + 1] + offset - 5;
-        for (int j = blocks[i] + offset; j < end; j += 3) {
+    for (int i = 0; i < 7; i++) {
+        for (int j = _blocks[i], end = _blocks[i + 1] - 5; j < end; j += 3) {
             // does not count the distance of the gap between two classes is greater than 45 minutes
-            if (blocks[j + 3] - blocks[j + 1] < 45) {
-                auto r1 = blocks[j + 2],
-                     r2 = blocks[j + 5];
+            if (_blocks[j + 3] - _blocks[j + 1] < 45) {
+                auto r1 = _blocks[j + 2],
+                     r2 = _blocks[j + 5];
 
                 // skip unknown buildings
                 if (r1 != (uint16_t)65535 && r2 != (uint16_t)65535) dist += timeMatrix[r1 * tmSize + r2];
@@ -229,9 +215,9 @@ float distance(int idx) {
 
 float similarity(int idx) {
     int sum = numCourses;
-    idx *= numCourses;
+    const auto* _allChoices = allChoices + idx * numCourses;
     for (int j = 0; j < numCourses; j++)
-        sum -= (refSchedule[j] == allChoices[idx + j]);
+        sum -= (refSchedule[j] == _allChoices[j]);
     return sum;
 }
 
@@ -332,25 +318,31 @@ void computeCoeff(int enabled, int lastIdx) {
 
 extern "C" {
 
+/**
+ * initialize the global indices, offsets and blocks array so the sort function can use then
+*/
 void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
     int offset = 0;
-    int prefixLen = numCourses * maxLen * 8;
-    auto* __restrict__ _allChoices = allChoices;
+    // point to the second part of the timeArray where the content is stored
+    // should not alias with timeArray, which should be only used to access the first part
+    const auto* __restrict__ timeArrayContent = timeArray + numCourses * maxLen * 8;
+    const auto* __restrict__ _allChoices = allChoices;
     auto* __restrict__ _blocks = blocks;
-    for (int i = 0; i < count; i++) {
-        // sort the time blocks in order
-        int bound = 8;  // size does not contain offset
-        // no offset in j because timeArray also needs it
-        for (int j = 0; j < 7; j++) {
-            // start of the current day
+    for (int i = 0; i < count; i++) {  // for each schedule
+        int bound = 8;
+        for (int j = 0; j < 7; j++) {  // sort the time blocks in order for each day
+            // start index of day j in _blocks
             int s1 = (_blocks[j] = bound);
+
+            // for each section selected (for each course), extract its time blocks on day j,
+            // and insert into day j of _blocks
             for (int k = 0; k < numCourses; k++) {
                 // offset of the time arrays
                 int _off = ((k * maxLen + _allChoices[k]) << 3) + j;
                 // insertion sort, fast for small arrays
-                for (int n = timeArray[_off] + prefixLen, e2 = timeArray[_off + 1] + prefixLen; n < e2; n += 3, bound += 3) {
+                for (int n = timeArray[_off], e2 = timeArray[_off + 1]; n < e2; n += 3, bound += 3) {
                     int p = s1;
-                    uint16_t vToBeInserted = timeArray[n];
+                    uint16_t vToBeInserted = timeArrayContent[n];
                     for (; p < bound; p += 3) {
                         if (vToBeInserted < _blocks[p]) break;
                     }
@@ -358,11 +350,12 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
                     for (int m = bound - 1; m >= p; m--) _blocks[m + 3] = _blocks[m];
                     // insert three elements at p
                     _blocks[p] = vToBeInserted;
-                    _blocks[p + 1] = timeArray[n + 1];
-                    _blocks[p + 2] = timeArray[n + 2];
+                    _blocks[p + 1] = timeArrayContent[n + 1];
+                    _blocks[p + 2] = timeArrayContent[n + 2];
                 }
             }
         }
+        indices[i] = i;
         // record the current offset
         offsets[i] = offset;
         offset += _blocks[7] = bound;
@@ -453,6 +446,15 @@ end:;
     count = base / numCourses;
     timeLen += 8 * count;
 
+    /**
+     * backing storage for indices, coeffs, offsets and blocks
+     */
+    static void* evalMem = NULL;
+    /**
+     * length of the evalMem in bytes
+     */
+    static uint32_t memSize = 0;
+
     // handle reallocation of memory
     uint32_t newMemSize = (uint32_t)(count)*3 * 4 + (uint32_t)(timeLen)*2;
     if (newMemSize > memSize) {
@@ -484,8 +486,6 @@ end:;
  * sort the array of schedules according to their quality coefficients which will be computed by `computeCoeff`
  */
 void sort() {
-    for (int i = 0; i < count; i++) indices[i] = i;
-
     if (isRandom()) {
         default_random_engine eng;
         shuffle(indices, indices + count, eng);

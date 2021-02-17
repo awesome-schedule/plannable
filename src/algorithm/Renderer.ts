@@ -12,11 +12,12 @@ import { ScheduleDays } from '@/models/Schedule';
 export const options = {
     isTolerance: 0,
     ISMethod: 1,
-    applyDFS: true,
+    applyDFS: false,
     tolerance: 0,
     LPIters: 50,
     LPModel: 2,
-    showFixed: false
+    showFixed: false,
+    MILP: false
 };
 
 /**
@@ -32,7 +33,8 @@ export async function computeBlockPositions(days: ScheduleDays) {
         +options.applyDFS,
         options.tolerance,
         options.LPIters,
-        options.LPModel
+        options.LPModel,
+        +options.MILP
     );
     let N = 0;
     let sum = 0;
@@ -63,9 +65,14 @@ export async function computeBlockPositions(days: ScheduleDays) {
             blocks[i].left = result[11 * i + 3];
             blocks[i].width = result[11 * i + 4];
         }
-        N += len;
-        sum += Module._getSum();
-        sumSq += Module._getSumSq();
+        if (len > N) {
+            N = len;
+            sum = Module._getSum();
+            sumSq = Module._getSumSq();
+        }
+        // N += len;
+        // sum += Module._getSum();
+        // sumSq += Module._getSumSq();
         if (options.showFixed) {
             const arr = new Uint8Array(Module.HEAPU8.buffer, rPtr, len * 88);
             for (let i = 0; i < len; i++) {

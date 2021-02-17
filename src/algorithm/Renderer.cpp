@@ -19,6 +19,7 @@ int applyDFS = 1;
 int dfsTolerance = 0;
 int LPIters = 100;
 int LPModel = 3;
+int MILP = 0;
 
 glp_smcp parm;
 
@@ -99,7 +100,7 @@ int N = 0;
 
 void computeResult() {
     for (int i = 0; i < N; i++) {
-        double w = blocks[i].width;
+        double w = blocks[i].width * 100;
         r_sum += w;
         r_sumSq += w * w;
     }
@@ -114,6 +115,11 @@ void sortByStartTime() {
          });
 }
 
+/**
+ * a modified interval partitioning algorithm, runs in worst case O(n^2)
+ * besides using the fewest possible rooms, it also tries to assign events to the rooms with the lowest possible index
+ * @returns the total number of rooms
+ */
 int intervalScheduling() {
     if (N == 0) return 0;
 
@@ -146,6 +152,10 @@ int intervalScheduling() {
     return numRooms;
 }
 
+/**
+ * the classical interval scheduling algorithm, runs in O(n log n)
+ * @returns the total number of rooms
+ */
 int intervalScheduling2() {
     if (N == 0) return 0;
 
@@ -227,6 +237,7 @@ void condenseAdjList(ScheduleBlock* end) {
 
 /**
  * find the connected component containing start and other nodes that are not fixed
+ * the nodes in this component will be stored on the blockBuffer global array
  * @returns the number of nodes in this component 
  */
 int BFS(ScheduleBlock* start) {
@@ -313,11 +324,6 @@ void dfsWidthExpansion() {
         block->width = 1.0 / block->pathDepth;
     }
 }
-
-struct Cons {
-    int var1, var2;
-    double var3;
-};
 
 vector<int> ia, ja;
 vector<double> ar;
@@ -490,6 +496,88 @@ void buildLPModel2(int NC) {
     glp_delete_prob(lp);
 }
 
+void buildMILPModel(int total) {
+#define L(x) 2 * (x) + 1
+#define W(x) 2 * (x) + 2
+#define B(x) 2 * N + (x)
+    // count the number of rows needed
+    int auxVar = 0;
+    for (int i = 0; i < N; i++) {
+        auto bi = blocksReordered[i];
+        for (int j = i + 1; j < N; j++) {
+            auto bj = blocksReordered[j];
+            if (bj->startMin + dfsTolerance >= bi->endMin) break;
+            auxVar++;
+        }
+    }
+    int numBV = auxVar;
+    glp_prob* lp = glp_create_prob();
+    glp_set_obj_dir(lp, GLP_MAX);
+
+    // preallocate rows and cols
+    glp_add_cols(lp, 2 * N + numBV);
+    glp_add_rows(lp, 2 * auxVar + N);
+
+    // index 0 is not used by glpk
+    ia.resize(1);
+    ja.resize(1);
+    ar.resize(1);
+    auxVar = 1;
+    int bvIdx = 1;
+    constexpr double M = 10.0;
+    for (int i = 0; i < N; i++) {
+        auto bi = blocksReordered[i];
+        for (int j = i + 1; j < N; j++) {
+            auto bj = blocksReordered[j];
+            if (bj->startMin + dfsTolerance >= bi->endMin) break;
+            // li + wi <= lj + My => li + wi - lj - My <= 0
+            addConstraint(auxVar, L(bi->idx), 1.0);
+            addConstraint(auxVar, W(bi->idx), 1.0);
+            addConstraint(auxVar, L(bj->idx), -1.0);
+            addConstraint(auxVar, B(bvIdx), -M);
+            glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, 0.0);
+
+            // lj + wj <= li + M(1-y) => lj + wj - li + My <= M
+            addConstraint(auxVar, L(bj->idx), 1.0);
+            addConstraint(auxVar, W(bj->idx), 1.0);
+            addConstraint(auxVar, L(bi->idx), -1.0);
+            addConstraint(auxVar, B(bvIdx++), M);
+            glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, M);
+        }
+        // li + wi <= 1
+        addConstraint(auxVar, L(bi->idx), 1.0);
+        addConstraint(auxVar, W(bi->idx), 1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, 1.0);
+
+        // li >= 0
+        glp_set_col_bnds(lp, L(bi->idx), GLP_LO, 0.0, 1.0);
+        glp_set_obj_coef(lp, L(bi->idx), 0.0);
+        // wi >= 0
+        glp_set_col_bnds(lp, W(bi->idx), GLP_LO, 1.0 / total, 1.0);
+        glp_set_obj_coef(lp, W(bi->idx), 1.0);
+    }
+    for (int i = 2 * N; i < 2 * N + numBV; i++) {
+        glp_set_col_kind(lp, i + 1, GLP_BV);
+        glp_set_obj_coef(lp, i + 1, 0.0);
+    }
+
+    glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
+
+    // glp_simplex(lp, &parm);
+    glp_iocp parm;
+    glp_init_iocp(&parm);
+    parm.presolve = GLP_ON;
+    parm.msg_lev = GLP_MSG_ERR;
+    parm.tm_lim = 10 * 1000;  // 10s time limit
+    glp_intopt(lp, &parm);
+
+    for (int i = 0; i < N; i++) {
+        blocks[i].left = glp_mip_col_val(lp, 2 * i + 1);
+        blocks[i].width = glp_mip_col_val(lp, 2 * i + 2);
+    }
+    glp_delete_prob(lp);
+}
+
 struct Input {
     int16_t startMin, endMin;
 };
@@ -515,13 +603,14 @@ inline int getFixedCount(ScheduleBlock* end) {
 extern "C" {
 
 void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
-                int _dfsTolerance, int _LPIters, int _LPModel) {
+                int _dfsTolerance, int _LPIters, int _LPModel, int _MILP) {
     isTolerance = _isTolerance;
     ISMethod = _ISMethod;
     applyDFS = _applyDFS;
     dfsTolerance = _dfsTolerance;
     LPIters = _LPIters;
     LPModel = _LPModel;
+    MILP = _MILP;
 
     glp_init_smcp(&parm);
     parm.msg_lev = GLP_MSG_ERR;
@@ -575,8 +664,15 @@ ScheduleBlock* compute(const Input* arr, int _N) {
     }
     // ---------------------------- end setup --------------------------------------
 
-    // STEP 1 the total number of rooms/slots needed
+    // STEP 1 the total number of rooms/columns needed
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
+
+    if (MILP) {
+        buildMILPModel(total);
+        computeResult();
+        return blocks;
+    }
+
     auto end = blocks + N;
     if (total <= 1) {
         computeInitialWidth(end, total);

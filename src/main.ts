@@ -28,7 +28,7 @@ declare global {
         _malloc(size: number): Ptr;
         _free(ptr: Ptr): void;
 
-        _setOptions(a: number, b: number, c: number, d: number, e: number, f: number): void;
+        _setOptions(...a: number[]): void;
         _getSum(): number;
         _getSumSq(): number;
         _compute(a: Ptr, b: number): Ptr;

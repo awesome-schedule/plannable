@@ -143,6 +143,7 @@ class ScheduleEvaluator {
     }
 
     public getRange(opt: SortOption) {
+        if (!this.Module) return 1.0;
         if (opt.name == 'IamFeelingLucky') return 1.0;
         return this.Module!._getRange(opt.idx);
     }

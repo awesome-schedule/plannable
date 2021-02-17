@@ -331,9 +331,15 @@ export default abstract class Schedule {
         // const tStart = performance.now();
         await computeBlockPositions(days);
         // console.log('compute blocks', performance.now() - tStart);
-        if (days.reduce((sum, blocks) => sum + blocks.length, 0) < 200) this.days = days;
+
+        const totalBlocks = days.reduce((sum, blocks) => sum + blocks.length, 0);
+        if (totalBlocks < 200) this.days = days;
         // disable reactivity for large schedules
-        else this.days = Object.seal(days);
+        else if (totalBlocks < 2500 * 7) this.days = Object.seal(days);
+        else {
+            this.days = [[], [], [], [], [], [], []];
+            console.warn('not rendered!');
+        }
     }
 
     /**

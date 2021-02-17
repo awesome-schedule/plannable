@@ -1,8 +1,12 @@
 #include <glpk.h>
 
 #include <algorithm>
+#include <climits>
+#include <cstring>
 #include <queue>
 #include <vector>
+
+// #include "emscripten.h"
 using namespace std;
 
 #define DOUBLE_EPS 1e-8
@@ -59,11 +63,13 @@ struct ScheduleBlock {
     */
     vector<ScheduleBlock*> rightN;
     /**
+     * cleftN: Condensed leftN
      * a subset of leftN. For each node in leftN, it belongs to cleftN if and only if 
      * it is not in the leftN of any node that is in leftN
      */
     vector<ScheduleBlock*> cleftN;
     /**
+     * crightN: Condensed rightN
      * a subset of rightN. For each node in rightN, it belongs to crightN if and only if 
      * it is not in the rightN of any node that is in rightN
      */
@@ -78,6 +84,9 @@ ScheduleBlock** __restrict__ blocksReordered = NULL;
 ScheduleBlock** __restrict__ blockBuffer = NULL;
 
 int* __restrict__ idxMap = NULL;
+/**
+ * matrix[i*N+j] is true iff event j is on the LHS of event i
+*/
 bool* __restrict__ matrix = NULL;
 
 // --------- results -----------------
@@ -195,10 +204,9 @@ void constructAdjList() {
 }
 
 /**
- * @note one of the bottle necks of the algorithm
+ * @note one of the bottle necks of the algorithm, if enabled
  */
-void condenseAdjList() {
-    auto end = blocks + N;
+void condenseAdjList(ScheduleBlock* end) {
     for (auto block = blocks; block < end; block++) {
         for (auto v1 : block->leftN) {
             for (auto v : block->leftN) {
@@ -253,34 +261,18 @@ int BFS(ScheduleBlock* start) {
  * The depth of all nodes are known beforehand (from the room assignment).
  */
 void depthFirstSearchRec(ScheduleBlock* start, int maxDepth) {
-    start->visited = true;
-    start->pathDepth = maxDepth;
-
-    for (auto adj : start->cleftN) {
-        if (!adj->visited) depthFirstSearchRec(adj, maxDepth);
-    }
-}
-
-bool DFSFindFixed(ScheduleBlock* start) {
-    start->visited = true;
-    int startDepth = start->depth;
-    if (startDepth == 0) return (start->isFixed = true);
-
-    int pDepth = start->pathDepth;
-    bool flag = false;
-    for (auto adj : start->cleftN) {
-        // we only visit nodes next to the current node (depth different is
-        // exactly 1) with the same pathDepth
-        if (startDepth - adj->depth == 1 && pDepth == adj->pathDepth) {
-            if (adj->visited) {
-                flag = adj->isFixed || flag;
-            } else {
-                // be careful of the short-circuit evaluation
-                flag = DFSFindFixed(adj) || flag;
+    blockBuffer[0] = start;
+    int size = 1;
+    while (size > 0) {
+        start = blockBuffer[--size];
+        start->visited = true;
+        start->pathDepth = maxDepth;
+        for (auto adj : start->cleftN) {
+            if (!adj->visited) {
+                blockBuffer[size++] = adj;
             }
         }
     }
-    return (start->isFixed = flag);
 }
 
 bool DFSFindFixedNumerical(ScheduleBlock* start) {
@@ -303,7 +295,7 @@ bool DFSFindFixedNumerical(ScheduleBlock* start) {
     return (start->isFixed = flag);
 }
 
-void calculateMaxDepth() {
+void dfsWidthExpansion() {
     sort(blocksReordered, blocksReordered + N,
          [](const ScheduleBlock* b1, const ScheduleBlock* b2) {
              return b2->depth < b1->depth;
@@ -316,12 +308,9 @@ void calculateMaxDepth() {
         if (!node->visited) depthFirstSearchRec(node, node->depth + 1);
     }
     auto* end = blocks + N;
-    for (auto* node = blocks; node < end; node++) {
-        node->visited = false;
-    }
-    for (int i = 0; i < N; i++) {
-        auto node = blocksReordered[i];
-        if (!node->visited && node->rightN.size() == 0) DFSFindFixed(node);
+    for (auto block = blocks; block < end; block++) {
+        block->left = static_cast<double>(block->depth) / block->pathDepth;
+        block->width = 1.0 / block->pathDepth;
     }
 }
 
@@ -363,12 +352,13 @@ void buildLPModel1(int NC) {
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
-        double minRight = 1.0;
+        double minRightFixed = 1.0;
         int leftVar = 2 * i + 1;
         for (auto v : block->cleftN) {
             if (v->isFixed)
                 maxLeftFixed = max(maxLeftFixed, v->left + v->width);
             else {
+                // li >= lj + wj
                 addConstraint(auxVar, leftVar, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
                 addConstraint(auxVar, idxMap[v->idx] + 1, -1.0);
@@ -376,16 +366,17 @@ void buildLPModel1(int NC) {
             }
         }
         for (auto v : block->crightN)
-            if (v->isFixed) minRight = min(v->left, minRight);
+            if (v->isFixed) minRightFixed = min(v->left, minRightFixed);
 
-        // l + width <= right
+        // li + wi <= minRightFixed
         addConstraint(auxVar, leftVar, 1.0);
         addConstraint(auxVar, leftVar + 1, 1.0);
-        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRight);
+        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRightFixed);
 
-        // l >= maxLeftFixed
+        // li >= maxLeftFixed
         glp_set_col_bnds(lp, leftVar, GLP_LO, maxLeftFixed, 0.0);
-        // w >= initialWidth
+
+        // wi >= initialWidth
         glp_set_col_bnds(lp, leftVar + 1, GLP_LO, block->width, 0.0);
         glp_set_obj_coef(lp, leftVar, 0.0);
         glp_set_obj_coef(lp, leftVar + 1, 1.0);
@@ -435,6 +426,7 @@ void buildLPModel1(int NC) {
 }
 
 void buildLPModel2(int NC) {
+    // map each event to an index (for structural vairable)
     for (int i = 0; i < NC; i++) {
         idxMap[blockBuffer[i]->idx] = i + 1;
     }
@@ -458,12 +450,12 @@ void buildLPModel2(int NC) {
     for (int i = 0; i < NC; i++) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
-        double minRight = 1.0;
+        double minRightFixed = 1.0;
         for (auto v : block->cleftN) {
             if (v->isFixed)
                 maxLeftFixed = max(maxLeftFixed, v->left + v->width);
             else {
-                // l >= leftL + width
+                // li >= lj + w
                 addConstraint(auxVar, i + 1, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
                 addConstraint(auxVar, NC + 1, -1.0);
@@ -471,19 +463,20 @@ void buildLPModel2(int NC) {
             }
         }
         for (auto v : block->crightN)
-            if (v->isFixed) minRight = min(v->left, minRight);
+            if (v->isFixed) minRightFixed = min(v->left, minRightFixed);
 
-        // l + width <= right
+        // li + w <= minRightFixed
         addConstraint(auxVar, i + 1, 1.0);
         addConstraint(auxVar, NC + 1, 1.0);
-        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRight);
+        glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRightFixed);
 
-        // l >= maxLeft
+        // li >= maxLeftFixed
         glp_set_col_bnds(lp, i + 1, GLP_LO, maxLeftFixed, 0.0);
         glp_set_obj_coef(lp, i + 1, 0.0);
     }
     // 0 <= width <= 1
     glp_set_col_bnds(lp, NC + 1, GLP_DB, 0.0, 1.0);
+    // argmax(w)
     glp_set_obj_coef(lp, NC + 1, 1.0);
 
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
@@ -500,6 +493,23 @@ void buildLPModel2(int NC) {
 struct Input {
     int16_t startMin, endMin;
 };
+
+inline void computeInitialWidth(ScheduleBlock* end, int total) {
+    for (auto block = blocks; block < end; block++) {
+        block->left = static_cast<double>(block->depth) / total;
+        block->width = 1.0 / total;
+    }
+}
+
+/**
+ * count the number of event blocks that are fixed, while also set their visited flag to be equal to fixed
+ * */
+inline int getFixedCount(ScheduleBlock* end) {
+    int fixedCount = 0;
+    for (auto block = blocks; block < end; block++)
+        fixedCount += (block->visited = block->isFixed);
+    return fixedCount;
+}
 
 // disable name-mangling for exported functions
 extern "C" {
@@ -565,36 +575,45 @@ ScheduleBlock* compute(const Input* arr, int _N) {
     }
     // ---------------------------- end setup --------------------------------------
 
-    // the total number of rooms/slots needed
+    // STEP 1 the total number of rooms/slots needed
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
     auto end = blocks + N;
-    if (total <= 1 || !applyDFS) {
-        for (auto block = blocks; block < end; block++) {
-            block->left = static_cast<double>(block->depth) / total;
-            block->width = 1.0 / total;
-        }
+    if (total <= 1) {
+        computeInitialWidth(end, total);
         computeResult();
         return blocks;
     }
+    // STEP 2
     constructAdjList();
-    condenseAdjList();
-    calculateMaxDepth();
-
-    int prevFixedCount = 0;
-    for (auto block = blocks; block < end; block++) {
-        prevFixedCount += (block->visited = block->isFixed);
-        block->left = static_cast<double>(block->depth) / block->pathDepth;
-        block->width = 1.0 / block->pathDepth;
+    // STEP 3
+    condenseAdjList(end);
+    if (applyDFS) {  // STEP 4
+        dfsWidthExpansion();
+        for (auto* node = blocks; node < end; node++)
+            node->visited = false;
+    } else {
+        computeInitialWidth(end, total);
     }
-    int i = 0;
+
+    // STEP 5
+    for (auto* block = blocks; block < end; block++) {
+        if (block->visited) continue;
+        double right = block->left + block->width;
+        if (abs(right - 1.0) < DOUBLE_EPS)
+            DFSFindFixedNumerical(block);
+    }
+    int prevFixedCount = getFixedCount(end);
     auto buildLPModel = LPModel == 2 ? buildLPModel2 : buildLPModel1;
-    while (i < LPIters) {
+    for (int i = 0; i < LPIters; i++) {
+        // for each non-fixed component
         for (auto block = blocks; block < end; block++) {
-            if (!block->visited)
+            if (!block->visited)  // build and solve the lp model
                 buildLPModel(BFS(block));
         }
+        // reset the visited flag because DFSFindFixedNumerical also needs it
         for (auto block = blocks; block < end; block++)
             block->visited = block->isFixed;
+
         for (auto block = blocks; block < end; block++) {
             if (block->visited) continue;
             double right = block->left + block->width;
@@ -609,15 +628,12 @@ ScheduleBlock* compute(const Input* arr, int _N) {
                 }
             }
         }
-        int fixedCount = 0;
-        for (auto block = blocks; block < end; block++)
-            fixedCount += (block->visited = block->isFixed);
+        int fixedCount = getFixedCount(end);
         if (fixedCount == prevFixedCount) {
-            // cout << "convergence reached at " << i << endl;
+            // EM_ASM({console.log("convergence reached at", $0)}, i);
             break;
         }
         prevFixedCount = fixedCount;
-        i++;
     }
     computeResult();
     return blocks;

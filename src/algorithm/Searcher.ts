@@ -22,13 +22,16 @@ export interface SearchResult<T, K = string> {
  * Fast searcher for fuzzy search among a list of strings
  */
 export class FastSearcher<T, K = string> {
-    public originals: string[] = [];
+    public readonly originals: string[] = [];
 
-    private idxOffsets: Uint32Array;
-    private indices: Uint32Array;
-    private tokenIds: Uint32Array;
+    private readonly idxOffsets: Uint32Array;
+    private readonly indices: Uint32Array;
+    private readonly tokenIds: Uint32Array;
 
-    private uniqueTokens: string[] = [];
+    private readonly tokenScores: Float32Array;
+    private readonly scoreWindow: Float32Array;
+
+    private readonly uniqueTokens: string[] = [];
     private maxTokenLen = 0;
 
     /**
@@ -84,6 +87,8 @@ export class FastSearcher<T, K = string> {
                 );
             }
         }
+        this.scoreWindow = new Float32Array(this.maxTokenLen);
+        this.tokenScores = new Float32Array(this.uniqueTokens.length);
 
         console.log('all tokens', tokenLen);
         console.log('unique tokens', this.uniqueTokens.length);
@@ -188,7 +193,7 @@ export class FastSearcher<T, K = string> {
         const [queryGrams, freqCount, freqCountCopy] = this.constructQueryGrams(query, gramLen);
 
         const len = this.uniqueTokens.length;
-        const tokenScores = new Float32Array(len);
+        const tokenScores = this.tokenScores;
         const tokenMatches: number[][] = [];
         // compute score for each token
         for (let i = 0; i < len; i++) {
@@ -214,7 +219,7 @@ export class FastSearcher<T, K = string> {
 
         // score & matches for each sentence
         const allMatches: SearchResult<T, K>[] = [];
-        const scoreWindow = new Float32Array(this.maxTokenLen);
+        const scoreWindow = this.scoreWindow;
         for (let i = 0; i < this.originals.length; i++) {
             const matches = [];
             const offset = this.idxOffsets[i];

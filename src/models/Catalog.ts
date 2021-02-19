@@ -8,11 +8,10 @@
 /**
  *
  */
-import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
-import Course, { CourseMatch, Match } from './Course';
+import Course, { Match } from './Course';
 import Schedule from './Schedule';
 import Section, { SectionMatch } from './Section';
-import { FastSearcherNative, SearchResult as _SearchResult } from '@/algorithm/Searcher';
+import { FastSearcherNative, SearchResult } from '@/algorithm/Searcher';
 /**
  * represents a semester
  */
@@ -28,19 +27,14 @@ export interface SemesterJSON {
 }
 
 /**
- * the match indices for a [[Course]]
+ * the match entry for a [[Course]]
  *
  * 0: the array of matches for the fields of this Course
  *
  * 1: the Map that maps [[Section.id]] to the array of matches for the fields of that section
  */
-export type SearchMatch = [CourseMatch[], Map<number, SectionMatch[]>];
-type SearchResult = readonly [Course[], SearchMatch[]];
+export type SearchMatch = [Match<'key' | 'title' | 'description'>[], Map<number, SectionMatch[]>];
 
-type SearchWorkerResult = [RawAlgoCourse[], SearchMatch[]];
-
-type CourseResultMap = Map<string, _SearchResult<Course, string>[]>;
-type SectionResultMap = Map<string, Map<number, _SearchResult<Section, string>[]>>;
 /**
  * elements in array:
  * 1. score for courses,
@@ -48,18 +42,19 @@ type SectionResultMap = Map<string, Map<number, _SearchResult<Section, string>[]
  * 3. number of distinct sections
  */
 type ScoreEntry = [number, number, number];
-type Scores = Map<string, ScoreEntry>;
+type CourseSearchResult = SearchResult<Course, 'title' | 'description'>;
+type SectionSearchResult = SearchResult<Section, 'topic' | 'instructors'>;
 
-const courseMap: CourseResultMap = new Map();
-const sectionMap: SectionResultMap = new Map();
-const scores: Scores = new Map();
+const courseMap = new Map<string, CourseSearchResult[]>();
+const sectionMap = new Map<string, Map<number, SectionSearchResult[]>>();
+const scores = new Map<string, ScoreEntry>();
 
-function toMatches(matches: _SearchResult<any, any>[]) {
-    const allMatches: Match<any>[] = [];
+function toMatches<T extends string>(matches: SearchResult<any, T>[]) {
+    const allMatches: Match<T>[] = [];
     for (const { data, matches: m } of matches) {
         for (let i = 0; i < m.length; i += 2) {
             allMatches.push({
-                match: data as any,
+                match: data,
                 start: m[i],
                 end: m[i + 1]
             });
@@ -94,10 +89,10 @@ export default class Catalog {
      */
     private readonly sectionMap: Map<number, Section>;
 
-    private titleSearcher?: FastSearcherNative<Course>;
-    private descriptionSearcher?: FastSearcherNative<Course>;
-    private topicSearcher?: FastSearcherNative<Section>;
-    private instrSearcher?: FastSearcherNative<Section>;
+    private titleSearcher?: FastSearcherNative<Course, 'title'>;
+    private descriptionSearcher?: FastSearcherNative<Course, 'description'>;
+    private topicSearcher?: FastSearcherNative<Section, 'topic'>;
+    private instrSearcher?: FastSearcherNative<Section, 'instructors'>;
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -155,9 +150,10 @@ export default class Catalog {
      * you may specify a set of section indices so that you can
      * only obtain a subset of the original course sections
      */
-    public getCourse(key: string, sections?: Set<number> | -1) {
+    public getCourse(key: string, sections?: number[] | Set<number> | -1) {
         const course = this.courseDict[key];
         if (!sections || sections === -1) return course;
+        if (sections instanceof Array) return course.getCourse(sections);
         else return course.getCourse([...sections]);
     }
 
@@ -185,7 +181,7 @@ export default class Catalog {
         }
     }
 
-    private processCourseResults(results: _SearchResult<Course, string>[], weight: number) {
+    private processCourseResults(results: CourseSearchResult[], weight: number) {
         for (const result of results) {
             const { key } = this.courses[result.index];
             const score = result.score ** 2 * weight;
@@ -202,7 +198,7 @@ export default class Catalog {
         }
     }
 
-    private processSectionResults(results: _SearchResult<Section, string>[], weight: number) {
+    private processSectionResults(results: SectionSearchResult[], weight: number) {
         for (const result of results) {
             const { key, id } = this.sections[result.index];
             const score = result.score ** 2 * weight;
@@ -244,17 +240,13 @@ export default class Catalog {
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
-            .sort(
-                (a, b) =>
-                    b[1][0] -
-                    a[1][0] +
-                    (b[1][2] && b[1][1] / b[1][2]) -
-                    (a[1][2] && a[1][1] / a[1][2])
-            )
-            .slice(0, 12);
+            .map(([_, a]) => [_, a[0] + (a[2] && a[1] / a[2])] as const)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 12)
+            .filter(entry => entry[1] > 0.1);
         console.log(scoreEntries);
 
-        const finalResults: RawAlgoCourse[] = [];
+        const finalResults: Course[] = [];
         const allMatches: SearchMatch[] = [];
 
         // merge course and section matches
@@ -267,12 +259,12 @@ export default class Catalog {
             if (s) for (const [id, matches] of s) secMatches.set(id, toMatches(matches));
 
             if (courseMatch) {
-                const crsMatches: CourseMatch[] = toMatches(courseMatch);
-                finalResults.push([key, courseMatch[0].item.ids]);
+                const crsMatches = toMatches(courseMatch);
+                finalResults.push(this.getCourse(key, courseMatch[0].item.ids));
                 allMatches.push([crsMatches, secMatches]);
             } else {
                 // only section match exists
-                finalResults.push([key, [...secMatches.keys()]]);
+                finalResults.push(this.getCourse(key, [...secMatches.keys()]));
                 allMatches.push([[], secMatches]);
             }
         }
@@ -281,11 +273,7 @@ export default class Catalog {
         courseMap.clear();
         sectionMap.clear();
         scores.clear();
-        return this.convertWorkerResult([finalResults, allMatches]);
-    }
-
-    private convertWorkerResult([courses, match]: SearchWorkerResult) {
-        return [courses.map(x => this.getCourse(x[0], new Set(x[1]))), match] as const;
+        return [finalResults, allMatches] as const;
     }
 
     /**
@@ -294,7 +282,7 @@ export default class Catalog {
      * @param query
      * @param maxResults
      */
-    public search(query: string, maxResults = 6): SearchResult {
+    public search(query: string, maxResults = 6): [Course[], SearchMatch[]] {
         query = query.trim().toLowerCase();
         const temp = query.split(/\s+/);
         query = temp.join(' ');
@@ -388,7 +376,7 @@ export default class Catalog {
         const targetIdx = target.indexOf(query);
         if (targetIdx !== -1) {
             const prev = results.findIndex(x => x.key === key);
-            const match: CourseMatch = {
+            const match = {
                 match: field,
                 start: targetIdx,
                 end: targetIdx + query.length

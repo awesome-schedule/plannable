@@ -67,9 +67,6 @@ export interface Match<T extends string> {
     readonly end: number;
 }
 
-type CourseMatchField = 'title' | 'description' | 'key';
-export type CourseMatch<T extends CourseMatchField = CourseMatchField> = Match<T>;
-
 /**
  * the model of a Course that has multiple sections. A Course object may have all or a subset of the sections,
  * depending on the array of section indices passed to its constructor.

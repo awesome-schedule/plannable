@@ -295,7 +295,10 @@ export default abstract class Schedule {
                     if (Schedule.multiSelect) {
                         // try to combine sections even if we're in multi-select mode
                         const combined = Object.values(course.getCombined()).map(secs =>
-                            catalog.getCourse(course.key, new Set(secs.map(sec => sec.id)))
+                            catalog.getCourse(
+                                course.key,
+                                secs.map(sec => sec.id)
+                            )
                         );
                         for (const crs of combined) this.place(crs, days);
                     } else {

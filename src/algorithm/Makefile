@@ -8,9 +8,10 @@ EMCC_LINK_FLAGS = -s ALLOW_MEMORY_GROWTH=1
 EMCC_LINK_FLAGS += -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=web
 EMCC_LINK_FLAGS += -s EXPORTED_FUNCTIONS='[\
 "_compute", "_setOptions", "_getSum", "_getSumSq", "_free", \
-"_generate", "_sort", "_setSortOption", "_size", "_getSchedule", "_setTimeMatrix", "_setSortMode", "_getRange", "_setRefSchedule"\
+"_generate", "_sort", "_setSortOption", "_size", "_getSchedule", "_setTimeMatrix", "_setSortMode", "_getRange", "_setRefSchedule", \
+"_getSearcher", "_getMatches", "_getMatchSize", "_sWSearch"\
 ]'
-# EMCC_LINK_FLAGS += -s EXPORTED_RUNTIME_METHODS='["cwrap"]'
+EMCC_LINK_FLAGS += -s EXPORTED_RUNTIME_METHODS='["stringToUTF8", "lengthBytesUTF8"]'
 
 all: dev
 

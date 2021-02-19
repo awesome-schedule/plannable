@@ -6,6 +6,8 @@
 #include <vector>
 using namespace std;
 
+namespace Searcher {
+
 struct Match {
     int start, end;
 };
@@ -33,6 +35,7 @@ struct IndexedToken {
 struct FastSearcher {
     int size;
     string_view* originals;
+    const char** _originals;
     vector<IndexedToken>* sentences;
     float* scoreWindow;
     SearchResult* results;
@@ -50,9 +53,23 @@ void split(const char* sentence, vector<string_view>& result) {
     }
 }
 
+inline unordered_map<string_view, int> constructQueryGrams(string_view query, int gramLen) {
+    unordered_map<string_view, int> queryGrams;
+    const auto queryGramCount = query.size() - gramLen + 1;
+    for (int j = 0; j < queryGramCount; j++) {
+        queryGrams[query.substr(j, gramLen)]++;
+    }
+    return queryGrams;
+}
+
+vector<string_view> splitBuffer;
+
+extern "C" {
+
 FastSearcher* getSearcher(const char** sentences, const int* len, int N) {
     auto* searcher = new FastSearcher();
     searcher->size = N;
+    searcher->_originals = sentences;
     auto* originals = searcher->originals = new string_view[N];
     auto* sentenceTokens = searcher->sentences = new vector<IndexedToken>[N];
     auto& uniqueTokens = searcher->uniqueTokens;
@@ -92,25 +109,17 @@ FastSearcher* getSearcher(const char** sentences, const int* len, int N) {
     return searcher;
 }
 
-inline unordered_map<string_view, int> constructQueryGrams(string_view query, int gramLen) {
-    unordered_map<string_view, int> queryGrams;
-    const auto queryGramCount = query.size() - gramLen + 1;
-    for (size_t j = 0; j < queryGramCount; j++) {
-        queryGrams[query.substr(j, gramLen)]++;
-    }
-    return queryGrams;
-}
+SearchResult* sWSearch(FastSearcher* searcher, const char* _query, int _len) {
+    int gramLen = 3;
+    float threshold = 0.05;
 
-vector<string_view> splitBuffer;
-
-void sWSearch(FastSearcher* searcher, const char* _query, int _len, int gramLen = 3, float threshold = 0.05) {
     string_view query(_query, _len);
     splitBuffer.resize(0);
     split(_query, splitBuffer);
 
     unordered_map<string_view, int> queryGrams = constructQueryGrams(query, gramLen);
     const int queryGramCount = queryGrams.size();
-    int maxWindow = queryGramCount;
+    int maxWindow = max((int)splitBuffer.size(), 2);
 
     int len = searcher->uniqueTokens.size();
     for (int i = 0; i < len; i++) {
@@ -192,10 +201,22 @@ void sWSearch(FastSearcher* searcher, const char* _query, int _len, int gramLen 
         result.index = i;
     }
     std::sort(results, results + len, [](auto& a, auto& b) { return b.score < a.score; });
+    return results;
 }
 
+Match* getMatches(SearchResult* result) {
+    return result->matches.data();
+}
+int getMatchSize(SearchResult* result) {
+    return result->matches.size();
+}
+}
+
+}  // namespace Searcher
+
 int main() {
-    cout << sizeof(Token) << endl;
+    using namespace Searcher;
+    cout << sizeof(Searcher::SearchResult) << endl;
     const char* sentences[] = {"this is a course about computer science", "what the heck are you talking science about  "};
     int N = sizeof(sentences) / sizeof(char*);
     int len[N];
@@ -206,7 +227,7 @@ int main() {
     // for (auto token : searcher->uniqueTokens) {
     //     cout << token.token << endl;
     // }
-    char q[] = "curse comp sci";
+    char q[] = "what the";
     sWSearch(searcher, q, sizeof(q));
     for (int i = 0; i < N; i++) {
         auto r = searcher->results[i];

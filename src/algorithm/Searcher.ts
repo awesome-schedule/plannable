@@ -340,3 +340,60 @@ export class FastSearcher<T, K = string> {
         return this.originals;
     }
 }
+
+/**
+ * Fast searcher for fuzzy search among a list of strings
+ */
+export class FastSearcherNative<T, K = string> {
+    public readonly originals: string[] = [];
+    private readonly ptr: number;
+    constructor(
+        public items: readonly T[],
+        toStr: (a: T) => string = x => x as any,
+        public data: K = '' as any
+    ) {
+        console.time('start up');
+        const Module = window.NativeModule;
+        const strArrPtr = Module._malloc(items.length * 4);
+        const lenArrPtr = Module._malloc(items.length * 4);
+        for (let i = 0; i < items.length; i++) {
+            const str = toStr(items[i]).toLowerCase();
+            const strLen = str.length + 1;
+            const ptr = Module._malloc(strLen);
+            Module.stringToUTF8(str, ptr, strLen);
+            Module.HEAPU32[strArrPtr / 4 + i] = ptr;
+            Module.HEAP32[lenArrPtr / 4 + i] = strLen;
+        }
+        this.ptr = Module._getSearcher(strArrPtr, lenArrPtr, items.length);
+        console.timeEnd('start up');
+        // for (let i = 0; i < items.length; i++) {}
+    }
+
+    sWSearch(query: string, gramLen = 3, threshold = 0.03, maxWindow?: number) {
+        const Module = window.NativeModule;
+        const strLen = query.length + 1;
+        const ptr = Module._malloc(strLen);
+        Module.stringToUTF8(query, ptr, strLen);
+        const resultPtr = Module._sWSearch(this.ptr, ptr, strLen);
+        const scoreArr = Module.HEAPF32.subarray(resultPtr / 4);
+        const idxArr = Module.HEAP32.subarray(resultPtr / 4);
+
+        const total = Math.min(10, this.items.length);
+        const allMatches: SearchResult<T, K>[] = [];
+        for (let i = 0; i < total; i++) {
+            const idx = idxArr[i * 5 + 1];
+            const matchPtr = Module._getMatches(resultPtr + i * 20);
+            const matchSize = Module._getMatchSize(resultPtr + i * 20);
+            allMatches.push({
+                score: scoreArr[i * 5],
+                index: idx,
+                item: this.items[idx],
+                data: this.data,
+                matches: Module.HEAP32.subarray(matchPtr / 4, matchPtr / 4 + matchSize * 2) as any
+            });
+        }
+        return allMatches;
+    }
+}
+
+(window as any).FastSearcher = FastSearcherNative;

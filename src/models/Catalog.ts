@@ -9,10 +9,10 @@
  *
  */
 import { RawAlgoCourse } from '../algorithm/ScheduleGenerator';
-import Course, { CourseMatch } from './Course';
+import Course, { CourseMatch, Match } from './Course';
 import Schedule from './Schedule';
 import Section, { SectionMatch } from './Section';
-import Worker from 'worker-loader!../workers/SearchWorker';
+import { FastSearcherNative, SearchResult as _SearchResult } from '@/algorithm/Searcher';
 /**
  * represents a semester
  */
@@ -39,6 +39,35 @@ type SearchResult = readonly [Course[], SearchMatch[]];
 
 type SearchWorkerResult = [RawAlgoCourse[], SearchMatch[]];
 
+type CourseResultMap = Map<string, _SearchResult<Course, string>[]>;
+type SectionResultMap = Map<string, Map<number, _SearchResult<Section, string>[]>>;
+/**
+ * elements in array:
+ * 1. score for courses,
+ * 2. score for sections,
+ * 3. number of distinct sections
+ */
+type ScoreEntry = [number, number, number];
+type Scores = Map<string, ScoreEntry>;
+
+const courseMap: CourseResultMap = new Map();
+const sectionMap: SectionResultMap = new Map();
+const scores: Scores = new Map();
+
+function toMatches(matches: _SearchResult<any, any>[]) {
+    const allMatches: Match<any>[] = [];
+    for (const { data, matches: m } of matches) {
+        for (let i = 0; i < m.length; i += 2) {
+            allMatches.push({
+                match: data as any,
+                start: m[i],
+                end: m[i + 1]
+            });
+        }
+    }
+    return allMatches;
+}
+
 /**
  * Catalog wraps the raw data of a semester, providing methods to access and search for courses/sections
  * @author Hanzhi Zhou
@@ -64,11 +93,11 @@ export default class Catalog {
      * a map from section id to section instance
      */
     private readonly sectionMap: Map<number, Section>;
-    /**
-     * the pending search (one that's not completed yet)
-     */
-    private readonly resultMap = new Map<string, SearchResult>();
-    private readonly promMap = new Map<string, (value: any) => void>();
+
+    private titleSearcher?: FastSearcherNative<Course>;
+    private descriptionSearcher?: FastSearcherNative<Course>;
+    private topicSearcher?: FastSearcherNative<Section>;
+    private instrSearcher?: FastSearcherNative<Section>;
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -96,41 +125,28 @@ export default class Catalog {
     /**
      * initialize the web worker for searching
      */
-    public async initWorker(): Promise<'ready'> {
-        if (!this.worker) {
-            // use require because we don't want this in unit-tests
-            // this if branch will not tested in unit-tests because there's no web worker
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const worker = new Worker();
-            worker.onerror = err => console.error(err);
-            worker.postMessage([this.courses, this.sections]);
-            await new Promise<'ready'>(resolve => {
-                worker.onmessage = ({ data }) => {
-                    resolve(data);
-                };
-            });
-            worker.onmessage = ({ data: [query, result] }) => {
-                this.resultMap.set(query, this.convertWorkerResult(result));
-                const resolve = this.promMap.get(query);
-                if (resolve) {
-                    resolve(this.convertWorkerResult(result));
-                    this.promMap.delete(query);
-                }
-            };
-            this.worker = worker;
+    public initWorker() {
+        if (!this.titleSearcher) {
+            this.titleSearcher = new FastSearcherNative(this.courses, obj => obj.title, 'title');
+            this.descriptionSearcher = new FastSearcherNative(
+                this.courses,
+                obj => obj.description,
+                'description'
+            );
+            this.topicSearcher = new FastSearcherNative(this.sections, obj => obj.topic, 'topic');
+            this.instrSearcher = new FastSearcherNative(
+                this.sections,
+                obj => obj.instructors.join(' '),
+                'instructors'
+            );
         }
-        return 'ready';
     }
 
     /**
      * terminate the worker and free memory
      */
     public disposeWorker() {
-        if (this.worker) {
-            this.worker.terminate();
-            this.resultMap.clear();
-            this.worker = undefined;
-        }
+        //
     }
 
     /**
@@ -169,23 +185,107 @@ export default class Catalog {
         }
     }
 
+    private processCourseResults(results: _SearchResult<Course, string>[], weight: number) {
+        for (const result of results) {
+            const { key } = this.courses[result.index];
+            const score = result.score ** 2 * weight;
+
+            const temp = courseMap.get(key);
+            if (temp) {
+                scores.get(key)![0] += score;
+                temp.push(result);
+            } else {
+                // if encounter this course for the first time
+                scores.set(key, [score, 0, 0]);
+                courseMap.set(key, [result]);
+            }
+        }
+    }
+
+    private processSectionResults(results: _SearchResult<Section, string>[], weight: number) {
+        for (const result of results) {
+            const { key, id } = this.sections[result.index];
+            const score = result.score ** 2 * weight;
+
+            let scoreEntry = scores.get(key);
+            if (!scoreEntry) {
+                scoreEntry = [0, 0, 0];
+                scores.set(key, scoreEntry);
+            }
+            scoreEntry[1] += score;
+
+            const secMatches = sectionMap.get(key);
+            if (secMatches) {
+                const matches = secMatches.get(id);
+                if (matches) {
+                    matches.push(result);
+                } else {
+                    secMatches.set(id, [result]);
+                    // if encounter a new section of a course, increment the number of section recorded
+                    scoreEntry[2] += 1;
+                }
+            } else {
+                sectionMap.set(key, new Map().set(id, [result]));
+                scoreEntry[2] += 1;
+            }
+        }
+    }
+
     /**
      * perform fuzzy search in the dedicated web worker
      */
     public fuzzySearch(query: string) {
-        const worker = this.worker;
-        if (!worker) return Promise.reject('Worker not initialized!');
+        console.time('search');
+        this.processCourseResults(this.titleSearcher!.sWSearch(query), 1);
+        this.processCourseResults(this.descriptionSearcher!.sWSearch(query), 0.5);
+        this.processSectionResults(this.topicSearcher!.sWSearch(query), 0.9);
+        this.processSectionResults(this.instrSearcher!.sWSearch(query), 0.25);
+        console.timeEnd('search');
+        // processCourseResults(titleSearcher.sWSearch(query, 2), 1);
+        // processCourseResults(descriptionSearcher.sWSearch(query, 2), 0.5);
+        // processSectionResults(topicSearcher.sWSearch(query, 2), 0.9);
+        // processSectionResults(instrSearcher.sWSearch(query, 2), 0.25);
 
-        const lastResult = this.resultMap.get(query);
-        if (lastResult && !(lastResult instanceof ErrorEvent)) {
-            return Promise.resolve(lastResult);
+        // sort courses in descending order; section score is normalized before added to course score
+        const scoreEntries = Array.from(scores)
+            .sort(
+                (a, b) =>
+                    b[1][0] -
+                    a[1][0] +
+                    (b[1][2] && b[1][1] / b[1][2]) -
+                    (a[1][2] && a[1][1] / a[1][2])
+            )
+            .slice(0, 12);
+        // console.log(scoreEntries);
+
+        const finalResults: RawAlgoCourse[] = [];
+        const allMatches: SearchMatch[] = [];
+
+        // merge course and section matches
+        for (const [key] of scoreEntries) {
+            const courseMatch = courseMap.get(key);
+            const secMatches = new Map<number, SectionMatch[]>();
+
+            // record section matches
+            const s = sectionMap.get(key);
+            if (s) for (const [id, matches] of s) secMatches.set(id, toMatches(matches));
+
+            if (courseMatch) {
+                const crsMatches: CourseMatch[] = toMatches(courseMatch);
+                finalResults.push([key, courseMatch[0].item.ids]);
+                allMatches.push([crsMatches, secMatches]);
+            } else {
+                // only section match exists
+                finalResults.push([key, [...secMatches.keys()]]);
+                allMatches.push([[], secMatches]);
+            }
         }
-        const promise = new Promise<SearchResult>((resolve, reject) => {
-            this.promMap.set(query, resolve);
-        });
-        worker.postMessage(query);
+        // console.log(finalResults, allMatches);
 
-        return promise;
+        courseMap.clear();
+        sectionMap.clear();
+        scores.clear();
+        return this.convertWorkerResult([finalResults, allMatches]);
     }
 
     private convertWorkerResult([courses, match]: SearchWorkerResult) {

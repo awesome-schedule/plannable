@@ -355,31 +355,37 @@ export class FastSearcherNative<T, K = string> {
         console.time('start up');
         const Module = window.NativeModule;
         const strArrPtr = Module._malloc(items.length * 4);
-        const lenArrPtr = Module._malloc(items.length * 4);
         for (let i = 0; i < items.length; i++) {
-            const str = toStr(items[i]).toLowerCase();
+            const str = toStr(items[i])
+                .trim()
+                .toLowerCase();
             const strLen = str.length + 1;
             const ptr = Module._malloc(strLen);
             Module.stringToUTF8(str, ptr, strLen);
             Module.HEAPU32[strArrPtr / 4 + i] = ptr;
-            Module.HEAP32[lenArrPtr / 4 + i] = strLen;
         }
-        this.ptr = Module._getSearcher(strArrPtr, lenArrPtr, items.length);
+        this.ptr = Module._getSearcher(strArrPtr, items.length);
         console.timeEnd('start up');
-        // for (let i = 0; i < items.length; i++) {}
     }
 
-    sWSearch(query: string, gramLen = 3, threshold = 0.03, maxWindow?: number) {
+    sWSearch(query: string, numResults: number, gramLen = 2, threshold = 0.05) {
+        query = query.trim().toLowerCase();
+        const allMatches: SearchResult<T, K>[] = [];
+
+        if (query.length < gramLen) return allMatches;
+
         const Module = window.NativeModule;
+        // TODO: handle UTF-8
         const strLen = query.length + 1;
         const ptr = Module._malloc(strLen);
         Module.stringToUTF8(query, ptr, strLen);
-        const resultPtr = Module._sWSearch(this.ptr, ptr, strLen);
+
+        const resultPtr = Module._sWSearch(this.ptr, ptr, numResults, gramLen, threshold);
         const scoreArr = Module.HEAPF32.subarray(resultPtr / 4);
         const idxArr = Module.HEAP32.subarray(resultPtr / 4);
 
-        const total = Math.min(10, this.items.length);
-        const allMatches: SearchResult<T, K>[] = [];
+        const total = Math.min(numResults, this.items.length);
+
         for (let i = 0; i < total; i++) {
             const idx = idxArr[i * 5 + 1];
             const matchPtr = Module._getMatches(resultPtr + i * 20);

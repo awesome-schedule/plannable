@@ -2,9 +2,12 @@
 #include <cstring>
 #include <iostream>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
+
+#include "parallel-hashmap/parallel_hashmap/phmap.h"
 using namespace std;
+
+using phmap::flat_hash_map;
 
 namespace Searcher {
 
@@ -47,26 +50,32 @@ void split(const char* sentence, vector<string_view>& result) {
     while (*it != 0) {
         const char* tokenStart = it;
         while (*it != ' ' && *it != 0) it++;
-        result.push_back({tokenStart, (string_view::size_type)(it - tokenStart)});
+        result.push_back({tokenStart, static_cast<string_view::size_type>(it - tokenStart)});
         // skip spaces
         while (*it == ' ' && *it != 0) it++;
     }
 }
 
-inline unordered_map<string_view, int> constructQueryGrams(string_view query, int gramLen) {
-    unordered_map<string_view, int> queryGrams;
-    const auto queryGramCount = query.size() - gramLen + 1;
+inline pair<int16_t*, int> constructQueryGrams(flat_hash_map<string_view, int16_t*>& queryGrams, string_view query, int gramLen) {
+    int queryGramCount = query.size() - gramLen + 1;
+    auto* freqCount = new int16_t[queryGramCount * 2]();
+    auto* curPtr = freqCount;
     for (int j = 0; j < queryGramCount; j++) {
-        queryGrams[query.substr(j, gramLen)]++;
+        auto& ptr = queryGrams[query.substr(j, gramLen)];
+        if (ptr == nullptr) {
+            ptr = curPtr++;
+        }
+        (*ptr)++;
     }
-    return queryGrams;
+    memcpy(freqCount + queryGramCount, freqCount, queryGramCount * 2);
+    return {freqCount, queryGramCount};
 }
 
 vector<string_view> splitBuffer;
 
 extern "C" {
 
-FastSearcher* getSearcher(const char** sentences, const int* len, int N) {
+FastSearcher* getSearcher(const char** sentences, int N) {
     auto* searcher = new FastSearcher();
     searcher->size = N;
     searcher->_originals = sentences;
@@ -75,11 +84,9 @@ FastSearcher* getSearcher(const char** sentences, const int* len, int N) {
     auto& uniqueTokens = searcher->uniqueTokens;
 
     int maxTokenLen = 0;
-    unordered_map<string_view, int> str2num;
+    flat_hash_map<string_view, int> str2num;
     for (int i = 0; i < N; i++) {
         const char* sentence = sentences[i];
-        originals[i] = {sentence, (string_view::size_type)(len[i])};
-
         const char* it = sentence;
         while (*it != 0) {
             const char* tokenStart = it;
@@ -88,15 +95,16 @@ FastSearcher* getSearcher(const char** sentences, const int* len, int N) {
 
             auto mit = str2num.find(token);
             if (mit == str2num.end()) {  // if new unique token, add to unique token list
-                sentenceTokens[i].push_back({str2num[token] = uniqueTokens.size(), (int)(tokenStart - sentence)});
+                sentenceTokens[i].push_back({{str2num[token] = uniqueTokens.size()}, static_cast<int>(tokenStart - sentence)});
                 uniqueTokens.push_back({token, 0.0f});
             } else {
-                sentenceTokens[i].push_back({mit->second, (int)(tokenStart - sentence)});
+                sentenceTokens[i].push_back({{mit->second}, static_cast<int>(tokenStart - sentence)});
             }
             // skip spaces
             while (*it == ' ' && *it != 0) it++;
         }
-        maxTokenLen = max(maxTokenLen, (int)(sentenceTokens[i].size()));
+        originals[i] = {sentence, static_cast<string_view::size_type>(it - sentence)};
+        maxTokenLen = max(maxTokenLen, static_cast<int>(sentenceTokens[i].size()));
     }
     uniqueTokens.shrink_to_fit();
     for (int i = 0; i < N; i++) {
@@ -109,39 +117,40 @@ FastSearcher* getSearcher(const char** sentences, const int* len, int N) {
     return searcher;
 }
 
-SearchResult* sWSearch(FastSearcher* searcher, const char* _query, int _len) {
-    int gramLen = 3;
-    float threshold = 0.05;
-
-    string_view query(_query, _len);
+SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, const int gramLen, const float threshold) {
+    string_view query(_query);
     splitBuffer.resize(0);
     split(_query, splitBuffer);
 
-    unordered_map<string_view, int> queryGrams = constructQueryGrams(query, gramLen);
-    const int queryGramCount = queryGrams.size();
-    int maxWindow = max((int)splitBuffer.size(), 2);
-
     int len = searcher->uniqueTokens.size();
-    for (int i = 0; i < len; i++) {
-        auto& token = searcher->uniqueTokens[i];
-        const int tokenGramCount = static_cast<int>(token.token.size()) - gramLen + 1;
-        if (tokenGramCount <= 0) {
-            token.score = 0.0f;
-            continue;
-        }
+    int maxWindow = max((int)splitBuffer.size(), 2);
+    {
+        flat_hash_map<string_view, int16_t*> queryGrams;
+        auto [freqCount, queryGramCount] = constructQueryGrams(queryGrams, query, gramLen);
 
-        int intersectionSize = 0;
-        auto queryGramsCopy = queryGrams;
-        token.matches.resize(0);
-        for (int j = 0; j < tokenGramCount; j++) {
-            auto it = queryGramsCopy.find(token.token.substr(j, gramLen));
-            if (it != queryGramsCopy.end() && it->second > 0) {
-                it->second--;
-                intersectionSize++;
-                token.matches.push_back({j, j + gramLen});
+        for (int i = 0; i < len; i++) {
+            auto& token = searcher->uniqueTokens[i];
+            const int tokenGramCount = static_cast<int>(token.token.size()) - gramLen + 1;
+            if (tokenGramCount <= 0) {
+                token.score = 0.0f;
+                continue;
             }
+
+            int intersectionSize = 0;
+
+            token.matches.resize(0);
+            for (int j = 0; j < tokenGramCount; j++) {
+                auto it = queryGrams.find(token.token.substr(j, gramLen));
+                if (it != queryGrams.end() && *(it->second) > 0) {
+                    *it->second -= 1;
+                    intersectionSize++;
+                    token.matches.push_back({j, j + gramLen});
+                }
+            }
+            token.score = static_cast<float>(2 * intersectionSize) / (queryGramCount + tokenGramCount);
+            memcpy(freqCount, freqCount + queryGramCount, queryGramCount * 2);
         }
-        token.score = static_cast<float>(2 * intersectionSize) / (queryGramCount + tokenGramCount);
+        delete[] freqCount;
     }
 
     len = searcher->size;
@@ -167,7 +176,7 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, int _len) {
             for (auto match : token->matches) {
                 int start = sentence[j].index + match.start;
                 int end = sentence[j].index + match.end;
-                // resolve overlapping matches
+                // merge overlapping matches
                 if (result.matches.size() && result.matches.back().end >= start) {
                     result.matches.back().end = end;
                 } else {
@@ -189,7 +198,7 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, int _len) {
             for (auto match : token->matches) {
                 int start = sentence[j].index + match.start;
                 int end = sentence[j].index + match.end;
-                // resolve overlapping matches
+                // merge overlapping matches
                 if (result.matches.size() && result.matches.back().end >= start) {
                     result.matches.back().end = end;
                 } else {
@@ -200,14 +209,18 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, int _len) {
         result.score = maxScore;
         result.index = i;
     }
-    std::sort(results, results + len, [](auto& a, auto& b) { return b.score < a.score; });
+    if (len > numResults) {
+        std::partial_sort(results, results + numResults, results + len, [](const auto& a, const auto& b) { return b.score < a.score; });
+    } else {
+        std::sort(results, results + len, [](const auto& a, const auto& b) { return b.score < a.score; });
+    }
     return results;
 }
 
-Match* getMatches(SearchResult* result) {
+const Match* getMatches(const SearchResult* result) {
     return result->matches.data();
 }
-int getMatchSize(SearchResult* result) {
+int getMatchSize(const SearchResult* result) {
     return result->matches.size();
 }
 }
@@ -218,18 +231,12 @@ int main() {
     using namespace Searcher;
     cout << sizeof(Searcher::SearchResult) << endl;
     const char* sentences[] = {"this is a course about computer science", "what the heck are you talking science about  "};
-    int N = sizeof(sentences) / sizeof(char*);
-    int len[N];
-    for (int i = 0; i < N; i++) {
-        len[i] = strlen(sentences[i]);
-    }
-    auto* searcher = getSearcher(sentences, len, 2);
+    auto* searcher = getSearcher(sentences, 2);
     // for (auto token : searcher->uniqueTokens) {
     //     cout << token.token << endl;
     // }
-    char q[] = "what the";
-    sWSearch(searcher, q, sizeof(q));
-    for (int i = 0; i < N; i++) {
+    sWSearch(searcher, "what the", 10, 3, 0.05);
+    for (int i = 0; i < 2; i++) {
         auto r = searcher->results[i];
         cout << r.index << endl;
         for (auto m : r.matches) {

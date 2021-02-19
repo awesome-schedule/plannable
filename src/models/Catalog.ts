@@ -236,15 +236,11 @@ export default class Catalog {
      */
     public fuzzySearch(query: string) {
         console.time('search');
-        this.processCourseResults(this.titleSearcher!.sWSearch(query), 1);
-        this.processCourseResults(this.descriptionSearcher!.sWSearch(query), 0.5);
-        this.processSectionResults(this.topicSearcher!.sWSearch(query), 0.9);
-        this.processSectionResults(this.instrSearcher!.sWSearch(query), 0.25);
+        this.processCourseResults(this.titleSearcher!.sWSearch(query, 50), 1);
+        this.processCourseResults(this.descriptionSearcher!.sWSearch(query, 50), 0.5);
+        this.processSectionResults(this.topicSearcher!.sWSearch(query, 50), 0.9);
+        this.processSectionResults(this.instrSearcher!.sWSearch(query, 50), 0.25);
         console.timeEnd('search');
-        // processCourseResults(titleSearcher.sWSearch(query, 2), 1);
-        // processCourseResults(descriptionSearcher.sWSearch(query, 2), 0.5);
-        // processSectionResults(topicSearcher.sWSearch(query, 2), 0.9);
-        // processSectionResults(instrSearcher.sWSearch(query, 2), 0.25);
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
@@ -256,7 +252,7 @@ export default class Catalog {
                     (a[1][2] && a[1][1] / a[1][2])
             )
             .slice(0, 12);
-        // console.log(scoreEntries);
+        console.log(scoreEntries);
 
         const finalResults: RawAlgoCourse[] = [];
         const allMatches: SearchMatch[] = [];

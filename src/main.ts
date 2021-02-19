@@ -43,8 +43,8 @@ declare global {
         _getRange(a: number): number;
         _setRefSchedule(a: Ptr): number;
 
-        _getSearcher(stringArr: Ptr, lenArr: Ptr, N: number): number;
-        _sWSearch(searcher: Ptr, query: Ptr, len: number): number;
+        _getSearcher(stringArr: Ptr, N: number): number;
+        _sWSearch(a: Ptr, b: Ptr, c: number, d: number, e: number): number;
         _getMatches(a: Ptr): Ptr;
         _getMatchSize(a: Ptr): number;
 

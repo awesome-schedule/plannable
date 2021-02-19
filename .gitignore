@@ -74,3 +74,4 @@ _latexindent_*
 dist-electron
 glpk-*
 public/js/*
+*.o

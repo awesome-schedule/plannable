@@ -91,7 +91,7 @@ export default class App extends Store {
         if (encoded) {
             try {
                 this.profile.addProfile(JSON.stringify(await parseFromURL(encoded)), 'url loaded');
-                await this.loadProfile(undefined, !match);
+                await this.loadProfile(!match);
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;
             } catch (err) {
@@ -163,7 +163,7 @@ export default class App extends Store {
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);
                 // if version mismatch, force-update semester data
-                await this.loadProfile(this.profile.current, !match);
+                await this.loadProfile(!match);
             }
         }
         this.status.loading = false;

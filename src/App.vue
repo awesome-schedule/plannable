@@ -4,12 +4,9 @@
         <course-modal
             :course="modal.course"
             :match="modal.match"
-            :semester="semester.currentSemester"
+            :semester="semester.current"
         ></course-modal>
-        <section-modal
-            :semester="semester.currentSemester"
-            :section="modal.section"
-        ></section-modal>
+        <section-modal :semester="semester.current" :section="modal.section"></section-modal>
         <URL-modal :url="modal.url"></URL-modal>
 
         <nav class="tab-bar bg-light">
@@ -69,7 +66,7 @@
             >
                 <i class="fas fa-download"></i>
                 <div
-                    v-if="!profile.tokenType && profile.profiles.some((p) => p.remote)"
+                    v-if="!profile.tokenType && profile.profiles.some(p => p.remote)"
                     class="badge text-warning"
                     style="position: absolute; top: 0.75rem; right: 0px; font-size: 14px"
                     title="Some profiles are marked as synced, but you've been logged out."

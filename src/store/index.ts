@@ -118,7 +118,7 @@ function isLegacy(parsed: any): parsed is LegacyStorage {
 let pendingStatusSave = 0;
 
 function _saveStatus() {
-    const { currentSemester } = semester;
+    const currentSemester = semester.current;
     if (!currentSemester) return;
     const name = profile.current;
     const idx = profile.profiles.findIndex(p => p.name === name);
@@ -210,22 +210,20 @@ export default class Store extends Vue {
     }
 
     /**
-     * given the profile name, switch to the profile's semester.
-     * recover all store modules' states from the localStorage,
-     * and assign a correct Catalog object to `window.catalog`,
-     * @param name
+     * Load [[Profile.current]], switch to the profile's semester.
+     * Recover all store modules' states from the localStorage, and assign a correct Catalog object to `window.catalog`,
+     * @note if you want to switch to other profiles, assign the profile name to [[Profile.current]] first.
      * @param force force update current semester data and load the given profile
      */
-    async loadProfile(name?: string, force = false) {
+    async loadProfile(force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
-        if (!name) name = this.profile.current;
 
         window.scheduleEvaluator = new ScheduleEvaluator();
         let parsed: Partial<AncientStorage> | Partial<LegacyStorage> | Partial<SemesterState> = {};
-        const data = localStorage.getItem(name);
+        const data = localStorage.getItem(this.profile.current);
         if (data) {
             try {
                 parsed = JSON.parse(data);
@@ -237,8 +235,8 @@ export default class Store extends Vue {
         // do not re-select current semester if it is already selected and this is not a force-update
         if (
             parsed.currentSemester &&
-            this.semester.currentSemester &&
-            parsed.currentSemester.id === this.semester.currentSemester.id &&
+            this.semester.current &&
+            parsed.currentSemester.id === this.semester.current.id &&
             !force
         ) {
             console.warn('Semester data loading aborted');
@@ -373,25 +371,17 @@ export default class Store extends Vue {
      * @param target the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(target: SemesterJSON, force = false) {
+    async selectSemester(target: SemesterJSON | null, force = false) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
-        this.status.loading = true;
+        if (!force && this.semester.current && target && target.id === this.semester.current.id)
+            return;
 
-        if (force) {
-            this.noti.info(`Updating ${target.name} data...`, 3600, true);
-            await this.loadProfile(this.profile.current, force);
-            this.status.loading = false;
-            return;
-        } else if (
-            this.semester.currentSemester &&
-            target.id === this.semester.currentSemester.id
-        ) {
-            this.status.loading = false;
-            return;
-        }
+        target = target || this.semester.semesters[0];
+        this.status.loading = true;
+        if (force) this.noti.info(`Updating ${target.name} data...`, 3600, true);
 
         const { profiles } = this.profile;
         let parsed: Partial<SemesterStorage> = {};
@@ -440,7 +430,7 @@ export default class Store extends Vue {
             // load the existing profile
             this.profile.current = parsed.name!;
         }
-        await this.loadProfile();
+        await this.loadProfile(force);
         this.status.loading = false;
     }
 }

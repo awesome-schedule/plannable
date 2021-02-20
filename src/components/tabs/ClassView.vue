@@ -15,7 +15,7 @@
                     style="width: 1.2em; height: 1.2em; margin-bottom: 0.1em"
                 >
                 </span>
-                {{ semester.currentSemester ? semester.currentSemester.name : 'Select Semester' }}
+                {{ semester.current ? semester.current.name : 'Select Semester' }}
                 <i class="fas fa-caret-down ml-2" style="font-size: 20px;"></i>
             </button>
             <div v-if="semester.semesters.length" class="dropdown-menu w-100">

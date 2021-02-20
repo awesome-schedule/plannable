@@ -29,8 +29,7 @@ export default class DisplayView extends Store {
     async clearCache() {
         if (confirm('Your selected classes and schedules will be cleaned. Are you sure?')) {
             window.localStorage.clear();
-            const { currentSemester } = this.semester;
-            if (currentSemester) new CatalogDB(currentSemester).delete();
+            if (this.semester.current) new CatalogDB(this.semester.current).delete();
             window.location.reload(true);
         }
     }

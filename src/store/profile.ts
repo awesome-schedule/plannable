@@ -153,7 +153,8 @@ class Profile {
     }
 
     /**
-     * initialize profile storage if it does not exist already
+     * initialize profile storage if it does not exist already.
+     * set [[Profile.current]] to the name of the latest semester
      */
     initProfiles(semesters: SemesterJSON[]) {
         if (!semesters.length) return;

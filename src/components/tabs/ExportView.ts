@@ -123,10 +123,10 @@ export default class ExportView extends Store {
                     this.profile.addProfile(reader.result.toString(), files[0].name);
                     // unequal length: new profile name added
                     if (prevLen !== profiles.length) this.newName.push(null);
+                    await this.loadProfile();
                 } catch (err) {
                     this.noti.error(err.message + ': Parsing error');
                 }
-                await this.loadProfile();
             } else {
                 this.noti.warn('File is empty!');
             }
@@ -141,7 +141,7 @@ export default class ExportView extends Store {
         }
     }
     saveToJson() {
-        if (!this.semester.currentSemester) return;
+        if (!this.semester.current) return;
         const json = localStorage.getItem(this.profile.current);
         if (json) savePlain(json, this.profile.current + '.json');
     }
@@ -149,7 +149,7 @@ export default class ExportView extends Store {
         savePlain(toICal(this.schedule.currentSchedule), this.profile.current + '.ics');
     }
     exportToURL() {
-        if (!this.semester.currentSemester) return;
+        if (!this.semester.current) return;
         const json = localStorage.getItem(this.profile.current);
         if (json) {
             const url = new URL(window.location.href);

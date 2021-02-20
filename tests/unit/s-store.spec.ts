@@ -60,12 +60,9 @@ test('generated', () => {
 test('semesters and profile switching', async () => {
     const json = require('./test_data/mySchedule2019Fall.json');
     store.profile.addProfile(JSON.stringify(json), '');
-    await store.loadProfile('mySchedule2019Fall');
+    await store.loadProfile();
 
     await store.selectSemester(store.semester.semesters[0]);
-    await store.selectSemester(
-        store.semester.semesters.find(s => s.name === 'Fall 2019'),
-        true
-    );
+    await store.selectSemester(store.semester.semesters.find(s => s.name === 'Fall 2019')!, true);
     expect(profile.current).toBe('mySchedule2019Fall');
 });

@@ -14,7 +14,7 @@ import Catalog, { SemesterJSON } from '../models/Catalog';
 export interface SemesterState {
     [x: string]: any;
     semesters: SemesterJSON[];
-    currentSemester: SemesterJSON | null;
+    current: SemesterJSON | null;
     lastUpdate: string;
 }
 
@@ -24,7 +24,7 @@ export interface SemesterState {
  */
 class Semesters implements SemesterState {
     semesters: SemesterJSON[] = [];
-    currentSemester: SemesterJSON | null = null;
+    current: SemesterJSON | null = null; // cannot use undefined here, otherwise we will lose reactivity
     lastUpdate = '';
     pendingPromise: CancelablePromise<Catalog> | null = null;
 
@@ -70,10 +70,10 @@ class Semesters implements SemesterState {
         //  if the a catalog object is returned
         if (result.payload) {
             window.catalog = result.payload;
-            this.currentSemester = currentSemester;
+            this.current = currentSemester;
             this.lastUpdate = new Date(window.catalog.modified).toLocaleString();
         } else {
-            this.currentSemester = null;
+            this.current = null;
             this.lastUpdate = '';
         }
         this.pendingPromise = null;

@@ -89,10 +89,10 @@ export default class Catalog {
      */
     private readonly sectionMap: Map<number, Section>;
 
-    private titleSearcher?: FastSearcher<Course, 'title'>;
-    private descriptionSearcher?: FastSearcher<Course, 'description'>;
-    private topicSearcher?: FastSearcher<Section, 'topic'>;
-    private instrSearcher?: FastSearcher<Section, 'instructors'>;
+    private titleSearcher: FastSearcher<Course, 'title'>;
+    private descriptionSearcher: FastSearcher<Course, 'description'>;
+    private topicSearcher: FastSearcher<Section, 'topic'>;
+    private instrSearcher: FastSearcher<Section, 'instructors'>;
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -103,11 +103,25 @@ export default class Catalog {
         data: ReturnType<Catalog['data']>,
         public readonly modified: number
     ) {
+        console.time('catalog prep');
         [this.courseDict, this.courses, this.sections] = data;
         this.sectionMap = new Map();
         for (const sec of this.sections) {
             this.sectionMap.set(sec.id, sec);
         }
+        this.titleSearcher = new FastSearcher(this.courses, obj => obj.title, 'title');
+        this.descriptionSearcher = new FastSearcher(
+            this.courses,
+            obj => obj.description,
+            'description'
+        );
+        this.topicSearcher = new FastSearcher(this.sections, obj => obj.topic, 'topic');
+        this.instrSearcher = new FastSearcher(
+            this.sections,
+            obj => obj.instructors.join(' '),
+            'instructors'
+        );
+        console.timeEnd('catalog prep');
     }
 
     /**
@@ -115,33 +129,6 @@ export default class Catalog {
      */
     private data() {
         return [this.courseDict, this.courses, this.sections] as const;
-    }
-
-    /**
-     * initialize the web worker for searching
-     */
-    public initWorker() {
-        if (!this.titleSearcher) {
-            this.titleSearcher = new FastSearcher(this.courses, obj => obj.title, 'title');
-            this.descriptionSearcher = new FastSearcher(
-                this.courses,
-                obj => obj.description,
-                'description'
-            );
-            this.topicSearcher = new FastSearcher(this.sections, obj => obj.topic, 'topic');
-            this.instrSearcher = new FastSearcher(
-                this.sections,
-                obj => obj.instructors.join(' '),
-                'instructors'
-            );
-        }
-    }
-
-    /**
-     * terminate the worker and free memory
-     */
-    public disposeWorker() {
-        //
     }
 
     /**
@@ -236,7 +223,6 @@ export default class Catalog {
         this.processCourseResults(this.descriptionSearcher!.sWSearch(query, 50), 0.5);
         this.processSectionResults(this.topicSearcher!.sWSearch(query, 50), 0.9);
         this.processSectionResults(this.instrSearcher!.sWSearch(query, 50), 0.25);
-        console.timeEnd('search');
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
@@ -244,7 +230,6 @@ export default class Catalog {
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12)
             .filter(entry => entry[1] > 0.1);
-        console.log(scoreEntries);
 
         const finalResults: Course[] = [];
         const allMatches: SearchMatch[] = [];
@@ -273,6 +258,7 @@ export default class Catalog {
         courseMap.clear();
         sectionMap.clear();
         scores.clear();
+        console.timeEnd('search');
         return [finalResults, allMatches] as const;
     }
 

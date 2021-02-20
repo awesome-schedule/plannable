@@ -11,7 +11,6 @@
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Title/Topic/Prof./Desc."
-                :disabled="!workerLoaded"
                 @input="onInput($event.target.value)"
                 @keydown.enter="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"
@@ -22,7 +21,6 @@
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Title/Topic/Prof./Desc."
-                :disabled="!workerLoaded"
                 @keydown.enter="getClass($event.target.value)"
                 @keyup.esc="closeClassList()"
             />

@@ -10,7 +10,7 @@ export interface SearchResult<T, K = string> {
     /** the score of this result */
     score: number;
     /** an array of pairs indicating the indices of match. [[1,2], [7,9]] means that the indices [1, 2) and [7, 9) of the string are matched */
-    matches: number[];
+    matches: Int32Array;
     /** index of the item in the original list */
     index: number;
     /** original_list[index] */
@@ -52,7 +52,6 @@ export class FastSearcher<T, K = string> {
         toStr: (a: T) => string = x => x as any,
         public data: K = '' as any
     ) {
-        console.time('start up');
         const Module = window.NativeModule;
         const strArrPtr = Module._malloc(items.length * 4);
         for (let i = 0; i < items.length; i++) {
@@ -61,14 +60,12 @@ export class FastSearcher<T, K = string> {
                 toStr(items[i])
                     .trim()
                     .toLowerCase()
-                    .replace(/\s+/g, ' ')
             );
         }
         this.ptr = Module._getSearcher(strArrPtr, items.length);
-        console.timeEnd('start up');
     }
 
-    sWSearch(query: string, numResults: number, gramLen = 2, threshold = 0.03) {
+    sWSearch(query: string, numResults: number, gramLen = 3, threshold = 0.1) {
         const Module = window.NativeModule;
         const ptr = prepareQuery(Module, query, gramLen);
         const allMatches: SearchResult<T, K>[] = [];
@@ -89,7 +86,7 @@ export class FastSearcher<T, K = string> {
                 index: idx,
                 item: this.items[idx],
                 data: this.data,
-                matches: Module.HEAP32.subarray(matchPtr / 4, matchPtr / 4 + matchSize * 2) as any
+                matches: Module.HEAP32.subarray(matchPtr / 4, matchPtr / 4 + matchSize * 2)
             });
         }
         Module._free(ptr);

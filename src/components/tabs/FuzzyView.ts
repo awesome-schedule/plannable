@@ -31,40 +31,11 @@ export default class FuzzyView extends Store {
      */
     loading = false;
 
-    workerLoaded = !!window.catalog.worker;
-
     realtime = true;
-
-    /**
-     * initialize catalog's search worker if it is not yet initialized
-     */
-    async initWorker() {
-        if (!window.catalog.worker) {
-            this.loading = true;
-            this.noti.info('Gathering data for fuzzy search...');
-            await window.catalog.initWorker();
-            this.noti.success('Successfully initialized fuzzy search!', 2.5);
-            this.loading = false;
-            this.workerLoaded = true;
-        }
-    }
-
-    mounted() {
-        if (!this.workerLoaded) this.initWorker();
-    }
-
-    destroyed() {
-        if (this.workerLoaded) this.disposeWorker();
-    }
 
     onInput(query: string) {
         if (this.realtime) this.getClass(query);
         else if (!query) this.getClass('');
-    }
-
-    disposeWorker() {
-        window.catalog.disposeWorker();
-        this.workerLoaded = false;
     }
 
     /**
@@ -84,16 +55,8 @@ export default class FuzzyView extends Store {
         }
         this.loading = true;
         if (this.schedule.generated) this.schedule.switchSchedule(false);
-        window.catalog.initWorker();
 
-        try {
-            [this.inputCourses, this.inputMatches] = await window.catalog.fuzzySearch(query);
-        } catch (err) {
-            this.noti.error(err.message);
-            console.error(err);
-        } finally {
-            this.loading = false;
-        }
+        [this.inputCourses, this.inputMatches] = window.catalog.fuzzySearch(query);
     }
 
     closeClassList() {

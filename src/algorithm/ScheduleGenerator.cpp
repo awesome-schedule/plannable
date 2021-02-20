@@ -1,5 +1,14 @@
+/**
+ * The use of data structure assumes that
+ * 1. Each course has no more than 255 sections (uint8 for allChoices)
+ * 2. Each schedule has no more than 21845 meetings each week (uint16 for timeArray)
+ * Additionally, only one set of schedules can be stored at a time, since all data are stored as global variables
+*/
+
 #include <algorithm>
+#include <chrono>
 #include <cstring>
+#include <iostream>
 #include <limits>
 #include <random>
 #include <vector>
@@ -24,12 +33,6 @@ using namespace std;
 // };
 
 namespace ScheduleGenerator {
-
-/**
- * The use of data structure assumes that
- * 1. Each course has no more than 255 sections (uint8 for allChoices)
- * 2. Each schedule has no more than 21845 meetings each week (uint16 for timeArray)
-*/
 
 template <typename T>
 inline T calcOverlap(T a, T b, T c, T d) {
@@ -228,6 +231,16 @@ float (*sortFunctions[])(int idx) = {
     lunchTime,
     noEarly,
     similarity};
+
+#ifdef DEBUG_LOG
+const char* sortFunctionNames[] = {
+    "distance",
+    "variance",
+    "compactness",
+    "lunchTime",
+    "noEarly",
+    "similarity"};
+#endif
 
 /**
  * whether the random sort option is enabled

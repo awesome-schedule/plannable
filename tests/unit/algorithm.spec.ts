@@ -1,6 +1,7 @@
 import Schedule from '@/models/Schedule';
 import Store from '@/store';
 import ProposedSchedule from '@/models/ProposedSchedule';
+import { FastSearcher } from '@/algorithm/Searcher';
 
 const store = new Store();
 
@@ -98,5 +99,11 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[5].enabled = true;
         r = store.generateSchedules();
         expect(r).toBeTruthy();
+    });
+
+    it('searcher', () => {
+        const searcher = new FastSearcher(['building number 1', 'a great building']);
+        const [idx] = searcher.findBestMatch('build num 1');
+        expect(idx).toBe(0);
     });
 });

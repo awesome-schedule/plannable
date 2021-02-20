@@ -3,10 +3,10 @@
 #include <algorithm>
 #include <climits>
 #include <cstring>
+#include <iostream>
 #include <queue>
 #include <vector>
 
-// #include "emscripten.h"
 using namespace std;
 
 #define DOUBLE_EPS 1e-8
@@ -667,11 +667,13 @@ ScheduleBlock* compute(const Input* arr, int _N) {
     // STEP 1 the total number of rooms/columns needed
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
 
+#ifdef ENABLE_MILP
     if (MILP) {
         buildMILPModel(total);
         computeResult();
         return blocks;
     }
+#endif
 
     auto end = blocks + N;
     if (total <= 1) {
@@ -726,7 +728,9 @@ ScheduleBlock* compute(const Input* arr, int _N) {
         }
         int fixedCount = getFixedCount(end);
         if (fixedCount == prevFixedCount) {
-            // EM_ASM({console.log("convergence reached at", $0)}, i);
+#ifdef DEBUG_LOG
+            cout << "convergence reached at " << i << endl;
+#endif
             break;
         }
         prevFixedCount = fixedCount;

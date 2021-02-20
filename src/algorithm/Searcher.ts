@@ -93,6 +93,10 @@ export class FastSearcher<T, K = string> {
         return allMatches;
     }
 
+    /**
+     * @param query
+     * @returns [best match index, score of the best match]
+     */
     public findBestMatch(query: string): readonly [number, number] {
         const Module = window.NativeModule;
         const ptr = prepareQuery(Module, query, 2);

@@ -37,6 +37,11 @@ struct IndexedToken {
     int index;
 };
 
+/**
+ * represents an instance of FastSearcher
+ * In theroy this can be written as a c++ class, 
+ * but embind has higher code size/runtime overhead, so plain C-struct is used instead
+*/
 struct FastSearcher {
     int size;
     // views of _originals
@@ -178,6 +183,14 @@ FastSearcher* getSearcher(const char** sentences, int N) {
             token.token = &uniqueTokens[token.idx];
         }
     }
+
+#ifdef DEBUG_LOG
+    int numTokens = 0;
+    for (int i = 0; i < N; i++) {
+        numTokens += sentenceTokens[i].size();
+    }
+    cout << "num tokens: " << numTokens << " | num unique: " << uniqueTokens.size() << endl;
+#endif
     return searcher;
 }
 
@@ -324,27 +337,3 @@ void deleteSearcher(FastSearcher* searcher) {
 }
 }  // end extern "C"
 }  // namespace Searcher
-
-int main() {
-    using namespace Searcher;
-    cout << sizeof(Searcher::SearchResult) << endl;
-    const char* sentences[] = {"this is a course about computer science", "what the heck are you talking science about  "};
-    auto* searcher = getSearcher(sentences, 2);
-    // for (auto token : searcher->uniqueTokens) {
-    //     cout << token.token << endl;
-    // }
-    // sWSearch(searcher, "what the", 10, 3, 0.05);
-    // for (int i = 0; i < 2; i++) {
-    //     auto r = searcher->results[i];
-    //     cout << r.index << endl;
-    //     for (auto m : r.matches) {
-    //         cout << m.start << "," << m.end << endl;
-    //     }
-    // }
-    for (int i = 0; i < 2; i++) {
-        cout << searcher->originals[i] << endl;
-    }
-    findBestMatch(searcher, "wat the");
-    cout << bestMatchIndex << "," << bestMatchRating << endl;
-    return 0;
-}

@@ -11,7 +11,7 @@
 import Course, { Match } from './Course';
 import Schedule from './Schedule';
 import Section, { SectionMatch } from './Section';
-import { FastSearcherNative, SearchResult } from '@/algorithm/Searcher';
+import { FastSearcher, SearchResult } from '@/algorithm/Searcher';
 /**
  * represents a semester
  */
@@ -89,10 +89,10 @@ export default class Catalog {
      */
     private readonly sectionMap: Map<number, Section>;
 
-    private titleSearcher?: FastSearcherNative<Course, 'title'>;
-    private descriptionSearcher?: FastSearcherNative<Course, 'description'>;
-    private topicSearcher?: FastSearcherNative<Section, 'topic'>;
-    private instrSearcher?: FastSearcherNative<Section, 'instructors'>;
+    private titleSearcher?: FastSearcher<Course, 'title'>;
+    private descriptionSearcher?: FastSearcher<Course, 'description'>;
+    private topicSearcher?: FastSearcher<Section, 'topic'>;
+    private instrSearcher?: FastSearcher<Section, 'instructors'>;
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -122,14 +122,14 @@ export default class Catalog {
      */
     public initWorker() {
         if (!this.titleSearcher) {
-            this.titleSearcher = new FastSearcherNative(this.courses, obj => obj.title, 'title');
-            this.descriptionSearcher = new FastSearcherNative(
+            this.titleSearcher = new FastSearcher(this.courses, obj => obj.title, 'title');
+            this.descriptionSearcher = new FastSearcher(
                 this.courses,
                 obj => obj.description,
                 'description'
             );
-            this.topicSearcher = new FastSearcherNative(this.sections, obj => obj.topic, 'topic');
-            this.instrSearcher = new FastSearcherNative(
+            this.topicSearcher = new FastSearcher(this.sections, obj => obj.topic, 'topic');
+            this.instrSearcher = new FastSearcher(
                 this.sections,
                 obj => obj.instructors.join(' '),
                 'instructors'

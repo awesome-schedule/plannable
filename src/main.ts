@@ -47,6 +47,9 @@ declare global {
         _sWSearch(a: Ptr, b: Ptr, c: number, d: number, e: number): number;
         _getMatches(a: Ptr): Ptr;
         _getMatchSize(a: Ptr): number;
+        _findBestMatch(a: Ptr, b: Ptr): void;
+        _getBestMatchIndex(): number;
+        _getBestMatchRating(): number;
 
         onRuntimeInitialized(): void;
         stringToUTF8(str: string, outPtr: Ptr, maxBytesToWrite: number): void;

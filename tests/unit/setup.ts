@@ -146,10 +146,10 @@ beforeAll(async () => {
     });
     catalog.courseDict.cs45015.sections.push(section);
     window.saveStatus = saveStatus;
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    window.NativeModule = await require('../../public/js/wasm_modules.js')();
     window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
     window.timeMatrix = await dataend.distances();
     window.buildingSearcher = await dataend.buildings();
     window.watchers = new WatchFactory();
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    window.NativeModule = await require('../../public/js/wasm_modules.js')();
 });

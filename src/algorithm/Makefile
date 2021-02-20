@@ -9,7 +9,7 @@ EMCC_LINK_FLAGS += -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=w
 EMCC_LINK_FLAGS += -s EXPORTED_FUNCTIONS='[\
 "_compute", "_setOptions", "_getSum", "_getSumSq", "_free", \
 "_generate", "_sort", "_setSortOption", "_size", "_getSchedule", "_setTimeMatrix", "_setSortMode", "_getRange", "_setRefSchedule", \
-"_getSearcher", "_getMatches", "_getMatchSize", "_sWSearch"\
+"_getSearcher", "_getMatches", "_getMatchSize", "_sWSearch", "_findBestMatch", "_getBestMatchIndex", "_getBestMatchRating"\
 ]'
 EMCC_LINK_FLAGS += -s EXPORTED_RUNTIME_METHODS='["stringToUTF8", "lengthBytesUTF8"]'
 

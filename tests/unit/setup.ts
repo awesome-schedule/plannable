@@ -64,30 +64,16 @@ function convertAll(all: { [x: string]: Set<number> | -1 }) {
     return converted;
 }
 
-Object.defineProperty(global, 'onmessage', {
-    set(handler) {
-        global.msgHandler = handler;
-    },
-    get() {
-        return global.msgHandler;
-    }
-});
-
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace NodeJS {
         interface Global {
-            queue: any[];
-            postMessage: (msg: any) => void;
             convertAll: typeof convertAll;
-            msgHandler(msg: any): void;
         }
     }
 }
 
-global.queue = [];
 global.convertAll = convertAll;
-global.postMessage = (msg: any) => global.queue.push(msg);
 
 beforeAll(async () => {
     const store = new Store();

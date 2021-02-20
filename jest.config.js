@@ -8,8 +8,7 @@ module.exports = {
     },
     transformIgnorePatterns: [],
     moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1',
-        '^worker-loader.+$': '<rootDir>/src/empty'
+        '^@/(.*)$': '<rootDir>/src/$1'
     },
     setupTestFrameworkScriptFile: '<rootDir>/tests/unit/setup.ts',
     snapshotSerializers: ['jest-serializer-vue'],

@@ -4,10 +4,22 @@
 #include <string_view>
 #include <vector>
 
-#include "parallel-hashmap/parallel_hashmap/phmap.h"
-using namespace std;
+#ifdef USE_FLATMAP
 
-using phmap::flat_hash_map;
+#include "parallel-hashmap/parallel_hashmap/phmap.h"
+template <typename K, typename V>
+using HashMap = phmap::flat_hash_map<K, V>;
+
+#else
+
+#include <unordered_map>
+template <typename K, typename V>
+using HashMap = std::unordered_map<K, V>;
+
+#endif
+
+using namespace std;
+using GramMap = HashMap<string_view, int16_t*>;
 
 namespace Searcher {
 
@@ -66,14 +78,12 @@ void split(const char* sentence, vector<string_view>& result) {
     }
 }
 
-// map a string to an pointer into the frequency table
-// Reason for an additional level of indirection is that we need to constantly restore the frequency table to its original values
-// Instead of copying the whole map, we just copy the frequency which is stored in a separate array
-using GramMap = flat_hash_map<string_view, int16_t*>;
-
 /**
- * returns a pointer to the frequency table and its size
- * ptr to ptr+size is the table, ptr+size to ptr+size*2 is a copy of this table
+ * The queryGram hashmap maps a string to an pointer into the frequency table, which indicates the frequency of the gram
+ * Reason for an additional level of indirection is that we need to constantly restore the frequency table to its original values
+ * Instead of copying the whole map, we just copy the frequency which is stored in a separate array
+ * @returns a pointer to the frequency table, and its size
+ * @note ptr to ptr+size is the table, ptr+size to ptr+size*2 is a copy of this table
 */
 inline pair<int16_t*, int> constructQueryGrams(GramMap& queryGrams, string_view query, int gramLen) {
     int queryGramCount = query.size() - gramLen + 1;
@@ -150,7 +160,7 @@ FastSearcher* getSearcher(const char** sentences, int N) {
 
     int maxTokenLen = 0;
     // map a token to an index in the uniqueTokens array
-    flat_hash_map<string_view, int> str2num;
+    HashMap<string_view, int> str2num(N * 2);
     for (int i = 0; i < N; i++) {
         const char* sentence = sentences[i];
         const char* it = sentence;
@@ -160,13 +170,11 @@ FastSearcher* getSearcher(const char** sentences, int N) {
             while (*it != ' ' && *it != 0) it++;
             string_view token(tokenStart, it - tokenStart);
 
-            auto mit = str2num.find(token);
-            if (mit == str2num.end()) {  // if new unique token, add to unique token list
-                sentenceTokens[i].push_back({{str2num[token] = uniqueTokens.size()}, static_cast<int>(tokenStart - sentence)});
+            auto [mit, success] = str2num.insert({token, uniqueTokens.size()});
+            if (success)  // if new unique token, add it to unique token list
                 uniqueTokens.push_back({token, 0.0f});
-            } else {
-                sentenceTokens[i].push_back({{mit->second}, static_cast<int>(tokenStart - sentence)});
-            }
+            // record the position of this token in the unique token list
+            sentenceTokens[i].push_back({{mit->second}, static_cast<int>(tokenStart - sentence)});
             // skip spaces
             while (*it == ' ' && *it != 0) it++;
         }

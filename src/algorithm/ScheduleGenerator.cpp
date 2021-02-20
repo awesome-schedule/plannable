@@ -596,7 +596,7 @@ float getRange(int idx) {
 }
 
 void setRefSchedule(uint8_t* ref) {
-    if (refSchedule != NULL) delete[] refSchedule;
+    if (refSchedule != NULL) free(refSchedule);
     refSchedule = ref;
     auto& cache = sortCoeffCache[5];
     if (cache.coeffs != NULL) {

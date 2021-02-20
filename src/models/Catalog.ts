@@ -245,7 +245,7 @@ export default class Catalog {
 
             if (courseMatch) {
                 const crsMatches = toMatches(courseMatch);
-                finalResults.push(this.getCourse(key, courseMatch[0].item.ids));
+                finalResults.push(this.getCourse(key, this.courses[courseMatch[0].index].ids));
                 allMatches.push([crsMatches, secMatches]);
             } else {
                 // only section match exists

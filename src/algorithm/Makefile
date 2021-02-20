@@ -1,7 +1,7 @@
 # this make file is partly borrowed from https://github.com/jvail/glpk.js/blob/master/Makefile
 GLPK_VERSION = 4.65
 
-EMCC_FLAGS = -Wall -Winline -std=c++17
+EMCC_FLAGS = -Wall -Winline -std=c++17 -DUSE_FLATMAP
 EMCC_DEV_FLAGS = -O2 -DDEBUG_LOG -DENABLE_MILP -g --profiling
 EMCC_LINK_FLAGS = -s ALLOW_MEMORY_GROWTH=1
 EMCC_LINK_FLAGS += -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=web

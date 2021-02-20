@@ -4,7 +4,7 @@
  */
 
 /**
- * The struture of the objects used to store search results
+ * The structure of the object used to store search results
  */
 export interface SearchResult<T, K = string> {
     /** the score of this result */
@@ -13,8 +13,6 @@ export interface SearchResult<T, K = string> {
     matches: Int32Array;
     /** index of the item in the original list */
     index: number;
-    /** original_list[index] */
-    item: T;
     /** some arbitrary data associated with this item */
     data: K;
 }
@@ -48,19 +46,16 @@ export class FastSearcher<T, K = string> {
     /** internal pointer to the FastSearcher instance on WASM heap */
     private readonly ptr: number;
     constructor(
-        public items: readonly T[],
+        items: readonly T[],
         toStr: (a: T) => string = x => x as any,
         public data: K = '' as any
     ) {
         const Module = window.NativeModule;
         const strArrPtr = Module._malloc(items.length * 4);
         for (let i = 0; i < items.length; i++) {
-            Module.HEAPU32[strArrPtr / 4 + i] = allocateStr(
-                Module,
-                toStr(items[i])
-                    .trim()
-                    .toLowerCase()
-            );
+            const str = toStr(items[i]);
+            this.originals.push(str);
+            Module.HEAPU32[strArrPtr / 4 + i] = allocateStr(Module, str.trim().toLowerCase());
         }
         this.ptr = Module._getSearcher(strArrPtr, items.length);
     }
@@ -75,7 +70,7 @@ export class FastSearcher<T, K = string> {
         const scoreArr = Module.HEAPF32.subarray(resultPtr / 4);
         const idxArr = Module.HEAP32.subarray(resultPtr / 4);
 
-        const total = Math.min(numResults, this.items.length);
+        const total = Math.min(numResults, this.originals.length);
 
         for (let i = 0; i < total; i++) {
             const idx = idxArr[i * 5 + 1];
@@ -84,7 +79,6 @@ export class FastSearcher<T, K = string> {
             allMatches.push({
                 score: scoreArr[i * 5],
                 index: idx,
-                item: this.items[idx],
                 data: this.data,
                 matches: Module.HEAP32.subarray(matchPtr / 4, matchPtr / 4 + matchSize * 2)
             });

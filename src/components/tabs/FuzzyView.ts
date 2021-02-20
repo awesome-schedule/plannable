@@ -57,6 +57,7 @@ export default class FuzzyView extends Store {
         if (this.schedule.generated) this.schedule.switchSchedule(false);
 
         [this.inputCourses, this.inputMatches] = window.catalog.fuzzySearch(query);
+        this.loading = false;
     }
 
     closeClassList() {

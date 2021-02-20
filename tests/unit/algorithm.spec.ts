@@ -84,6 +84,10 @@ describe('ScheduleGenerator Test', () => {
         expect(r).toBeTruthy(); // will still try to generate schedule even if there's conflict
         expect(r!.size).toBe(1);
 
+        schedule.addEvent('MoTuWeThFr 2:00AM - 11:00PM', false); // falsy only if no schedules can be generated
+        r = store.generateSchedules();
+        expect(r).toBeFalsy();
+
         schedule.events.length = 0;
         // similarity
         store.filter.refSchedule = {

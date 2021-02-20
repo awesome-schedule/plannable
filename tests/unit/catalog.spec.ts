@@ -13,6 +13,11 @@ describe('catalog test', () => {
 
         expect(catalog.search(':desc a')[0].length).toBeGreaterThan(1);
         expect(catalog.search(':prof asdasdasdasdasdasdsad')[0].length).toBe(0);
+
+        expect(catalog.fuzzySearch('comp. vision')[0][0].key.includes('cs4501')).toBe(true);
+        expect(
+            catalog.fuzzySearch('data structures and representation')[0][0].key.includes('cs2150')
+        ).toBe(true);
     });
 
     it('convert key', () => {

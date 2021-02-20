@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/camelcase */
 import { dataend } from '@/config';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
 import Section from '@/models/Section';
-import { saveStatus } from '@/store';
+import Store, { saveStatus } from '@/store';
 import WatchFactory from '@/store/watch';
 
 global.console.time = jest.fn();
@@ -89,6 +90,9 @@ global.convertAll = convertAll;
 global.postMessage = (msg: any) => global.queue.push(msg);
 
 beforeAll(async () => {
+    const store = new Store();
+    await store.semester.loadSemesters();
+    window.NativeModule = await require('../../public/js/wasm_modules.js')();
     const catalog = await dataend.courses({ name: '', id: '1198' });
     const section = Object.create(Section.prototype, {
         course: {
@@ -146,8 +150,6 @@ beforeAll(async () => {
     });
     catalog.courseDict.cs45015.sections.push(section);
     window.saveStatus = saveStatus;
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    window.NativeModule = await require('../../public/js/wasm_modules.js')();
     window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
     window.timeMatrix = await dataend.distances();
     window.buildingSearcher = await dataend.buildings();

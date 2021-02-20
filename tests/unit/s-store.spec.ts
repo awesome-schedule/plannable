@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import Store from '@/store';
+import profile from '@/store/profile';
 const store = new Store();
 const { schedule } = store;
 
@@ -53,4 +55,17 @@ test('generated', () => {
     expect(schedule.cpIndex).toBe(0);
     schedule.clear();
     expect(schedule.currentSchedule.empty()).toBe(true);
+});
+
+test('semesters and profile switching', async () => {
+    const json = require('./test_data/mySchedule2019Fall.json');
+    store.profile.addProfile(JSON.stringify(json), '');
+    await store.loadProfile('mySchedule2019Fall');
+
+    await store.selectSemester(store.semester.semesters[0]);
+    await store.selectSemester(
+        store.semester.semesters.find(s => s.name === 'Fall 2019'),
+        true
+    );
+    expect(profile.current).toBe('mySchedule2019Fall');
 });

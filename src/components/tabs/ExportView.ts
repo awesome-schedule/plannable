@@ -142,9 +142,8 @@ export default class ExportView extends Store {
     }
     saveToJson() {
         if (!this.semester.currentSemester) return;
-        const { current } = this.profile;
         const json = localStorage.getItem(this.profile.current);
-        if (json) savePlain(json, current + '.json');
+        if (json) savePlain(json, this.profile.current + '.json');
     }
     saveToIcal() {
         savePlain(toICal(this.schedule.currentSchedule), this.profile.current + '.ics');

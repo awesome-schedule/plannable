@@ -618,7 +618,7 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
 
 /**
  * compute the width and left of the blocks
- * @param arr the array of start/end times of the blocks
+ * @param arr the array of start/end times of the blocks. It will be freed before this function returns.
  * @param N the number of blocks
  */
 ScheduleBlock* compute(const Input* arr, int _N) {
@@ -662,6 +662,7 @@ ScheduleBlock* compute(const Input* arr, int _N) {
         block.cleftN.resize(0);
         block.crightN.resize(0);
     }
+    free((void*)arr);
     // ---------------------------- end setup --------------------------------------
 
     // STEP 1 the total number of rooms/columns needed

@@ -377,7 +377,8 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
  * Indexed like this: conflictCache[section1][course1][section2][course2]
  * which is in fact: conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
  * Can do bitpacking, but no performance improvement observed
- * @param timeArray TODO: add description
+ * @param timeArray TODO: add description.
+ * @note the pointers passed in to this function should point to dynamically allocated memory. They will be freed before this function returns. 
  * @returns the number of schedules generated. Returns -1 on memory allocation failure
  */
 int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
@@ -479,8 +480,9 @@ end:;
 
 // cleanup
 #ifndef _TEST
-    delete[] conflictCache;
-    delete[] timeArray;
+    free((void*)sectionLens);
+    free((void*)conflictCache);
+    free((void*)timeArray);
 #endif
     for (auto& cache : sortCoeffCache) {
         if (cache.coeffs != NULL) {

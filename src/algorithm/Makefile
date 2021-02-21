@@ -6,7 +6,7 @@ EMCC_DEV_FLAGS = -O2 -DDEBUG_LOG -DENABLE_MILP -g --profiling
 EMCC_LINK_FLAGS = -s ALLOW_MEMORY_GROWTH=1
 EMCC_LINK_FLAGS += -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=web
 EMCC_LINK_FLAGS += -s EXPORTED_FUNCTIONS='[\
-"_compute", "_setOptions", "_getSum", "_getSumSq", "_free", \
+"_compute", "_setOptions", "_getSum", "_getSumSq", \
 "_generate", "_sort", "_setSortOption", "_size", "_getSchedule", "_setTimeMatrix", "_setSortMode", "_getRange", "_setRefSchedule", \
 "_getSearcher", "_getMatches", "_getMatchSize", "_sWSearch", "_findBestMatch", "_getBestMatchIndex", "_getBestMatchRating"\
 ]'

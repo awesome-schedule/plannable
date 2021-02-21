@@ -24,15 +24,18 @@ axios.defaults.xsrfCookieName = 'csrftoken';
 type Ptr = number;
 
 declare global {
+    // ! for parameter meaning, refer to the cpp files in src/algorithm
     interface EMModule {
         _malloc(size: number): Ptr;
-        _free(ptr: Ptr): void;
 
+        // ------------ APIs of Renderer.cpp --------------------------------------
         _setOptions(...a: number[]): void;
         _getSum(): number;
         _getSumSq(): number;
         _compute(a: Ptr, b: number): Ptr;
+        // ------------------------------------------------------------------------
 
+        // ------------ APIs of ScheduleGenerator.cpp -----------------------------
         _generate(a: number, b: number, c: Ptr, d: Ptr, e: Ptr): number;
         _setSortOption: any;
         _setSortMode(a: number): void;
@@ -42,14 +45,17 @@ declare global {
         _getSchedule(a: number): Ptr;
         _getRange(a: number): number;
         _setRefSchedule(a: Ptr): number;
+        // ------------------------------------------------------------------------
 
-        _getSearcher(stringArr: Ptr, N: number): number;
-        _sWSearch(a: Ptr, b: Ptr, c: number, d: number, e: number): number;
+        // ------------ APIs of Searcher.cpp --------------------------------------
+        _getSearcher(stringArr: Ptr, N: number): Ptr;
+        _sWSearch(a: Ptr, b: Ptr, c: number, d: number, e: number): Ptr;
         _getMatches(a: Ptr): Ptr;
         _getMatchSize(a: Ptr): number;
         _findBestMatch(a: Ptr, b: Ptr): void;
         _getBestMatchIndex(): number;
         _getBestMatchRating(): number;
+        // ------------------------------------------------------------------------
 
         onRuntimeInitialized(): void;
         stringToUTF8(str: string, outPtr: Ptr, maxBytesToWrite: number): void;

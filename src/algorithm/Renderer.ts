@@ -79,7 +79,6 @@ export async function computeBlockPositions(days: ScheduleDays) {
                 if (arr[88 * i]) (blocks[i] as any).background = '#000';
             }
         }
-        Module._free(bufPtr);
     }
     if (N > 0) console.log('mean', sum / N, 'variance', sumSq / N - (sum / N) ** 2);
     console.timeEnd('native compute');

@@ -205,6 +205,7 @@ FastSearcher* getSearcher(const char** sentences, int N) {
 /**
  * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations
  * MIT License
+ * @param _query a dynamically allocated string. It will be freed after this function returns.
  */
 void findBestMatch(FastSearcher* searcher, const char* _query) {
     string_view query(_query);
@@ -221,6 +222,7 @@ void findBestMatch(FastSearcher* searcher, const char* _query) {
         }
         memcpy(freqCount, freqCount + queryGramCount, queryGramCount * sizeof(int16_t));
     }
+    free((void*)_query);
     delete[] freqCount;
 }
 
@@ -235,6 +237,7 @@ float getBestMatchRating() {
 
 /**
  * sliding window search
+ * @param _query a dynamically allocated string. It will be freed after this function returns.
 */
 SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, const int gramLen, const float threshold) {
     string_view query(_query);
@@ -322,6 +325,7 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int num
     } else {
         std::sort(results, results + len, [](const auto& a, const auto& b) { return b.score < a.score; });
     }
+    free((void*)_query);
     return results;
 }
 

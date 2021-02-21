@@ -83,7 +83,6 @@ export class FastSearcher<T, K = string> {
                 matches: Module.HEAP32.subarray(matchPtr / 4, matchPtr / 4 + matchSize * 2)
             });
         }
-        Module._free(ptr);
         return allMatches;
     }
 
@@ -97,7 +96,6 @@ export class FastSearcher<T, K = string> {
         if (ptr === -1) return [0, 0.0];
 
         Module._findBestMatch(this.ptr, ptr);
-        Module._free(ptr);
         return [Module._getBestMatchIndex(), Module._getBestMatchRating()];
     }
 

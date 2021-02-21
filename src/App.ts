@@ -90,10 +90,7 @@ export default class App extends Store {
 
         if (encoded) {
             try {
-                await this.profile.addProfile(
-                    JSON.stringify(await parseFromURL(encoded)),
-                    'url loaded'
-                );
+                await this.profile.addProfile(await parseFromURL(encoded), 'url loaded');
                 await this.loadProfile(!match);
                 this.noti.success('Configuration loaded from URL!', 3, true);
                 return true;

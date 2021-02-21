@@ -274,10 +274,7 @@
                 </div>
             </li>
             <li class="list-group-item">
-                <button
-                    class="btn btn-outline-info mb-1 w-100"
-                    @click="selectSemester(semester.current, true)"
-                >
+                <button class="btn btn-outline-info mb-1 w-100" @click="loadProfile(true)">
                     Update Semester Data
                 </button>
                 <small class="text-center form-text text-muted">

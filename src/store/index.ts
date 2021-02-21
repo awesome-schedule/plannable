@@ -241,6 +241,7 @@ export default class Store extends Vue {
         ) {
             console.warn('Semester data loading aborted');
         } else {
+            if (force) this.noti.info(`Updating ${parsed.currentSemester} data...`, 3600, true);
             const msg = await this.semester.selectSemester(
                 parsed.currentSemester || this.semester.semesters[0],
                 force
@@ -371,25 +372,23 @@ export default class Store extends Vue {
      * @param target the semester to switch to
      * @param force whether to force-update semester data
      */
-    async selectSemester(target: SemesterJSON | null, force = false) {
+    async selectSemester(target: SemesterJSON | null) {
         if (!this.semester.semesters.length) {
             this.noti.error('No semester data! Please refresh this page');
             return;
         }
-        if (!force && this.semester.current && target && target.id === this.semester.current.id)
-            return;
+        if (this.semester.current && target && target.id === this.semester.current.id) return;
 
         target = target || this.semester.semesters[0];
         this.status.loading = true;
-        if (force) this.noti.info(`Updating ${target.name} data...`, 3600, true);
 
         const { profiles } = this.profile;
         let parsed: Partial<SemesterStorage> = {};
         let parsedLatest = -Infinity;
 
         // find the latest profile corresponding to the semester to be switched
-        for (const { name: profileName } of profiles) {
-            const data = localStorage.getItem(profileName);
+        for (const { name } of profiles) {
+            const data = localStorage.getItem(name);
             if (data) {
                 const temp: Partial<SemesterStorage> = JSON.parse(data);
                 const { currentSemester, modified } = temp;
@@ -401,6 +400,7 @@ export default class Store extends Vue {
                             parsedLatest = time;
                         }
                     } else {
+                        // if no modified time, only use it if no profile corresponding to this semester has been found
                         if (!parsed.currentSemester) parsed = temp;
                     }
                 }
@@ -408,29 +408,17 @@ export default class Store extends Vue {
         }
         // no profile for target semester exists. let's create one
         if (!parsed.currentSemester) {
-            let { name } = target;
-            if (profiles.find(p => p.name === name)) {
-                if (
-                    !confirm(
-                        `You already have a profile named ${name}. However, it does not correspond to the ${name} semester. Click Ok to overwrite, click Cancel to keep both.`
-                    )
-                ) {
-                    let idx = 2;
-                    while (profiles.find(p => p.name === `${name} (${idx})`)) idx++;
-                    name = `${name} (${idx})`;
-                    profiles.push(profile.createProfile(name));
-                }
-            } else {
-                profiles.push(profile.createProfile(name));
-            }
             parsed.currentSemester = target;
-            this.profile.current = parsed.name = name;
-            localStorage.setItem(name, JSON.stringify(parsed));
+            profile.addProfile(
+                parsed,
+                target.name,
+                `You already have a profile named ${target.name}. However, it does not correspond to the ${target.name} semester. Click Ok to overwrite, click Cancel to keep both.`
+            );
         } else {
             // load the existing profile
             this.profile.current = parsed.name!;
         }
-        await this.loadProfile(force);
+        await this.loadProfile();
         this.status.loading = false;
     }
 }

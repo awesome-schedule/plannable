@@ -10,19 +10,19 @@ test('profile basic', async () => {
 
     // name of the latest semester
     const latest = s.semester.semesters[0].name;
-    s.profile.addProfile(JSON.stringify({ name: 'prof1' }), '');
+    s.profile.addProfile({ name: 'prof1' });
     expect(s.profile.profiles.map(p => p.name)).toEqual([latest, 'prof1']);
     s.profile.deleteProfile(latest, 0);
 
-    s.profile.addProfile(JSON.stringify({ name: 'prof2' }), '');
+    s.profile.addProfile({ name: 'prof2' });
     expect(s.profile.current).toBe('prof2');
     expect(s.profile.profiles.map(p => p.name)).toEqual(['prof1', 'prof2']);
-    s.profile.addProfile(JSON.stringify({ name: 'prof2' }), '');
-    s.profile.addProfile(JSON.stringify({ wtf: 'prof2' }), 'prof1');
+    s.profile.addProfile({ name: 'prof2' });
+    s.profile.addProfile({ wtf: 'prof2' } as any, 'prof1');
     expect(s.profile.current).toBe('prof1');
 
-    s.profile.addProfile(JSON.stringify({ name: 'prof2' }), '');
-    s.profile.addProfile(JSON.stringify({ name: 'prof3' }), '');
+    s.profile.addProfile({ name: 'prof2' });
+    s.profile.addProfile({ name: 'prof3' });
 
     s.profile.renameProfile(1, 'prof2', 'prof4', JSON.stringify({ name: 'prof2' }));
     expect(s.profile.profiles.map(p => p.name)).toEqual(['prof1', 'prof4', 'prof3']);
@@ -35,8 +35,8 @@ test('profile basic', async () => {
 
     // duplicated name
     flag = false;
-    s.profile.addProfile(JSON.stringify({ name: 'prof4' }), 'prof4');
+    s.profile.addProfile({ name: 'prof4' }, 'prof4');
     expect(s.profile.current).toBe('prof4 (2)');
-    s.profile.addProfile(JSON.stringify({ name: 'prof4' }), 'prof4');
+    s.profile.addProfile({ name: 'prof4' }, 'prof4');
     expect(s.profile.current).toBe('prof4 (3)');
 });

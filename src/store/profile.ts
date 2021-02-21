@@ -367,46 +367,46 @@ class Profile {
      * parse a profile from string, add it to the list of profiles, store it in localStorage, and set [[Profile.current]] to be the newly added profile.
      * If the newly added profile overwrites an existing profile that is marked as remote, also upload it to the remote
      * @note it is the caller's responsibility to call loadProfile() to load the newly added profile
-     * @param raw the raw string representation of the profile (before JSON.parse)
-     * @param fallbackName the fallback name if the raw does not contain the name of the profile
+     * @param newProfile the profile to add
+     * @param fallbackName the fallback name if `newProfile` does not contain the name of the profile
+     * @param overwriteMsg the message shown to the user if there already exists a profile of the same name
      */
-    async addProfile(raw: string, fallbackName: string) {
-        const rawData: SemesterStorage = JSON.parse(raw);
-
+    async addProfile(
+        newProfile: Partial<SemesterStorage>,
+        fallbackName = 'Untitled',
+        overwriteMsg = ''
+    ) {
         // change modified time to new to it can overwrite remote profiles
-        rawData.modified = new Date().toJSON();
-        let profileName = rawData.name || fallbackName;
-        let prof = this.profiles.find(p => p.name === profileName);
+        newProfile.modified = new Date().toJSON();
+        newProfile.name = newProfile.name || fallbackName;
+        let prof = this.profiles.find(p => p.name === newProfile.name);
         if (prof) {
             if (
                 !confirm(
-                    `A profile named ${profileName} already exists! Click confirm to overwrite, click cancel to keep both.`
+                    overwriteMsg ||
+                        `A profile named ${newProfile.name} already exists! Click confirm to overwrite, click cancel to keep both.`
                 )
             ) {
                 let idx = 2;
-                while (this.profiles.find(p => p.name === `${profileName} (${idx})`)) idx++;
-                profileName = `${profileName} (${idx})`;
+                while (this.profiles.find(p => p.name === `${newProfile.name} (${idx})`)) idx++;
+                newProfile.name = `${newProfile.name} (${idx})`;
 
-                rawData.name = profileName;
-                localStorage.setItem(profileName, JSON.stringify(rawData));
-
-                this.profiles.push((prof = this.createProfile(profileName)));
+                localStorage.setItem(newProfile.name, JSON.stringify(newProfile));
+                this.profiles.push((prof = this.createProfile(newProfile.name)));
             }
         } else {
-            this.profiles.push((prof = this.createProfile(profileName)));
+            this.profiles.push((prof = this.createProfile(newProfile.name)));
         }
-        // backward compatibility only
-        if (!rawData.name) rawData.name = profileName;
 
-        const data = JSON.stringify(rawData);
-        localStorage.setItem(profileName, data);
-        this.current = profileName;
+        const data = JSON.stringify(newProfile);
+        localStorage.setItem(newProfile.name, data);
+        this.current = newProfile.name;
 
         if (this.tokenType && prof.remote) {
             const msg = await this.uploadProfile([
                 {
                     profile: data,
-                    name: profileName,
+                    name: newProfile.name,
                     new: true
                 }
             ]);

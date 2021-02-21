@@ -120,7 +120,7 @@ export default class ExportView extends Store {
                 const { profiles } = this.profile;
                 const prevLen = profiles.length;
                 try {
-                    this.profile.addProfile(reader.result.toString(), files[0].name);
+                    await this.profile.addProfile(reader.result.toString(), files[0].name);
                     // unequal length: new profile name added
                     if (prevLen !== profiles.length) this.newName.push(null);
                     await this.loadProfile();

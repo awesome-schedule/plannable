@@ -33,13 +33,7 @@ class Semesters implements SemesterState {
      */
     async loadSemesters() {
         const result = await loadSemesterList();
-        const semesters = result.payload;
-        if (semesters) {
-            this.semesters = semesters;
-        } else {
-            this.semesters = [];
-        }
-
+        this.semesters = result.payload || [];
         return result;
     }
 

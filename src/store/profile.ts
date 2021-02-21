@@ -364,7 +364,8 @@ class Profile {
     }
 
     /**
-     * parse a profile from string, add it to the list of profiles, store it in localStorage, and set [[Profile.current]] to be the newly added profile
+     * parse a profile from string, add it to the list of profiles, store it in localStorage, and set [[Profile.current]] to be the newly added profile.
+     * If the newly added profile overwrites an existing profile that is marked as remote, also upload it to the remote
      * @note it is the caller's responsibility to call loadProfile() to load the newly added profile
      * @param raw the raw string representation of the profile (before JSON.parse)
      * @param fallbackName the fallback name if the raw does not contain the name of the profile
@@ -405,7 +406,8 @@ class Profile {
             const msg = await this.uploadProfile([
                 {
                     profile: data,
-                    name: profileName
+                    name: profileName,
+                    new: true
                 }
             ]);
             if (msg) return msg;

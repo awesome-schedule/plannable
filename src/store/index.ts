@@ -241,11 +241,9 @@ export default class Store extends Vue {
         ) {
             console.warn('Semester data loading aborted');
         } else {
-            if (force) this.noti.info(`Updating ${parsed.currentSemester} data...`, 3600, true);
-            const msg = await this.semester.selectSemester(
-                parsed.currentSemester || this.semester.semesters[0],
-                force
-            );
+            const semester = parsed.currentSemester || this.semester.semesters[0];
+            if (force) this.noti.info(`Updating ${semester.name} data...`, 3600, true);
+            const msg = await this.semester.selectSemester(semester, force);
             this.noti.notify(msg);
             if (!msg.payload) return;
         }

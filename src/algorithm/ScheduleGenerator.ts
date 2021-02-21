@@ -157,7 +157,6 @@ class ScheduleGenerator {
      */
     public getSchedules(
         schedule: ProposedSchedule,
-        sort = true,
         refSchedule: GeneratedSchedule['All'] = {}
     ): NotiMsg<ScheduleEvaluator> {
         console.time('algorithm bootstrapping');
@@ -283,7 +282,7 @@ class ScheduleGenerator {
         );
 
         console.time('sort');
-        if (sort) evaluator.sort();
+        evaluator.sort();
         console.timeEnd('sort');
 
         let msgString = '';

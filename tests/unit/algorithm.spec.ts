@@ -44,6 +44,8 @@ describe('ScheduleGenerator Test', () => {
         sort.sortBy[4].enabled = true;
         const result = store.generateSchedules();
         expect(result!.empty()).toBeFalsy();
+        expect(result!.getRange(sort.sortBy[0])).toBeGreaterThan(0.0);
+        expect(result!.refSchedule).toEqual({});
 
         schedule.addEvent('MoFr 10:00AM - 10:15AM', false);
         schedule.addEvent('MoFr 21:00PM - 22:30PM', false);

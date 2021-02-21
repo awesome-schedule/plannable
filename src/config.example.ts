@@ -37,10 +37,9 @@ export interface BackendConfig {
 
 export interface DataEnd {
     /**
-     * an async function that fetches the array of buildings
-     * @returns a FastSearcher instance constructed from the array of buildings
+     * an async function that fetches the array of building names
      */
-    readonly buildings: () => Promise<FastSearcher<string>>;
+    readonly buildings: () => Promise<string[]>;
     /**
      * an async function that fetches the distance matrix (equivalently, the walking time) between the buildings.
      * matrix[i * len + j] represents the distance between the ith building and jth building in the array of buildings fetched by dataend.buildings

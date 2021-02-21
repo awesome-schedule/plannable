@@ -34,7 +34,7 @@ test.skip('algorithm benchmark', () => {
     const num = 6;
     for (let i = 0; i < num; i++) {
         const start = new Date().getTime();
-        const { payload: result } = generator.getSchedules(schedule, false);
+        const { payload: result } = generator.getSchedules(schedule);
         const time = (new Date().getTime() - start) / 1000;
         expect(result!.empty()).toBeFalsy();
         total += time;

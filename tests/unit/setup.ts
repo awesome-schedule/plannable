@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/camelcase */
+import { FastSearcher } from '@/algorithm/Searcher';
 import { dataend } from '@/config';
+import { setupTimeMatrix } from '@/data/BuildingLoader';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
 import Section from '@/models/Section';
@@ -137,7 +139,7 @@ beforeAll(async () => {
     catalog.courseDict.cs45015.sections.push(section);
     window.saveStatus = saveStatus;
     window.catalog = new Catalog(catalog.semester, catalog['data'](), catalog.modified);
-    window.timeMatrix = await dataend.distances();
-    window.buildingSearcher = await dataend.buildings();
+    setupTimeMatrix((window.timeMatrix = await dataend.distances()));
+    window.buildingSearcher = new FastSearcher(await dataend.buildings());
     window.watchers = new WatchFactory();
 });

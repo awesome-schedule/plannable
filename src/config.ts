@@ -10,7 +10,6 @@
 import axios from 'axios';
 import { parse } from 'papaparse';
 import { stringify } from 'querystring';
-import { FastSearcher } from './algorithm/Searcher';
 import Catalog, { SemesterJSON } from './models/Catalog';
 import Course, { CourseFields } from './models/Course';
 import Meeting, { getInstructors } from './models/Meeting';
@@ -192,7 +191,7 @@ async function requestTimeMatrix(): Promise<Int32Array> {
  */
 async function requestBuildingSearcher() {
     const res = await axios.get<string[]>(`${getApi()}/data/Distance/Building_Array.json`);
-    return new FastSearcher(res.data);
+    return res.data;
 }
 
 async function requestCourses(semester: SemesterJSON) {

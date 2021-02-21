@@ -4,6 +4,7 @@ import * as Utils from '@/utils';
 import colorSchemes from '@/data/ColorSchemes';
 import ProposedSchedule from '@/models/ProposedSchedule';
 import GeneratedSchedule from '@/models/GeneratedSchedule';
+import { options } from '@/algorithm/Renderer';
 
 describe('Schedule Test', () => {
     it('Schedule Color Hash', () => {
@@ -66,6 +67,7 @@ describe('Schedule Test', () => {
     });
 
     it('add/update course/events', async () => {
+        options.showFixed = true;
         const schedule = new ProposedSchedule();
         const cs11105 = window.catalog.getCourse('cs11105');
         const id0 = cs11105.sections[1].id;

@@ -35,11 +35,12 @@ import URLModal from './components/modals/URLModal.vue';
 import VersionModal from './components/modals/VersionModal.vue';
 
 import randomColor from 'randomcolor';
-import { loadBuildingSearcher, loadTimeMatrix } from './data/BuildingLoader';
+import { loadBuildingSearcher, loadTimeMatrix, setupTimeMatrix } from './data/BuildingLoader';
 import Store, { parseFromURL } from './store';
 import GeneratedSchedule from './models/GeneratedSchedule';
 import { backend, runningOnElectron, version } from './config';
 import axios from 'axios';
+import { FastSearcher } from './algorithm/Searcher';
 
 /** whether the version stored in localStorage matches the current version */
 const match = localStorage.getItem('version') === version;
@@ -144,16 +145,10 @@ export default class App extends Store {
         if (pay4.level !== 'warn') this.noti.notify(pay4);
 
         this.noti.notify(pay1);
-        if (pay1.payload) {
-            window.timeMatrix = pay1.payload;
-            const M = window.NativeModule;
-            const ptr = M._malloc(window.timeMatrix.byteLength);
-            M.HEAP32.set(window.timeMatrix, ptr / 4);
-            M._setTimeMatrix(ptr, window.timeMatrix.length ** 0.5);
-        }
+        if (pay1.payload) setupTimeMatrix((window.timeMatrix = pay1.payload));
 
         this.noti.notify(pay2);
-        if (pay2.payload) window.buildingSearcher = pay2.payload;
+        if (pay2.payload) window.buildingSearcher = new FastSearcher(pay2.payload);
 
         this.noti.notify(pay3);
         if (pay3.payload) {

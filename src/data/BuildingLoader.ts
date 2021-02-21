@@ -9,7 +9,6 @@
  */
 import Expirable from './Expirable';
 import { fallback, loadFromCache } from './Loader';
-import { FastSearcher } from '@/algorithm/Searcher';
 import { dataend } from '@/config';
 
 export interface TimeMatrixJSON extends Expirable {
@@ -18,6 +17,13 @@ export interface TimeMatrixJSON extends Expirable {
 
 export interface BuildingListJSON extends Expirable {
     buildingList: string[];
+}
+
+export function setupTimeMatrix(timeMatrix: Int32Array) {
+    const M = window.NativeModule;
+    const ptr = M._malloc(timeMatrix.byteLength);
+    M.HEAP32.set(timeMatrix, ptr / 4);
+    M._setTimeMatrix(ptr, timeMatrix.length ** 0.5);
 }
 
 /**
@@ -62,15 +68,14 @@ export function loadTimeMatrix(force = false) {
  * If it expires or does not exist,
  * load a fresh one from the data backend and store it in localStorage.
  *
- * Then, construct and return a building searcher
  * storage key: "buildingList"
  */
 export function loadBuildingSearcher(force = false) {
     return fallback(
-        loadFromCache<FastSearcher<string>, BuildingListJSON>(
+        loadFromCache<string[], BuildingListJSON>(
             'buildingList',
             dataend.buildings,
-            x => new FastSearcher(x.buildingList),
+            x => x.buildingList,
             {
                 expireTime: 1000 * 86400,
                 force

@@ -80,10 +80,10 @@ npm config set script-shell YOURSHELL
 
 -   Node.js >= 12.x
 
-Clone the repository. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. The `getwasm` script will clone the pre-build wasm binary. Note that if you want to build wasm yourself, please refer to the Build WASM section below.
+Clone this repository. The `updatedata` script will automatically clone `https://github.com/awesome-schedule/data` into `scripts` so the data (e.g. course catalog) can be access locally. The `getwasm` script will clone the pre-build wasm binary. Note that if you want to build wasm yourself, please refer to the Build WASM section below.
 
 ```bash
-git clone https://github.com/awesome-schedule/plannable
+git clone https://github.com/awesome-schedule/plannable && cd plannable
 npm run updatedata
 npm run getwasm
 ```

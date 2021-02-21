@@ -6,22 +6,12 @@
         </button>
         <div class="input-group mt-2">
             <input
-                v-if="realtime"
-                ref="classSearch"
                 type="text"
                 class="form-control form-control-sm"
                 placeholder="Title/Topic/Prof./Desc."
-                @input="onInput($event.target.value)"
-                @keydown.enter="getClass($event.target.value)"
-                @keyup.esc="closeClassList()"
-            />
-            <input
-                v-else
-                ref="classSearch"
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Title/Topic/Prof./Desc."
-                @keydown.enter="getClass($event.target.value)"
+                v-model="query"
+                @input="onInput()"
+                @keydown.enter="getClass()"
                 @keyup.esc="closeClassList()"
             />
             <div class="input-group-append">
@@ -33,7 +23,7 @@
                 >
                     <span class="sr-only">Loading...</span>
                 </div>
-                <span v-else class="input-group-text px-2 click-icon">
+                <span v-else class="input-group-text px-2 click-icon" @click="getClass()">
                     <i class="fas fa-search"></i>
                 </span>
             </div>
@@ -52,6 +42,9 @@
                 @course-modal="modal.showCourseModal($event.crs, $event.match)"
                 @close="closeClassList()"
             ></ClassList>
+        </div>
+        <div v-else-if="query.length" class="mt-2 mx-2">
+            Input too short or no results
         </div>
         <div v-else class="mx-3 my-2">
             <div class="form-group row no-gutters mt-0 mb-1 mx-2">
@@ -72,12 +65,17 @@
             </div>
             <ol class="pl-2">
                 <li class="mb-2 pl-1">
-                    You should use fuzzy search only when you want do an <b>approximate</b>
-                    match to your query. If you know exactly what your target course's course
-                    number/title/etc., please use the ordinary search instead.
+                    You should use fuzzy search only when you want do an approxiate matching. If you
+                    know exactly what your target course's number/title/etc. is, please use the
+                    ordinary search instead.
                 </li>
                 <li class="mb-2 pl-1">
-                    Searching for course numbers (e.g. CS 2102) is not supported.
+                    Searching for course numbers (e.g. CS 2102) is not supported here.
+                </li>
+                <li class="mb-2 pl-1">
+                    If your computer is too slow to run realtime search, you can uncheck the
+                    realtime checkbox. To search in non-realtime mode, type your query and press
+                    enter or click the search icon.
                 </li>
             </ol>
         </div>

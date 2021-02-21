@@ -24,18 +24,20 @@ import ClassList from '../ClassList.vue';
 export default class FuzzyView extends Store {
     inputCourses: Course[] = [];
     inputMatches: SearchMatch[] = [];
+    query = '';
 
     /**
      * represent the current state of the fuzzy search component.
      * disable the input box if true
      */
     loading = false;
-
+    /**
+     * whether realtime search is enabled
+     */
     realtime = true;
 
-    onInput(query: string) {
-        if (this.realtime) this.getClass(query);
-        else if (!query) this.getClass('');
+    onInput() {
+        if (this.realtime) this.getClass();
     }
 
     /**
@@ -47,10 +49,10 @@ export default class FuzzyView extends Store {
      *
      * @see Catalog.search
      */
-    async getClass(query: string) {
+    async getClass() {
+        const query = this.query;
         if (!query) {
-            this.inputCourses = [];
-            this.inputMatches = [];
+            this.closeClassList();
             return;
         }
         this.loading = true;
@@ -61,8 +63,9 @@ export default class FuzzyView extends Store {
     }
 
     closeClassList() {
-        (this.$refs.classSearch as HTMLInputElement).value = '';
-        this.getClass('');
+        this.query = '';
+        this.inputCourses = [];
+        this.inputMatches = [];
     }
 
     /**

@@ -12,6 +12,7 @@ import axios from 'axios';
 import { backend, runningOnElectron } from '@/config';
 import { NotiMsg } from './notification';
 import { stringify } from 'querystring';
+import { timeout } from '@/utils';
 
 interface BackendBaseResponse {
     /** true if success, false otherwise */
@@ -427,16 +428,20 @@ class Profile {
     ): Promise<ResponseType | BackendFailedResponse> {
         try {
             return (
-                await axios.post<ResponseType>(endpoint, request, {
-                    headers: {
-                        Authorization: this.tokenType + ' ' + this.accessToken
-                    }
-                })
+                await timeout(
+                    axios.post<ResponseType>(endpoint, request, {
+                        headers: {
+                            Authorization: this.tokenType + ' ' + this.accessToken
+                        }
+                    }),
+                    5000,
+                    'Timed out'
+                )
             ).data;
         } catch (err) {
             return {
                 success: false,
-                message: err.message
+                message: err.message || err
             };
         }
     }

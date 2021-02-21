@@ -16,36 +16,7 @@ import { calcOverlap, parseDate } from '../utils';
 import ScheduleEvaluator, { EvaluatorOptions } from './ScheduleEvaluator';
 
 /**
- * The TimeArray is a condensed typed array storing
- * the time (and usually room index) information of the a schedule at each day.
- * Index from 0 to 6 represents the index of information from Monday to Sunday.
- * Index 7 is the length of the array, which is there for convenience.
- * Example:
- * ```js
- * const timeArr = [
- *   7, 7, 7, 7, 13, 13, 13, 13, //indices
- *   600, 660, 11, 900, 960, // Monday
- *   1200, 1260, 12 // Friday
- * ]
- * ```
- * represents that this entity will take place
- * every Monday 10:00 to 11:00 at room index 11, 15:00 to 16:00 at room 2,
- * and Friday 20:00 to 21:00 at room 12
- *
- * a typical loop that visits these info is shown below
- * ```js
- * for (let i = 0; i < 7; i++){
- *   for (let j = timeArr[i]; j < timeArr[i+1]; j += 3) {
- *     const timeStart = timeArr[j],
- *           timeEnd   = timeArr[j+1],
- *           roomIdx   = timeArr[j+2];
- *     // do some processing
- *   }
- * }
- *
- * Note that the room information might be absent from the TimeArray, so instead of
- * using j += 3 in the inner loop, we might use j += 2 in some use cases.
- * ```
+ * TODO: add description
  */
 export type TimeArray = [number[], number[], number[], number[], number[], number[], number[]];
 /**

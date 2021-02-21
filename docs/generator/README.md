@@ -134,7 +134,7 @@ Array.from(allChoices.slice(i, i + numCourses)).map(
 
 ### Enumeration
 
-The schedule enumeration algorithm is relatively straightforward. See [ScheduleGenerator.ts](/src/algorithm/ScheduleGenerator.ts) for inline comments about the details of the algorithm.
+The schedule enumeration algorithm is relatively straightforward. See [ScheduleGenerator.cpp](/src/algorithm/ScheduleGenerator.cpp) for inline comments about the details of the algorithm.
 
 ## Schedule Evaluation and Sorting
 

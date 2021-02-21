@@ -15,12 +15,6 @@
 
 using namespace std;
 
-struct TimeEntry {
-    int16_t start;
-    int16_t end;
-    int16_t room;
-};
-
 namespace ScheduleGenerator {
 
 template <typename T>
@@ -213,13 +207,21 @@ float similarity(int idx) {
     return sum;
 }
 
+// just used for a place holder, will never be called
+float IamFeelingLucky(int idx) {
+    return 1.0;
+}
+
 float (*sortFunctions[])(int idx) = {
     distance,
     variance,
     compactness,
     lunchTime,
     noEarly,
-    similarity};
+    similarity,
+    IamFeelingLucky  // placeholder
+    // can add more sort functions here
+};
 
 #ifdef DEBUG_LOG
 const char* sortFunctionNames[] = {
@@ -356,7 +358,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
                     curBlock[p + 1] = timeArrayContent[n + 1];
                     curBlock[p + 2] = timeArrayContent[n + 2];
                     // TODO: bulk move
-                    // *((TimeArray*)&timeArrayContent[n]) = *((TimeArray*)&curBlock[p]);
+                    // *((TimeEntry*)&timeArrayContent[n]) = *((TimeEntry*)&curBlock[p]);
                 }
             }
         }
@@ -375,6 +377,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
  * Indexed like this: conflictCache[section1][course1][section2][course2]
  * which is in fact: conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
  * Can do bitpacking, but no performance improvement observed
+ * @param timeArray TODO: add description
  * @returns the number of schedules generated. Returns -1 on memory allocation failure
  */
 int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
@@ -474,9 +477,11 @@ end:;
 
     addToEval(timeArray, maxLen);
 
-    // cleanup
+// cleanup
+#ifndef _TEST
     delete[] conflictCache;
     delete[] timeArray;
+#endif
     for (auto& cache : sortCoeffCache) {
         if (cache.coeffs != NULL) {
             delete[] cache.coeffs;
@@ -598,3 +603,29 @@ void setRefSchedule(uint8_t* ref) {
 }
 
 }  // namespace ScheduleGenerator
+#ifdef _TEST
+int main() {
+    using namespace ScheduleGenerator;
+    uint16_t timeArray[] = {
+        32, 32, 35, 35, 38, 38, 38, 38,
+        38, 38, 41, 41, 44, 44, 44, 44,
+        44, 44, 47, 47, 50, 50, 50, 50,
+        50, 50, 53, 53, 56, 56, 56, 56,
+        240, 300, (uint16_t)-1, 240, 300, (uint16_t)-1,
+        0, 60, (uint16_t)-1, 0, 60, (uint16_t)-1,
+        400, 460, (uint16_t)-1, 400, 460, (uint16_t)-1,
+        120, 180, (uint16_t)-1, 120, 180, (uint16_t)-1};
+    for (int i = 0; i < 4 * 8; i++) {
+        timeArray[i] -= 32;
+    }
+
+    uint8_t conflict[16] = {0};
+    uint8_t secLens[2] = {2, 2};
+    generate(2, 10, secLens, conflict, timeArray);
+    for (int i = 0; i < (8 + 12) * 4; i++) {
+        cout << blocks[i] << ",";
+        /* code */
+    }
+    cout << endl;
+}
+#endif

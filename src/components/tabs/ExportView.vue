@@ -207,15 +207,16 @@
         </div>
 
         <div v-else-if="allowBackend" class="w-100 my-2 text-center">
-            <small
-                class="mx-3"
-                v-if="!profile.tokenType && profile.profiles.some((p) => p.remote)"
-                style="font-size: 10px"
-            >
-                <i class="fas fa-exclamation-triangle text-warning"></i>
-                Some profiles are marked as synced, but you've been logged out. To re-enabled sync,
-                please login.
-            </small>
+            <div class="mx-3">
+                <small
+                    v-if="!profile.tokenType && profile.profiles.some(p => p.remote)"
+                    style="font-size: 12px"
+                >
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Some profiles are marked as synced, but you've been logged out. To re-enabled
+                    sync, please login.
+                </small>
+            </div>
             <button class="btn btn-outline-primary mt-2 mx-3" @click="profile.loginBackend()">
                 Login to Hoosmyprofessor
             </button>

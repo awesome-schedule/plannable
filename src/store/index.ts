@@ -407,7 +407,7 @@ export default class Store extends Vue {
         // no profile for target semester exists. let's create one
         if (!parsed.currentSemester) {
             parsed.currentSemester = target;
-            profile.addProfile(
+            await profile.addProfile(
                 parsed,
                 target.name,
                 `You already have a profile named ${target.name}. However, it does not correspond to the ${target.name} semester. Click Ok to overwrite, click Cancel to keep both.`

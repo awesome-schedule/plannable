@@ -105,14 +105,16 @@ You can use `npx electron .` to launch the native application powered by electro
 
 You can use `npx electron-builder --win` (or `--mac`, `--linux`) to build the native executable for your platform.
 
-### Build WASM
+### Build WebAssembly (WASM)
+
+> Plannable utilizes WASM to speed up some of its compute-intensive part
 
 Make sure that you have [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) installed. Also make sure that emsdk_env.sh is sourced before running the following scripts.
 
-Before you can build the binary, you need to compile GLPK first. This only needs to be done once.
+Before you can build the binary, you need to download dependencies (parallel-hashmap and GLPK) and compile GLPK. This only needs to be done once, with the following script:
 
 ```bash
-npm run getglpk
+npm run getdep
 ```
 
 Then, each time you modify any cpp file, you can simply do

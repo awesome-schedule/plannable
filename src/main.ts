@@ -16,6 +16,7 @@ import App from './App.vue';
 import axios from 'axios';
 import WatchFactory from './store/watch';
 import { saveStatus } from './store';
+import { formatLocationURL } from './config';
 
 axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN';
 axios.defaults.xsrfCookieName = 'csrftoken';
@@ -91,6 +92,7 @@ declare module 'vue/types/vue' {
     // Declare augmentation for Vue
     interface Vue {
         highlightMatch: typeof highlightMatch;
+        formatLocationURL: typeof formatLocationURL;
     }
 }
 
@@ -105,6 +107,7 @@ Vue.directive('top', {
 Vue.config.productionTip = false;
 Vue.config.devtools = true;
 Vue.prototype.highlightMatch = highlightMatch;
+Vue.prototype.formatLocationURL = formatLocationURL;
 
 window.saveStatus = saveStatus;
 window.watchers = new WatchFactory();

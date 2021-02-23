@@ -15,7 +15,16 @@
                     <div class="m-color">{{ section.instructors.join(', ') }}</div>
                     <div class="m-color">{{ section.dates }}</div>
                     <div v-for="(meeting, idx) in section.meetings" :key="idx" class="m-color">
-                        {{ meeting.days }} @ {{ meeting.room }}
+                        {{ meeting.days }} @
+                        <a
+                            v-if="formatLocationURL(meeting.room)"
+                            :href="formatLocationURL(meeting.room)"
+                            target="_blank"
+                            >{{ meeting.room }}
+                        </a>
+                        <template v-else>
+                            {{ meeting.room }}
+                        </template>
                     </div>
                     <div class="m-color">
                         Status: {{ section.status }} | Enrolled: {{ section.enrollment }} |

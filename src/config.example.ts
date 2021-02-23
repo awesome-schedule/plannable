@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { FastSearcher } from './algorithm/Searcher';
 import Catalog, { SemesterJSON } from './models/Catalog';
 import Course from './models/Course';
 import Section from './models/Section';
@@ -91,6 +90,14 @@ export const modalLinks: ModalLinks = {
     section: [],
     course: []
 };
+
+/**
+ * Given an address, convert it to an link to the map (e.g. Google map)
+ * @returns an url or an empty string
+ */
+export function formatLocationURL(addr: string) {
+    return '';
+}
 
 /**
  * some default UI configurations. Usually no need to change

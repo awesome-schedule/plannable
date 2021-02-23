@@ -36,6 +36,9 @@ dev: Renderer.dev.o ScheduleGenerator.dev.o Searcher.dev.o
 prod: Renderer.prod.o ScheduleGenerator.prod.o Searcher.prod.o
 	emcc -O3 --closure 1 $(EMCC_LINK_FLAGS) glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a *.prod.o -o temp/wasm_modules.js
 
+test: ScheduleGenerator.cpp
+	clang++ -m32 -O2 -D_TEST ScheduleGenerator.cpp && ./a.out
+
 clean:
 	rm -f *.prod.o
 	rm -f *.dev.o

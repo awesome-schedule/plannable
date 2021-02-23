@@ -84,6 +84,18 @@ export const modalLinks: defaultConfig.ModalLinks = {
 };
 
 /**
+ * Given an address, convert it to an link to the map (e.g. Google map)
+ * @returns an url or an empty string
+ */
+export function formatLocationURL(addr: string) {
+    const lAddr = addr.toLowerCase();
+    if (lAddr.startsWith('tba') || lAddr.startsWith('tbd') || lAddr.startsWith('web')) return '';
+    return `https://www.google.com/maps/search/?api=1&query=${window.encodeURIComponent(
+        addr
+    )},Charlottesville,VA`;
+}
+
+/**
  * some default UI configurations. Usually no need to change
  */
 export const ui = defaultConfig.ui;

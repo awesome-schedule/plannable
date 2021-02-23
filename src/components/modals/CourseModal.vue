@@ -56,14 +56,22 @@
                                         {{ section.dates }}
                                     </td>
                                     <td>
-                                        <template v-for="(meeting, idx) in section.meetings"
-                                            >{{ meeting.days }} <br :key="idx" />
-                                        </template>
+                                        <div :key="idx" v-for="(meeting, idx) in section.meetings">
+                                            {{ meeting.days }}
+                                        </div>
                                     </td>
                                     <td>
-                                        <template v-for="(meeting, idx) in section.meetings"
-                                            >{{ meeting.room }} <br :key="idx" />
-                                        </template>
+                                        <div :key="idx" v-for="(meeting, idx) in section.meetings">
+                                            <a
+                                                v-if="formatLocationURL(meeting.room)"
+                                                :href="formatLocationURL(meeting.room)"
+                                                target="_blank"
+                                                >{{ meeting.room }}
+                                            </a>
+                                            <template v-else>
+                                                {{ meeting.room }}
+                                            </template>
+                                        </div>
                                     </td>
                                     <td>{{ section.status }}</td>
                                     <td>

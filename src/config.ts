@@ -63,6 +63,10 @@ export const modalLinks: defaultConfig.ModalLinks = {
             }
         },
         {
+            name: 'Reviews (theCourseForum)',
+            action: viewCourseforum
+        },
+        {
             name: 'Reviews (Hoosmyprofessor, Chinese)',
             action: viewHpEvals
         }
@@ -75,6 +79,10 @@ export const modalLinks: defaultConfig.ModalLinks = {
         {
             name: 'Grade Distribution',
             action: viewGrades
+        },
+        {
+            name: 'Reviews (theCourseForum)',
+            action: viewCourseforum
         },
         {
             name: 'Reviews (Hoosmyprofessor, Chinese)',
@@ -146,8 +154,7 @@ export const keyRegex: typeof enableKeyConversion extends true
 function viewGrades(semester: SemesterJSON, course: CourseFields) {
     window.open(
         `https://vagrades.com/uva/${course.department.toUpperCase()}${course.number}`,
-        '_blank',
-        'width=650,height=700,scrollbars=yes'
+        '_blank'
     );
 }
 
@@ -157,13 +164,19 @@ function viewGrades(semester: SemesterJSON, course: CourseFields) {
 function viewEvals(semester: SemesterJSON, param: CourseFields) {
     window.open(
         `https://evals.itc.virginia.edu/course-selectionguide/pages/SGMain.jsp?cmp=${param.department},${param.number}`,
-        '_blank',
-        'width=720,height=700,scrollbars=yes'
+        '_blank'
     );
 }
 
 function viewHpEvals(semester: SemesterJSON, param: CourseFields) {
     window.open(`https://match.msnatuva.org/courses/v2/${param.key}/`, '_blank');
+}
+
+function viewCourseforum(semester: SemesterJSON, param: CourseFields) {
+    window.open(
+        `https://thecourseforum.com/course/${param.department.toUpperCase()}/${param.number}`,
+        '_blank'
+    );
 }
 
 /**

@@ -389,7 +389,21 @@
                         v-model.number="options.LPModel"
                         min="1"
                         step="1"
-                        max="2"
+                        max="3"
+                        type="number"
+                        class="form-control form-control-sm"
+                    />
+                </div>
+            </div>
+            <div class="form-group row no-gutters my-0 mx-3">
+                <label for="tFactor" class="col-lg-6 pt-1 pb-0 col-form-label">t Factor</label>
+                <div class="col-lg-6">
+                    <input
+                        id="tFactor"
+                        v-model.number="options.tFactor"
+                        min="0"
+                        step="0.1"
+                        max="10"
                         type="number"
                         class="form-control form-control-sm"
                     />

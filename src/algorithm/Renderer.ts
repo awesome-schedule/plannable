@@ -17,7 +17,8 @@ export const options = {
     LPIters: 50,
     LPModel: 2,
     showFixed: false,
-    MILP: false
+    MILP: false,
+    tFactor: 0.1
 };
 
 /**
@@ -34,7 +35,8 @@ export async function computeBlockPositions(days: ScheduleDays) {
         options.tolerance,
         options.LPIters,
         options.LPModel,
-        +options.MILP
+        +options.MILP,
+        options.tFactor
     );
     let N = 0;
     let sum = 0;

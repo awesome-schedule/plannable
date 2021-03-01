@@ -277,7 +277,7 @@ export default class ProposedSchedule extends Schedule {
     /**
      * add some random event to the schedule. For testing purposes only
      */
-    private randEvents(num = 20, maxDuration = 120, minDuration = 20) {
+    private randEvents(num = 20, maxDuration = 240, minDuration = 20) {
         for (let i = 0; i < num; i++) {
             let days = '';
             for (let j = 0; j < 7; j++) {
@@ -298,20 +298,8 @@ export default class ProposedSchedule extends Schedule {
                 Utils.to12hr(Utils.intTo24hr(start)) +
                 ' - ' +
                 Utils.to12hr(Utils.intTo24hr(end));
-            try {
-                for (const e of this.events) {
-                    if (e.days === days) {
-                        throw new Error(
-                            `Your new event's time is identical to ${e.title}. Please consider merging these two events.`
-                        );
-                    }
-                }
-                const ev = new Event(days, true, 'rand ' + i);
-                this.events.push(ev);
-            } catch (e) {
-                console.log(e);
-                i--;
-            }
+            // no dup check
+            this.events.push(new Event(days, true, 'rand ' + i));
         }
         this.computeSchedule();
         window.saveStatus();

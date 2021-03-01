@@ -58,14 +58,14 @@ export async function computeBlockPositions(days: ScheduleDays) {
          * assert(offsetof(ScheduleBlock, isFixed) == 0);
          * assert(offsetof(ScheduleBlock, left) == 24);
          * assert(offsetof(ScheduleBlock, width) == 32);
-         * assert(sizeof(ScheduleBlock) == 88);
+         * assert(sizeof(ScheduleBlock) == 64);
          * ```
          */
         const rPtr = Module._compute(bufPtr, len);
-        const result = new Float64Array(Module.HEAPU8.buffer, rPtr, len * 11);
+        const result = new Float64Array(Module.HEAPU8.buffer, rPtr, len * 8);
         for (let i = 0; i < len; i++) {
-            blocks[i].left = result[11 * i + 3];
-            blocks[i].width = result[11 * i + 4];
+            blocks[i].left = result[8 * i + 3];
+            blocks[i].width = result[8 * i + 4];
         }
         if (len > N) {
             N = len;
@@ -76,9 +76,9 @@ export async function computeBlockPositions(days: ScheduleDays) {
         // sum += Module._getSum();
         // sumSq += Module._getSumSq();
         if (options.showFixed) {
-            const arr = new Uint8Array(Module.HEAPU8.buffer, rPtr, len * 88);
+            const arr = new Uint8Array(Module.HEAPU8.buffer, rPtr, len * 64);
             for (let i = 0; i < len; i++) {
-                if (arr[88 * i]) (blocks[i] as any).background = '#000';
+                if (arr[64 * i]) (blocks[i] as any).background = '#000';
             }
         }
     }

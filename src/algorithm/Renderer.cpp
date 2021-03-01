@@ -1,6 +1,7 @@
 #include <glpk.h>
 
 #include <algorithm>
+#include <chrono>
 #include <climits>
 #include <cstring>
 #include <iostream>
@@ -57,14 +58,6 @@ struct ScheduleBlock {
     double width;
 
     /**
-     * all blocks that conflict with the current block and also on the LHS of the current block
-    */
-    vector<ScheduleBlock*> leftN;
-    /**
-     * all blocks that conflict with the current block and also on the RHS of the current block
-    */
-    vector<ScheduleBlock*> rightN;
-    /**
      * cleftN: Condensed leftN
      * a subset of leftN. For each node in leftN, it belongs to cleftN if and only if 
      * it is not in the leftN of any node that is in leftN
@@ -86,10 +79,6 @@ ScheduleBlock** __restrict__ blocksReordered = NULL;
 ScheduleBlock** __restrict__ blockBuffer = NULL;
 
 int* __restrict__ idxMap = NULL;
-/**
- * matrix[i*N+j] is true iff event j is on the LHS of event i
-*/
-bool* __restrict__ matrix = NULL;
 
 // --------- results -----------------
 double r_sum;
@@ -190,50 +179,50 @@ int intervalScheduling2() {
     return numRooms + 1;
 }
 
+struct TimeEntry {
+    int16_t startMin, endMin;
+};
+
 /**
  * for the array of schedule blocks provided, construct an adjacency list
  * to represent the conflicts between each pair of blocks
  * @note this function assumes blocksReordered is already sorted by start time
  */
-void constructAdjList() {
+void constructAdjList(int total) {
+    auto* grouped = new vector<ScheduleBlock*>[total];
     for (int i = 0; i < N; i++) {
-        auto bi = blocksReordered[i];
-        for (int j = i + 1; j < N; j++) {
-            auto bj = blocksReordered[j];
-            if (bj->startMin + dfsTolerance >= bi->endMin) break;
-            if (bi->depth < bj->depth) {
-                matrix[bj->idx * N + bi->idx] = 1;
-                bj->leftN.push_back(bi);
-                bi->rightN.push_back(bj);
-            } else {
-                matrix[bi->idx * N + bj->idx] = 1;
-                bj->rightN.push_back(bi);
-                bi->leftN.push_back(bj);
+        grouped[blocks[i].depth].push_back(&blocks[i]);
+    }
+    for (int i = 0; i < total; i++) {
+        sort(grouped[i].begin(), grouped[i].end(), [](ScheduleBlock* a, ScheduleBlock* b) { return a->startMin < b->startMin; });
+    }
+    vector<TimeEntry> ranges;
+    for (int i = 1; i < total; i++) {
+        for (auto block : grouped[i]) {
+            ranges.resize(0);
+            int16_t startMin = block->startMin, endMin = block->endMin;
+            for (int j = i - 1; j >= 0; j--) {
+                for (auto leftBlock : grouped[j]) {
+                    if (leftBlock->startMin >= endMin) break;
+                    if (leftBlock->endMin > startMin) {
+                        // if (leftBlock->startMin < endMin && leftBlock->endMin > startMin) {  // conflict
+                        for (auto& [startMin, endMin] : ranges) {
+                            if (leftBlock->startMin < endMin && leftBlock->endMin > startMin) {
+                                startMin = min(startMin, leftBlock->startMin);
+                                endMin = max(endMin, leftBlock->endMin);
+                                goto nopush1;
+                            }
+                        }
+                        block->cleftN.push_back(leftBlock);
+                        leftBlock->crightN.push_back(block);
+                        ranges.push_back({leftBlock->startMin, leftBlock->endMin});
+                    nopush1:;
+                    }
+                }
             }
         }
     }
-}
-
-/**
- * @note one of the bottle necks of the algorithm, if enabled
- */
-void condenseAdjList(ScheduleBlock* end) {
-    for (auto block = blocks; block < end; block++) {
-        for (auto v1 : block->leftN) {
-            for (auto v : block->leftN) {
-                if (matrix[v->idx * N + v1->idx]) goto nextl1;
-            }
-            block->cleftN.push_back(v1);
-        nextl1:;
-        }
-        for (auto v1 : block->rightN) {
-            for (auto v : block->rightN) {
-                if (matrix[v1->idx * N + v->idx]) goto nextl2;
-            }
-            block->crightN.push_back(v1);
-        nextl2:;
-        }
-    }
+    delete[] grouped;
 }
 
 /**
@@ -674,10 +663,6 @@ void buildMILPModel(int total) {
     glp_delete_prob(lp);
 }
 
-struct Input {
-    int16_t startMin, endMin;
-};
-
 inline void computeInitialWidth(ScheduleBlock* end, int total) {
     for (auto block = blocks; block < end; block++) {
         block->left = static_cast<double>(block->depth) / total;
@@ -723,25 +708,23 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
  * @param arr the array of start/end times of the blocks. It will be freed before this function returns.
  * @param N the number of blocks
  */
-ScheduleBlock* compute(const Input* arr, int _N) {
+ScheduleBlock* compute(const TimeEntry* arr, int _N) {
     // ---------------------------- setup --------------------------------------
     N = _N;
-    if (N > maxN) {  // TOOD: check for allocation failure
+    if (N > maxN) {  // TODO: check for allocation failure
         // we need to allocate more memory.
         // the previous ptr may be NULL, so realloc will be equivalent to malloc in that case
         blocks = (ScheduleBlock*)realloc(blocks, N * sizeof(ScheduleBlock));
 
         // initialize newly allocated memory
         for (int i = maxN; i < N; i++) new ((void*)&blocks[i]) ScheduleBlock;
+
+        // they are overwritten anyway, no need to use memset to initialize/clear them
         blocksReordered = (ScheduleBlock**)realloc(blocksReordered, N * sizeof(ScheduleBlock*));
         blockBuffer = (ScheduleBlock**)realloc(blockBuffer, N * sizeof(ScheduleBlock*));
         idxMap = (int*)realloc(idxMap, N * sizeof(int));
-        matrix = (bool*)realloc(matrix, N * N * sizeof(bool));
         maxN = N;
     }
-    // for old arrays, use memset if needed
-    // if they are overwritten anyway, no need to use memset
-    memset(matrix, 0, N * N * sizeof(bool));
     r_sumSq = r_sum = 0.0;
 
     // initialize each block
@@ -759,11 +742,10 @@ ScheduleBlock* compute(const Input* arr, int _N) {
         // block.pathDepth = 0;
         // block.left = 0.0;
         // block.depth = 0.0;
-        block.leftN.resize(0);
-        block.rightN.resize(0);
         block.cleftN.resize(0);
         block.crightN.resize(0);
     }
+    // free the input memory
     free((void*)arr);
     // ---------------------------- end setup --------------------------------------
 
@@ -785,9 +767,8 @@ ScheduleBlock* compute(const Input* arr, int _N) {
         return blocks;
     }
     // STEP 2
-    constructAdjList();
+    constructAdjList(total);
     // STEP 3
-    condenseAdjList(end);
     if (applyDFS) {  // STEP 4
         dfsWidthExpansion();
         for (auto* node = blocks; node < end; node++)
@@ -796,6 +777,9 @@ ScheduleBlock* compute(const Input* arr, int _N) {
         computeInitialWidth(end, total);
     }
 
+#ifdef DEBUG_LOG
+    auto t1 = chrono::high_resolution_clock::now();
+#endif
     // STEP 5
     for (auto* block = blocks; block < end; block++) {
         if (block->visited) continue;
@@ -805,7 +789,8 @@ ScheduleBlock* compute(const Input* arr, int _N) {
     }
     int prevFixedCount = getFixedCount(end);
     auto buildLPModel = LPModels[LPModel - 1];
-    for (int i = 0; i < LPIters; i++) {
+    int i;
+    for (i = 0; i < LPIters; i++) {
         // for each non-fixed component
         for (auto block = blocks; block < end; block++) {
             if (!block->visited)  // build and solve the lp model
@@ -822,7 +807,7 @@ ScheduleBlock* compute(const Input* arr, int _N) {
                 DFSFindFixedNumerical(block);
                 continue;
             }
-            for (auto n : block->rightN) {
+            for (auto n : block->crightN) {
                 if (n->isFixed && abs(right - n->left) < DOUBLE_EPS) {
                     DFSFindFixedNumerical(block);
                     break;
@@ -830,14 +815,15 @@ ScheduleBlock* compute(const Input* arr, int _N) {
             }
         }
         int fixedCount = getFixedCount(end);
-        if (fixedCount == prevFixedCount) {
-#ifdef DEBUG_LOG
-            cout << "convergence reached at " << i << endl;
-#endif
+        if (fixedCount == prevFixedCount)
             break;
-        }
         prevFixedCount = fixedCount;
     }
+#ifdef DEBUG_LOG
+    auto t2 = chrono::high_resolution_clock::now();
+    auto time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+    cout << "convergence reached at " << i << " | " << N - prevFixedCount << " | " << time_span.count() * 1000 << " ms" << endl;
+#endif
     computeResult();
     return blocks;
 }

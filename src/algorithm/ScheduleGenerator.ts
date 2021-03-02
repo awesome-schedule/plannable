@@ -237,11 +237,6 @@ class ScheduleGenerator {
             dateList,
             Module.HEAPU8.subarray(conflictCachePtr, conflictCachePtr + _size)
         );
-
-        console.log(Array.from(Module.HEAPU8.subarray(conflictCachePtr, conflictCachePtr + _size)));
-        console.log(classList);
-        console.log(secLens);
-
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');

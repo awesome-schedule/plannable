@@ -401,6 +401,7 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
     int sectionIdx = 0;
     /** pointer to the current schedule */
     auto* curSchedule = schedules;
+    int numSections = sectionLens[numCourses];
     while (true) {
         if (courseIdx >= numCourses) {  // we have finished building the current schedule
             // accumulate the length of the time arrays combined in each schedule
@@ -433,8 +434,9 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
         }
 
         // check conflict between the newly chosen section and the sections already in the schedule
+        int temp = sectionIdx * numSections;
         for (int i = 0; i < courseIdx; i++) {
-            if (conflictCache[(sectionLens[i] + curSchedule[i]) * sectionLens[numCourses] + sectionIdx]) {
+            if (conflictCache[temp + sectionLens[i] + curSchedule[i]]) {
                 // if conflict, increment the section index
                 ++sectionIdx;
                 goto outer;

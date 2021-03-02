@@ -2,8 +2,8 @@
 GLPK_VERSION = 4.65
 
 EMCC_FLAGS = -Wall -Winline -std=c++17 -DUSE_FLATMAP
-EMCC_DEV_FLAGS = -DDEBUG_LOG -DENABLE_MILP -g --profiling
-EMCC_DEV_FLAGS += -s SAFE_HEAP=1 -s ASSERTIONS=2 # warning: slow!
+EMCC_DEV_FLAGS = -O2 -DDEBUG_LOG -DENABLE_MILP -g --profiling
+# EMCC_DEV_FLAGS += -s SAFE_HEAP=1 -s ASSERTIONS=2 # warning: slow!
 EMCC_LINK_FLAGS = -s ALLOW_MEMORY_GROWTH=1
 EMCC_LINK_FLAGS += -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=web
 EMCC_LINK_FLAGS += -s EXPORTED_FUNCTIONS='[\
@@ -38,7 +38,7 @@ prod: Renderer.prod.o ScheduleGenerator.prod.o Searcher.prod.o
 	emcc -O3 --closure 1 $(EMCC_LINK_FLAGS) glpk-$(GLPK_VERSION)/build/src/.libs/libglpk.a *.prod.o -o temp/wasm_modules.js
 
 test: ScheduleGenerator.cpp
-	clang++ -m32 -O2 -D_TEST ScheduleGenerator.cpp && ./a.out
+	g++ -m32 -O2 -D_TEST ScheduleGenerator.cpp && ./a.out
 
 clean:
 	rm -f *.prod.o

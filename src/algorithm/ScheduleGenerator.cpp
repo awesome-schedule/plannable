@@ -329,7 +329,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
     int offset = 0;
     // point to the second part of the timeArray where the content is stored
     // should not alias with timeArray, which should be only used to access the first part
-    const auto* __restrict__ timeArrayContent = timeArray + (sectionLens[numCourses + 1]) * 8;
+    const auto* __restrict__ timeArrayContent = timeArray + (sectionLens[numCourses]) * 8;
     const auto* __restrict__ curSchedule = schedules;
     // store the time and room information corresponding to curSchedule
     auto* __restrict__ curBlock = blocks;
@@ -434,7 +434,7 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
 
         // check conflict between the newly chosen section and the sections already in the schedule
         for (int i = 0; i < courseIdx; i++) {
-            if (conflictCache[(sectionLens[i] + curSchedule[i]) * sectionLens[numCourses + 1] + sectionIdx]) {
+            if (conflictCache[(sectionLens[i] + curSchedule[i]) * sectionLens[numCourses] + sectionIdx]) {
                 // if conflict, increment the section index
                 ++sectionIdx;
                 goto outer;
@@ -450,11 +450,6 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
     }
 end:;
     count = (curSchedule - schedules) / numCourses;
-    cout << "indices " << sectionIdx << "|" << courseIdx << "|" << count << endl;
-    for (int i = 0; i < numCourses + 1; i++) {
-        cout << sectionLens[i] << ",";
-    }
-    cout << endl;
     timeLen += 8 * count;
 
     /**
@@ -625,8 +620,17 @@ int main() {
     }
 
     uint8_t conflict[16] = {0};
-    uint8_t secLens[2] = {2, 2};
-    generate(2, 10, secLens, conflict, timeArray);
+    conflict[0 + 1] = 1;
+    conflict[2] = 1;
+    int secLens[3] = {0, 2, 4};
+    ScheduleGenerator::generate(2, 10, secLens, conflict, timeArray);
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 2; j++) {
+            cout << (int)schedules[i * 2 + j] << ",";
+        }
+        cout << endl;
+    }
+    cout << ScheduleGenerator::count << endl;
     for (int i = 0; i < (8 + 12) * 4; i++) {
         cout << blocks[i] << ",";
         /* code */

@@ -63,11 +63,19 @@ int tmSize = 0;
 int numCourses;
 /**
  * array of schedules. Schedule i is stored at i*numCourse to (i+1)*numCourses
+ * @note may not be full
  */
 uint16_t* __restrict__ schedules = NULL;
+/**
+ * maximum capcity the schedules
+ * @note scheduleLen / numCourses = max number of schedules
+ **/
 int scheduleLen = 0;
 
-uint8_t* __restrict__ refSchedule = NULL;
+/**
+ * the reference schedule for sort by similarity. Length=numCourses
+*/
+uint16_t* __restrict__ refSchedule = NULL;
 
 /** 
  * coefficient cache for each sort option 
@@ -593,7 +601,7 @@ float getRange(int idx) {
     return sortCoeffCache[idx].max - sortCoeffCache[idx].min;
 }
 
-void setRefSchedule(uint8_t* ref) {
+void setRefSchedule(uint16_t* ref) {
     if (refSchedule != NULL) free(refSchedule);
     refSchedule = ref;
     auto& cache = sortCoeffCache[5];

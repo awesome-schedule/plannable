@@ -84,15 +84,21 @@ class ScheduleEvaluator {
         // don't do anything if this is an empty evaluator or the ref schedule is set to empty
         if (!this.Module || Object.keys(refSchedule).length === 0) return;
 
-        const numCourses = this.classList.length;
-        const ptr = this.Module!._malloc(numCourses);
-        const refScheduleEncoded = this.Module.HEAPU8.subarray(ptr, ptr + numCourses).fill(255);
+        const numCourses = this.secLens.length - 1;
+        const ptr = this.Module!._malloc(numCourses * 2);
+        const refScheduleEncoded = this.Module.HEAPU16.subarray(ptr / 2, ptr / 2 + numCourses).fill(
+            65535
+        );
         for (const key in refSchedule) {
-            const refSecs = refSchedule[key].map(x => x.keys().next().value);
-            for (let i = 0; i < this.classList.length; i++) {
-                const secs = this.classList[i];
-                for (let j = 0; j < secs.length; j++) {
-                    if (secs[j][0] === key && refSecs.some(id => secs[j][1].includes(id))) {
+            // all section ids of the course with key=key in the reference schedule
+            const refSecs = refSchedule[key].reduce<number[]>((acc, x) => {
+                for (const id of x) acc.push(id);
+                return acc;
+            }, []);
+            for (let i = 1; i < this.secLens.length; i++) {
+                for (let j = this.secLens[i - 1]; j < this.secLens[i]; j++) {
+                    const secs = this.classList[j];
+                    if (secs[0] === key && refSecs.some(id => secs[1].includes(id))) {
                         refScheduleEncoded[i] = j;
                         break;
                     }

@@ -61,7 +61,8 @@ class ScheduleEvaluator {
     constructor(
         public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },
         private readonly events: Event[] = [],
-        private readonly classList: RawAlgoCourse[][] = [],
+        private readonly classList: RawAlgoCourse[] = [],
+        private readonly secLens: number[] = [],
         refSchedule: GeneratedSchedule['All'] = {},
         private readonly Module?: typeof window.NativeModule
     ) {
@@ -129,8 +130,8 @@ class ScheduleEvaluator {
 
         const ptr = Module._getSchedule(idx);
         return new GeneratedSchedule(
-            Array.from(Module.HEAPU8.subarray(ptr, ptr + this.classList.length)).map(
-                (choice, classNum) => this.classList[classNum][choice]
+            Array.from(Module.HEAPU8.subarray(ptr, ptr + this.secLens.length - 1)).map(
+                (choice, classNum) => this.classList[this.secLens[classNum] + choice]
             ),
             this.events
         );

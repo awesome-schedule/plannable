@@ -72,30 +72,26 @@ export function checkTimeConflict(
  * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
  * of time array of section `i` of course `j` at day k is at `j * maxLen * 8 + i * 8 + k` position of the resulting array.
  */
-function timeArrayToCompact(Module: EMModule, timeArrays: TimeArray[][], maxSecLen: number) {
-    const numCourses = timeArrays.length;
-    const prefixLen = numCourses * maxSecLen * 8;
+function timeArrayToCompact(Module: EMModule, timeArrays: TimeArray[]) {
+    const numSections = timeArrays.length;
+    const prefixLen = numSections * 8;
     let len = prefixLen;
-    for (const course of timeArrays) {
-        for (const sec of course) {
-            for (const day of sec) {
-                len += day.length;
-            }
+    for (const sec of timeArrays) {
+        for (const day of sec) {
+            len += day.length;
         }
     }
     const ptr = Module._malloc(len * 2);
     const arr = Module.HEAPU16.subarray(ptr / 2);
     len = 0;
-    for (let i = 0; i < numCourses; i++) {
-        for (let j = 0; j < timeArrays[i].length; j++) {
-            for (let k = 0; k < 7; k++) {
-                arr[i * maxSecLen * 8 + j * 8 + k] = len;
-                const day = timeArrays[i][j][k];
-                arr.set(day, len + prefixLen);
-                len += day.length;
-            }
-            arr[i * maxSecLen * 8 + j * 8 + 7] = len;
+    for (let i = 0; i < numSections; i++) {
+        for (let k = 0; k < 7; k++) {
+            arr[i * 8 + k] = len;
+            const day = timeArrays[i][k];
+            arr.set(day, len + prefixLen);
+            len += day.length;
         }
+        arr[i * 8 + 7] = len;
     }
     return ptr;
 }
@@ -104,30 +100,19 @@ function timeArrayToCompact(Module: EMModule, timeArrays: TimeArray[][], maxSecL
  * pre-compute `conflictCache` using `timeArrayList` and `dateList`
  */
 function computeConflict(
-    timeArrayList: TimeArray[][],
-    dateList: MeetingDate[][],
-    conflictCache: Uint8Array,
-    sideLen: number
+    timeArrayList: TimeArray[],
+    dateList: MeetingDate[],
+    conflictCache: Uint8Array
 ) {
-    const numCourses = timeArrayList.length;
+    const numSections = timeArrayList.length;
     // pre-compute the conflict between each pair of sections
-    for (let i = 0; i < numCourses; i++) {
-        for (let j = i + 1; j < numCourses; j++) {
-            const arrs1 = timeArrayList[i],
-                arrs2 = timeArrayList[j],
-                dates1 = dateList[i],
-                dates2 = dateList[j];
-            for (let m = 0; m < arrs1.length; m++) {
-                for (let n = 0; n < arrs2.length; n++) {
-                    const i1 = m * numCourses + i, // courses are in the columns
-                        i2 = n * numCourses + j;
-                    // conflict is symmetric
-                    conflictCache[i1 * sideLen + i2] = conflictCache[i2 * sideLen + i1] = +(
-                        checkTimeConflict(arrs1[m], arrs2[n], 3, 3) &&
-                        calcOverlap(dates1[m][0], dates1[m][1], dates2[n][0], dates2[n][1]) !== -1
-                    );
-                }
-            }
+    for (let i = 0; i < numSections; i++) {
+        for (let j = i + 1; j < numSections; j++) {
+            // conflict is symmetric
+            conflictCache[i * numSections + j] = conflictCache[j * numSections + i] = +(
+                checkTimeConflict(timeArrayList[i], timeArrayList[j], 3, 3) &&
+                calcOverlap(dateList[i][0], dateList[i][1], dateList[j][0], dateList[j][1]) !== -1
+            );
         }
     }
 }
@@ -165,10 +150,11 @@ class ScheduleGenerator {
         const timeSlots: TimeArray[] = schedule.events.map(e => e.toTimeArray());
         for (const event of this.options.timeSlots) timeSlots.push(event.toTimeArray());
 
-        const classList: RawAlgoCourse[][] = [];
-        const timeArrayList: TimeArray[][] = [];
-        const dateList: MeetingDate[][] = [];
+        const classList: RawAlgoCourse[] = [];
+        const timeArrayList: TimeArray[] = [];
+        const dateList: MeetingDate[] = [];
 
+        const secLens = [0];
         const courses = schedule.All;
 
         const msgs: NotiMsg<ScheduleEvaluator>[] = [];
@@ -201,9 +187,10 @@ class ScheduleGenerator {
                         }. Reason: No sections satisfy your filters and do not conflict with your events`
                     });
                 } else {
-                    classList.push(classes);
-                    timeArrayList.push(timeArrays);
-                    dateList.push(dates);
+                    secLens.push(classes.length);
+                    classList.push(...classes);
+                    timeArrayList.push(...timeArrays);
+                    dateList.push(...dates);
                 }
                 if (allInvalid) {
                     msgs.push({
@@ -224,41 +211,46 @@ class ScheduleGenerator {
             }
         }
 
-        const numCourses = classList.length;
-        if (numCourses === 0) {
+        if (classList.length === 0) {
             return {
                 level: 'error',
                 msg: 'Given your filter, we cannot generate schedules without overlapping classes'
             };
         }
-
+        // change to prefix array
+        for (let i = 1; i < secLens.length; i++) {
+            secLens[i] += secLens[i - 1];
+        }
         const Module = window.NativeModule;
 
-        // the maximum number of sections in each course
-        let maxLen = 0;
         // pointer to the cache for the number of sections in each course
-        const secLenPtr = Module._malloc(numCourses);
-        for (let i = 0; i < numCourses; i++) {
-            const len = (Module.HEAPU8[secLenPtr + i] = classList[i].length);
-            if (len > maxLen) maxLen = len;
-        }
+        const secLenPtr = Module._malloc(secLens.length * 4);
+        Module.HEAP32.set(secLens, secLenPtr / 4);
 
         // the side length of the conflict cache matrix
-        const sideLen = maxLen * numCourses;
-        const conflictCachePtr = Module._malloc(sideLen * sideLen);
+        const _size = classList.length ** 2;
+        const conflictCachePtr = Module._malloc(_size);
 
         // prepare the conflictCache
-        computeConflict(timeArrayList, dateList, Module.HEAPU8.subarray(conflictCachePtr), sideLen);
+        computeConflict(
+            timeArrayList,
+            dateList,
+            Module.HEAPU8.subarray(conflictCachePtr, conflictCachePtr + _size)
+        );
+
+        console.log(Array.from(Module.HEAPU8.subarray(conflictCachePtr, conflictCachePtr + _size)));
+        console.log(classList);
+        console.log(secLens);
 
         console.timeEnd('algorithm bootstrapping');
 
         console.time('running algorithm:');
         const size = Module._generate(
-            numCourses,
+            secLens.length - 1,
             this.options.maxNumSchedules,
             secLenPtr,
             conflictCachePtr,
-            timeArrayToCompact(Module, timeArrayList, maxLen)
+            timeArrayToCompact(Module, timeArrayList)
         );
         console.timeEnd('running algorithm:');
 
@@ -277,6 +269,7 @@ class ScheduleGenerator {
             this.options.sortOptions,
             schedule.events,
             classList,
+            secLens,
             refSchedule,
             window.NativeModule
         );

@@ -325,11 +325,11 @@ extern "C" {
 /**
  * initialize the global indices, offsets and blocks array so the sort function can use then
 */
-void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
+void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ sectionLens) {
     int offset = 0;
     // point to the second part of the timeArray where the content is stored
     // should not alias with timeArray, which should be only used to access the first part
-    const auto* __restrict__ timeArrayContent = timeArray + numCourses * maxLen * 8;
+    const auto* __restrict__ timeArrayContent = timeArray + (sectionLens[numCourses + 1]) * 8;
     const auto* __restrict__ curSchedule = schedules;
     // store the time and room information corresponding to curSchedule
     auto* __restrict__ curBlock = blocks;
@@ -343,7 +343,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
             // and insert into day j of curBlock
             for (int k = 0; k < numCourses; k++) {
                 // offset of the time arrays
-                int _off = ((k * maxLen + curSchedule[k]) << 3) + j;
+                int _off = (sectionLens[k] + curSchedule[k]) * 8 + j;
                 // insertion sort, fast for small arrays
                 for (int n = timeArray[_off], e2 = timeArray[_off + 1]; n < e2; n += 3, bound += 3) {
                     int p = s1;
@@ -381,11 +381,8 @@ void addToEval(const uint16_t* __restrict__ timeArray, int maxLen) {
  * @note the pointers passed in to this function should point to dynamically allocated memory. They will be freed before this function returns. 
  * @returns the number of schedules generated. Returns -1 on memory allocation failure
  */
-int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
+int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
     numCourses = _numCourses;
-    int maxLen = *max_element(sectionLens, sectionLens + numCourses);
-    int sideLen = numCourses * maxLen;
-
     maxNumSchedules *= numCourses;
     if (maxNumSchedules + numCourses > scheduleLen) {
         // extra 1x numCourses to prevent write out of bound at computeSchedules at *!*!*
@@ -396,62 +393,68 @@ int generate(int _numCourses, int maxNumSchedules, const uint8_t* __restrict__ s
         schedules = newMem;
     }
 
-    /**  the total length of the time array that we need to allocate for schedules generated */
+    /** the total length of the time array that we need to allocate for schedules generated */
     int timeLen = 0;
     /** current course index */
-    int classNum = 0;
-    /** the index of the section of the current course */
-    int choiceNum = 0;
-    /**
-     * pointer to the current schedule
-     */
+    int courseIdx = 0;
+    /** the index of the current section */
+    int sectionIdx = 0;
+    /** pointer to the current schedule */
     auto* curSchedule = schedules;
     while (true) {
-        if (classNum >= numCourses) {
+        if (courseIdx >= numCourses) {  // we have finished building the current schedule
             // accumulate the length of the time arrays combined in each schedule
             // and copy the current schedule to next schedule
             auto* nextSchedule = curSchedule + numCourses;
             for (int i = 0; i < numCourses; i++) {
                 int secIdx = (nextSchedule[i] = curSchedule[i]);  // *!*!*
-                int _off = (i * maxLen + secIdx) << 3;
+                int _off = (sectionLens[i] + secIdx) * 8;
                 timeLen += timeArray[_off + 7] - timeArray[_off];
             }
 
             curSchedule = nextSchedule;
             if ((curSchedule - schedules) >= maxNumSchedules) goto end;
-            choiceNum = curSchedule[--classNum] + 1;
+            --courseIdx;
+            sectionIdx = sectionLens[courseIdx] + curSchedule[courseIdx] + 1;
         }
 
         /**
-         * when all possibilities in on class have exhausted, explore the next possibilities in the previous class
+         * when all possibilities in on class have exhausted, explore the next possibility in the previous class
          * reset choices of the later classes to 0
          */
-        while (choiceNum >= sectionLens[classNum]) {
+        while (sectionIdx >= sectionLens[courseIdx + 1]) {
+            // return to the previous class
             // if all possibilities are exhausted, break out the loop
-            if (--classNum < 0) goto end;
+            if (--courseIdx < 0) goto end;
 
-            choiceNum = curSchedule[classNum] + 1;
-            for (int i = classNum + 1; i < numCourses; i++) curSchedule[i] = 0;
+            // explore the next possibility
+            sectionIdx = sectionLens[courseIdx] + curSchedule[courseIdx] + 1;
+            for (int i = courseIdx + 1; i < numCourses; i++) curSchedule[i] = 0;
         }
 
         // check conflict between the newly chosen section and the sections already in the schedule
-        int temp = (choiceNum * numCourses + classNum) * sideLen;
-        for (int i = 0; i < classNum; i++) {
-            int idx = temp + i + curSchedule[i] * numCourses;
-            if (conflictCache[idx]) {
-                ++choiceNum;
+        for (int i = 0; i < courseIdx; i++) {
+            if (conflictCache[(sectionLens[i] + curSchedule[i]) * sectionLens[numCourses + 1] + sectionIdx]) {
+                // if conflict, increment the section index
+                ++sectionIdx;
                 goto outer;
             }
         }
 
-        // if the section does not conflict with any previously chosen sections,
-        // go to the next class, reset the choiceNum = 0
-        curSchedule[classNum++] = choiceNum;
-        choiceNum = 0;
+        // if the section does not conflict with any previously chosen sections, record the section
+        curSchedule[courseIdx] = sectionIdx - sectionLens[courseIdx];
+        // go to the next class, set choice num to be the first section
+        courseIdx++;
+        sectionIdx = sectionLens[courseIdx];
     outer:;
     }
 end:;
     count = (curSchedule - schedules) / numCourses;
+    cout << "indices " << sectionIdx << "|" << courseIdx << "|" << count << endl;
+    for (int i = 0; i < numCourses + 1; i++) {
+        cout << sectionLens[i] << ",";
+    }
+    cout << endl;
     timeLen += 8 * count;
 
     /**
@@ -476,7 +479,7 @@ end:;
         blocks = ((uint16_t*)evalMem) + 6 * count;
     }
 
-    addToEval(timeArray, maxLen);
+    addToEval(timeArray, sectionLens);
 
 // cleanup
 #ifndef _TEST

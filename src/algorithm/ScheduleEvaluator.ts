@@ -95,8 +95,8 @@ class ScheduleEvaluator {
                 for (const id of x) acc.push(id);
                 return acc;
             }, []);
-            for (let i = 1; i < this.secLens.length; i++) {
-                for (let j = this.secLens[i - 1]; j < this.secLens[i]; j++) {
+            for (let i = 0; i < numCourses; i++) {
+                for (let j = this.secLens[i]; j < this.secLens[i + 1]; j++) {
                     const secs = this.classList[j];
                     if (secs[0] === key && refSecs.some(id => secs[1].includes(id))) {
                         refScheduleEncoded[i] = j;
@@ -122,7 +122,7 @@ class ScheduleEvaluator {
                 +option.enabled,
                 +option.reverse,
                 option.idx,
-                option.weight || 1.0
+                option.weight || 0.0
             );
         }
         this.Module!._sort();

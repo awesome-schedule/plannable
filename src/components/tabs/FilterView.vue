@@ -115,6 +115,7 @@
                                 </div>
                                 <input
                                     v-model="option.weight"
+                                    @change="applySort()"
                                     class="form-control"
                                     type="number"
                                     min="0.1"

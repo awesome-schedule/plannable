@@ -1,6 +1,4 @@
 {
-    "editor.formatOnSave": true,
-    // prevent formatting conflict
     "[javascript]": {
         "editor.formatOnSave": false
     },

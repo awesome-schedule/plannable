@@ -128,10 +128,10 @@ class ScheduleEvaluator {
     public getSchedule(idx: number) {
         const Module = this.Module!;
 
-        const ptr = Module._getSchedule(idx);
+        const ptr = Module._getSchedule(idx) / 2;
         return new GeneratedSchedule(
-            Array.from(Module.HEAPU8.subarray(ptr, ptr + this.secLens.length - 1)).map(
-                (choice, classNum) => this.classList[this.secLens[classNum] + choice]
+            Array.from(Module.HEAPU16.subarray(ptr, ptr + this.secLens.length - 1)).map(
+                choice => this.classList[choice]
             ),
             this.events
         );

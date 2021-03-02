@@ -64,7 +64,7 @@ int numCourses;
 /**
  * array of schedules. Schedule i is stored at i*numCourse to (i+1)*numCourses
  */
-uint8_t* __restrict__ schedules = NULL;
+uint16_t* __restrict__ schedules = NULL;
 int scheduleLen = 0;
 
 uint8_t* __restrict__ refSchedule = NULL;
@@ -343,7 +343,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
             // and insert into day j of curBlock
             for (int k = 0; k < numCourses; k++) {
                 // offset of the time arrays
-                int _off = (sectionLens[k] + curSchedule[k]) * 8 + j;
+                int _off = curSchedule[k] * 8 + j;
                 // insertion sort, fast for small arrays
                 for (int n = timeArray[_off], e2 = timeArray[_off + 1]; n < e2; n += 3, bound += 3) {
                     int p = s1;
@@ -387,7 +387,7 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
     if (maxNumSchedules + numCourses > scheduleLen) {
         // extra 1x numCourses to prevent write out of bound at computeSchedules at *!*!*
         scheduleLen = maxNumSchedules + numCourses;
-        auto* newMem = (uint8_t*)realloc(schedules, scheduleLen);
+        auto* newMem = (uint16_t*)realloc(schedules, scheduleLen * 2);
         // handle allocation failure
         if (newMem == NULL) return -1;
         schedules = newMem;
@@ -409,14 +409,14 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
             auto* nextSchedule = curSchedule + numCourses;
             for (int i = 0; i < numCourses; i++) {
                 int secIdx = (nextSchedule[i] = curSchedule[i]);  // *!*!*
-                int _off = (sectionLens[i] + secIdx) * 8;
+                int _off = secIdx * 8;
                 timeLen += timeArray[_off + 7] - timeArray[_off];
             }
 
             curSchedule = nextSchedule;
             if ((curSchedule - schedules) >= maxNumSchedules) goto end;
             --courseIdx;
-            sectionIdx = sectionLens[courseIdx] + curSchedule[courseIdx] + 1;
+            sectionIdx = curSchedule[courseIdx] + 1;
         }
 
         /**
@@ -429,14 +429,14 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
             if (--courseIdx < 0) goto end;
 
             // explore the next possibility
-            sectionIdx = sectionLens[courseIdx] + curSchedule[courseIdx] + 1;
+            sectionIdx = curSchedule[courseIdx] + 1;
             for (int i = courseIdx + 1; i < numCourses; i++) curSchedule[i] = 0;
         }
 
         // check conflict between the newly chosen section and the sections already in the schedule
         int temp = sectionIdx * numSections;
         for (int i = 0; i < courseIdx; i++) {
-            if (conflictCache[temp + sectionLens[i] + curSchedule[i]]) {
+            if (conflictCache[temp + curSchedule[i]]) {
                 // if conflict, increment the section index
                 ++sectionIdx;
                 goto outer;
@@ -444,7 +444,7 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
         }
 
         // if the section does not conflict with any previously chosen sections, record the section
-        curSchedule[courseIdx] = sectionIdx - sectionLens[courseIdx];
+        curSchedule[courseIdx] = sectionIdx;
         // go to the next class, set choice num to be the first section
         courseIdx++;
         sectionIdx = sectionLens[courseIdx];
@@ -585,7 +585,7 @@ int size() {
     return count;
 }
 
-uint8_t* getSchedule(int idx) {
+uint16_t* getSchedule(int idx) {
     return schedules + indices[idx] * numCourses;
 }
 

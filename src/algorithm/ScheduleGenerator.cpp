@@ -372,10 +372,12 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
     }
 }
 /**
- * @param sectionLens array that stores the number of sections in each course
- * @param conflictCache the conflict cache matrix, a 4d matrix that caches the conflict between each pair of sections.
- * Indexed like this: conflictCache[section1][course1][section2][course2]
- * which is in fact: conflictCache[(section1 * numCourses + course1) * sideLen + (section2 * numCourses + course2)]
+ * @param _numCourses number of courses
+ * @param sectionLens a prefix array that stores the number of sections in each course
+ * sectionLens[i] is the total number of sections in courses 0 to i - 1 inclusive
+ * sectionLens[numCourses] is the total number of sections 
+ * @param conflictCache the conflict cache matrix which caches the conflict between each pair of sections.
+ * To check whether section i conflicts with section j: conflictCache[i * numSections + j] (or conflictCache[j * numSections + i])
  * Can do bitpacking, but no performance improvement observed
  * @param timeArray TODO: add description.
  * @note the pointers passed in to this function should point to dynamically allocated memory. They will be freed before this function returns. 
@@ -414,11 +416,10 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
             }
 
             curSchedule = nextSchedule;
-            if ((curSchedule - schedules) >= maxNumSchedules) goto end;
-            --courseIdx;
-            sectionIdx = curSchedule[courseIdx] + 1;
+            if (curSchedule - schedules >= maxNumSchedules) goto end;
+            sectionIdx = curSchedule[--courseIdx] + 1;
         }
-
+next:;
         /**
          * when all possibilities in on class have exhausted, explore the next possibility in the previous class
          * reset choices of the later classes to 0
@@ -439,16 +440,15 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
             if (conflictCache[temp + curSchedule[i]]) {
                 // if conflict, increment the section index
                 ++sectionIdx;
-                goto outer;
+                goto next;
             }
         }
 
-        // if the section does not conflict with any previously chosen sections, record the section
-        curSchedule[courseIdx] = sectionIdx;
-        // go to the next class, set choice num to be the first section
-        courseIdx++;
+        // if the section does not conflict with any previously chosen sections, 
+        // record the section and go to the next class, 
+        curSchedule[courseIdx++] = sectionIdx;
+        // set choice num to be the first section of the next class
         sectionIdx = sectionLens[courseIdx];
-    outer:;
     }
 end:;
     count = (curSchedule - schedules) / numCourses;

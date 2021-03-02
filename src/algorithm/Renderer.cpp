@@ -14,14 +14,14 @@ using namespace std;
 
 namespace Renderer {
 
+bool MILP = 0;
+bool applyDFS = 1;
+int8_t ISMethod = 1;
+int8_t LPModel = 3;
 int isTolerance = 0;
-int ISMethod = 1;
-int applyDFS = 1;
 int dfsTolerance = 0;
 int LPIters = 100;
-int LPModel = 3;
 double tFactor = 0.1;
-int MILP = 0;
 
 glp_smcp parm;
 
@@ -179,14 +179,14 @@ int intervalScheduling2() {
     return numRooms + 1;
 }
 
+template <typename T>
 struct TimeEntry {
-    int16_t startMin, endMin;
+    T startMin, endMin;
 };
 
 /**
  * for the array of schedule blocks provided, construct an adjacency list
  * to represent the conflicts between each pair of blocks
- * @note this function assumes blocksReordered is already sorted by start time
  */
 void constructAdjList(int total) {
     auto* grouped = new vector<ScheduleBlock*>[total];
@@ -196,26 +196,28 @@ void constructAdjList(int total) {
     for (int i = 0; i < total; i++) {
         sort(grouped[i].begin(), grouped[i].end(), [](ScheduleBlock* a, ScheduleBlock* b) { return a->startMin < b->startMin; });
     }
-    vector<TimeEntry> ranges;
+    // int faster than int16_t
+    // and int16_t will get implicitly promoted anyway
+    vector<TimeEntry<int>> ranges;
     for (int i = 1; i < total; i++) {
         for (auto block : grouped[i]) {
             ranges.resize(0);
-            int16_t startMin = block->startMin, endMin = block->endMin;
+            int startMin = block->startMin + dfsTolerance;
+            int endMin = block->endMin - dfsTolerance;
             for (int j = i - 1; j >= 0; j--) {
                 for (auto leftBlock : grouped[j]) {
                     if (leftBlock->startMin >= endMin) break;
                     if (leftBlock->endMin > startMin) {
-                        // if (leftBlock->startMin < endMin && leftBlock->endMin > startMin) {  // conflict
                         for (auto& [startMin, endMin] : ranges) {
                             if (leftBlock->startMin < endMin && leftBlock->endMin > startMin) {
-                                startMin = min(startMin, leftBlock->startMin);
-                                endMin = max(endMin, leftBlock->endMin);
+                                startMin = min(startMin, leftBlock->startMin + dfsTolerance);
+                                endMin = max(endMin, leftBlock->endMin - dfsTolerance);
                                 goto nopush1;
                             }
                         }
                         block->cleftN.push_back(leftBlock);
                         leftBlock->crightN.push_back(block);
-                        ranges.push_back({leftBlock->startMin, leftBlock->endMin});
+                        ranges.push_back({leftBlock->startMin + dfsTolerance, leftBlock->endMin - dfsTolerance});
                     nopush1:;
                     }
                 }
@@ -708,7 +710,7 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
  * @param arr the array of start/end times of the blocks. It will be freed before this function returns.
  * @param N the number of blocks
  */
-ScheduleBlock* compute(const TimeEntry* arr, int _N) {
+ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
     // ---------------------------- setup --------------------------------------
     N = _N;
     if (N > maxN) {  // TODO: check for allocation failure

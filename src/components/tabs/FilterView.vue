@@ -105,6 +105,13 @@
                             >
                                 <i class="fas fa-exclamation-triangle"></i>
                             </span>
+                            <span
+                                class="ml-1 text-warning"
+                                v-if="!option.weight"
+                                title="Invalid or zero weight"
+                            >
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
                             <div
                                 v-if="filter.sortOptions.mode === 1 && option.enabled"
                                 class="input-group input-group-sm"

@@ -269,9 +269,7 @@ class ScheduleGenerator {
             window.NativeModule
         );
 
-        console.time('sort');
         evaluator.sort();
-        console.timeEnd('sort');
 
         let msgString = '';
         for (const msg of msgs) msgString += msg.msg + '<br>';

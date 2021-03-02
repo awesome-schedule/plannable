@@ -111,6 +111,7 @@ class ScheduleEvaluator {
     public sort({ newOptions }: { newOptions?: EvaluatorOptions } = {}) {
         if (!this.Module) return;
 
+        console.time('sort');
         if (newOptions) this.options = newOptions;
         this.Module!._setSortMode(this.options.mode);
 
@@ -126,6 +127,7 @@ class ScheduleEvaluator {
             );
         }
         this.Module!._sort();
+        console.timeEnd('sort');
     }
 
     /**

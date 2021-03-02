@@ -370,7 +370,6 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
                 }
             }
         }
-        indices[i] = i;
         // record the current offset
         offsets[i] = offset;
         offset += curBlock[7] = bound;
@@ -505,6 +504,10 @@ end:;
  * sort the array of schedules according to their quality coefficients which will be computed by `computeCoeff`
  */
 void sort() {
+    // we start from the original order
+    // so that when the sort is performed repetitively, the result will be stable
+    for (int i = 0; i < count; i++)
+        indices[i] = i;
     if (isRandom()) {
         default_random_engine eng;
         shuffle(indices, indices + count, eng);

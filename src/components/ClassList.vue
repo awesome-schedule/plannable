@@ -196,7 +196,7 @@
                                             ></span>
                                             <span v-else> {{ sec.topic }}</span>
                                         </li>
-                                        <li v-for="meeting in sec.meetings" :key="meeting.days">
+                                        <li v-for="(meeting, i) in sec.meetings" :key="i">
                                             {{ meeting.days }}
                                         </li>
                                         <li

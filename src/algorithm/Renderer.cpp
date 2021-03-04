@@ -708,6 +708,9 @@ void setOptions(int _isTolerance, int _ISMethod, int _applyDFS,
  * @param N the number of blocks
  */
 ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
+#ifdef DEBUG_LOG
+    auto t1 = chrono::high_resolution_clock::now();
+#endif
     // ---------------------------- setup --------------------------------------
     N = _N;
     if (N > maxN) {  // TODO: check for allocation failure
@@ -777,7 +780,11 @@ ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
     }
 
 #ifdef DEBUG_LOG
-    auto t1 = chrono::high_resolution_clock::now();
+    auto t2 = chrono::high_resolution_clock::now();
+    auto time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+    cout << "non-LP part took " << time_span.count() * 1000 << " ms" << endl;
+
+    t1 = chrono::high_resolution_clock::now();
 #endif
     // STEP 5
     for (auto* block = blocks; block < end; block++) {
@@ -819,8 +826,8 @@ ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
         prevFixedCount = fixedCount;
     }
 #ifdef DEBUG_LOG
-    auto t2 = chrono::high_resolution_clock::now();
-    auto time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+    t2 = chrono::high_resolution_clock::now();
+    time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
     cout << "convergence reached at " << i << " | " << N - prevFixedCount << " | " << time_span.count() * 1000 << " ms" << endl;
 #endif
     computeResult();

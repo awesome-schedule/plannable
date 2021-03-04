@@ -51,11 +51,10 @@ declare global {
         // ------------ APIs of Searcher.cpp --------------------------------------
         _getSearcher(stringArr: Ptr, N: number): Ptr;
         _sWSearch(a: Ptr, b: Ptr, c: number, d: number, e: number): Ptr;
-        _getMatches(a: Ptr): Ptr;
-        _getMatchSize(a: Ptr): number;
-        _findBestMatch(a: Ptr, b: Ptr): void;
-        _getBestMatchIndex(): number;
-        _getBestMatchRating(): number;
+        _getMatches(a: Ptr, b: number): Ptr;
+        _getMatchSize(a: Ptr, b: number): number;
+        _getScore(a: Ptr, b: number): number;
+        _findBestMatch(a: Ptr, b: Ptr): number;
         // ------------------------------------------------------------------------
 
         onRuntimeInitialized(): void;

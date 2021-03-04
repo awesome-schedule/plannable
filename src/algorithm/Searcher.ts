@@ -19,6 +19,7 @@ export interface SearchResult<T, K = string> {
 
 function allocateStr(Module: EMModule, str: string) {
     // TODO: handle complete UTF-8
+    // stringToUT8 will write exactly strLen number of bytes only if str contains ASCII characters only
     const strLen = str.length + 1;
     const ptr = Module._malloc(strLen);
     Module.stringToUTF8(str, ptr, strLen);
@@ -66,21 +67,20 @@ export class FastSearcher<T, K = string> {
         const allMatches: SearchResult<T, K>[] = [];
         if (ptr === -1) return allMatches;
 
-        const resultPtr = Module._sWSearch(this.ptr, ptr, numResults, gramLen, threshold);
-        const scoreArr = Module.HEAPF32.subarray(resultPtr / 4);
-        const idxArr = Module.HEAP32.subarray(resultPtr / 4);
-
+        const resultPtr = Module._sWSearch(this.ptr, ptr, numResults, gramLen, threshold) / 4;
         const total = Math.min(numResults, this.originals.length);
-
+        const idxArr = Module.HEAP32.subarray(resultPtr, resultPtr + total);
         for (let i = 0; i < total; i++) {
-            const idx = idxArr[i * 5 + 1];
-            const matchPtr = Module._getMatches(resultPtr + i * 20);
-            const matchSize = Module._getMatchSize(resultPtr + i * 20);
+            const idx = idxArr[i];
+            const matchPtr = Module._getMatches(this.ptr, idx) / 4;
             allMatches.push({
-                score: scoreArr[i * 5],
+                score: Module._getScore(this.ptr, idx),
                 index: idx,
                 data: this.data,
-                matches: Module.HEAP32.subarray(matchPtr / 4, matchPtr / 4 + matchSize * 2)
+                matches: Module.HEAP32.subarray(
+                    matchPtr,
+                    matchPtr + Module._getMatchSize(this.ptr, idx) * 2
+                )
             });
         }
         return allMatches;
@@ -95,8 +95,8 @@ export class FastSearcher<T, K = string> {
         const ptr = prepareQuery(Module, query, 2);
         if (ptr === -1) return [0, 0.0];
 
-        Module._findBestMatch(this.ptr, ptr);
-        return [Module._getBestMatchIndex(), Module._getBestMatchRating()];
+        const idx = Module._findBestMatch(this.ptr, ptr);
+        return [idx, Module._getScore(this.ptr, idx)];
     }
 
     public toJSON() {

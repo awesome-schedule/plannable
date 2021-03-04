@@ -27,12 +27,6 @@ struct Match {
     int start, end;
 };
 
-struct SearchResult {
-    float score;
-    int index;
-    vector<Match> matches;
-};
-
 struct Token {
     string_view token;
     float score;
@@ -40,13 +34,29 @@ struct Token {
 };
 
 // an indexed token contains an index/pointer to the array of unique tokens
-// and also an index of this token in a sentence
+// and also an index of this token in the original sentence that contains it
 struct IndexedToken {
     union {
         int idx;
         Token* token;
     };
     int index;
+};
+
+struct Sentence {
+    // view of _original
+    string_view original;
+    // the sentence in its original form
+    const char* _original;
+    // tokenized sentence
+    vector<IndexedToken> tokens;
+    // score for this sentence (computed after a search)
+    float score;
+    // matches for this sentence (computed after a search)
+    vector<Match> matches;
+    ~Sentence() {
+        free((void*)_original);
+    }
 };
 
 /**
@@ -56,14 +66,11 @@ struct IndexedToken {
 */
 struct FastSearcher {
     int size;
-    // views of _originals
-    string_view* originals;
-    const char** _originals;
-    // tokenized sentences
-    vector<IndexedToken>* sentences;
+    // array of pre-processed and tokenized sentences
+    Sentence* sentences;
     // working window for computing results
     float* scoreWindow;
-    SearchResult* results;
+    int* indices;
     vector<Token> uniqueTokens;
 };
 
@@ -80,7 +87,9 @@ void split(const char* sentence, vector<string_view>& result) {
 
 /**
  * The queryGram hashmap maps a string to an pointer into the frequency table, which indicates the frequency of the gram
+ * 
  * Reason for an additional level of indirection is that we need to constantly restore the frequency table to its original values
+ * 
  * Instead of copying the whole map, we just copy the frequency which is stored in a separate array
  * @returns a pointer to the frequency table, and its size
  * @note ptr to ptr+size is the table, ptr+size to ptr+size*2 is a copy of this table
@@ -127,8 +136,6 @@ float compareTwoStrings(const GramMap& bigrams, int16_t* freqCount, string_view 
 }
 
 vector<string_view> splitBuffer;
-int bestMatchIndex = 0;
-float bestMatchRating = 0.0f;
 
 /**
  * add a new match [start, end) to an end of the match array
@@ -152,17 +159,15 @@ extern "C" {
 FastSearcher* getSearcher(const char** sentences, int N) {
     auto* searcher = new FastSearcher();
     searcher->size = N;
-    searcher->_originals = sentences;
-    auto* originals = searcher->originals = new string_view[N];
-    auto* sentenceTokens = searcher->sentences = new vector<IndexedToken>[N];
-    searcher->results = new SearchResult[N]();
+    searcher->indices = new int[N];
+    searcher->sentences = new Sentence[N];
     auto& uniqueTokens = searcher->uniqueTokens;
 
     int maxTokenLen = 0;
     // map a token to an index in the uniqueTokens array
     HashMap<string_view, int> str2num(N * 2);
     for (int i = 0; i < N; i++) {
-        const char* sentence = sentences[i];
+        const char* sentence = searcher->sentences[i]._original = sentences[i];
         const char* it = sentence;
         while (*it != 0) {
             const char* tokenStart = it;
@@ -174,28 +179,29 @@ FastSearcher* getSearcher(const char** sentences, int N) {
             if (success)  // if new unique token, add it to unique token list
                 uniqueTokens.push_back({token, 0.0f});
             // record the position of this token in the unique token list
-            sentenceTokens[i].push_back({{mit->second}, static_cast<int>(tokenStart - sentence)});
+            searcher->sentences[i].tokens.push_back({{mit->second}, static_cast<int>(tokenStart - sentence)});
             // skip spaces
             while (*it == ' ' && *it != 0) it++;
         }
-        originals[i] = {sentence, static_cast<string_view::size_type>(it - sentence)};
-        maxTokenLen = max(maxTokenLen, static_cast<int>(sentenceTokens[i].size()));
+        searcher->sentences[i].original = {sentence, static_cast<string_view::size_type>(it - sentence)};
+        maxTokenLen = max(maxTokenLen, static_cast<int>(searcher->sentences[i].tokens.size()));
     }
+    // free the string array, but not strings them self
+    free((void*)sentences);
     uniqueTokens.shrink_to_fit();
     searcher->scoreWindow = new float[maxTokenLen];
 
     // note: we can only assign pointers into uniqueTokens here (no reallocations will occur after this point)
     // otherwise they might be invalid
     for (int i = 0; i < N; i++) {
-        for (auto& token : sentenceTokens[i]) {
+        for (auto& token : searcher->sentences[i].tokens) {
             token.token = &uniqueTokens[token.idx];
         }
     }
-
 #ifdef DEBUG_LOG
     int numTokens = 0;
     for (int i = 0; i < N; i++) {
-        numTokens += sentenceTokens[i].size();
+        numTokens += searcher->sentences[i].tokens.size();
     }
     cout << "num tokens: " << numTokens << " | num unique: " << uniqueTokens.size() << endl;
 #endif
@@ -205,41 +211,34 @@ FastSearcher* getSearcher(const char** sentences, int N) {
 /**
  * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations
  * MIT License
- * @param _query a dynamically allocated string. It will be freed after this function returns.
+ * @param _query a dynamically allocated string. It will be freed before this function returns.
  */
-void findBestMatch(FastSearcher* searcher, const char* _query) {
+int findBestMatch(FastSearcher* searcher, const char* _query) {
     string_view query(_query);
     GramMap queryGrams;
     auto [freqCount, queryGramCount] = constructQueryGrams(queryGrams, query, 2);
 
-    bestMatchIndex = 0;
-    bestMatchRating = 0.0f;
+    float bestMatchRating = 0.0f;
+    int bestMatchIndex = 0;
     for (int i = 0; i < searcher->size; i++) {
-        float currentRating = compareTwoStrings(queryGrams, freqCount, query, searcher->originals[i]);
+        float currentRating = compareTwoStrings(queryGrams, freqCount, query, searcher->sentences[i].original);
         if (currentRating > bestMatchRating) {
             bestMatchIndex = i;
             bestMatchRating = currentRating;
         }
         memcpy(freqCount, freqCount + queryGramCount, queryGramCount * sizeof(int16_t));
     }
+    searcher->sentences[bestMatchIndex].score = bestMatchRating;
     free((void*)_query);
     delete[] freqCount;
-}
-
-// - used to retrive results from findBestMatch
-int getBestMatchIndex() {
     return bestMatchIndex;
-}
-// - used to retrive results from findBestMatch
-float getBestMatchRating() {
-    return bestMatchRating;
 }
 
 /**
  * sliding window search
  * @param _query a dynamically allocated string. It will be freed after this function returns.
 */
-SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, const int gramLen, const float threshold) {
+int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, const int gramLen, const float threshold) {
     string_view query(_query);
     splitBuffer.resize(0);
     split(_query, splitBuffer);
@@ -279,14 +278,12 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int num
     }
 
     len = searcher->size;
-    auto* results = searcher->results;
     // compute score and matches for each sentence
     for (int i = 0; i < len; i++) {
-        const auto& sentence = searcher->sentences[i];
-        auto& result = results[i];
-        result.matches.resize(0);
+        auto& sentence = searcher->sentences[i];
+        sentence.matches.resize(0);
 
-        const int tokenLen = sentence.size();
+        const int tokenLen = sentence.tokens.size();
 
         // use the number of words as the window size in this string if maxWindow > number of words
         const int window = min(maxWindow, tokenLen);
@@ -294,20 +291,20 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int num
         float score = 0, maxScore = 0;
         // initialize score window
         for (int j = 0; j < window; j++) {
-            auto token = sentence[j].token;
+            auto token = sentence.tokens[j].token;
             score += searcher->scoreWindow[j] = token->score;
 
             if (token->score < threshold) continue;
             // add token matches to sentence matches
             for (auto match : token->matches)
-                addMatchNoOverlap(result.matches, sentence[j].index + match.start, sentence[j].index + match.end);
+                addMatchNoOverlap(sentence.matches, sentence.tokens[j].index + match.start, sentence.tokens[j].index + match.end);
         }
         if (score > maxScore) maxScore = score;
 
         for (int j = window; j < tokenLen; j++) {
             // subtract the last score and add the new score
             score -= searcher->scoreWindow[j - window];
-            auto token = sentence[j].token;
+            auto token = sentence.tokens[j].token;
             score += searcher->scoreWindow[j] = token->score;
 
             if (token->score < threshold) continue;
@@ -315,35 +312,45 @@ SearchResult* sWSearch(FastSearcher* searcher, const char* _query, const int num
 
             // add token matches to sentence matches
             for (auto match : token->matches)
-                addMatchNoOverlap(result.matches, sentence[j].index + match.start, sentence[j].index + match.end);
+                addMatchNoOverlap(sentence.matches, sentence.tokens[j].index + match.start, sentence.tokens[j].index + match.end);
         }
-        result.score = maxScore;
-        result.index = i;
+        sentence.score = maxScore;
+    }
+    for (int i = 0; i < len; i++) {
+        searcher->indices[i] = i;
     }
     if (len > numResults) {
-        std::partial_sort(results, results + numResults, results + len, [](const auto& a, const auto& b) { return b.score < a.score; });
+        std::partial_sort(
+            searcher->indices,
+            searcher->indices + numResults, searcher->indices + len,
+            [searcher](int a, int b) {
+                return searcher->sentences[b].score < searcher->sentences[a].score;
+            });
     } else {
-        std::sort(results, results + len, [](const auto& a, const auto& b) { return b.score < a.score; });
+        std::sort(
+            searcher->indices,
+            searcher->indices + len,
+            [searcher](int a, int b) {
+                return searcher->sentences[b].score < searcher->sentences[a].score;
+            });
     }
     free((void*)_query);
-    return results;
+    return searcher->indices;
 }
 
-const Match* getMatches(const SearchResult* result) {
-    return result->matches.data();
+const Match* getMatches(const FastSearcher* searcher, int idx) {
+    return searcher->sentences[idx].matches.data();
 }
-int getMatchSize(const SearchResult* result) {
-    return result->matches.size();
+int getMatchSize(const FastSearcher* searcher, int idx) {
+    return searcher->sentences[idx].matches.size();
+}
+float getScore(const FastSearcher* searcher, int idx) {
+    return searcher->sentences[idx].score;
 }
 
 void deleteSearcher(FastSearcher* searcher) {
-    delete[] searcher->originals;
-    for (int i = 0; i < searcher->size; i++) {
-        free((void*)searcher->_originals[i]);
-    }
-    free(searcher->_originals);
     delete[] searcher->sentences;
-    delete[] searcher->results;
+    delete[] searcher->indices;
     delete[] searcher->scoreWindow;
     delete searcher;
 }

@@ -28,18 +28,19 @@ glp_smcp parm;
 struct ScheduleBlock {
     /**
      * whether this block is movable/expandable
-     * i.e. whether there's still room for it to change its left and width) 
+     * i.e. whether there's still room for it to change its left and width
     */
     bool isFixed;
     /**
      *  visited flag used in BFS/DFS 
      **/
     bool visited;
-
-    int16_t startMin;
-    int16_t endMin;
+    /**
+     * equals to endMin - startMin. Reason for using int16_t: exactly the padding size
+     * */
     int16_t duration;
-
+    int startMin;
+    int endMin;
     /** 
      * an unique index for this scheduleBlock 
      * */
@@ -58,16 +59,12 @@ struct ScheduleBlock {
     double width;
 
     /**
-     * cleftN: Condensed leftN
-     * a subset of leftN. For each node in leftN, it belongs to cleftN if and only if 
-     * it is not in the leftN of any node that is in leftN
-     */
+     * blocks that conflict with the current block and also on the LHS of the current block
+    */
     vector<ScheduleBlock*> cleftN;
     /**
-     * crightN: Condensed rightN
-     * a subset of rightN. For each node in rightN, it belongs to crightN if and only if 
-     * it is not in the rightN of any node that is in rightN
-     */
+     * blocks that conflict with the current block and also on the RHS of the current block
+    */
     vector<ScheduleBlock*> crightN;
 };
 

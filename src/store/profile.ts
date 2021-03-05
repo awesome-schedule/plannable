@@ -436,7 +436,7 @@ class Profile {
                             Authorization: this.tokenType + ' ' + this.accessToken
                         }
                     }),
-                    5000,
+                    6000,
                     'Timed out'
                 )
             ).data;

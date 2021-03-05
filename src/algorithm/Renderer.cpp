@@ -326,6 +326,37 @@ inline void addConstraint(int auxVar, int structVar, double coeff) {
 #define L(x) 2 * (x) + 1
 #define W(x) 2 * (x) + 2
 
+void setupMinMAE(glp_prob* lp, int auxVar, const int MEAN_VAR, const int N) {
+    // 0 = sum wi - N*mean
+    for (int i = 0; i < N; i++) {
+        addConstraint(auxVar, W(i), 1.0);
+    }
+    addConstraint(auxVar, MEAN_VAR, -N);
+    glp_set_row_bnds(lp, auxVar++, GLP_FX, 0.0, 0.0);
+
+    for (int i = 0; i < N; i++) {
+        int tVar = 2 * N + i + 1;
+        int widthVar = W(i);
+
+        // ti >= mean - wi
+        addConstraint(auxVar, tVar, 1.0);
+        addConstraint(auxVar, widthVar, 1.0);
+        addConstraint(auxVar, MEAN_VAR, -1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
+
+        // ti >= wi - mean
+        addConstraint(auxVar, tVar, 1.0);
+        addConstraint(auxVar, widthVar, -1.0);
+        addConstraint(auxVar, MEAN_VAR, 1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
+
+        glp_set_col_bnds(lp, tVar, GLP_FR, 0.0, 0.0);
+        glp_set_obj_coef(lp, tVar, tFactor);
+    }
+    glp_set_col_bnds(lp, MEAN_VAR, GLP_FR, 0.0, 0.0);
+    glp_set_obj_coef(lp, MEAN_VAR, 0.0);
+}
+
 void buildLPModel3(int NC) {
     for (int i = 0; i < NC; i++) {
         idxMap[blockBuffer[i]->idx] = 2 * i + 1;
@@ -380,35 +411,7 @@ void buildLPModel3(int NC) {
         glp_set_obj_coef(lp, leftVar, 0.0);
         glp_set_obj_coef(lp, leftVar + 1, -1.0);  // note the negative sign
     }
-    // 0 = sum wi - N*mean
-    for (int i = 0; i < NC; i++) {
-        addConstraint(auxVar, W(i), 1.0);
-    }
-    addConstraint(auxVar, MEAN_VAR, -NC);
-    glp_set_row_bnds(lp, auxVar++, GLP_FX, 0.0, 0.0);
-
-    for (int i = 0; i < NC; i++) {
-        int tVar = 2 * NC + i + 1;
-        int widthVar = W(i);
-
-        // ti >= mean - wi
-        addConstraint(auxVar, tVar, 1.0);
-        addConstraint(auxVar, widthVar, 1.0);
-        addConstraint(auxVar, MEAN_VAR, -1.0);
-        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
-
-        // ti >= wi - mean
-        addConstraint(auxVar, tVar, 1.0);
-        addConstraint(auxVar, widthVar, -1.0);
-        addConstraint(auxVar, MEAN_VAR, 1.0);
-        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
-
-        glp_set_col_bnds(lp, tVar, GLP_FR, 0.0, 0.0);
-        glp_set_obj_coef(lp, tVar, tFactor);
-    }
-    glp_set_col_bnds(lp, MEAN_VAR, GLP_FR, 0.0, 0.0);
-    glp_set_obj_coef(lp, MEAN_VAR, 0.0);
-
+    setupMinMAE(lp, auxVar, MEAN_VAR, NC);
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
     glp_simplex(lp, &parm);
 
@@ -583,7 +586,7 @@ void buildLPModel2(int NC) {
 }
 
 void buildMILPModel(int total) {
-#define B(x) 2 * N + (x)
+#define B(x) 3 * N + (x) + 1
     // count the number of rows needed
     int auxVar = 0;
     for (int i = 0; i < N; i++) {
@@ -596,18 +599,19 @@ void buildMILPModel(int total) {
     }
     int numBV = auxVar;
     glp_prob* lp = glp_create_prob();
-    glp_set_obj_dir(lp, GLP_MAX);
+    glp_set_obj_dir(lp, GLP_MIN);
 
     // preallocate rows and cols
-    glp_add_cols(lp, 2 * N + numBV);
-    glp_add_rows(lp, 2 * auxVar + N);
+    const int MEAN_VAR = 3 * N + numBV + 1;  // li wi ti yi(binary) MEAN_VAR
+    glp_add_cols(lp, MEAN_VAR);
+    glp_add_rows(lp, 2 * numBV + N + 2 * N + 1);  // 2bin constraints, 1 li+wi, 2 ti constraints, 1 mean constraint
 
     // index 0 is not used by glpk
     ia.resize(1);
     ja.resize(1);
     ar.resize(1);
     auxVar = 1;
-    int bvIdx = 1;
+    int bvIdx = 0;
     constexpr double M = 10.0;
     for (int i = 0; i < N; i++) {
         auto bi = blocksReordered[i];
@@ -638,13 +642,15 @@ void buildMILPModel(int total) {
         glp_set_obj_coef(lp, L(bi->idx), 0.0);
         // wi >= 0
         glp_set_col_bnds(lp, W(bi->idx), GLP_LO, 1.0 / total, 1.0);
-        glp_set_obj_coef(lp, W(bi->idx), 1.0);
+        glp_set_obj_coef(lp, W(bi->idx), -1.0);
     }
-    for (int i = 2 * N; i < 2 * N + numBV; i++) {
-        glp_set_col_kind(lp, i + 1, GLP_BV);
-        glp_set_obj_coef(lp, i + 1, 0.0);
+    // setup binary variables
+    for (int i = 0; i < numBV; i++) {
+        glp_set_col_kind(lp, B(i), GLP_BV);
+        glp_set_obj_coef(lp, B(i), 0.0);
     }
 
+    setupMinMAE(lp, auxVar, MEAN_VAR, N);
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
 
     // glp_simplex(lp, &parm);
@@ -652,7 +658,7 @@ void buildMILPModel(int total) {
     glp_init_iocp(&parm);
     parm.presolve = GLP_ON;
     parm.msg_lev = GLP_MSG_ERR;
-    parm.tm_lim = 10 * 1000;  // 10s time limit
+    parm.tm_lim = 2000;  // 2s time limit
     glp_intopt(lp, &parm);
 
     for (int i = 0; i < N; i++) {

@@ -105,8 +105,10 @@ export default class App extends Store {
 
     async created() {
         // for debugging purpose
-        (window as any).axios = axios;
-        (window as any).vue = this;
+        if (process.env.NODE_ENV === 'development') {
+            (window as any).axios = axios;
+            (window as any).vue = this;
+        }
 
         window.NativeModule = await window.GetNative();
 

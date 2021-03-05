@@ -6,7 +6,11 @@
                 "${workspaceFolder}/**",
                 "~/emsdk/upstream/emscripten/cache/sysroot/include/emscripten"
             ],
-            "defines": [],
+            "defines": [
+                "EXTRA_MODELS",
+                "DEBUG_LOG",
+                "USE_FLATMAP"
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",

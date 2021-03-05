@@ -15,7 +15,7 @@ export const options = {
     applyDFS: false,
     tolerance: 0,
     LPIters: 50,
-    LPModel: 2,
+    LPModel: 1,
     showFixed: false,
     MILP: false,
     tFactor: 0.1

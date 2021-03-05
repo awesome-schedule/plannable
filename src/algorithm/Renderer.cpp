@@ -15,12 +15,12 @@ using namespace std;
 namespace Renderer {
 
 bool MILP = 0;
-bool applyDFS = 1;
+bool applyDFS = 0;
 int8_t ISMethod = 1;
-int8_t LPModel = 3;
+int8_t LPModel = 1;
 int isTolerance = 0;
 int dfsTolerance = 0;
-int LPIters = 100;
+int LPIters = 50;
 double tFactor = 0.1;
 
 glp_smcp parm;
@@ -139,6 +139,7 @@ int intervalScheduling() {
     return numRooms;
 }
 
+#ifdef EXTRA_MODELS
 /**
  * the classical interval scheduling algorithm, runs in O(n log n)
  * @returns the total number of rooms
@@ -175,6 +176,7 @@ int intervalScheduling2() {
     }
     return numRooms + 1;
 }
+#endif
 
 template <typename T>
 struct TimeEntry {
@@ -326,40 +328,10 @@ inline void addConstraint(int auxVar, int structVar, double coeff) {
 #define L(x) 2 * (x) + 1
 #define W(x) 2 * (x) + 2
 
-void setupMinMAE(glp_prob* lp, int auxVar, const int MEAN_VAR, const int N) {
-    // 0 = sum wi - N*mean
-    for (int i = 0; i < N; i++) {
-        addConstraint(auxVar, W(i), 1.0);
-    }
-    addConstraint(auxVar, MEAN_VAR, -N);
-    glp_set_row_bnds(lp, auxVar++, GLP_FX, 0.0, 0.0);
-
-    for (int i = 0; i < N; i++) {
-        int tVar = 2 * N + i + 1;
-        int widthVar = W(i);
-
-        // ti >= mean - wi
-        addConstraint(auxVar, tVar, 1.0);
-        addConstraint(auxVar, widthVar, 1.0);
-        addConstraint(auxVar, MEAN_VAR, -1.0);
-        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
-
-        // ti >= wi - mean
-        addConstraint(auxVar, tVar, 1.0);
-        addConstraint(auxVar, widthVar, -1.0);
-        addConstraint(auxVar, MEAN_VAR, 1.0);
-        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
-
-        glp_set_col_bnds(lp, tVar, GLP_FR, 0.0, 0.0);
-        glp_set_obj_coef(lp, tVar, tFactor);
-    }
-    glp_set_col_bnds(lp, MEAN_VAR, GLP_FR, 0.0, 0.0);
-    glp_set_obj_coef(lp, MEAN_VAR, 0.0);
-}
-
-void buildLPModel3(int NC) {
+void buildLPModel1(int NC) {
+    // map each event to an index (for structural vairable)
     for (int i = 0; i < NC; i++) {
-        idxMap[blockBuffer[i]->idx] = 2 * i + 1;
+        idxMap[blockBuffer[i]->idx] = i + 1;
     }
     // count the number of rows needed
     int auxVar = 0;
@@ -367,12 +339,11 @@ void buildLPModel3(int NC) {
         for (auto v : blockBuffer[i]->cleftN)
             auxVar += !v->isFixed;
     glp_prob* lp = glp_create_prob();
-    glp_set_obj_dir(lp, GLP_MIN);
+    glp_set_obj_dir(lp, GLP_MAX);
 
     // preallocate rows and cols
-    int MEAN_VAR = NC + NC + NC + 1;
-    glp_add_cols(lp, NC + NC + NC + 1);          // li, wi, ti, mean
-    glp_add_rows(lp, auxVar + NC + 1 + 2 * NC);  // 1 for mean, 2*NC for ti
+    glp_add_cols(lp, NC + 1);
+    glp_add_rows(lp, auxVar + NC);
 
     // index 0 is not used by glpk
     ia.resize(1);
@@ -383,46 +354,47 @@ void buildLPModel3(int NC) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
         double minRightFixed = 1.0;
-        int leftVar = 2 * i + 1;
         for (auto v : block->cleftN) {
             if (v->isFixed)
                 maxLeftFixed = max(maxLeftFixed, v->left + v->width);
             else {
-                // li >= lj + wj
-                addConstraint(auxVar, leftVar, 1.0);
+                // li >= lj + w
+                addConstraint(auxVar, i + 1, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
-                addConstraint(auxVar, idxMap[v->idx] + 1, -1.0);
+                addConstraint(auxVar, NC + 1, -1.0);
                 glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
             }
         }
         for (auto v : block->crightN)
             if (v->isFixed) minRightFixed = min(v->left, minRightFixed);
 
-        // li + wi <= minRightFixed
-        addConstraint(auxVar, leftVar, 1.0);
-        addConstraint(auxVar, leftVar + 1, 1.0);
+        // li + w <= minRightFixed
+        addConstraint(auxVar, i + 1, 1.0);
+        addConstraint(auxVar, NC + 1, 1.0);
         glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRightFixed);
 
         // li >= maxLeftFixed
-        glp_set_col_bnds(lp, leftVar, GLP_LO, maxLeftFixed, 0.0);
-
-        // wi >= initialWidth
-        glp_set_col_bnds(lp, leftVar + 1, GLP_LO, block->width, 0.0);
-        glp_set_obj_coef(lp, leftVar, 0.0);
-        glp_set_obj_coef(lp, leftVar + 1, -1.0);  // note the negative sign
+        glp_set_col_bnds(lp, i + 1, GLP_LO, maxLeftFixed, 0.0);
+        glp_set_obj_coef(lp, i + 1, 0.0);
     }
-    setupMinMAE(lp, auxVar, MEAN_VAR, NC);
+    // w >= 0
+    glp_set_col_bnds(lp, NC + 1, GLP_LO, 0.0, 1.0);
+    // argmax(w)
+    glp_set_obj_coef(lp, NC + 1, 1.0);
+
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
     glp_simplex(lp, &parm);
 
+    double width = glp_get_col_prim(lp, NC + 1);
     for (int i = 0; i < NC; i++) {
-        blockBuffer[i]->left = glp_get_col_prim(lp, L(i));
-        blockBuffer[i]->width = glp_get_col_prim(lp, W(i));
+        blockBuffer[i]->left = glp_get_col_prim(lp, i + 1);
+        blockBuffer[i]->width = width;
     }
     glp_delete_prob(lp);
 }
 
-void buildLPModel1(int NC) {
+#ifdef EXTRA_MODELS
+void buildLPModel2(int NC) {
     for (int i = 0; i < NC; i++) {
         idxMap[blockBuffer[i]->idx] = 2 * i + 1;
     }
@@ -520,10 +492,40 @@ void buildLPModel1(int NC) {
     glp_delete_prob(lp);
 }
 
-void buildLPModel2(int NC) {
-    // map each event to an index (for structural vairable)
+void setupMinMAE(glp_prob* lp, int auxVar, const int MEAN_VAR, const int N) {
+    // 0 = sum wi - N*mean
+    for (int i = 0; i < N; i++) {
+        addConstraint(auxVar, W(i), 1.0);
+    }
+    addConstraint(auxVar, MEAN_VAR, -N);
+    glp_set_row_bnds(lp, auxVar++, GLP_FX, 0.0, 0.0);
+
+    for (int i = 0; i < N; i++) {
+        int tVar = 2 * N + i + 1;
+        int widthVar = W(i);
+
+        // ti >= mean - wi
+        addConstraint(auxVar, tVar, 1.0);
+        addConstraint(auxVar, widthVar, 1.0);
+        addConstraint(auxVar, MEAN_VAR, -1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
+
+        // ti >= wi - mean
+        addConstraint(auxVar, tVar, 1.0);
+        addConstraint(auxVar, widthVar, -1.0);
+        addConstraint(auxVar, MEAN_VAR, 1.0);
+        glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
+
+        glp_set_col_bnds(lp, tVar, GLP_FR, 0.0, 0.0);
+        glp_set_obj_coef(lp, tVar, tFactor);
+    }
+    glp_set_col_bnds(lp, MEAN_VAR, GLP_FR, 0.0, 0.0);
+    glp_set_obj_coef(lp, MEAN_VAR, 0.0);
+}
+
+void buildLPModel3(int NC) {
     for (int i = 0; i < NC; i++) {
-        idxMap[blockBuffer[i]->idx] = i + 1;
+        idxMap[blockBuffer[i]->idx] = 2 * i + 1;
     }
     // count the number of rows needed
     int auxVar = 0;
@@ -531,11 +533,12 @@ void buildLPModel2(int NC) {
         for (auto v : blockBuffer[i]->cleftN)
             auxVar += !v->isFixed;
     glp_prob* lp = glp_create_prob();
-    glp_set_obj_dir(lp, GLP_MAX);
+    glp_set_obj_dir(lp, GLP_MIN);
 
     // preallocate rows and cols
-    glp_add_cols(lp, NC + 1);
-    glp_add_rows(lp, auxVar + NC);
+    int MEAN_VAR = NC + NC + NC + 1;
+    glp_add_cols(lp, NC + NC + NC + 1);          // li, wi, ti, mean
+    glp_add_rows(lp, auxVar + NC + 1 + 2 * NC);  // 1 for mean, 2*NC for ti
 
     // index 0 is not used by glpk
     ia.resize(1);
@@ -546,41 +549,41 @@ void buildLPModel2(int NC) {
         auto block = blockBuffer[i];
         double maxLeftFixed = 0.0;
         double minRightFixed = 1.0;
+        int leftVar = 2 * i + 1;
         for (auto v : block->cleftN) {
             if (v->isFixed)
                 maxLeftFixed = max(maxLeftFixed, v->left + v->width);
             else {
-                // li >= lj + w
-                addConstraint(auxVar, i + 1, 1.0);
+                // li >= lj + wj
+                addConstraint(auxVar, leftVar, 1.0);
                 addConstraint(auxVar, idxMap[v->idx], -1.0);
-                addConstraint(auxVar, NC + 1, -1.0);
+                addConstraint(auxVar, idxMap[v->idx] + 1, -1.0);
                 glp_set_row_bnds(lp, auxVar++, GLP_LO, 0.0, 0.0);
             }
         }
         for (auto v : block->crightN)
             if (v->isFixed) minRightFixed = min(v->left, minRightFixed);
 
-        // li + w <= minRightFixed
-        addConstraint(auxVar, i + 1, 1.0);
-        addConstraint(auxVar, NC + 1, 1.0);
+        // li + wi <= minRightFixed
+        addConstraint(auxVar, leftVar, 1.0);
+        addConstraint(auxVar, leftVar + 1, 1.0);
         glp_set_row_bnds(lp, auxVar++, GLP_UP, 0.0, minRightFixed);
 
         // li >= maxLeftFixed
-        glp_set_col_bnds(lp, i + 1, GLP_LO, maxLeftFixed, 0.0);
-        glp_set_obj_coef(lp, i + 1, 0.0);
-    }
-    // w >= 0
-    glp_set_col_bnds(lp, NC + 1, GLP_LO, 0.0, 1.0);
-    // argmax(w)
-    glp_set_obj_coef(lp, NC + 1, 1.0);
+        glp_set_col_bnds(lp, leftVar, GLP_LO, maxLeftFixed, 0.0);
 
+        // wi >= initialWidth
+        glp_set_col_bnds(lp, leftVar + 1, GLP_LO, block->width, 0.0);
+        glp_set_obj_coef(lp, leftVar, 0.0);
+        glp_set_obj_coef(lp, leftVar + 1, -1.0);  // note the negative sign
+    }
+    setupMinMAE(lp, auxVar, MEAN_VAR, NC);
     glp_load_matrix(lp, ia.size() - 1, ia.data(), ja.data(), ar.data());
     glp_simplex(lp, &parm);
 
-    double width = glp_get_col_prim(lp, NC + 1);
     for (int i = 0; i < NC; i++) {
-        blockBuffer[i]->left = glp_get_col_prim(lp, i + 1);
-        blockBuffer[i]->width = width;
+        blockBuffer[i]->left = glp_get_col_prim(lp, L(i));
+        blockBuffer[i]->width = glp_get_col_prim(lp, W(i));
     }
     glp_delete_prob(lp);
 }
@@ -667,6 +670,11 @@ void buildMILPModel(int total) {
     }
     glp_delete_prob(lp);
 }
+void (*LPModels[])(int idx) = {
+    buildLPModel1,
+    buildLPModel2,
+    buildLPModel3};
+#endif
 
 inline void computeInitialWidth(ScheduleBlock* end, int total) {
     for (auto block = blocks; block < end; block++) {
@@ -684,11 +692,6 @@ inline int getFixedCount(ScheduleBlock* end) {
         fixedCount += (block->visited = block->isFixed);
     return fixedCount;
 }
-
-void (*LPModels[])(int idx) = {
-    buildLPModel1,
-    buildLPModel2,
-    buildLPModel3};
 
 // disable name-mangling for exported functions
 extern "C" {
@@ -757,15 +760,16 @@ ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
     free((void*)arr);
     // ---------------------------- end setup --------------------------------------
 
-    // STEP 1 the total number of rooms/columns needed
+#ifdef EXTRA_MODELS
     int total = ISMethod == 1 ? intervalScheduling() : intervalScheduling2();
-
-#ifdef ENABLE_MILP
     if (MILP) {
         buildMILPModel(total);
         computeResult();
         return blocks;
     }
+#else
+    // STEP 1 the total number of rooms/columns needed
+    int total = intervalScheduling();
 #endif
 
     auto end = blocks + N;
@@ -800,13 +804,19 @@ ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
             DFSFindFixedNumerical(block);
     }
     int prevFixedCount = getFixedCount(end);
-    auto buildLPModel = LPModels[LPModel - 1];
     int i;
     for (i = 0; i < LPIters; i++) {
         // for each non-fixed component
         for (auto block = blocks; block < end; block++) {
-            if (!block->visited)  // build and solve the lp model
-                buildLPModel(BFS(block));
+            if (!block->visited)  {
+                // build and solve the lp model
+                int NC = BFS(block);
+                #ifdef EXTRA_MODELS
+                    LPModels[LPModel - 1](NC);
+                #else
+                    buildLPModel1(NC);
+                #endif
+            }
         }
         // reset the visited flag because DFSFindFixedNumerical also needs it
         for (auto block = blocks; block < end; block++)

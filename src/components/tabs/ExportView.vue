@@ -159,7 +159,7 @@
                                         :class="{
                                             active: ver.version === prof.currentVersion
                                         }"
-                                        href="#"
+                                        href="javascript:void(0);"
                                         :title="`Full user agent: ${ver.userAgent}`"
                                         @click.stop="switchVersion(prof.name, idx, ver.version)"
                                     >

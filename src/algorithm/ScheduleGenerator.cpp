@@ -1,8 +1,12 @@
 /**
  * The use of data structure assumes that
- * 1. Each course has no more than 255 sections (uint8 for schedules)
- * 2. Each schedule has no more than 21845 meetings each week (uint16 for timeArray)
- * Additionally, only one set of schedules can be stored at a time, since all data are stored as global variables
+ * 1. There can be no more than 65535 sections to choose from for each schedule (uint16 for schedules).
+ *    Note that the total number of schedules is only memory-limited. 
+ *    For a typical course schedule (e.g. 7 courses, each course meets 2~3 times a week), 
+ *    about 10,000,000 schedules can be generated and stored within the browser memory limit (2GB)
+ * 2. Each schedule has no more than 21845 (65536/3) meetings each week (uint16 for timeArray).
+ * Additionally, only one set of schedules can be stored at a time, since all data are stored as global variables. 
+ * This is not a limitation, but rather a design decision, to keep memory usage low. 
 */
 
 #include <algorithm>
@@ -22,11 +26,6 @@ inline T calcOverlap(T a, T b, T c, T d) {
     if (c > b || a > d) return -1;
     return min(b, d) - max(a, c);
 }
-
-struct Date {
-    double start;
-    double end;
-};
 
 enum SortMode {
     fallback = 0,

@@ -180,19 +180,8 @@
                 <p>
                     The primary address of our website is
                     <a href="https://plannable.org">https://plannable.org</a>. It is hosted on
-                    GitHub. Since we load content from many sources, it may take a while for
-                    first-time loading. For users in China, we provide a <strong>mirror</strong> (<a
-                        href="https://cn.plannable.org"
-                        >https://cn.plannable.org</a
-                    >) whose content is synchronized with the primary website once per hour. Note
-                    that it automatically redirects to
-                    <a href="https://plannable.gitee.io">https://plannable.gitee.io</a>, because to
-                    host websites in China, one needs to register at ICP (ICP备案), which is somehow
-                    complicated. To avoid such a burden, we hosted our website on gitee.io, a top
-                    level domain operated by a Chinese company. However, your data is not
-                    synchronized (and it is techniqually impossible to do so). If you want to
-                    transfer your data between them, you need to use the
-                    <a href="#item-7-2" @click="showGuide(7)">Export to JSON</a> function provided.
+                    GitHub (free of charge!). Since we load content from many sources, it may take a
+                    while for first-time loading.
                 </p>
 
                 <h5>Privacy</h5>

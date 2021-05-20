@@ -36,7 +36,13 @@ However, optional backend storage features are available. Users can choose to lo
 
 ## Mirror
 
-To facilitate access in China, we provide a mirror: https://cn.plannable.org/. It is synchronized with https://plannable.org/ once per hour.
+<s> To facilitate access in China, we provide a mirror: https://cn.plannable.org/. It is synchronized with https://plannable.org/ once per hour.</s>
+
+> Note: due to technical issues, the synchronization must be performed manually, so the mirror might not be up-to-date. I suggest to use the main website https://plannable.org/.
+
+### Supported browsers
+
+Since Plannable uses some of the cutting-edge features of CSS and Javascript, it requires relatively recent versions of the mainstream browsers. Specifically, Edge >= 16, Firefox >= 52, Chrome >= 57, Safari >= 11, Opera >= 44 are supported. IE is not supported. Plannable might also work on browsers not mentioned above, as long as the newer features such as ES6, WebAssembly and CSS Grid are supported. 
 
 ## Desktop App
 

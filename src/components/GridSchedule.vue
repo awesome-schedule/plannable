@@ -3,7 +3,7 @@
         class="row no-gutters justify-content-start px-1 mb-3"
         :style="{ width: display.width + '%' }"
     >
-        <div class="col-xs-auto time">
+        <div class="col-xs-auto mr-1 time">
             <div
                 v-for="(hour, idx) in hours"
                 :key="hour"

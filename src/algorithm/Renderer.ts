@@ -62,6 +62,10 @@ export async function computeBlockPositions(days: ScheduleDays) {
          * ```
          */
         const rPtr = Module._compute(bufPtr, len);
+        if (rPtr === 0) {
+            alert('Out of memory!');
+            console.error('Out of memory!');
+        }
         const result = new Float64Array(Module.HEAPU8.buffer, rPtr, len * 8);
         for (let i = 0; i < len; i++) {
             blocks[i].left = result[8 * i + 3];

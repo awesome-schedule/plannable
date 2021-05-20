@@ -722,18 +722,28 @@ ScheduleBlock* compute(const TimeEntry<int16_t>* arr, int _N) {
 #endif
     // ---------------------------- setup --------------------------------------
     N = _N;
-    if (N > maxN) {  // TODO: check for allocation failure
+    if (N > maxN) {
         // we need to allocate more memory.
         // the previous ptr may be NULL, so realloc will be equivalent to malloc in that case
-        blocks = (ScheduleBlock*)realloc(blocks, N * sizeof(ScheduleBlock));
-
+        void* newMem = realloc(blocks, N * sizeof(ScheduleBlock));
+        if (!newMem) return NULL;
+        
+        blocks = static_cast<ScheduleBlock*>(newMem);
         // initialize newly allocated memory
         for (int i = maxN; i < N; i++) new ((void*)&blocks[i]) ScheduleBlock;
 
         // they are overwritten anyway, no need to use memset to initialize/clear them
-        blocksReordered = (ScheduleBlock**)realloc(blocksReordered, N * sizeof(ScheduleBlock*));
-        blockBuffer = (ScheduleBlock**)realloc(blockBuffer, N * sizeof(ScheduleBlock*));
-        idxMap = (int*)realloc(idxMap, N * sizeof(int));
+        newMem = realloc(blocksReordered, N * sizeof(ScheduleBlock*));
+        if (!newMem) return NULL;
+        blocksReordered = static_cast<ScheduleBlock**>(newMem);
+
+        newMem = realloc(blockBuffer, N * sizeof(ScheduleBlock*));
+        if (!newMem) return NULL;
+        blockBuffer = static_cast<ScheduleBlock**>(newMem);
+
+        newMem = realloc(idxMap, N * sizeof(int));
+        if (!newMem) return NULL;
+        idxMap = static_cast<int*>(newMem);
         maxN = N;
     }
     r_sumSq = r_sum = 0.0;

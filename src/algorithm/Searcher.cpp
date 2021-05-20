@@ -114,7 +114,7 @@ inline pair<int16_t*, int> constructQueryGrams(GramMap& queryGrams, string_view 
  * Adapted from [[https://github.com/aceakash/string-similarity]], with optimizations
  * MIT License
  */
-float compareTwoStrings(const GramMap& bigrams, int16_t* freqCount, string_view first, string_view second) {
+float compareTwoStrings(const GramMap& bigrams, string_view first, string_view second) {
     int len1 = first.length(),
         len2 = second.length();
     if (!len1 && !len2) return 1;          // if both are empty strings
@@ -186,7 +186,7 @@ FastSearcher* getSearcher(const char** sentences, int N) {
         searcher->sentences[i].original = {sentence, static_cast<string_view::size_type>(it - sentence)};
         maxTokenLen = max(maxTokenLen, static_cast<int>(searcher->sentences[i].tokens.size()));
     }
-    // free the string array, but not strings them self
+    // free the string array, but not strings themselves
     free((void*)sentences);
     uniqueTokens.shrink_to_fit();
     searcher->scoreWindow = new float[maxTokenLen];
@@ -221,7 +221,7 @@ int findBestMatch(FastSearcher* searcher, const char* _query) {
     float bestMatchRating = 0.0f;
     int bestMatchIndex = 0;
     for (int i = 0; i < searcher->size; i++) {
-        float currentRating = compareTwoStrings(queryGrams, freqCount, query, searcher->sentences[i].original);
+        float currentRating = compareTwoStrings(queryGrams, query, searcher->sentences[i].original);
         if (currentRating > bestMatchRating) {
             bestMatchIndex = i;
             bestMatchRating = currentRating;

@@ -43,7 +43,6 @@ struct SortOption {
     float weight;
 };
 
-SortOption sortOptions[7];
 int sortMode = SortMode::combined;
 
 struct CoeffCache {
@@ -75,11 +74,6 @@ int scheduleLen = 0;
  * the reference schedule for sort by similarity. Length=numCourses
 */
 uint16_t* __restrict__ refSchedule = NULL;
-
-/** 
- * coefficient cache for each sort option 
- */
-CoeffCache sortCoeffCache[7];
 /**
  * the indices of the sorted schedules, equals to argsort(coeffs)
  * */
@@ -239,6 +233,14 @@ const char* sortFunctionNames[] = {
     "noEarly",
     "similarity"};
 #endif
+
+constexpr int NUM_SORT_FUNCS = sizeof(sortFunctions) / sizeof(void*);
+
+SortOption sortOptions[NUM_SORT_FUNCS];
+/** 
+ * coefficient cache for each sort option 
+ */
+CoeffCache sortCoeffCache[NUM_SORT_FUNCS];
 
 /**
  * whether the random sort option is enabled
@@ -425,7 +427,7 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
             if (curSchedule - schedules >= maxNumSchedules) goto end;
             sectionIdx = curSchedule[--courseIdx] + 1;
         }
-next:;
+    next:;
         /**
          * when all possibilities in on class have exhausted, explore the next possibility in the previous class
          * reset choices of the later classes to 0
@@ -450,8 +452,8 @@ next:;
             }
         }
 
-        // if the section does not conflict with any previously chosen sections, 
-        // record the section and go to the next class, 
+        // if the section does not conflict with any previously chosen sections,
+        // record the section and go to the next class,
         curSchedule[courseIdx++] = sectionIdx;
         // set choice num to be the first section of the next class
         sectionIdx = sectionLens[courseIdx];
@@ -512,8 +514,7 @@ void sort() {
         shuffle(indices, indices + count, eng);
         return;
     }
-
-    static SortOption enabledOptions[7];
+    static SortOption enabledOptions[NUM_SORT_FUNCS];
 
     int enabled = 0;
     int lastIdx = -1;

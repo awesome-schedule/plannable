@@ -75,3 +75,4 @@ dist-electron
 glpk-*
 public/js/*
 *.o
+parallel-hashmap

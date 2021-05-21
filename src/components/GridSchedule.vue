@@ -7,7 +7,7 @@
             <div
                 v-for="(hour, idx) in hours"
                 :key="hour"
-                :style="`top: ${heights.sumHeights[idx] - 5}px`"
+                :style="`margin-top: ${heights.sumHeights[idx] - 5}px`"
             >
                 {{ hour }}
             </div>
@@ -90,12 +90,12 @@
 .time {
     text-align: right;
     font-size: 10px;
-    width: 24px;
+    display: grid;
     position: relative;
 }
 
 .time > div {
-    position: absolute;
+    grid-area: 1/1;
 }
 
 .course-block,

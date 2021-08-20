@@ -260,27 +260,30 @@ export default abstract class Schedule {
         for (const key in this.All) {
             const temp = this.All[key];
 
+            // we need a full course record of key `key`
+            const fullCourse = catalog.getCourse(key);
+            const _creditStr = parseFloat(fullCourse.units);
+            const credit = isNaN(_creditStr) ? 0 : _creditStr;
             // combine all groups because groups don't affect display
             const sections =
                 temp === -1
                     ? -1
                     : temp.reduce((acc, group) => {
-                          group.forEach(x => acc.add(x));
+                          if (group.size) {
+                              group.forEach(x => acc.add(x));
+                              // since we select one section from each group, we need to accumulate credit for each group
+                              this.totalCredit += credit;
+                          }
                           return acc;
                       }, new Set<number>());
 
-            // we need a full course record of key `key`
-            const fullCourse = catalog.getCourse(key);
             // a "partial" course with only selected sections
             const course = catalog.getCourse(key, sections);
-            // skip placing empty courses
+            // skip placing empty courses (any section or no sections are selected)
             if (!course.sections.length) {
                 current.push([fullCourse, [' - ']]);
                 continue;
             }
-
-            const credit = parseFloat(course.units);
-            this.totalCredit += isNaN(credit) ? 0 : credit;
             // if any section
             if (sections === -1) {
                 current.push([fullCourse, [' - ']]);

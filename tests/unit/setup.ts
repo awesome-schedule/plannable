@@ -5,9 +5,10 @@ import { dataend } from '@/config';
 import { setupTimeMatrix } from '@/data/BuildingLoader';
 import Catalog from '@/models/Catalog';
 import { ScheduleAll } from '@/models/Schedule';
-import Section from '@/models/Section';
+import Section, { SectionFields } from '@/models/Section';
 import Store, { saveStatus } from '@/store';
 import WatchFactory from '@/store/watch';
+import { parseDate } from '@/utils';
 
 global.console.time = jest.fn();
 global.console.timeEnd = jest.fn();
@@ -124,17 +125,31 @@ beforeAll(async () => {
             enumerable: true
         },
         meetings: {
-            value: ['Comp. Vision', 'MoWe 5:00PM - 6:15PM', 'Thornton Hall E316'],
+            value: [{
+                'days': 'MoWe 5:00PM - 6:15PM',
+                'instructor':  'dummy',
+                'room': 'Thornton Hall E316'
+            }],
             enumerable: true
         },
         instructors: {
-            value: ['Comp. Vision'],
+            value: 'Comp. Vision',
+            enumerable: true
+        },
+        rooms: {
+            value: 'Comp. Vision',
             enumerable: true
         },
         dates: {
             value: '08/27/2019 - 12/06/2019',
             enumerable: true
+        },
+        dateArray: {
+            value: parseDate('08/27/2019 - 12/06/2019'),
+            enumerable: true
         }
+    } as {
+        [x in keyof Required<SectionFields>]: TypedPropertyDescriptor<Section[x]>;
     });
     catalog.courseDict.cs45015.sections.push(section);
     window.saveStatus = saveStatus;

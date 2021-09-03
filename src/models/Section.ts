@@ -24,7 +24,7 @@ import { CourseStatus } from '../config';
  */
 export type ValidFlag = number;
 
-type SectionMatchFields = 'topic' | 'instructors';
+type SectionMatchFields = 'topic' | 'instructors' | 'rooms';
 export type SectionMatch<T extends SectionMatchFields = SectionMatchFields> = Match<T>;
 
 /**
@@ -59,9 +59,13 @@ export interface SectionFields {
     readonly enrollment_limit: number;
     readonly wait_list: number;
     /**
-     * array of instructor names (computed from meeting)
+     * instructor names (computed from meeting)
      */
-    readonly instructors: readonly string[];
+    readonly instructors: string;
+    /**
+     * rooms (computed from meeting)
+     */
+    readonly rooms: string;
     readonly dates: string;
     readonly meetings: readonly Meeting[];
 

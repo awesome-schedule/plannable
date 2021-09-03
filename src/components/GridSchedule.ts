@@ -176,7 +176,7 @@ export default class GridSchedule extends Store {
                         title: showSuffix ? section.displayName : section.displayNameNoType,
                         time: showTime ? block.meeting!.days : '',
                         room: showRoom ? block.meeting!.room : '',
-                        description: showInstructor ? section.instructors.join(', ') : ''
+                        description: showInstructor ? section.instructors : ''
                     });
                 } else if (section instanceof Course) {
                     const firstSec = section.sections[0];
@@ -189,10 +189,7 @@ export default class GridSchedule extends Store {
                         time: showTime ? block.meeting!.days : '',
                         room: showRoom ? `${block.meeting!.room} and ${more} more` : '',
                         description: showInstructor
-                            ? `${firstSec.instructors.join(', ')} and ${section.sections.reduce(
-                                  (acc, x) => acc + x.instructors.length,
-                                  0
-                              ) - 1} more`
+                            ? `${firstSec.instructors} and ${section.sections.length} more`
                             : ''
                     });
                 } else {

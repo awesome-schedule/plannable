@@ -12,7 +12,7 @@ import { parse } from 'papaparse';
 import { stringify } from 'querystring';
 import Catalog, { SemesterJSON } from './models/Catalog';
 import Course, { CourseFields } from './models/Course';
-import Meeting, { getInstructors } from './models/Meeting';
+import Meeting, { getCombinedMeeting } from './models/Meeting';
 import Section, { SectionFields, ValidFlag } from './models/Section';
 import { parseDate } from './utils';
 import * as defaultConfig from './config.example';
@@ -397,7 +397,11 @@ function parseSemesterData(rawData: string[][]) {
                 enumerable: true
             },
             instructors: {
-                value: getInstructors(meetings),
+                value: getCombinedMeeting(meetings, 'instructor').join(", "),
+                enumerable: true
+            },
+            rooms: {
+                value: getCombinedMeeting(meetings, 'room').join(", "),
                 enumerable: true
             },
             dateArray: {

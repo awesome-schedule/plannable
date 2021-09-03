@@ -46,7 +46,7 @@
                                     <td
                                         v-html="
                                             highlightMatch(
-                                                section.instructors.join(', '),
+                                                section.instructors,
                                                 'instructors',
                                                 match[1].get(section.id)
                                             )

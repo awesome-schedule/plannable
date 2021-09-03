@@ -203,13 +203,24 @@
                                             v-if="matches.length"
                                             v-html="
                                                 highlightMatch(
-                                                    sec.instructors.join(', '),
+                                                    sec.instructors,
                                                     'instructors',
                                                     matches[idx][1].get(sec.id)
                                                 )
                                             "
                                         ></li>
-                                        <li v-else>{{ sec.instructors.join(', ') }}</li>
+                                        <li v-else>{{ sec.instructors }}</li>
+                                        <li
+                                            v-if="matches.length"
+                                            v-html="
+                                                highlightMatch(
+                                                    sec.rooms,
+                                                    'rooms',
+                                                    matches[idx][1].get(sec.id)
+                                                )
+                                            "
+                                        ></li>
+                                        <li v-else>{{ sec.rooms }}</li>
                                     </ul>
                                 </div>
                                 <div class="col col-sm-auto align-self-center">

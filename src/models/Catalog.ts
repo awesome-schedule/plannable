@@ -118,7 +118,7 @@ export default class Catalog {
         this.topicSearcher = new FastSearcher(this.sections, obj => obj.topic, 'topic');
         this.instrSearcher = new FastSearcher(
             this.sections,
-            obj => obj.instructors.join(' '),
+            obj => obj.instructors,
             'instructors'
         );
         console.timeEnd('catalog prep');
@@ -306,19 +306,25 @@ export default class Catalog {
 
         if (!spec || field === 'topic')
             for (let i = 0; i < len; i++) {
-                this.searchTopic(query, courses[i], results, matches);
+                this.searchSectionField(query, 'topic', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
         if (!spec || field === 'prof')
             for (let i = 0; i < len; i++) {
-                this.searchProf(query, courses[i], results, matches);
+                this.searchSectionField(query, 'instructors', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
         if (!spec || field === 'desc')
             for (let i = 0; i < len; i++) {
                 this.searchField(query, 'description', courses[i], results, matches);
+                if (results.length >= maxResults) return [results, matches];
+            }
+
+        if (!spec || field === 'room')
+            for (let i = 0; i < len; i++) {
+                this.searchSectionField(query, 'rooms', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
         return [results, matches];
@@ -376,42 +382,22 @@ export default class Catalog {
         }
     }
 
-    private searchTopic(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
+    private searchSectionField(query: string, field: 'topic' | 'instructors' | 'rooms', course: Course, results: Course[], matches: SearchMatch[]) {
         // check any topic/professor match. Select the sections which only match the topic/professor
-        const topicMatches = new Map<number, [SectionMatch]>();
+        const secMatches = new Map<number, [SectionMatch]>();
         for (const sec of course.sections) {
-            const topic = sec.topic;
-            const topicIdx = topic.toLowerCase().indexOf(query);
-            if (topicIdx !== -1) {
-                topicMatches.set(sec.id, [
+            const mIdx = sec[field].toLowerCase().indexOf(query);
+            if (mIdx !== -1) {
+                secMatches.set(sec.id, [
                     {
-                        match: 'topic',
-                        start: topicIdx,
-                        end: topicIdx + query.length
+                        match: field,
+                        start: mIdx,
+                        end: mIdx + query.length
                     }
                 ]);
             }
         }
-        if (topicMatches.size) this.appendToResult(course, topicMatches, results, matches);
-    }
-
-    private searchProf(query: string, course: Course, results: Course[], matches: SearchMatch[]) {
-        // check any topic/professor match. Select the sections which only match the topic/professor
-        const profMatches = new Map<number, [SectionMatch]>();
-        for (const sec of course.sections) {
-            const profs = sec.instructors.join(', ').toLowerCase();
-            const profIdx = profs.indexOf(query);
-            if (profIdx !== -1) {
-                profMatches.set(sec.id, [
-                    {
-                        match: 'instructors',
-                        start: profIdx,
-                        end: profIdx + query.length
-                    }
-                ]);
-            }
-        }
-        if (profMatches.size) this.appendToResult(course, profMatches, results, matches);
+        if (secMatches.size) this.appendToResult(course, secMatches, results, matches);
     }
 
     private appendToResult(

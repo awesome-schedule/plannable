@@ -96,7 +96,8 @@ Examples of things that need to run fast include, but not limited to,
 
 -   ScheduleGenerator.ts, as the number of possible schedules is exponential in the number of courses chosen
 -   ScheduleEvaluator.ts, as it is evaluating all the schedules given by the ScheduleGenerator
--   Coloring.ts, as graph coloring is an NP-complete problem, implying that the best-known exact algorithms run in exponential time.
+
+Currently, compute-intensive parts of the algorithm are written in C++, and they are compiled to WebAssembly with Emscripten. The ts files listed above mainly wrap around WebAssembly functions so they can be called from the JS side with JS data structures. 
 
 Examples of things that do not need to run that fast include, but not limited to,
 

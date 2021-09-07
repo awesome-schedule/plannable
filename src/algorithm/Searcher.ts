@@ -31,10 +31,6 @@ function allocateStr(Module: EMModule, str: string) {
  * returns -1 if query is shorter than gramLen
  */
 function prepareQuery(Module: EMModule, query: string, gramLen: number) {
-    query = query
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, ' ');
     if (query.length < gramLen) return -1;
     return allocateStr(Module, query);
 }
@@ -56,12 +52,13 @@ export class FastSearcher<T, K = string> {
         for (let i = 0; i < items.length; i++) {
             const str = toStr(items[i]);
             this.originals.push(str);
-            Module.HEAPU32[strArrPtr / 4 + i] = allocateStr(Module, str.trim().toLowerCase());
+            //eslint-disable-next-line
+            Module.HEAPU32[strArrPtr / 4 + i] = allocateStr(Module, str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ").toLowerCase());
         }
         this.ptr = Module._getSearcher(strArrPtr, items.length);
     }
 
-    sWSearch(query: string, numResults: number, gramLen = 3, threshold = 0.1) {
+    sWSearch(query: string, numResults: number, gramLen = 2, threshold = 0.1) {
         const Module = window.NativeModule;
         const ptr = prepareQuery(Module, query, gramLen);
         const allMatches: SearchResult<T, K>[] = [];

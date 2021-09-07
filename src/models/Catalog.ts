@@ -43,7 +43,7 @@ export type SearchMatch = [Match<'key' | 'title' | 'description'>[], Map<number,
  */
 type ScoreEntry = [number, number, number];
 type CourseSearchResult = SearchResult<Course, 'title' | 'description'>;
-type SectionSearchResult = SearchResult<Section, 'topic' | 'instructors'>;
+type SectionSearchResult = SearchResult<Section, 'topic' | 'instructors' | 'rooms'>;
 
 const courseMap = new Map<string, CourseSearchResult[]>();
 const sectionMap = new Map<string, Map<number, SectionSearchResult[]>>();
@@ -93,6 +93,7 @@ export default class Catalog {
     private descriptionSearcher: FastSearcher<Course, 'description'>;
     private topicSearcher: FastSearcher<Section, 'topic'>;
     private instrSearcher: FastSearcher<Section, 'instructors'>;
+    private roomSearcher: FastSearcher<Section, 'rooms'>;
     /**
      * @param semester the semester corresponding to the catalog stored in this object
      * @param data
@@ -120,6 +121,11 @@ export default class Catalog {
             this.sections,
             obj => obj.instructors,
             'instructors'
+        );
+        this.roomSearcher = new FastSearcher(
+            this.sections,
+            obj => obj.rooms,
+            'rooms'
         );
         console.timeEnd('catalog prep');
     }
@@ -171,7 +177,7 @@ export default class Catalog {
     private processCourseResults(results: CourseSearchResult[], weight: number) {
         for (const result of results) {
             const { key } = this.courses[result.index];
-            const score = result.score ** 2 * weight;
+            const score = result.score;
 
             const temp = courseMap.get(key);
             if (temp) {
@@ -188,7 +194,7 @@ export default class Catalog {
     private processSectionResults(results: SectionSearchResult[], weight: number) {
         for (const result of results) {
             const { key, id } = this.sections[result.index];
-            const score = result.score ** 2 * weight;
+            const score = result.score;
 
             let scoreEntry = scores.get(key);
             if (!scoreEntry) {
@@ -214,23 +220,46 @@ export default class Catalog {
         }
     }
 
-    /**
-     * perform fuzzy search in the dedicated web worker
-     */
-    public fuzzySearch(query: string) {
-        console.time('search');
-        this.processCourseResults(this.titleSearcher!.sWSearch(query, 50), 1);
-        this.processCourseResults(this.descriptionSearcher!.sWSearch(query, 50), 0.5);
-        this.processSectionResults(this.topicSearcher!.sWSearch(query, 50), 0.9);
-        this.processSectionResults(this.instrSearcher!.sWSearch(query, 50), 0.25);
+    private prepQuery(query: string) {
+        query = query.trim().toLowerCase();
+        const temp = query.split(/\s+/);
+        query = temp.join(' ');
+
+        /** query no space*/
+        let queryNoSp: string;
+        let field = '';
+        /** is special search*/
+        if (query.startsWith(':') && temp.length > 1) {
+            field = temp[0].substring(1);
+            queryNoSp = temp.slice(1).join('');
+            query = temp.slice(1).join(' ');
+        } else {
+            queryNoSp = temp.join('');
+        }
+
+        return [query, field, queryNoSp] as const
+    }
+
+    public fuzzySearch(_query: string) {
+        const [query, field] = this.prepQuery(_query);
+
+        if (!field || field.startsWith('title'))
+            this.processCourseResults(this.titleSearcher.sWSearch(query, 50), 1.0);
+        if (!field || field.startsWith('desc'))
+            this.processCourseResults(this.descriptionSearcher.sWSearch(query, 50), 1.0);
+        if (!field || field.startsWith('topic'))
+            this.processSectionResults(this.topicSearcher.sWSearch(query, 50), 1.0);
+        if (!field || field.startsWith('prof'))
+            this.processSectionResults(this.instrSearcher.sWSearch(query, 50), 1.0);
+        if (field.startsWith('room'))
+            this.processSectionResults(this.roomSearcher.sWSearch(query, 50), 1.0);
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
             .map(([_, a]) => [_, a[0] + (a[2] && a[1] / a[2])] as const)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12)
-            .filter(entry => entry[1] > 0.1);
-
+            .filter(entry => entry[1] > 0.000001);
         const finalResults: Course[] = [];
         const allMatches: SearchMatch[] = [];
 
@@ -265,64 +294,48 @@ export default class Catalog {
     /**
      * Perform a linear search in the catalog against
      * course number, title, topic, professor name and description, in the order specified.
-     * @param query
+     * @param _query
      * @param maxResults
      */
-    public search(query: string, maxResults = 6): [Course[], SearchMatch[]] {
-        query = query.trim().toLowerCase();
-        const temp = query.split(/\s+/);
-        query = temp.join(' ');
-
-        /** is special search*/
-        const spec = query.startsWith(':') && temp.length > 1;
-
-        /** query no space*/
-        let queryNoSp: string;
-        let field = '';
-        if (spec) {
-            field = temp[0].substring(1);
-            queryNoSp = temp.slice(1).join('');
-            query = temp.slice(1).join(' ');
-        } else {
-            queryNoSp = temp.join('');
-        }
+    public search(_query: string, maxResults = 6): [Course[], SearchMatch[]] {
+        const [query, field, queryNoSp] = this.prepQuery(_query);
 
         const results: Course[] = [];
         const matches: SearchMatch[] = [];
         const courses = this.courses;
         const len = courses.length;
 
-        if (!spec || field === 'num' || field === 'key')
+        if (!field || field === 'num' || field === 'key')
             for (let i = 0; i < len; i++) {
                 this.searchKey(queryNoSp, courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
-        if (!spec || field === 'title')
+        if (!field || field.startsWith('title'))
             for (let i = 0; i < len; i++) {
                 this.searchField(query, 'title', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
-        if (!spec || field === 'topic')
+        if (!field || field.startsWith('topic'))
             for (let i = 0; i < len; i++) {
                 this.searchSectionField(query, 'topic', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
-        if (!spec || field === 'prof')
+        if (!field || field.startsWith('prof'))
             for (let i = 0; i < len; i++) {
                 this.searchSectionField(query, 'instructors', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
-        if (!spec || field === 'desc')
+        if (!field || field.startsWith('desc'))
             for (let i = 0; i < len; i++) {
                 this.searchField(query, 'description', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];
             }
 
-        if (!spec || field === 'room')
+        if (!field || field.startsWith('room'))
             for (let i = 0; i < len; i++) {
                 this.searchSectionField(query, 'rooms', courses[i], results, matches);
                 if (results.length >= maxResults) return [results, matches];

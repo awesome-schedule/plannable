@@ -36,24 +36,18 @@ struct Match {
 struct Token {
     string_view token;
     float score;
-    vector<Match> matches;
 };
 
-// an indexed token contains an index/pointer to the array of unique tokens
+// an indexed token contains an index to the array of unique tokens
 // and also an index of this token in the original sentence that contains it
 struct IndexedToken {
-    union {
-        int idx;
-        Token* token;
-    };
+    int idx;
     vector<int> indices;
 };
 
 struct Sentence {
-    // view of _original
+    // the sentence in its original form. Owns memory!
     string_view original;
-    // the sentence in its original form
-    const char* _original;
     // tokenized sentence
     vector<IndexedToken> tokens;
     // score for this sentence (computed after a search)
@@ -61,7 +55,7 @@ struct Sentence {
     // matches for this sentence (computed after a search)
     vector<Match> matches;
     ~Sentence() {
-        free((void*)_original);
+        free((void*)original.data());
     }
 };
 
@@ -74,8 +68,6 @@ struct FastSearcher {
     int size;
     // array of pre-processed and tokenized sentences
     Sentence* sentences;
-    // working window for computing results
-    float* scoreWindow;
     int* indices;
     vector<Token> uniqueTokens;
 };
@@ -174,12 +166,12 @@ FastSearcher* getSearcher(const char** sentences, int N) {
     HashMap<string_view, int> str2num(N * 2);
     HashMap<int, vector<int>> unique_sent_tokens;
     for (int i = 0; i < N; i++) {
-        const char* sentence = searcher->sentences[i]._original = sentences[i];
+        const char* sentence = sentences[i];
         const char* it = sentence;
         while (*it != 0) {
             // skip spaces
             while (*it == ' ' && *it != 0) it++;
-            
+
             const char* tokenStart = it;
             // skip token until we hit spaces
             while (*it != ' ' && *it != 0) it++;
@@ -190,7 +182,6 @@ FastSearcher* getSearcher(const char** sentences, int N) {
                 uniqueTokens.push_back({token, 0.0f});
             // record the position of this token in the unique token list
             unique_sent_tokens[mit->second].push_back(static_cast<int>(tokenStart - sentence));
-            // searcher->sentences[i].tokens.push_back({{mit->second}, static_cast<int>(tokenStart - sentence)});
         }
         searcher->sentences[i].original = {sentence, static_cast<string_view::size_type>(it - sentence)};
         auto& s_tokens = searcher->sentences[i].tokens;
@@ -208,15 +199,7 @@ FastSearcher* getSearcher(const char** sentences, int N) {
     // free the string array, but not strings themselves
     free((void*)sentences);
     uniqueTokens.shrink_to_fit();
-    searcher->scoreWindow = new float[maxTokenLen];
 
-    // note: we can only assign pointers into uniqueTokens here (no reallocations will occur after this point)
-    // otherwise they might be invalid
-    for (int i = 0; i < N; i++) {
-        for (auto& token : searcher->sentences[i].tokens) {
-            token.token = &uniqueTokens[token.idx];
-        }
-    }
 #ifdef DEBUG_LOG
     int numTokens = 0;
     for (int i = 0; i < N; i++) {
@@ -258,37 +241,38 @@ int findBestMatch(FastSearcher* searcher, const char* _query) {
  * @param _query a dynamically allocated string. It will be freed after this function returns.
 */
 int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, const int gramLen, const float threshold) {
-    string_view query(_query);
-    splitBuffer.resize(0);
+    splitBuffer.clear();
     split(_query, splitBuffer);
 
+    for (auto& tok : searcher->uniqueTokens)
+        tok.score = 0.0;
+    const int querySize = splitBuffer.size();
     int len = searcher->uniqueTokens.size();
-    int maxWindow = max((int)splitBuffer.size() + 1, 2);
-    {
-        GramMap queryGrams;
-        auto [freqCount, queryGramCount] = constructQueryGrams(queryGrams, query, gramLen);
+    vector<vector<Match>> tokenMatches(len * querySize);
+    GramMap queryGrams;
+    for (int j = 0; j < querySize; j++) {
+        queryGrams.clear();
+        auto [freqCount, queryGramCount] = constructQueryGrams(queryGrams, splitBuffer[j], gramLen);
 
         // compute score and match for each unique token
         for (int i = 0; i < len; i++) {
             auto& token = searcher->uniqueTokens[i];
             const int tokenGramCount = static_cast<int>(token.token.size()) - gramLen + 1;
-            if (tokenGramCount <= 0) {
-                token.score = 0.0f;
+            if (tokenGramCount <= 0)
                 continue;
-            }
 
             int intersectionSize = 0;
-            token.matches.resize(0);  // clear previous matches
-            for (int j = 0; j < tokenGramCount; j++) {
-                auto it = queryGrams.find(token.token.substr(j, gramLen));
+            auto& matches = tokenMatches[i * querySize + j];
+            for (int k = 0; k < tokenGramCount; k++) {
+                auto it = queryGrams.find(token.token.substr(k, gramLen));
                 if (it != queryGrams.end() && *(it->second) > 0) {
                     *it->second -= 1;  // decrement the frequency (don't want this gram to be matched again)
                     intersectionSize++;
-                    addMatchNoOverlap(token.matches, j, j + gramLen);
+                    addMatchNoOverlap(matches, k, k + gramLen);
                 }
             }
             // intersection over union
-            token.score = (2.0f * intersectionSize) / (queryGramCount + tokenGramCount);
+            token.score += (2.0f * intersectionSize) / (queryGramCount + tokenGramCount);
 
             // restore frequency table to its original state
             memcpy(freqCount, freqCount + queryGramCount, queryGramCount * sizeof(int16_t));
@@ -304,11 +288,14 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
 
         tempMatches.clear();
         sentence.score = 0.0f;
-        for (auto& token : sentence.tokens) {
-            sentence.score += token.token->score;
-            for (auto& match : token.token->matches) {
-                for (auto& idx : token.indices) {
-                    tempMatches.push_back({idx + match.start, idx + match.end});
+        for (const auto& token : sentence.tokens) {
+            auto tIdx = token.idx;
+            sentence.score += searcher->uniqueTokens[tIdx].score;
+            for (int j = 0; j < querySize; j++) {
+                for (const auto& match : tokenMatches[tIdx * querySize + j]) {
+                    for (auto idx : token.indices) {
+                        tempMatches.push_back({idx + match.start, idx + match.end});
+                    }
                 }
             }
         }
@@ -318,40 +305,6 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
         for (auto& match : tempMatches) {
             addMatchNoOverlap(sentence.matches, match.start, match.end);
         }
-        
-
-        // const int tokenLen = sentence.tokens.size();
-
-        // // use the number of words as the window size in this string if maxWindow > number of words
-        // const int window = min(maxWindow, tokenLen);
-
-        // float score = 0, maxScore = 0;
-        // // initialize score window
-        // for (int j = 0; j < window; j++) {
-        //     auto token = sentence.tokens[j].token;
-        //     score += searcher->scoreWindow[j] = token->score;
-
-        //     if (token->score < threshold) continue;
-        //     // add token matches to sentence matches
-        //     for (auto match : token->matches)
-        //         addMatchNoOverlap(sentence.matches, sentence.tokens[j].index + match.start, sentence.tokens[j].index + match.end);
-        // }
-        // if (score > maxScore) maxScore = score;
-
-        // for (int j = window; j < tokenLen; j++) {
-        //     // subtract the last score and add the new score
-        //     score -= searcher->scoreWindow[j - window];
-        //     auto token = sentence.tokens[j].token;
-        //     score += searcher->scoreWindow[j] = token->score;
-
-        //     if (token->score < threshold) continue;
-        //     if (score > maxScore) maxScore = score;
-
-        //     // add token matches to sentence matches
-        //     for (auto match : token->matches)
-        //         addMatchNoOverlap(sentence.matches, sentence.tokens[j].index + match.start, sentence.tokens[j].index + match.end);
-        // }
-        // sentence.score = maxScore;
     }
     for (int i = 0; i < len; i++) {
         searcher->indices[i] = i;
@@ -388,7 +341,6 @@ float getScore(const FastSearcher* searcher, int idx) {
 void deleteSearcher(FastSearcher* searcher) {
     delete[] searcher->sentences;
     delete[] searcher->indices;
-    delete[] searcher->scoreWindow;
     delete searcher;
 }
 }  // end extern "C"

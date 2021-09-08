@@ -29,6 +29,8 @@ using GramMap = HashMap<string_view, int16_t*>;
 
 namespace Searcher {
 
+HashSet<string> stopWords{"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"};
+
 struct Match {
     int start, end;
 };
@@ -179,7 +181,7 @@ FastSearcher* getSearcher(const char** sentences, int N) {
             // skip token until we hit spaces
             while (*it != ' ' && *it != 0) it++;
             string_view token(tokenStart, it - tokenStart);
-            if (token.size() <= 1)
+            if (token.size() <= 1 || stopWords.find(token) != stopWords.end())
                 continue;
 
             auto [mit, success] = str2num.insert({token, uniqueTokens.size()});
@@ -322,9 +324,9 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
                 }
             }
         }
-        float penalty = sqrt(sentence.tokens.size());
+        float penalty = 1.0f;
         for (int freq : tkMatchFreq)
-            penalty += freq < 1;
+            penalty += (freq < 1) + sqrt(freq);
         sentence.score /= penalty;
         sort(tempMatches.begin(), tempMatches.end(), [](const auto& m1, const auto& m2) { return m1.start < m2.start; });
         for (const auto& match : tempMatches) {

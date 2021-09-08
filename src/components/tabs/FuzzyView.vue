@@ -4,17 +4,17 @@
             Fuzzy Search
             <span class="badge badge-secondary">Beta</span>
         </button>
-        <div class="input-group mt-2">
-            <input
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Title/Topic/Prof./Desc."
-                v-model="query"
-                @input="onInput()"
-                @keydown.enter="getClass()"
-                @keyup.esc="closeClassList()"
-            />
-            <div class="input-group-append">
+        <vue-typeahead-bootstrap
+            v-model="query"
+            :data="queryTypes"
+            :minMatchingChars="1"
+            size="sm"
+            placeholder="Title/Topic/Room/Prof./Desc."
+            class="mt-2"
+            @keyup.esc="closeClassList()"
+            @keyup.enter="getClass()"
+        >
+            <template slot="append">
                 <div
                     v-if="loading"
                     class="spinner-border my-auto text-primary mx-1"
@@ -26,8 +26,8 @@
                 <span v-else class="input-group-text px-2 click-icon" @click="getClass()">
                     <i class="fas fa-search"></i>
                 </span>
-            </div>
-        </div>
+            </template>
+        </vue-typeahead-bootstrap>
 
         <div v-if="inputCourses.length" ref="classList" class="card card-body p-1">
             <ClassList

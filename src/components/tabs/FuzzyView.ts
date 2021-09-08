@@ -8,8 +8,9 @@
 import { SearchMatch } from '@/models/Catalog';
 import Course from '@/models/Course';
 import Store from '@/store';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import ClassList from '../ClassList.vue';
+import VueTypeaheadBootstrap from '../autocomplete/VueTypeaheadBootstrap.vue';
 
 /**
  * component for performing fuzzy-search against the catalog of courses
@@ -18,12 +19,14 @@ import ClassList from '../ClassList.vue';
  */
 @Component({
     components: {
-        ClassList
+        ClassList,
+        VueTypeaheadBootstrap
     }
 })
 export default class FuzzyView extends Store {
     inputCourses: Course[] = [];
     inputMatches: SearchMatch[] = [];
+    queryTypes = [':title ', ':topic ', ':prof ', ':desc ', ':room '];
     query = '';
 
     /**
@@ -36,6 +39,7 @@ export default class FuzzyView extends Store {
      */
     realtime = true;
 
+    @Watch('query')
     onInput() {
         if (this.realtime) this.getClass();
     }

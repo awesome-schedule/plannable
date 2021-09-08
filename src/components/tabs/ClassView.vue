@@ -16,7 +16,7 @@
                 >
                 </span>
                 {{ semester.current ? semester.current.name : 'Select Semester' }}
-                <i class="fas fa-caret-down ml-2" style="font-size: 20px;"></i>
+                <i class="fas fa-caret-down ml-2" style="font-size: 20px"></i>
             </button>
             <div v-if="semester.semesters.length" class="dropdown-menu w-100">
                 <a
@@ -28,39 +28,26 @@
                 </a>
             </div>
         </div>
-        <div
-            class="input-group mt-2"
-            @keydown.enter="dSelect(dPointer)"
-            @keydown.down="dropdownNext()"
-            @keydown.up="dropdownPrev()"
+
+        <vue-typeahead-bootstrap
+            v-model="query"
+            :data="queryTypes"
+            :minMatchingChars="1"
+            size="sm"
+            placeholder="Title/Topic/Prof./Desc."
+            class="mt-2"
+            @keyup.esc="closeClassList()"
         >
-            <input
-                v-model="query"
-                type="text"
-                class="form-control form-control-sm"
-                placeholder="Title/Number/Topic/Prof./Desc."
-                @keyup.esc="closeClassList()"
-            />
-            <div v-if="query === ':'" class="dropdown-menu show">
-                <a
-                    v-for="(q, id) of queryTypes"
-                    :key="q"
-                    :class="`dropdown-item ${id === dPointer ? 'active' : ''}`"
-                    @click="dSelect(id)"
-                    @keydown.enter="dSelect(id)"
-                    >{{ q }}</a
-                >
-            </div>
-            <div class="input-group-append">
+            <template slot="append">
                 <span
                     class="input-group-text px-2"
                     :class="{ 'click-icon': isEntering }"
-                    @click="closeClassList"
+                    @click="closeClassList()"
                     ><i v-if="isEntering" class="fas fa-times"> </i>
                     <i v-else class="fas fa-search"></i>
                 </span>
-            </div>
-        </div>
+            </template>
+        </vue-typeahead-bootstrap>
 
         <ClassList
             v-if="isEntering"
@@ -89,7 +76,7 @@
                     ? `View Schedule: ${schedule.currentScheduleIndex + 1}`
                     : 'Edit Classes'
             }}
-            <i class="fas fa-exchange-alt ml-4" style="font-size: 18px;"></i>
+            <i class="fas fa-exchange-alt ml-4" style="font-size: 18px"></i>
         </button>
         <div
             class="row no-gutters mx-3 align-items-center justify-content-between"
@@ -103,11 +90,7 @@
                     @click="schedule.switchProposed(schedule.proposedScheduleIndex - 1)"
                 ></i>
             </div>
-            <div
-                class="col-auto"
-                style="font-size: 20px;"
-                title="the index of the current schedule"
-            >
+            <div class="col-auto" style="font-size: 20px" title="the index of the current schedule">
                 {{ schedule.proposedScheduleIndex + 1 }}
             </div>
             <div class="col-auto">
@@ -178,14 +161,10 @@
                 type="checkbox"
                 class="custom-control-input"
             />
-            <label class="custom-control-label" for="multiSelect">
-                Show Multiple Sections
-            </label>
+            <label class="custom-control-label" for="multiSelect"> Show Multiple Sections </label>
         </div>
-        <div class="btn bg-info nav-btn mt-2">
-            Schedule Overview
-        </div>
-        <ul class="list-group list-group-flush" style="width:99%">
+        <div class="btn bg-info nav-btn mt-2">Schedule Overview</div>
+        <ul class="list-group list-group-flush" style="width: 99%">
             <li class="list-group-item p-2">
                 Total Credits: {{ schedule.currentSchedule.totalCredit }}
                 <span
@@ -221,3 +200,8 @@
 </template>
 
 <script lang="ts" src="./ClassView.ts"></script>
+<style>
+.vbst-item {
+    padding: 0.25rem 0.5rem !important;
+}
+</style>

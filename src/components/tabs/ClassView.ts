@@ -12,6 +12,7 @@ import Course from '@/models/Course';
 import Store from '@/store';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import ClassList from '../ClassList.vue';
+import VueTypeaheadBootstrap from '../autocomplete/VueTypeaheadBootstrap.vue';
 
 const generatedWarning = `You're editing the generated schedule! You should do 'change to proposed' if you want to add on this particular generated schedule.`;
 
@@ -22,7 +23,8 @@ const generatedWarning = `You're editing the generated schedule! You should do '
  */
 @Component({
     components: {
-        ClassList
+        ClassList,
+        VueTypeaheadBootstrap
     }
 })
 export default class ClassView extends Store {
@@ -31,8 +33,7 @@ export default class ClassView extends Store {
     inputCourses: Course[] = [];
     inputMatches: SearchMatch[] = [];
     query = '';
-    queryTypes: string[] = ['title', 'num', 'topic', 'prof', 'desc', 'room'];
-    dPointer = 0;
+    queryTypes: string[] = [':title ', ':num ', ':topic ', ':prof ', ':desc ', ':room '];
 
     get current() {
         return this.schedule.currentSchedule.current;
@@ -103,18 +104,5 @@ export default class ClassView extends Store {
             this.noti.warn(e.message || generatedWarning);
         }
         this.saveStatus();
-    }
-
-    dropdownNext() {
-        if (this.query === ':') this.dPointer = (this.dPointer + 1) % this.queryTypes.length;
-    }
-
-    dropdownPrev() {
-        if (this.query === ':')
-            this.dPointer = (this.dPointer - 1 + this.queryTypes.length) % this.queryTypes.length;
-    }
-
-    dSelect(id: number) {
-        if (this.query === ':') this.query = `:${this.queryTypes[id]} `;
     }
 }

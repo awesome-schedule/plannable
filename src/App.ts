@@ -41,6 +41,7 @@ import GeneratedSchedule from './models/GeneratedSchedule';
 import { backend, runningOnElectron, version } from './config';
 import axios from 'axios';
 import { FastSearcher } from './algorithm/Searcher';
+import Dexie from 'dexie';
 
 /** whether the version stored in localStorage matches the current version */
 const match = localStorage.getItem('version') === version;
@@ -122,7 +123,9 @@ export default class App extends Store {
             // failed to get auth code
             this.noti.error(`Failed to login: ${search.get('error_description')}`);
         }
-        if (!match) this.modal.showReleaseNoteModal();
+        if (!match) {
+            this.modal.showReleaseNoteModal();
+        }
 
         // clear url after obtained url params
         history.replaceState(history.state, 'current', '/');
@@ -155,7 +158,9 @@ export default class App extends Store {
         this.noti.notify(pay3);
         if (pay3.payload) {
             this.semester.semesters = pay3.payload;
-
+            if (!match) { // delete all previous semester data if version mismatch
+                await Promise.all(this.semester.semesters.map(sem => Dexie.delete(`db_${sem.id}`)));
+            }
             const urlResult = await this.loadConfigFromURL(search);
             if (!urlResult) {
                 this.profile.initProfiles(this.semester.semesters);

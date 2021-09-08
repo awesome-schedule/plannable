@@ -70,6 +70,9 @@
                     ordinary search instead.
                 </li>
                 <li class="mb-2 pl-1">
+                    By default, Plannable will match the title, topic, description and professor name with a predefined set of weights, which may not be always ideal. Therefore, it is recommended that you specify the field to search. For example, you can use "<strong>:title comp arch</strong>" to match only the titles of each course. 
+                </li>
+                <li class="mb-2 pl-1">
                     Searching for course numbers (e.g. CS 2102) is not supported here.
                 </li>
                 <li class="mb-2 pl-1">

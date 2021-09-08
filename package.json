@@ -40,7 +40,7 @@
         "tsdoc": "typedoc --options typedoc.json ./src",
         "updatedata": "rm -rf scripts/data && git clone https://github.com/awesome-schedule/data scripts/data",
         "data": "cd scripts && http-server --cors -p 8000 -c-1",
-        "getdep": "cd src/algorithm && git clone https://github.com/greg7mdp/parallel-hashmap || make glpk",
+        "getdep": "cd src/algorithm; git clone https://github.com/greg7mdp/parallel-hashmap; make glpk",
         "getwasm": "./scripts/get_wasm.sh",
         "wasm": "./scripts/build_wasm.sh",
         "pushdev": "./scripts/push_dev.sh"

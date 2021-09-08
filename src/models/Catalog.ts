@@ -35,18 +35,16 @@ export interface SemesterJSON {
  */
 export type SearchMatch = [Match<'key' | 'title' | 'description'>[], Map<number, SectionMatch[]>];
 
-/**
- * elements in array:
- * 1. score for courses,
- * 2. score for sections,
- * 3. number of distinct sections
- */
-type ScoreEntry = [number, number, number];
 type CourseSearchResult = SearchResult<Course, 'title' | 'description'>;
 type SectionSearchResult = SearchResult<Section, 'topic' | 'instructors' | 'rooms'>;
 
-const courseMap = new Map<string, CourseSearchResult[]>();
-const sectionMap = new Map<string, Map<number, SectionSearchResult[]>>();
+interface ScoreEntry {
+    courseScore: number;
+    courseResults: CourseSearchResult[];
+    sectionScore: number;
+    sectionMap: Map<number, SectionSearchResult[]>;
+};
+
 const scores = new Map<string, ScoreEntry>();
 
 function toMatches<T extends string>(matches: SearchResult<any, T>[]) {
@@ -151,7 +149,7 @@ export default class Catalog {
     }
 
     /**
-     * Get a Course associated with the given key and section id
+     * Get a section given its section id
      */
     public getSectionById(id: number) {
         const sec = this.sectionMap.get(id);
@@ -177,16 +175,20 @@ export default class Catalog {
     private processCourseResults(results: CourseSearchResult[], weight: number) {
         for (const result of results) {
             const { key } = this.courses[result.index];
-            const score = result.score;
+            const score = result.score * weight;
 
-            const temp = courseMap.get(key);
+            const temp = scores.get(key);
             if (temp) {
-                scores.get(key)![0] += score;
-                temp.push(result);
+                temp.courseScore += score;
+                temp.courseResults.push(result);
             } else {
                 // if encounter this course for the first time
-                scores.set(key, [score, 0, 0]);
-                courseMap.set(key, [result]);
+                scores.set(key, {
+                    courseScore: score,
+                    courseResults: [result],
+                    sectionScore: 0.0,
+                    sectionMap: new Map()
+                });
             }
         }
     }
@@ -194,28 +196,24 @@ export default class Catalog {
     private processSectionResults(results: SectionSearchResult[], weight: number) {
         for (const result of results) {
             const { key, id } = this.sections[result.index];
-            const score = result.score;
+            const score = result.score * weight;
 
-            let scoreEntry = scores.get(key);
+            const scoreEntry = scores.get(key);
             if (!scoreEntry) {
-                scoreEntry = [0, 0, 0];
-                scores.set(key, scoreEntry);
-            }
-            scoreEntry[1] += score;
-
-            const secMatches = sectionMap.get(key);
-            if (secMatches) {
-                const matches = secMatches.get(id);
-                if (matches) {
-                    matches.push(result);
-                } else {
-                    secMatches.set(id, [result]);
-                    // if encounter a new section of a course, increment the number of section recorded
-                    scoreEntry[2] += 1;
-                }
+                scores.set(key, {
+                    courseScore: 0.0,
+                    courseResults: [],
+                    sectionScore: score,
+                    sectionMap: new Map().set(id, [result])
+                });
             } else {
-                sectionMap.set(key, new Map().set(id, [result]));
-                scoreEntry[2] += 1;
+                scoreEntry.sectionScore += score;
+                const secResults = scoreEntry.sectionMap.get(id);
+                if (secResults) {
+                    secResults.push(result);
+                } else {
+                    scoreEntry.sectionMap.set(id, [result]);
+                }
             }
         }
     }
@@ -229,10 +227,11 @@ export default class Catalog {
         let queryNoSp: string;
         let field = '';
         /** is special search*/
-        if (query.startsWith(':') && temp.length > 1) {
+        if (query.startsWith(':')) {
             field = temp[0].substring(1);
-            queryNoSp = temp.slice(1).join('');
-            query = temp.slice(1).join(' ');
+            const rest = temp.slice(1);
+            queryNoSp = rest.join('');
+            query = rest.join(' ');
         } else {
             queryNoSp = temp.join('');
         }
@@ -241,41 +240,40 @@ export default class Catalog {
     }
 
     public fuzzySearch(_query: string) {
+        console.time('search');
         const [query, field] = this.prepQuery(_query);
-
         if (!field || field.startsWith('title'))
             this.processCourseResults(this.titleSearcher.sWSearch(query, 50), 1.0);
         if (!field || field.startsWith('desc'))
-            this.processCourseResults(this.descriptionSearcher.sWSearch(query, 50), 1.0);
+            this.processCourseResults(this.descriptionSearcher.sWSearch(query, 50), 0.5);
         if (!field || field.startsWith('topic'))
             this.processSectionResults(this.topicSearcher.sWSearch(query, 50), 1.0);
         if (!field || field.startsWith('prof'))
-            this.processSectionResults(this.instrSearcher.sWSearch(query, 50), 1.0);
+            this.processSectionResults(this.instrSearcher.sWSearch(query, 50), 0.5);
         if (field.startsWith('room'))
             this.processSectionResults(this.roomSearcher.sWSearch(query, 50), 1.0);
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
-            .map(([_, a]) => [_, a[0] + (a[2] && a[1] / a[2])] as const)
+            .map(([_, a]) => [_, a.courseScore + (a.sectionMap.size && a.sectionScore / a.sectionMap.size)] as const)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12)
-            .filter(entry => entry[1] > 0.000001);
+            .filter(entry => entry[1] > 0.001);
         const finalResults: Course[] = [];
         const allMatches: SearchMatch[] = [];
 
         // merge course and section matches
         for (const [key] of scoreEntries) {
-            const courseMatch = courseMap.get(key);
+            const temp = scores.get(key)!;
             const secMatches = new Map<number, SectionMatch[]>();
 
-            // record section matches
-            const s = sectionMap.get(key);
-            if (s) for (const [id, matches] of s) secMatches.set(id, toMatches(matches));
+            // convert section matches
+            for (const [id, matches] of temp.sectionMap)
+                secMatches.set(id, toMatches(matches));
 
-            if (courseMatch) {
-                const crsMatches = toMatches(courseMatch);
-                finalResults.push(this.getCourse(key, this.courses[courseMatch[0].index].ids));
-                allMatches.push([crsMatches, secMatches]);
+            if (temp.courseResults.length) {
+                finalResults.push(this.getCourse(key, -1));
+                allMatches.push([toMatches(temp.courseResults), secMatches]);
             } else {
                 // only section match exists
                 finalResults.push(this.getCourse(key, [...secMatches.keys()]));
@@ -284,8 +282,6 @@ export default class Catalog {
         }
         // console.log(finalResults, allMatches);
 
-        courseMap.clear();
-        sectionMap.clear();
         scores.clear();
         console.timeEnd('search');
         return [finalResults, allMatches] as const;

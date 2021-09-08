@@ -326,7 +326,7 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
         }
         float penalty = 1.0f;
         for (int freq : tkMatchFreq)
-            penalty += (freq < 1) + sqrt(freq);
+            penalty += (freq < 1) * 2 + pow(freq, 0.75);
         sentence.score /= penalty;
         sort(tempMatches.begin(), tempMatches.end(), [](const auto& m1, const auto& m2) { return m1.start < m2.start; });
         for (const auto& match : tempMatches) {

@@ -9,7 +9,7 @@
     @blur="processFocusOut"
     tabindex="0"
     href="#"
-    :class="textClasses"
+    :class="`${textClasses} ${active ? 'active' : ''}`"
   >
     <div class="sr-only">{{screenReaderText}}</div>
     <div aria-hidden="true">

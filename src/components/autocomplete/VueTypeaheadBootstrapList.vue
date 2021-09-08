@@ -251,7 +251,7 @@ export default {
         } else {
           scrollContainer.scrollTop = 0
         }
-        listItem.focus()
+        // listItem.focus()
       }
     }
   }

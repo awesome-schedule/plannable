@@ -65,6 +65,41 @@ struct FastSearcher {
     Sentence* sentences;
     int* indices;
     vector<string_view> uniqueTokens;
+    FastSearcher(int N): size(N), sentences(new Sentence[N]), indices(new int[N]) {
+    }
+    ~FastSearcher() {
+        delete[] indices;
+        delete[] sentences;
+    }
+};
+
+struct TokenGrams {
+    const int gramCount;
+    // freqCount to freqCount+gramCount is the table, freqCount+gramCount to freqCount+gramCount*2 is a copy of this table
+    int16_t* freqCount;
+    // A hashmap that maps a string to an pointer into the frequency table, which indicates the frequency of the gram
+    // Reason for an additional level of indirection is that we need to constantly restore the frequency table to its original values
+    // Instead of copying the whole map, we just copy the frequency which is stored in a separate array
+    GramMap gramMap;
+
+    TokenGrams(string_view query, int gramLen) : gramCount(query.size() - gramLen + 1), freqCount(new int16_t[gramCount * 2]()) {
+        auto* curPtr = freqCount;
+        for (int j = 0; j < gramCount; j++) {
+            auto& ptr = gramMap[query.substr(j, gramLen)];
+            if (ptr == nullptr) {
+                ptr = curPtr++;
+            }
+            (*ptr)++;
+        }
+        // prepare a copy of this table
+        memcpy(freqCount + gramCount, freqCount, gramCount * sizeof(int16_t));
+    }
+    ~TokenGrams() {
+        delete[] freqCount;
+    }
+    inline void restoreFreq() {
+        memcpy(freqCount, freqCount + gramCount, gramCount * sizeof(int16_t));
+    }
 };
 
 void split(const char* sentence, vector<string_view>& result) {
@@ -76,31 +111,6 @@ void split(const char* sentence, vector<string_view>& result) {
         // skip spaces
         while (*it == ' ' && *it != 0) it++;
     }
-}
-
-/**
- * The queryGram hashmap maps a string to an pointer into the frequency table, which indicates the frequency of the gram
- * 
- * Reason for an additional level of indirection is that we need to constantly restore the frequency table to its original values
- * 
- * Instead of copying the whole map, we just copy the frequency which is stored in a separate array
- * @returns a pointer to the frequency table, and its size
- * @note ptr to ptr+size is the table, ptr+size to ptr+size*2 is a copy of this table
-*/
-inline pair<int16_t*, int> constructQueryGrams(GramMap& queryGrams, string_view query, int gramLen) {
-    int queryGramCount = query.size() - gramLen + 1;
-    auto* freqCount = new int16_t[queryGramCount * 2]();
-    auto* curPtr = freqCount;
-    for (int j = 0; j < queryGramCount; j++) {
-        auto& ptr = queryGrams[query.substr(j, gramLen)];
-        if (ptr == nullptr) {
-            ptr = curPtr++;
-        }
-        (*ptr)++;
-    }
-    // prepare a copy of this table
-    memcpy(freqCount + queryGramCount, freqCount, queryGramCount * sizeof(int16_t));
-    return {freqCount, queryGramCount};
 }
 
 /**
@@ -150,15 +160,13 @@ extern "C" {
  * @param N ths length of sentences
 */
 FastSearcher* getSearcher(const char** sentences, int N) {
-    auto* searcher = new FastSearcher();
-    searcher->size = N;
-    searcher->indices = new int[N];
-    searcher->sentences = new Sentence[N];
+    auto* searcher = new FastSearcher(N);
     auto& uniqueTokens = searcher->uniqueTokens;
 
     int maxTokenLen = 0;
     // map a token to an index in the uniqueTokens array
     HashMap<string_view, int> str2num(N * 2);
+    // a temporary map that maps the unique token index to the indices the token appears in the sentence
     HashMap<int, vector<int>> unique_sent_tokens;
     for (int i = 0; i < N; i++) {
         const char* sentence = sentences[i];
@@ -171,6 +179,8 @@ FastSearcher* getSearcher(const char** sentences, int N) {
             // skip token until we hit spaces
             while (*it != ' ' && *it != 0) it++;
             string_view token(tokenStart, it - tokenStart);
+            if (token.size() <= 1)
+                continue;
 
             auto [mit, success] = str2num.insert({token, uniqueTokens.size()});
             if (success)  // if new unique token, add it to unique token list
@@ -212,22 +222,20 @@ FastSearcher* getSearcher(const char** sentences, int N) {
  */
 int findBestMatch(FastSearcher* searcher, const char* _query) {
     string_view query(_query);
-    GramMap queryGrams;
-    auto [freqCount, queryGramCount] = constructQueryGrams(queryGrams, query, 2);
+    TokenGrams tokenGrams(query, 2);
 
     float bestMatchRating = 0.0f;
     int bestMatchIndex = 0;
     for (int i = 0; i < searcher->size; i++) {
-        float currentRating = compareTwoStrings(queryGrams, query, searcher->sentences[i].original);
+        float currentRating = compareTwoStrings(tokenGrams.gramMap, query, searcher->sentences[i].original);
         if (currentRating > bestMatchRating) {
             bestMatchIndex = i;
             bestMatchRating = currentRating;
         }
-        memcpy(freqCount, freqCount + queryGramCount, queryGramCount * sizeof(int16_t));
+        tokenGrams.restoreFreq();
     }
     searcher->sentences[bestMatchIndex].score = bestMatchRating;
     free((void*)_query);
-    delete[] freqCount;
     return bestMatchIndex;
 }
 
@@ -239,47 +247,62 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
     splitBuffer.clear();
     split(_query, splitBuffer);
 
-    const int querySize = splitBuffer.size();
-    int len = searcher->uniqueTokens.size();
     struct TokenMatch {
-        float score;
+        int queryTkIdx;
+        float score = 0.0f;
         vector<Match> matches;
+        TokenMatch() = default;
+        TokenMatch(int idx): queryTkIdx(idx) {}
     };
-    vector<TokenMatch> tokenMatches(len * querySize);
-    GramMap queryGrams;
-    for (int j = 0; j < querySize; j++) {
-        queryGrams.clear();
-        auto [freqCount, queryGramCount] = constructQueryGrams(queryGrams, splitBuffer[j], gramLen);
+    
+    int len = searcher->uniqueTokens.size();
+    vector<TokenMatch> tokenMatches(len);
+    vector<TokenGrams> queryTokenGrams;
+    const int querySize = splitBuffer.size();
+    queryTokenGrams.reserve(querySize);
+    for (auto token : splitBuffer) {
+        queryTokenGrams.emplace_back(token, gramLen);
+    }
 
-        // compute score and match for each unique token
-        for (int i = 0; i < len; i++) {
-            auto& token = searcher->uniqueTokens[i];
-            const int tokenGramCount = static_cast<int>(token.size()) - gramLen + 1;
-            if (tokenGramCount <= 0)
-                continue;
+    // compute score and match for each unique token
+    for (int i = 0; i < len; i++) {
+        auto& token = searcher->uniqueTokens[i];
+        const int tokenGramCount = static_cast<int>(token.size()) - gramLen + 1;
+        if (tokenGramCount <= 0)
+            continue;
 
+        for (int j = 0; j < querySize; j++) {
+            auto& qTkGrams = queryTokenGrams[j];
             int intersectionSize = 0;
-            auto& tkMatch = tokenMatches[i * querySize + j];
+            TokenMatch tkMatch(j);
             for (int k = 0; k < tokenGramCount; k++) {
-                auto it = queryGrams.find(token.substr(k, gramLen));
-                if (it != queryGrams.end() && *(it->second) > 0) {
+                auto it = qTkGrams.gramMap.find(token.substr(k, gramLen));
+                if (it != qTkGrams.gramMap.end() && *(it->second) > 0) {
                     *it->second -= 1;  // decrement the frequency (don't want this gram to be matched again)
                     intersectionSize++;
                     addMatchNoOverlap(tkMatch.matches, k, k + gramLen);
                 }
             }
-            // intersection over union
-            tkMatch.score = (2.0f * intersectionSize) / (queryGramCount + tokenGramCount);
-
             // restore frequency table to its original state
-            memcpy(freqCount, freqCount + queryGramCount, queryGramCount * sizeof(int16_t));
+            qTkGrams.restoreFreq();
+
+            // ignore token match if too few grams are matched
+            if (tokenGramCount - intersectionSize > 1 && intersectionSize <= 1)
+                continue;
+
+            // intersection over union
+            tkMatch.score = (2.0f * intersectionSize) / (qTkGrams.gramCount + tokenGramCount);
+            if (tkMatch.score > tokenMatches[i].score) {
+                tokenMatches[i] = std::move(tkMatch);
+            }
         }
-        delete[] freqCount;
     }
 
     len = searcher->size;
     // compute score and matches for each sentence
     vector<Match> tempMatches;
+    // frequency of matches of each token in the query
+    vector<int> tkMatchFreq(querySize);
     for (int i = 0; i < len; i++) {
         auto& sentence = searcher->sentences[i];
         sentence.score = 0.0f;
@@ -288,24 +311,23 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
             continue;
 
         tempMatches.clear();
+        fill(tkMatchFreq.begin(), tkMatchFreq.end(), 0);
         for (const auto& token : sentence.tokens) {
-            // find the queryToken
-            auto bestIt = std::max_element(
-                tokenMatches.begin() + token.idx * querySize,
-                tokenMatches.begin() + token.idx * querySize + querySize,
-                [](const auto& m1, const auto& m2) {
-                    return m1.score < m2.score;
-                });
-            sentence.score += bestIt->score;
-            for (const auto& match : bestIt->matches) {
+            const auto& tkMatches = tokenMatches[token.idx];
+            tkMatchFreq[tkMatches.queryTkIdx]++;
+            sentence.score += tkMatches.score;
+            for (const auto& match : tkMatches.matches) {
                 for (auto idx : token.indices) {
                     tempMatches.push_back({idx + match.start, idx + match.end});
                 }
             }
         }
-        sentence.score /= sqrt(sentence.tokens.size());
+        float penalty = sqrt(sentence.tokens.size());
+        for (int freq : tkMatchFreq)
+            penalty += freq < 1;
+        sentence.score /= penalty;
         sort(tempMatches.begin(), tempMatches.end(), [](const auto& m1, const auto& m2) { return m1.start < m2.start; });
-        for (auto& match : tempMatches) {
+        for (const auto& match : tempMatches) {
             addMatchNoOverlap(sentence.matches, match.start, match.end);
         }
     }
@@ -342,8 +364,6 @@ float getScore(const FastSearcher* searcher, int idx) {
 }
 
 void deleteSearcher(FastSearcher* searcher) {
-    delete[] searcher->sentences;
-    delete[] searcher->indices;
     delete searcher;
 }
 }  // end extern "C"

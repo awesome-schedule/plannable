@@ -243,15 +243,15 @@ export default class Catalog {
         console.time('search');
         const [query, field] = this.prepQuery(_query);
         if (!field || field.startsWith('title'))
-            this.processCourseResults(this.titleSearcher.sWSearch(query, 50), 1.0);
+            this.processCourseResults(this.titleSearcher.sWSearch(query, 100), 1.0);
         if (!field || field.startsWith('desc'))
-            this.processCourseResults(this.descriptionSearcher.sWSearch(query, 50), 0.5);
+            this.processCourseResults(this.descriptionSearcher.sWSearch(query, 100), 0.5);
         if (!field || field.startsWith('topic'))
-            this.processSectionResults(this.topicSearcher.sWSearch(query, 50), 1.0);
+            this.processSectionResults(this.topicSearcher.sWSearch(query, 100), 1.0);
         if (!field || field.startsWith('prof'))
-            this.processSectionResults(this.instrSearcher.sWSearch(query, 50), 0.5);
+            this.processSectionResults(this.instrSearcher.sWSearch(query, 100), 0.5);
         if (field.startsWith('room'))
-            this.processSectionResults(this.roomSearcher.sWSearch(query, 50), 1.0);
+            this.processSectionResults(this.roomSearcher.sWSearch(query, 100), 1.0);
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)

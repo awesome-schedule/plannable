@@ -1,7 +1,7 @@
 # this make file is partly borrowed from https://github.com/jvail/glpk.js/blob/master/Makefile
 GLPK_VERSION = 4.65
 
-EMCC_FLAGS = -Wall -Winline -std=c++17 -DUSE_FLATMAP
+EMCC_FLAGS = -Wall -Winline -std=c++20 -DUSE_FLATMAP
 # extra flags for production
 # disable exceptions and runtime type info to reduce code size
 EMCC_PROD_FLAGS = -fno-exceptions -fno-rtti

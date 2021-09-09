@@ -40,6 +40,9 @@ struct Match {
 struct IndexedToken {
     int idx;
     vector<int> indices;
+    IndexedToken(int idx, vector<int>&& indices): idx(idx), indices(indices) {
+        this->indices.shrink_to_fit();
+    }
 };
 
 struct Sentence {
@@ -165,7 +168,6 @@ FastSearcher* getSearcher(const char** sentences, int N) {
     auto* searcher = new FastSearcher(N);
     auto& uniqueTokens = searcher->uniqueTokens;
 
-    int maxTokenLen = 0;
     // map a token to an index in the uniqueTokens array
     HashMap<string_view, int> str2num(N * 2);
     // a temporary map that maps the unique token index to the indices the token appears in the sentence
@@ -192,16 +194,10 @@ FastSearcher* getSearcher(const char** sentences, int N) {
         }
         searcher->sentences[i].original = {sentence, static_cast<string_view::size_type>(it - sentence)};
         auto& s_tokens = searcher->sentences[i].tokens;
-        s_tokens.resize(unique_sent_tokens.size());
-        int j = 0;
-        for (auto& [k, v] : unique_sent_tokens) {
-            s_tokens[j].idx = k;
-            s_tokens[j].indices = std::move(v);
-            s_tokens[j].indices.shrink_to_fit();
-            j++;
-        }
+        s_tokens.reserve(unique_sent_tokens.size());
+        for (auto& [k, v] : unique_sent_tokens)
+            s_tokens.emplace_back(k, std::move(v));
         unique_sent_tokens.clear();
-        maxTokenLen = max(maxTokenLen, static_cast<int>(searcher->sentences[i].tokens.size()));
     }
     // free the string array, but not strings themselves
     free((void*)sentences);

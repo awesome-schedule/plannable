@@ -148,7 +148,7 @@ float lunchTime(int idx) {
         int dayOverlap = 0;
         for (int j = _blocks[i], end = _blocks[i + 1]; j < end; j += 3) {
             // 11:00 to 14:00
-            dayOverlap += calcOverlap((int16_t)660, (int16_t)840, (int16_t)_blocks[j], (int16_t)_blocks[j + 1]);
+            dayOverlap += calcOverlap(660, 840, (int)_blocks[j], (int)_blocks[j + 1]);
         }
 
         if (dayOverlap > 60) totalOverlap += dayOverlap;
@@ -366,8 +366,6 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
                     curBlock[p] = timeArrayContent[n];
                     curBlock[p + 1] = timeArrayContent[n + 1];
                     curBlock[p + 2] = timeArrayContent[n + 2];
-                    // TODO: bulk move
-                    // *((TimeEntry*)&timeArrayContent[n]) = *((TimeEntry*)&curBlock[p]);
                 }
             }
         }

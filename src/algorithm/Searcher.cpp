@@ -157,6 +157,20 @@ inline void addMatchNoOverlap(vector<Match>& matches, int start, int end) {
     }
 }
 
+void resolveOverlap(vector<Match>& matches) {
+    sort(matches.begin(), matches.end(), [](const auto& m1, const auto& m2) { return m1.start < m2.start; });
+    int i = 0;
+    for (int j = 1; j < matches.size(); j++) {
+        if (matches[j].start <= matches[i].end) {
+            matches[i].end = matches[j].end;
+        } else {
+            i++;
+        }
+    }
+    matches.resize(i + 1);
+    matches.shrink_to_fit();
+}
+
 extern "C" {
 
 /**
@@ -297,8 +311,6 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
     }
 
     len = searcher->size;
-    // compute score and matches for each sentence
-    vector<Match> tempMatches;
     // frequency of matches of each token in the query
     vector<int> tkMatchFreq(querySize);
     for (int i = 0; i < len; i++) {
@@ -308,7 +320,6 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
         if (!sentence.tokens.size())
             continue;
 
-        tempMatches.clear();
         fill(tkMatchFreq.begin(), tkMatchFreq.end(), 0);
         for (const auto& token : sentence.tokens) {
             const auto& tkMatches = tokenMatches[token.idx];
@@ -316,7 +327,7 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
             sentence.score += tkMatches.score;
             for (const auto& match : tkMatches.matches) {
                 for (auto idx : token.indices) {
-                    tempMatches.push_back({idx + match.start, idx + match.end});
+                    sentence.matches.push_back({idx + match.start, idx + match.end});
                 }
             }
         }
@@ -324,10 +335,7 @@ int* sWSearch(FastSearcher* searcher, const char* _query, const int numResults, 
         for (int freq : tkMatchFreq)
             penalty += (freq < 1) * 2 + pow(freq, 0.75);
         sentence.score /= penalty;
-        sort(tempMatches.begin(), tempMatches.end(), [](const auto& m1, const auto& m2) { return m1.start < m2.start; });
-        for (const auto& match : tempMatches) {
-            addMatchNoOverlap(sentence.matches, match.start, match.end);
-        }
+        resolveOverlap(sentence.matches);
     }
     for (int i = 0; i < len; i++) {
         searcher->indices[i] = i;

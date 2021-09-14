@@ -8,7 +8,7 @@ EMCC_PROD_FLAGS = -fno-exceptions -fno-rtti
 EMCC_DEV_FLAGS = -O2 -DDEBUG_LOG -DEXTRA_MODELS -g --profiling
 # only enable these flags to debug bizzare memory bugs. Note: with these flags, the executable is extremely slow!
 # EMCC_DEV_FLAGS += -s SAFE_HEAP=1 -s ASSERTIONS=2
-EMCC_LINK_FLAGS = -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=web
+EMCC_LINK_FLAGS = -s MALLOC=emmalloc -s ALLOW_MEMORY_GROWTH=1 -s MODULARIZE=1 -s EXPORT_NAME="GetNative" # -s ENVIRONMENT=web
 EMCC_LINK_FLAGS += -s EXPORTED_FUNCTIONS='[\
 "_malloc",\
 "_compute", "_setOptions", "_getSum", "_getSumSq", \

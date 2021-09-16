@@ -6,10 +6,10 @@
 /**
  * The structure of the object used to store search results
  */
-export interface SearchResult<T, K = string> {
+export interface SearchResult<K = string> {
     /** the score of this result */
     score: number;
-    /** an array of pairs indicating the indices of match. [[1,2], [7,9]] means that the indices [1, 2) and [7, 9) of the string are matched */
+    /** a flat array of pairs indicating the indices of match. [1,2,7,9] means that the indices [1, 2) and [7, 9) of the string are matched */
     matches: Int32Array;
     /** index of the item in the original list */
     index: number;
@@ -61,7 +61,7 @@ export class FastSearcher<T, K = string> {
     sWSearch(query: string, numResults: number, gramLen = 2, threshold = 0.1) {
         const Module = window.NativeModule;
         const ptr = prepareQuery(Module, query, gramLen);
-        const allMatches: SearchResult<T, K>[] = [];
+        const allMatches: SearchResult<K>[] = [];
         if (ptr === -1) return allMatches;
 
         const resultPtr = Module._sWSearch(this.ptr, ptr, numResults, gramLen, threshold) / 4;

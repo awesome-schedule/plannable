@@ -35,8 +35,8 @@ export interface SemesterJSON {
  */
 export type SearchMatch = [Match<'key' | 'title' | 'description'>[], Map<number, SectionMatch[]>];
 
-type CourseSearchResult = SearchResult<Course, 'title' | 'description'>;
-type SectionSearchResult = SearchResult<Section, 'topic' | 'instructors' | 'rooms'>;
+type CourseSearchResult = SearchResult<'title' | 'description'>;
+type SectionSearchResult = SearchResult<'topic' | 'instructors' | 'rooms'>;
 
 interface ScoreEntry {
     courseScore: number;
@@ -47,7 +47,7 @@ interface ScoreEntry {
 
 const scores = new Map<string, ScoreEntry>();
 
-function toMatches<T extends string>(matches: SearchResult<any, T>[]) {
+function toMatches<T extends string>(matches: SearchResult<T>[]) {
     const allMatches: Match<T>[] = [];
     for (const { data, matches: m } of matches) {
         for (let i = 0; i < m.length; i += 2) {
@@ -66,9 +66,8 @@ function toMatches<T extends string>(matches: SearchResult<any, T>[]) {
  * @author Hanzhi Zhou
  */
 export default class Catalog {
-    public worker?: Worker;
     /**
-     * a mapping from course key to course itself
+     * a mapping from course key to courses
      */
     public readonly courseDict: { readonly [courseKey: string]: Course };
     /**

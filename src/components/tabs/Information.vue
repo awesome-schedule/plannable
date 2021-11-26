@@ -801,7 +801,7 @@
                     ><strong> Contact Authors</strong>
                 </h5>
 
-                <p>The primiary contributors of this website are</p>
+                <p>The primary contributors of this website are</p>
                 <ol>
                     <li>
                         Hanzhi Zhou &nbsp;&nbsp;<i class="fab fa-github"></i>

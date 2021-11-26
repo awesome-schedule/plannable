@@ -48,7 +48,7 @@ Using this method, the representation of a section that meets at Monday, Wednesd
 
 _Time and Room Representation Prior to v7.0_
 
-However, these is a lot of overhead in storing these small arrays, as the JS engine has to track a lot of meta data, e.g. element kinds, hidden class, length, etc. This memory overhead becomes especially important in ScheduleEvaluator, which we will see later. Also, it is common for one or more of these arrays to be empty, especially at index 6 and 7. A natural idea of optimization is to concatenate all of them together. Then, the problem is to figure out the line of separation for each day. Luckily, with the observation that the number of days in a week, 7, is always fixed, we came up with a solution.
+However, there is a lot of overhead in storing these small arrays, as the JS engine has to track a lot of meta data, e.g. element kinds, hidden class, length, etc. This memory overhead becomes especially important in ScheduleEvaluator, which we will see later. Also, it is common for one or more of these arrays to be empty, especially at index 6 and 7. A natural idea of optimization is to concatenate all of them together. Then, the problem is to figure out the line of separation for each day. Luckily, with the observation that the number of days in a week, 7, is always fixed, we came up with a solution.
 
 <img width="500px" src="./time_repr_new.svg">
 

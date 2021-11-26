@@ -22,6 +22,7 @@ export type SortFunctionNames =
 
 /**
  * representation of a single sort option
+ * corresponds to the SortOption struct in ScheduleGenerator.cpp
  */
 export interface SortOption {
     /** name of this sort option*/
@@ -30,8 +31,11 @@ export interface SortOption {
     enabled: boolean;
     /** whether to sort in reverse */
     reverse: boolean;
-    /** a unique index for this sort option */
-    idx: number;
+    /** 
+     * the index into the sortFunctions array.
+     * Used to get the sort function corresponding to this option
+     */
+    readonly idx: number;
     /** the weight of this sort option, used by the combined sort mode only */
     weight: number;
 }
@@ -56,7 +60,7 @@ class ScheduleEvaluator {
     /**
      * @param options
      * @param events the array of events kept, use to construct generated schedules
-     * @param classList the 2d array of (combined) sections
+     * @param classList the array of (combined) sections
      */
     constructor(
         public options: Readonly<EvaluatorOptions> = { sortBy: [], mode: 0 },

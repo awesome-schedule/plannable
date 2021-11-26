@@ -7,6 +7,9 @@
  * 2. Each schedule has no more than 21845 (65536/3) meetings each week (uint16 for timeArray).
  * Additionally, only one set of schedules can be stored at a time, since all data are stored as global variables. 
  * This is not a limitation, but rather a design decision, to keep memory usage low. 
+ * 
+ * @note code in this unit is a little overly optimized, 
+ * e.g. many uses of manual memory allocations, raw pointers, pointer arithmetic, etc.  
 */
 
 #include <algorithm>
@@ -37,7 +40,10 @@ struct SortOption {
     bool enabled;
     /** whether to sort in reverse */
     bool reverse;
-    /** a unique index for this sort option */
+    /** 
+     * the index into the sortFunctions array.
+     * Used to get the sort function corresponding to this option
+     */
     int idx;
     /** the weight of this sort option, used by the combined sort mode only */
     float weight;
@@ -47,6 +53,9 @@ int sortMode = SortMode::combined;
 
 struct CoeffCache {
     float max, min;
+    /**
+     * if this is NULL, that means the coefficient for this sort option is not yet computed
+     */
     float* __restrict__ coeffs = NULL;
 };
 
@@ -73,7 +82,7 @@ int scheduleLen = 0;
 /**
  * the reference schedule for sort by similarity. Length=numCourses
 */
-uint16_t* __restrict__ refSchedule = NULL;
+const uint16_t* __restrict__ refSchedule = NULL;
 /**
  * the indices of the sorted schedules, equals to argsort(coeffs)
  * */
@@ -94,7 +103,7 @@ uint16_t* __restrict__ blocks = NULL;
 /**
  * number of schedules generated
  */
-int count = 0;
+uint32_t count = 0;
 
 /**
  * compute the variance of class times during the week
@@ -202,7 +211,7 @@ float distance(int idx) {
 
 float similarity(int idx) {
     int sum = numCourses;
-    const auto* curSchedule = schedules + idx * numCourses;
+    const auto* __restrict__ curSchedule = schedules + idx * numCourses;
     for (int j = 0; j < numCourses; j++)
         sum -= (refSchedule[j] == curSchedule[j]);
     return sum;
@@ -253,10 +262,9 @@ bool isRandom() {
 }
 
 /**
- * compute the coefficient array for a specific sorting option.
- * if it exists (i.e. already computed), don't do anything
+ * get the computed/cached coefficient array for a specific sorting option.
  * @param funcIdx the index of the sorting option
- * @param assign whether assign to the values to `coeffs`
+ * @param assign whether assign the computed/cached values to `coeffs`
  * @returns the computed/cached coefficients
  */
 CoeffCache computeCoeffFor(int funcIdx, bool assign) {
@@ -279,53 +287,12 @@ CoeffCache computeCoeffFor(int funcIdx, bool assign) {
     }
 }
 
-/**
- * pre-compute the coefficient for each schedule using each enabled sorting function
- * so that they don't need to be computed on the fly when sorting
- */
-void computeCoeff(int enabled, int lastIdx) {
-    // if there's only one option enabled, just compute coefficients for it and
-    // assign to the .coeff field for each schedule
-    if (enabled == 1) {
-        computeCoeffFor(lastIdx, true);
-        return;
-    }
-
-    if (sortMode == SortMode::fallback) {
-        for (auto option : sortOptions) {
-            if (option.enabled)
-                computeCoeffFor(option.idx, false);
-        }
+template <typename F>
+inline void _apply_sort(F cmpFunc) {
+    if (count > 1000) {
+        std::partial_sort(indices, indices + 1000, indices + count, cmpFunc);
     } else {
-        memset(coeffs, 0, count * sizeof(float));
-        for (auto& option : sortOptions) {
-            if (!option.enabled) continue;
-
-            const auto& cache = computeCoeffFor(option.idx, false);
-
-            float max = cache.max, min = cache.min;
-            float range = max - min;
-            // if all of the values are the same, skip this sorting coefficient
-            if (range == 0.0) {
-                continue;
-            }
-
-            float normalizeRatio = 1 / range,
-                  weight = option.weight;
-            auto coeff = cache.coeffs;
-            // use Euclidean distance to combine multiple sorting coefficients
-            if (option.reverse) {
-                for (int i = 0; i < count; i++) {
-                    float val = (max - coeff[i]) * normalizeRatio;
-                    coeffs[i] += weight * val * val;
-                }
-            } else {
-                for (int i = 0; i < count; i++) {
-                    float val = (coeff[i] - min) * normalizeRatio;
-                    coeffs[i] += weight * val * val;
-                }
-            }
-        }
+        std::sort(indices, indices + count, cmpFunc);
     }
 }
 
@@ -344,7 +311,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
     auto* __restrict__ curBlock = blocks;
     for (int i = 0; i < count; i++) {  // for each schedule
         int bound = 8;
-        for (int j = 0; j < 7; j++) {  // sort the time blocks in order for each day
+        for (int j = 0; j < 7; j++) {  // sort the time blocks for each day
             // start index of day j in curBlock
             int s1 = (curBlock[j] = bound);
 
@@ -378,7 +345,7 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
     }
 }
 /**
- * @param _numCourses number of courses
+ * @param numCourses number of courses
  * @param sectionLens a prefix array that stores the number of sections in each course
  * sectionLens[i] is the total number of sections in courses 0 to i - 1 inclusive
  * sectionLens[numCourses] is the total number of sections 
@@ -389,8 +356,8 @@ void addToEval(const uint16_t* __restrict__ timeArray, const int* __restrict__ s
  * @note the pointers passed in to this function should point to dynamically allocated memory. They will be freed before this function returns. 
  * @returns the number of schedules generated. Returns -1 on memory allocation failure
  */
-int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
-    numCourses = _numCourses;
+int generate(const int numCourses, int maxNumSchedules, const int* __restrict__ sectionLens, const uint8_t* __restrict__ conflictCache, const uint16_t* __restrict__ timeArray) {
+    ScheduleGenerator::numCourses = numCourses;
     maxNumSchedules *= numCourses;
     if (maxNumSchedules + numCourses > scheduleLen) {
         // extra 1x numCourses to prevent write out of bound at computeSchedules at *!*!*
@@ -402,26 +369,25 @@ int generate(const int _numCourses, int maxNumSchedules, const int* __restrict__
     }
 
     /** the total length of the time array that we need to allocate for schedules generated */
-    int timeLen = 0;
+    uint32_t timeLen = 0;
     /** current course index */
     int courseIdx = 0;
     /** the index of the current section */
     int sectionIdx = 0;
     /** pointer to the current schedule */
-    auto* curSchedule = schedules;
-    int numSections = sectionLens[numCourses];
+    auto* __restrict__ curSchedule = schedules;
+    const int numSections = sectionLens[numCourses];
     while (true) {
         if (courseIdx >= numCourses) {  // we have finished building the current schedule
             // accumulate the length of the time arrays combined in each schedule
             // and copy the current schedule to next schedule
-            auto* nextSchedule = curSchedule + numCourses;
             for (int i = 0; i < numCourses; i++) {
-                int secIdx = (nextSchedule[i] = curSchedule[i]);  // *!*!*
+                int secIdx = (curSchedule[numCourses + i] = curSchedule[i]);  // *!*!*
                 int _off = secIdx * 8;
                 timeLen += timeArray[_off + 7] - timeArray[_off];
             }
 
-            curSchedule = nextSchedule;
+            curSchedule += numCourses;
             if (curSchedule - schedules >= maxNumSchedules) goto end;
             sectionIdx = curSchedule[--courseIdx] + 1;
         }
@@ -470,7 +436,9 @@ end:;
     static uint32_t memSize = 0;
 
     // handle reallocation of memory
-    uint32_t newMemSize = (uint32_t)(count)*3 * 4 + (uint32_t)(timeLen)*2;
+    static_assert(sizeof(int) == sizeof(float));
+    static_assert(alignof(int) == alignof(float));
+    uint32_t newMemSize = count * 3 * sizeof(int) + timeLen * sizeof(uint16_t);
     if (newMemSize > memSize) {
         void* newMem = realloc(evalMem, newMemSize);
         if (newMem == NULL) return -1;
@@ -513,49 +481,68 @@ void sort() {
         return;
     }
     static SortOption enabledOptions[NUM_SORT_FUNCS];
+    static struct {
+        float rev;
+        float* coeffs;
+    } data[NUM_SORT_FUNCS];
 
     int enabled = 0;
-    int lastIdx = -1;
     for (int i = 0; i < 7; i++) {
         auto& option = sortOptions[i];
-        if (option.enabled) {
+        if (option.enabled)
             enabledOptions[enabled++] = option;
-            lastIdx = option.idx;
-        }
     }
     if (enabled == 0) return;
-    computeCoeff(enabled, lastIdx);
 
-    if (sortMode == SortMode::combined || enabled == 1) {
-        /**
-         * The comparator function used:
-         *
-         * if only one option is enabled, the sort direction depends on the `reversed` property of it
-         *
-         * if multiple sort options are enabled and the sort mode is combined, the `computeCoeff` method
-         * will take care of the sort direction of each function, so we sort in ascending order anyway
-         */
-        auto cmpFunc =
-            enabledOptions[0].reverse && enabled == 1
-                ? [](int a, int b) { return coeffs[b] < coeffs[a]; }   // descending
-                : [](int a, int b) { return coeffs[a] < coeffs[b]; };  // ascending
-        if (count > 1000) {
-            std::partial_sort(indices, indices + 1000, indices + count, cmpFunc);
+    if (enabled == 1) {
+        // special case: only one sort option enabled
+        /** note: shadow the global */
+        const auto coeffs = computeCoeffFor(enabledOptions[0].idx, true).coeffs;
+        if (enabledOptions[0].reverse) {
+            _apply_sort([coeffs](int a, int b) { return coeffs[b] < coeffs[a]; });
         } else {
-            std::sort(indices, indices + count, cmpFunc);
+            _apply_sort([coeffs](int a, int b) { return coeffs[b] > coeffs[a]; });
         }
+    } else if (sortMode == SortMode::combined) {
+        // for combiend sorting, we combine the coefficients from different sort options into
+        // a single array of coefficients
+        memset(coeffs, 0, count * sizeof(float));
+        for (int i = 0; i < enabled; i++) {
+            const auto& option = enabledOptions[i];
+            auto cache = computeCoeffFor(option.idx, false);
+
+            float max = cache.max, min = cache.min;
+            float range = max - min;
+            // if all of the values are the same, skip this sorting coefficient
+            if (range == 0.0)
+                continue;
+
+            float normalizeRatio = 1 / range;
+            float weight = option.weight;
+            auto coeff = cache.coeffs;
+            // use Euclidean distance to combine multiple sorting coefficients
+            if (option.reverse) {
+                for (int i = 0; i < count; i++) {
+                    float val = (max - coeff[i]) * normalizeRatio;
+                    coeffs[i] += weight * val * val;
+                }
+            } else {
+                for (int i = 0; i < count; i++) {
+                    float val = (coeff[i] - min) * normalizeRatio;
+                    coeffs[i] += weight * val * val;
+                }
+            }
+        }
+        _apply_sort([](int a, int b) { return coeffs[a] < coeffs[b]; });
     } else {
-        struct {
-            float rev;
-            float* coeffs;
-        } data[enabled];
         // if option[i] is reverse, ifReverse[i] will be -1 * weight
         // cached array of coefficients for each enabled sort function
         for (int i = 0; i < enabled; i++) {
+            int funcIdx = enabledOptions[i].idx;
+            data[i].coeffs = computeCoeffFor(funcIdx, false).coeffs;
             data[i].rev = enabledOptions[i].reverse ? -1.0f : 1.0f;
-            data[i].coeffs = sortCoeffCache[enabledOptions[i].idx].coeffs;
         }
-        auto func = [enabled, &data](int a, int b) {
+        _apply_sort([enabled](int a, int b) {
             float r = 0;
             for (int i = 0; i < enabled; i++) {
                 // calculate the difference in coefficients
@@ -567,12 +554,7 @@ void sort() {
                 // otherwise, fallback to the next sort option
             }
             return r < 0;
-        };
-        if (count > 1000) {
-            std::partial_sort(indices, indices + 1000, indices + count, func);
-        } else {
-            std::sort(indices, indices + count, func);
-        }
+        });
     }
 }
 
@@ -585,7 +567,7 @@ void setSortOption(int i, int enabled, int reverse, int idx, float weight) {
 }
 
 void setTimeMatrix(int* ptr, int sideLen) {
-    if (timeMatrix != NULL) delete[] timeMatrix;
+    if (timeMatrix != NULL) free((void *)timeMatrix);
     timeMatrix = ptr;
     tmSize = sideLen;
 }
@@ -603,7 +585,8 @@ float getRange(int idx) {
 }
 
 void setRefSchedule(uint16_t* ref) {
-    if (refSchedule != NULL) free(refSchedule);
+    // note the refSchedule is malloced out side of C++ code
+    if (refSchedule != NULL) free((void*)refSchedule);
     refSchedule = ref;
     auto& cache = sortCoeffCache[5];
     if (cache.coeffs != NULL) {

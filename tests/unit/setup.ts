@@ -80,7 +80,7 @@ global.convertAll = convertAll;
 
 beforeAll(async () => {
     const store = new Store();
-    await store.semester.loadSemesters();
+    await store.semester.loadSemesters(15);
     window.NativeModule = await require('../../public/js/wasm_modules.js')();
     const catalog = await dataend.courses({ name: '', id: '1198' });
     const section = Object.create(Section.prototype, {

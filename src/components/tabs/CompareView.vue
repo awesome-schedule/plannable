@@ -31,7 +31,7 @@
                                 style="width: 25px"
                                 type="color"
                                 class="mr-1"
-                                @change="renderSchedule()"
+                                @change="renderSchedule(false)"
                             />
                             <i
                                 class="fas fa-sync-alt click-icon"
@@ -70,7 +70,15 @@
             </div>
         </nav>
         <main-content>
-            <grid-schedule :current-schedule="compareSchedule"></grid-schedule>
+            <div id="pg" class="w-100 mb-2 row justify-content-center mt-1">
+                <date-separator
+                    class="col-sm-auto text-center"
+                    :cur-schedule="compareSchedule"
+                    @update-select="renderSchedule(false)"
+                ></date-separator>
+            </div>
+
+            <grid-schedule :schedule-days="compareSchedule.days"></grid-schedule>
         </main-content>
     </div>
 </template>

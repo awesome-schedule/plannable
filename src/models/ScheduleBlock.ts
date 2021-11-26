@@ -6,6 +6,7 @@
 /**
  *
  */
+import { MeetingDate } from '@/algorithm/ScheduleGenerator';
 import Course from './Course';
 import Event from './Event';
 import Meeting from './Meeting';
@@ -37,12 +38,15 @@ export default class ScheduleBlock {
      * @param startMin start time of this block, in minutes from 00:00
      * @param endMin end time of this block, in minutes from 00:00
      * @param meeting if `section` is a Course/Section, this is an instance of [[Meeting]], otherwise undefined
+     * @param dateArray if `section` is a Course/Section, this is an instance of [[MeetingDate]], otherwise is undefined
+     * @note dateArray currently is only used in compareView as it needs the date information to properly use date separators
      */
     constructor(
         public readonly background: string,
         public readonly startMin: number,
         public readonly endMin: number,
         public readonly section: Section | Course | Event,
-        public readonly meeting?: Meeting
+        public readonly meeting?: Meeting,
+        public readonly dateArray?: MeetingDate
     ) {}
 }

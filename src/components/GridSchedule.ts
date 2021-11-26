@@ -5,7 +5,7 @@
 /**
  *
  */
-import Schedule from '@/models/Schedule';
+import { ScheduleDays } from '@/models/Schedule';
 import { DAYS } from '@/models/constants';
 import { Component, Prop } from 'vue-property-decorator';
 import Store from '../store';
@@ -21,7 +21,7 @@ import Event from '@/models/Event';
  */
 @Component
 export default class GridSchedule extends Store {
-    @Prop(Object) readonly currentSchedule!: Schedule;
+    @Prop(Array) readonly scheduleDays!: ScheduleDays;
 
     df = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -39,8 +39,7 @@ export default class GridSchedule extends Store {
      */
     get earliestBlock() {
         let earliest = 48;
-        const schedule = this.currentSchedule;
-        for (const blocks of schedule.days) {
+        for (const blocks of this.scheduleDays) {
             for (const course of blocks) {
                 const temp = Math.floor(course.startMin / 30);
                 if (temp < earliest) {
@@ -55,8 +54,7 @@ export default class GridSchedule extends Store {
      */
     get latestBlock() {
         let latest = 0;
-        const schedule = this.currentSchedule;
-        for (const blocks of schedule.days) {
+        for (const blocks of this.scheduleDays) {
             for (const course of blocks) {
                 const temp = Math.floor(course.endMin / 30);
                 if (temp > latest) {
@@ -107,7 +105,7 @@ export default class GridSchedule extends Store {
         const heights = new Uint16Array(this.numRow + 1).fill(this.display.partialHeight);
         heights[0] = 44; // height of the title cell
         const earliest = this.absoluteEarliest;
-        for (const blocks of this.currentSchedule.days) {
+        for (const blocks of this.scheduleDays) {
             for (const course of blocks) {
                 const startTime = Math.floor(course.startMin / 30) + 1;
                 const endTime = Math.floor(course.endMin / 30) + 1;
@@ -131,12 +129,11 @@ export default class GridSchedule extends Store {
         // console.time('compute style');
         const arr: string[][] = [[], [], [], [], [], [], []];
         // cache these properties will speed up their access
-        const schedule = this.currentSchedule;
         const sumHeights = this.heights.sumHeights;
         const absoluteEarliest = this.absoluteEarliest;
         const fullHeight = this.display.fullHeight;
         for (let i = 0; i < this.numCol; i++) {
-            for (const block of schedule.days[i]) {
+            for (const block of this.scheduleDays[i]) {
                 const { startMin, endMin, left, width, background } = block;
                 const perc = 100 / this.numCol;
 
@@ -166,10 +163,9 @@ export default class GridSchedule extends Store {
             [],
             []
         ];
-        const schedule = this.currentSchedule;
         const { showInstructor, showRoom, showTime, showSuffix } = this.display;
         for (let i = 0; i < this.numCol; i++) {
-            for (const block of schedule.days[i]) {
+            for (const block of this.scheduleDays[i]) {
                 const section = block.section;
                 if (section instanceof Section) {
                     arr[i].push({

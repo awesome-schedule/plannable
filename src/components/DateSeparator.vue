@@ -1,5 +1,5 @@
 <template>
-    <div class="btn-group ml-4" role="group">
+    <div class="btn-group ml-4" role="group" v-if="curSchedule.dateSeparators.length > 2">
         <button
             v-for="idx in curSchedule.dateSeparators.length - 1"
             :key="idx"

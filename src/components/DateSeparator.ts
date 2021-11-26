@@ -14,7 +14,7 @@ export default class DateSeparator extends Vue {
     @Prop(Object) curSchedule!: Schedule;
     public selectInterval(idx: number) {
         this.curSchedule.dateSelector = idx;
-        this.curSchedule.computeSchedule();
+        this.$emit('update-select');
     }
 
     public convDate(n: number, offset = 0) {

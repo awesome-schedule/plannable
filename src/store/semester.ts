@@ -31,8 +31,8 @@ class Semesters implements SemesterState {
     /**
      * load the list of semesters
      */
-    async loadSemesters() {
-        const result = await loadSemesterList();
+    async loadSemesters(count = 10) {
+        const result = await loadSemesterList(count);
         this.semesters = result.payload || [];
         return result;
     }

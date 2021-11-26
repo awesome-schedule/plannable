@@ -6,12 +6,14 @@
  *
  */
 import { computeBlockPositions } from '@/algorithm/Renderer';
+import { MeetingDate } from '@/algorithm/ScheduleGenerator';
 import GeneratedSchedule from '@/models/GeneratedSchedule';
 import { ScheduleDays } from '@/models/Schedule';
 import ScheduleBlock from '@/models/ScheduleBlock';
 import Store from '@/store';
 import randomColor from 'randomcolor';
 import { Component } from 'vue-property-decorator';
+import DateSeparator from '../DateSeparator.vue';
 import GridSchedule from '../GridSchedule.vue';
 import MainContent from '../MainContent.vue';
 
@@ -23,7 +25,8 @@ import MainContent from '../MainContent.vue';
 @Component({
     components: {
         GridSchedule,
-        MainContent
+        MainContent,
+        DateSeparator
     }
 })
 export default class CompareView extends Store {
@@ -32,42 +35,57 @@ export default class CompareView extends Store {
     similarityRefShown = false;
 
     created() {
-        this.renderSchedule();
+        this.renderSchedule(true);
     }
 
     get refSchedule() {
         return this.getDesc(this.filter.refSchedule);
     }
 
-    async renderSchedule() {
+    async renderSchedule(reconstructDateSeparator: boolean) {
+        if (reconstructDateSeparator) {
+            const dates: MeetingDate[] = [];
+            for (const { schedule } of this.compare) {
+                for (const day of schedule.days) {
+                    for (const { dateArray } of day) {
+                        if (dateArray)
+                            dates.push(dateArray);
+                    }
+                }
+            }
+            this.compareSchedule.constructDateSeparatorFromDateList(dates);
+        }
         const days: ScheduleDays = [[], [], [], [], [], [], []];
         for (let i = 0; i < this.compare.length; i++) {
             const { schedule, color } = this.compare[i];
+            const highlighted = this.highlightIdx === i;
             for (let j = 0; j < 7; j++) {
                 for (const sb of schedule.days[j]) {
-                    const nsb = new ScheduleBlock(
-                        color,
-                        sb.startMin,
-                        sb.endMin,
-                        sb.section,
-                        sb.meeting
-                    );
-                    nsb.strong = this.highlightIdx === i;
-                    days[j].push(nsb);
+                    if (this.compareSchedule.checkDate(sb.dateArray)) {
+                        const nsb = new ScheduleBlock(
+                            color,
+                            sb.startMin,
+                            sb.endMin,
+                            sb.section,
+                            sb.meeting,
+                            sb.dateArray
+                        );
+                        nsb.strong = highlighted;
+                        days[j].push(nsb);
+                    }
                 }
             }
         }
         await computeBlockPositions(days);
-        this.compareSchedule = new GeneratedSchedule();
         this.compareSchedule.days = days;
     }
     randColor(idx: number) {
         this.compare[idx].color = randomColor({ luminosity: 'dark' });
-        this.renderSchedule();
+        this.renderSchedule(false);
     }
     deleteCompare(idx: number) {
         this.compare.splice(idx, 1);
-        this.renderSchedule();
+        this.renderSchedule(true);
     }
     /**
      * get the description of the schedule at index `idx` of the `compare` array
@@ -108,7 +126,7 @@ export default class CompareView extends Store {
         } else {
             this.highlightIdx = idx;
         }
-        this.renderSchedule();
+        this.renderSchedule(false);
     }
     similarity(idx: number) {
         const evaluator = window.scheduleEvaluator;

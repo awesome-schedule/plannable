@@ -66,7 +66,7 @@
             >
                 <i class="fas fa-download"></i>
                 <div
-                    v-if="!profile.tokenType && profile.profiles.some(p => p.remote)"
+                    v-if="!profile.tokenType && profile.profiles.some((p) => p.remote)"
                     class="badge text-warning"
                     style="position: absolute; top: 0.75rem; right: 0px; font-size: 14px"
                     title="Some profiles are marked as synced, but you've been logged out."
@@ -133,18 +133,19 @@
         <log-view v-else-if="sideBar.showLog"></log-view>
 
         <main-content v-if="!sideBar.showInfo && !sideBar.showExternal && !sideBar.showCompare">
-            <div id="pg" class="w-100 mb-2 row justify-content-center">
-                <div v-if="schedule.generated" class="col-sm-auto text-center my-1">
+            <div id="pg" class="w-100 mb-2 row justify-content-center mt-1">
+                <div v-if="schedule.generated" class="col-sm-auto text-center">
                     <Pagination></Pagination>
                 </div>
-                <div
-                    v-if="schedule.currentSchedule.dateSeparators.length > 2"
-                    class="col-sm-auto text-center my-1"
-                >
-                    <date-separator :cur-schedule="schedule.currentSchedule"></date-separator>
-                </div>
+
+                <date-separator
+                    class="col-sm-auto text-center"
+                    :cur-schedule="schedule.currentSchedule"
+                    @update-select="schedule.currentSchedule.computeSchedule()"
+                ></date-separator>
+
                 <div v-if="schedule.generated" class="col-sm-auto text-center align-self-center">
-                    <button class="btn btn-outline-primary my-1" @click="addToCompare()">
+                    <button class="btn btn-outline-primary" @click="addToCompare()">
                         <i class="fas fa-balance-scale"></i>
                         Compare
                         <i v-if="indexOfCompare() !== -1" class="fas fa-check"></i>
@@ -152,7 +153,7 @@
                 </div>
             </div>
 
-            <grid-schedule :current-schedule="schedule.currentSchedule"></grid-schedule>
+            <grid-schedule :schedule-days="schedule.currentSchedule.days"></grid-schedule>
         </main-content>
     </div>
 </template>

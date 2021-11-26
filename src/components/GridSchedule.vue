@@ -28,7 +28,7 @@
             <template v-if="status.isMobile">
                 <template v-for="(day, i) in days">
                     <div
-                        v-for="(block, j) in currentSchedule.days[i]"
+                        v-for="(block, j) in scheduleDays[i]"
                         :style="blockStyles[i][j]"
                         :key="day + j"
                         class="course-block-mobile"
@@ -42,7 +42,7 @@
             <template v-else>
                 <template v-for="(day, i) in days">
                     <div
-                        v-for="(block, j) in currentSchedule.days[i]"
+                        v-for="(block, j) in scheduleDays[i]"
                         :style="blockStyles[i][j]"
                         :key="day + j"
                         class="course-block"

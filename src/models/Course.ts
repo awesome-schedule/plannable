@@ -102,12 +102,11 @@ export default class Course implements CourseFields, Hashable {
         this.units = course.units;
         this.title = course.title;
         this.description = course.description;
-        this.sections = ids.reduce<Section[]>((acc, id) => {
+        this.sections = ids.map(id => {
             const sec = course.sections.find(s => s.id === id);
             if (!sec) throw new Error('Non-existent id ' + id);
-            acc.push(sec);
-            return acc;
-        }, []);
+            return sec;
+        })
     }
     /**
      * human readable name for this course, e.g. ECON 2010 Lecture
@@ -145,10 +144,10 @@ export default class Course implements CourseFields, Hashable {
 
     /**
      * Get an object in which the key is the date string + days and
-     * value is the array of section indices contained in this Course occurring at that time.
+     * value is the array of section contained in this Course occurring at that time.
      * For example:
      * ```js
-     * {"08/27/2019 - 12/17/2019|MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [1,2,3,7,9]}
+     * {"08/27/2019 - 12/17/2019|MoTu 11:00AM-11:50AM|Fr 10:00AM - 10:50AM" : [...Sections]}
      * ```
      */
     public getCombined() {
@@ -163,7 +162,6 @@ export default class Course implements CourseFields, Hashable {
 
     /**
      * Returns a 32-bit integer hash for this Course.
-     * Hashes are different if the sections contained in this course are different
      */
     public hash() {
         return hashCode(this.key);

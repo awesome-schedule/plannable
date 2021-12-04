@@ -15,7 +15,7 @@ import { dayToInt } from './constants';
 import { CourseStatus } from '../config';
 
 /**
- * last three bits of this number correspond to the three types of invalid sections,
+ * last several bits of this number correspond to different types of validity,
  * as specified by [[Section.Validity]]
  *
  * flag & 0b1 !== 0 => Section.Validity[1]

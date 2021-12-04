@@ -70,7 +70,7 @@ export function checkTimeConflict(
 
 /**
  * returns an array with all time arrays in `timeArrayList` concatenated together. The offsets
- * of time array of section `i` of course `j` at day k is at `j * maxLen * 8 + i * 8 + k` position of the resulting array.
+ * of time array of section `i` at day k is at `i * 8 + k` position of the resulting array.
  */
 function timeArrayToCompact(Module: EMModule, timeArrays: TimeArray[]) {
     const numSections = timeArrays.length;

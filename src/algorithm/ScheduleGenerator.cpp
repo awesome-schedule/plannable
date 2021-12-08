@@ -267,24 +267,21 @@ bool isRandom() {
  * @param assign whether assign the computed/cached values to `coeffs`
  * @returns the computed/cached coefficients
  */
-CoeffCache computeCoeffFor(int funcIdx, bool assign) {
+CoeffCache computeCoeffFor(int funcIdx) {
     auto& cache = sortCoeffCache[funcIdx];
-    if (cache.coeffs != NULL) {
-        if (assign) memcpy(coeffs, cache.coeffs, count * sizeof(float));
+    if (cache.coeffs != NULL)
         return cache;
-    } else {
-        auto* __restrict__ newCache = new float[count];
-        float max = -std::numeric_limits<float>::infinity(),
-              min = std::numeric_limits<float>::infinity();
-        auto evalFunc = sortFunctions[funcIdx];
-        for (int i = 0; i < count; i++) {
-            float val = (newCache[i] = evalFunc(i));
-            if (val > max) max = val;
-            if (val < min) min = val;
-        }
-        if (assign) memcpy(coeffs, newCache, count * sizeof(float));
-        return (sortCoeffCache[funcIdx] = {max, min, newCache});
+
+    auto newCache = new float[count];
+    float max = -std::numeric_limits<float>::infinity(),
+            min = std::numeric_limits<float>::infinity();
+    auto evalFunc = sortFunctions[funcIdx];
+    for (int i = 0; i < count; i++) {
+        float val = (newCache[i] = evalFunc(i));
+        if (val > max) max = val;
+        if (val < min) min = val;
     }
+    return (sortCoeffCache[funcIdx] = {max, min, newCache});
 }
 
 template <typename F>
@@ -497,7 +494,7 @@ void sort() {
     if (enabled == 1) {
         // special case: only one sort option enabled
         /** note: shadow the global */
-        const auto coeffs = computeCoeffFor(enabledOptions[0].idx, true).coeffs;
+        const auto coeffs = computeCoeffFor(enabledOptions[0].idx).coeffs;
         if (enabledOptions[0].reverse) {
             _apply_sort([coeffs](int a, int b) { return coeffs[b] < coeffs[a]; });
         } else {
@@ -509,10 +506,8 @@ void sort() {
         memset(coeffs, 0, count * sizeof(float));
         for (int i = 0; i < enabled; i++) {
             const auto& option = enabledOptions[i];
-            auto cache = computeCoeffFor(option.idx, false);
-
-            float max = cache.max, min = cache.min;
-            float range = max - min;
+            auto cache = computeCoeffFor(option.idx);
+            float range = cache.max - cache.min;
             // if all of the values are the same, skip this sorting coefficient
             if (range == 0.0)
                 continue;
@@ -523,12 +518,12 @@ void sort() {
             // use Euclidean distance to combine multiple sorting coefficients
             if (option.reverse) {
                 for (int i = 0; i < count; i++) {
-                    float val = (max - coeff[i]) * normalizeRatio;
+                    float val = (cache.max - coeff[i]) * normalizeRatio;
                     coeffs[i] += weight * val * val;
                 }
             } else {
                 for (int i = 0; i < count; i++) {
-                    float val = (coeff[i] - min) * normalizeRatio;
+                    float val = (coeff[i] - cache.min) * normalizeRatio;
                     coeffs[i] += weight * val * val;
                 }
             }
@@ -539,7 +534,7 @@ void sort() {
         // cached array of coefficients for each enabled sort function
         for (int i = 0; i < enabled; i++) {
             int funcIdx = enabledOptions[i].idx;
-            data[i].coeffs = computeCoeffFor(funcIdx, false).coeffs;
+            data[i].coeffs = computeCoeffFor(funcIdx).coeffs;
             data[i].rev = enabledOptions[i].reverse ? -1.0f : 1.0f;
         }
         _apply_sort([enabled](int a, int b) {

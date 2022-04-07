@@ -95,6 +95,7 @@ export const modalLinks: ModalLinks = {
  * Given an address, convert it to an link to the map (e.g. Google map)
  * @returns an url or an empty string
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function formatLocationURL(addr: string) {
     return '';
 }

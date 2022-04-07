@@ -43,7 +43,7 @@ interface ScoreEntry {
     courseResults: CourseSearchResult[];
     sectionScore: number;
     sectionMap: Map<number, SectionSearchResult[]>;
-};
+}
 
 const scores = new Map<string, ScoreEntry>();
 
@@ -114,16 +114,8 @@ export default class Catalog {
             'description'
         );
         this.topicSearcher = new FastSearcher(this.sections, obj => obj.topic, 'topic');
-        this.instrSearcher = new FastSearcher(
-            this.sections,
-            obj => obj.instructors,
-            'instructors'
-        );
-        this.roomSearcher = new FastSearcher(
-            this.sections,
-            obj => obj.rooms,
-            'rooms'
-        );
+        this.instrSearcher = new FastSearcher(this.sections, obj => obj.instructors, 'instructors');
+        this.roomSearcher = new FastSearcher(this.sections, obj => obj.rooms, 'rooms');
         console.timeEnd('catalog prep');
     }
 
@@ -235,7 +227,7 @@ export default class Catalog {
             queryNoSp = temp.join('');
         }
 
-        return [query, field, queryNoSp] as const
+        return [query, field, queryNoSp] as const;
     }
 
     public fuzzySearch(_query: string) {
@@ -254,7 +246,13 @@ export default class Catalog {
 
         // sort courses in descending order; section score is normalized before added to course score
         const scoreEntries = Array.from(scores)
-            .map(([_, a]) => [_, a.courseScore + (a.sectionMap.size && a.sectionScore / a.sectionMap.size)] as const)
+            .map(
+                ([_, a]) =>
+                    [
+                        _,
+                        a.courseScore + (a.sectionMap.size && a.sectionScore / a.sectionMap.size)
+                    ] as const
+            )
             .sort((a, b) => b[1] - a[1])
             .slice(0, 12)
             .filter(entry => entry[1] > 0.001);
@@ -267,8 +265,7 @@ export default class Catalog {
             const secMatches = new Map<number, SectionMatch[]>();
 
             // convert section matches
-            for (const [id, matches] of temp.sectionMap)
-                secMatches.set(id, toMatches(matches));
+            for (const [id, matches] of temp.sectionMap) secMatches.set(id, toMatches(matches));
 
             if (temp.courseResults.length) {
                 finalResults.push(this.getCourse(key, -1));
@@ -390,7 +387,13 @@ export default class Catalog {
         }
     }
 
-    private searchSectionField(query: string, field: 'topic' | 'instructors' | 'rooms', course: Course, results: Course[], matches: SearchMatch[]) {
+    private searchSectionField(
+        query: string,
+        field: 'topic' | 'instructors' | 'rooms',
+        course: Course,
+        results: Course[],
+        matches: SearchMatch[]
+    ) {
         // check any topic/professor match. Select the sections which only match the topic/professor
         const secMatches = new Map<number, [SectionMatch]>();
         for (const sec of course.sections) {

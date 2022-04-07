@@ -370,7 +370,8 @@ export default abstract class Schedule {
             const course = window.catalog.getCourse(key, all);
             for (const section of course.sections) {
                 // also make sure that all meetings of this section are not TBA
-                if (section.dateArray && (section.valid & 0b100) === 0) dates.push(section.dateArray);
+                if (section.dateArray && (section.valid & 0b100) === 0)
+                    dates.push(section.dateArray);
             }
         }
 
@@ -379,12 +380,10 @@ export default abstract class Schedule {
 
     public constructDateSeparatorFromDateList(dates: MeetingDate[]) {
         const _temp = new Set<number>();
-        for (const date of dates)
-            _temp.add(date![0]).add(date![1] + 24 * 60 * 60 * 1000);
+        for (const date of dates) _temp.add(date![0]).add(date![1] + 24 * 60 * 60 * 1000);
 
         this.dateSeparators = [..._temp].sort((a, b) => a - b);
-        if (this.dateSelector >= this.dateSeparators.length)
-            this.dateSelector = -1;
+        if (this.dateSelector >= this.dateSeparators.length) this.dateSelector = -1;
     }
 
     /**

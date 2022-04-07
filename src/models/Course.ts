@@ -106,7 +106,7 @@ export default class Course implements CourseFields, Hashable {
             const sec = course.sections.find(s => s.id === id);
             if (!sec) throw new Error('Non-existent id ' + id);
             return sec;
-        })
+        });
     }
     /**
      * human readable name for this course, e.g. ECON 2010 Lecture

@@ -31,7 +31,7 @@ export interface SortOption {
     enabled: boolean;
     /** whether to sort in reverse */
     reverse: boolean;
-    /** 
+    /**
      * the index into the sortFunctions array.
      * Used to get the sort function corresponding to this option
      */

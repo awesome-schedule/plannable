@@ -7,7 +7,7 @@
  * extract the array of instructor names from the array of meetings
  * @param meetings
  */
-export function getCombinedMeeting(meetings: readonly Meeting[], key : 'instructor' | 'room') {
+export function getCombinedMeeting(meetings: readonly Meeting[], key: 'instructor' | 'room') {
     const combined: string[] = [];
     for (const meeting of meetings) {
         for (const str of meeting[key].split(', ')) {

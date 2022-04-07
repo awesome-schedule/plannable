@@ -397,11 +397,11 @@ function parseSemesterData(rawData: string[][]) {
                 enumerable: true
             },
             instructors: {
-                value: getCombinedMeeting(meetings, 'instructor').join(", "),
+                value: getCombinedMeeting(meetings, 'instructor').join(', '),
                 enumerable: true
             },
             rooms: {
-                value: getCombinedMeeting(meetings, 'room').join(", "),
+                value: getCombinedMeeting(meetings, 'room').join(', '),
                 enumerable: true
             },
             dateArray: {

@@ -27,7 +27,7 @@ jobs:
     - name: Build
       shell: bash -l {0}
       run: |
-        npm config set script-shell "C:\\Program Files (x86)\\git\\bin\\bash.exe"
+        npm config set script-shell bash
         . ./scripts/ci_common.sh
         . npx electron-builder --win
   build-linux:

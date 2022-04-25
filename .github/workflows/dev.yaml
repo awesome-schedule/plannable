@@ -16,7 +16,6 @@ jobs:
     - name: Build
       run: |
         . ./scripts/ci_common.sh
-        . npx electron-builder --mac
   build-windows:
     runs-on: windows-2019
     steps:
@@ -29,7 +28,6 @@ jobs:
       run: |
         npm config set script-shell bash
         . ./scripts/ci_common.sh
-        . npx electron-builder --win
   build-linux:
     runs-on: ubuntu-20.04
     steps:
@@ -40,4 +38,3 @@ jobs:
     - name: Build
       run: |
         . ./scripts/ci_common.sh
-        . npx electron-builder --linux

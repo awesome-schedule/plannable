@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - dev
-
+env:
+  GH_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 jobs:
   build-macos:
     runs-on: macos-11

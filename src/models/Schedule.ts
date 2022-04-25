@@ -268,7 +268,7 @@ export default abstract class Schedule {
             // combine all groups because groups don't affect display
             const sections =
                 temp === -1
-                    ? -1
+                    ? ((this.totalCredit += credit), -1) // add credit once if 'Any Section'
                     : temp.reduce((acc, group) => {
                           if (group.size) {
                               group.forEach(x => acc.add(x));

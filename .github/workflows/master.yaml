@@ -1,0 +1,53 @@
+name: Master workflow
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  GH_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+jobs:
+  build-macos:
+    runs-on: macos-11
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Build
+      run: |
+        . ./scripts/ci_common.sh
+        npx electron-builder --mac
+  build-windows:
+    runs-on: windows-2019
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Build
+      shell: bash -l {0}
+      run: |
+        npm config set script-shell bash
+        . ./scripts/ci_common.sh
+        npx electron-builder --win
+  build-linux:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Build
+      run: |
+        . ./scripts/ci_common.sh
+        npx electron-builder --linux
+        . ./scripts/pre_deploy.sh
+    - name: dev deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4.3.0
+      with:
+        token: ${{ secrets.DEPLOY_TOKEN }}
+        branch: master
+        folder: dist
+        repository-name: awesome-schedule/awesome-schedule.github.io

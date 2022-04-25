@@ -38,3 +38,12 @@ jobs:
     - name: Build
       run: |
         . ./scripts/ci_common.sh
+        echo "dev.plannable.org" > public/CNAME
+        . ./scripts/pre_deploy.sh
+    - name: dev deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4.3.0
+      with:
+        token: ${{ secrets.DEPLOY_TOKEN }}
+        branch: master
+        folder: dist
+        repository-name: awesome-schedule/dev

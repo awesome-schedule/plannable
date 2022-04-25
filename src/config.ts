@@ -429,7 +429,7 @@ function parseSemesterData(rawData: string[][]) {
 /**
  * Fetch the list of semesters from Lou's list
  */
-async function requestSemesterList(count = 10): Promise<SemesterJSON[]> {
+async function requestSemesterList(): Promise<SemesterJSON[]> {
     console.time('get semester list');
     const response = await (location.host === 'plannable.org' || location.protocol === 'file:'
         ? axios.get<string>(`https://louslist.org/index.php?time=${Math.random()}`)
@@ -440,7 +440,7 @@ async function requestSemesterList(count = 10): Promise<SemesterJSON[]> {
     element.innerHTML = response.data;
     const options = element.getElementsByTagName('option');
     const records: SemesterJSON[] = [];
-    for (let i = 0; i < Math.min(count, options.length); i++) {
+    for (let i = 0; i < options.length; i++) {
         const option = options[i];
         const key = option.getAttribute('value');
         if (key) {

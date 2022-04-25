@@ -48,7 +48,7 @@ export interface DataEnd {
     /**
      * an async function that fetches the list of the semesters
      */
-    readonly semesters: (count?: number) => Promise<SemesterJSON[]>;
+    readonly semesters: () => Promise<SemesterJSON[]>;
     /**
      * an async function that fetches all courses corresponding to the given semester
      * @returns a catalog object built from the courses

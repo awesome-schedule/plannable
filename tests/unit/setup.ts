@@ -80,7 +80,7 @@ global.convertAll = convertAll;
 
 beforeAll(async () => {
     const store = new Store();
-    await store.semester.loadSemesters(15);
+    await store.semester.loadSemesters();
     window.NativeModule = await require('../../public/js/wasm_modules.js')();
     const catalog = await dataend.courses({ name: '', id: '1198' });
     const section = Object.create(Section.prototype, {
@@ -125,11 +125,13 @@ beforeAll(async () => {
             enumerable: true
         },
         meetings: {
-            value: [{
-                'days': 'MoWe 5:00PM - 6:15PM',
-                'instructor':  'dummy',
-                'room': 'Thornton Hall E316'
-            }],
+            value: [
+                {
+                    days: 'MoWe 5:00PM - 6:15PM',
+                    instructor: 'dummy',
+                    room: 'Thornton Hall E316'
+                }
+            ],
             enumerable: true
         },
         instructors: {

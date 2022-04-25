@@ -23,7 +23,7 @@ export interface SemesterState {
  * @author Hanzhi Zhou
  */
 class Semesters implements SemesterState {
-    semesters: SemesterJSON[] = [];
+    semesters: SemesterJSON[] = []; // [0] is the latest semester
     current: SemesterJSON | null = null; // cannot use undefined here, otherwise we will lose reactivity
     lastUpdate = '';
     pendingPromise: CancelablePromise<Catalog> | null = null;
@@ -31,8 +31,8 @@ class Semesters implements SemesterState {
     /**
      * load the list of semesters
      */
-    async loadSemesters(count = 10) {
-        const result = await loadSemesterList(count);
+    async loadSemesters() {
+        const result = await loadSemesterList();
         this.semesters = result.payload || [];
         return result;
     }

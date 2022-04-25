@@ -22,12 +22,12 @@ interface SemesterListJSON extends Expirable {
  *
  * storage key: "semesters"
  */
-export function loadSemesterList(count = 10) {
+export function loadSemesterList() {
     // load the cached list of semesters, if it exists
     return fallback(
         loadFromCache<SemesterJSON[], SemesterListJSON>(
             'semesters',
-            () => dataend.semesters(count),
+            () => dataend.semesters(),
             x => x.semesters,
             {
                 expireTime: semesterListExpirationTime,

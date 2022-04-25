@@ -9,7 +9,7 @@
         <section-modal :semester="semester.current" :section="modal.section"></section-modal>
         <URL-modal :url="modal.url"></URL-modal>
 
-        <nav class="tab-bar bg-light">
+        <nav class="tab-bar bg-light thin-scroll">
             <div
                 class="tab-icon pt-4"
                 :class="{ 'tab-icon-active': sideBar.showSelectClass }"
@@ -66,7 +66,7 @@
             >
                 <i class="fas fa-download"></i>
                 <div
-                    v-if="!profile.tokenType && profile.profiles.some((p) => p.remote)"
+                    v-if="!profile.tokenType && profile.profiles.some(p => p.remote)"
                     class="badge text-warning"
                     style="position: absolute; top: 0.75rem; right: 0px; font-size: 14px"
                     title="Some profiles are marked as synced, but you've been logged out."
@@ -195,6 +195,16 @@
 .icon-disabled {
     color: #999999;
 }
+.thin-scroll {
+    scrollbar-width: thin !important;
+}
+.thin-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+    width: 5px;
+    background-color: #ccc;
+}
 .sidebar {
     position: fixed;
     top: 0;
@@ -222,14 +232,6 @@
     box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
     width: 3vw;
     overflow-y: auto;
-    scrollbar-width: thin !important;
-}
-.tab-bar::-webkit-scrollbar {
-    width: 5px;
-}
-.tab-bar::-webkit-scrollbar-thumb {
-    width: 5px;
-    background-color: #ccc;
 }
 .nav-btn {
     border-radius: 0 !important;

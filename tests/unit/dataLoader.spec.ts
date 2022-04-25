@@ -35,7 +35,7 @@ describe('Data loader test', () => {
     });
 
     it('semester data', async () => {
-        const data = await loadSemesterList(5);
+        const data = await loadSemesterList();
         const payload = data.payload!;
         expect(payload).toBeTruthy();
         expect(payload[0].id).toBeTruthy();

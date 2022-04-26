@@ -219,6 +219,13 @@ export class ScheduleStore implements StoreModule<ScheduleState, ScheduleStateJS
         });
     }
 
+    cancelComputeAll() {
+        if (this.currentSchedule !== this.proposedSchedule) {
+            this.currentSchedule.cancelCompute();
+        }
+        this.proposedSchedules.forEach(s => s.cancelCompute());
+    }
+
     /**
      * @note the schedules parsed from JSON are **not** computed (i.e. the `computeSchedule` method is not called)
      * @note the `currentSchedule` is not assigned.

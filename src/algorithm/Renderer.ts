@@ -24,7 +24,7 @@ export const options = {
 /**
  * compute the width and left of the blocks contained in each day
  */
-export async function computeBlockPositions(days: ScheduleDays) {
+export function computeBlockPositions(days: ScheduleDays) {
     const Module = window.NativeModule;
 
     console.time('native compute');

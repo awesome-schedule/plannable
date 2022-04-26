@@ -227,6 +227,10 @@ export default abstract class Schedule {
         this.hover(key, false);
     }
 
+    public cancelCompute() {
+        window.clearTimeout(this.pendingCompute);
+    }
+
     /**
      * Compute the schedule view based on `this.All` and `this.preview`.
      * If there is a pending compute task, remove that pending task.
@@ -236,10 +240,10 @@ export default abstract class Schedule {
      * However, because we're running on small input sets (usually contain no more than 20 sections), it usually completes within 50ms.
      * @note it is the caller's responsibility to call constructDateSeparators, which is necessary if new classes are added
      */
-    public async computeSchedule(sync = true, time = 100) {
-        window.clearTimeout(this.pendingCompute);
+    public computeSchedule(sync = true, time = 100) {
+        this.cancelCompute();
         if (sync) {
-            await this._computeSchedule();
+            this._computeSchedule();
         } else {
             this.pendingCompute = window.setTimeout(() => {
                 this._computeSchedule();
@@ -247,7 +251,7 @@ export default abstract class Schedule {
         }
     }
 
-    private async _computeSchedule() {
+    private _computeSchedule() {
         const catalog = window.catalog;
         if (!catalog) return;
 
@@ -336,7 +340,7 @@ export default abstract class Schedule {
         for (const event of this.events) if (event.display) this.place(event, days);
 
         // const tStart = performance.now();
-        await computeBlockPositions(days);
+        computeBlockPositions(days);
         // console.log('compute blocks', performance.now() - tStart);
 
         const totalBlocks = days.reduce((sum, blocks) => sum + blocks.length, 0);

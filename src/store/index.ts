@@ -243,6 +243,8 @@ export default class Store extends Vue {
         } else {
             const semester = parsed.currentSemester || this.semester.semesters[0];
             if (force) this.noti.info(`Updating ${semester.name} data...`, 3600, true);
+            // rare case: if a pending compute occurs after semester switch, an error may occur due to difference in semester courses
+            this.schedule.cancelComputeAll();
             const msg = await this.semester.selectSemester(semester, force);
             this.noti.notify(msg);
             if (!msg.payload) return;
@@ -278,7 +280,7 @@ export default class Store extends Vue {
         if (this.schedule.generated) this.generateSchedules();
         else this.schedule.switchSchedule(false);
 
-        this.schedule.recomputeAll(false, 100); // need to compute all schedules for rendering
+        this.schedule.recomputeAll(true); // need to compute all schedules for rendering
     }
 
     /**
@@ -363,8 +365,7 @@ export default class Store extends Vue {
      * Select a semester and fetch all its associated data,
      * note that the first profile corresponding to the target semester will be loaded.
      *
-     * @param target the semester to switch to
-     * @param force whether to force-update semester data
+     * @param target the semester to switch to. If null, switch to the latest semester
      */
     async selectSemester(target: SemesterJSON | null) {
         if (!this.semester.semesters.length) {

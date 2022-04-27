@@ -43,7 +43,6 @@ jobs:
       run: |
         . ./scripts/ci_common.sh
         npx electron-builder --linux
-        . ./scripts/pre_deploy.sh
     - name: dev deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4.3.0
       with:

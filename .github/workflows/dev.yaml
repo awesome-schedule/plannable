@@ -40,10 +40,9 @@ jobs:
         node-version: '16'
     - name: Build
       run: |
+        echo "dev.plannable.org" > public/CNAME
         . ./scripts/ci_common.sh
         npx electron-builder --linux
-        echo "dev.plannable.org" > public/CNAME
-        . ./scripts/pre_deploy.sh
     - name: dev deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4.3.0
       with:

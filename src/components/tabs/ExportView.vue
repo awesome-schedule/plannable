@@ -192,6 +192,17 @@
         </ul>
 
         <div v-if="profile.tokenType" class="w-100 text-center my-2">
+            <div>
+                <small class="text-muted">
+                    You profiles are synchronized with {{ backendName }}
+                </small>
+            </div>
+            <div class="mb-1">
+                <small>
+                    <i class="fas fa-cloud mr-1 text-success"></i> = Synced &nbsp;&nbsp;
+                    <i class="fas fa-cloud mr-1 text-warning"></i> = Not Synced
+                </small>
+            </div>
             <button
                 class="btn btn-outline-primary"
                 :title="`Close connection to ${backendName}`"
@@ -199,11 +210,6 @@
             >
                 Logout
             </button>
-            <div>
-                <small class="text-muted">
-                    You profiles are synchronizd with {{ backendName }}
-                </small>
-            </div>
         </div>
 
         <div v-else-if="allowBackend" class="w-100 my-2 text-center">

@@ -20,6 +20,10 @@
     </a>
 </p>
 
+## Update 04/04/2026
+
+Plannable is not usable now and is archived. See [Release](https://github.com/awesome-schedule/plannable/releases/tag/v9.7.0) for more details.
+
 # Plannable
 
 > Previously known as Awesome-Schedule
@@ -33,12 +37,6 @@ https://plannable.org/
 Our website consists of only front-end components, i.e. all the scripts run in your browser and data are stored locally. It fetches data from [Lou's list](https://rabi.phys.virginia.edu/mySIS/CS2/) on page load and store it in browser cache.
 
 However, optional backend storage features are available. Users can choose to login to a third-party website and store their plannable profiles. This enables cross-device profile syncing. We currently support [Hoosmyprofessor](https://match.msnatuva.org). If you wish to provide such service, please refer to our [backend specification](./docs/Backend%20Specification.md) for more details.
-
-## Mirror
-
-<s> To facilitate access in China, we provide a mirror: https://cn.plannable.org/. It is synchronized with https://plannable.org/ once per hour.</s>
-
-> Note: due to technical issues, the synchronization must be performed manually, so the mirror might not be up-to-date. I suggest to use the main website https://plannable.org/.
 
 ### Supported browsers
 

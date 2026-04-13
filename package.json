@@ -100,7 +100,7 @@
         "babel-plugin-transform-remove-console": "^6.9.4",
         "cheerio": "^1.0.0-rc.5",
         "circular-dependency-plugin": "^5.2.2",
-        "electron": "^18.1.0",
+        "electron": "^18.3.7",
         "electron-builder": "^23.0.3",
         "eslint": "^6.7.2",
         "eslint-plugin-prettier": "^3.1.3",

@@ -60,7 +60,7 @@
         "axios": "^0.21.1",
         "bootstrap": "^4.5.3",
         "core-js": "^3.6.5",
-        "dexie": "^2.0.4",
+        "dexie": "^3.2.2",
         "electron-prompt": "^1.6.0",
         "file-saver": "^2.0.5",
         "jquery": "^3.5.1",
